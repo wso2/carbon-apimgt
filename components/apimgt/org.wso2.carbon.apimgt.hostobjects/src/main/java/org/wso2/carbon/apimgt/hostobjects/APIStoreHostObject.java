@@ -2293,6 +2293,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Documentation documentation = (Documentation) docObject;
                     Object objectSourceType = documentation.getSourceType();
                     String strSourceType = objectSourceType.toString();
+
                     row.put("name", row, documentation.getName());
                     row.put("sourceType", row, strSourceType);
                     row.put("summary", row, documentation.getSummary());
@@ -3207,6 +3208,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("hasMultipleEndpoints", apiObj, String.valueOf(api.getSandboxUrl() != null));
             apisArray.put(apisArray.getIds().length, apisArray, apiObj);
         } catch (APIManagementException e) {
+            // we didn't throw this exception if registry corruption occured as mentioned in https://wso2.org/jira/browse/APIMANAGER-2046
             log.error("Error while obtaining application metadata", e);
         }
     }

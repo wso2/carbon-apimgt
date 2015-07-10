@@ -552,10 +552,13 @@
                                      var failedToUnpublishedEnvironments=environmentsFailed.UNPUBLISHED;
                                      var divPublish="",divUnpublished="";
                                      for(i= 0; i< failedToPublishEnvironments.split(",").length;i++){
-                                        divPublish+=failedToPublishEnvironments.split(",")[i]+"<br>";
+                                        var splitPublished = (failedToPublishEnvironments.split(",")[i]).split(":");
+                                        divPublish+=splitPublished[0]+"<br>"+splitPublished[1]+"<br>";
                                          }
                                      for(i= 0; i< failedToUnpublishedEnvironments.split(",").length;i++){
-                                        divUnpublished+=failedToUnpublishedEnvironments.split(",")[i]+"<br>";
+                                        var splitUnPublished = (failedToUnpublishedEnvironments.split(",")[i]).split(":");
+
+                                        divUnpublished+=splitUnPublished[0]+"<br>"+splitUnPublished[1]+"<br>";
                                          }
                                        $( "#modal-published-content" ).empty();
                                        $( "#modal-unpublished-content" ).empty();

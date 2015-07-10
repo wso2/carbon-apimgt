@@ -4,7 +4,6 @@ var publisher = jagg.module("manager").getAPIProviderObj();
 var tenantDomain = request.getParameter("tenant");
 var resourceUrl = request.getParameter("resourceUrl");
 
-    if(publisher.getDocument instanceof Function){
 var object = publisher.getDocument(tenantDomain,resourceUrl);
 if(object == null){
     response.status=500;
@@ -14,8 +13,4 @@ if(object == null){
 
     print(object.Data);
 }
-    }else{
-    response.status = 200;
-    response.sendRedirect(resourceUrl);
-    }
 %>

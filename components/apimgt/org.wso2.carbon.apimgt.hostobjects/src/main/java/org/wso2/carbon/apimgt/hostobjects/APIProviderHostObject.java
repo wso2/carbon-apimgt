@@ -1836,14 +1836,17 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return context;
     }
+
     /**
+     * This method used to change status of API
      *
-     * @param cx Rhino context
+     * @param cx      Rhino context
      * @param thisObj Scriptable object
-     * @param args Passing arguments
-     * @param funObj Function object
+     * @param args    Passing arguments
+     * @param funObj  Function object
      * @return true if the API was added successfully
-     * @throws APIManagementException
+     * @throws APIManagementException if API couldn't found
+     * @throw FaultGatewaysException if any gateway couldn't update or create api
      */
     public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
                                                     Object[] args,

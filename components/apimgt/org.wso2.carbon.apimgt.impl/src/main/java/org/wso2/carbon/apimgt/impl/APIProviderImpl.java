@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -505,7 +506,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      */
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
-        Map<String, List<String>> failedGateways = new HashMap<String, List<String>>();
+        Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
             try {
@@ -575,39 +576,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             }
                             apiPublished.setOldInSequence(oldApi.getInSequence());
                             apiPublished.setOldOutSequence(oldApi.getOutSequence());
+                            //old api contain what environments want to remove
                             Set<String> environmentsToRemove =
                                     new HashSet<String>(oldApi.getEnvironments());
+                            //updated api contain what environments want to add
                             Set<String> environmentsToPublish =
                                     new HashSet<String>(apiPublished.getEnvironments());
                             Set<String> environmentsRemoved =
                                     new HashSet<String>(oldApi.getEnvironments());
                             if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
+                                // this block will sort what gateways have to remove and published
                                 environmentsRemoved.retainAll(environmentsToPublish);
                                 environmentsToRemove.removeAll(environmentsRemoved);
                             }
-                            List<String> failedToPublishEnvironments =
+                            // map contain failed to publish Environments
+                            Map<String, String> failedToPublishEnvironments =
                                     publishToGateway(apiPublished);
                             apiPublished.setEnvironments(environmentsToRemove);
-                            List<String> failedToRemoveEnvironments =
+                            // map contain failed to remove Environments
+                            Map<String, String> failedToRemoveEnvironments =
                                     removeFromGateway(apiPublished);
-                            environmentsToPublish.removeAll(failedToPublishEnvironments);
-                            environmentsToPublish.addAll(failedToRemoveEnvironments);
+                            environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
+                            environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
                             apiPublished.setEnvironments(environmentsToPublish);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
-                            failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
-                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                        } else if (api.getStatus() == APIStatus.PUBLISHED) {
-                            List<String> failedToPublishEnvironments = publishToGateway(api);
+                            failedGateways
+                                    .put("UNPUBLISHED", failedToRemoveEnvironments);
+                            failedGateways
+                                    .put("PUBLISHED", failedToPublishEnvironments);
+                        } else if (api.getStatus() != APIStatus.CREATED && api.getStatus() != APIStatus.RETIRED) {
+                            if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()){
+                                api.setEnvironments(
+                                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                                              .getAPIManagerConfiguration().getApiGatewayEnvironments()
+                                                              .keySet());
+                            }
+                            Map<String, String> failedToPublishEnvironments = publishToGateway(api);
                             if (!failedToPublishEnvironments.isEmpty()) {
                                 Set<String> publishedEnvironments =
                                         new HashSet<String>(api.getEnvironments());
-                                publishedEnvironments.removeAll(failedToPublishEnvironments);
+                                publishedEnvironments.removeAll(failedToPublishEnvironments.keySet());
                                 api.setEnvironments(publishedEnvironments);
                                 updateApiArtifact(api, true, false);
                                 failedGateways.clear();
-                                failedGateways.put("PUBLISHED", failedToPublishEnvironments);
-                                failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
+                                failedGateways
+                                        .put("PUBLISHED", failedToPublishEnvironments);
+                                failedGateways.put("UNPUBLISHED", Collections.EMPTY_MAP);
                             }
                         }
                     } else {
@@ -640,6 +655,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 }
                             }
                             } catch (AxisFault ex) {
+                                 /*
+                                didn't throw this exception to handle multiple gateway publishing feature therefore
+                                this didn't break invalidating cache from the all the gateways if one gateway is
+                                unreachable
+                                 */
                                 log.error("Error while invalidating from environment " +
                                           environment.getName(), ex);
                             }
@@ -806,7 +826,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void changeAPIStatus(API api, APIStatus status, String userId,
                                 boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException {
-        Map<String, List<String>> failedGateways = new ConcurrentHashMap<String, List<String>>();
+        Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         APIStatus currentStatus = api.getStatus();
         if (!currentStatus.equals(status)) {
             api.setStatus(status);
@@ -829,28 +849,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (gatewayType.equalsIgnoreCase(APIConstants.API_GATEWAY_TYPE_SYNAPSE) && updateGatewayConfig) {
                     if (status.equals(APIStatus.PUBLISHED) || status.equals(APIStatus.DEPRECATED) ||
                         status.equals(APIStatus.BLOCKED) || status.equals(APIStatus.PROTOTYPED)) {
-                        List<String> failedToPublishEnvironments = publishToGateway(api);
+                        Map<String, String> failedToPublishEnvironments = publishToGateway(api);
                         if (!failedToPublishEnvironments.isEmpty()) {
                             Set<String> publishedEnvironments =
                                     new HashSet<String>(api.getEnvironments());
-                            publishedEnvironments.removeAll(failedToPublishEnvironments);
+                            publishedEnvironments
+                                    .removeAll(new ArrayList<String>(failedToPublishEnvironments.keySet()));
                             api.setEnvironments(publishedEnvironments);
                             updateApiArtifact(api, true, false);
                             failedGateways.clear();
-                            failedGateways.put("UNPUBLISHED", Collections.EMPTY_LIST);
-                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
+                            failedGateways.put("UNPUBLISHED", Collections.EMPTY_MAP);
+                            failedGateways
+                                    .put("PUBLISHED", failedToPublishEnvironments);
                         }
                     } else {
-                        List<String> failedToRemoveEnvironments = removeFromGateway(api);
+                        Map<String, String> failedToRemoveEnvironments = removeFromGateway(api);
                         if (!failedToRemoveEnvironments.isEmpty()) {
                             Set<String> publishedEnvironments =
                                     new HashSet<String>(api.getEnvironments());
-                            publishedEnvironments.addAll(failedToRemoveEnvironments);
+                            publishedEnvironments.addAll(failedToRemoveEnvironments.keySet());
                             api.setEnvironments(publishedEnvironments);
                             updateApiArtifact(api, true, false);
                             failedGateways.clear();
+
                             failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
-                            failedGateways.put("PUBLISHED", Collections.EMPTY_LIST);
+                            failedGateways.put("PUBLISHED", Collections.EMPTY_MAP);
                         }
                     }
                 }
@@ -931,8 +954,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private List<String> publishToGateway(API api) throws APIManagementException {
-        List<String> failedEnvironment;
+    private Map<String, String> publishToGateway(API api) throws APIManagementException {
+        Map<String, String> failedEnvironment;
         APITemplateBuilder builder = null;
         String tenantDomain = null;
         if (api.getId().getProviderName().contains("AT")) {
@@ -979,9 +1002,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    private List<String> removeFromGateway(API api) {
+    private Map<String, String> removeFromGateway(API api) {
         String tenantDomain = null;
-        List<String> failedEnvironment;
+        Map<String, String> failedEnvironment;
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain( provider);
@@ -996,7 +1019,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedEnvironment;
     }
 
-    public List<String> removeDefaultAPIFromGateway(API api) {
+    public Map<String, String> removeDefaultAPIFromGateway(API api) {
         String tenantDomain = null;
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
@@ -1022,10 +1045,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
         corsProperties.put("inline", api.getImplementation());
-        if (api.getAllowedHeaders() != null && api.getAllowedHeaders() != "") {
+        if (!StringUtils.isEmpty(api.getAllowedHeaders())) {
             corsProperties.put("allowHeaders", api.getAllowedHeaders());
         }
-        if (api.getAllowedOrigins() != null && api.getAllowedOrigins() != "") {
+        if (!StringUtils.isEmpty(api.getAllowedOrigins())) {
             corsProperties.put("allowedOrigins", api.getAllowedOrigins());
         }
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);

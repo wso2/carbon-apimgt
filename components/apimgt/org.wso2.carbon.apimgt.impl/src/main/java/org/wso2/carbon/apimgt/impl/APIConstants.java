@@ -706,6 +706,7 @@ public final class APIConstants {
         OPTIONS
     }
 
+    public static String CORS_SEQUENCE_NAME = "_cors_request_handler_";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";

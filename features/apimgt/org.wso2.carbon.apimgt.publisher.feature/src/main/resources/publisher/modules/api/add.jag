@@ -65,12 +65,19 @@ var updateAPIImplementation = function (api) {
         return {
             error:true
         }; }
-    } catch (e) {
-        log.error(e);
+    }  catch (e) {
+     if (e.javaException instanceof org.wso2.carbon.apimgt.api.FaultGatewaysException){
+        return {
+            error:true,
+            message:e.javaException.getFaultGateWayString() + '||warning'
+        };
+     } else {
         return {
             error:true,
             message:e.message.replace(e.message.split(":")[0] + ":", "")
         };
+     }
+
     }
 };
 
