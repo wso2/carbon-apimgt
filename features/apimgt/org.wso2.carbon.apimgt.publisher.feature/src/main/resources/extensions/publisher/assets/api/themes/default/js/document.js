@@ -34,6 +34,8 @@ $(function(){
       });
 
 
+    $("input:radio[name=typeOptionRadio]:first", '#form-document-create').attr('checked', true);
+    $("input:radio[name=sourceOptionRadio]:first", '#form-document-create').attr('checked', true);
 
 	$('#addDocHref').on('click',function(){
 		$('#doc-add-container').css('display','inline');
@@ -52,7 +54,8 @@ $(function(){
 		$('#overview_name').val("");
 		$('#doc_summary').val('');
 		var pageId = $('#addDocPageId').val();
-		window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+		clearDocs();
+		//window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 
 	});
 
@@ -104,21 +107,47 @@ $(function(){
 		
 	});
 
-	//validate url
-	var docUrlInput = $('#docUrl');
-	docUrlInput.change(function(e) {
-		if(docUrlInput.val() !== ""){
-			//validInputUrl(docUrlInput);
-		}
-        
-    });
 
 
 	$('#add-doc-btn').on('click',function(){
+		//validatet name
+		var nameInputElement = $('#overview_name');
+		var docName = nameInputElement.val();
+		var requiredMsg = $('#errorMsgRequired').val();
+		if(docName == ""){
+			nameInputElement.css("border", "1px solid red");
+			nameInputElement.parent().append('<label class="error">' + requiredMsg + '</label>');
+			return;
+		}
+
+		//validate source type
+		var sourceType = $('input[name=sourceOptionRadio]:checked', '#form-document-create').val();
+		if(sourceType == 'URL'){
+			var docUrlElement = $("#docUrl");
+	    	sourceURL= docUrlElement.val();
+	    	var docValid = validInputUrl(docUrlElement);
+	    	if(!docValid){
+	    		 docUrlElement.css("border", "1px solid red");
+	    		return;
+	    	}
+		}	
+
+		var docType = $('input[name=typeOptionRadio]:checked', '#form-document-create').val();
+		if(docType == 'Other'){
+			var otherElement = $('#overview_other_name');
+			var otherVal = otherElement.val();
+			if(otherVal == ""){
+				otherElement.css("border", "1px solid red");
+				otherElement.parent().append('<label class="error">' + requiredMsg + '</label>');
+				return;
+			}
+		}
+
 		if($('#docAction').val() == "updateDocument"){
 			saveOrUpdate("updateDocument");
 		}else if($('#docAction').val() == "createDocument"){
 			saveOrUpdate("createDocument");
+			
 		}		
 
 	});
@@ -153,7 +182,9 @@ var saveOrUpdate = function(action){
 	var pageId = $('#addDocPageId').val();
 	var docType = $('input[name=typeOptionRadio]:checked', '#form-document-create').val();
 	var sourceType = $('input[name=sourceOptionRadio]:checked', '#form-document-create').val();
-	var docName = $('#overview_name').val();
+	var nameInputElement = $('#overview_name');
+	var docName = nameInputElement.val();
+	
 	var summary = $('#doc_summary').val();	
 	var otherTypeName;
 	var visibility;
@@ -181,7 +212,9 @@ var saveOrUpdate = function(action){
 
 
     }else if(sourceType == 'URL'){
-    	sourceURL= $("#docUrl").val();
+    	var docUrlElement = $("#docUrl");
+    	sourceURL= docUrlElement.val();
+    	
     }
 
     $('#form-document-create').ajaxSubmit({
@@ -311,12 +344,6 @@ var  editDocumentation = function(url, filePath, editContent){
 	$('.mceEditor').css('display','none');
 	if(url != null){
 		window.open(url);
-	}else if(filePath != null){
-		/*$("docListEdit").on("click", function () {
-    		$(this).attr("href",filePath);
-    	});
-    	$('fileUpload').click();
-		*/
 	}
 
 };
@@ -373,7 +400,6 @@ var getInlineContent = function(provider, apiName, version,docName, mode,tenantD
 
 var editInlineContent	 = function (provider, apiName, version, docName, mode,tenantDomain) {
 
-
 	$('#addOrUpdateDoc').hide();
 	$('#doc-add-container').hide();
 	$('#doc-list-container').hide();
@@ -390,6 +416,8 @@ var editInlineContent	 = function (provider, apiName, version, docName, mode,ten
   	$('#inlineApiVersion').val(version);
 	$('#inlineDocPageId').val($('#addDocPageId').val());
 	$('#inlineButtonGroup').show('fast');
+	$('.mceEditor').css('display','inline');
+
 };
 
 function saveContent(provider, apiName, apiVersion, mode) {
@@ -402,7 +430,8 @@ function saveContent(provider, apiName, apiVersion, mode) {
 
   var pageId = $('#inlineDocPageId').val();
   if(mode == 'cancel'){
-     window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+  	clearDocs();
+    // window.location.href = caramel.context+'/assets/api/docs/'+pageId;
   }
   var visibility={};
   var showVisibility = $('#InlineShowVisibility').val();
@@ -506,7 +535,8 @@ var removeDocumentation = function(provider, apiName, version, docName, docType)
 			                label: 'Close',
 			                action: function(dialogItself){
 				                dialogItself.close();
-				                window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+				                //window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+				                clearDocs();
 			                }
 			            
 		            	}]
@@ -525,8 +555,8 @@ var removeDocumentation = function(provider, apiName, version, docName, docType)
                       label: 'Close',
                       action: function(dialogItself){
                         dialogItself.close();
-                        window.location.href = caramel.context+'/assets/api/docs/'+pageId;
-                        
+                        //window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+                        clearDocs();
                       }
                   
                   }]
@@ -555,7 +585,8 @@ var validInputUrl = function(docUrlDiv) {
             docUrlD = docUrlDiv.val();
         }
         var erCondition = validUrl(docUrlD);
-        return validInput(docUrlDiv, $('#errorMsgDocUrl').val(), erCondition);
+        var errorMsgDocUrl = $('#errorMsgDocUrl').val();
+        return validInput(docUrlDiv, errorMsgDocUrl, erCondition);
     }
 };
 
@@ -629,5 +660,10 @@ var getMimeType = function(extension) {
     var type=CONTENT_MAP[extension];
     if(!type){type="application/octet-stream";}
     return type;
+};
+
+var clearDocs = function () {
+    window.location.reload();
+
 };
 
