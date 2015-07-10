@@ -435,6 +435,38 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                 }
             }
 
+            // get scopeTxtBox successor
+            var tokenTxtBox=$('#prodAccess').parent().parent().parent().parent().parent();
+            var scopeTxtBox=$('#prodAccessScope');          // select scopeTxtBox
+
+            //checking whether Scope is selected
+            if(generatedScopesNames!=""){
+
+                if(scopeTxtBox.length==0){  // checking whether scopeTxtBox is already exist
+
+                    //generate scopeTxtBox and append
+                   tokenTxtBox.before(
+                        function(){
+                            return  '<div class="row-fluid keys">'+
+                                    '<div class="span3">'+
+                                    '<b>Scope:</b>'+
+                                    '</div>'+
+                                    '<div class="span9">'+
+                                    '<div class="token">'+
+                                    '<span class="accessTokenScopeDisplayPro keyValues" id="prodAccessScope" data-value="'+generatedScopesNames+'">'+generatedScopesNames+'</span>'+
+                                    '</div>'+
+                                    '</div>'+
+                                    '</div>';
+                        }
+                    );
+                }
+            }else{  // if Scope is not selected
+                if(scopeTxtBox.length>0){
+                    //remove scopeTxtBox if Scope is not selected
+                   tokenTxtBox.prev().remove();
+                }
+            }
+
             if(keyType == "PRODUCTION"){
                 $('.prodAccessTokenHidden').val(result.data.key.accessToken);
                 if(!regenerateOption){ $('.proRegenerateForm').hide(); }
