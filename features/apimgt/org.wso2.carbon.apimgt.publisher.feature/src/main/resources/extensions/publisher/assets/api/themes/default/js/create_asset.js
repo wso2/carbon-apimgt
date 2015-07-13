@@ -74,7 +74,14 @@ $(function(){
                                                                                     designer.saved_api.provider = responseText.data.provider;
                                                                                     designer.saved_api.id = responseText.data.id;
                                                                                     $( "body" ).trigger( "api_saved" );
-                                                                                } else {
+                                                                                 }else if (responseText) {
+                                                                                    designer.saved_api = {};
+                                                                                    designer.saved_api.name = responseText.name;
+                                                                                    designer.saved_api.version = responseText.version;
+                                                                                    designer.saved_api.provider = responseText.provider;
+                                                                                    designer.saved_api.id = responseText.id;
+                                                                                    $( "body" ).trigger( "api_saved" );
+                                                                                 }else {
                                                                                     if (responseText.message == "timeout") {
                                                                                         if (ssoEnabled) {
                                                                                             var currentLoc = window.location.pathname;
