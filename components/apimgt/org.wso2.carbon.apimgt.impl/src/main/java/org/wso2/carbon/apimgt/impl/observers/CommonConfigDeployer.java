@@ -32,7 +32,7 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 /**
  * This task provisions mandatory configs & Artifacts needed by any tenant. The reason for introducing this task is
- * to prevent {@link org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator} class being run on None-synapse
+ * to prevent {@link org.wso2.carbon.apimgt.gateway.internal.TenantServiceCreator} class being run on None-synapse
  * environments. Configs such as workflow configs, analytic configs should be loaded within this task.
  */
 public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObserver {
