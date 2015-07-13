@@ -67,12 +67,12 @@ $(function(){
                                                                             success:function(responseText, statusText, xhr, $form){
                                                                                 $('#saveMessage').hide();
                                                                                 $('#saveButtons').show();
-                                                                                if (responseText) {
+                                                                                if (responseText.data) {
                                                                                     designer.saved_api = {};
-                                                                                    designer.saved_api.name = responseText.name;
-                                                                                    designer.saved_api.version = responseText.version;
-                                                                                    designer.saved_api.provider = responseText.provider;
-                                                                                    designer.saved_api.id = responseText.id;
+                                                                                    designer.saved_api.name = responseText.data.name;
+                                                                                    designer.saved_api.version = responseText.data.version;
+                                                                                    designer.saved_api.provider = responseText.data.provider;
+                                                                                    designer.saved_api.id = responseText.data.id;
                                                                                     $( "body" ).trigger( "api_saved" );
                                                                                 } else {
                                                                                     if (responseText.message == "timeout") {
