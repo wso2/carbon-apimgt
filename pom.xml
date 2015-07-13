@@ -826,7 +826,7 @@
         <carbon.governance.version>4.5.2-SNAPSHOT</carbon.governance.version>
 
         <!-- Carbon Registry -->
-        <carbon.registry.version>4.4.4-SNAPSHOT</carbon.registry.version>
+        <carbon.registry.version>4.4.5-SNAPSHOT</carbon.registry.version>
         <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
 
 	
