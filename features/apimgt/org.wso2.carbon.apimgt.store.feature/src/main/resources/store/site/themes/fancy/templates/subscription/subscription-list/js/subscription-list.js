@@ -436,7 +436,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
             }
 
             // get scopeTxtBox successor
-            var tokenTxtBox=$('#prodAccess').parent().parent().parent().parent().parent();
+            var tokenTxtBox=$('#prodAccess').parents(".row-fluid .keys");
             var scopeTxtBox=$('#prodAccessScope');          // select scopeTxtBox
 
             //checking whether Scope is selected
