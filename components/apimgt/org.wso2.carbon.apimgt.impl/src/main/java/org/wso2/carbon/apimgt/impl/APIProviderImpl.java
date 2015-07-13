@@ -83,7 +83,7 @@ import java.util.regex.Pattern;
  * the class to the overall API management functionality, the visibility of the class has
  * been reduced to package level. This means we can still use it for internal purposes and
  * possibly even extend it, but it's totally off the limits of the users. Users wishing to
- * programmatically access this functionality should use one of the extensions of this
+ * pragmatically access this functionality should use one of the extensions of this
  * class which is visible to them. These extensions may add additional features like
  * security to this class.
  */
@@ -467,24 +467,33 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      * @throws RegistryException
      */
-    private void updateWsdl(API api) throws APIManagementException, RegistryException {
+    private void updateWsdl(API api) throws APIManagementException {
 
-        registry.beginTransaction();
-        String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
-        GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
-        GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
-        String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
-        if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
-            String path = APIUtil.createWSDL(registry, api);
-            if (path != null) {
-                registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
-                apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
-                artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
+
+        try {
+            registry.beginTransaction();
+            String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
+            GenericArtifact apiArtifact = APIUtil.createAPIArtifactContent(artifact, api);
+            String artifactPath = GovernanceUtils.getArtifactPath(registry, apiArtifact.getId());
+            if (APIUtil.isValidWSDLURL(api.getWsdlUrl(), false)) {
+                String path = APIUtil.createWSDL(registry, api);
+                if (path != null) {
+                    registry.addAssociation(artifactPath, path, CommonConstants.ASSOCIATION_TYPE01);
+                    apiArtifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl()); //reset the wsdl path
+                    artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
+                }
+            }
+            registry.commitTransaction();
+        } catch (RegistryException e) {
+            try {
+                registry.rollbackTransaction();
+            } catch (RegistryException ex) {
+                handleException("Error occurred while saving the wsdl in the registry.", ex);
             }
         }
-        registry.commitTransaction();
     }
 
 
@@ -668,8 +677,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             } catch (APIManagementException e) {
                 handleException("Error while updating the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
-            } catch (RegistryException e) {
-                handleException("Error while saving wsdl in the registry for the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
             }
         } else {
             // We don't allow API status updates via this method.

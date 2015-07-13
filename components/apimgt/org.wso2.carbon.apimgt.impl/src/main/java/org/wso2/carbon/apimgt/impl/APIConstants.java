@@ -707,4 +707,28 @@ public final class APIConstants {
     }
 
     public static String CORS_SEQUENCE_NAME = "_cors_request_handler_";
+    //Swagger v2.0 constants
+    public static final String SWAGGER_X_SCOPE = "x-scope";
+    public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
+    public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
+    public static final String SWAGGER_X_MEDIATION_SCRIPT = "x-mediation-script";
+    public static final String SWAGGER_X_WSO2_SECURITY = "x-wso2-security";
+    public static final String SWAGGER_X_WSO2_SCOPES = "x-wso2-scopes";
+    public static final String SWAGGER_SCOPE_KEY = "key";
+    public static final String SWAGGER_NAME = "name";
+    public static final String SWAGGER_DESCRIPTION = "description";
+    public static final String SWAGGER_ROLES = "roles";
+    public static final String SWAGGER_TITLE = "title";
+    public static final String SWAGGER_EMAIL = "email";
+    public static final String SWAGGER_CONTACT = "contact";
+    public static final String SWAGGER_VER = "version";
+    public static final String SWAGGER_OBJECT_NAME_APIM = "apim";
+    public static final String SWAGGER_PATHS = "paths";
+    public static final String SWAGGER_RESPONSES = "responses";
+    public static final String SWAGGER = "swagger";
+    public static final String SWAGGER_V2 = "2.0";
+    public static final String SWAGGER_INFO = "info";
+    public static final String SWAGGER_RESPONSE_200 = "200";
+
+
 }
