@@ -23,8 +23,6 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
@@ -34,7 +32,7 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
  */
 public class SignupObserver extends AbstractAxis2ConfigurationContextObserver {
 
-    private static final Log log = LogFactory.getLog(TenantServiceCreator.class);
+    private static final Log log = LogFactory.getLog(SignupObserver.class);
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();

@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
-import org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
@@ -147,12 +146,12 @@ public class APIManagerComponent {
             //WorkflowExecutorFactory.getInstance().load(filePath);
 
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-            if ("Synapse".equalsIgnoreCase(gatewayType)) {
+            /*if ("Synapse".equalsIgnoreCase(gatewayType)) {
                 //Register Tenant service creator to deploy tenant specific common synapse configurations
                 TenantServiceCreator listener = new TenantServiceCreator();
                 bundleContext.registerService(
                         Axis2ConfigurationContextObserver.class.getName(), listener, null);
-            }
+            }*/
 
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
