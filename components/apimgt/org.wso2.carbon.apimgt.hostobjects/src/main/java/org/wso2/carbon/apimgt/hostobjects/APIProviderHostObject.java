@@ -1836,14 +1836,17 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return context;
     }
+
     /**
+     * This method used to change status of API
      *
-     * @param cx Rhino context
+     * @param cx      Rhino context
      * @param thisObj Scriptable object
-     * @param args Passing arguments
-     * @param funObj Function object
+     * @param args    Passing arguments
+     * @param funObj  Function object
      * @return true if the API was added successfully
-     * @throws APIManagementException
+     * @throws APIManagementException if API couldn't found
+     * @throw FaultGatewaysException if any gateway couldn't update or create api
      */
     public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
                                                     Object[] args,
@@ -4352,51 +4355,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("count", row, fault.getCount());
                 row.put("faultPercentage", row, fault.getFaultPercentage());
                 row.put("totalRequestCount",row,fault.getRequestCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIFaultyAnalyzeByTime(Context cx, Scriptable thisObj,
-                                                                   Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResponseFaultCountDTO> list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        if (args == null || args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIFaultyAnalyzeByTime(providerName);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object faultObject = it.next();
-                APIResponseFaultCountDTO fault = (APIResponseFaultCountDTO) faultObject;
-                long faultTime = Long.parseLong(fault.getRequestTime());
-                row.put("apiName", row, fault.getApiName());
-                row.put("version", row, fault.getVersion());
-                row.put("context", row, fault.getContext());
-                row.put("requestTime", row, faultTime);
                 myn.put(i, myn, row);
                 i++;
             }

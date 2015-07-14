@@ -117,10 +117,6 @@ var log = new Log();
                     urlArr[count] = environmentURL[accessProtocol.replace(":","")];
                     count++;
                     break;
-                }else{
-                var environmentURL = environmentsToType[name];
-                urlArr[count] = environmentURL[accessProtocol.replace(":","")];
-                count++;
                 }
            
             }

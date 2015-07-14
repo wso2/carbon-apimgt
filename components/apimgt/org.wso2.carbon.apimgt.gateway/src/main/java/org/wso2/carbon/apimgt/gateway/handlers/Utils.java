@@ -180,25 +180,6 @@ public class Utils {
             messageContext.setRelatesTo(new RelatesTo[] { relatesTo });
         }
     }
-    
-    public static String getAllowedOrigin(String currentRequestOrigin,String allowedOrigins) {
-    	if (allowedOrigins != null) {
-    		String[] origins = allowedOrigins.split(",");
-    		List<String> originsList = new LinkedList<String>();
-    		for (String origin: origins) {
-    			originsList.add(origin.trim());
-    		}
-    		if(originsList.contains("*")){
-                allowedOrigins="*";
-            }else if (currentRequestOrigin != null && originsList.contains(currentRequestOrigin)) {
-    			allowedOrigins = currentRequestOrigin;
-    		} else {
-    			allowedOrigins = null; 
-    		}
-    	}
-    	
-    	return allowedOrigins;
-    }
 
     public static String getAllowedHeaders() {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
@@ -275,6 +256,12 @@ public class Utils {
         return requestPath;
     }
 
+    /**
+     * This method used to send the response back from the request.
+     *
+     * @param messageContext messageContext of the request
+     * @param status         HTTP Status to return from the response
+     */
     public static void send(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -283,7 +270,6 @@ public class Utils {
         messageContext.setProperty("RESPONSE", "true");
         messageContext.setTo(null);
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         Axis2Sender.sendBack(messageContext);
     }
 }
