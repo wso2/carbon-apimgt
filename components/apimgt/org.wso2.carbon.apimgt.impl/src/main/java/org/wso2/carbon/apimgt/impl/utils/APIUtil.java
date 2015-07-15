@@ -5327,4 +5327,15 @@ public final class APIUtil {
         }
         return environmentObject;
     }
+    
+    public static boolean isStringArray(Object[] args) {
+        int argsCount = args.length;
+        for (int i = 0; i < argsCount; i++) {
+            if (!(args[i] instanceof String)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

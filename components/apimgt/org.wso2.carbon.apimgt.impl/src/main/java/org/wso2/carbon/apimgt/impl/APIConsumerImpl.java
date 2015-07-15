@@ -3283,6 +3283,74 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscriptions;
 
     }
+    
+    public JSONObject resumeWorkflow(Object[] args) {
+    	JSONObject row = new JSONObject();
+
+        if (args != null && APIUtil.isStringArray(args)) {
+
+            String workflowReference = (String) args[0];
+            String status = (String) args[1];
+            String description = null;
+            if (args.length > 2 && args[2] != null) {
+                description = (String) args[2];
+            }
+
+            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            boolean isTenantFlowStarted = false;
+
+            try {
+                if (workflowReference != null) {
+                    WorkflowDTO workflowDTO = apiMgtDAO.retrieveWorkflow(workflowReference);
+                    String tenantDomain = workflowDTO.getTenantDomain();
+                    if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                        isTenantFlowStarted = true;
+                        PrivilegedCarbonContext.startTenantFlow();
+                        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    }
+
+                    if (workflowDTO == null) {
+                        log.error("Could not find workflow for reference " + workflowReference);
+                        row.put("error", true);
+                        row.put("statusCode", 500);
+                        row.put("message", "Could not find workflow for reference " + workflowReference);
+                        return row;
+                    }
+
+                    workflowDTO.setWorkflowDescription(description);
+                    workflowDTO.setStatus(WorkflowStatus.valueOf(status));
+
+                    String workflowType = workflowDTO.getWorkflowType();
+                    WorkflowExecutor workflowExecutor;
+					try {
+						workflowExecutor = WorkflowExecutorFactory.getInstance()
+						        .getWorkflowExecutor(workflowType);
+						workflowExecutor.complete(workflowDTO);
+					} catch (WorkflowException e) {
+						throw new APIManagementException(e);
+					}
+
+                    
+                    row.put("error", false);
+                    row.put("statusCode", 200);
+                    row.put("message", "Invoked workflow completion successfully.");
+                }
+            } catch (IllegalArgumentException e) {
+                row.put("error", true);
+                row.put("statusCode", 500);
+                row.put("message", "Illegal argument provided. Valid values for status are APPROVED and REJECTED.");
+            } catch (APIManagementException e) {
+                row.put("error", true);
+                row.put("statusCode", 500);
+                row.put("message", "Error while resuming workflow. " + e.getMessage());
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+        }
+        return row;
+    }
 
 
 }
