@@ -219,4 +219,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		this.apiImplementationType = apiImplementationType;
 	}
 
+	// For backward compatibility with 1.9.0 since the property name is inline
+	public String getInline() { return getApiImplementationType(); }
+
+	// For backward compatibility with 1.9.0 since the property name is inline
+	public void setInline(String inlineType) {
+		setApiImplementationType(inlineType);
+	}
+
 }
