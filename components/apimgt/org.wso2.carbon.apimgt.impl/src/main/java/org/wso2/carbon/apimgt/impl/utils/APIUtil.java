@@ -5179,7 +5179,7 @@ public final class APIUtil {
         return result;
 
     }
-	public String isURLValid(String type, String urlVal) throws APIManagementException {
+	public static String isURLValid(String type, String urlVal) throws APIManagementException {
 
 		String response = "";
 
