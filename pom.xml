@@ -166,6 +166,13 @@
                 <version>${apimgt.keymgt.stub.version}</version>
             </dependency>
 
+	    <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
+                <version>${apimgt.gateway.version}</version>
+            </dependency>
+
+
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
@@ -188,12 +195,6 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
                 <version>${apimgt.keymgt.client.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.core</artifactId>
-                <version>${apimgt.core.version}</version>
             </dependency>
 
             <dependency>
@@ -732,6 +733,7 @@
                 <artifactId>Saxon-HE</artifactId>
                 <version>${Saxon-HE.version}</version>
             </dependency>
+	    
 
             <dependency>
                 <groupId>org.wso2.carbon.deployment</groupId>
@@ -768,6 +770,12 @@
                 <artifactId>json-smart</artifactId>
                 <version>${json-smart.version}</version>
             </dependency>
+
+	    <dependency>
+		<groupId>net.sf.saxon.wso2</groupId>
+		<artifactId>saxon.he</artifactId>
+		<version>${saxon.wso2.version}</version>
+	  </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -896,6 +904,7 @@
         <commons-logging.version>1.1.1</commons-logging.version>
         <h2-database-engine.version>1.2.140.wso2v3</h2-database-engine.version>
         <Saxon-HE.version>9.4</Saxon-HE.version>
+	<saxon.wso2.version>9.4.0.wso2v1</saxon.wso2.version>
         <wss4j.version>1.5.11.wso2v10</wss4j.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <json-smart.version>1.3</json-smart.version>
