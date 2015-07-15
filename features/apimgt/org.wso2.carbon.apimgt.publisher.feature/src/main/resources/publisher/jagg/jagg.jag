@@ -1,5 +1,5 @@
 <%
-
+ var site = require("/site/conf/site.json");
 //TODO : remove this when log configs are implemented
 //Log.prototype.isDebugEnabled = function () {
 //    return false;
@@ -693,6 +693,16 @@ return getThemePath() + path;
         return true;
     };
 
+    var getTenantDomain = function(){
+        var user = jagg.getUser(),username;
+        if(user!=null){
+            username=user.username;
+        	var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+           	var domainName =MultitenantUtils.getTenantDomain(username);
+           	return domainName;
+        }
+    };
+
     return {
         setUser:setUser,
         getUser:getUser,
@@ -734,6 +744,7 @@ return getThemePath() + path;
         url:url,
         getRegistryPath:getRegistryPath,
         getHttpsUrl:getHttpsUrl,
+        getTenantDomain:getTenantDomain,
 	getSiteContext:getSiteContext
     };
 
