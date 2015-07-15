@@ -1,7 +1,7 @@
 $(document).ready(function(){
     $( "body" ).delegate( "button.check_url_valid", "click", function() {
         var btn = this;
-        var url = $(this).parent().find('input:first').val();
+        var url = $(this).parent().parent().find('input:first').val();
         var type = '';
         var attr = $(this).attr('url-type');
         if (typeof attr !== typeof undefined && attr !== false) {
@@ -11,7 +11,7 @@ $(document).ready(function(){
         }
         $(btn).parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");
-        $(btn).val("Validating..");
+        $(btn).html("Validating..");
 
         if (url == '') {
             $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
@@ -50,10 +50,10 @@ $(document).ready(function(){
                    data: { action:"isURLValid", type:type ,url:url },
                    success: function (response) {
                        if (!response.error) {
-                           if(response.status === "success") {
+                           if(response.data.response === "success") {
                                $(btn).parent().after(' <span class="label label-success url_validate_label"><i class="icon-ok icon-white"></i>Valid URL</span>');
-                           } else if(response.status === "error") {
-                               $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
+                           } else if(response.data.response === "error while connecting") {
+                               $(btn).parent().after(' <span class="label label-warning url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
                            }
                            var toFade = $(btn).parent().parent().find('.url_validate_label');
                            var foo = setTimeout(function() {
@@ -61,7 +61,7 @@ $(document).ready(function(){
                            }, 3000);
                        }
                        $(btn).removeClass("loadingButton-small");
-                       $(btn).val("Test URI");
+                       $(btn).html("Test URI");
                    }
                })
 
