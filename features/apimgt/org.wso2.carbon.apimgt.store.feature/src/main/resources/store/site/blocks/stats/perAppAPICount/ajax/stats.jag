@@ -36,7 +36,6 @@ log = new Log();
         var groupId = session.get("groupId");
         result = mod.getProviderAPIUsage(subscriber,from,to,groupId);
 
-
         if (result.error == "true") {
             obj = {
                 error:result.error,
