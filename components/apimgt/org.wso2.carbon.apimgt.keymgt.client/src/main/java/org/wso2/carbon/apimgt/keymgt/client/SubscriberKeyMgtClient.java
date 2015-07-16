@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceStub;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.net.URL;
 
@@ -41,26 +42,14 @@ public class SubscriberKeyMgtClient {
     public SubscriberKeyMgtClient(String backendServerURL, String username, String password)
             throws Exception {
         try {
-            AuthenticationAdminStub authenticationAdminStub = new AuthenticationAdminStub(null, backendServerURL + "AuthenticationAdmin");
-            ServiceClient authAdminServiceClient = authenticationAdminStub._getServiceClient();
-            authAdminServiceClient.getOptions().setManageSession(true);
-            authenticationAdminStub.login(username, password, new URL(backendServerURL).getHost());
-            ServiceContext serviceContext = authenticationAdminStub.
-                    _getServiceClient().getLastOperationContext().getServiceContext();
-            String authenticatedCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-
-            if (log.isDebugEnabled()) {
-                log.debug("Authentication Successful with AuthenticationAdmin. " +
-                          "Authenticated Cookie ID : " + authenticatedCookie);
-            }
-
             subscriberServiceStub = new APIKeyMgtSubscriberServiceStub(
                     null, backendServerURL + "APIKeyMgtSubscriberService");
             ServiceClient client = subscriberServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
-            options.setProperty(HTTPConstants.COOKIE_STRING,
-                                authenticatedCookie);
+            CarbonUtils.setBasicAccessSecurityHeaders(username, password,
+                                                      true, subscriberServiceStub._getServiceClient());
+
         } catch (Exception e) {
             String errorMsg = "Error when instantiating SubscriberKeyMgtClient.";
             log.error(errorMsg, e);
