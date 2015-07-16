@@ -2235,7 +2235,7 @@ public class APIUsageStatisticsClient {
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exist
                 query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY
-                        + " WHERE " + APIUsageStatisticsClientConstants.API + " = " + apiName + "'";
+                        + " WHERE " + APIUsageStatisticsClientConstants.API + " = '" + apiName + "'";
                 if (apiVersion != null) {
                     query += " AND " + APIUsageStatisticsClientConstants.VERSION + " = '" + apiVersion + "'";
                 }
