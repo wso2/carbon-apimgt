@@ -101,6 +101,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
+                            org.wso2.carbon.apimgt.gateway.stub.*;version="${apimgt.handlers.security.stub.version}",
                             org.wso2.carbon.sequences.stub.*;version="${carbon.mediation.version}"
                            
                         </Export-Package>
