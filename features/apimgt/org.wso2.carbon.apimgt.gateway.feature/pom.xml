@@ -59,7 +59,15 @@
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
-
+	 <dependency>
+             <groupId>org.wso2.carbon.mediation</groupId>
+             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>org.wso2.carbon.mediation</groupId>
+             <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+        </dependency>
+       
     </dependencies>
 
     <build>
