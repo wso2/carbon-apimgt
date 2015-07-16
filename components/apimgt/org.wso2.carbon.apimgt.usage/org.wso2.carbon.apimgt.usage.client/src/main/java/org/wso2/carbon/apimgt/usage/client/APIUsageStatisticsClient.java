@@ -404,7 +404,7 @@ public class APIUsageStatisticsClient {
         Collection<AppAPIUsage> usageData = getAppAPIUsageData(omElement);
 
 
-        List<String> subscriberApps = getAppsbySubscriber(subscriberName,groupId);
+        List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
 
         List<APIUsageDTO> perAppUsageList = new ArrayList<APIUsageDTO>();
         APIUsageDTO apiUsageDTO;
@@ -436,7 +436,7 @@ public class APIUsageStatisticsClient {
         return perAppUsageList;
     }
 
-    private List<String> getAppsbySubscriber(String subscriberName,String groupId) throws APIMgtUsageQueryServiceClientException {
+    private List<String> getAppsbySubscriber(String subscriberName, String groupId) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -450,21 +450,19 @@ public class APIUsageStatisticsClient {
                            " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE ";
 
             boolean sharedApp;
-            if(groupId != null && !"".equals(groupId)){
+            if (groupId != null && !"".equals(groupId)) {
                 query = query + "AM_APPLICATION.GROUP_ID = ? ";
-                System.out.println("client group");
-                sharedApp=true;
-            }else{
+                sharedApp = true;
+            } else {
                 query = query + "AM_SUBSCRIBER.USER_ID = ? ";
-                System.out.println("client user");
-                sharedApp=false;
+                sharedApp = false;
             }
 
             statement = connection.prepareStatement(query);
 
-            if(!sharedApp){
+            if (!sharedApp) {
                 statement.setString(1, subscriberName);
-            }else{
+            } else {
                 statement.setString(1, groupId);
             }
 
