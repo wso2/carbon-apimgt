@@ -257,7 +257,7 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
-        String groupId = (String)args[3];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
             list = client.getAppApiCallType(subscriberName, groupId, fromDate, toDate, 10);
@@ -338,7 +338,7 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
-        String groupId = (String)args[3];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
             list = client.getPerAppFaultCount(subscriberName, groupId, fromDate, toDate, 10);
@@ -408,7 +408,7 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
-        String groupId = (String)args[3];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
             list = client.perAppPerAPIUsage(subscriberName, groupId, fromDate, toDate, 10);
@@ -555,7 +555,7 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
-        String groupId = (String)args[3];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
             list = client.getAppRegisteredUsers(subscriberName, groupId);
