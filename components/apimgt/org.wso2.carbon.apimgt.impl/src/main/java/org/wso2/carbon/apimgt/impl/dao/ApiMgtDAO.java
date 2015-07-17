@@ -6725,7 +6725,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 }else {
                     is = null;
                 }
-                if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                if (connection.getMetaData().getDriverName().contains("PostgreSQL")
+                        || connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                     if(uriTemplate.getMediationScript() != null) {
                         prepStmt.setBinaryStream(6, is, uriTemplate.getMediationScript().getBytes().length);
                     }else{
