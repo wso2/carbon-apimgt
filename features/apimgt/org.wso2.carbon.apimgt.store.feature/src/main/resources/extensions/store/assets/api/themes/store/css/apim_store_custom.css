@@ -275,3 +275,16 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
     outline: 0;
 }
 .editable-div span { background:#dfebed; color:#292E38; }
+
+.tag{width: 100%; float:left;}
+.error-title{font-size: 14px; border: none; font-weight: 100; float: left; }
+.attribute .value{ float: left; width: auto; padding-top: 10px;}
+#curlProdtoken_help .dropdown-menu{   left: 64px ;   top: 8px; -webkit-box-shadow:none; box-shadow:none;}
+.dropdown-menu-new {
+  left: 65px !important;
+  top: 7px !important;
+  -webkit-box-shadow:none !important;
+  box-shadow:none !important;
+    width: 13%;
+}
+.title{font-size: 14px; border: none; font-weight: 100; float: left; }

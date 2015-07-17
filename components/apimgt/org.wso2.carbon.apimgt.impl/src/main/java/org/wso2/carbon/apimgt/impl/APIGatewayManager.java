@@ -186,6 +186,7 @@ public class APIGatewayManager {
                 throw new APIManagementException(axisFault.getMessage(), axisFault);
             } catch (APIManagementException ex) {
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
+                throw new APIManagementException(ex);
             }
         }
         return failedEnvironmentsList;
@@ -269,7 +270,7 @@ public class APIGatewayManager {
 	 * @return True if the API is available in at least one Gateway. False if
 	 *         available in none.
 	 */
-    public boolean isAPIPublished(API api, String tenantDomain) {
+    public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
         List<String> failedEnvironmentsList = new ArrayList<String>(0);
         for (Environment environment : environments.values()) {
             try {
@@ -282,6 +283,7 @@ public class APIGatewayManager {
             } catch (AxisFault axisFault) {
                 log.error("Error occurred when check api is published on gatway" + environment.getName(), axisFault);
                 failedEnvironmentsList.add(environment.getName());
+                throw new APIManagementException(axisFault);
             }
         }
         return false;
