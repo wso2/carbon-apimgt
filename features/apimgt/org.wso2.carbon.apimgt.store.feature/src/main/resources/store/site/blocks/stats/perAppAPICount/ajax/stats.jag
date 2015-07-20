@@ -33,7 +33,8 @@ log = new Log();
         var subscriber = jagg.getUser().username;
         from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
-        result = mod.getProviderAPIUsage(subscriber,from,to);
+        var groupId = session.get("groupId");
+        result = mod.getProviderAPIUsage(subscriber,from,to,groupId);
 
         if (result.error == "true") {
             obj = {

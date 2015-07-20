@@ -152,14 +152,14 @@ public class APIUsageStatisticsClient {
         return builder.getDocumentElement();
     }
 
-    public List<APIResponseFaultCountDTO> getPerAppFaultCount(String subscriberName, String fromDate, String toDate, int limit)
+    public List<APIResponseFaultCountDTO> getPerAppFaultCount(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         OMElement omElement = this.queryBetweenTwoDays(
                 APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, fromDate, toDate);
         Collection<AppAPIResponseFaultCount> usageData = getAppAPIResponseFaultCount(omElement);
 
-        List<String> subscriberApps = getAppsbySubscriber(subscriberName);
+        List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
 
         List<APIResponseFaultCountDTO> perAppFaultCountList = new ArrayList<APIResponseFaultCountDTO>();
         APIResponseFaultCountDTO apiUsageDTO;
@@ -190,14 +190,14 @@ public class APIUsageStatisticsClient {
         return perAppFaultCountList;
     }
 
-    public List<AppUsageDTO> getTopAppUsers(String subscriberName, String fromDate, String toDate, int limit)
+    public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         OMElement omElement = this.queryBetweenTwoDays(
                 APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, fromDate, toDate);
         Collection<AppUsage> usageData = getAppUsageData(omElement);
 
-        List<String> subscriberApps = getAppsbySubscriber(subscriberName);
+        List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
 
         List<AppUsageDTO> appUsageList = new ArrayList<AppUsageDTO>();
         AppUsageDTO appUsageDTO;
@@ -246,14 +246,14 @@ public class APIUsageStatisticsClient {
 
     }
 
-    public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String fromDate, String toDate, int limit)
+    public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         OMElement omElement = this.queryBetweenTwoDays(
                 APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, fromDate, toDate);
         Collection<AppCallType> usageData = getCallTypeUsageData(omElement);
 
-        List<String> subscriberApps = getAppsbySubscriber(subscriberName);
+        List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
 
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
         AppCallTypeDTO appCallTypeDTO;
@@ -308,10 +308,10 @@ public class APIUsageStatisticsClient {
 
     }
 
-    public List<AppRegisteredUsersDTO> getAppRegisteredUsers(String subscriberName) throws APIMgtUsageQueryServiceClientException {
+    public List<AppRegisteredUsersDTO> getAppRegisteredUsers(String subscriberName, String groupId) throws APIMgtUsageQueryServiceClientException {
 
 
-        List<String> subscriberApps = getAppsbySubscriber(subscriberName);
+        List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
 
         Collection<AppRegisteredUsersDTO> usageData = getAppUsers();
 
@@ -396,7 +396,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    public List<APIUsageDTO> perAppPerAPIUsage(String subscriberName, String fromDate, String toDate, int limit)
+    public List<APIUsageDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         OMElement omElement = this.queryBetweenTwoDays(
@@ -404,7 +404,7 @@ public class APIUsageStatisticsClient {
         Collection<AppAPIUsage> usageData = getAppAPIUsageData(omElement);
 
 
-        List<String> subscriberApps = getAppsbySubscriber(subscriberName);
+        List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
 
         List<APIUsageDTO> perAppUsageList = new ArrayList<APIUsageDTO>();
         APIUsageDTO apiUsageDTO;
@@ -436,7 +436,7 @@ public class APIUsageStatisticsClient {
         return perAppUsageList;
     }
 
-    private List<String> getAppsbySubscriber(String subscriberName) throws APIMgtUsageQueryServiceClientException {
+    private List<String> getAppsbySubscriber(String subscriberName, String groupId) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         PreparedStatement statement = null;
@@ -447,11 +447,24 @@ public class APIUsageStatisticsClient {
             String query = "SELECT CONSUMER_KEY, NAME FROM AM_APPLICATION_KEY_MAPPING INNER JOIN AM_APPLICATION ON " +
                            "AM_APPLICATION_KEY_MAPPING.APPLICATION_ID=AM_APPLICATION.APPLICATION_ID INNER JOIN " +
                            "AM_SUBSCRIBER" +
-                           " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE AM_SUBSCRIBER" +
-                           ".USER_ID = ? ";
+                           " ON AM_APPLICATION.SUBSCRIBER_ID = AM_SUBSCRIBER.SUBSCRIBER_ID WHERE ";
+
+            boolean sharedApp;
+            if (groupId != null && !"".equals(groupId)) {
+                query = query + "AM_APPLICATION.GROUP_ID = ? ";
+                sharedApp = true;
+            } else {
+                query = query + "AM_SUBSCRIBER.USER_ID = ? ";
+                sharedApp = false;
+            }
 
             statement = connection.prepareStatement(query);
-            statement.setString(1, subscriberName);
+
+            if (!sharedApp) {
+                statement.setString(1, subscriberName);
+            } else {
+                statement.setString(1, groupId);
+            }
 
             rs = statement.executeQuery();
 
