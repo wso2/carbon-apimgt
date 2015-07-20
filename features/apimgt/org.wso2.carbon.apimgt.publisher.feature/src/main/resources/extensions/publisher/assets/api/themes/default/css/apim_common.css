@@ -293,3 +293,12 @@ button.btn-api-del {
     color: #FF0000;
     background-color: #FFFFFF;
 }
+
+.radio > input[type=radio] {
+    opacity: 1;
+}
+
+footer {
+    position: fixed;
+}
+
