@@ -1652,7 +1652,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     result.put("length", 0);
                     return result;
                 }
-                totalLength=0;      // reset totalLength to 0
+                totalLength = 0;      // reset totalLength to 0
                 for (GenericArtifact artifact : genericArtifacts) {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
@@ -1660,7 +1660,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
                             API resultAPI = APIUtil.getAPI(artifact, registry);
                             if (resultAPI != null) {
-                                if (totalLength>=start && totalLength<(start+end)){
+                                if (totalLength >= start && totalLength < (start + end)) {
                                     apiSet.add(resultAPI);      // add if API's count lie between start and end
                                 }
                                 totalLength++;                  //counting published APIS
@@ -1670,7 +1670,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         if (status.equals(APIConstants.PUBLISHED)) {
                             API resultAPI = APIUtil.getAPI(artifact, registry);
                             if (resultAPI != null) {
-                                if (totalLength>=start && totalLength<(start+end)){
+                                if (totalLength >= start && totalLength < (start + end)) {
                                     apiSet.add(resultAPI);      // add if API's count lie between start and end
                                 }
                                 totalLength++;                  //counting published APIS
@@ -1678,7 +1678,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         }
                     }
                 }
-                
+
             }
         } catch (RegistryException e) {
             handleException("Failed to search APIs with type", e);
