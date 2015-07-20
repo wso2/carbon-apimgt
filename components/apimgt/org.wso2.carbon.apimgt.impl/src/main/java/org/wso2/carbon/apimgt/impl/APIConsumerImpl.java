@@ -1600,7 +1600,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end) throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
-        List<API> apiList = new ArrayList<API>();
 
         searchTerm = searchTerm.trim();
         Map<String,Object> result=new HashMap<String, Object>();
@@ -1653,7 +1652,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     result.put("length", 0);
                     return result;
                 }
-
+                totalLength = 0;      // reset totalLength to 0
                 for (GenericArtifact artifact : genericArtifacts) {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
@@ -1661,26 +1660,25 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
                             API resultAPI = APIUtil.getAPI(artifact, registry);
                             if (resultAPI != null) {
-                                apiList.add(resultAPI);
+                                if (totalLength >= start && totalLength < (start + end)) {
+                                    apiSet.add(resultAPI);      // add if API's count lie between start and end
+                                }
+                                totalLength++;                  //counting published APIS
                             }
                         }
                     } else {
                         if (status.equals(APIConstants.PUBLISHED)) {
                             API resultAPI = APIUtil.getAPI(artifact, registry);
                             if (resultAPI != null) {
-                                apiList.add(resultAPI);
+                                if (totalLength >= start && totalLength < (start + end)) {
+                                    apiSet.add(resultAPI);      // add if API's count lie between start and end
+                                }
+                                totalLength++;                  //counting published APIS
                             }
                         }
                     }
-                    totalLength=apiList.size();
                 }
-                if(totalLength<=((start+end)-1)){
-                    end=totalLength;
-                }
-				for (int i = start; i < end; i++) {
-					apiSet.add(apiList.get(i));
 
-				}
             }
         } catch (RegistryException e) {
             handleException("Failed to search APIs with type", e);
