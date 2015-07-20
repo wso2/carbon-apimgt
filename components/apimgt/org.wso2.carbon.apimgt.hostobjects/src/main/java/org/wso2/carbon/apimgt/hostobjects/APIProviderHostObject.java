@@ -1423,6 +1423,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
         String thumbUrl = (String) apiData.get("thumbUrl",apiData);
+        String environments = (String) apiData.get("environments", apiData);
         String visibleRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
@@ -1661,6 +1662,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
             }
         }
+
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
         api.setLastUpdated(new Date());
