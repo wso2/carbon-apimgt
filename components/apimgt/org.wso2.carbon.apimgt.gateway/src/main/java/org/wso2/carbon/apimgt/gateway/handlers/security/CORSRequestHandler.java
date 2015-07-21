@@ -167,7 +167,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				(Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 		String requestOrigin = headers.get("Origin");
 		messageContext
-				.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, getAllowedOrigins(requestOrigin));
+				.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, getAllowedOrigin(requestOrigin));
 		String allowedMethods = "";
 		if (selectedResource != null) {
 			for (String method : selectedResource.getMethods()) {
@@ -197,7 +197,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		this.allowHeaders = allowHeaders;
 	}
 
-	public String getAllowedOrigins(String origin) {
+	public String getAllowedOrigin(String origin) {
 		if (allowedOrigins.contains("*")) {
 			return "*";
 		} else if (allowedOrigins.contains(origin)) {
@@ -207,8 +207,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		}
 	}
 
-	public void setAllowedOrigins(String allowedOrigins) {
-		this.allowedOrigins = Arrays.asList(allowedOrigins.split(","));
+	public void setAllowedOrigin(String allowedOrigin) {
+		this.allowedOrigins = Arrays.asList(allowedOrigin.split(","));
 	}
 
 	public String getApiImplementationType() {

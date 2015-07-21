@@ -402,8 +402,9 @@ public class APIKeyValidator {
 
             if (selectedResource == null) {
                 //No matching resource found.
-                log.error("Could not find matching resource for " + requestPath);
-                throw new ResourceNotFoundException("Could not find matching resource for " + requestPath);
+                String msg = "Could not find matching resource for " + requestPath;
+                log.error(msg);
+                throw new ResourceNotFoundException(msg);
             }
 
             resourceString = selectedResource.getDispatcherHelper().getString();
