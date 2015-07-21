@@ -401,7 +401,6 @@ var getInlineContent = function(provider, apiName, version,docName, mode,tenantD
 	
 	}); 
 
-	return content;
 
 }
 
