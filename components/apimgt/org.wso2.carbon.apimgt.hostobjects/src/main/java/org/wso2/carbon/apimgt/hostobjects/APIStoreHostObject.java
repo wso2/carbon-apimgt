@@ -1478,6 +1478,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                    }
 	                    resultObj.put("apis", resultObj, apiArray);
 	                    resultObj.put("totalLength", resultObj, result.get("length"));
+                        resultObj.put("isMore", resultObj, result.get("isMore"));
 	                }
             }
             }
