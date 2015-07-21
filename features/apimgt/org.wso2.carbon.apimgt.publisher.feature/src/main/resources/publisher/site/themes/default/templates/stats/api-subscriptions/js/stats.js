@@ -37,7 +37,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                          var apiData= JSON.parse(json.usage[i].apiName);
 
-                         apiName_Provider=""+truncate(apiData[0],20)+" ("+apiData[2]+")";
+                         apiName_Provider = "" + truncate(apiData[0], 20) + " (" + apiData[2] + ")";
                          inputData.push({
                                   "apiName_Provider":apiName_Provider,
                                   "api_name":apiData[0],
