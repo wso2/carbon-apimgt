@@ -240,7 +240,11 @@ label {
     background-color: #237bd5;
     border:none;}
 .btn-success:hover {background-color: #1965b2;}
+<<<<<<< HEAD
+.inlineDocName{  
+=======
 .inlineDocName{
+>>>>>>> b69fcead5477c430a59452dd3041cefe73ceb52c
     margin-left: 32px;}
 .has-spinner{margin-left: 10px;}
 .help-block .jsonform-errortext{background-color: red}
@@ -254,6 +258,9 @@ button.btn-api-del {
     position: relative !important;
     top: -140px !important;
     right: 0px!important;
+<<<<<<< HEAD
+}
+=======
 }
 .input-long .textarea-long{width:70%; float: left; border: 1px solid #ccc; height: 30px; border-radius: 0px; margin-left: 10px;}
 .align-group{
@@ -301,3 +308,5 @@ button.btn-api-del {
 footer {
     position: fixed;
 }
+
+>>>>>>> b69fcead5477c430a59452dd3041cefe73ceb52c

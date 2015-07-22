@@ -141,6 +141,10 @@ legend {
 .asset-description-header{margin-top: 10px;}
 .wr-action-btn-bar{height: 50px;}
 .form-horizontal {
+<<<<<<< HEAD
+=======
+
+>>>>>>> b69fcead5477c430a59452dd3041cefe73ceb52c
     margin-bottom: 30px;
     padding: 30px;
 }
@@ -194,6 +198,8 @@ legend {
 #assets-container{background-color: #fff;}
 .asset-description-header>p{padding-left: 20px;}
 .asset-description-header > .col-lg-12 > h3{padding-top: 20px;}
+<<<<<<< HEAD
+=======
 .label-align {
     display: inline-block;
     max-width: 100%;
@@ -217,6 +223,7 @@ label {
     right: 13px;
     font-size:14px;
 }
+>>>>>>> b69fcead5477c430a59452dd3041cefe73ceb52c
 .grey {color: #6C6767;  }
 .advance-search-btn:hover {
     color: #FFF;
@@ -242,7 +249,9 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
     height: 55px !important;}
 .action-wrapper:hover{background-color: #1965b2; opacity: 1;}
 .action-title:hover{background-color: #1965b2; }
-
+<<<<<<< HEAD
+.action-wrapper>a:hover{background-color: #1965b2 !important; }
+=======
 .action-wrapper>a:hover{background-color: #1965b2 !important; }
 
 .curlurl-genbtn { white-space:nowrap; }
@@ -288,4 +297,4 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
     width: 13%;
 }
 .title{font-size: 14px; border: none; font-weight: 100; float: left; }
-
+>>>>>>> b69fcead5477c430a59452dd3041cefe73ceb52c
