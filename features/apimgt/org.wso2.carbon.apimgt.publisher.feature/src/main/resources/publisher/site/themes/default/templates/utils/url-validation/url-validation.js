@@ -3,11 +3,17 @@ $(document).ready(function(){
         var btn = this;
         var url = $(this).parent().find('input:first').val();
         var type = '';
+        var thisID = $(this).attr('id');
         var attr = $(this).attr('url-type');
         if (typeof attr !== typeof undefined && attr !== false) {
             type = $(btn).attr('url-type');
         } else {
-            type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+            if (thisID == "prototype_test") {
+                type = "http";
+            }
+            else {
+                type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+            }
         }
         $(btn).parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");
