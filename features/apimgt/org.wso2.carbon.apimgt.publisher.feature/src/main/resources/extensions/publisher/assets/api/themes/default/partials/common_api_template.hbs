@@ -22,7 +22,7 @@
 <div class="col-sm-12 text-center">
 <ul class="new-sub-menu-wizard" style="margin:0 auto">
     <li>
-        <a href='{{url ""}}/asts/api/create' class="wizard-active">
+        <a href='{{url ""}}/assets/api/create' class="wizard-active">
             <div class="wizard-number">1</div>
             <span>Design</span>
         </a>
@@ -42,7 +42,7 @@
     </li>
 {{else}}
    <li>
-        <a href='{{url ""}}/asts/api/implement/{{id}}' class="<%= implement_wlabel%>">
+        <a href='{{url ""}}/assets/api/implement/{{id}}' class="<%= implement_wlabel%>">
             <div class="wizard-number">2</div>
             <span>Implement</span>
         </a>
@@ -132,7 +132,7 @@
     <div class='form-group'>
         <label class='custom-form-label   col-lg-2'>Context:<span class="requiredAstrix">*</span></label>
         <div class='custom-form-right col-lg-5 '>
-            <input type='text' id='overview_context' name='overview_context' class="form-control required" >
+            <input type='text' id='overview_context' name='overview_context' class="form-control required" onchange="getContextValue()" value="" onkeyup="updateContextPattern()">
             <a class="icon-question-sign help_popup" help_data="context_help"></a>
             <p id="context_help" class="hide">{{t "contextHelpMsg"}}</p>
         </div>
@@ -140,7 +140,7 @@
     <div class='form-group'>
         <label class='custom-form-label col-lg-2 '>Version:<span class="requiredAstrix">*</span></label>
         <div class='custom-form-right col-lg-5 '>
-            <input type='text' id='overview_version' name='overview_version' class="form-control required validInput noSpace" >
+            <input type='text' id='overview_version' name='overview_version' class="form-control required validInput noSpace" onchange="getContextValue()" value="" onkeyup="updateContextPattern()">
             <p class="help-block">{{t "E.g.,: v1.0.0 ,v1.0 , 1.0.0, 1.0"}}</p>
         </div>
     </div>
@@ -270,7 +270,7 @@
             <a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
             <legend>{{t "API Definition "}}</legend>
             <div class="control-group api_wsdl">
-                <label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+                <label class="control-label custom-form-label col-lg-2" for="wsdl">{{t "WSDL"}}:</label>
                 <div class="controls">
                 <div class="input-append">
                 <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{apiMetaData.wsdl}}" />
@@ -287,7 +287,7 @@
 				<a  href="#wsdlUpload" role="button" class="btn pull-right" data-toggle="modal" ><i class="icon-download-alt" ></i> {{t "Import"}} </a>
 				<legend>{{t "API Definition "}}</legend>
 			<div class="control-group api_wsdl">
-				<label class="control-label" for="wsdl">{{t "WSDL"}}:</label>
+				<label class="control-label custom-form-label col-lg-2" for="wsdl">{{t "WSDL"}}:</label>
 				<div class="controls">
 					<div class="input-append">
 						<input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="{{api.wsdl}}" />
@@ -305,13 +305,13 @@
 						<legend>API Definition</legend>
 						<div class="resource_create">
 							<div class="control-group">
-								<label class="control-label" for="inputPassword">URL Pattern</label>
+								<label class="control-label custom-form-label col-lg-2" for="inputPassword">URL Pattern</label>
 								<div class="controls">
 									<div class="input-prepend">
 										{{#if api}}
 											<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
 										{{else}}
-											<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+											<span class="context-area add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
 										{{/if}}
 										<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
 									</div>
@@ -331,13 +331,13 @@
 						<legend>API Definition</legend>
 						<div class="resource_create">
 							<div class="control-group">
-								<label class="control-label" for="inputPassword">URL Pattern</label>
+								<label class="control-label custom-form-label col-lg-2" for="inputPassword">URL Pattern</label>
 								<div class="controls">
 									<div class="input-prepend">
 										{{#if api}}
 											<span class="add-on" id="resource_url_pattern_refix">{{api.context}}</span>
 										{{else}}
-											<span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
+											<span class="context-area add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
 										{{/if}}
 										<input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
 									</div>
@@ -358,7 +358,7 @@
     </div>
     <div class="form-actions" id="saveButtons">
         <input type="submit" class="btn btn-primary" value="Save" action="design"/>
-        <a class="btn btn-primary" id="go_to_implement">{{t "Next"}}: {{t "Implement"}} ></a>
+        <button class="btn btn-primary" id="go_to_implement">{{t "Next"}}: {{t "Implement"}} ></button>
         <input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'"/>
     </div>
 </form>

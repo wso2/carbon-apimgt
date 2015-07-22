@@ -17,7 +17,7 @@
 *
 */
 
-package org.wso2.carbon.apimgt.impl.observers;
+package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
@@ -149,18 +149,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
 
     }
 
-    private void initPersistence(String configName,
-                                 ConfigurationContext configurationContext,
-                                 ServerContextInformation contextInfo)
-            throws RegistryException, AxisFault {
-
-    }
-
-    private ServerContextInformation initESB(String configurationName,
-                                             ConfigurationContext configurationContext)
-            throws AxisFault {
-        return null;
-    }
+   
 
     /**
      * Create the file system for holding the synapse configuration for a new tanent.

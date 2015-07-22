@@ -22,7 +22,7 @@
 
  ENDPOINTS:
  GET
- /apis/asts/swagger
+ /apis/assets/swagger
  */
 
 require('/modules/publisher.js').exec(function (ctx) {
@@ -34,14 +34,13 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var user = server.current(ctx.session);
 	var username = user.username;
 	var uriMatcher = new URIMatcher(request.getRequestURI());
-	var UPDATE_LIFECYCLE_URL = '/{context}/asts/api/apis/lifecycle';
+	var UPDATE_LIFECYCLE_URL = '/{context}/assets/api/apis/lifecycle';
 	var method = request.getMethod();
 	var options = ref.getQueryOptions(request.getQueryString());
 	var response = ctx.response;
 	var CONTENT_TYPE_JSON = 'application/json';
 	response.contentType = CONTENT_TYPE_JSON;
 	var constants = require("rxt").constants;
-	//log.info("Calling Life Cycle API");
 	data = obtainData(request);
 	switch (method) {
 		case 'POST':
@@ -54,7 +53,6 @@ require('/modules/publisher.js').exec(function (ctx) {
 				apiData.apiName = data.name;
 				apiData.version = data.version;
 				apiData.status = data.status;
-				//log.info(data.deprecateOldVersions);
 				if (data.publishToGateway != null) {
 					apiData.publishToGateway = data.publishToGateway;
 				} else {
@@ -80,13 +78,14 @@ require('/modules/publisher.js').exec(function (ctx) {
 						error: true,
 						message: result.message
 					};
+                response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.INTERNAL_SERVER_ERROR, obj);
 				} else {
 					obj = {
 						error: false,
 						lcs: 'success'
 					}
+			    response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				}
-				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 			} else {
 				response = responseProcessor.buildErrorResponse(response,
 																constants.STATUS_CODES.NOT_IMPLEMENTED,

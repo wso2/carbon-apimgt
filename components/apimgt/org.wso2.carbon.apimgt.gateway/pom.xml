@@ -92,6 +92,34 @@
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
             <version>4.2.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
+        </dependency> 
+		<dependency>
+           <groupId>org.wso2.carbon.mediation</groupId>
+            <artifactId>org.wso2.carbon.sequences.stub</artifactId>
+        </dependency> 
+		<dependency>
+			<groupId>org.wso2.carbon.mediation</groupId>
+			<artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.mediation</groupId>
+			<artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.mediation</groupId>
+			<artifactId>org.wso2.carbon.mediation.registry</artifactId>
+		</dependency>	
+		<dependency>
+			<groupId>org.wso2.carbon.mediation</groupId>
+			<artifactId>org.wso2.carbon.rest.api.stub</artifactId>
+		</dependency>
+		<dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.utils</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -105,6 +133,23 @@
                     <target>1.5</target>
                 </configuration>
             </plugin>
+            <plugin>
+                                <groupId>org.apache.axis2</groupId>
+                                <artifactId>axis2-java2wsdl-maven-plugin</artifactId>
+                                <executions>
+                                        <execution>
+                                                <goals>
+                                                        <goal>java2wsdl</goal>
+                                                </goals>
+                                        </execution>
+                                </executions>
+                                <configuration>
+                                        <className>
+                                                org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin
+                                        </className>
+                                </configuration>
+                        </plugin>
+            
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
@@ -126,7 +171,8 @@
                             !javax.servlet.http,
                             !org.wso2.carbon.apimgt.gateway.internal,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
-                            org.wso2.throttle.*
+                            org.wso2.throttle.*,
+                            org.wso2.carbon.apimgt.gateway.dto
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,

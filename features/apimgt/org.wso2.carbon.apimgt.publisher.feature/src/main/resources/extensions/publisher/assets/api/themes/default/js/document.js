@@ -34,6 +34,8 @@ $(function(){
       });
 
 
+    $("input:radio[name=typeOptionRadio]:first", '#form-document-create').attr('checked', true);
+    $("input:radio[name=sourceOptionRadio]:first", '#form-document-create').attr('checked', true);
 
 	$('#addDocHref').on('click',function(){
 		$('#doc-add-container').css('display','inline');
@@ -52,7 +54,8 @@ $(function(){
 		$('#overview_name').val("");
 		$('#doc_summary').val('');
 		var pageId = $('#addDocPageId').val();
-		window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+		clearDocs();
+		//window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 
 	});
 
@@ -77,6 +80,14 @@ $(function(){
              $('#sourceOptionRadio3').attr('checked', false);
              $('#sourceOptionRadio2').attr('checked', true);
 		}
+
+		if(docType == "Other" || docType == "How To" || docType == "Samples"){
+			 $('#sourceOptionRadio2').attr('checked', false);
+             $('#sourceOptionRadio3').attr('checked', false);
+			 $('#sourceOptionRadio1').prop("checked", true);
+			 $('#sourceDocUrl').hide('slow');
+			 $('#sourceFile').hide('slow');
+		}
 	});
 //source selection
 	$("input[name='sourceOptionRadio']").change(function(){
@@ -89,8 +100,7 @@ $(function(){
 			$('#sourceDocUrl').show('slow');
 			
 
-		}else if(
-			sourceType == "File"){
+		}else if(sourceType == "File"){
 			//$('#sourceDocUrl').fadeIn().css('display','none');
 			$('#sourceDocUrl').hide('slow');
 			$('#sourceFile').show('slow');
@@ -104,21 +114,47 @@ $(function(){
 		
 	});
 
-	//validate url
-	var docUrlInput = $('#docUrl');
-	docUrlInput.change(function(e) {
-		if(docUrlInput.val() !== ""){
-			//validInputUrl(docUrlInput);
-		}
-        
-    });
 
 
 	$('#add-doc-btn').on('click',function(){
+		//validatet name
+		var nameInputElement = $('#overview_name');
+		var docName = nameInputElement.val();
+		var requiredMsg = $('#errorMsgRequired').val();
+		if(docName == ""){
+			nameInputElement.css("border", "1px solid red");
+			nameInputElement.parent().append('<label class="error">' + requiredMsg + '</label>');
+			return;
+		}
+
+		//validate source type
+		var sourceType = $('input[name=sourceOptionRadio]:checked', '#form-document-create').val();
+		if(sourceType == 'URL'){
+			var docUrlElement = $("#docUrl");
+	    	sourceURL= docUrlElement.val();
+	    	var docValid = validInputUrl(docUrlElement);
+	    	if(!docValid){
+	    		 docUrlElement.css("border", "1px solid red");
+	    		return;
+	    	}
+		}	
+
+		var docType = $('input[name=typeOptionRadio]:checked', '#form-document-create').val();
+		if(docType == 'Other'){
+			var otherElement = $('#overview_other_name');
+			var otherVal = otherElement.val();
+			if(otherVal == ""){
+				otherElement.css("border", "1px solid red");
+				otherElement.parent().append('<label class="error">' + requiredMsg + '</label>');
+				return;
+			}
+		}
+
 		if($('#docAction').val() == "updateDocument"){
 			saveOrUpdate("updateDocument");
 		}else if($('#docAction').val() == "createDocument"){
 			saveOrUpdate("createDocument");
+			
 		}		
 
 	});
@@ -127,7 +163,7 @@ $(function(){
 	$('ul.art-vmenu li').on("click", function(){
  
 
-});
+	});
 
 });
 
@@ -143,7 +179,7 @@ var saveOrUpdate = function(action){
 		errorMsg = 'Error Occured while Update Document';
 	}
 
-	ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	ajaxURL = caramel.context + '/assets/api/apis/addDoc';
 	$('#doc-add-container').css('display','none');
 	
 	var apiName = $('#addDocName').val();
@@ -153,7 +189,9 @@ var saveOrUpdate = function(action){
 	var pageId = $('#addDocPageId').val();
 	var docType = $('input[name=typeOptionRadio]:checked', '#form-document-create').val();
 	var sourceType = $('input[name=sourceOptionRadio]:checked', '#form-document-create').val();
-	var docName = $('#overview_name').val();
+	var nameInputElement = $('#overview_name');
+	var docName = nameInputElement.val();
+	
 	var summary = $('#doc_summary').val();	
 	var otherTypeName;
 	var visibility;
@@ -181,7 +219,9 @@ var saveOrUpdate = function(action){
 
 
     }else if(sourceType == 'URL'){
-    	sourceURL= $("#docUrl").val();
+    	var docUrlElement = $("#docUrl");
+    	sourceURL= docUrlElement.val();
+    	
     }
 
     $('#form-document-create').ajaxSubmit({
@@ -215,7 +255,7 @@ var saveOrUpdate = function(action){
 			                label: 'Close',
 			                action: function(dialogItself){
 				                dialogItself.close();
-				                window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+				                window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 			                }
 			            
 		            	}]
@@ -234,7 +274,7 @@ var saveOrUpdate = function(action){
 			                label: 'Close',
 			                action: function(dialogItself){
 				                dialogItself.close();
-				                window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+				                window.location.href = caramel.context+'/assets/api/docs/'+pageId;
 			                }
 			            
 		            	}]
@@ -311,12 +351,6 @@ var  editDocumentation = function(url, filePath, editContent){
 	$('.mceEditor').css('display','none');
 	if(url != null){
 		window.open(url);
-	}else if(filePath != null){
-		/*$("docListEdit").on("click", function () {
-    		$(this).attr("href",filePath);
-    	});
-    	$('fileUpload').click();
-		*/
 	}
 
 };
@@ -324,7 +358,7 @@ var  editDocumentation = function(url, filePath, editContent){
 var getInlineContent = function(provider, apiName, version,docName, mode,tenantDomain){
 	var content = {};
 	var action = 'getInlineContent';
-	var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+	var ajaxURL = caramel.context + '/assets/api/apis/addDoc';
 	var errorMsg = 'Error occurred while retrieve Inline Content';
 	 $.ajax({
 			    type: "GET",
@@ -367,12 +401,10 @@ var getInlineContent = function(provider, apiName, version,docName, mode,tenantD
 	
 	}); 
 
-	return content;
 
 }
 
 var editInlineContent	 = function (provider, apiName, version, docName, mode,tenantDomain) {
-
 
 	$('#addOrUpdateDoc').hide();
 	$('#doc-add-container').hide();
@@ -390,6 +422,8 @@ var editInlineContent	 = function (provider, apiName, version, docName, mode,ten
   	$('#inlineApiVersion').val(version);
 	$('#inlineDocPageId').val($('#addDocPageId').val());
 	$('#inlineButtonGroup').show('fast');
+	$('.mceEditor').css('display','inline');
+
 };
 
 function saveContent(provider, apiName, apiVersion, mode) {
@@ -402,7 +436,8 @@ function saveContent(provider, apiName, apiVersion, mode) {
 
   var pageId = $('#inlineDocPageId').val();
   if(mode == 'cancel'){
-     window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+  	clearDocs();
+    // window.location.href = caramel.context+'/assets/api/docs/'+pageId;
   }
   var visibility={};
   var showVisibility = $('#InlineShowVisibility').val();
@@ -414,7 +449,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
   var successMsg = 'Successfully Edited Inline Content';
   var errorMsg = 'Error Occured while Edit Inline Content';
 
-  var ajaxURL = caramel.context + '/asts/api/apis/addDoc';
+  var ajaxURL = caramel.context + '/assets/api/apis/addDoc';
 
     $('#form-inline-editor').ajaxSubmit({
           type: "POST",
@@ -443,7 +478,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
                       action: function(dialogItself){
                         dialogItself.close();
                         if(mode == 'save'){
-                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                          window.location.href = caramel.context+'/assets/api/docs/'+pageId;
                         }
                         
                       }
@@ -465,7 +500,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
                       action: function(dialogItself){
                         dialogItself.close();
                         if(mode == 'save'){
-                          window.location.href = caramel.context+'/asts/api/docs/'+pageId;
+                          window.location.href = caramel.context+'/assets/api/docs/'+pageId;
                         }
                       }
                   
@@ -477,7 +512,69 @@ function saveContent(provider, apiName, apiVersion, mode) {
          
           dataType: "json"
   }); 
-}
+};
+
+var removeDocumentation = function(provider, apiName, version, docName, docType){
+	var action = 'deleteDocument';
+	var ajaxURL = caramel.context + '/assets/api/apis/addDoc';
+	var errorMsg = 'Error occurred while Deleting Document';
+	var successMsg = 'Successfully Deleted Document';
+	 $.ajax({
+			    type: "POST",
+			    url: ajaxURL,
+			    data: {
+			        action:action,
+			        name:apiName,
+			        version:version,
+			        provider:provider,			      
+			        docName:docName,
+			        docType:docType
+
+			    },
+			    success: function (result) {
+			        BootstrapDialog.show({
+		                type: BootstrapDialog.TYPE_SUCCESS,
+		                title: 'success',
+		                message: successMsg,
+		                buttons: [{
+		                
+			                label: 'Close',
+			                action: function(dialogItself){
+				                dialogItself.close();
+				                //window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+				                clearDocs();
+			                }
+			            
+		            	}]
+
+		            });
+	               
+			           
+			        },
+			    error : function(result) {		                
+	              BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Error',
+                    message: errorMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        //window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+                        clearDocs();
+                      }
+                  
+                  }]
+
+                  });
+               	},
+			          
+			   
+			    dataType: "json"
+	
+	}); 
+};
 
 var hideMsg=function () {
     $('#docAddMessage').hide("fast");
@@ -494,7 +591,8 @@ var validInputUrl = function(docUrlDiv) {
             docUrlD = docUrlDiv.val();
         }
         var erCondition = validUrl(docUrlD);
-        return validInput(docUrlDiv, $('#errorMsgDocUrl').val(), erCondition);
+        var errorMsgDocUrl = $('#errorMsgDocUrl').val();
+        return validInput(docUrlDiv, errorMsgDocUrl, erCondition);
     }
 };
 
@@ -568,5 +666,10 @@ var getMimeType = function(extension) {
     var type=CONTENT_MAP[extension];
     if(!type){type="application/octet-stream";}
     return type;
+};
+
+var clearDocs = function () {
+    window.location.reload();
+
 };
 

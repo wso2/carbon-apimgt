@@ -3,7 +3,7 @@ $(function () {
     var designer = new APIMangerAPI.APIDesigner();
     designer.set_partials('manage');
 
-    var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
+    var swaggerUrl = caramel.context + "/assets/api/apis/swagger?action=swaggerDoc&provider=" + store.publisher.api.provider + "&name=" + store.publisher.api.name + "&version=" + store.publisher.api.version;
     $(document).ready(function () {
         $.ajaxSetup({
                         contentType: "application/x-www-form-urlencoded; charset=utf-8"
@@ -221,39 +221,57 @@ $(function () {
         var publishAPI = function () {
             var data = {};
             $("body").off('api_saved');
+            var apiName = store.publisher.api.name;
+            var apiVersion = store.publisher.api.version;
+            var apiProvider = store.publisher.api.provider;
             data = {
                     action: "updateStatus",
-                    name: store.publisher.api.name,
-                    version: store.publisher.api.version,
-                    provider: store.publisher.api.provider,
+                    name: apiName,
+                    version: apiVersion,
+                    provider: apiProvider,
                     status: "PUBLISHED",
                     publishToGateway: true,
                     requireResubscription: true
             };
             $.ajax({
-                       url: caramel.context + '/asts/api/apis/lifecycle?type=api',
+                       url: caramel.context + '/assets/api/apis/lifecycle?type=api',
                        type: 'POST',
                        data: JSON.stringify(data),
                        contentType: 'application/json',
                        success: function (data) {
-                           //BootstrapDialog.alert('Successfully Changed the life cycle state');
                            if(!data.error) {
                                BootstrapDialog.show({
                                                         type: BootstrapDialog.TYPE_INFO,
-                                                        title: 'Success',
-                                                        message: 'Successfully Changed the life cycle state.',
+                                                        title: 'Congratulations',
+                                                        message: 'You have successfully published your API :' + apiName + '-' + apiVersion,
                                                         buttons: [{
-                                                                      label: 'OK',
+                                                                      label: 'Keep Editing API',
                                                                       action: function (dialogRef) {
                                                                           dialogRef.close();
                                                                       }
-                                                                  }]
+                                                                   },{
+                                                                       label: 'Go to API Store',
+                                                                        action: function (dialogRef) {
+                                                                            var storeUrl = store.publisher.urls.storeUrl + '/assets/api/details/' + store.publisher.api.id;
+                                                                            window.open(storeUrl, '_blank');
+                                                                            var overviewUrl = caramel.context + '/assets/api/details/'+store.publisher.api.id;
+                                                                            location.href = overviewUrl;
+                                                                      }
+                                                                   },{
+                                                                      label: 'Go to Overview',
+                                                                      cssClass: 'btn-primary',
+                                                                      action: function () {
+                                                                          var overviewUrl = caramel.context + '/assets/api/details/'+store.publisher.api.id;
+                                                                          location.href = overviewUrl;
+                                                                      }
+                                                                  }
+                                                                  ]
                                                     });
                            } else {
                                BootstrapDialog.show({
                                                         type: BootstrapDialog.TYPE_DANGER,
-                                                        title: 'Error',
-                                                        message: 'Error while changing the life cycle state.' + data.message,
+                                                        title: 'Failure',
+                                                        message: 'Error while publishing the API' + data.message,
                                                         buttons: [{
                                                                       label: 'OK',
                                                                       action: function (dialogRef) {

@@ -44,7 +44,6 @@ asset.manager = function(ctx){
             return assets;
         },
         get:function(id){
-            // log.info('Calling custom get of asset');
             return this._super.get.call(this,id);
         }
         /*search : function(query, paging) {
@@ -82,6 +81,7 @@ asset.manager = function(ctx){
 asset.configure = function(ctx) {
     return {
         meta: {
+            thumbnail: 'overview_thumbnail',
             search: {
                 searchableFields: ['overview_provider', 'overview_name']
             }
@@ -108,16 +108,20 @@ asset.server = function(ctx) {
                         url: 'my_applications',
                         path: 'my_applications.jag',
                         secured: true
-                    },{
+                    }, {
+                        title: 'Swagger',
+                        url: 'swagger',
+                        path: 'swagger.jag'
+                    },
+                    {
                         title: 'My Subscriptions',
                         url: 'my_subscriptions',
                         path: 'my_subscriptions.jag',
                         secured: true
                     },{
                         title: 'View Document',
-                        url: 'document/view',
-                        path: 'view_document.jag',
-                        secured: true
+                        url: 'view_document',
+                        path: 'view_document.jag'
                     },{
                         title: 'Forum',
                         url: 'forum',
@@ -146,12 +150,21 @@ asset.renderer = function(ctx) {
         return 'https://digg.com/submit?url=' + assetUrl;
     };
     return {
+        list: function(page) {
+            var assets = page.assets;
+            for (var index in assets) {
+                var asset = assets[index];
+                //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+                // value which need be explicitly set to null
+                if(asset.thumbnail == 'null') {
+                    asset.thumbnail = null;
+                }
+            }
+        },
         details:function(page){
-            // log.info('Details page rendered!!!');
-
-            //=================== Getting subscription details ========================
 
             var carbonAPI = require('carbon');
+
             var server = require('store').server;
             var user = server.current(ctx.session);
             var tenantId = null, tenantDomain = null;
@@ -168,6 +181,11 @@ asset.renderer = function(ctx) {
             var lenI=0,lenJ=0,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status,selectedDefault=false;
             var apistore = require('apistore').apistore.instance(userName);
 
+            //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
+            // value which need be explicitly set to null
+            if (page.assets.thumbnail == 'null') {
+                page.assets.thumbnail = null;
+            }
             var asset = page.assets;
             if (asset != null) {
                 status = asset.lifecycleState;
@@ -176,7 +194,7 @@ asset.renderer = function(ctx) {
                 }
             }
             var resultapi = apistore.getAPI(asset.attributes.overview_provider,
-                asset.name, asset.attributes.overview_version);
+                                            asset.name, asset.attributes.overview_version);
             var apidata=resultapi.api;
             if (apidata != null) {
                 tiers = apidata.tiers;
@@ -189,7 +207,7 @@ asset.renderer = function(ctx) {
                 var applications = JSON.parse(apistore.getApplications(userName));
 
                 var subscriptions = JSON.parse(apistore.getAPISubscriptions(asset.attributes.overview_provider,
-                    asset.name, asset.attributes.overview_version, userName));
+                                                                            asset.name, asset.attributes.overview_version, userName));
                 if (applications) {
                     lenI = applications.length;
                 }
@@ -197,27 +215,27 @@ asset.renderer = function(ctx) {
                     lenJ = subscriptions.length;
                 }
                 Label1:
-                    for (i = 0; i < lenI; i++) {
-                        var application = applications[i];
-                        for (j = 0; j < lenJ; j++) {
-                            var subscription = subscriptions[j];
-                            if (subscription.applicationId == application.id) {
-                                if (application.name == "DefaultApplication") {
-                                    selectedDefault = true;
-                                }
-                                continue Label1;
-                            } else {
-                                if (application.name == "DefaultApplication") {
-                                    subscribedToDefault = true;
+                        for (i = 0; i < lenI; i++) {
+                            var application = applications[i];
+                            for (j = 0; j < lenJ; j++) {
+                                var subscription = subscriptions[j];
+                                if (subscription.applicationId == application.id) {
+                                    if (application.name == "DefaultApplication") {
+                                        selectedDefault = true;
+                                    }
+                                    continue Label1;
+                                } else {
+                                    if (application.name == "DefaultApplication") {
+                                        subscribedToDefault = true;
+                                    }
                                 }
                             }
-                        }
 
-                        if (application.status == "APPROVED") {
-                            application.selectedDefault = selectedDefault;
-                            appsList.push(application);
+                            if (application.status == "APPROVED") {
+                                application.selectedDefault = selectedDefault;
+                                appsList.push(application);
+                            }
                         }
-                    }
 
                 result = apistore.getDeniedTiers();
                 deniedTiers = result.tiers;
@@ -245,6 +263,8 @@ asset.renderer = function(ctx) {
                 page.tiersAvailable = tiersAvailable;
                 page.tiers = allowedTiers;
                 page.subscribedToDefault = subscribedToDefault;
+                page.subscriptions=subscriptions;
+                page.anonymous=false;
             }
 
             page.showSubscribe = showSubscribe;
@@ -317,7 +337,7 @@ asset.renderer = function(ctx) {
                                                          asset.name, asset.attributes.overview_version, userName).documents;
             var apiIdentifier = {};
             apiIdentifier.name = asset.attributes.overview_name;
-            apiIdentifier.version = asset.name;
+            apiIdentifier.version = asset.attributes.overview_version;
             apiIdentifier.provider = asset.attributes.overview_provider;
             page.apiIdentifier = apiIdentifier;
 
@@ -360,45 +380,47 @@ asset.renderer = function(ctx) {
         pageDecorators: {
             populateEndPoints : function(page){
                 if (page.assets && page.assets.id) {
-                    var httpEndpoint,httpsEndpoint;
-                    if (page.api.serverURL.split(",")[0] == 'Production and Sandbox') {
-                        httpEndpoint = page.api.serverURL.split(",")[1];
-                        httpsEndpoint = page.api.serverURL.split(",")[2];
-                    }
-                    var isDefaultVersion=page.api.isDefaultVersion;
+                    var httpEndpoint='',httpsEndpoint='';
+                    var api=page.api;
+                    var isDefaultVersion=api.isDefaultVersion;
 
-                    page.assets.httpEndpoint = httpEndpoint;
-                    page.assets.httpsEndpoint = httpsEndpoint;
+                    page.assets.isAdvertiseOnly = api.isAdvertiseOnly;
                     page.assets.isDefaultVersion = isDefaultVersion;
 
-                    //var prodEps = parse(page.assets.attributes.overview_endpointConfig).production_endpoints;
-                    //var sandBoxEps = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints;
-                    //
-                    //if(prodEps != null){
-                    //    var prodEpArry = [];
-                    //
-                    //    for(var i = 0; prodEps.length > i; i++){
-                    //        prodEpArry.push(prodEps[i].url);
-                    //    }
-                    //
-                    //    page.assets.production_endpoint = prodEpArry.join(',');
-                    //
-                    //}else {
-                    //    page.assets.production_endpoint = parse(page.assets.attributes.overview_endpointConfig).production_endpoints.url;
-                    //}
-                    //
-                    //if(sandBoxEps != null){
-                    //    var sandBoxEpArry = [];
-                    //
-                    //    for(var i = 0; prodEps.length > i; i++){
-                    //        sandBoxEpArry.push(sandBoxEps[i].url);
-                    //    }
-                    //
-                    //    page.assets.sandbox_endpoint = sandBoxEpArry.join(',');
-                    //
-                    //} else if(parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints != null && parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url != null) {
-                    //    page.assets.sandbox_endpoint = parse(page.assets.attributes.overview_endpointConfig).sandbox_endpoints.url;
-                    //}
+                    var environments = JSON.parse(api.serverURL);
+                    var filteredEnvironments={};
+                    for(var environmentType in environments){
+                        var environmentsPerType = environments[environmentType];
+                        if(environmentType == "production"){
+                            environmentType.isProd=true;
+                            environmentType.isSand=false;
+                        }else if(environmentType == "sandbox"){
+                            environmentType.isSand=true;
+                            environmentType.isProd=false;
+                        }else{
+                            environmentType.isProd=false;
+                            environmentType.isSand=false;
+                        }
+                        var filEnvironmentsPerType=[];
+                        for( var environmentName in environmentsPerType){
+                            var filteredEnvironmentUrls=[];
+                            var environmenturls = environmentsPerType[environmentName];
+                            for (var urltype in environmenturls ) {
+                                if(urltype != "showInConsole" && urltype == "http"){
+                                    var endpoints=environmenturls[urltype];
+                                    httpEndpoint=endpoints[0];
+                                    httpsEndpoint=endpoints[1];
+                                    filteredEnvironmentUrls.push(environmenturls[urltype]);
+                                }
+                            }
+                            environmentsPerType[environmentName]=filteredEnvironmentUrls;
+
+                        }
+                        environments[environmentType]=environmentsPerType;
+
+                    }
+                    page.assets.httpEndpoint = httpEndpoint;
+                    page.assets.httpsEndpoint = httpsEndpoint;
                 }
             },
             socialSitePopulator: function(page, meta) {
@@ -429,36 +451,36 @@ asset.renderer = function(ctx) {
                 }
             },  populateApiActionBar: function(page,meta){
                 var action = {};
-                action.url = '/asts/api/list';
+                action.url = '/assets/api/list';
                 action.iconClass ='fa-cogs';
                 action.name ='APIs';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/asts/api/prototyped_apis';
+                action.url = '/assets/api/prototyped_apis';
                 action.iconClass ='fa-cog';
                 action.name ='Prototyped APIs';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/asts/api/my_applications';
+                action.url = '/assets/api/my_applications';
                 action.iconClass ='fa-briefcase';
                 action.name ='My Applications';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/asts/api/my_subscriptions';
+                action.url = '/assets/api/my_subscriptions';
                 action.iconClass ='fa-tags';
                 action.name ='My Subscriptions';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/asts/api/forum';
+                action.url = '/assets/api/forum';
                 action.iconClass ='fa-comment-o';
                 action.name ='Forum';
                 page.actionBar.actions.push(action);
                 action = {};
-                action.url = '/asts/api/statistics';
+                action.url = '/assets/api/statistics';
                 action.iconClass ='fa-line-chart';
                 action.name ='Statistics';
                 page.actionBar.actions.push(action);
-        }
+            }
         }
     }
 }

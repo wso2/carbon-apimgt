@@ -231,6 +231,11 @@ var provider = {};
         return this.impl.getDocumentationContent(apiId, docName);
     };
 
+    APIProviderProxy.prototype.removeDocumentation = function (api, docName, docType) {
+        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        return this.impl.removeDocumentation(apiId, docName, docType);
+    };
+
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
@@ -432,9 +437,7 @@ var provider = {};
         return this.impl.updateSubscription(identifier, status, parseInt(appId));
     };
 
-    APIProviderProxy.prototype.removeDocumentation = function (apiId, docName, docType) {
-        return this.impl.removeDocumentation(apiId, docName, docType);
-    };
+   
 
     /**
      * Delete a API
@@ -904,7 +907,7 @@ var provider = {};
             if (log.isDebugEnabled()) {
                 log.debug("updateAPIStatus : " + api.name + "-" + api.version);
             }
-            if (!success) {
+            if (success) {
                 return {
                     error:false
                 };
@@ -1040,6 +1043,26 @@ var provider = {};
                 error:e
             };
         }
+    };
+
+    APIProviderProxy.prototype.getAPIStoreURL = function (){
+        var result;
+        try {
+            result = APIUtil.getAPIStoreURL();
+            if (log.isDebugEnabled()) {
+                log.debug("getAPIStoreURL : ");
+            }
+            return {
+                error: false,
+                url: result
+            };
+        } catch (e) {
+            return {
+                error: true,
+                message: e.message.split(":")[1]
+            };
+        }
+
     };
 
 })(provider);

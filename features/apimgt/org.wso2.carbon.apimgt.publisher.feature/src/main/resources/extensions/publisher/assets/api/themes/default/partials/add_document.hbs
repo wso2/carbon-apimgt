@@ -7,7 +7,8 @@
 	        <input id="addDocName" value={{assets.name}} type="hidden"/>
 	        <input id="addDocProvider" value={{assets.provider}} type="hidden"/>
 	        <input id="addDocPageId" value={{assets.id}} type="hidden"/>
-	        <input id="errorMsgDocUrl" value={{t "Invalid Document URL"}} type="hidden"/>
+	        <input id="errorMsgDocUrl" value='{{t "Invalid Document URL "}}' type="hidden"/>
+            <input id="errorMsgRequired" value='{{t "This field is required"}}' type="hidden"/>
 	        <input id="docAction" value="createDocument" type="hidden"/>
 	        {{#if assets.showAPIDocVisibility}}
 	        <input id="showVisibility" value="true" type="hidden"/>
@@ -21,7 +22,8 @@
                         <div class='control-group cnl-group'>
                             <label class='control-label cnl-label'>{{t "Name :"}}</label>
                             <div class='controls cnls'>
-                                <input type='text' id='overview_name' name='overview_name'/>
+                                <span style='color:red;'>*</span>
+                                <input type='text' id='overview_name' name='overview_name' />
                             </div>
                         </div>
 						<div class="clear"></div>
@@ -99,6 +101,7 @@
                                 </label>
                                 <div class='controls' id="sourceFile" style='display:none;'>
                                     <input type='file' id='fileUpload'  name='fileUpload' style="width:100%"/>
+                                    <span style='color:red;'>*</span>
                                 </div>
                                 <label class='radio' style='display:none;' id='uploadFileName'/>
                             </div>

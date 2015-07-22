@@ -23,7 +23,7 @@ require('/modules/publisher.js').exec(function(ctx) {
     var ui = require('rxt').ui;
     var asset = require('rxt').asset;
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}');
+    var options = uriMatcher.match('/{context}/assets/{type}/{pageName}');
     var type = options.type;
     var am = asset.createUserAssetManager(ctx.session, type);
     var page = ui.buildPage(ctx.session, ctx.request);

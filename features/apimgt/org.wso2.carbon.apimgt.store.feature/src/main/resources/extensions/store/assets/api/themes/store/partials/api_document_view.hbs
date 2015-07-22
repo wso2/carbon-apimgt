@@ -2,11 +2,10 @@
 <br/>
 <div class="documentation">
 	<div class="span11">
-		{{#if doc.content}}
+		{{#unless doc.contentAvailable}}
 			No document content have been added yet.
 		{{else}}
 			{{doc.content}}
-		{{/if}}
+		{{/unless}}
 	</div>
-</div>
 </div>

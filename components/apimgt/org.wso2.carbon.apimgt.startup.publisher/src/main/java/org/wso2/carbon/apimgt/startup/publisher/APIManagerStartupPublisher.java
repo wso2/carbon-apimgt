@@ -310,7 +310,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 		GenericArtifactManager artifactManager = APIUtil.getArtifactManager(
 				registry, APIConstants.API_KEY);
 		try {
-			registry.beginTransaction();
+			//registry.beginTransaction();
 			GenericArtifact genericArtifact = artifactManager
 					.newGovernanceArtifact(new QName(api.getId().getApiName()));
 			GenericArtifact artifact = APIUtil.createAPIArtifactContent(
@@ -348,20 +348,20 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			}
 			APIUtil.setResourcePermissions(api.getId().getProviderName(),
 					api.getVisibility(), visibleRoles, artifactPath);
-			registry.commitTransaction();
+			//registry.commitTransaction();
 
 			// Generate API Definition for Swagger. 
 			//TO DO: Need to re-write this method to generate swagger 2.0 resource
 			//createUpdateAPIDefinition(api);
 
 		} catch (RegistryException e) {
-			try {
+			/*try {
 				registry.rollbackTransaction();
 			} catch (RegistryException re) {
 				handleException(
 						"Error while rolling back the transaction for API: "
 								+ api.getId().getApiName(), re);
-			}
+			}*/
 			handleException(
 					"Error while performing registry transaction operation", e);
 		}

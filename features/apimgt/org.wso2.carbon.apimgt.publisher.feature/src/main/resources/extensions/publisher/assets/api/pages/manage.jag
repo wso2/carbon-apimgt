@@ -20,7 +20,7 @@
 var caramel;
 require('/modules/publisher.js').exec(function(ctx) {
 	var log = new Log();
-	// log.info("MANAGE CALLED");
+
 	var rxtModule = require('rxt');
 	var carbon = require('carbon');
 	var server = require('store').server;
@@ -30,7 +30,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	caramel = require('caramel');
 	var am;
 	var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-	var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/asts/{type}/{pageName}');
+	var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/assets/{type}/{pageName}');
 	var page;
 	var output;
 	if (!options.id) {
@@ -163,8 +163,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 		filteredTiers.push(tier);
 	}
 
+	var storeUrl = apiProxy.getAPIStoreURL().url;
 	output.api.configuredTiers = configuredTiers;
 	output.api.filteredTiers = filteredTiers;
+	output.api.storeUrl = storeUrl;
 
 	output.api.isPermitted = apiProxy.hasPublishPermission().permitted;
 

@@ -23,7 +23,7 @@ require('/modules/publisher.js').exec(function(ctx) {
     var ui = require('rxt').ui;
     var asset = require('rxt').asset;
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-    var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/asts/{type}/{pageName}');
+    var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/assets/{type}/{pageName}');
     var log = new Log();
 
     if (!options) {
@@ -36,7 +36,6 @@ require('/modules/publisher.js').exec(function(ctx) {
         var documentAssetManager = asset.createUserAssetManager(session, 'document');
         var page = ui.buildPage(session, request);
         var assets = am.get(options.id);
-        log.info('================================= id : '+ options.id);
         var documents = documentAssetManager.list();
         //show visibility levels
         var apiPublisher =  require('apipublisher').provider;
@@ -54,15 +53,13 @@ require('/modules/publisher.js').exec(function(ctx) {
             apiId.name = assets.attributes.overview_name;
             apiId.version = assets.version;
             var allDocs = apiProxy.getAllDocumentation(apiId);
-            log.info('+++++++++++++++++++++++++++++++++++++++ docs : '+ documents);
-            log.info('================================= docs : '+ allDocs);
+
             page.documents = allDocs;
             var output = am.render(assets, page).details();
             //output.showAPIDocVisibility=canShow;
             output.cuser.tenantDomain = tenantDomain;
             output.assets.showAPIDocVisibility = canShow;
             output.assets.visibility_display = canShow;
-            //log.info(output);
             var tables = output.assets.tables;
                if(tables.length > 1){
                     tables.splice(1,1);

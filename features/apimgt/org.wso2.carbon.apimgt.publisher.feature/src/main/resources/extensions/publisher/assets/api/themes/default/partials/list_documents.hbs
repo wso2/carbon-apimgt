@@ -40,7 +40,7 @@
 						{{/if}}
 						
 						<a href="javascript:updateDocumentation('{{name}}','{{type_display}}','{{summary}}','{{sourceType}}','{{sourceUrl}}','{{filePath}}','{{otherTypeName}}','{{visibility}}','{{t "Update"}}')"> <i name="rowAction4" class='fa fa-retweet' style="color:black"></i> {{t "Update"}}|</a>
-						<a><i name="rowAction5" class='fa fa-trash' style="color:black"></i> {{t "Delete"}}</a>
+						<a   href="javascript:removeDocumentation('{{../assets.provider}}','{{../assets.name}}','{{../assets.version}}','{{name}}','{{type}}')"><i name="rowAction5" class='fa fa-trash' style="color:black"></i> {{t "Delete"}}</a>
 					</ul>
 				</td>
 			</tr>

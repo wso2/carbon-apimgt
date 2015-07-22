@@ -184,7 +184,7 @@ $(function() {
         $('#go_to_manage').click(function(e){
             $("body").unbind("api_saved");
             $("body").on("api_saved" , function(e){
-              location.href = caramel.context + "/asts/api/manage/"+store.publisher.api.id;
+              location.href = caramel.context + "/assets/api/manage/"+store.publisher.api.id;
             });
             $("#implement_form").submit();
         });
@@ -247,7 +247,7 @@ $(function() {
                     requireResubscription: true
                 };
                 $.ajax({
-                           url: caramel.context + '/asts/api/apis/lifecycle?type=api',
+                           url: caramel.context + '/assets/api/apis/lifecycle?type=api',
                            type: 'POST',
                            data: JSON.stringify(data),
                            contentType: 'application/json',

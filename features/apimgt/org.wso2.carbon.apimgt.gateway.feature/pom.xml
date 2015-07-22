@@ -51,11 +51,23 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
         </dependency>
+	<dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
-
+	 <dependency>
+             <groupId>org.wso2.carbon.mediation</groupId>
+             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
+         </dependency>
+         <dependency>
+             <groupId>org.wso2.carbon.mediation</groupId>
+             <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
+        </dependency>
+       
     </dependencies>
 
     <build>
@@ -85,6 +97,7 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${apimgt.keymgt.stub.version}</bundleDef>
+				<bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${apimgt.gateway.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${apimgt.handlers.security.stub.version}</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                             </bundles>
@@ -93,6 +106,15 @@
                                 <importFeatureDef>org.apache.synapse.wso2:${carbon.mediation.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.mediation.initializer:${carbon.mediation.version}</importFeatureDef>
                             </importFeatures>
+
+			    <importBundles>
+				<importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}</importBundleDef>
+				<importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>
+				<importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.registry:${carbon.mediation.version}</importBundleDef>
+				<importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.dependency.mgt:${carbon.mediation.version}</importBundleDef>
+				<importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
+
+			    </importBundles>
                         </configuration>
                     </execution>
                 </executions>

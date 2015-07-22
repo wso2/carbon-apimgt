@@ -1,6 +1,5 @@
-<%
 /*
- *  Copyright (c) 2005-2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -17,6 +16,11 @@
  *  under the License.
  *
  */
-	
-	print('Put widget code here');
-%>
+var resources = function (page, meta) {
+    return {
+        js: ['swagger/lib/jquery-1.11.1.min.js', 'swagger/lib/jquery.slideto.min.js', 'swagger/lib/jquery.wiggle.min.js', 'swagger/lib/jquery.ba-bbq.min.js', 'swagger/lib/handlebars.js',
+            'swagger/lib/underscore-min.js', 'swagger/lib/backbone-min.js', 'swagger/swagger-ui.js','swagger/lib/highlight.7.3.pack.js','swagger/lib/marked.js'],
+        css: ['swagger/css/screen.css','swagger.css']        
+    };
+};
+

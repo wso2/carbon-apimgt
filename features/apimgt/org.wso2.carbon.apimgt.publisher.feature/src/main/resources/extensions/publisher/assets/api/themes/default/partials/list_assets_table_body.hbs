@@ -17,9 +17,9 @@
     <div class="ctrl-wr-asset">
         <div class="itm-ast">
             {{#if thumbnail }}
-            <a class="ast-img" href='{{url ""}}/asts/{{type}}/details/{{this.id}}'><img src='{{url ""}}/storage/{{type}}/{{id}}/{{this.thumbnail}}' /></a>
+            <a class="ast-img" href='{{url ""}}/assets/{{type}}/details/{{this.id}}'><img src='{{url ""}}/storage/{{type}}/{{id}}/{{this.thumbnail}}' /></a>
             {{else}}
-	            <a class="ast-img" href='{{url ""}}/asts/{{type}}/details/{{this.id}}'>
+	            <a class="ast-img" href='{{url ""}}/assets/{{type}}/details/{{this.id}}'>
                     <img src="{{url ""}}/extensions/assets/api/themes/default/imgs/api.png"/>
 	            </a>
             {{/if}}
@@ -28,7 +28,7 @@
                         return false;">×</button>
 	        </div>
             <div class="ast-desc">
-                <a href='{{url ""}}/asts/{{type}}/details/{{this.id}}'>
+                <a href='{{url ""}}/assets/{{type}}/details/{{this.id}}'>
                     <h3 class="ast-name">{{this.attributes.overview_name}}</h3>
                 </a>
 

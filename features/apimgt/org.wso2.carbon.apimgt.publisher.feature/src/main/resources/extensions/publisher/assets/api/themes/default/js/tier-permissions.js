@@ -3,7 +3,7 @@ var updatePermissions = function (tierName, n, btn) {
     var permissiontype, roles;
     permissiontype = getRadioValue($('input[name=permissionType'+n+']:radio:checked'));
     roles = document.getElementById('roles'+n).value;
-    var tierUrl = caramel.context + "/asts/api/apis/tiers";
+    var tierUrl = caramel.context + "/assets/api/apis/tiers";
     $.post(tierUrl, {
         action:"updatePermissions",
         tierName:tierName,
@@ -46,7 +46,7 @@ var hideMsg = function(n) {
     $('#statusUpdateMsg' +n).hide("slow");
 }
 
-var validateRoleUrl = caramel.context + "/asts/api/apis/validation";
+var validateRoleUrl = caramel.context + "/assets/api/apis/validation";
 var validateRoles=function(roles){
     var valid = false;
     $.post(validateRoleUrl, { action:"validateRoles", roles:roles },

@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -31,10 +35,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tag;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * APIConsumer responsible for providing helper functionality
@@ -606,6 +606,8 @@ public interface APIConsumer extends APIManager {
     public Map<String,Object> getAllSubscriptions(String userName, String appName, int startSubIndex, int endSubIndex,String groupId) throws APIManagementException;
 
     public JSONArray getSubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException;
+    
+    public JSONObject resumeWorkflow(Object[] args);
 
 
 }

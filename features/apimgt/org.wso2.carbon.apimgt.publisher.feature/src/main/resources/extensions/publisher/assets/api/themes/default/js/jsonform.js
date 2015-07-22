@@ -435,7 +435,7 @@ jsonform.elementTypes = {
           $(node.el).find(idSelector).change();
         }, 600);
         editor.getSession().on('change', lazyChanged);
-        
+
         editor.on('blur', function() {
           $(node.el).find(idSelector).change();
           $(node.el).find(idSelector).trigger("blur");
@@ -494,7 +494,7 @@ jsonform.elementTypes = {
       } else {
         node.ownerTree._transloadit_generic_public_index++;
       }
-      
+
       data.transloaditname = "_transloadit_jsonform_genericupload_public_"+node.ownerTree._transloadit_generic_public_index;
 
       if (!node.ownerTree._transloadit_generic_elts) node.ownerTree._transloadit_generic_elts = {};
@@ -795,8 +795,8 @@ jsonform.elementTypes = {
   'array': {
     'template': '<div id="<%= id %>"><ul class="_jsonform-array-ul" style="list-style-type:none;"><%= children %></ul>' +
       '<span class="_jsonform-array-buttons">' +
-        '<a href="#" class="btn _jsonform-array-addmore"><i class="icon-plus-sign" title="Add new"></i></a> ' +
-        '<a href="#" class="btn _jsonform-array-deletelast"><i class="icon-minus-sign" title="Delete last"></i></a>' +
+        '<a href="#" class="btn btn-default _jsonform-array-addmore"><i class="fa fa-plus-circle" title="Add new"></i></a> ' +
+        '<a href="#" class="btn btn-default _jsonform-array-deletelast"><i class="fa fa-minus-circle" title="Delete last"></i></a>' +
       '</span>' +
       '</div>',
     'fieldtemplate': true,
@@ -939,8 +939,8 @@ jsonform.elementTypes = {
         '<%= children %>' +
       '</div>' +
       '</div>' +
-      '<a href="#" class="btn _jsonform-array-addmore"><i class="icon-plus-sign" title="Add new"></i></a> ' +
-      '<a href="#" class="btn _jsonform-array-deleteitem"><i class="icon-minus-sign" title="Delete item"></i></a></div>',
+      '<a href="#" class="btn btn-default _jsonform-array-addmore"><i class="fa fa-plus-circle" title="Add new"></i></a> ' +
+      '<a href="#" class="btn btn-default _jsonform-array-deleteitem"><i class="fa fa-minus-circle" title="Delete item"></i></a></div>',
     'fieldtemplate': true,
     'array': true,
     'childTemplate': function (inner) {
@@ -1862,7 +1862,7 @@ formNode.prototype.hasNonDefaultValue = function () {
   if (this.formElement && this.formElement.type=="hidden") {
     return false;
   }
-  
+
   if (this.value && !this.defaultValue) {
     return true;
   }
@@ -3207,7 +3207,7 @@ formTree.prototype.buildFromLayout = function (formElement, context) {
     throw new Error('The JSONForm contains an element whose type is unknown: "' +
       formElement.type + '"');
   }
-  
+
 
   if (schemaElement) {
     // The form element is linked to an element in the schema.
@@ -3332,7 +3332,7 @@ formTree.prototype.render = function (domRoot) {
  * @param {Function} callback The callback to call on each element
  */
 formTree.prototype.forEachElement = function (callback) {
-  
+
   var f = function(root) {
     for (var i=0;i<root.children.length;i++) {
       callback(root.children[i]);

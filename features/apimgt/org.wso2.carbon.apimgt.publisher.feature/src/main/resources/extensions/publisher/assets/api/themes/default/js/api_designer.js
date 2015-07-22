@@ -486,7 +486,7 @@ function checkNested(obj) {
                 roles : $("#scopeRoles").val()
             };
 
-            var validationUrl =  caramel.context + "/asts/api/apis/validation?action=validateScope";
+            var validationUrl =  caramel.context + "/assets/api/apis/validation?action=validateScope";
             var data = {scope:$("#scopeKey").val()};
             $.ajax({
                        url: validationUrl,
@@ -899,7 +899,7 @@ function checkNested(obj) {
                 var data = {
                     "swagger_url": $("#swagger_import_url").val() // "http://petstore.swagger.wordnik.com/api/api-docs"
                 }
-                var swaggerUrl = caramel.context + "/asts/api/apis/swagger?action=swaggerFromUrl";
+                var swaggerUrl = caramel.context + "/assets/api/apis/swagger?action=swaggerFromUrl";
                 $.post(swaggerUrl, data, function (result) {
                     var designer = APIDesigner();
                     designer.load_api_document(result.data);
@@ -1035,52 +1035,6 @@ function checkNested(obj) {
         thisID = $(this).attr('id');
     });
 
-    function getContextValue() {
-        var context = $('#overview_context').val();
-        var version = $('#overview_version').val();
-
-        if (context == "" && version != "") {
-            $('#contextForUrl').html("/{context}/" + version);
-            $('#contextForUrlDefault').html("/{context}/" + version);
-        }
-        if (context != "" && version == "") {
-            if (context.charAt(0) != "/") {
-                context = "/" + context;
-            }
-            $('#contextForUrl').html(context + "/{version}");
-            $('#contextForUrlDefault').html(context + "/{version}");
-        }
-        if (context != "" && version != "") {
-            if (context.charAt(0) != "/") {
-                context = "/" + context;
-            }
-            $('.contextForUrl').html(context + "/" + version);
-        }
-        updateContextPattern();
-    }
-
-    function updateContextPattern(){
-        var context = $('#overview_context').val();
-        var version = $('#overview_version').val();
-
-        if(context != ""){
-            if(context.indexOf("{version}") < 0){
-                if(context.lastIndexOf('/') < 0){
-                    context = context + '/';
-                }
-                context = context + "{version}";
-            }
-            $('#resource_url_pattern_refix').text(context);
-        }else{
-            $('#resource_url_pattern_refix').text("/{context}/{version}/");
-        }
-
-        if(version){
-            context = context.replace("{version}",version);
-            $('#resource_url_pattern_refix').text(context);
-        }
-    }
-
     var renderPartialWithContainer = function (partialName, container, data, that ,fn) {
         fn = fn || function () {
         };
@@ -1204,3 +1158,49 @@ function checkNested(obj) {
     };
     APIMangerAPI.APIDesigner = APIDesigner;
 });
+
+function getContextValue() {
+    var context = $('#overview_context').val();
+    var version = $('#overview_version').val();
+
+    if (context == "" && version != "") {
+        $('#contextForUrl').html("/{context}/" + version);
+        $('#contextForUrlDefault').html("/{context}/" + version);
+    }
+    if (context != "" && version == "") {
+        if (context.charAt(0) != "/") {
+            context = "/" + context;
+        }
+        $('#contextForUrl').html(context + "/{version}");
+        $('#contextForUrlDefault').html(context + "/{version}");
+    }
+    if (context != "" && version != "") {
+        if (context.charAt(0) != "/") {
+            context = "/" + context;
+        }
+        $('.contextForUrl').html(context + "/" + version);
+    }
+    updateContextPattern();
+}
+
+function updateContextPattern(){
+    var context = $('#overview_context').val();
+    var version = $('#overview_version').val();
+
+    if(context != ""){
+        if(context.indexOf("{version}") < 0){
+            if(context.lastIndexOf('/') < 0){
+                context = context + '/';
+            }
+            context = context + "{version}";
+        }
+        $('#resource_url_pattern_refix').text(context);
+    }else{
+        $('#resource_url_pattern_refix').text("/{context}/{version}/");
+    }
+
+    if(version){
+        context = context.replace("{version}",version);
+        $('#resource_url_pattern_refix').text(context);
+    }
+}

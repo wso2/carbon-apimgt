@@ -29,7 +29,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	caramel = require('caramel');
 	var am;
 	var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
-	var options = uriMatcher.match('/{context}/asts/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/asts/{type}/{pageName}');
+	var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/assets/{type}/{pageName}');
 	var page;
 	var output;
 	am = asset.createUserAssetManager(ctx.session, options.type);

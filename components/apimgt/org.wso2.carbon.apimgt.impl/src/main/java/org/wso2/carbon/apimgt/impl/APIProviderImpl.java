@@ -511,7 +511,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateWsdl(API api) throws APIManagementException, RegistryException {
 
-        registry.beginTransaction();
+        //registry.beginTransaction();
         String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                 APIConstants.API_KEY);
@@ -526,7 +526,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifactManager.updateGenericArtifact(apiArtifact); //update the  artifact
             }
         }
-        registry.commitTransaction();
+        //registry.commitTransaction();
     }
 
 
@@ -715,7 +715,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetTransports(api);
 
         try {
-        	registry.beginTransaction();
+        	//registry.beginTransaction();
             String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
@@ -787,7 +787,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
             }
-            registry.commitTransaction();
+            //registry.commitTransaction();
             if(updatePermissions){
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                                              getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -828,12 +828,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         } catch (Exception e) {
-        	 try {
+        	 /*try {
                  registry.rollbackTransaction();
              } catch (RegistryException re) {
                  handleException("Error while rolling back the transaction for API: " +
                                  api.getId().getApiName(), re);
-             }
+             }*/
              handleException("Error while performing registry transaction operation", e);
            
         }
@@ -1044,7 +1044,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
-    private boolean isAPIPublished(API api) {
+    private boolean isAPIPublished(API api) throws APIManagementException{
             String tenantDomain = null;
 			if (api.getId().getProviderName().contains("AT")) {
 				String provider = api.getId().getProviderName().replace("-AT-", "@");
@@ -1156,11 +1156,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             success = true;
         } catch (Exception e) {
-            try {
+            /*try {
                 registry.rollbackTransaction();
             } catch (RegistryException re) {
                 handleException("Error while rolling back the transaction for API: " + api.getId(), re);
-            }
+            }*/
             String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
             handleException(msg, e);
 	    } finally {
@@ -1175,7 +1175,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         boolean success=false;
         String apiSourcePath = APIUtil.getAPIPath(api.getId());
         try{
-        registry.beginTransaction();
+        //registry.beginTransaction();
         Resource apiSourceArtifact = registry.get(apiSourcePath);
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                             APIConstants.API_KEY);
@@ -1335,7 +1335,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         apiMgtDAO.addAPI(newAPI,tenantId);
-        registry.commitTransaction();
+        //registry.commitTransaction();
         success=true;
         } catch (ParseException e) {
             String msg =
@@ -1343,11 +1343,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     api.getId().getApiName();
             handleException(msg, e);
         } catch (Exception e) {
-            try {
+            /*try {
                 registry.rollbackTransaction();
             } catch (RegistryException re) {
                 handleException("Error while rolling back the transaction for API: " + api.getId(), re);
-            }
+            }*/
             String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
             handleException(msg, e);
         }
@@ -1449,6 +1449,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	}
     	
     	createDocumentation(api, documentation);
+    	addDocumentationContent(api, docName, "");
     }
 
     /**
@@ -1628,7 +1629,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         try {
-            registry.beginTransaction();
+            //registry.beginTransaction();
             GenericArtifact genericArtifact =
                     artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
             GenericArtifact artifact = APIUtil.createAPIArtifactContent(genericArtifact, api);
@@ -1669,19 +1670,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 visibleRoles = visibleRolesList.split(",");
             }
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, artifactPath);
-            registry.commitTransaction();
+            //registry.commitTransaction();
          
             if(log.isDebugEnabled()){
             	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" created";
             	log.debug(logMessage);
             }
         } catch (Exception e) {
-        	 try {
+        	 /*try {
                  registry.rollbackTransaction();
              } catch (RegistryException re) {
                  handleException("Error while rolling back the transaction for API: " +
                                  api.getId().getApiName(), re);
-             }
+             }*/
              handleException("Error while performing registry transaction operation", e);
         }
 	    return id;	

@@ -117,6 +117,9 @@ asset.manager = function(ctx) {
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
                 api.swagger = options.attributes.swagger;
+                if(!options.attributes.wsdl){
+                options.attributes.wsdl=null;
+                }
                 api.wsdl = options.attributes.wsdl;
                 api.swagger = options.attributes.swagger;
                 result = apiProxy.updateDesignAPI(api);
@@ -139,7 +142,6 @@ asset.manager = function(ctx) {
             }
         },
         list: function(paging) {
-            //log.info(this._super.list.call(this, paging));
             return this._super.list.call(this, paging);
         },
         update: function(options){
@@ -177,6 +179,9 @@ asset.manager = function(ctx) {
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
                 api.swagger = options.attributes.swagger;
+                if(!options.attributes.wsdl){
+                options.attributes.wsdl=null;
+                }
                 api.wsdl = options.attributes.wsdl;
                 api.swagger = options.attributes.swagger;
                 result = apiProxy.updateDesignAPI(api);
@@ -198,7 +203,13 @@ asset.manager = function(ctx) {
 
                 //TODO Hard coded
                 api.implementation_type = 'endpoint';
+                if(!options.attributes.wsdl){
+                    options.attributes.wsdl=null;
+                }
                 api.wsdl = options.attributes.wsdl;
+                if(!options.attributes.wadl){
+                    options.attributes.wadl=null;
+                }
                 api.wadl = options.attributes.wadl;
                 api.endpointSecured = options.attributes.endpointType;
                 api.endpointUTUsername = options.attributes.epUsername;
@@ -210,12 +221,11 @@ asset.manager = function(ctx) {
 
                 var apiProxy = apiPublisher.instance(ctx.username);
                 result = apiProxy.implementAPI(api);
-                // log.info(result);
                 if (result != null && result.error==true) {
                     obj = {
                         error:true,
                         message:result.message,
-                        data :apiId,
+                        data :apiId
                     };
                 } else {
                     obj = {
@@ -226,7 +236,6 @@ asset.manager = function(ctx) {
                return obj;
             } else if(options.attributes.action == "manage") {
                 var apiData = {};
-                //log.info(options);
                 apiData.apiName = options.name;
                 apiData.version = options.attributes.version;
                 if (request.getParameter("provider") == null) {
@@ -293,6 +302,19 @@ asset.manager = function(ctx) {
                     }
                 }
                 return obj;
+            } else if (options.attributes._method == "delete") { //This condition added to pass ajax delete requests as post
+                //requests due to some of the browsers doesn't support ajax requests with type 'delete'
+                var asset = this.get.call(this, options.id);
+                // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
+                var apiProxy = apiPublisher.instance(ctx.username);
+                var result;
+                try {
+                    result = apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
+                    return result;
+                } catch (e) {
+                    log.error("Error while deleting the API-" + asset.attributes.overview_name + "-" + asset.version);
+                    throw e;
+                }
             }
         }
     };
@@ -432,7 +454,6 @@ asset.renderer = function (ctx) {
         }
         for (var index in activatedAssets) {
             if (activatedAssets[index] == assetType) {
-                //log.info(activatedAssets[index] + "&" + assetType);
                 return true;
             }
         }
@@ -446,10 +467,10 @@ asset.renderer = function (ctx) {
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
         navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('start'));
-        navList.push('All Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Subscriptions', 'btn-subscribe', '/asts/' + type + '/api-subscriptions');
-        navList.push('Statistics', 'btn-stats', '/asts/' + type + '/statistics');
-        navList.push('Tier Permissions', 'btn-cog', '/asts/' + type + '/tier-permissions');
+        navList.push('All Statistics', 'btn-stats', '/assets/' + type + '/statistics');
+        navList.push('Subscriptions', 'btn-subscribe', '/assets/' + type + '/api-subscriptions');
+        navList.push('Statistics', 'btn-stats', '/assets/' + type + '/statistics');
+        navList.push('Tier Permissions', 'btn-cog', '/assets/' + type + '/tier-permissions');
         return navList.list();
     };
 
@@ -481,7 +502,6 @@ asset.renderer = function (ctx) {
             }
         },
         details: function (page) {
-            //log.info(page);
             //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
             // value which need be explicitly set to null
             if (page.assets.thumbnail == 'null') {
@@ -563,13 +583,15 @@ asset.renderer = function (ctx) {
 
                var endpointJSON = firstOne.fields.endpointConfig.value;
                var endpoints = JSON.parse(endpointJSON);
-               var prodEndpoint = endpoints.production_endpoints;
-               var sandboxEndpoint = endpoints.sandbox_endpoints;
-               var endpontType = endpoints.endpoint_type;
-
+               var prodEndpoint='',sandboxEndpoint='',endpointType='';
+               if(endpoints){
+               prodEndpoint = endpoints.production_endpoints;
+               sandboxEndpoint = endpoints.sandbox_endpoints;
+               endpointType = endpoints.endpoint_type;
+               }
                assets.prodEndpoint = prodEndpoint;
                assets.sandboxEndpoint = sandboxEndpoint;
-               assets.endpontType = endpontType;
+               assets.endpointType = endpointType;
                assets.lastUpdatedDate = page.lastUpdatedDate;
                assets.createdDate = page.createdDate;
 

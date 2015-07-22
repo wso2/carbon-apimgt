@@ -28,13 +28,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.impl.clients.MediationSecurityAdminServiceClient;
-import org.wso2.carbon.apimgt.impl.clients.SequenceAdminServiceClient;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
+import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.RESTAPIAdminClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -80,12 +78,12 @@ public class APIGatewayManager {
         }
         for (String environmentName : api.getEnvironments()) {
             Environment environment = environments.get(environmentName);
-            RESTAPIAdminClient client = null;
+            APIGatewayAdminClient client = null;
             try {
-                client = new RESTAPIAdminClient(api.getId(), environment);
+                client = new APIGatewayAdminClient(api.getId(), environment);
 			String operation;
 			// If the API exists in the Gateway
-			if (client.getApi(tenantDomain) != null) {
+			if (client.getApi(tenantDomain,api.getId()) != null) {
 
 				// If the Gateway type is 'production' and the production url
 				// has been removed
@@ -101,10 +99,10 @@ public class APIGatewayManager {
 					// We need to remove the api from the environment since its
 					// relevant url has been removed.
 					operation ="delete";
-					client.deleteApi(tenantDomain);
+					client.deleteApi(tenantDomain,api.getId());
                     if(api.isPublishedDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain)!=null){
-                            client.deleteDefaultApi(tenantDomain);
+                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
+                            client.deleteDefaultApi(tenantDomain,api.getId());
                         }
                     }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
@@ -121,16 +119,16 @@ public class APIGatewayManager {
 
                     //Update the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.updateApiForInlineScript(builder, tenantDomain);
+                        client.updateApiForInlineScript(builder, tenantDomain,api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.updateApi(builder, tenantDomain);
+                        client.updateApi(builder, tenantDomain,api.getId());
                     }
 
                     if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
-                        if(client.getDefaultApi(tenantDomain)!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion());
+                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(),api.getId());
                         }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion());
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(),api.getId());
                         }
                     }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
@@ -164,16 +162,16 @@ public class APIGatewayManager {
 
                     //Add the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.addPrototypeApiScriptImpl(builder, tenantDomain);
+                        client.addPrototypeApiScriptImpl(builder, tenantDomain,api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.addApi(builder, tenantDomain);
+                        client.addApi(builder, tenantDomain,api.getId());
                     }
 
                     if(api.isDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain)!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion());
+                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(),api.getId());
                         }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion());
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(),api.getId());
                         }
                     }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
@@ -188,6 +186,7 @@ public class APIGatewayManager {
                 throw new APIManagementException(axisFault.getMessage(), axisFault);
             } catch (APIManagementException ex) {
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
+                throw new APIManagementException(ex);
             }
         }
         return failedEnvironmentsList;
@@ -207,22 +206,22 @@ public class APIGatewayManager {
             for (String environmentName : api.getEnvironments()) {
                 try {
                     Environment environment = environments.get(environmentName);
-                    RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
+                    APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
-                    if (client.getApi(tenantDomain) != null) {
+                    if (client.getApi(tenantDomain,api.getId()) != null) {
                         if (debugEnabled) {
 					log.debug("Removing API " + api.getId().getApiName() + " From environment " +
 					          environment.getName());
 				}
 				String operation ="delete";
-				client.deleteApi(tenantDomain);
+				client.deleteApi(tenantDomain,api.getId());
 				undeployCustomSequences(api, tenantDomain,environment);
 				setSecurevaultProperty(api,tenantDomain,environment,operation);
 			}
 
             if(api.isPublishedDefaultVersion()){
-                if(client.getDefaultApi(tenantDomain)!=null){
-                    client.deleteDefaultApi(tenantDomain);
+                if(client.getDefaultApi(tenantDomain,api.getId())!=null){
+                    client.deleteDefaultApi(tenantDomain,api.getId());
                 }
             }
                 } catch (AxisFault axisFault) {
@@ -243,14 +242,14 @@ public class APIGatewayManager {
             for (String environmentName : api.getEnvironments()) {
                 try {
                     Environment environment = environments.get(environmentName);
-            RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
-            if(client.getDefaultApi(tenantDomain)!=null){
+            APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+            if(client.getDefaultApi(tenantDomain,api.getId())!=null){
                 if (debugEnabled) {
                     log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
                             environment.getName());
                 }
 
-                client.deleteDefaultApi(tenantDomain);
+                client.deleteDefaultApi(tenantDomain,api.getId());
             }
                 } catch (AxisFault axisFault) {
                     log.error("Error occurred when removing default api from gateway " + environmentName, axisFault);
@@ -271,19 +270,20 @@ public class APIGatewayManager {
 	 * @return True if the API is available in at least one Gateway. False if
 	 *         available in none.
 	 */
-    public boolean isAPIPublished(API api, String tenantDomain) {
+    public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
         List<String> failedEnvironmentsList = new ArrayList<String>(0);
         for (Environment environment : environments.values()) {
             try {
-                RESTAPIAdminClient client = new RESTAPIAdminClient(api.getId(), environment);
+                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
                 // If the API exists in at least one environment, consider as
                 // published and return true.
-                if (client.getApi(tenantDomain) != null) {
+                if (client.getApi(tenantDomain,api.getId()) != null) {
                     return true;
                 }
             } catch (AxisFault axisFault) {
                 log.error("Error occurred when check api is published on gatway" + environment.getName(), axisFault);
                 failedEnvironmentsList.add(environment.getName());
+                throw new APIManagementException(axisFault);
             }
         }
         return false;
@@ -342,7 +342,7 @@ public class APIGatewayManager {
         String inSequenceName = api.getInSequence();
         OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, "in");
 
-       SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(environment);
+        APIGatewayAdminClient sequenceAdminServiceClient = new APIGatewayAdminClient(api.getId(), environment);
 
         if (inSequence != null) {
             inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
@@ -357,11 +357,11 @@ public class APIGatewayManager {
         String outSequenceName = api.getOutSequence();
         OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, "out");
 
-        SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(environment);
+        APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
         if (outSequence != null) {
             outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);
-            sequenceAdminServiceClient.addSequence(outSequence, tenantDomain);
+            client.addSequence(outSequence, tenantDomain);
         }
     }
 
@@ -385,15 +385,15 @@ public class APIGatewayManager {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
                             (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 }
-                SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
+                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
                 if (isSequenceDefined(api.getInSequence())) {
                     String inSequence = APIUtil.getSequenceExtensionName(api) + "--In";
-                    seqClient.deleteSequence(inSequence, tenantDomain);
+                    client.deleteSequence(inSequence, tenantDomain);
                 }
                 if (isSequenceDefined(api.getOutSequence())) {
                     String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
-                    seqClient.deleteSequence(outSequence, tenantDomain);
+                    client.deleteSequence(outSequence, tenantDomain);
                 }
             } catch (Exception e) {
                 String msg = "Error in deleting the sequence from gateway";
@@ -429,15 +429,15 @@ public class APIGatewayManager {
                 }
                 int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
-                SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
+                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
                 //If an inSequence has been added, updated or removed.
                 if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOldInSequence())) {
                     String inSequenceKey = APIUtil.getSequenceExtensionName(api) + "--In";
                     //If sequence already exists
-                    if (seqClient.isExistingSequence(inSequenceKey, tenantDomain)) {
+                    if (client.isExistingSequence(inSequenceKey, tenantDomain)) {
                         //Delete existing sequence
-                        seqClient.deleteSequence(inSequenceKey, tenantDomain);
+                        client.deleteSequence(inSequenceKey, tenantDomain);
                     }
                     //If an inSequence has been added or updated.
                     if(isSequenceDefined(api.getInSequence())){
@@ -450,9 +450,9 @@ public class APIGatewayManager {
                 if (isSequenceDefined(api.getOutSequence()) || isSequenceDefined(api.getOldOutSequence())) {
                     String outSequence = APIUtil.getSequenceExtensionName(api) + "--Out";
                     //If the outSequence exists.
-                    if (seqClient.isExistingSequence(outSequence, tenantDomain)) {
+                    if (client.isExistingSequence(outSequence, tenantDomain)) {
                         //Delete existing outSequence
-                        seqClient.deleteSequence(outSequence, tenantDomain);
+                        client.deleteSequence(outSequence, tenantDomain);
                     }
 
                     //If an outSequence has been added or updated.
@@ -490,21 +490,19 @@ public class APIGatewayManager {
                 }
                 int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
-                SequenceAdminServiceClient seqClient = new SequenceAdminServiceClient(environment);
+                APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
                 //If the sequence already exists
-                if (seqClient.isExistingSequence(faultSequenceName, tenantDomain)) {
+                if (client.isExistingSequence(faultSequenceName, tenantDomain)) {
                     //Delete the sequence. We need to redeploy afterwards since the sequence may have been updated.
-                    seqClient.deleteSequence(faultSequenceName, tenantDomain);
+                    client.deleteSequence(faultSequenceName, tenantDomain);
                 }
                 //Get the fault sequence xml
                 OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, "fault");
 
-                SequenceAdminServiceClient sequenceAdminServiceClient = new SequenceAdminServiceClient(environment);
-
                 if (faultSequence != null) {
                     //Deploy the fault sequence
-                    sequenceAdminServiceClient.addSequence(faultSequence, tenantDomain);
+                    client.addSequence(faultSequence, tenantDomain);
                 }
 
             } catch (Exception e) {
@@ -538,7 +536,7 @@ public class APIGatewayManager {
 		                                                    getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
 		if (api.isEndpointSecured() && isSecureVaultEnabled) {
 			try {							
-				MediationSecurityAdminServiceClient securityAdminclient =  new MediationSecurityAdminServiceClient( environment);
+				APIGatewayAdminClient securityAdminclient = new APIGatewayAdminClient(api.getId(), environment);
 				if("add".equals(operation.toString())){                                                                                                 
 				securityAdminclient.addSecureVaultProperty(api, tenantDomain);
 				} else if("update".equals(operation.toString())){

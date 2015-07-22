@@ -22,7 +22,7 @@
 
  ENDPOINTS:
  POST
- asts/api/apis/copyAPI
+ assets/api/apis/copyAPI
  */
 
 require('/modules/publisher.js').exec(function (ctx) {
@@ -32,7 +32,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var request = ctx.request;
 	var server = require('store').server;
 	var uriMatcher = new URIMatcher(request.getRequestURI());
-	var POST_NEW_API_URL = '/{context}/asts/api/apis/start';
+	var POST_NEW_API_URL = '/{context}/assets/api/apis/start';
 	var method = request.getMethod();
 	var options = ref.getQueryOptions(request.getQueryString());
 	var response = ctx.response;

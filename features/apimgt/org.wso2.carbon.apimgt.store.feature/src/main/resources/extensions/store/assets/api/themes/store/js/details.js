@@ -65,7 +65,7 @@ $(document).ready(function () {
                                      buttons: [{
                                                    label: 'Go to My Subscriptions',
                                                    action: function(dialogRef){
-                                                       window.location.href =caramel.context+ '/asts/api/my_subscriptions';
+                                                       window.location.href =caramel.context+ '/assets/api/my_subscriptions';
                                                    }
                                                },{
                                          label: 'Stay on this page',
@@ -103,7 +103,7 @@ $(document).ready(function () {
 $('#application-list').change(
             function(){
                 if($(this).val() == "createNewApp"){                   
-                    window.location.href =caramel.context+ '/asts/api/my_applications';
+                    window.location.href =caramel.context+ '/assets/api/my_applications';
                 }
             }
             );

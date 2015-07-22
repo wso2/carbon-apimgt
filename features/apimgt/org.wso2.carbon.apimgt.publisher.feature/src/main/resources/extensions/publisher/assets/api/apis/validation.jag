@@ -26,7 +26,7 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var usr = carbon.server.tenantUser(user.username);
 	var tenantId = usr.tenantId;
 	var uriMatcher = new URIMatcher(req.getRequestURI());
-	var GET_VALIDATION_URL = '/{context}/asts/api/apis/validation';
+	var GET_VALIDATION_URL = '/{context}/assets/api/apis/validation';
 	var method = req.getMethod();
 	var response = ctx.response;
 	response.contentType = 'application/json';

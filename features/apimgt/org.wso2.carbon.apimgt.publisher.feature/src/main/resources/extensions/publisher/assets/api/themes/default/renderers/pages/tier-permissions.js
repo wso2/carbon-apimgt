@@ -16,20 +16,24 @@
  *  under the License.
  *
  */
-var render = function(theme, data, meta, require) {
+var render = function (theme, data, meta, require) {
     theme('single-col-fluid', {
-        title: 'Asset',
+        title: 'Subscriptions',
         header: [{
-            partial: 'header',
-            context: data
-        }],
+                     partial: 'header',
+                     context: data
+                 }],
+        ribbon: [{
+                     partial: 'ribbon',
+                     context: data
+                 }],
         leftnav: [{
-        	partial:'left-nav',
-        	context:data
-        }],
+                      partial: 'left-nav',
+                      context: data
+                  }],
         listassets: [{
-            partial: 'tier-permissions',
-            context: data
-        }]
+                         partial: 'tier-permissions',
+                         context: data
+                     }]
     });
 };
