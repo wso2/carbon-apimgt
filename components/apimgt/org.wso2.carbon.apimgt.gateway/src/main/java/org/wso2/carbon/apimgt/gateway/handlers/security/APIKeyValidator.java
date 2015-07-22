@@ -383,7 +383,8 @@ public class APIKeyValidator {
             for (API api : synCtx.getConfiguration().getAPIs()) {
                 if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
+
+                        log.debug("Selected API: " + apiContext + ", Version: " + apiVersion);
                     }
                     selectedApi = api;
                     break;

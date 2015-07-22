@@ -1044,12 +1044,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private APITemplateBuilder getAPITemplateBuilder(API api){
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
-        corsProperties.put("inline", api.getImplementation());
-        if (!StringUtils.isEmpty(api.getAllowedHeaders())) {
-            corsProperties.put("allowHeaders", api.getAllowedHeaders());
+        corsProperties.put("apiImplementationType", api.getImplementation());
+        if (api.getAllowedHeaders() != null && !api.getAllowedHeaders().isEmpty()) {
+            StringBuffer allowHeaders = new StringBuffer();
+            for (String header : api.getAllowedHeaders()) {
+                allowHeaders.append(header + ",");
+            }
+            if (!allowHeaders.toString().isEmpty()) {
+                allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+            }
+            corsProperties.put("allowHeaders", allowHeaders.toString());
         }
-        if (!StringUtils.isEmpty(api.getAllowedOrigins())) {
-            corsProperties.put("allowedOrigins", api.getAllowedOrigins());
+        if (api.getAllowedOrigins() != null && !api.getAllowedOrigins().isEmpty()) {
+            StringBuffer allowOrigins = new StringBuffer();
+            for (String origin : api.getAllowedOrigins()) {
+                allowOrigins.append(origin + ",");
+            }
+            if (!allowOrigins.toString().isEmpty()) {
+                allowOrigins.deleteCharAt(allowOrigins.length() - 1);
+            }
+            corsProperties.put("allowedOrigins", allowOrigins.toString());
         }
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
