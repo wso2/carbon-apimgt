@@ -209,9 +209,9 @@ label {
     max-width: 100%;
     top: -72px;
     position: relative;
-    left: -349px;
+    left: -125px;
 }
-#resource_default{width:143%;}
+#resource_default{width:120%;}
 .swagger{
     position: relative;
     top: -92px;
@@ -288,3 +288,7 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
     width: 13%;
 }
 .title{font-size: 14px; border: none; font-weight: 100; float: left; }
+.container-fluid>.wr-action-btn-bar{width: 102.5% !important;}
+.ast-img>img {
+    width: 100%;
+}

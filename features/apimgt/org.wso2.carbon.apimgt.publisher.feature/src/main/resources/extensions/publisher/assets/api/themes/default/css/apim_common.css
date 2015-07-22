@@ -301,4 +301,9 @@ button.btn-api-del {
 footer {
     position: fixed;
 }
+.wr-search input{  padding: 5.5px 15px;}
+.endpoint_list{padding-left: 0px;}
+.ast-img>img {
+    width: 100%;
+}
 
