@@ -143,8 +143,6 @@
 */
 
 .scope_container {
-    margin: 5px 0 0 10px;
-    padding: 10px;
     background-color: #F5F5BB !important;
 }
 
@@ -218,6 +216,10 @@
 
 .resource-method-options{
     background-color: #777;
+}
+
+.resource-method-head{
+    background-color: #333;
 }
 
 .resource-path {
