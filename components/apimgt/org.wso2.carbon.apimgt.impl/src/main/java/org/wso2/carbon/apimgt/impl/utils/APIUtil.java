@@ -1180,7 +1180,7 @@ public final class APIUtil {
     		String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
                     "--" + api.getId().getApiName() + api.getId().getVersion()+".wsdl";
 			String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
-                    RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)) +
+                    RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
                     wsdlResourcePath;
 
 			APIMWSDLReader wsdlreader = new APIMWSDLReader(api.getWsdlUrl());
