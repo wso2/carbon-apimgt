@@ -37,6 +37,7 @@
 	if (checkSSO && !Boolean(isAuthenticated)) {
 
 	    var keyStorePassword = site.ssoConfiguration.keyStorePassword;
+        var acsURL = site.ssoConfiguration.acsURL;
             var keyStoreAlias = site.ssoConfiguration.identityAlias;
             var keyStoreLocation = site.ssoConfiguration.keyStoreName;
             var signRequests = site.ssoConfiguration.signRequests;
@@ -59,7 +60,13 @@
             ssoRelyingParty.setProperty("keyStoreName", String(site.ssoConfiguration.keyStoreName));
             ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
 
-        var consumerUrl = jagg.getHttpsUrl("/jagg/jaggery_acs.jag");
+        var consumerUrl = "";
+        //if acsURL is provided in site.json, consumerUrl will be taken from that. Otherwise generated from the app.
+        if (acsURL) {
+            consumerUrl = acsURL;
+        } else {
+            consumerUrl = jagg.getHttpsUrl("/jagg/jaggery_acs.jag");
+        }
         if(site.ssoConfiguration.passive == "true")    {
             samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(isPassiveAuthRequired, consumerUrl);
         } else {
