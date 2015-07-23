@@ -15,7 +15,8 @@
         "responseSigningEnabled":"true",
         "keyStoreName" :"",
         "passive" : "true",
-        "signRequests" : "true"
+        "signRequests" : "true",
+        //"acsURL" : "https://localhost:9443/store/jagg/jaggery_acs.jag" //In passive or request signing mode, use only if app generated Assertion Consumer Service URL needs to be overidden
     },
     "oidcConfiguration" : {
       "enabled" : "false",
