@@ -24,7 +24,6 @@ import org.joda.time.DateTime;
 import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.Issuer;
-import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.NameIDPolicy;
 import org.opensaml.saml2.core.impl.IssuerBuilder;
 import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
@@ -54,14 +53,14 @@ public class AuthReqBuilder {
      * @return AuthnRequest Object
      * @throws Exception error when bootstrapping
      */
-    public AuthnRequest buildAuthenticationRequest(String issuerId) throws Exception {
+    public AuthnRequest buildAuthenticationRequest(String issuerId, String nameIdPolicy) throws Exception {
         Util.doBootstrap();
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
         authnRequest.setVersion(SAMLVersion.VERSION_20);
         authnRequest.setIssueInstant(new DateTime());
         authnRequest.setIssuer(buildIssuer( issuerId));
-        authnRequest.setNameIDPolicy(buildNameIDPolicy());
+        authnRequest.setNameIDPolicy(buildNameIDPolicy(nameIdPolicy));
         return authnRequest;
     }
 
@@ -71,7 +70,8 @@ public class AuthReqBuilder {
      * @return AuthnRequest Object
      * @throws Exception error when bootstrapping
      */
-    public AuthnRequest buildPassiveAuthenticationRequest(String issuerId, String acsUrl) throws Exception  {
+    public AuthnRequest buildPassiveAuthenticationRequest(String issuerId, String acsUrl, String nameIdPolicy)
+            throws Exception {
         Util.doBootstrap();
         acsUrl = processAcsUrl(acsUrl);
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
@@ -79,7 +79,7 @@ public class AuthReqBuilder {
         authnRequest.setVersion(SAMLVersion.VERSION_20);
         authnRequest.setIssueInstant(new DateTime());
         authnRequest.setIssuer(buildIssuer(issuerId));
-        authnRequest.setNameIDPolicy(buildNameIDPolicy());
+        authnRequest.setNameIDPolicy(buildNameIDPolicy(nameIdPolicy));
         authnRequest.setIsPassive(true);
         authnRequest.setAssertionConsumerServiceURL(acsUrl);
         return authnRequest;
@@ -94,7 +94,7 @@ public class AuthReqBuilder {
      * @throws Exception
      */
     public AuthnRequest buildPassiveSignedAuthenticationRequest(String issuerId, int tenantId,
-            String tenantDomain, String destination, String acsUrl) throws Exception {
+            String tenantDomain, String destination, String acsUrl, String nameIdPolicy) throws Exception {
         Util.doBootstrap();
         acsUrl = processAcsUrl(acsUrl);
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
@@ -102,7 +102,7 @@ public class AuthReqBuilder {
         authnRequest.setVersion(SAMLVersion.VERSION_20);
         authnRequest.setIssueInstant(new DateTime());
         authnRequest.setIssuer(buildIssuer(issuerId));
-        authnRequest.setNameIDPolicy(buildNameIDPolicy());
+        authnRequest.setNameIDPolicy(buildNameIDPolicy(nameIdPolicy));
         authnRequest.setIsPassive(true);
         authnRequest.setAssertionConsumerServiceURL(acsUrl);
         authnRequest.setDestination(destination);
@@ -120,14 +120,14 @@ public class AuthReqBuilder {
      * @throws Exception error when bootstrapping
      */
     public AuthnRequest buildSignedAuthRequest(String issuerId, String destination, int tenantId,
-            String tenantDomain) throws Exception {
+            String tenantDomain, String nameIdPolicy) throws Exception {
         Util.doBootstrap();
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
         authnRequest.setVersion(SAMLVersion.VERSION_20);
         authnRequest.setIssueInstant(new DateTime());
         authnRequest.setIssuer(buildIssuer(issuerId));
-        authnRequest.setNameIDPolicy(buildNameIDPolicy());
+        authnRequest.setNameIDPolicy(buildNameIDPolicy(nameIdPolicy));
         authnRequest.setDestination(destination);
         SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
                 new SSOAgentCarbonX509Credential(tenantId, tenantDomain);
@@ -145,15 +145,14 @@ public class AuthReqBuilder {
      */
 
     public AuthnRequest buildSignedAuthRequestWithConsumerUrl(String issuerId, String destination, String consumerUrl,
-            int tenantId,
-            String tenantDomain) throws Exception {
+            int tenantId, String tenantDomain, String nameIdPolicy) throws Exception {
         Util.doBootstrap();
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
         authnRequest.setVersion(SAMLVersion.VERSION_20);
         authnRequest.setIssueInstant(new DateTime());
         authnRequest.setIssuer(buildIssuer(issuerId));
-        authnRequest.setNameIDPolicy(buildNameIDPolicy());
+        authnRequest.setNameIDPolicy(buildNameIDPolicy(nameIdPolicy));
         authnRequest.setAssertionConsumerServiceURL(consumerUrl);
         authnRequest.setDestination(destination);
         SSOAgentCarbonX509Credential ssoAgentCarbonX509Credential =
@@ -180,11 +179,15 @@ public class AuthReqBuilder {
      *
      * @return NameIDPolicy object
      */
-    private static NameIDPolicy buildNameIDPolicy() {
-        NameIDPolicy nameIDPolicy = new NameIDPolicyBuilder().buildObject();
-        nameIDPolicy.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameIDPolicy.setAllowCreate(true);
-        return nameIDPolicy;
+    private static NameIDPolicy buildNameIDPolicy(String nameIdPolicy) {
+        NameIDPolicy nameIDPolicyObj = new NameIDPolicyBuilder().buildObject();
+        if (nameIdPolicy != null && !nameIdPolicy.isEmpty()){
+            nameIDPolicyObj.setFormat(nameIdPolicy);
+        }else {
+            nameIDPolicyObj.setFormat(SSOConstants.NAME_ID_POLICY_DEFAULT);
+        }
+        nameIDPolicyObj.setAllowCreate(true);
+        return nameIDPolicyObj;
     }
 
     /**

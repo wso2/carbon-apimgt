@@ -53,7 +53,7 @@ public class LogoutRequestBuilder {
      * @return LogoutRequest object
      */
     public LogoutRequest buildLogoutRequest(String subject,String sessionIndexId, String reason,
-                                            String issuerId) {
+                                            String issuerId, String nameIdFormat) {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -67,10 +67,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(buildNameID(nameIdFormat, subject));
 
         SessionIndex sessionIndex = new SessionIndexBuilder().buildObject();
         sessionIndex.setSessionIndex(sessionIndexId);
@@ -88,7 +85,8 @@ public class LogoutRequestBuilder {
      * @return LogoutRequest object
      */
     public LogoutRequest buildSignedLogoutRequest(String subject,String sessionIndexId, String reason,
-            String issuerId, int tenantId, String tenantDomain, String destination) throws Exception {
+            String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
+            throws Exception {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -102,10 +100,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(buildNameID(nameIdFormat, subject));
 
         SessionIndex sessionIndex = new SessionIndexBuilder().buildObject();
         sessionIndex.setSessionIndex(sessionIndexId);
@@ -130,7 +125,7 @@ public class LogoutRequestBuilder {
      * @return
      */
     public LogoutRequest buildLogoutRequest(String subject, String reason,
-                                            String issuerId) {
+                                            String issuerId, String nameIdFormat) {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -144,10 +139,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(buildNameID(nameIdFormat, subject));
 
         logoutReq.setReason(reason);
 
@@ -162,7 +154,8 @@ public class LogoutRequestBuilder {
      * @return
      */
     public LogoutRequest buildSignedLogoutRequest(String subject, String reason,
-            String issuerId, int tenantId, String tenantDomain, String destination) throws Exception {
+            String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
+            throws Exception {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -176,10 +169,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(buildNameID(nameIdFormat, subject));
 
         logoutReq.setReason(reason);
         logoutReq.setDestination(destination);
@@ -261,5 +251,21 @@ public class LogoutRequestBuilder {
         }
         return builder.buildObject(objectQName.getNamespaceURI(), objectQName.getLocalPart(),
                 objectQName.getPrefix());
+    }
+
+    /**
+     * Build the NameID object
+     *
+     * @return NameID object
+     */
+    private static NameID buildNameID(String nameIdFormat, String subject) {
+        NameID nameIdObj = new NameIDBuilder().buildObject();
+        if (nameIdFormat != null && !nameIdFormat.isEmpty()) {
+            nameIdObj.setFormat(nameIdFormat);
+        } else {
+            nameIdObj.setFormat(SSOConstants.NAME_ID_POLICY_DEFAULT);
+        }
+        nameIdObj.setValue(subject);
+        return nameIdObj;
     }
 }
