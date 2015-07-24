@@ -54,12 +54,16 @@
             if(site.ssoConfiguration.signRequests == null || site.ssoConfiguration.signRequests == ""){
                 site.ssoConfiguration.signRequests = "false";
             }
+            if(site.ssoConfiguration.nameIdPolicy == null){
+                site.ssoConfiguration.nameIdPolicy = "";
+            }
+
             ssoRelyingParty.setProperty("identityProviderURL", site.ssoConfiguration.identityProviderURL);
             ssoRelyingParty.setProperty("keyStorePassword", String(site.ssoConfiguration.keyStorePassword));
             ssoRelyingParty.setProperty("identityAlias", String(site.ssoConfiguration.identityAlias));
             ssoRelyingParty.setProperty("keyStoreName", String(site.ssoConfiguration.keyStoreName));
             ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
-
+            ssoRelyingParty.setProperty("nameIdPolicy", site.ssoConfiguration.nameIdPolicy);
 
         var consumerUrl = "";
         //if acsURL is provided in site.json, consumerUrl will be taken from that. Otherwise generated from the app.
