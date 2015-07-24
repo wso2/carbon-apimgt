@@ -38,6 +38,7 @@ public class SubscriberKeyMgtClient {
     private static Log log = LogFactory.getLog(SubscriberKeyMgtClient.class);
 
     private APIKeyMgtSubscriberServiceStub subscriberServiceStub;
+    private volatile String cookie;
 
     public SubscriberKeyMgtClient(String backendServerURL, String username, String password)
             throws Exception {
@@ -59,8 +60,23 @@ public class SubscriberKeyMgtClient {
 
 
     public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl) throws Exception {
+        //setCookie(subscriberServiceStub);
         OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.createOAuthApplication(userId, applicationName, callbackUrl);
+        //updateCookie(subscriberServiceStub);
         return oAuthApplicationInfo;
+    }
+
+    private void updateCookie(APIKeyMgtSubscriberServiceStub subscriberServiceStub) {
+        Object cookie = subscriberServiceStub._getServiceClient().getOptions().getProperty(HTTPConstants.COOKIE_STRING);
+        if(cookie != null){
+            this.cookie = (String) cookie;
+        }
+    }
+
+    private void setCookie(APIKeyMgtSubscriberServiceStub subscriberServiceStub) {
+        if (cookie != null) {
+            subscriberServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
+        }
     }
 
 

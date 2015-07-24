@@ -1423,6 +1423,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
         String thumbUrl = (String) apiData.get("thumbUrl",apiData);
+        String environments = (String) apiData.get("environments", apiData);
         String visibleRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
@@ -1662,6 +1663,8 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
 
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+
         api.setDescription(StringEscapeUtils.escapeHtml(description));
         api.setLastUpdated(new Date());
         api.setUrl(endpoint);
@@ -1836,14 +1839,17 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return context;
     }
+
     /**
+     * This method used to change status of API
      *
-     * @param cx Rhino context
+     * @param cx      Rhino context
      * @param thisObj Scriptable object
-     * @param args Passing arguments
-     * @param funObj Function object
+     * @param args    Passing arguments
+     * @param funObj  Function object
      * @return true if the API was added successfully
-     * @throws APIManagementException
+     * @throws APIManagementException if API couldn't found
+     * @throw FaultGatewaysException if any gateway couldn't update or create api
      */
     public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
                                                     Object[] args,

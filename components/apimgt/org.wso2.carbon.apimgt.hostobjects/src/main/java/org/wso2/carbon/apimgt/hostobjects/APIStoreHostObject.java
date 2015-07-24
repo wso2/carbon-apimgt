@@ -260,9 +260,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getAppApiCallType(subscriberName, fromDate, toDate, 10);
+            list = client.getAppApiCallType(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -340,9 +341,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getPerAppFaultCount(subscriberName, fromDate, toDate, 10);
+            list = client.getPerAppFaultCount(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for faultCount", e);
         }
@@ -409,9 +411,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.perAppPerAPIUsage(subscriberName, fromDate, toDate, 10);
+            list = client.perAppPerAPIUsage(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -478,9 +481,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getTopAppUsers(subscriberName, fromDate, toDate, 10);
+            list = client.getTopAppUsers(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -554,9 +558,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getAppRegisteredUsers(subscriberName);
+            list = client.getAppRegisteredUsers(subscriberName, groupId);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -1476,6 +1481,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                    }
 	                    resultObj.put("apis", resultObj, apiArray);
 	                    resultObj.put("totalLength", resultObj, result.get("length"));
+                        resultObj.put("isMore", resultObj, result.get("isMore"));
 	                }
             }
             }

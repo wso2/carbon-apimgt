@@ -715,7 +715,7 @@
 
                                 <% for (var i = 0; i < lenS; i++) {
 
-                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="CheckboxProd" <%
+                                         %><li><input type="checkbox" name="<%= encode.forHtml(scopes[i].scopeName)%>" value="<%=  encode.forHtml(scopes[i].scopeKey)%>" id="<%=  encode.forHtml(scopes[i].scopeKey)%>" class="CheckboxProd" <%
                                          	if(app.prodKeyScopeValue != null){
                                          		for(var j = 0; j < prodKeyScopeArray.length; j++){
 	                                         		if(prodKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
@@ -725,7 +725,7 @@
                                          		}
                                          	}
                                          	
-                                         %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                         %>> <%=  encode.forHtml(scopes[i].scopeName)%> : <%=  encode.forHtml(scopes[i].scopeKey) %></li><%
                                         }
                                         %></ul><%
                                  %>
@@ -746,7 +746,7 @@
                         <ul>
 
                                 <% for (var i = 0; i < lenS; i++) {
-                                         %><li><input type="checkbox" name="<%=scopes[i].scopeName%>" value="<%=scopes[i].scopeKey%>" id="<%= scopes[i].scopeKey%>" class="CheckboxSand" <%
+                                         %><li><input type="checkbox" name="<%=  encode.forHtml(scopes[i].scopeName) %>" value="<%=  encode.forHtml(scopes[i].scopeKey) %>" id="<%=  encode.forHtml(scopes[i].scopeKey)%>" class="CheckboxSand" <%
                                          if(app.sandKeyScopeValue != null){
                                          	for(var j = 0; j < sandKeyScopeArray.length; j++){
                                          		if(sandKeyScopeArray.indexOf(scopes[i].scopeKey)>-1){
@@ -756,7 +756,7 @@
                                          	}
                                          }
                                          	
-                                         %>> <%= scopes[i].scopeName%> : <%= scopes[i].scopeKey %></li><%
+                                         %>> <%=  encode.forHtml(scopes[i].scopeName)%> : <%=  encode.forHtml(scopes[i].scopeKey) %></li><%
                                         }
                                         %></ul><%
                                  %>

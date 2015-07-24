@@ -71,15 +71,14 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain)
-                                                                                       throws APIManagementException {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+        Map<String, String> failedEnvironmentsList = new HashMap<String, String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsList;
         }
         for (String environmentName : api.getEnvironments()) {
             Environment environment = environments.get(environmentName);
-            RESTAPIAdminClient client = null;
+            RESTAPIAdminClient client;
             try {
                 client = new RESTAPIAdminClient(api.getId(), environment);
 			String operation;
@@ -182,10 +181,21 @@ public class APIGatewayManager {
 				}
 			}
             } catch (AxisFault axisFault) {
-                failedEnvironmentsList.add(environmentName);
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+                failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 log.error("Error occurred when publish to gateway " + environmentName, axisFault);
             } catch (APIManagementException ex) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
+                failedEnvironmentsList.put(environmentName, ex.getMessage());
             }
         }
         return failedEnvironmentsList;
@@ -199,8 +209,8 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public List<String> removeFromGateway(API api, String tenantDomain) {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+    public Map<String, String> removeFromGateway(API api, String tenantDomain) {
+        Map<String, String> failedEnvironmentsList = new HashMap<String, String>(0);
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
@@ -230,7 +240,7 @@ public class APIGatewayManager {
                 therefore this didn't break the gateway unpublisihing if one gateway unreachable
                  */
                     log.error("Error occurred when removing from gateway " + environmentName, axisFault);
-                    failedEnvironmentsList.add(environmentName);
+                    failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 } catch (APIManagementException ex) {
                     /*
                 didn't throw this exception to handle multiple gateway publishing
@@ -238,6 +248,7 @@ public class APIGatewayManager {
                 therefore this didn't break the gateway unpublisihing if one gateway unreachable
                  */
                     log.error("Error occurred undeploy sequences on " + environmentName, ex);
+                    failedEnvironmentsList.put(environmentName, ex.getMessage());
                 }
             }
 
@@ -245,8 +256,8 @@ public class APIGatewayManager {
         return failedEnvironmentsList;
     }
 
-    public List<String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+    public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
+        Map<String, String> failedEnvironmentsList = new HashMap<String, String>(0);
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
@@ -267,7 +278,7 @@ public class APIGatewayManager {
                 therefore this didn't break the gateway unpublisihing if one gateway unreachable
                  */
                     log.error("Error occurred when removing default api from gateway " + environmentName, axisFault);
-                    failedEnvironmentsList.add(environmentName);
+                    failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 }
             }
         }
