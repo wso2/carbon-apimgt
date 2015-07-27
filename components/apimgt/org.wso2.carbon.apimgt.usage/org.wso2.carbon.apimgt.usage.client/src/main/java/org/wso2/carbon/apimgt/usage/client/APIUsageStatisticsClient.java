@@ -155,15 +155,20 @@ public class APIUsageStatisticsClient {
     public List<APIResponseFaultCountDTO> getPerAppFaultCount(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDays(
-                APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, fromDate, toDate);
-        Collection<AppAPIResponseFaultCount> usageData = getAppAPIResponseFaultCount(omElement);
-
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
+        String[] stringArray = subscriberApps.toArray(new String[subscriberApps.size()]);
+
+        String concatenatedKeySetString = "''";
+
+        if (stringArray.length > 0) {
+            concatenatedKeySetString = buildKeySetString(stringArray);
+        }
+        Collection<AppAPIResponseFaultCount> faultUsageData = getFaultAppUsageData
+                (APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeySetString);
 
         List<APIResponseFaultCountDTO> perAppFaultCountList = new ArrayList<APIResponseFaultCountDTO>();
         APIResponseFaultCountDTO apiUsageDTO;
-        for (AppAPIResponseFaultCount usage : usageData) {
+        for (AppAPIResponseFaultCount usage : faultUsageData) {
             for (String subscriberApp : subscriberApps) {
                 if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
                     String consumerKey = usage.consumerKey;
@@ -193,11 +198,16 @@ public class APIUsageStatisticsClient {
     public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDays(
-                APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, fromDate, toDate);
-        Collection<AppUsage> usageData = getAppUsageData(omElement);
-
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
+        String[] stringArray = subscriberApps.toArray(new String[subscriberApps.size()]);
+        String concatenatedKeySetString = "''";
+
+        if (stringArray.length > 0) {
+            concatenatedKeySetString = buildKeySetString(stringArray);
+        }
+
+        Collection<AppUsage> usageData = getTopAppUsageData
+                (APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString);
 
         List<AppUsageDTO> appUsageList = new ArrayList<AppUsageDTO>();
         AppUsageDTO appUsageDTO;
@@ -229,6 +239,156 @@ public class APIUsageStatisticsClient {
         return appUsageList;
     }
 
+    /**
+     * This method gets the app usage data for invoking APIs
+     *
+     * @param tableName name of the required table in the database
+     * @param keyString concatenated key set of applications
+     * @return a collection containing the data related to App usage
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private Collection<AppUsage> getTopAppUsageData(String tableName, String keyString)
+            throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        Collection<AppUsage> topAppUsageDataList = new ArrayList<AppUsage>();
+
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+
+            //check whether table exist first
+            if (isTableExist(tableName, connection)) {
+
+                query = "SELECT " +
+                        "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS net_total_requests" +
+                        " FROM " + tableName +
+                        " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
+                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY;
+
+                resultSet = statement.executeQuery(query);
+                while (resultSet.next()) {
+                    String userId = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
+                    long requestCount = resultSet.getLong("net_total_requests");
+                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
+                    topAppUsageDataList.add(new AppUsage(userId, requestCount, consumerKey));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException
+                    ("Error occurred while querying top app usage data from JDBC database", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing JDBC database connection.", e);
+                }
+            }
+        }
+        return topAppUsageDataList;
+    }
+
+    /**
+     * This method gets the API faulty invocation data
+     *
+     * @param tableName name of the required table in the database
+     * @param keyString concatenated key set of applications
+     * @return a collection containing the data related to API faulty invocations
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private Collection<AppAPIResponseFaultCount> getFaultAppUsageData(String tableName, String keyString)
+            throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        Collection<AppAPIResponseFaultCount> falseAppUsageDataList = new ArrayList<AppAPIResponseFaultCount>();
+
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+
+            //check whether table exist first
+            if (isTableExist(tableName, connection)) {
+
+                query = "SELECT " +
+                        "*,SUM(" + APIUsageStatisticsClientConstants.FAULT + ") AS total_faults " +
+                        " FROM " + tableName +
+                        " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY;
+
+                resultSet = statement.executeQuery(query);
+
+                while (resultSet.next()) {
+                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String apiVersion = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
+                    String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                    long faultCount = resultSet.getLong("total_faults");
+                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
+                    falseAppUsageDataList.add(new AppAPIResponseFaultCount
+                            (apiName, apiVersion, context, faultCount, consumerKey));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException
+                    ("Error occurred while querying API faulty invocation data from JDBC database", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing JDBC database connection.", e);
+                }
+            }
+        }
+        return falseAppUsageDataList;
+    }
+
     private Collection<AppUsage> getAppUsageData(OMElement data) {
         List<AppUsage> usageData = new ArrayList<AppUsage>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -249,11 +409,15 @@ public class APIUsageStatisticsClient {
     public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDays(
-                APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, fromDate, toDate);
-        Collection<AppCallType> usageData = getCallTypeUsageData(omElement);
-
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
+        String[] stringArray = subscriberApps.toArray(new String[subscriberApps.size()]);
+        String concatenatedKeySetString = "''";
+
+        if (stringArray.length > 0) {
+            concatenatedKeySetString = buildKeySetString(stringArray);
+        }
+        Collection<AppCallType> usageData = getAPICallTypeUsageData
+                (APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, concatenatedKeySetString);
 
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
         AppCallTypeDTO appCallTypeDTO;
@@ -289,6 +453,84 @@ public class APIUsageStatisticsClient {
             }
         }
         return appApiCallTypeList;
+    }
+
+    /**
+     * This method gets the API usage data per API call type
+     *
+     * @param tableName name of the required table in the database
+     * @param keyString concatenated key set of applications
+     * @return a collection containing the data related to API call types
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private Collection<AppCallType> getAPICallTypeUsageData(String tableName, String keyString)
+            throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        Collection<AppCallType> topAppUsageDataList = new ArrayList<AppCallType>();
+
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+
+            //check whether table exist first
+            if (isTableExist(tableName, connection)) {
+
+                query = "SELECT " +
+                        "*" +
+                        " FROM " + tableName +
+                        " WHERE " +
+                        APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                        " GROUP BY " +
+                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD;
+
+
+                resultSet = statement.executeQuery(query);
+
+                while (resultSet.next()) {
+                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String callType = resultSet.getString(APIUsageStatisticsClientConstants.METHOD);
+                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
+                    String resource = resultSet.getString(APIUsageStatisticsClientConstants.RESOURCE);
+                    topAppUsageDataList.add(new AppCallType(apiName, callType, consumerKey, resource));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException
+                    ("Error occurred while querying API call type data from JDBC database", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing JDBC database connection.", e);
+                }
+            }
+        }
+        return topAppUsageDataList;
     }
 
     private Collection<AppCallType> getCallTypeUsageData(OMElement data) {
@@ -399,14 +641,17 @@ public class APIUsageStatisticsClient {
     public List<APIUsageDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDays(
-                APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, fromDate, toDate);
-        Collection<AppAPIUsage> usageData = getAppAPIUsageData(omElement);
-
-
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
+        String[] stringArray = subscriberApps.toArray(new String[subscriberApps.size()]);
+        String concatenatedKeySetString = "''";
+
+        if (stringArray.length > 0) {
+            concatenatedKeySetString = buildKeySetString(stringArray);
+        }
 
         List<APIUsageDTO> perAppUsageList = new ArrayList<APIUsageDTO>();
+        Collection<AppAPIUsage> usageData = getPerAppAPIUsageData
+                (APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString);
         APIUsageDTO apiUsageDTO;
         for (AppAPIUsage usage : usageData) {
             for (String subscriberApp : subscriberApps) {
@@ -434,6 +679,107 @@ public class APIUsageStatisticsClient {
             }
         }
         return perAppUsageList;
+    }
+
+    /**
+     * This method builds a single string from a set of strings in a string array, to be used in database query
+     *
+     * @param keyArray string array containing the keys
+     * @return set of keys as a comma separated single string
+     */
+    private String buildKeySetString(String[] keyArray){
+
+        String keySetString = "";
+
+        for (int i = 0; i < keyArray.length; i++) {
+            keySetString = keySetString + "'" + keyArray[i] + "'";
+            if (i != keyArray.length - 1) {
+                //adds a comma to the end of the string if the current key is not the last in the array
+                keySetString = keySetString + ",";
+            }
+        }
+        if (keySetString.isEmpty()) {
+            keySetString = "''";
+        }
+        return keySetString;
+    }
+
+    /**
+     * This method gets the API usage data per application
+     *
+     * @param tableName name of the required table in the database
+     * @param keyString concatenated key set of applications
+     * @return a collection containing the data related to per App API usage
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private Collection<AppAPIUsage> getPerAppAPIUsageData(String tableName, String keyString)
+            throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        Collection<AppAPIUsage> perAppUsageDataList = new ArrayList<AppAPIUsage>();
+
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+
+            //check whether table exist first
+            if (isTableExist(tableName, connection)) {
+
+                query = "SELECT " +
+                        "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS total_calls " +
+                        " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
+                        " WHERE " +
+                        APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                        " GROUP BY " +
+                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.CONSUMERKEY;
+
+                resultSet = statement.executeQuery(query);
+
+                while (resultSet.next()) {
+                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String apiVersion = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
+                    String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                    long requestCount = resultSet.getLong("total_calls");
+                    String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
+                    perAppUsageDataList.add(new AppAPIUsage(apiName, apiVersion, context, requestCount, consumerKey));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException
+                    ("Error occurred while querying per App usage data from JDBC database", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing JDBC database connection.", e);
+                }
+            }
+        }
+        return perAppUsageDataList;
     }
 
     private List<String> getAppsbySubscriber(String subscriberName, String groupId) throws APIMgtUsageQueryServiceClientException {
@@ -530,9 +876,7 @@ public class APIUsageStatisticsClient {
     public List<APIUsageDTO> getUsageByAPIs(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDays(
-                APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY, fromDate, toDate);
-        Collection<APIUsage> usageData = getUsageData(omElement);
+        Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
@@ -561,6 +905,83 @@ public class APIUsageStatisticsClient {
             }
         }
         return getAPIUsageTopEntries(new ArrayList<APIUsageDTO>(usageByAPIs.values()), limit);
+    }
+
+    /**
+     * This method gets the usage data for a given API across all versions
+     *
+     * @param tableName name of the table in the database
+     * @return a collection containing the API usage data
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private Collection<APIUsage> getAPIUsageData(String tableName) throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        Collection<APIUsage> usageDataList = new ArrayList<APIUsage>();
+
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+
+            //check whether table exist first
+            if (isTableExist(tableName, connection)) {
+
+                query = "SELECT " +
+                        APIUsageStatisticsClientConstants.API + "," +
+                        APIUsageStatisticsClientConstants.CONTEXT + "," +
+                        APIUsageStatisticsClientConstants.VERSION + "," +
+                        "SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS aggregateSum " +
+                        " FROM " +
+                        tableName +
+                        " GROUP BY " +
+                        APIUsageStatisticsClientConstants.API;
+
+                resultSet = statement.executeQuery(query);
+
+                while (resultSet.next()) {
+                    String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                    String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                    String version = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
+                    long requestCount = resultSet.getLong("aggregateSum");
+                    usageDataList.add(new APIUsage(apiName, context, version, requestCount));
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException
+                    ("Error occurred while querying API usage data from JDBC database", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing JDBC database connection.", e);
+                }
+            }
+        }
+        return usageDataList;
     }
 
     /**
@@ -743,9 +1164,8 @@ public class APIUsageStatisticsClient {
     public List<APIResponseTimeDTO> getResponseTimesByAPIs(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDays(
-                APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY, fromDate, toDate);
-        Collection<APIResponseTime> responseTimes = getResponseTimeData(omElement);
+        Collection<APIResponseTime> responseTimes =
+                getAPIResponseTimeData(APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, Double> apiCumulativeServiceTimeMap = new HashMap<String, Double>();
         Map<String, Long> apiUsageMap = new TreeMap<String, Long>();
@@ -754,8 +1174,10 @@ public class APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(responseTime.apiName) &&
                         providerAPI.getId().getVersion().equals(responseTime.apiVersion) &&
                         providerAPI.getContext().equals(responseTime.context)) {
-                    Double cumulativeResponseTime = apiCumulativeServiceTimeMap.get(responseTime.apiName);
+
                     String apiName = responseTime.apiName + " (" + providerAPI.getId().getProviderName() + ")";
+                    Double cumulativeResponseTime = apiCumulativeServiceTimeMap.get(apiName);
+
                     if (cumulativeResponseTime != null) {
                         apiCumulativeServiceTimeMap.put(apiName,
                                 cumulativeResponseTime + responseTime.responseTime * responseTime.responseCount);
@@ -783,6 +1205,84 @@ public class APIUsageStatisticsClient {
     }
 
     /**
+     * This method gets the response times for APIs
+     *
+     * @param tableName name of the required table in the database
+     * @return a collection containing the data related to API response times
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private Collection<APIResponseTime> getAPIResponseTimeData(String tableName)
+            throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        Collection<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
+
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+
+            query = "SELECT " +
+                    "TempTable.*, " +
+                    "SUM(" + APIUsageStatisticsClientConstants.RESPONSE + ") AS totalTime ," +
+                    "SUM(weighted_service_time) AS totalWeightTime " +
+                    " FROM " +
+                    "(SELECT " +
+                    "*, (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
+                    APIUsageStatisticsClientConstants.RESPONSE + ") AS weighted_service_time " +
+                    " FROM " +
+                    APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
+                    " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION;
+
+            resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split(":v")[0];
+                String version = resultSet.getString(APIUsageStatisticsClientConstants.API_VERSION).split(":v")[1];
+                String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                long responseCount = resultSet.getLong("totalTime");
+                double responseTime = resultSet.getDouble("totalWeightTime") / responseCount;
+                responseTimeData.add(new APIResponseTime(apiName, version, context, responseTime, responseCount));
+            }
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException
+                    ("Error occurred while querying API response times from JDBC database", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing JDBC database connection.", e);
+                }
+            }
+        }
+        return responseTimeData;
+    }
+
+    /**
      * Returns a list of APIVersionLastAccessTimeDTO objects for all the APIs belonging to the
      * specified provider. Last access times are calculated without taking API versions into
      * account. That is all the versions of an API are treated as one.
@@ -794,9 +1294,8 @@ public class APIUsageStatisticsClient {
     public List<APIVersionLastAccessTimeDTO> getLastAccessTimesByAPI(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDays(
-                APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY, fromDate, toDate);
-        Collection<APIAccessTime> accessTimes = getAccessTimeData(omElement);
+        Collection<APIAccessTime> accessTimes =
+                getLastAccessData(APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIAccessTime> lastAccessTimes = new TreeMap<String, APIAccessTime>();
         for (APIAccessTime accessTime : accessTimes) {
@@ -828,6 +1327,89 @@ public class APIUsageStatisticsClient {
         }
         return getLastAccessTimeTopEntries(new ArrayList<APIVersionLastAccessTimeDTO>(accessTimeByAPI.values()), limit);
 
+    }
+
+    /**
+     * This method gets the last access times for APIs
+     *
+     * @param tableName name of the required table in the database
+     * @return a collection containing the data related to API last access times
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
+     */
+    private Collection<APIAccessTime> getLastAccessData(String tableName)
+            throws APIMgtUsageQueryServiceClientException {
+
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+        Collection<APIAccessTime> lastAccessTimeData = new ArrayList<APIAccessTime>();
+
+        try {
+            connection = dataSource.getConnection();
+            statement = connection.createStatement();
+            String query;
+
+            query = "SELECT " +
+                    "dataTable.* " +
+                    " FROM (" +
+                    " SELECT " +
+                    APIUsageStatisticsClientConstants.API + "," +
+                    "MAX(" + APIUsageStatisticsClientConstants.TIME + ") " + "AS maxTime " +
+                    " FROM " + tableName +
+                    " GROUP BY " + APIUsageStatisticsClientConstants.API + ") maxTimesTable " +
+                    " INNER JOIN " +
+                    "(SELECT * " +
+                    " FROM " +
+                    tableName + ") dataTable " +
+                    " ON maxTimesTable." +
+                    APIUsageStatisticsClientConstants.API + "=dataTable." + APIUsageStatisticsClientConstants.API +
+                    " AND " +
+                    "maxTimesTable.maxTime=dataTable." + APIUsageStatisticsClientConstants.TIME;
+
+            resultSet = statement.executeQuery(query);
+
+            while (resultSet.next()) {
+                String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
+                String version = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
+                String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                double accessTime = resultSet.getDouble(APIUsageStatisticsClientConstants.REQUEST_TIME);
+                String username = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
+                lastAccessTimeData.add(new APIAccessTime(apiName, version, context, accessTime, username));
+            }
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException
+                    ("Error occurred while querying last access data for APIs from JDBC database", e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing JDBC database connection.", e);
+                }
+            }
+        }
+        return lastAccessTimeData;
     }
 
     /**
@@ -1200,6 +1782,17 @@ public class APIUsageStatisticsClient {
         }
     }
 
+    /**
+     * @deprecated please do not use this function as this may cause memory overflow.
+     * This loads a whole database table into memory as XML object
+     *
+     * @param columnFamily name of the table
+     * @param fromDate starting date of the duration for the query
+     * @param toDate last date of the duration for the query
+     * @return XML object containing the specified table
+     * @throws APIMgtUsageQueryServiceClientException if an error occurs while retrieving data
+     */
+    @Deprecated
     private OMElement queryBetweenTwoDays(String columnFamily, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -2311,6 +2904,13 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.CONSUMERKEY)).getText();
 
         }
+
+        public AppUsage(String userId, long requestCount, String consumerKey) {
+
+            this.userid = userId;
+            this.requestCount = requestCount;
+            this.consumerKey = consumerKey;
+        }
     }
 
     private static class AppCallType {
@@ -2330,6 +2930,14 @@ public class APIUsageStatisticsClient {
             resource = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.RESOURCE)).getText();
         }
+
+        public AppCallType(String apiName, String callType, String consumerKey, String resource) {
+
+            this.apiName = apiName;
+            this.callType = callType;
+            this.consumerKey = consumerKey;
+            this.resource = resource;
+        }
     }
 
     private static class APIUsage {
@@ -2348,6 +2956,14 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.CONTEXT)).getText();
             requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.REQUEST)).getText());
+        }
+
+        public APIUsage(String apiName, String context, String apiVersion, long requestCount) {
+
+            this.apiName = apiName;
+            this.context = context;
+            this.apiVersion = apiVersion;
+            this.requestCount = requestCount;
         }
     }
 
@@ -2370,6 +2986,15 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.REQUEST)).getText());
             consumerKey = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.CONSUMERKEY)).getText();
+        }
+
+        public AppAPIUsage(String apiName, String apiVersion, String context, long requestCount, String consumerKey) {
+
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.context = context;
+            this.requestCount = requestCount;
+            this.consumerKey = consumerKey;
         }
     }
 
@@ -2525,6 +3150,18 @@ public class APIUsageStatisticsClient {
                 faultCount = (long) Double.parseDouble(faultCountEle.getText());
             }
         }
+
+        public AppAPIResponseFaultCount
+                (String apiName, String apiVersion, String context, long faultCount, String consumerKey) {
+
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.context = context;
+            this.consumerKey = consumerKey;
+            if (faultCount != 0) {
+                this.faultCount = faultCount;
+            }
+        }
     }
 
     private static class APIVersionUsageByUser {
@@ -2607,6 +3244,16 @@ public class APIUsageStatisticsClient {
             responseCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.RESPONSE)).getText());
         }
+
+        public APIResponseTime
+                (String apiName, String apiVersion, String context, double responseTime, long responseCount) {
+
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.context = context;
+            this.responseTime = responseTime;
+            this.responseCount = responseCount;
+        }
     }
 
     private static class APIAccessTime {
@@ -2629,6 +3276,15 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.REQUEST_TIME)).getText());
             username = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.USER_ID)).getText();
+        }
+
+        public APIAccessTime(String apiName, String apiVersion, String context, double accessTime, String username) {
+
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.context = context;
+            this.accessTime = accessTime;
+            this.username = username;
         }
     }
 
