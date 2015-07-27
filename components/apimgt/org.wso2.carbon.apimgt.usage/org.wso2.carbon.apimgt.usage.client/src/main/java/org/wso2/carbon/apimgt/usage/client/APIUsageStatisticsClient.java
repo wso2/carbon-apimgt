@@ -2293,6 +2293,465 @@ public class APIUsageStatisticsClient {
         }
     }
 
+    /** Given API name and Application, returns throttling request counts over time for a given time span
+     * 
+     * @param apiName Name of the API
+     * @param provider Provider name
+     * @param appName Application name
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @return Throttling counts over time
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
+            String appName, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String queryLeftJoin, queryRightJoin, query;
+
+            List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
+
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
+                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
+
+                //To get throttle data, here we are joining two tables which corresponds to success requests 
+                //(i.e. API_REQUEST_SUMMARY_MINIMAL) and throttled requests (i.e. API_THROTTLE_SUMMARY). We need to 
+                //perform a full join as there can be sometimes no rows associated with the partner table. (ex. For 
+                //unlimited tier APIs, all the requests are allowed and there are no associated data in the throttle 
+                //table (i.e. API_THROTTLE_SUMMARY). Sometimes all the requests can be throttled out for a time segment
+                //and there can be no associated rows in success request table)
+                //Since most databases (mysql,h2) does not support full joins we need to apply a workaround (take the 
+                //left join and the right join separately and then take the union)
+                queryLeftJoin = "select API_REQUEST_SUMMARY_MINIMAL.api,API_REQUEST_SUMMARY_MINIMAL.api_version,"
+                        + " API_REQUEST_SUMMARY_MINIMAL.apiPublisher, API_REQUEST_SUMMARY_MINIMAL.time,"
+                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
+                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
+                        + " from API_REQUEST_SUMMARY_MINIMAL left join API_THROTTLE_SUMMARY"
+                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
+                        + " where API_REQUEST_SUMMARY_MINIMAL.api = ?"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = ?"
+                        + (!appName.isEmpty() ? " and API_REQUEST_SUMMARY_MINIMAL.applicationName = ?" : "")
+                        + " and API_REQUEST_SUMMARY_MINIMAL.time between ? and ?";
+
+                queryRightJoin = "select API_THROTTLE_SUMMARY.api, API_REQUEST_SUMMARY_MINIMAL.api_version,"
+                        + " API_THROTTLE_SUMMARY.apiPublisher, API_THROTTLE_SUMMARY.time,"
+                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
+                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
+                        + " from API_REQUEST_SUMMARY_MINIMAL right join API_THROTTLE_SUMMARY"
+                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
+                        + " where API_THROTTLE_SUMMARY.api = ?"
+                        + " and API_THROTTLE_SUMMARY.apiPublisher = ?"
+                        + (!appName.isEmpty() ? " and API_THROTTLE_SUMMARY.applicationName = ?" : "")
+                        + " and API_THROTTLE_SUMMARY.time between ? and ?";
+                
+                query = "select api,apiPublisher,time,sum(success_request_count) as success_request_count,"
+                        + " sum(throttleout_count) as throttleout_count FROM (" + queryLeftJoin 
+                        + " UNION " + queryRightJoin + ") JOINED_TABLE group by time order by time asc";
+                
+                statement = connection.prepareStatement(query);
+
+                int index = 1;
+                //for left join query
+                statement.setString(index++, apiName);
+                statement.setString(index++, provider);
+                if (!appName.isEmpty()) {
+                    statement.setString(index++, appName);
+                }
+                statement.setString(index++, fromDate);
+                statement.setString(index++, toDate);
+
+                //for right join query
+                statement.setString(index++, apiName);
+                statement.setString(index++, provider);
+                if (!appName.isEmpty()) {
+                    statement.setString(index++, appName);
+                }
+                statement.setString(index++, fromDate);
+                statement.setString(index, toDate);
+                rs = statement.executeQuery();
+
+                while (rs.next()) {
+                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
+                    String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
+                    int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
+                    int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
+                    String time = rs.getString(APIUsageStatisticsClientConstants.TIME);
+                    throttlingData
+                            .add(new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
+                                    time));
+                }
+
+            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
+                        " does not exist.");
+            } else {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
+                        " does not exist.");
+            }
+
+            return throttlingData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
+
+    /** Given Application name and the provider, returns throttle data for the APIs of the provider invoked by the 
+     *  given application
+     * 
+     * @param appName Application name
+     * @param provider Provider name
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @return Throttling counts of APIs of the provider invoked by the given app
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
+            String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String queryLeftJoin, queryRightJoin, query;
+
+            List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
+
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
+                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
+
+                //To get throttle data, here we are joining two tables which corresponds to success requests 
+                //(i.e. API_REQUEST_SUMMARY_MINIMAL) and throttled requests (i.e. API_THROTTLE_SUMMARY). We need to 
+                //perform a full join as there can be sometimes no rows associated with the partner table. (ex. For 
+                //unlimited tier APIs, all the requests are allowed and there are no associated data in the throttle 
+                //table (i.e. API_THROTTLE_SUMMARY). Sometimes all the requests can be throttled out for a time segment
+                //and there can be no associated rows in success request table)
+                //Since most databases (mysql,h2) does not support full joins we need to apply a workaround (take the 
+                //left join and the right join separately and then take the union)
+                queryLeftJoin = "select API_REQUEST_SUMMARY_MINIMAL.api,API_REQUEST_SUMMARY_MINIMAL.api_version,"
+                        + " API_REQUEST_SUMMARY_MINIMAL.apiPublisher, API_REQUEST_SUMMARY_MINIMAL.time,"
+                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
+                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
+                        + " from API_REQUEST_SUMMARY_MINIMAL left join API_THROTTLE_SUMMARY"
+                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
+                        + " where API_REQUEST_SUMMARY_MINIMAL.applicationName = ?"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = ?"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.time between ? and ?";
+
+                queryRightJoin = "select API_THROTTLE_SUMMARY.api, API_THROTTLE_SUMMARY.api_version,"
+                        + " API_THROTTLE_SUMMARY.apiPublisher, API_THROTTLE_SUMMARY.time,"
+                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
+                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
+                        + " from API_REQUEST_SUMMARY_MINIMAL right join API_THROTTLE_SUMMARY"
+                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
+                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
+                        + " where API_THROTTLE_SUMMARY.applicationName = ?"
+                        + " and API_THROTTLE_SUMMARY.apiPublisher = ?"
+                        + " and API_THROTTLE_SUMMARY.time between ? and ?";
+
+                query = "select api,apiPublisher,sum(success_request_count) as success_request_count,"
+                        + " sum(throttleout_count) as throttleout_count FROM (" + queryLeftJoin
+                        + " UNION " + queryRightJoin + ") JOINED_TABLE group by api, apiPublisher"
+                        + " order by api asc";
+
+                statement = connection.prepareStatement(query);
+
+                int index = 1;
+                //for left join query
+                statement.setString(index++, appName);
+                statement.setString(index++, provider);
+                statement.setString(index++, fromDate);
+                statement.setString(index++, toDate);
+
+                //for right join query
+                statement.setString(index++, appName);
+                statement.setString(index++, provider);
+                statement.setString(index++, fromDate);
+                statement.setString(index, toDate);
+                rs = statement.executeQuery();
+
+                while (rs.next()) {
+                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
+                    String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
+                    int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
+                    int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
+                    throttlingData
+                            .add(new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
+                                    null));
+                }
+
+            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
+                        " does not exist.");
+            } else {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
+                        " does not exist.");
+            }
+
+            return throttlingData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
+
+    /** Get APIs of the provider that consist of throttle data 
+     * 
+     * @param provider Provider name
+     * @return List of APIs of the provider that consist of throttle data
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<String> getAPIsForThrottleStats(String provider)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String query;
+
+            List<String> throttlingAPIData = new ArrayList<String>();
+
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
+                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
+
+                query = "select distinct api from API_REQUEST_SUMMARY_MINIMAL where apiPublisher = ?"
+                        + " union select distinct api from API_THROTTLE_SUMMARY where apiPublisher = ?";
+
+                statement = connection.prepareStatement(query);
+
+                int index = 1;
+                statement.setString(index++, provider);
+                statement.setString(index, provider);
+                
+                rs = statement.executeQuery();
+
+                while (rs.next()) {
+                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
+                    throttlingAPIData.add(api);
+                }
+
+            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
+                        " does not exist.");
+            } else {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
+                        " does not exist.");
+            }
+
+            return throttlingAPIData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
+
+    /** Given provider name and the API name, returns a list of applications through which the corresponding API is
+     *  invoked and which consist of throttle data
+     * 
+     * @param provider Provider name
+     * @param apiName Name of th API
+     * @return A list of applications through which the corresponding API is invoked and which consist of throttle data
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<String> getAppsForThrottleStats(String provider, String apiName)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String query;
+
+            List<String> throttlingAppData = new ArrayList<String>();
+
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
+                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
+
+                int index = 1;
+                if (apiName == null) {
+                    query = "select distinct applicationName from API_REQUEST_SUMMARY_MINIMAL where apiPublisher = ?"
+                            + " union select distinct applicationName from API_THROTTLE_SUMMARY where apiPublisher = ?";
+                }else {
+                    query = "select distinct applicationName from API_REQUEST_SUMMARY_MINIMAL "
+                            + " where apiPublisher = ? and api = ?"
+                            + " union select distinct applicationName from API_THROTTLE_SUMMARY"
+                            + " where api = ? and apiPublisher = ?"; 
+                }
+                statement = connection.prepareStatement(query);
+
+                statement.setString(index++, provider);
+                if( apiName != null ){
+                    statement.setString(index++, apiName); // for second and third ?'s for 'api' in second query
+                    statement.setString(index++, apiName);
+                }
+                statement.setString(index, provider);
+
+                rs = statement.executeQuery();
+
+                while (rs.next()) {
+                    String applicationName = rs.getString(APIUsageStatisticsClientConstants.APPLICATION_NAME);
+                    throttlingAppData.add(applicationName);
+                }
+
+            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
+                        " does not exist.");
+            } else {
+                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
+                        " does not exist.");
+            }
+
+            return throttlingAppData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
 
     private static class AppUsage {
 

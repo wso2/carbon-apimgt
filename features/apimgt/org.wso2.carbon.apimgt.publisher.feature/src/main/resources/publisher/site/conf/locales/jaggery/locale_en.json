@@ -146,6 +146,8 @@
     "apiUsageFromDestination" : "API Usage by Destination",
     "apiUsageComparison" : "API Usage Comparison",
     "faultyInvocations" : "Faulty Invocations",
+    "apiThrottledCounts" : "API Throttled Out Requests",
+    "applicationThrottledCounts" : "App Throttled Out Requests",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "overallAPISubscriptionsTitle": "Overall API Subscriptions (Across All Versions)",
@@ -155,6 +157,8 @@
     "apiUsageFromDestinationTitle": "API Usage by Destination",
     "apiUsageComparisonTitle": "API Usage Comparison (Across All Versions)",
     "faultyInvocationsTitle": "Faulty Invocations",
+    "apiThrottledCountsTitle" : "API Throttled Out Requests",
+    "applicationThrottledCountsTitle" : "Application Throttled Out Requests",
     "faultyAnalyzeTitle": "Faulty Invocations",
     "apiUsageByVersionTitle": "API Usage by Versions",
     "apiSubscriptionsByVersionTitle": "API Subscriptions by Versions",

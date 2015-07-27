@@ -1,0 +1,41 @@
+<% jagg.template("stats/api-throttledcounts", function(inputs, outputs, jagg) { %>
+<div id="apiThrottledCounts-stat-page" class="stat-page">
+    <div class="title-section"> <h2><%=i18n.localize("apiThrottledCountsTitle")%></h2> </div>
+    <div class="col-md-12">
+
+    <form class="form-inline">
+        <div class="form-group">
+            <label class="control-label">API&nbsp;&nbsp;</label>
+            <select id="apiSelect" class="selectpicker" data-live-search="true"></select>
+        </div>
+        <div class="form-group">
+          <label class="control-label">Application&nbsp;&nbsp;</label>
+          <select id="appSelect" class="selectpicker" data-live-search="true" title = "Select Application"></select>
+        </div>
+        <div class="form-group pull-right" >
+           <div id="dateRangePickerContainer">
+               <div class="btn-group" role="group">
+                   <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
+                   <button id="today-btn" type="button" class="btn btn-default date-range">Day
+                   </button>
+                   <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
+                   <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
+                   <button id="date-range" type="button" class="btn btn-default date-range last-child" >
+                     <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                     <span></span> <b class="caret"></b>
+                   </button>
+               </div>
+           </div>
+        </div>
+    </form>
+
+    <div id="noData"></div>
+    <br/>
+    <div id="chartContainer"  class="col-sm-12" style="margin-bottom :20px;height: 100%"></div>
+    <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
+    <div id="tableContainer"></div>
+    </div>
+</div>
+<% }); %>
+
+
