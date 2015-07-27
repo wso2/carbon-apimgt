@@ -73,9 +73,9 @@
             consumerUrl = jagg.getHttpsUrl("/jagg/jaggery_acs.jag");
         }
         if(site.ssoConfiguration.passive == "true")    {
-            samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(isPassiveAuthRequired, consumerUrl);
+            samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(consumerUrl, isPassiveAuthRequired);
         } else {
-            if(site.ssoConfiguration.signRequests && (site.reverseProxy.enabled == "auto")){
+            if(site.ssoConfiguration.signRequests == "true" && (site.reverseProxy.enabled == "auto")){
                 samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(consumerUrl);
             }else{
                 samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
