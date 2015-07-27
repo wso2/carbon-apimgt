@@ -3009,12 +3009,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
            apiProvider.addDocumentation(apiId, doc);
             success = true;
-        } catch (APIManagementException e) {
-            handleException("Error occurred while adding the document- " + docName, e);
-            return false;
         } catch (ScriptException e) {
             handleException("The attachment cannot be found for document- " + docName, e);
-            return false;
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -4059,11 +4055,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         } catch (ScriptException e) {
             handleException("The attachment cannot be found for document- " + docName, e);
-            return false;
-
-        } catch (APIManagementException e) {
-            handleException("Error occurred while adding the document- " + docName, e);
-            return false;
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
