@@ -23,16 +23,16 @@
         <tag>HEAD</tag>
     </scm>
 
-    <modules> 
+    <modules>
         <module>service-stubs/apimgt</module>
-	<module>service-stubs/oidc-authenticator</module>
+        <module>service-stubs/oidc-authenticator</module>
         <module>components/apimgt</module>
         <module>components/forum</module>
         <module>components/sso-hostobject</module>
         <module>components/oidc-authenticator</module>
         <module>features/apimgt</module>
         <module>features/forum</module>
-	<module>features/oidc-authenticator</module>
+        <module>features/oidc-authenticator</module>
     </modules>
 
     <build>
@@ -41,7 +41,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>${maven-scr-plugin.version}</version>
                     <executions>
                         <execution>
                             <id>generate-scr-scrdescriptor</id>
@@ -50,6 +50,12 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-bundle-plugin</artifactId>
+                    <version>${maven-bundle-plugin.version}</version>
                 </plugin>
 
                 <plugin>
@@ -63,6 +69,11 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
+                </plugin>
+                <plugin>
+                    <groupId>org.wso2.maven</groupId>
+                    <artifactId>carbon-p2-plugin</artifactId>
+                    <version>${carbon.p2.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -813,13 +824,13 @@
         <identity.authentication.version>4.2.1</identity.authentication.version>
 
         <!-- Carbon kernel version -->
-        <wso2carbon.version>4.2.0</wso2carbon.version>
+        <wso2carbon.version>4.4.0</wso2carbon.version>
         <carbon.kernel.version>4.4.0</carbon.kernel.version>
 
         <carbon.commons.version>4.4.3</carbon.commons.version>
         <carbon.registry.version>4.4.3</carbon.registry.version>
         <carbon.mediation.version>4.4.2</carbon.mediation.version>
-        <carbon.identity.version>4.5.1</carbon.identity.version>
+        <carbon.identity.version>4.5.2</carbon.identity.version>
         <carbon.deployment.version>4.4.1</carbon.deployment.version>
         <carbon.governance.version>4.5.1</carbon.governance.version>
         <carbon.analytics.version>1.0.1</carbon.analytics.version>
@@ -835,6 +846,9 @@
 
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
+
+        <maven-scr-plugin.version>1.7.2</maven-scr-plugin.version>
+        <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
 
         <!-- Axis2 Version -->
         <axis2.wso2.version>1.6.1-wso2v11</axis2.wso2.version>
@@ -862,7 +876,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.10.1</jaggery.version>
+        <jaggery.version>0.9.0.ALPHA4.wso2v3</jaggery.version>
 
         <!-- Misc Versions -->
         <orbit.version.h2.engine>1.2.140.wso2v3</orbit.version.h2.engine>

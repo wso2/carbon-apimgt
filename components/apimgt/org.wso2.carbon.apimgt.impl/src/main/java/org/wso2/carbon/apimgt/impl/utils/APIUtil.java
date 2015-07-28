@@ -1180,7 +1180,7 @@ public final class APIUtil {
     		String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
                     "--" + api.getId().getApiName() + api.getId().getVersion()+".wsdl";
 			String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
-                    RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)) +
+                    RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
                     wsdlResourcePath;
 
 			APIMWSDLReader wsdlreader = new APIMWSDLReader(api.getWsdlUrl());
@@ -1498,39 +1498,34 @@ public final class APIUtil {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        try {
-                            throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
-                        }
+                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
                     }
                     store.setName(name); //Set store name
-                    OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
+                    OMElement configDisplayName = storeElem.getFirstChildWithName
+                            (new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
                     String displayName = (configDisplayName != null) ? replaceSystemProperty(
                             configDisplayName.getText()) : name;
                     store.setDisplayName(displayName);//Set store display name
-                    store.setEndpoint(replaceSystemProperty(
-                            storeElem.getFirstChildWithName(new QName(
-                                    APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText())); //Set store endpoint,which is used to publish APIs
+                    store.setEndpoint(replaceSystemProperty(storeElem.getFirstChildWithName(
+                            new QName(APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText()));
+                    //Set store endpoint, which is used to publish APIs
                     store.setPublished(false);
                     if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
                         OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
                         if (password != null) {
-                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "." + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name;//Set store login password [optional]
+                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "."
+                                    + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name; //Set store login password
                             String value = password.getText();
 
-                    store.setPassword(replaceSystemProperty(value));
-                    store.setUsername(replaceSystemProperty(
-                            storeElem.getFirstChildWithName(new QName(
-                                    APIConstants.EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
-                    }else{
-                        try {
-                            throw new APIManagementException("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
+                            store.setPassword(replaceSystemProperty(value));
+                            store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
+                                    new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
+                                    //Set store login username
+                        } else {
+                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
+                                    "config of api-manager.xml.");
                         }
-                    }
                     }
                     externalAPIStores.add(store);
                 }
@@ -1545,11 +1540,17 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ClassNotFoundException e) {
-            log.error("Requested APIPublisher Class couldn't found", e);
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (InstantiationException e) {
-            log.error("Requested APIPublisher Class couldn't load", e);
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return externalAPIStores;
     }
@@ -4023,13 +4024,9 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
-        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        int tenantId;
         try {
-            if (tenantDomain != null && !"null".equals(tenantDomain)) {
-                tenantId = ServiceReferenceHolder
-                        .getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            }
+           tenantId = APIUtil.getTenantId(userName);
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4042,11 +4039,7 @@ public final class APIUtil {
                 String[] content = apiDocResource.getPath().split("/");
                 documentMap.put("name", content[content.length - 1]);
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Couldn't retrieve Tenant Domain for User " + userName, e);
-            handleException("Couldn't retrieve Tenant Domain for User " + userName, e);
-
-        } catch (RegistryException e) {
+        }  catch (RegistryException e) {
             log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
                       e);
             handleException(

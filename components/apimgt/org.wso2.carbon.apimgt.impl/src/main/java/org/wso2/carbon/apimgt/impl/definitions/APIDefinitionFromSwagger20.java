@@ -86,8 +86,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                         if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
-                            Scope scope= APIUtil.findScopeByKey(scopes,(String) operation.get("x-scope"));
-                            String authType = (String) operation.get("x-auth-type");
+                            Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants.SWAGGER_X_SCOPE));
+                            String authType = (String) operation.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             } else if ("Application User".equals(authType)) {
@@ -99,8 +99,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                             } else {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
-                            template.setThrottlingTier((String) operation.get("x-throttling-tier"));
-                            template.setMediationScript((String) operation.get("x-mediation-script"));
+                            template.setThrottlingTier((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER ));
+                            template.setMediationScript((String) operation.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
                             template.setUriTemplate(uriTempVal);
                             template.setHTTPVerb(httpVerb.toUpperCase());
                             template.setAuthType(authType);
@@ -135,22 +135,22 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             swaggerObject = (JSONObject) parser.parse(resourceConfigsJSON);
 
             //Check whether security definitions are defined or not
-            if (swaggerObject.get("x-wso2-security") != null) {
-                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get("x-wso2-security");
+            if (swaggerObject.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
                 Iterator<JSONObject> definitionIterator = securityDefinitionsObjects.values().iterator();
                 while (definitionIterator.hasNext()) {
                     JSONObject securityDefinition = definitionIterator.next();
                     //Read scopes from custom wso2 scopes
 
-                    if (securityDefinition.get("x-wso2-scopes") != null) {
-                        JSONArray oauthScope = (JSONArray) securityDefinition.get("x-wso2-scopes");
+                    if (securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES) != null) {
+                        JSONArray oauthScope = (JSONArray) securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
                         for (Object anOauthScope : oauthScope) {
                             Scope scope = new Scope();
                             JSONObject scopeObj = (JSONObject) anOauthScope;
-                            scope.setKey((String) scopeObj.get("key"));
-                            scope.setName((String) scopeObj.get("name"));
-                            scope.setDescription((String) scopeObj.get("description"));
-                            scope.setRoles(scopeObj.get("roles").toString());
+                            scope.setKey((String) scopeObj.get(APIConstants.SWAGGER_SCOPE_KEY));
+                            scope.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
+                            scope.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
+                            scope.setRoles(scopeObj.get(APIConstants.SWAGGER_ROLES).toString());
 
                             scopeList.add(scope);
                         }
@@ -267,32 +267,32 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         //Create info object
         JSONObject infoObject = new JSONObject();
-        infoObject.put("title", api.getId().getApiName());
-        if(api.getDescription() != null){
-            infoObject.put("description", api.getDescription());
+        infoObject.put(APIConstants.SWAGGER_TITLE, identifier.getApiName());
+        if (api.getDescription() != null) {
+            infoObject.put(APIConstants.SWAGGER_DESCRIPTION, api.getDescription());
         }
 
         //Create contact object and map business owner info
         JSONObject contactObject = new JSONObject();
-        if(api.getBusinessOwner() != null ){
-            contactObject.put("name", api.getBusinessOwner());
+        if (api.getBusinessOwner() != null) {
+            contactObject.put(APIConstants.SWAGGER_NAME, api.getBusinessOwner());
         }
-        if(api.getBusinessOwnerEmail() != null ){
-            contactObject.put("email", api.getBusinessOwnerEmail());
+        if (api.getBusinessOwnerEmail() != null) {
+            contactObject.put(APIConstants.SWAGGER_EMAIL, api.getBusinessOwnerEmail());
         }
-        if(api.getBusinessOwner() != null || api.getBusinessOwnerEmail() != null) {
+        if (api.getBusinessOwner() != null || api.getBusinessOwnerEmail() != null) {
             //put contact object to info object
-            infoObject.put("contact", contactObject);
+            infoObject.put(APIConstants.SWAGGER_CONTACT, contactObject);
         }
 
         //Create licence object # no need for this since this is not mandatory
         //JSONObject licenceObject = new JSONObject();
 
         //infoObject.put("license", licenceObject);
-        infoObject.put("version", api.getId().getVersion());
+        infoObject.put(APIConstants.SWAGGER_VER, identifier.getVersion());
 
         //add info object to swaggerObject
-        swaggerObject.put("info", infoObject);
+        swaggerObject.put(APIConstants.SWAGGER_INFO, infoObject);
 
         JSONObject pathsObject = new JSONObject();
         JSONObject pathItemObject = null;
@@ -300,8 +300,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         JSONObject responseObject = new JSONObject();
         //add default response
         JSONObject status200 = new JSONObject();
-        status200.put("description", "OK");
-        responseObject.put("200",status200);
+        status200.put(APIConstants.SWAGGER_DESCRIPTION, "OK");
+        responseObject.put(APIConstants.SWAGGER_RESPONSE_200, status200);
 
         for (URITemplate uriTemplate : uriTemplates) {
             String pathName = uriTemplate.getUriTemplate();
@@ -313,16 +313,16 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             String httpVerb = uriTemplate.getHTTPVerb();
             if (pathItemObject != null) {
                 operationObject = new JSONObject();
-                operationObject.put("x-auth-type", uriTemplate.getAuthType());
-                operationObject.put("x-throttling-tier", uriTemplate.getThrottlingTier());
-                operationObject.put("responses", responseObject);
+                operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, uriTemplate.getAuthType());
+                operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
+                operationObject.put(APIConstants.SWAGGER_RESPONSES, responseObject);
                 pathItemObject.put(httpVerb.toLowerCase(), operationObject);
             }
             pathsObject.put(pathName, pathItemObject);
         }
 
-        swaggerObject.put("paths", pathsObject);
-        swaggerObject.put("swagger", "2.0");
+        swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
+        swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
 
         JSONObject securityDefinitionObject = new JSONObject();
         JSONObject scopesObject = new JSONObject();
@@ -332,19 +332,19 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         if (scopes != null) {
             for (Scope scope : scopes) {
                 xWso2ScopesObject = new JSONObject();
-                xWso2ScopesObject.put("key", scope.getKey());
-                xWso2ScopesObject.put("name", scope.getName());
-                xWso2ScopesObject.put("roles", scope.getRoles());
-                xWso2ScopesObject.put("description", scope.getDescription());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
+                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
 
                 xWso2ScopesArray.add(xWso2ScopesObject);
             }
         }
 
-        scopesObject.put("x-wso2-scopes", xWso2ScopesArray);
-        securityDefinitionObject.put("apim", scopesObject);
+        scopesObject.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xWso2ScopesArray);
+        securityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, scopesObject);
 
-        swaggerObject.put("x-wso2-security", securityDefinitionObject);
+        swaggerObject.put(APIConstants.SWAGGER_X_WSO2_SECURITY, securityDefinitionObject);
 
         return swaggerObject.toJSONString();
     }

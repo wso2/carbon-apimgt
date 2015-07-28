@@ -535,24 +535,31 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                            .getAPIManagerConfiguration()
                                                            .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
-            // If the Config exists read the value and substitute for the hard coded '30' below
-            int maxPaginationLimit;
+            // If the Config exists use it to set the pagination limit
+            final int maxPaginationLimit;
             if (paginationLimit != null) {
                 // The additional 1 added to the maxPaginationLimit is to help us determine if more
                 // APIs may exist so that we know that we are unable to determine the actual total
                 // API count. We will subtract this 1 later on so that it does not interfere with
                 // the logic of the rest of the application
                 int pagination = Integer.parseInt(paginationLimit);
-                maxPaginationLimit = start + pagination + 1;
 
-                PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
+                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
+                // leading to some of the APIs not being displayed
+                if (pagination < 11) {
+                    pagination = 11;
+                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
+                }
+
+                maxPaginationLimit = start + pagination + 1;
             }
             // Else if the config is not specifed we go with default functionality and load all
             else {
                 maxPaginationLimit = Integer.MAX_VALUE;
-                PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
             }
 
+            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
             if (artifactManager != null) {
                 GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
@@ -645,7 +652,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PaginationContext.destroy();
         }
         result.put("apis",apiSortedSet);
-        result.put("totalLength",totalLength);
+        result.put("totalLength", totalLength);
         result.put("isMore", isMore);
         return result;
 	}
@@ -854,8 +861,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }finally {
             PaginationContext.destroy();
         }
-        result.put("apis",apiSortedSet);
-        result.put("totalLength",totalLength);
+        result.put("apis", apiSortedSet);
+        result.put("totalLength", totalLength);
         return result;
 
     }
@@ -1605,11 +1612,37 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         searchTerm = searchTerm.trim();
         Map<String,Object> result=new HashMap<String, Object>();
         int totalLength=0;
+        boolean isMore = false;
         String criteria=APIConstants.API_OVERVIEW_NAME;
         try {
+            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration()
+                    .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
+            // If the Config exists use it to set the pagination limit
+            final int maxPaginationLimit;
+            if (paginationLimit != null) {
+                // The additional 1 added to the maxPaginationLimit is to help us determine if more
+                // APIs may exist so that we know that we are unable to determine the actual total
+                // API count. We will subtract this 1 later on so that it does not interfere with
+                // the logic of the rest of the application
+                int pagination = Integer.parseInt(paginationLimit);
+
+                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
+                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
+                // leading to some of the APIs not being displayed
+                if (pagination < 11) {
+                    pagination = 11;
+                    log.warn("Value of '" + APIConstants.API_STORE_APIS_PER_PAGE + "' is too low, defaulting to 11");
+                }
+                maxPaginationLimit = start + pagination + 1;
+            }
+            // Else if the config is not specified we go with default functionality and load all
+            else {
+                maxPaginationLimit = Integer.MAX_VALUE;
+            }
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
+            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             if (artifactManager != null) {
 
                 if (searchType.equalsIgnoreCase("Provider")) {
@@ -1651,9 +1684,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 if (!isFound) {
                     result.put("apis", apiSet);
                     result.put("length", 0);
+                    result.put("isMore", isMore);
                     return result;
                 }
 
+                // Check to see if we can speculate that there are more APIs to be loaded
+                if (maxPaginationLimit == totalLength) {
+                    isMore = true;  // More APIs exist, cannot determine total API count without incurring perf hit
+                    --totalLength; // Remove the additional 1 added earlier when setting max pagination limit
+                }
+
+                int tempLength =0;
                 for (GenericArtifact artifact : genericArtifacts) {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
@@ -1672,21 +1713,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             }
                         }
                     }
-                    totalLength=apiList.size();
+                    // Ensure the APIs returned matches the length, there could be an additional API
+                    // returned due incrementing the pagination limit when getting from registry
+                    tempLength++;
+                    if (tempLength >= totalLength){
+                        break;
+                    }
                 }
-                if(totalLength<=((start+end)-1)){
-                    end=totalLength;
-                }
-				for (int i = start; i < end; i++) {
-					apiSet.add(apiList.get(i));
 
-				}
+                apiSet.addAll(apiList);
             }
         } catch (RegistryException e) {
             handleException("Failed to search APIs with type", e);
         }
         result.put("apis",apiSet);
         result.put("length",totalLength);
+        result.put("isMore", isMore);
         return result;
     }
     

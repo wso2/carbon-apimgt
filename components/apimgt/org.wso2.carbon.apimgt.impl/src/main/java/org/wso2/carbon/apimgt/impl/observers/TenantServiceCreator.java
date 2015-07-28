@@ -78,7 +78,6 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String throttleOutSequenceName = "_throttle_out_handler_";
     private String faultSequenceName = "fault";
     private String mainSequenceName = "main";
-    private String corsSequenceName = "_cors_request_handler_";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
     private SequenceMediator authFailureHandlerSequence = null;
     private SequenceMediator resourceMisMatchSequence = null;
@@ -217,10 +216,11 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 productionKeyErrorSequence.setFileName(productionKeyErrorSequenceName + ".xml");
             }
             if (corsSequence == null) {
-                in = FileUtils.openInputStream(new File(synapseConfigRootPath + corsSequenceName + ".xml"));
+                in = FileUtils
+                        .openInputStream(new File(synapseConfigRootPath + APIConstants.CORS_SEQUENCE_NAME + ".xml"));
                 builder = new StAXOMBuilder(in);
                 corsSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                corsSequence.setFileName(corsSequenceName + ".xml");
+                corsSequence.setFileName(APIConstants.CORS_SEQUENCE_NAME + ".xml");
             }
             FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
                     new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + mainSequenceName + ".xml"));

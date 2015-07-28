@@ -243,7 +243,11 @@
                         <div class="col-sm-8">
                             <div class="input-group">
                                 <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control"/>
-                                <span class="input-group-btn"><button type="button" class="btn btn-default check_url_valid btn-block"><span>Test</span></button></span>
+                                <span class="input-group-btn">
+                                    <button type="button" id="prototype_test" class="btn btn-default check_url_valid btn-block">
+                                        <span>Test</span>
+                                    </button>
+                                </span>
                             </div>
                             <a style="margin-left:3px" class="glyphicon glyphicon-question-sign help_popup" help_data="endpoint_test_help"></a>
                             <div id="endpoint_test_help" class="hide">

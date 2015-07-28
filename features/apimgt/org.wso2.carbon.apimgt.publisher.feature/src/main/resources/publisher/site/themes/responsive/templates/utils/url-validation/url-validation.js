@@ -4,10 +4,16 @@ $(document).ready(function(){
         var url = $(this).parent().parent().find('input:first').val();
         var type = '';
         var attr = $(this).attr('url-type');
+        var thisID = $(this).attr('id');
         if (typeof attr !== typeof undefined && attr !== false) {
             type = $(btn).attr('url-type');
         } else {
-            type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+            if (thisID == "prototype_test") {
+                type = "http";
+            }
+            else {
+                type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+            }
         }
         $(btn).parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");

@@ -47,6 +47,8 @@ var isTenantAllowed=function(){
    }
    };
 
+var tenantDomain = jagg.getTenantDomain();
+
 var encode = require('encode');
 encode = new encode.Encode();
 

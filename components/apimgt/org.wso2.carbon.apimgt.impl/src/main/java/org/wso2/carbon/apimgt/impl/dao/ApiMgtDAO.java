@@ -2818,7 +2818,7 @@ public class ApiMgtDAO {
                         " IAT.TOKEN_STATE = 'REVOKED')" +
                         " ORDER BY IAT.TIME_CREATED DESC";
 
-        String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null;
+        String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null, db2SQL = null;
 
         //Construct database specific sql statements.
 //        oracleSQL = "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
@@ -2878,6 +2878,8 @@ public class ApiMgtDAO {
 
         mySQLSQL = "SELECT" + statement + " LIMIT 1";
 
+        db2SQL = "SELECT" + statement + " FETCH FIRST 1 ROWS ONLY";
+
         msSQL = "SELECT TOP 1" + statement;
 
         postgreSQL = "SELECT * FROM (SELECT" + statement + ") AS TOKEN LIMIT 1";
@@ -2891,8 +2893,9 @@ public class ApiMgtDAO {
             if (connection.getMetaData().getDriverName().contains("MySQL")
                     || connection.getMetaData().getDriverName().contains("H2")) {
                 sql = mySQLSQL;
-            }
-            else if(connection.getMetaData().getDriverName().contains("MS SQL")){
+            } else if(connection.getMetaData().getDatabaseProductName().contains("DB2")){
+                sql = db2SQL;
+            } else if(connection.getMetaData().getDriverName().contains("MS SQL")){
                 sql = msSQL;
             } else if (connection.getMetaData().getDriverName().contains("Microsoft")) {
                 sql = msSQL;
@@ -2960,7 +2963,7 @@ public class ApiMgtDAO {
                         " IAT.TOKEN_STATE = 'REVOKED')" +
                         " ORDER BY IAT.TIME_CREATED DESC";
 
-        String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null;
+        String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null, db2SQL = null;
 
         //Construct database specific sql statements.
         oracleSQL =  "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
@@ -2987,6 +2990,8 @@ public class ApiMgtDAO {
 
         mySQLSQL = "SELECT" + statement + " LIMIT 1";
 
+        db2SQL = "SELECT" + statement + " FETCH FIRST 1 ROWS ONLY";
+
         msSQL = "SELECT TOP 1" + statement;
 
         postgreSQL = "SELECT * FROM (SELECT" + statement + ") AS TOKEN LIMIT 1";
@@ -3000,8 +3005,9 @@ public class ApiMgtDAO {
             if (connection.getMetaData().getDriverName().contains("MySQL")
                     || connection.getMetaData().getDriverName().contains("H2")) {
                 sql = mySQLSQL;
-            }
-            else if(connection.getMetaData().getDriverName().contains("MS SQL")){
+            } else if(connection.getMetaData().getDatabaseProductName().contains("DB2")){
+                sql = db2SQL;
+            } else if(connection.getMetaData().getDriverName().contains("MS SQL")){
                 sql = msSQL;
             } else if (connection.getMetaData().getDriverName().contains("Microsoft")) {
                 sql = msSQL;
@@ -6711,7 +6717,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 }else {
                     is = null;
                 }
-                if (connection.getMetaData().getDriverName().contains("PostgreSQL")) {
+                if (connection.getMetaData().getDriverName().contains("PostgreSQL")
+                        || connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                     if(uriTemplate.getMediationScript() != null) {
                         prepStmt.setBinaryStream(6, is, uriTemplate.getMediationScript().getBytes().length);
                     }else{
