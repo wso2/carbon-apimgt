@@ -19,7 +19,7 @@
 var resources = function(page,meta){
     return {
         js:['copy_api.js','bootstrap/bootstrap-dialog.min.js','bootstrap/bootstrap-editable.js','bootstrap/bootstrap-multiselect.js'],
-		css:['bootstrap/bootstrap-editable.css','bootstrap/bootstrap-dialog.min.css',
+		css:['bootstrap/bootstrap-editable.css','bootstrap/bootstrap-dialog.min.css','top-styles.css',
              'bootstrap/bootstrap-tagsinput.css', 'bootstrap/bootstrap-multiselect.css']
     }
 };

@@ -210,7 +210,6 @@ var provider = {};
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
         var docs = this.impl.getAllDocumentation(identifier);
         var json = APIUtil.convertToString(docs);
-        log.info(' ####################################################  : '+json);
         var docsJSON = {};
         if(json != null){
             docsJSON = JSON.parse(json);
@@ -324,7 +323,6 @@ var provider = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -349,7 +347,6 @@ var provider = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -374,7 +371,6 @@ var provider = {};
             for (var i = 0 ; i < sequencesList.size(); i++) {
                 sequences.push(sequencesList.get(i));
             }
-            //log.info(sequences);
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -396,13 +392,11 @@ var provider = {};
     APIProviderProxy.prototype.getEnvironments = function () {
         var environments;
         var environmentList = [];
-        //log.info('=================================');
         try {
             environments = APIUtil.getEnvironments();
             var environment;
             var iterator = environments.values().iterator();
             while(iterator.hasNext()) {
-                //log.info('+++++++++++++++++++++++++++++==');
                 environment = iterator.next();
                 environmentList.push({
                                          "name" : environment.getName(),
@@ -410,8 +404,6 @@ var provider = {};
                                          "type"       : environment.getType()
                                      });
             }
-            //log.info(environmentList);
-            //log.info('=================================');
             if (log.isDebugEnabled()) {
                 log.debug("getCustomOutSequences " +  " : " + sequences);
             }
@@ -559,6 +551,10 @@ var provider = {};
                     scopesArray.push(scopeNative);
                 }
             }
+            var tags;
+            if(api.getTagSetAsString()==''){
+                tags=null;
+            }
 
             apiOb = {
                 name: api.getId().getApiName(),
@@ -566,7 +562,7 @@ var provider = {};
                 url: api.getUrl(),
                 wsdl: api.getWsdlUrl(),
                 version: api.getId().getVersion(),
-                tags: api.getTagSetAsString(),
+                tags: tags,
                 availableTiers: tierSet,
                 status: api.getStatus().toString(),
                 thumb: APIUtil.getWebContextRoot(api.getThumbnailUrl()),
@@ -743,7 +739,6 @@ var provider = {};
     APIProviderProxy.prototype.manageAPI = function (api) {
         var success;
         var log = new Log();
-        //log.info(api);
         try {
             var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
             var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
