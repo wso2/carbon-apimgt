@@ -1,3 +1,22 @@
+/*
+ *  Copyright (c), WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
+
 .wr-main-content {
     padding: 40px;
 }
@@ -7,7 +26,7 @@
     float: left;
     font-size: 11px;
     margin-left: 12px;
-    padding: 11px;
+    padding: 10px;
     background-color: #ccc;
     height: 35px;
 }
@@ -436,7 +455,7 @@ label {
 }
 
 #prototype_endpoint {
-    width: 90%;
+    width: 87%;
     height: 35px;
 }
 
@@ -602,6 +621,7 @@ button.btn-api-del {
     background: url('../imgs/icons/ico-subscribe.png') 0.8em 1em no-repeat;
 }
 
+
 .btn-versions {
     background: url('../imgs/icons/ico-versions.png') 0.8em 1em no-repeat;
 }
@@ -646,3 +666,11 @@ body {
 .wr-search input {
     padding: 5.5px 15px;
 }
+.endpoint_list{padding: 0px; margin: 0;}
+.bg-grey{background-color: #424242; color: #fff; text-transform: uppercase;}
+.bootstrap-tagsinput{  border-color: #ccc !important; margin-right: 10px;}
+.bootstrap-tagsinput .tag {
+    margin-right: 2px;
+    color: white;
+    float: left;
+    margin-top: 2px; background-color: #333; font-weight: 100; padding:5px 5px;}

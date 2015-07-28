@@ -323,7 +323,7 @@ label {
 }
 
 #resource_default {
-    width: 120%;
+    width: 140%;
 }
 
 .swagger {
@@ -497,6 +497,8 @@ header > .wr-global-header {
     padding-right: 0px;
     margin-top: 7px !important;
     float: right;
+    font-weight: 100;
+    text-transform: uppercase;
 }
 
 .bookmark-link:hover {
@@ -530,4 +532,22 @@ button.close {
 #swagger-ui-container {
     max-width: 100%;
     margin-left: 247px;
+}
+span.advanced-search-text {
+    display: inline-block;
+    font-weight: 100;
+    padding-top: 3px;
+    text-transform: uppercase;
+
+}
+div.top-menu-right-custom {
+    float: right;
+    padding-right: 10px;
+    text-align: right;
+    padding-top: 10px;
+    font-weight: 100;
+    text-transform: uppercase;
+}
+.action-title {
+    font-weight: 100;
 }
