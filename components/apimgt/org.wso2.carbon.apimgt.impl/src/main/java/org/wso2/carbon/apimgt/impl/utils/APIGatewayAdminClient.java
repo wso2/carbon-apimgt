@@ -29,7 +29,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient{
 		this.qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
         this.qualifiedDefaultApiName=apiId.getProviderName() + "--" + apiId.getApiName();
         String providerDomain = apiId.getProviderName();
-        providerDomain=providerDomain.replace("-AT-", "@");
+        providerDomain=APIUtil.replaceEmailDomainBack(providerDomain);
         apiGatewayAdminStub = new APIGatewayAdminStub(null, environment.getServerURL() + "APIGatewayAdmin");
         setup(apiGatewayAdminStub, environment);
         this.environment = environment;

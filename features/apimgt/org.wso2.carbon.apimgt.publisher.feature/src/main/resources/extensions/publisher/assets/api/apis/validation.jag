@@ -31,11 +31,14 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var response = ctx.response;
 	response.contentType = 'application/json';
 	var CONTENT_TYPE_JSON = 'application/json';
-	var constants = require("rxt").constants;
+	var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 	switch (method) {
 		case 'POST':// GET endpoints
 			var apiPublisher = require('apipublisher').provider;
-			var apiProxy = apiPublisher.instance(username);
+			var apiProxy = apiPublisher.instance(user);
 			var action = request.getParameter("action");
 			if (uriMatcher.match(GET_VALIDATION_URL)) {//return assets by type
 				if (action === "isAPINameExist") {

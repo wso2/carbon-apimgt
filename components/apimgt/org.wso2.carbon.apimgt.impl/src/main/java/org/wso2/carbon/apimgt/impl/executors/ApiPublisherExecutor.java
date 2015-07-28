@@ -76,11 +76,15 @@ public class ApiPublisherExecutor implements Execution {
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
         String user = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userWithDomain = APIUtil.appendDomainWithUser(user, domain);
+        userWithDomain = APIUtil.replaceEmailDomainBack(userWithDomain);
+        
         try {
             GenericArtifactManager artifactManager = APIUtil
                     .getArtifactManager(context.getSystemRegistry(), APIConstants.API_KEY);
             Registry registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceUserRegistry(user);
+                    getRegistryService().getGovernanceUserRegistry(APIUtil.replaceEmailDomain(userWithDomain));
             Resource apiResource = context.getResource();
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
@@ -88,7 +92,7 @@ public class ApiPublisherExecutor implements Execution {
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             API api = APIUtil.getAPI(apiArtifact);
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
 	        executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());

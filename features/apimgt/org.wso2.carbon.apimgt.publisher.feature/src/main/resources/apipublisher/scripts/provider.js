@@ -60,13 +60,39 @@ var provider = {};
     var utils = require("utils");
     var ref = utils.file;
 
-    function APIProviderProxy(username) {
-        this.username = username;
+    function appendDomainByUser(user){
+        log.info('-----------------------------------------   '+user);
+        var username = user.username;
+        var domain = user.domain;
+        var superTenantDomain = user.superTenantDomain;
+        if(superTenantDomain == domain){
+            return username;
+        }
+
+        return username + "@"+domain;
+    }
+
+    APIProviderProxy.prototype.appendDomainToUser = function (username){
+        log.info('++++++++++++++++++++++++++++++++++++++++++   '+this.user);
+        var domain = this.user.domain;
+        var superTenantDomain = this.user.superTenantDomain;
+        if(superTenantDomain == domain){
+            return username;
+        }
+
+        return username + "@"+domain;
+    }
+
+    function APIProviderProxy(user) {
+        var usrName = user.username;
+        this.user = user;
+        this.username = appendDomainByUser(user);
         this.impl = APIManagerFactory.getInstance().getAPIProvider(this.username);
     }
 
-    provider.instance = function(username){
-        return new APIProviderProxy(username);
+    provider.instance = function(user){
+        log.info('###############################################   '+user);
+        return new APIProviderProxy(user);
     };
 
     APIProviderProxy.prototype.getAllProviders = function () {
@@ -97,7 +123,7 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.createAPI = function (api) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var uuid;
         try {
             uuid = this.impl.createAPI(identifier, api.context);
@@ -117,7 +143,7 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.implementAPI = function (api) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.apiName, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
         apiOb.setImplementation(api.implementation_type);
         apiOb.setWsdlUrl(api.wsdl);
