@@ -25,6 +25,11 @@ require('/modules/publisher.js').exec(function(ctx) {
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
     var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/assets/{type}/{pageName}');
     var log = new Log();
+    var user = server.current(ctx.session);
+    var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
     if (!options) {
         response.sendError(400, 'Could not locate an endpoint for your request.Make sure that you provide an id');
@@ -39,7 +44,7 @@ require('/modules/publisher.js').exec(function(ctx) {
         var documents = documentAssetManager.list();
         //show visibility levels
         var apiPublisher =  require('apipublisher').provider;
-        var apiProxy = apiPublisher.instance(ctx.username);
+        var apiProxy = apiPublisher.instance(user);
         var canShow = apiProxy.isDocVisibilityCanShow();
 
         var user = server.current(ctx.session);

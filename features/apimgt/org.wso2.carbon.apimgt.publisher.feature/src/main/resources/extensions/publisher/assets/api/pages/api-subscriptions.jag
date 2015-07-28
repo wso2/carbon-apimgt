@@ -35,7 +35,11 @@ require('/modules/publisher.js').exec(function (ctx) {
     var tenantDomain = carbon.server.tenantDomain({tenantId: usr.tenantId});
 
     var apiPublisher = require('apipublisher').provider;
-    var apiProxy = apiPublisher.instance(user.username);
+    var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+    var apiProxy = apiPublisher.instance(user);
 
 
     var apiSubDataResult = apiProxy.getAllAPIUsageByProvider(user.username);

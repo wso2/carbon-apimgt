@@ -25,6 +25,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var server = require('store').server;
 	var user = server.current(ctx.session);
 	var asset = require('rxt').asset;
+	log.info(user);
 	var request = ctx.request;
 	caramel = require('caramel');
 	var am;
@@ -32,6 +33,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/assets/{type}/{pageName}');
 	var page;
 	var output;
+	var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 	am = asset.createUserAssetManager(ctx.session, options.type);
 	//Render page
 	page = ui.buildPage(ctx.session, ctx.request);
@@ -49,7 +54,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 
 		output = am.render(assets, page)._custom();
 		var apiPublisher =  require('apipublisher').provider;
-		var apiProxy = apiPublisher.instance(user.username);
+		var apiProxy = apiPublisher.instance(user);
 		var api = apiProxy.getAPI(assets.attributes.overview_provider, assets.attributes.overview_name, assets.attributes.overview_version).api;
 		output.api = api;
 		output.wsdl = api.wsdl;

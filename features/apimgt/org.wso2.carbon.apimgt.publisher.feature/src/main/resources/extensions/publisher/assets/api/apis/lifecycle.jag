@@ -41,13 +41,16 @@ require('/modules/publisher.js').exec(function (ctx) {
 	var CONTENT_TYPE_JSON = 'application/json';
 	response.contentType = CONTENT_TYPE_JSON;
 	var constants = require("rxt").constants;
+	var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 	data = obtainData(request);
 	switch (method) {
 		case 'POST':
 			options.type = request.getParameter('type');
 			if (uriMatcher.match(UPDATE_LIFECYCLE_URL)) {//return assets by type
 				var apiPublisher = require('apipublisher').provider;
-				var apiProxy = apiPublisher.instance(username);
+				var apiProxy = apiPublisher.instance(user);
 				var apiData = {};
 				apiData.provider = data.provider;
 				apiData.apiName = data.name;

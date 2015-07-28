@@ -123,6 +123,9 @@ private String[] methods = new String[4];
     }
 
     public void setFaultSeqXml(String faultSeqXml) {
+    	if(faultSeqXml == null){
+    		return;
+    	}
         this.faultSeqXml = faultSeqXml.trim().replaceAll("&gt", ">").replaceAll("&lt", "<")
                 .replaceAll("\n", "").replaceAll("\t", " ");
     }

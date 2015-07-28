@@ -26,6 +26,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var server = require('store').server;
 	var user = server.current(ctx.session);
 	var username = user.username;
+	var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
 
     var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
     var options = uriMatcher.match('/{context}/assets/{type}/{pageName}');
@@ -34,7 +38,7 @@ require('/modules/publisher.js').exec(function(ctx) {
     var page = ui.buildPage(ctx.session, ctx.request);
     var output = am.render(page)._custom();
 	var apiPublisher =  require('apipublisher').provider;
-	var apiProxy = apiPublisher.instance(username);
+	var apiProxy = apiPublisher.instance(user);
 	var tiers = apiProxy.getTiers().tiers;
 	var tierPermissions = apiProxy.getTierPermissions().tierPermissions;
 	output.tiers = tiers;

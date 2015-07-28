@@ -29,6 +29,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
 	var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}')||uriMatcher.match('/{context}/assets/{type}/{pageName}');
 	var log = new Log('api-usage-by-versiion');
+	var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
 	if(!options){
 		response.sendError(400,'Could not locate an endpoint for your request.Make sure that you provide an id');
 	}
@@ -43,7 +47,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 			response.sendError(404, 'The asset with id: ' + options.id + ' could not be located.');
 		} else {
 			var apiPublisher =  require('apipublisher').provider;
-			var apiProxy = apiPublisher.instance(username);
+			var apiProxy = apiPublisher.instance(user);
 			var apiIdentifier = {};
 			apiIdentifier.name = assets.attributes.overview_name;
 			apiIdentifier.version = assets.attributes.overview_version;

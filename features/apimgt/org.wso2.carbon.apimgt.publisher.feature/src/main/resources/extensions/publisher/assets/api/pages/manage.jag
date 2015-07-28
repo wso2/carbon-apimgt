@@ -33,6 +33,10 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}') || uriMatcher.match('/{context}/assets/{type}/{pageName}');
 	var page;
 	var output;
+	var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 	if (!options.id) {
 		ctx.response.sendError(400, 'Cannot render the implementation details without an asset id');
 		return;
@@ -48,7 +52,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 	}
 	
 	var apiPublisher =  require('apipublisher').provider;
-	var apiProxy = apiPublisher.instance(user.username);
+	var apiProxy = apiPublisher.instance(user);
 	var api = apiProxy.getAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version).api;
 
 	page = rxtModule.ui.buildPage(ctx.session, ctx.request);

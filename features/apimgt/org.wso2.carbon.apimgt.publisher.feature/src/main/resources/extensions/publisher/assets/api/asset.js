@@ -20,6 +20,11 @@ asset.manager = function(ctx) {
     var apiPublisher =  require('apipublisher').provider;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
+    var user = server.current(ctx.session);
+    var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    var constants = require('rxt').constants;
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
 
     //TODO Move to common module
     var isValiedImage = function(image){
@@ -98,7 +103,7 @@ asset.manager = function(ctx) {
                  throw 'Error while creating the API' + obj;
                  }*/
                 //If API not exist create
-                var apiProxy = apiPublisher.instance(ctx.username);
+                var apiProxy = apiPublisher.instance(user);
                 result = apiProxy.checkIfAPIExists(api.provider, api.name, api.version);
 
                 if (!result.error && !result.exist) {
@@ -131,7 +136,7 @@ asset.manager = function(ctx) {
         remove : function(id) {
             var asset = this.get.call(this, id);
            // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
-            var apiProxy = apiPublisher.instance(ctx.username);
+            var apiProxy = apiPublisher.instance(user);
             var result;
             try{
             result=apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
@@ -173,7 +178,7 @@ asset.manager = function(ctx) {
                  print(obj);
                  return;
                  }*/
-                var apiProxy = apiPublisher.instance(ctx.username);
+                var apiProxy = apiPublisher.instance(user);
                 api.description = options.attributes.overview_description;
                 api.tags = options.attributes.overview_tags;
                 api.visibility = options.attributes.visibility;
@@ -219,7 +224,7 @@ asset.manager = function(ctx) {
                 api.advertiseOnly= options.attributes.overview_advertiseOnly;
                 api.swagger = options.attributes.swagger;
 
-                var apiProxy = apiPublisher.instance(ctx.username);
+                var apiProxy = apiPublisher.instance(user);
                 result = apiProxy.implementAPI(api);
                 if (result != null && result.error==true) {
                     obj = {
@@ -290,7 +295,7 @@ asset.manager = function(ctx) {
                 apiData.cacheTimeout= options.attributes.cacheTimeout;
                 apiData.destinationStats= options.attributes.destinationStatsEnabled;
                 apiData.environments = options.attributes.environments;
-                var apiProxy = apiPublisher.instance(ctx.username);
+                var apiProxy = apiPublisher.instance(user);
                 result = apiProxy.manageAPI(apiData);
                 if (result != null && result.error) {
                     log.error(result.message);
@@ -306,7 +311,7 @@ asset.manager = function(ctx) {
                 //requests due to some of the browsers doesn't support ajax requests with type 'delete'
                 var asset = this.get.call(this, options.id);
                 // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
-                var apiProxy = apiPublisher.instance(ctx.username);
+                var apiProxy = apiPublisher.instance(user);
                 var result;
                 try {
                     result = apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
