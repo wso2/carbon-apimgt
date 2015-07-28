@@ -27,25 +27,22 @@
         <!-- If the identity database is created from another place and if it is required to skip schema initialization during the server start up, set the following
            property to "true". -->
         <SkipDBSchemaCreation>true</SkipDBSchemaCreation>
+        <!--SessionDataPersist>
+            <Enable>true</Enable>
+            <EnableCleanUp>true</EnableCleanUp>
+            <Temporary>false</Temporary-->
+        <!--/SessionDataPersist-->
     </JDBCPersistenceManager>
+    <TimeConfig>
+        <SessionIdleTimeout>15</SessionIdleTimeout><!-- Minutes -->
+        <RememberMeTimeout>20160</RememberMeTimeout><!-- Minutes -->
+        <PersistanceCleanUpTimeout>20160</PersistanceCleanUpTimeout><!-- Minutes -->
+        <PersistanceCleanUpPeriod>1140</PersistanceCleanUpPeriod><!-- Minutes -->
+    </TimeConfig>
 
-    <!--
-      Security configurations
-    -->
+    <!-- Security configurations -->
     <Security>
-        <UserTrustedRPStore>
-            <Location>${carbon.home}/repository/resources/security/userRP.jks</Location>
-            <!-- Keystore type (JKS/PKCS12 etc.)-->
-            <Type>JKS</Type>
-            <!-- Keystore password-->
-            <Password>wso2carbon</Password>
-            <!-- Private Key password-->
-            <KeyPassword>wso2carbon</KeyPassword>
-        </UserTrustedRPStore>
-
-        <!--
-              The directory under which all other KeyStore files will be stored
-          -->
+        <!-- The directory under which all other KeyStore files will be stored -->
         <KeyStoresDir>${carbon.home}/conf/keystores</KeyStoresDir>
     </Security>
 
@@ -79,6 +76,10 @@
     </OpenID>
 
     <OAuth>
+        <AppInfoCacheTimeout>-1</AppInfoCacheTimeout>
+        <AuthorizationGrantCacheTimeout>-1</AuthorizationGrantCacheTimeout>
+        <SessionDataCacheTimeout>-1</SessionDataCacheTimeout>
+        <ClaimCacheTimeout>-1</ClaimCacheTimeout>
         <RequestTokenUrl>https://localhost:9443/oauth/request-token</RequestTokenUrl>
         <AccessTokenUrl>https://localhost:9443/oauth/access-token</AccessTokenUrl>
         <AuthorizeUrl>https://localhost:9443/oauth/authorize-url</AuthorizeUrl>
@@ -90,23 +91,22 @@
         <ApplicationAccessTokenDefaultValidityPeriod>3600</ApplicationAccessTokenDefaultValidityPeriod>
         <!-- Default validity period for User Access Token in seconds-->
         <UserAccessTokenDefaultValidityPeriod>3600</UserAccessTokenDefaultValidityPeriod>
+        <!-- Validity period for refresh token -->
+        <RefreshTokenValidityPeriod>84600</RefreshTokenValidityPeriod>
         <!-- Timestamp skew in seconds -->
         <TimestampSkew>300</TimestampSkew>
         <!-- Enable OAuth caching. This cache has the replication support. -->
         <EnableOAuthCache>true</EnableOAuthCache>
-        <!-- Configure the security measures needs to be done prior to store the token in the database,
-          such as hashing, encrypting, etc.-->
-        <TokenPersistenceProcessor>
-            org.wso2.carbon.identity.oauth.tokenprocessor.PlainTextPersistenceProcessor
-        </TokenPersistenceProcessor>
+        <!-- Enable renewal of refresh token for refresh_token grant -->
+        <RenewRefreshTokenForRefreshGrant>true</RenewRefreshTokenForRefreshGrant>
+        <!-- Process the token before storing it in database, e.g. encrypting -->
+        <TokenPersistenceProcessor>org.wso2.carbon.identity.oauth.tokenprocessor.PlainTextPersistenceProcessor</TokenPersistenceProcessor>
+        <!-- Supported Client Autnetication Methods -->
         <ClientAuthHandlers>
             <ClientAuthHandler Class="org.wso2.carbon.identity.oauth2.token.handlers.clientauth.BasicAuthClientAuthHandler">
                 <Property Name="StrictClientCredentialValidation">false</Property>
             </ClientAuthHandler>
         </ClientAuthHandlers>
-        <!--TokenPersistenceProcessor>
-                org.wso2.carbon.identity.oauth.tokenprocessor.EncryptionDecryptionPersistenceProcessor
-            </TokenPersistenceProcessor-->
         <!-- Supported Response Types -->
         <SupportedResponseTypes>
             <SupportedResponseType>
@@ -154,8 +154,10 @@
         <OAuthCallbackHandlers>
             <OAuthCallbackHandler Class="org.wso2.carbon.apimgt.keymgt.util.APIManagerOAuthCallbackHandler"/>
         </OAuthCallbackHandlers>
-	<OAuthScopeValidator class="org.wso2.carbon.identity.oauth2.validators.JDBCScopeValidator"/>
-
+        <OAuthScopeValidator class="org.wso2.carbon.identity.oauth2.validators.JDBCScopeValidator"/>
+        <!--TokenValidators>
+	<TokenValidator type="bearer" class="org.wso2.carbon.identity.oauth2.validators.DefaultOAuth2TokenValidator"/>
+	</TokenValidators-->
         <!-- Add custom user headers to the response-->
         <!--<RequiredRespHeaderClaimUris>
             <ClaimUri>http://wso2.org/claims/emailaddress</ClaimUri>
@@ -231,6 +233,9 @@
     </MultifactorAuthentication>
 
     <SSOService>
+        <PersistanceCacheTimeout>157680000</PersistanceCacheTimeout>
+        <SessionIndexCacheTimeout>157680000</SessionIndexCacheTimeout>
+        <EntityId>localhost</EntityId>
         <IdentityProviderURL>https://localhost:9443/samlsso</IdentityProviderURL>
         <SingleLogoutRetryCount>5</SingleLogoutRetryCount>
         <SingleLogoutRetryInterval>60000</SingleLogoutRetryInterval> <!-- in milli seconds -->
@@ -241,18 +246,21 @@
         <AttributesClaimDialect>http://wso2.org/claims</AttributesClaimDialect>
         <AcceptOpenIDLogin>false</AcceptOpenIDLogin>
         <ClaimsRetrieverImplClass>org.wso2.carbon.identity.sso.saml.builders.claims.DefaultClaimsRetriever</ClaimsRetrieverImplClass>
+        <SAMLSSOAssertionBuilder>org.wso2.carbon.identity.sso.saml.builders.assertion.DefaultSAMLAssertionBuilder</SAMLSSOAssertionBuilder>
+        <SAMLSSOEncrypter>org.wso2.carbon.identity.sso.saml.builders.encryption.DefaultSSOEncrypter</SAMLSSOEncrypter>
+        <SAMLSSOSigner>org.wso2.carbon.identity.sso.saml.builders.signature.DefaultSSOSigner</SAMLSSOSigner>
+        <SAML2HTTPRedirectSignatureValidator>org.wso2.carbon.identity.sso.saml.validators.SAML2HTTPRedirectDeflateSignatureValidator</SAML2HTTPRedirectSignatureValidator>
+        <!--SAMLSSOResponseBuilder>org.wso2.carbon.identity.sso.saml.builders.DefaultResponseBuilder</SAMLSSOResponseBuilder-->
+
         <!-- SAML Token validity period in minutes -->
         <SAMLResponseValidityPeriod>5</SAMLResponseValidityPeriod>
-        <SAMLSSOSigner>org.wso2.carbon.identity.sso.saml.builders.signature.DefaultSSOSigner</SAMLSSOSigner>
-        <UseAuthenticatedUserDomainCrypto>true</UseAuthenticatedUserDomainCrypto>
+        <UseAuthenticatedUserDomainCrypto>false</UseAuthenticatedUserDomainCrypto>
     </SSOService>
 
     <EntitlementSettings>
         <!-- Uncomment this to enable on-demand policy loading -->
-        <!--OnDemandPolicyLoading>
-                <Enable>true</Enable>
-                <MaxInMemoryPolicies>100</MaxInMemoryPolicies>
-        </OnDemandPolicyLoading-->
+        <!--OnDemandPolicyLoading> <Enable>true</Enable> <MaxInMemoryPolicies>100</MaxInMemoryPolicies>
+            </OnDemandPolicyLoading -->
         <DecisionCaching>
             <Enable>true</Enable>
             <CachingInterval>36000</CachingInterval>
@@ -261,13 +269,15 @@
             <Enable>true</Enable>
         </AttributeCaching>
         <ThirftBasedEntitlementConfig>
-            <EnableThriftService>true</EnableThriftService>
+            <EnableThriftService>false</EnableThriftService>
             <ReceivePort>${Ports.ThriftEntitlementReceivePort}</ReceivePort>
             <ClientTimeout>10000</ClientTimeout>
             <KeyStore>
                 <Location>${carbon.home}/repository/resources/security/wso2carbon.jks</Location>
                 <Password>wso2carbon</Password>
             </KeyStore>
+            <!-- Enable this element to mention the host-name of your IS machine -->
+            <ThriftHostName>localhost</ThriftHostName>
         </ThirftBasedEntitlementConfig>
     </EntitlementSettings>
 
@@ -283,4 +293,8 @@
             <Property name="Password">admin</Property-->
         </Authenticator>
     </SCIMAuthenticators>
+    <!--SessionContextCache>
+        <Enable>true</Enable>
+        <Capacity>100000</Capacity>
+    </SessionContextCache-->
 </Server>
