@@ -2865,18 +2865,20 @@ public class ApiMgtDAO {
                         "ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
                         "IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
                         "IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
-                        "IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
+                        "IATA.TOKEN_SCOPE AS TOKEN_SCOPE, " +
                         "AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         "AKM.STATE AS STATE " +
                         "FROM " +
                         "AM_APPLICATION_KEY_MAPPING AKM, " +
                         accessTokenStoreTable + " IAT, " +
-                        "IDN_OAUTH_CONSUMER_APPS ICA " +
+                        "IDN_OAUTH_CONSUMER_APPS ICA," +
+                        "IDN_OAUTH2_SCOPE_ASSOCIATION IATA " +
                         "WHERE " +
                         "AKM.APPLICATION_ID = ? AND " +
                         "IAT.USER_TYPE = ? AND " +
                         "ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND " +
                         "IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND " +
+                        "IAT.TOKEN_ID = IATA.TOKEN_ID AND " +
                         "AKM.KEY_TYPE = 'PRODUCTION' AND " +
                         "(IAT.TOKEN_STATE = 'ACTIVE' OR " +
                         "IAT.TOKEN_STATE = 'EXPIRED' OR " +
@@ -2980,17 +2982,19 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " IATA.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
                         accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA " +
-                        "WHERE" +
+                        " IDN_OAUTH_CONSUMER_APPS ICA," +
+                        " IDN_OAUTH2_SCOPE_ASSOCIATION IATA" +
+                        " WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.TOKEN_ID = IATA.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
