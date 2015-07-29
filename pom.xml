@@ -771,11 +771,11 @@
                 <version>${json-smart.version}</version>
             </dependency>
 
-	    <dependency>
-		<groupId>net.sf.saxon.wso2</groupId>
-		<artifactId>saxon.he</artifactId>
-		<version>${saxon.wso2.version}</version>
-	  </dependency>
+            <dependency>
+                <groupId>net.sf.saxon.wso2</groupId>
+                <artifactId>saxon.he</artifactId>
+                <version>${saxon.wso2.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -879,8 +879,7 @@
         <!-- Misc Versions -->
         <orbit.version.h2.engine>1.2.140.wso2v3</orbit.version.h2.engine>
         <hostobjects.version>1.0.0</hostobjects.version>
-	    <carbon.identity.version>4.5.1</carbon.identity.version>
-        <identity.version>4.5.1</identity.version>
+        <carbon.identity.version>4.5.3</carbon.identity.version>
         <wso2carbon.version.identity>${project.version}</wso2carbon.version.identity>
         <axis2.wso2.version.identity>${axis2.wso2.version}</axis2.wso2.version.identity>
         <axiom.wso2.version.identity>${axiom.wso2.version}</axiom.wso2.version.identity>
@@ -894,7 +893,7 @@
         <httpcomponents.version>4.2.5</httpcomponents.version>
         <google.code.gson.version>2.2.4</google.code.gson.version>
         <dblock.waffle.version>1.6.wso2v1</dblock.waffle.version>
-        <commons-io.version>2.0.0.wso2v1</commons-io.version>
+        <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <commons-lang.version>2.6.0.wso2v1</commons-lang.version>
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
         <apache.poi.version>3.9</apache.poi.version>
