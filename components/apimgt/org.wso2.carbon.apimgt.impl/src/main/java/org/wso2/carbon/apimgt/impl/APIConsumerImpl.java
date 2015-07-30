@@ -71,6 +71,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
@@ -2092,15 +2093,52 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void updateApplication(Application application) throws APIManagementException {
         Application app = apiMgtDAO.getApplicationById(application.getId());
-        if(app != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(app.getStatus())){
+        if (app != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(app.getStatus())) {
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
 
         apiMgtDAO.updateApplication(application);
 
-        try{
+        APIKey[] apiKeys = null;
+
+        // Update on OAuthApps are performed by
+        if ((application.getCallbackUrl() != null && application.getCallbackUrl() != app.getCallbackUrl()) ||
+            !application.getName().equals(app.getName())) {
+
+            // Only the OauthApps created from UI will be changed. Mapped Clients won't be touched.
+            apiKeys = apiMgtDAO.getConsumerKeysWithMode(application.getId(),
+                                                        APIConstants.OAuthAppMode.CREATED.toString());
+        }
+        if (apiKeys != null && apiKeys.length > 0) {
+            for (APIKey apiKey : apiKeys) {
+                OAuthApplicationInfo applicationInfo = new OAuthApplicationInfo();
+                applicationInfo.setClientId(apiKey.getConsumerKey());
+
+                if (application.getCallbackUrl() != null && application.getCallbackUrl() != app.getCallbackUrl()) {
+                    applicationInfo.setCallBackURL(application.getCallbackUrl());
+                }
+
+                if (application.getName() != null && !application.getName().equals(app.getName())) {
+                    applicationInfo.setClientName(application.getName() + "_" + apiKey.getType());
+                }
+                applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, application.getSubscriber().getName());
+
+                // This parameter is set as a way of indicating from which point updateApplication was called. When
+                // integrating with different OAuthProviders, if the implementers do not wish to change CallBackUrl
+                // when an update is performed on the AM_Application, then using this variable that update can be
+                // ignored.
+                applicationInfo.addParameter("executing_mode", "AM_APPLICATION_UPDATE");
+
+                OAuthAppRequest oAuthAppRequest = new OAuthAppRequest();
+                oAuthAppRequest.setOAuthApplicationInfo(applicationInfo);
+                KeyManagerHolder.getKeyManagerInstance().updateApplication(oAuthAppRequest);
+
+            }
+        }
+
+        try {
             invalidateCachedKeys(application.getId());
-        }catch(APIManagementException ignore){
+        } catch (APIManagementException ignore) {
             //Log and ignore since we do not want to throw exceptions to the front end due to cache invalidation failure.
             log.warn("Failed to invalidate Gateway Cache " + ignore.getMessage());
         }
