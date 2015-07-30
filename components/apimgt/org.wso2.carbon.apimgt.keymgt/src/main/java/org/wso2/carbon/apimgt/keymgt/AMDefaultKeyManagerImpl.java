@@ -156,8 +156,41 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws APIManagementException {
-        return null;
+        OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
+        SubscriberKeyMgtClient keyMgtClient = null;
 
+        try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+
+            String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+            String applicationName = oAuthApplicationInfo.getClientName();
+            log.debug("Updating OAuth Client with ID : " + oAuthApplicationInfo.getClientId());
+
+            if (log.isDebugEnabled() && oAuthApplicationInfo.getCallBackURL() != null) {
+                log.debug("CallBackURL : " + oAuthApplicationInfo.getCallBackURL());
+            }
+
+            if (log.isDebugEnabled() && oAuthApplicationInfo.getClientName() != null) {
+                log.debug("Client Name : " + oAuthApplicationInfo.getClientName());
+            }
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = keyMgtClient
+                    .updateOAuthApplication(userId, applicationName, oAuthApplicationInfo.getCallBackURL(),
+                                            oAuthApplicationInfo.getClientId(), null);
+            OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
+            newAppInfo.setClientId(applicationInfo.getClientId());
+            newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
+            newAppInfo.setClientSecret(applicationInfo.getClientSecret());
+
+            return newAppInfo;
+        } catch (Exception e) {
+            handleException("Error occurred while updating OAuth Client : ", e);
+        } finally {
+            if (keyMgtClient != null) {
+                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+            }
+        }
+
+        return null;
     }
 
 

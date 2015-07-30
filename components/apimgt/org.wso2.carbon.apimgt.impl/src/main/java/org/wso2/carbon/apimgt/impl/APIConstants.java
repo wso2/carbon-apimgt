@@ -284,6 +284,10 @@ public final class APIConstants {
         public static final String REJECTED = "REJECTED";
     }
 
+    public static enum OAuthAppMode {
+        CREATED, MAPPED
+    }
+
     public static class SubscriptionCreatedStatus   {
         public static final String SUBSCRIBE = "SUBSCRIBE";
         public static final String UN_SUBSCRIBE = "UN_SUBSCRIBE";
