@@ -5759,6 +5759,49 @@ public class ApiMgtDAO {
         }
     }
 
+    public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        ArrayList<APIKey> consumerKeys = new ArrayList<APIKey>();
+
+        String getConsumerKeyQuery = "SELECT" +
+                                     " CONSUMER_KEY, KEY_TYPE" +
+                                     " FROM" +
+                                     " AM_APPLICATION_KEY_MAPPING " +
+                                     " WHERE" +
+                                     " APPLICATION_ID = ? AND " +
+                                     " CREATE_MODE = ?";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmt.setInt(1, appId);
+            prepStmt.setString(2, mode);
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                String consumerKey = rs.getString("CONSUMER_KEY");
+
+                if (consumerKey != null && !consumerKey.isEmpty()) {
+                    APIKey apiKey = new APIKey();
+                    apiKey.setConsumerKey(consumerKey);
+                    apiKey.setType(rs.getString("KEY_TYPE"));
+                    consumerKeys.add(apiKey);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys";
+            log.error(msg);
+            throw new APIManagementException(msg);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return consumerKeys.toArray(new APIKey[0]);
+    }
+
     /**
      * Returns the consumer Key for a given Application Name, Subscriber Name, Key Type, Grouping Id combination.
      * @param applicationName Name of the Application.
