@@ -52,7 +52,7 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String MONTH= "month";
 
-    public static final String  API_FAULT_SUMMARY = " API_FAULT_SUMMARY";
+    public static final String  API_FAULT_SUMMARY = "API_FAULT_SUMMARY";
 
 	public static final String  API_REQUEST_TIME_FAULT_SUMMARY = "API_REQUEST_TIME_FAULT_SUMMARY";
 
@@ -68,7 +68,7 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API_VERSION = "api_version";
 
-    public static final String SERVICE_TIME = "servicetime";
+    public static final String SERVICE_TIME = "serviceTime";
 
     public static final String VERSION = "version";
 

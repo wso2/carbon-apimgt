@@ -1,9 +1,9 @@
-function APISamples () {
-    this.sample1_swagger = "{\"paths\":{ \"/*\":{\"get\":{\"parameters\":[{\"description\":\"Name of the City\",\"name\":\"q\",\"type\":\"string\",\"required\":false,\"in\":\"query\"}],\"responses\":{\"200\":{ } },\"x-auth-type\":\"Application & Application User\", \"x-throttling-tier\":\"Unlimited\" }}},\"swagger\":\"2.0\",\"info\":{ \"title\":\"WeatherAPI\",\"version\":\"1.0.0\"}}";
+function APISamples (defaultTier) {
+    this.sample1_swagger = "{\"paths\":{ \"/*\":{\"get\":{\"parameters\":[{\"description\":\"Name of the City\",\"name\":\"q\",\"type\":\"string\",\"required\":false,\"in\":\"query\"}],\"responses\":{\"200\":{ } },\"x-auth-type\":\"Application & Application User\", \"x-throttling-tier\":\"" + defaultTier + "\" }}},\"swagger\":\"2.0\",\"info\":{ \"title\":\"WeatherAPI\",\"version\":\"1.0.0\"}}";
 }
 
 
-APISamples.prototype.deploySample1 = function(){
+APISamples.prototype.deploySample1 = function(defaultTier){
 	var formData = new FormData();
 	formData.append("action", "sampleDesign");
 	formData.append("name", "WeatherAPI");
@@ -44,7 +44,7 @@ APISamples.prototype.deploySample1 = function(){
 		
 			function(result){
 			
-			var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:username,version:"1.0.0",default_version_checked:" ",tier:"Unlimited",tiersCollection:"Unlimited",transport_http:"http",transport_https:"https",swagger:this.sample1_swagger},
+			var resultManage = jagg.post(urlDesign,{action:"manage",name:"WeatherAPI",provider:username,version:"1.0.0",default_version_checked:" ",tier:defaultTier,tiersCollection:defaultTier,transport_http:"http",transport_https:"https",swagger:this.sample1_swagger},
 			
 			function(result){
 				if (isPublishPermitted) {
@@ -81,10 +81,7 @@ APISamples.prototype.deploySample1 = function(){
 } 
 } 
 
-
-$(document).ready(function () {
-	$("#deploy_sample1").click(function(){
-		var deployer = new APISamples();
-		deployer.deploySample1();
-	});
-});
+var deploySampleApi = function(defaultTier){
+    var deployer = new APISamples(defaultTier);
+    deployer.deploySample1(defaultTier);
+};

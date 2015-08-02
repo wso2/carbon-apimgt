@@ -2924,11 +2924,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static boolean jsFunction_addDocumentation(Context cx, Scriptable thisObj,
                                                       Object[] args, Function funObj)
-            throws APIManagementException {
-        if (args == null || args.length==0) {
+            throws APIManagementException, ScriptException {
+        if (args == null || args.length == 0) {
             handleException("Invalid number of parameters or their types.");
         }
-        boolean success;
+        boolean success = false;
         String providerName = (String) args[0];
         String apiName = (String) args[1];
         String version = (String) args[2];
@@ -2940,41 +2940,52 @@ public class APIProviderHostObject extends ScriptableObject {
         FileHostObject fileHostObject = null;
         String sourceURL = null;
 
-        APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
-        Documentation doc = new Documentation(getDocType(docType), docName);
-        APIProvider apiProvider = getAPIProvider(thisObj);
+        boolean isTenantFlowStarted = false;
 
-        //add documentation is allowed only if document name does not already exist for this api
-        if (apiProvider.isDocumentationExist(apiId, docName)) {
-            handleException("Error occurred while adding the document. " + docName +
-                    " already exists for API " + apiName + "-" + version);
-        }
-
-        if (doc.getType() == DocumentationType.OTHER) {
-            doc.setOtherTypeName(args[9].toString());
-        }
-
-        if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.URL.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.URL);
-            sourceURL = args[7].toString();
-        } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.FILE);
-            fileHostObject = (FileHostObject) args[8];
-        } else {
-            doc.setSourceType(Documentation.DocumentSourceType.INLINE);
-        }
-
-        doc.setSummary(summary);
-        doc.setSourceUrl(sourceURL);
-        if(visibility==null){visibility=APIConstants.DOC_API_BASED_VISIBILITY;}
-        if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-        } else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
-        } else {
-            doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
-        }
         try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+            Documentation doc = new Documentation(getDocType(docType), docName);
+            APIProvider apiProvider = getAPIProvider(thisObj);
+
+            //add documentation is allowed only if document name does not already exist for this api
+            if (apiProvider.isDocumentationExist(apiId, docName)) {
+                handleException("Error occurred while adding the document. " + docName +
+                    " already exists for API " + apiName + "-" + version);
+            }
+
+            if (doc.getType() == DocumentationType.OTHER) {
+                doc.setOtherTypeName(args[9].toString());
+            }
+
+            if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.URL);
+                sourceURL = args[7].toString();
+            } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.FILE);
+                fileHostObject = (FileHostObject) args[8];
+            } else {
+                doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            }
+
+            doc.setSummary(summary);
+            doc.setSourceUrl(sourceURL);
+
+            if (visibility == null) {
+                visibility = APIConstants.DOC_API_BASED_VISIBILITY;
+            }
+            if (Documentation.DocumentVisibility.API_LEVEL.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
+            } else if (Documentation.DocumentVisibility.PRIVATE.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
+            } else {
+                doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
+            }
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
             	String contentType = (String) args[10];
@@ -2996,24 +3007,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 throw new APIManagementException("Empty File Attachment.");
             }
 
-        } catch (Exception e) {
-            handleException("Error while creating an attachment for Document- " + docName + "-" + version + ". " +
-                                    e.getMessage(), e);
-            return false;
-        }
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            		isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-             }
-            apiProvider.addDocumentation(apiId, doc);
+           apiProvider.addDocumentation(apiId, doc);
             success = true;
-        } catch (APIManagementException e) {
-            handleException("Error occurred while adding the document- " + docName, e);
-            return false;
+        } catch (ScriptException e) {
+            handleException("The attachment cannot be found for document- " + docName, e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -3981,11 +3978,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static boolean jsFunction_updateDocumentation(Context cx, Scriptable thisObj,
                                                          Object[] args, Function funObj)
-            throws APIManagementException {
-        if (args == null || args.length==0) {
+            throws APIManagementException, ScriptException {
+        if (args == null || args.length == 0) {
             handleException("Invalid number of parameters or their types.");
         }
-        boolean success;
+        boolean success = false;
         String providerName = (String) args[0];
         providerName=APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) args[1];
@@ -3998,43 +3995,53 @@ public class APIProviderHostObject extends ScriptableObject {
         String sourceURL = null;
         FileHostObject fileHostObject = null;
 
-        APIIdentifier apiId = new APIIdentifier(providerName, apiName, version);
-        Documentation doc = new Documentation(getDocType(docType), docName);
-        APIProvider apiProvider = getAPIProvider(thisObj);
-
-        //update documentation is allowed only if documentation name already exists for this api
-        if (!apiProvider.isDocumentationExist(apiId, docName)) {
-            handleException("Error occurred while updating the document. " + docName +
-                    " does not exist for API " + apiName + "-" + version);
-        }
-
-        if (doc.getType() == DocumentationType.OTHER) {
-            doc.setOtherTypeName(args[9].toString());
-        }
-
-        if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.URL.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.URL);
-            sourceURL = args[7].toString();
-        } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.FILE);
-            fileHostObject = (FileHostObject) args[8];
-        } else {
-            doc.setSourceType(Documentation.DocumentSourceType.INLINE);
-        }
-        doc.setSummary(summary);
-        doc.setSourceUrl(sourceURL);
-        if(visibility==null){visibility=APIConstants.DOC_API_BASED_VISIBILITY;}
-        if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-        } else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
-        } else {
-            doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
-        }
-
-        Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
-
+        boolean isTenantFlowStarted = false;
         try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            APIIdentifier apiId = new APIIdentifier(providerName, apiName, version);
+            Documentation doc = new Documentation(getDocType(docType), docName);
+            APIProvider apiProvider = getAPIProvider(thisObj);
+
+            //update documentation is allowed only if documentation name already exists for this api
+            if (!apiProvider.isDocumentationExist(apiId, docName)) {
+                handleException("Error occurred while updating the document. " + docName +
+                        " does not exist for API " + apiName + "-" + version);
+            }
+
+            if (doc.getType() == DocumentationType.OTHER) {
+                doc.setOtherTypeName(args[9].toString());
+            }
+
+            if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.URL);
+                sourceURL = args[7].toString();
+            } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.FILE);
+                fileHostObject = (FileHostObject) args[8];
+            } else {
+                doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            }
+            doc.setSummary(summary);
+            doc.setSourceUrl(sourceURL);
+            if (visibility == null){
+                visibility = APIConstants.DOC_API_BASED_VISIBILITY;
+            }
+            if (Documentation.DocumentVisibility.API_LEVEL.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
+            } else if (Documentation.DocumentVisibility.PRIVATE.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
+            } else {
+                doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
+            }
+
+            Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
+
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
                 Icon icon = new Icon(fileHostObject.getInputStream(),
                                      fileHostObject.getJavaScriptFile().getContentType());
@@ -4043,25 +4050,11 @@ public class APIProviderHostObject extends ScriptableObject {
             } else if (oldDoc.getFilePath() != null) {
                 doc.setFilePath(oldDoc.getFilePath());
             }
-
-        } catch (Exception e) {
-            handleException("Error while creating an attachment for Document- " + docName + "-" + version, e);
-            return false;
-        }
-        
-        boolean isTenantFlowStarted = false;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            	isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
             apiProvider.updateDocumentation(apiId, doc);
             success = true;
-        } catch (APIManagementException e) {
-            handleException("Error occurred while adding the document- " + docName, e);
-            return false;
+
+        } catch (ScriptException e) {
+            handleException("The attachment cannot be found for document- " + docName, e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
