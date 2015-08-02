@@ -24,7 +24,7 @@ var log = new Log();
         var provider = jagg.getUser().username;
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        var usageStatClient = new APIUsageStatisticsClient(provider);
+        var usageStatClient;
 
         var currentLocation = request.getParameter("currentLocation");
         if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
@@ -40,6 +40,7 @@ var log = new Log();
             if(appName && fromDate && toDate){
 
                 try {
+                    usageStatClient = new APIUsageStatisticsClient(provider);
                     var throttleData = usageStatClient.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
                     var result = [];
 
@@ -74,6 +75,7 @@ var log = new Log();
         } else if (action === "getAppsForThrottleStats") {
 
             try {
+                usageStatClient = new APIUsageStatisticsClient(provider);
                 var apps = usageStatClient.getAppsForThrottleStats(provider, apiName);
                 var result = [];
 
@@ -95,8 +97,7 @@ var log = new Log();
 
         } else if (action === "getFirstAccessTime") {
             mod = jagg.module("statistics");
-            var provider = jagg.getUser().username;
-            var currentLocation = request.getParameter("currentLocation");
+            provider = jagg.getUser().username;
             if (currentLocation.indexOf("all-statistics") >= 0) {
                 result = mod.getFirstAccessTime(allProviders);
             } else {

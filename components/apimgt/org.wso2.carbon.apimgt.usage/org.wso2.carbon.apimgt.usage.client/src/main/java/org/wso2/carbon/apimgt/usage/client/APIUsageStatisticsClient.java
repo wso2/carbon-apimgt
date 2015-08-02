@@ -2920,7 +2920,7 @@ public class APIUsageStatisticsClient {
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
                 
                 if (APIUsageStatisticsClientConstants.GROUP_BY_WEEK.equals(groupBy)) {
-                    groupByStmt = "year, month, week";
+                    groupByStmt = "week";
                 } else if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)){
                     groupByStmt = "year, month, day";
                 } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)){
