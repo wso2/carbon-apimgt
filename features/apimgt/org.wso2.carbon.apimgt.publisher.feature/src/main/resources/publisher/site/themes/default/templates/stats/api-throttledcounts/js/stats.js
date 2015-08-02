@@ -7,8 +7,8 @@ var statsEnabled = isDataPublishingEnabled();
 currentLocation=window.location.pathname;
 
 //setting default date
-var to = new Date();
-var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+to = new Date();
+from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
@@ -60,8 +60,8 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         })
                         .bind('datepicker-apply', function (event, obj) {
                             btnActiveToggle(this);
-                            var from = convertDate(obj.date1);
-                            var to = convertDate(obj.date2);
+                            from = convertDate(obj.date1);
+                            to = convertDate(obj.date2);
                             var fromStr = from.split(" ");
                             var toStr = to.split(" ");
                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
@@ -130,6 +130,15 @@ var pupulateAPIList = function() {
                     .empty()
                     .append(apis)          
                     .trigger('change');
+
+            } else {
+                $('#tempLoadingSpaceAPIThrottleCount').html('');
+                $('#tempLoadingSpaceAPIThrottleCount').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
             }
         }
     , "json");
@@ -150,6 +159,14 @@ var pupulateAppList = function(apiName) {
                     .append(apps)
                     .trigger('change');
 
+            } else {
+                $('#tempLoadingSpaceAPIThrottleCount').html('');
+                $('#tempLoadingSpaceAPIThrottleCount').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
             }
         }
     , "json");
@@ -179,43 +196,84 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
-                    var length = json.usage.length;
+                    var length = json.usage.result.length;
+                    var result = json.usage.result;
+                    var groupBy = json.usage.groupBy;
+                    var timeUnitMili = json.usage.timeUnitMili;
+                    var successValues = [];
+                    var throttledValues = [];
                     var data = [];
                     if (length > 0) {
-                        $('#noData').empty();
+
                         $('#chartContainer').show();
-                        $('.filters').css('display','block');
                         $('#chartContainer').empty();
+                        $('#tempLoadingSpaceAPIThrottleCount').empty();
+
+                        var normalizeTime = function(time) {
+                            return (time - convertDateToLong(result[0].time)) /timeUnitMili;
+                        }
+
+                        var denormalizeTime = function(time) {
+                            return time * timeUnitMili + convertDateToLong(result[0].time);
+                        }
 
                         nv.addGraph(function() {
-                        var chart = nv.models.multiBarChart();
-                        chart.xAxis.axisLabel('Time')
-                            .tickFormat(function (d) {
-                             return d3.time.format('%d/%m/%Y %H:%M')(new Date(d)) });
+                        var chart =  nv.models.stackedAreaChart();
+                        var dateFormat = '%d/%m %H:%M';
+                        if (groupBy == 'day') {
+                            dateFormat = '%d/%m';
+                        }
+
+                        chart.xAxis.axisLabel('Time (' + groupBy + ')')
+                           .tickFormat(function (d) {
+                                return d3.time.format(dateFormat)(new Date(denormalizeTime(d)))});
                         chart.yAxis.axisLabel('Count')
                             .tickFormat(d3.format('d'));
-                        chart.multibar.stacked(true);
+                        chart.useInteractiveGuideline(true);
 
-                        var result = json.usage;
-                        var successValues = [];
-                        var throttledValues = [];
-                        
-                        
-                        for (var i = 0; i < length; i++) {
-                             successValues.push({
-                                      "x" : convertDateToLong(result[i].time),
-                                      "y" : result[i].success_request_count
-                             });
-                             throttledValues.push({
-                                      "x" : convertDateToLong(result[i].time),
-                                      "y" : result[i].throttleout_count
-                             });
+                        var timeX = normalizeTime(convertDateToLong(result[0].time));
+                        successValues.push({
+                                "x" : timeX,
+                                "y" : result[0].success_request_count
+                        });
+                        throttledValues.push({
+                                "x" : timeX,
+                                "y" : result[0].throttleout_count
+                        });
+
+                        for (var i = 1; i < length; i++) {
+
+                            var timeSegStart = convertDateToLong(result[i-1].time);
+                            var timeSegEnd = convertDateToLong(result[i].time);
+
+                            for (var j = timeSegStart + timeUnitMili; j < timeSegEnd ; j += timeUnitMili) {
+
+                                timeX = normalizeTime(j);
+                                successValues.push({
+                                    "x" : timeX,
+                                    "y" : 0
+                                });
+                                throttledValues.push({
+                                    "x" : timeX,
+                                    "y" : 0
+                                });
+                            }
+
+                            timeX = normalizeTime(convertDateToLong(result[i].time));
+                            successValues.push({
+                                "x" : timeX,
+                                "y" : result[i].success_request_count
+                            });
+                            throttledValues.push({
+                                "x" : timeX,
+                                "y" : result[i].throttleout_count
+                            });
                         }
 
                         d3.select('#throttledTimeChart svg').datum([
                           {
                             key: "Success Count",
-                            color: "#51A351",
+                            color: "#60CA60",
                             values: successValues
                           },
                           {
@@ -235,8 +293,8 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
                         $('.filters').css('display','none');
                         $('#chartContainer').hide();
                         $('#tableContainer').hide();
-                        $('#noData').html('');
-                        $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#tempLoadingSpaceAPIThrottleCount').html('');
+                        $('#tempLoadingSpaceAPIThrottleCount').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                     }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -249,6 +307,7 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
     , "json");
 };
 
+
 var convertTimeString = function(date){
     var d = new Date(date);
     var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
@@ -260,6 +319,16 @@ var convertTimeStringPlusDay = function (date) {
     var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth() + 1)) + "-" + formatTimeChunk(d.getDate() + 1);
     return formattedDate;
 };
+
+function convertDate(date) {
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour=date.getHours();
+    var minute=date.getMinutes();
+    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
+        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
+        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
+}
 
 var formatTimeChunk = function (t) {
     if (t < 10) {
@@ -274,8 +343,8 @@ function btnActiveToggle(button){
 };
 
 function getDateTime(currentDay,fromDay){  
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";

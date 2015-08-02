@@ -21,10 +21,8 @@ public final class APIUsageStatisticsClientConstants {
 
 
     public static final String API_REQUEST_SUMMARY = "API_REQUEST_SUMMARY";
-    
-    public static final String API_REQUEST_SUMMARY_MINIMAL = "API_REQUEST_SUMMARY_MINIMAL";
 
-    public static final String API_THROTTLE_SUMMARY = "API_THROTTLE_SUMMARY";
+    public static final String API_THROTTLED_OUT_SUMMARY = "API_THROTTLED_OUT_SUMMARY";
     
     public static final String CONSUMERKEY = "consumerkey";
 
@@ -125,4 +123,11 @@ public final class APIUsageStatisticsClientConstants {
     public static final String THROTTLED_OUT_COUNT = "throttleout_count";
 
     public static final String FOR_ALL_API_VERSIONS = "FOR_ALL_API_VERSIONS";
+
+    public static final String GROUP_BY_HOUR = "hour";
+
+    public static final String GROUP_BY_DAY = "day";
+
+    public static final String GROUP_BY_WEEK = "week";
+
 }

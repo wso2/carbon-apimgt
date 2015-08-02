@@ -5,8 +5,8 @@ var statsEnabled = isDataPublishingEnabled();
 currentLocation=window.location.pathname;
 
 //setting default date
-var to = new Date();
-var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+to = new Date();
+from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 require(["dojo/dom", "dojo/domReady!"], function (dom) {
     jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
@@ -56,8 +56,8 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         })
                         .bind('datepicker-apply', function (event, obj) {
                             btnActiveToggle(this);
-                            var from = convertDate(obj.date1);
-                            var to = convertDate(obj.date2);
+                            from = convertDate(obj.date1);
+                            to = convertDate(obj.date2);
                             var fromStr = from.split(" ");
                             var toStr = to.split(" ");
                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
@@ -102,6 +102,10 @@ var populateAppList = function() {
             if (!json.error) {
                 var  apps = '';
 
+                if (json.usage.length == 0) {
+                    apps = '<option data-hidden="true">No Apps Available</option>';
+                }
+
                 for ( var i=0; i < json.usage.length ; i++){
                     if ( i == 0){
                         apps += '<option selected="selected">' + json.usage[i] + '</option>'
@@ -111,8 +115,18 @@ var populateAppList = function() {
                 }
 
                 $('#appSelect')
-                   .append(apps)
-                   .trigger('change');
+                    .empty()
+                    .append(apps)
+                    .trigger('change');
+
+            } else {
+                $('#tempLoadingSpaceAppThrottleCount').html('');
+                $('#tempLoadingSpaceAppThrottleCount').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
             }
         }
     , "json");
@@ -139,10 +153,9 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                     var length = json.usage.length;
                     var data = [];
                     if (length > 0) {
-                        $('#noData').empty();
                         $('#chartContainer').show();
-                        $('.filters').css('display','block');
                         $('#chartContainer').empty();
+                        $('#tempLoadingSpaceAppThrottleCount').empty();
 
                         nv.addGraph(function() {
                         var chart = nv.models.multiBarChart();
@@ -169,7 +182,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                         d3.select('#throttledTimeChart svg').datum([
                           {
                             key: "Success Count",
-                            color: "#51A351",
+                            color: "#60CA60",
                             values: successValues
                           },
                           {
@@ -177,6 +190,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                             color: "#BD362F",
                             values: throttledValues
                           }
+
                         ]).transition().duration(500).call(chart);
                         nv.utils.windowResize(chart.update);
                             return chart;
@@ -189,10 +203,12 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                         $('.filters').css('display','none');
                         $('#chartContainer').hide();
                         $('#tableContainer').hide();
-                        $('#noData').html('');
-                        $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#tempLoadingSpaceAppThrottleCount').html('');
+                        $('#tempLoadingSpaceAppThrottleCount').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                     }
             } else {
+                $('#tempLoadingSpaceAppThrottleCount').html('');
+                $('#tempLoadingSpaceAppThrottleCount').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -215,6 +231,16 @@ var convertTimeStringPlusDay = function (date) {
     return formattedDate;
 };
 
+function convertDate(date) {
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour=date.getHours();
+    var minute=date.getMinutes();
+    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
+        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
+        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
+}
+
 var formatTimeChunk = function (t) {
     if (t < 10) {
         t = "0" + t;
@@ -228,8 +254,8 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){  
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";

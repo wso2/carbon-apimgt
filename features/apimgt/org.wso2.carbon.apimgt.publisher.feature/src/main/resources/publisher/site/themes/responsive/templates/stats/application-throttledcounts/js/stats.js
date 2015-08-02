@@ -5,8 +5,8 @@ var statsEnabled = isDataPublishingEnabled();
 currentLocation=window.location.pathname;
 
 //setting default date
-var to = new Date();
-var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+to = new Date();
+from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 $( document ).ready(function() {
 
@@ -52,8 +52,8 @@ $( document ).ready(function() {
                     });
                     $('#date-range').on('apply.daterangepicker', function (ev, picker) {
                         btnActiveToggle(this);
-                        var from = convertTimeString(picker.startDate);
-                        var to = convertTimeString(picker.endDate);
+                        from = convertTimeString(picker.startDate);
+                        to = convertTimeString(picker.endDate);
                         var fromStr = from.split(" ");
                         var toStr = to.split(" ");
                         var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
@@ -97,6 +97,9 @@ var populateAppList = function() {
             if (!json.error) {
                 var  apps = '';
 
+                if (json.usage.length == 0) {
+                    apps = '<option data-hidden="true">No Apps Available</option>';
+                }
                 for ( var i=0; i < json.usage.length ; i++){
                     if ( i == 0){
                         apps += '<option selected="selected">' + json.usage[i] + '</option>'
@@ -106,9 +109,18 @@ var populateAppList = function() {
                 }
 
                 $('#appSelect')
-                   .append(apps)
-                   .selectpicker('refresh')
-                   .trigger('change');
+                    .empty()
+                    .append(apps)
+                    .selectpicker('refresh')
+                    .trigger('change');
+            } else {
+                $('#chartContainer').html('');
+                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                if (json.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content: json.message, type: "error"});
+                }
             }
         }
     , "json");
@@ -123,7 +135,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
     if (toDate.split(":").length == 2) {
         toDate = toDate + ":00";
     }
-    if(window.appParam == ""){
+    if(appName == ""){
         return;
     }
 
@@ -135,9 +147,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                     var length = json.usage.length;
                     var data = [];
                     if (length > 0) {
-                        $('#noData').empty();
                         $('#chartContainer').show();
-                        $('.filters').css('display','block');
                         $('#chartContainer').empty();
 
                         nv.addGraph(function() {
@@ -165,7 +175,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                         d3.select('#throttledTimeChart svg').datum([
                           {
                             key: "Success Count",
-                            color: "#51A351",
+                            color: "#60CA60",
                             values: successValues
                           },
                           {
@@ -182,13 +192,12 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                         $('#throttledTimeChart svg').show();
 
                     }else if(length == 0) {
-                        $('.filters').css('display','none');
-                        $('#chartContainer').hide();
-                        $('#tableContainer').hide();
-                        $('#noData').html('');
-                        $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                        $('#chartContainer').html('');
+                        $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                     }
             } else {
+                $('#chartContainer').html('');
+                $('#chartContainer').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -224,8 +233,8 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){  
-    var to = convertTimeString(currentDay);
-    var from = convertTimeString(fromDay);
+    to = convertTimeString(currentDay);
+    from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";

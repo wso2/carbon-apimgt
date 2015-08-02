@@ -10,13 +10,28 @@ var log = new Log();
             appName = request.getParameter("appName"),
             fromDate = request.getParameter("fromDate"),
             toDate = request.getParameter("toDate"),
-            site = require("/site/conf/site.json");
-    allProviders = "__all_providers__";
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag"),
+            allProviders = "__all_providers__";
+
+    convertToDateObj = function (date) {
+        var dateWithoutHour = date.split("\ ")[0].split("-");
+        var year = dateWithoutHour[0];
+        var month = dateWithoutHour[1] - 1;
+        var day = dateWithoutHour[2];
+        return new Date(year,month,day);
+    }
+
+    dayDiff = function (fromDate,toDate){
+        fromDate = convertToDateObj(fromDate);
+        toDate = convertToDateObj(toDate);
+        return (toDate - fromDate)/(1000*60*60*24);
+    }
 
     if (jagg.getUser() == null) {
         print({
             error: true,
-            message: 'Please login first'
+            message: 'AuthenticateError'
         });
     } else {        
         var provider = jagg.getUser().username;
@@ -32,78 +47,47 @@ var log = new Log();
         if (action === "getThrottleDataOfAPIAndApplication") {     
 
             if(apiName &&  fromDate && toDate){
-                var throttleData = usageStatClient.getThrottleDataOfAPIAndApplication(apiName,provider,appName,fromDate,toDate);       
-                var result = [];
 
-                for (var i = 0; i < throttleData.size(); i++) {
-                    var throttleDataObj = throttleData.get(i);
-                    result.push({
-                        time : throttleDataObj.getTime(),
-                        success_request_count : throttleDataObj.getSuccessRequestCount(),
-                        throttleout_count : throttleDataObj.getThrottleOutCount()
+                var groupBy = "hour";
+                var timeUnitMili = 1000 * 60 * 60;
+                var data = {};
+
+                if (dayDiff(fromDate, toDate) > 3){
+                    groupBy = "day";
+                    timeUnitMili = 1000 * 60 * 60 * 24;
+                }
+                /*
+                if (dayDiff(fromDate, toDate) > 62){
+                    groupBy = "week";
+                }*/
+
+                try {
+                    var throttleData = usageStatClient.getThrottleDataOfAPIAndApplication(apiName,provider,appName,fromDate,toDate,groupBy);
+                    var result = [];
+
+                    for (var i = 0; i < throttleData.size(); i++) {
+                        var throttleDataObj = throttleData.get(i);
+                        result.push({
+                            time : throttleDataObj.getTime(),
+                            success_request_count : throttleDataObj.getSuccessRequestCount(),
+                            throttleout_count : throttleDataObj.getThrottleOutCount()
+                        });
+                    }
+
+                    data.result = result;
+                    data.groupBy = groupBy;
+                    data.timeUnitMili = timeUnitMili;
+                    print({
+                        error: false,
+                        usage: data
+                    });
+                } catch (e) {
+                    log.error(e);
+                    print({
+                        error: true,
+                        message: "Error in retrieving throttle data over time for API: " + apiName
                     });
                 }
-
-                
-/*
-                result.push({
-                    time : "2015-07-21 17:30:00",
-                    success_request_count : 10,
-                    throttleout_count : 20
-                });
-
-                result.push({
-                    time : "2015-07-21 19:30:00",
-                    success_request_count : 15,
-                    throttleout_count : 25
-                });
-*/
-                /*
-                var db = jagg.getStatDBConnection();
-
-                var selectQueryWithAppName = "select API_REQUEST_SUMMARY_MINIMAL.api, API_REQUEST_SUMMARY_MINIMAL.api_version, API_REQUEST_SUMMARY_MINIMAL.context,"
-                                + " API_REQUEST_SUMMARY_MINIMAL.apiPublisher, API_REQUEST_SUMMARY_MINIMAL.applicationName, API_REQUEST_SUMMARY_MINIMAL.tenantDomain,"
-                                + " API_REQUEST_SUMMARY_MINIMAL.year, API_REQUEST_SUMMARY_MINIMAL.month, API_REQUEST_SUMMARY_MINIMAL.day, API_REQUEST_SUMMARY_MINIMAL.time,"
-                                + " API_REQUEST_SUMMARY_MINIMAL.success_request_count, coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count";
-                var selectQueryWithoutAppName = "select API_REQUEST_SUMMARY_MINIMAL.api, API_REQUEST_SUMMARY_MINIMAL.api_version, API_REQUEST_SUMMARY_MINIMAL.context,"
-                                + " API_REQUEST_SUMMARY_MINIMAL.apiPublisher, API_REQUEST_SUMMARY_MINIMAL.tenantDomain, API_REQUEST_SUMMARY_MINIMAL.year,"
-                                + " API_REQUEST_SUMMARY_MINIMAL.month, API_REQUEST_SUMMARY_MINIMAL.day, API_REQUEST_SUMMARY_MINIMAL.time,"
-                                + " sum(API_REQUEST_SUMMARY_MINIMAL.success_request_count) as success_request_count,"
-                                + " sum(coalesce(API_THROTTLE_SUMMARY.throttleout_count,0)) as throttleout_count";
-                var joinQuery = " from API_REQUEST_SUMMARY_MINIMAL left join API_THROTTLE_SUMMARY"
-                                + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
-                                + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
-                                + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
-                                + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time";
-                var whereQuery = " where API_REQUEST_SUMMARY_MINIMAL.api = '" + apiName + "' "
-                                    + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = '" + provider + "'";
-                var whereAppQuery = " and API_REQUEST_SUMMARY_MINIMAL.applicationName = '" + appName + "'";
-                var whereWithDateRange = " and API_REQUEST_SUMMARY_MINIMAL.time between '" + fromDate + "' and '" + toDate + "'";              
-                var groupByQuery = " group by API_REQUEST_SUMMARY_MINIMAL.api, API_REQUEST_SUMMARY_MINIMAL.apiPublisher, API_REQUEST_SUMMARY_MINIMAL.time";
-                var orderByQuery = " order by API_REQUEST_SUMMARY_MINIMAL.time asc";
-
-                var result,query;
-                if (appName) {
-                    query = selectQueryWithAppName + joinQuery + whereQuery + whereAppQuery;
-                } else {
-                    query = selectQueryWithoutAppName + joinQuery + whereQuery;
-                }
-
-                if(fromDate && toDate){
-                    query = query + whereWithDateRange;
-                }
-
-                if (!appName) {
-                    query = query + groupByQuery;
-                }
-
-                result = db.query(query + orderByQuery);
-                log.info(result);
-                */
-                print({
-                    error: false,
-                    usage: result
-                });
 
             }else{
                 print({
@@ -114,19 +98,28 @@ var log = new Log();
 
         } else if (action === "getAPIsForThrottleStats") {
 
-            var apis = usageStatClient.getAPIsForThrottleStats(provider);
-            var result = [];
+            try {
+                var apis = usageStatClient.getAPIsForThrottleStats(provider);
+                var result = [];
 
-            for (var i = 0; i < apis.size(); i++) {
-                result.push(apis.get(i));
+                for (var i = 0; i < apis.size(); i++) {
+                    result.push(apis.get(i));
+                }
+
+                print({
+                    error: false,
+                    usage: result
+                });
+            } catch (e) {
+                log.error(e);
+                print({
+                    error: true,
+                    message: "Error in retrieving API names for throttle stats"
+                });
             }
 
-            print({
-                error: false,
-                usage: result
-            });
-
         } else if (action === "getFirstAccessTime") {
+
             mod = jagg.module("statistics");
             var provider = jagg.getUser().username;
             var currentLocation = request.getParameter("currentLocation");
@@ -149,6 +142,7 @@ var log = new Log();
             print(obj);
 
         } else if (action === "isDataPublishingEnabled") {
+
             mod = jagg.module("statistics");
             result = mod.isDataPublishingEnabled();
 
@@ -167,5 +161,6 @@ var log = new Log();
 
         };
     }
+
 }());
 %>

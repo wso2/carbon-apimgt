@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -2246,7 +2247,7 @@ public class APIUsageStatisticsClient {
             statement = connection.createStatement();
             String query;
             //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exist
+            if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exists
                 query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY
                         + " WHERE " + APIUsageStatisticsClientConstants.API + " = '" + apiName + "'";
                 if (apiVersion != null) {
@@ -2300,11 +2301,12 @@ public class APIUsageStatisticsClient {
      * @param appName Application name
      * @param fromDate Start date of the time span
      * @param toDate End date of time span
+     * @param groupBy Group by parameter. Supported parameters are :day,hour
      * @return Throttling counts over time
      * @throws APIMgtUsageQueryServiceClientException
      */
     public List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
-            String appName, String fromDate, String toDate)
+            String appName, String fromDate, String toDate, String groupBy)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -2317,67 +2319,39 @@ public class APIUsageStatisticsClient {
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            String queryLeftJoin, queryRightJoin, query;
+            String query, groupByStmt;
 
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
 
             //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
-                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
-
-                //To get throttle data, here we are joining two tables which corresponds to success requests 
-                //(i.e. API_REQUEST_SUMMARY_MINIMAL) and throttled requests (i.e. API_THROTTLE_SUMMARY). We need to 
-                //perform a full join as there can be sometimes no rows associated with the partner table. (ex. For 
-                //unlimited tier APIs, all the requests are allowed and there are no associated data in the throttle 
-                //table (i.e. API_THROTTLE_SUMMARY). Sometimes all the requests can be throttled out for a time segment
-                //and there can be no associated rows in success request table)
-                //Since most databases (mysql,h2) does not support full joins we need to apply a workaround (take the 
-                //left join and the right join separately and then take the union)
-                queryLeftJoin = "select API_REQUEST_SUMMARY_MINIMAL.api,API_REQUEST_SUMMARY_MINIMAL.api_version,"
-                        + " API_REQUEST_SUMMARY_MINIMAL.apiPublisher, API_REQUEST_SUMMARY_MINIMAL.time,"
-                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
-                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
-                        + " from API_REQUEST_SUMMARY_MINIMAL left join API_THROTTLE_SUMMARY"
-                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
-                        + " where API_REQUEST_SUMMARY_MINIMAL.api = ?"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = ?"
-                        + (!appName.isEmpty() ? " and API_REQUEST_SUMMARY_MINIMAL.applicationName = ?" : "")
-                        + " and API_REQUEST_SUMMARY_MINIMAL.time between ? and ?";
-
-                queryRightJoin = "select API_THROTTLE_SUMMARY.api, API_REQUEST_SUMMARY_MINIMAL.api_version,"
-                        + " API_THROTTLE_SUMMARY.apiPublisher, API_THROTTLE_SUMMARY.time,"
-                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
-                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
-                        + " from API_REQUEST_SUMMARY_MINIMAL right join API_THROTTLE_SUMMARY"
-                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
-                        + " where API_THROTTLE_SUMMARY.api = ?"
-                        + " and API_THROTTLE_SUMMARY.apiPublisher = ?"
-                        + (!appName.isEmpty() ? " and API_THROTTLE_SUMMARY.applicationName = ?" : "")
-                        + " and API_THROTTLE_SUMMARY.time between ? and ?";
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
                 
-                query = "select api,apiPublisher,time,sum(success_request_count) as success_request_count,"
-                        + " sum(throttleout_count) as throttleout_count FROM (" + queryLeftJoin 
-                        + " UNION " + queryRightJoin + ") JOINED_TABLE group by time order by time asc";
+                if (APIUsageStatisticsClientConstants.GROUP_BY_WEEK.equals(groupBy)) {
+                    groupByStmt = "year, month, week";
+                } else if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)){
+                    groupByStmt = "year, month, day";
+                } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)){
+                    groupByStmt = "time";
+                } else {
+                    throw new APIMgtUsageQueryServiceClientException(
+                            "Unsupported group by parameter " + groupBy +
+                                    " for retrieving throttle data of API and app.");
+                }
+
+                query = "SELECT api, api_version, apiPublisher, time, year, month, day, week, " +
+                        "SUM(COALESCE(success_request_count,0)) AS success_request_count, " +
+                        "SUM(COALESCE(throttleout_count,0)) AS throttleout_count " +
+                        "FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE api = ? " +
+                        "AND apiPublisher = ? " +
+                        (!appName.isEmpty() ? " AND applicationName = ?" : "") +
+                        "AND time BETWEEN ? AND ? " +
+                        "GROUP BY " + groupByStmt + " " +
+                        "ORDER BY time ASC";
                 
                 statement = connection.prepareStatement(query);
 
                 int index = 1;
-                //for left join query
-                statement.setString(index++, apiName);
-                statement.setString(index++, provider);
-                if (!appName.isEmpty()) {
-                    statement.setString(index++, appName);
-                }
-                statement.setString(index++, fromDate);
-                statement.setString(index++, toDate);
-
-                //for right join query
                 statement.setString(index++, apiName);
                 statement.setString(index++, provider);
                 if (!appName.isEmpty()) {
@@ -2385,6 +2359,7 @@ public class APIUsageStatisticsClient {
                 }
                 statement.setString(index++, fromDate);
                 statement.setString(index, toDate);
+
                 rs = statement.executeQuery();
 
                 while (rs.next()) {
@@ -2392,18 +2367,24 @@ public class APIUsageStatisticsClient {
                     String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
                     int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
                     int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
-                    String time = rs.getString(APIUsageStatisticsClientConstants.TIME);
-                    throttlingData
-                            .add(new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
-                                    time));
+
+                    String time;
+                    if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
+                        time = rs.getString(APIUsageStatisticsClientConstants.TIME);
+                    } else {
+                        time = rs.getString(APIUsageStatisticsClientConstants.TIME).split(" ")[0] + " 00:00:00";
+                    }
+
+                    throttlingData.add(
+                            new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
+                                    time)
+                    );
                 }
 
-            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
-                        " does not exist.");
             } else {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
-                        " does not exist.");
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
             }
 
             return throttlingData;
@@ -2462,67 +2443,28 @@ public class APIUsageStatisticsClient {
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            String queryLeftJoin, queryRightJoin, query;
+            String query;
 
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
 
-            //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
-                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
 
-                //To get throttle data, here we are joining two tables which corresponds to success requests 
-                //(i.e. API_REQUEST_SUMMARY_MINIMAL) and throttled requests (i.e. API_THROTTLE_SUMMARY). We need to 
-                //perform a full join as there can be sometimes no rows associated with the partner table. (ex. For 
-                //unlimited tier APIs, all the requests are allowed and there are no associated data in the throttle 
-                //table (i.e. API_THROTTLE_SUMMARY). Sometimes all the requests can be throttled out for a time segment
-                //and there can be no associated rows in success request table)
-                //Since most databases (mysql,h2) does not support full joins we need to apply a workaround (take the 
-                //left join and the right join separately and then take the union)
-                queryLeftJoin = "select API_REQUEST_SUMMARY_MINIMAL.api,API_REQUEST_SUMMARY_MINIMAL.api_version,"
-                        + " API_REQUEST_SUMMARY_MINIMAL.apiPublisher, API_REQUEST_SUMMARY_MINIMAL.time,"
-                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
-                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
-                        + " from API_REQUEST_SUMMARY_MINIMAL left join API_THROTTLE_SUMMARY"
-                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
-                        + " where API_REQUEST_SUMMARY_MINIMAL.applicationName = ?"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = ?"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.time between ? and ?";
-
-                queryRightJoin = "select API_THROTTLE_SUMMARY.api, API_THROTTLE_SUMMARY.api_version,"
-                        + " API_THROTTLE_SUMMARY.apiPublisher, API_THROTTLE_SUMMARY.time,"
-                        + " coalesce(API_REQUEST_SUMMARY_MINIMAL.success_request_count,0) as success_request_count,"
-                        + " coalesce(API_THROTTLE_SUMMARY.throttleout_count,0) as throttleout_count"
-                        + " from API_REQUEST_SUMMARY_MINIMAL right join API_THROTTLE_SUMMARY"
-                        + " on API_REQUEST_SUMMARY_MINIMAL.api_version = API_THROTTLE_SUMMARY.api_version"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.apiPublisher = API_THROTTLE_SUMMARY.apiPublisher"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.applicationName = API_THROTTLE_SUMMARY.applicationName"
-                        + " and API_REQUEST_SUMMARY_MINIMAL.time = API_THROTTLE_SUMMARY.time"
-                        + " where API_THROTTLE_SUMMARY.applicationName = ?"
-                        + " and API_THROTTLE_SUMMARY.apiPublisher = ?"
-                        + " and API_THROTTLE_SUMMARY.time between ? and ?";
-
-                query = "select api,apiPublisher,sum(success_request_count) as success_request_count,"
-                        + " sum(throttleout_count) as throttleout_count FROM (" + queryLeftJoin
-                        + " UNION " + queryRightJoin + ") JOINED_TABLE group by api, apiPublisher"
-                        + " order by api asc";
+                query = "SELECT api, api_version, apiPublisher, time, SUM(COALESCE(success_request_count,0)) " +
+                        "AS success_request_count, SUM(COALESCE(throttleout_count,0)) as throttleout_count " +
+                        "FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE applicationName = ? " +
+                        "AND apiPublisher = ? " +
+                        "AND time BETWEEN ? AND ? " +
+                        "GROUP BY api, apiPublisher " +
+                        "ORDER BY api ASC";
 
                 statement = connection.prepareStatement(query);
 
-                int index = 1;
-                //for left join query
-                statement.setString(index++, appName);
-                statement.setString(index++, provider);
-                statement.setString(index++, fromDate);
-                statement.setString(index++, toDate);
+                statement.setString(1, appName);
+                statement.setString(2, provider);
+                statement.setString(3, fromDate);
+                statement.setString(4, toDate);
 
-                //for right join query
-                statement.setString(index++, appName);
-                statement.setString(index++, provider);
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
                 rs = statement.executeQuery();
 
                 while (rs.next()) {
@@ -2535,12 +2477,10 @@ public class APIUsageStatisticsClient {
                                     null));
                 }
 
-            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
-                        " does not exist.");
             } else {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
-                        " does not exist.");
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
             }
 
             return throttlingData;
@@ -2599,17 +2539,13 @@ public class APIUsageStatisticsClient {
             List<String> throttlingAPIData = new ArrayList<String>();
 
             //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
-                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
 
-                query = "select distinct api from API_REQUEST_SUMMARY_MINIMAL where apiPublisher = ?"
-                        + " union select distinct api from API_THROTTLE_SUMMARY where apiPublisher = ?";
+                query = "select distinct api from API_THROTTLED_OUT_SUMMARY where apiPublisher = ?";
 
                 statement = connection.prepareStatement(query);
 
-                int index = 1;
-                statement.setString(index++, provider);
-                statement.setString(index, provider);
+                statement.setString(1, provider);
                 
                 rs = statement.executeQuery();
 
@@ -2618,12 +2554,10 @@ public class APIUsageStatisticsClient {
                     throttlingAPIData.add(api);
                 }
 
-            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
-                        " does not exist.");
             } else {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
-                        " does not exist.");
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
             }
 
             return throttlingAPIData;
@@ -2659,7 +2593,7 @@ public class APIUsageStatisticsClient {
     }
 
     /** Given provider name and the API name, returns a list of applications through which the corresponding API is
-     *  invoked and which consist of throttle data
+     *  invoked and which consist of success/throttled requests
      * 
      * @param provider Provider name
      * @param apiName Name of th API
@@ -2684,27 +2618,20 @@ public class APIUsageStatisticsClient {
             List<String> throttlingAppData = new ArrayList<String>();
 
             //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection) &&
-                    isTableExist(APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY, connection)) { //Tables exist
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
 
-                int index = 1;
                 if (apiName == null) {
-                    query = "select distinct applicationName from API_REQUEST_SUMMARY_MINIMAL where apiPublisher = ?"
-                            + " union select distinct applicationName from API_THROTTLE_SUMMARY where apiPublisher = ?";
+                    query = "select distinct applicationName from API_THROTTLED_OUT_SUMMARY where apiPublisher = ?";
                 }else {
-                    query = "select distinct applicationName from API_REQUEST_SUMMARY_MINIMAL "
-                            + " where apiPublisher = ? and api = ?"
-                            + " union select distinct applicationName from API_THROTTLE_SUMMARY"
-                            + " where api = ? and apiPublisher = ?"; 
+                    query = "select distinct applicationName from API_THROTTLED_OUT_SUMMARY "
+                            + " where apiPublisher = ? and api = ?";
                 }
                 statement = connection.prepareStatement(query);
 
-                statement.setString(index++, provider);
+                statement.setString(1, provider);
                 if( apiName != null ){
-                    statement.setString(index++, apiName); // for second and third ?'s for 'api' in second query
-                    statement.setString(index++, apiName);
+                    statement.setString(2, apiName);
                 }
-                statement.setString(index, provider);
 
                 rs = statement.executeQuery();
 
@@ -2713,12 +2640,10 @@ public class APIUsageStatisticsClient {
                     throttlingAppData.add(applicationName);
                 }
 
-            } else if (!isTableExist(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL, connection)) {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY_MINIMAL +
-                        " does not exist.");
             } else {
-                log.error("Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLE_SUMMARY +
-                        " does not exist.");
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
             }
 
             return throttlingAppData;
