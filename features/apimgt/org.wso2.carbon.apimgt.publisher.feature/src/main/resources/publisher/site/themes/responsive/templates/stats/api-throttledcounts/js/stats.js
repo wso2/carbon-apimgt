@@ -12,7 +12,7 @@ from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 $( document ).ready(function() {
 
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
+    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action:"getFirstAccessTime", currentLocation : currentLocation  },
         function (json) {
 
             if (!json.error) {
@@ -101,7 +101,7 @@ $( document ).ready(function() {
 });
 
 var pupulateAPIList = function() { 
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action : "getAPIsForThrottleStats"},
+    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action : "getAPIsForThrottleStats", currentLocation : currentLocation},
         function (json) {
             if (!json.error) {
 
@@ -138,7 +138,7 @@ var pupulateAPIList = function() {
 };
 
 var pupulateAppList = function(apiName) { 
-    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action : "getAppsForThrottleStats", apiName : apiName },
+    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action : "getAppsForThrottleStats", currentLocation : currentLocation, apiName : apiName },
         function (json) {
             if (!json.error) {
                 var  apps = '<option selected="selected">All Apps</option>';
@@ -185,7 +185,7 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
         return;
     }
 
-    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfAPIAndApplication", apiName : apiName , appName : appName , fromDate: fromDate, toDate: toDate },
+    jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfAPIAndApplication", currentLocation : currentLocation, apiName : apiName , appName : appName , fromDate: fromDate, toDate: toDate },
 
         function (json) {
             $('#spinner').hide();

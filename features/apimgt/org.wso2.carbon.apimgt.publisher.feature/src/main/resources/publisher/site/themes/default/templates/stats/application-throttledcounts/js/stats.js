@@ -9,7 +9,7 @@ to = new Date();
 from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 require(["dojo/dom", "dojo/domReady!"], function (dom) {
-    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action:"getFirstAccessTime",currentLocation:currentLocation  },
+    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action:"getFirstAccessTime", currentLocation : currentLocation},
         function (json) {
             if (!json.error) {
 
@@ -97,7 +97,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 });
 
 var populateAppList = function() { 
-    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action : "getAppsForThrottleStats"},
+    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action : "getAppsForThrottleStats", currentLocation : currentLocation},
         function (json) {
             if (!json.error) {
                 var  apps = '';
@@ -145,7 +145,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
         return;
     }
 
-    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfApplication", appName : appName, fromDate: fromDate, toDate: toDate },
+    jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "getThrottleDataOfApplication", currentLocation : currentLocation, appName : appName, fromDate: fromDate, toDate: toDate },
 
         function (json) {
             $('#spinner').hide();

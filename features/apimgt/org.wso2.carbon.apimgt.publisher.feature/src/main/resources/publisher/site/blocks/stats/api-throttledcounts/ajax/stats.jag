@@ -35,12 +35,17 @@ var log = new Log();
         });
     } else {        
         var provider = jagg.getUser().username;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(provider);
         var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
         var usageStatClient = new APIUsageStatisticsClient(provider);
-        
+
+        var currentLocation = request.getParameter("currentLocation");
+        if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
+            provider = allProviders;
+        }
+
         if (provider.indexOf("@") == -1) {
-            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-            var tenantDomain = MultitenantUtils.getTenantDomain(provider);
             provider = provider + "@" + tenantDomain;
         }
 

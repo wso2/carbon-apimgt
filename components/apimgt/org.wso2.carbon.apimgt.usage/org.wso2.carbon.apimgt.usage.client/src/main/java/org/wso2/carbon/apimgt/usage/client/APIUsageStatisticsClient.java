@@ -2320,8 +2320,8 @@ public class APIUsageStatisticsClient {
         try {
             connection = dataSource.getConnection();
             String query, groupByStmt;
-
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
@@ -2342,39 +2342,40 @@ public class APIUsageStatisticsClient {
                         "SUM(COALESCE(success_request_count,0)) AS success_request_count, " +
                         "SUM(COALESCE(throttleout_count,0)) AS throttleout_count " +
                         "FROM API_THROTTLED_OUT_SUMMARY " +
-                        "WHERE api = ? " +
-                        "AND apiPublisher = ? " +
-                        (!appName.isEmpty() ? " AND applicationName = ?" : "") +
+                        "WHERE tenantDomain = ? " +
+                        "AND api = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ?") +
+                        (StringUtils.isEmpty(appName) ? "" : " AND applicationName = ?") +
                         "AND time BETWEEN ? AND ? " +
                         "GROUP BY " + groupByStmt + " " +
                         "ORDER BY time ASC";
-                
-                statement = connection.prepareStatement(query);
 
+                statement = connection.prepareStatement(query);
                 int index = 1;
+                statement.setString(index++, tenantDomain);
                 statement.setString(index++, apiName);
-                statement.setString(index++, provider);
-                if (!appName.isEmpty()) {
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(index++, provider);
+                }
+                if (!StringUtils.isEmpty(appName)) {
                     statement.setString(index++, appName);
                 }
                 statement.setString(index++, fromDate);
                 statement.setString(index, toDate);
 
                 rs = statement.executeQuery();
-
                 while (rs.next()) {
                     String api = rs.getString(APIUsageStatisticsClientConstants.API);
                     String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
                     int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
                     int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
-
                     String time;
                     if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
                         time = rs.getString(APIUsageStatisticsClientConstants.TIME);
                     } else {
                         time = rs.getString(APIUsageStatisticsClientConstants.TIME).split(" ")[0] + " 00:00:00";
                     }
-
                     throttlingData.add(
                             new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
                                     time)
@@ -2444,29 +2445,33 @@ public class APIUsageStatisticsClient {
         try {
             connection = dataSource.getConnection();
             String query;
-
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
 
                 query = "SELECT api, api_version, apiPublisher, time, SUM(COALESCE(success_request_count,0)) " +
                         "AS success_request_count, SUM(COALESCE(throttleout_count,0)) as throttleout_count " +
                         "FROM API_THROTTLED_OUT_SUMMARY " +
-                        "WHERE applicationName = ? " +
-                        "AND apiPublisher = ? " +
+                        "WHERE tenantDomain = ? " +
+                        "AND applicationName = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ?") +
                         "AND time BETWEEN ? AND ? " +
                         "GROUP BY api, apiPublisher " +
                         "ORDER BY api ASC";
 
                 statement = connection.prepareStatement(query);
-
-                statement.setString(1, appName);
-                statement.setString(2, provider);
-                statement.setString(3, fromDate);
-                statement.setString(4, toDate);
+                int index = 1;
+                statement.setString(index++, tenantDomain);
+                statement.setString(index++, appName);
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(index++, provider);
+                }
+                statement.setString(index++, fromDate);
+                statement.setString(index, toDate);
 
                 rs = statement.executeQuery();
-
                 while (rs.next()) {
                     String api = rs.getString(APIUsageStatisticsClientConstants.API);
                     String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
@@ -2535,25 +2540,28 @@ public class APIUsageStatisticsClient {
         try {
             connection = dataSource.getConnection();
             String query;
-
             List<String> throttlingAPIData = new ArrayList<String>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
 
-                query = "select distinct api from API_THROTTLED_OUT_SUMMARY where apiPublisher = ?";
+                query = "SELECT DISTINCT api FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE tenantDomain = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ?");
 
                 statement = connection.prepareStatement(query);
-
-                statement.setString(1, provider);
+                statement.setString(1, tenantDomain);
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(2, provider);
+                }
                 
                 rs = statement.executeQuery();
-
                 while (rs.next()) {
                     String api = rs.getString(APIUsageStatisticsClientConstants.API);
                     throttlingAPIData.add(api);
                 }
-
             } else {
                 throw new APIMgtUsageQueryServiceClientException(
                         "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
@@ -2614,27 +2622,28 @@ public class APIUsageStatisticsClient {
         try {
             connection = dataSource.getConnection();
             String query;
-
             List<String> throttlingAppData = new ArrayList<String>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
+                query = "SELECT DISTINCT applicationName FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE tenantDomain = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ?") +
+                        (apiName == null ? "" : "AND api = ? ");
 
-                if (apiName == null) {
-                    query = "select distinct applicationName from API_THROTTLED_OUT_SUMMARY where apiPublisher = ?";
-                }else {
-                    query = "select distinct applicationName from API_THROTTLED_OUT_SUMMARY "
-                            + " where apiPublisher = ? and api = ?";
-                }
                 statement = connection.prepareStatement(query);
-
-                statement.setString(1, provider);
+                int index = 1;
+                statement.setString(index++, tenantDomain);
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(index++, provider);
+                }
                 if( apiName != null ){
-                    statement.setString(2, apiName);
+                    statement.setString(index, apiName);
                 }
 
                 rs = statement.executeQuery();
-
                 while (rs.next()) {
                     String applicationName = rs.getString(APIUsageStatisticsClientConstants.APPLICATION_NAME);
                     throttlingAppData.add(applicationName);
