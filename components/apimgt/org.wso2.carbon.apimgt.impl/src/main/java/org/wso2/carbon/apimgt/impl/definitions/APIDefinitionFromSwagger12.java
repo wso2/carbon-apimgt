@@ -212,8 +212,6 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
         } catch (RegistryException e) {
             handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
-        } catch (APIManagementException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
         }
     }
 
