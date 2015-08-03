@@ -57,7 +57,8 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
             //Iterating each resourcePath config
             for (Object resource : resources) {
                 JSONObject resourceConfig = (JSONObject) resource;
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
                 Map<String, Environment> environments = config.getApiGatewayEnvironments();
                 Environment environment = null;
@@ -117,7 +118,8 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                         /* Right Now PATCH is not supported. Need to remove this check when PATCH is supported*/
                         if (!"PATCH".equals(httpVerb)) {
                             URITemplate template = new URITemplate();
-                            Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON), (String) jsonObjectOperation.get("scope"));
+                            Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON),
+                                    (String) jsonObjectOperation.get("scope"));
 
                             String authType = (String) jsonObjectOperation.get("auth_type");
                             if (authType != null) {
@@ -260,8 +262,16 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         JSONParser parser = new JSONParser();
         String pathJsonTemplate = "{\n    \"path\": \"\",\n    \"operations\": []\n}";
         String operationJsonTemplate = "{\n    \"method\": \"\",\n    \"parameters\": []\n}";
-        String apiJsonTemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
-        String apiResourceJsontemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    \"resourcePath\":\"\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+        String apiJsonTemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    " +
+                "\"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n       " +
+                " \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        " +
+                "\"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n           " +
+                " \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+        String apiResourceJsontemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    " +
+                "\"resourcePath\":\"\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        " +
+                "\"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        " +
+                "\"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n       " +
+                " \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
 
 
         APIIdentifier identifier = api.getId();
@@ -405,7 +415,8 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
             }
         } catch(ParseException e) {
-            throw new APIManagementException("Error while generating swagger 1.2 resource for api " + api.getId().getProviderName()
+            throw new APIManagementException("Error while generating swagger 1.2 resource for api "
+                    + api.getId().getProviderName()
                     + "-" + api.getId().getApiName()
                     + "-" + api.getId().getVersion(), e);
         }

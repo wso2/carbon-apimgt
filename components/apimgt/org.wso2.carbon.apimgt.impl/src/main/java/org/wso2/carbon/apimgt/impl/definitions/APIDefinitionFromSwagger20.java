@@ -196,10 +196,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         } catch (RegistryException e) {
             handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
-        } catch (APIManagementException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
         }
-
     }
 
 
@@ -251,7 +248,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     @SuppressWarnings("unchecked")
     public String generateAPIDefinition(API api) throws APIManagementException {
         APIIdentifier identifier = api.getId();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
