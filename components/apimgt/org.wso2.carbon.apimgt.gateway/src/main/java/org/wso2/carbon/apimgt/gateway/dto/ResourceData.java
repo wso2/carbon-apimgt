@@ -114,6 +114,9 @@ private String[] methods = new String[4];
     }
 
     public void setOutSeqXml(String outSeqXml) {
+        if(outSeqXml == null){
+            return;
+        }
         this.outSeqXml = outSeqXml.trim().replaceAll("&gt", ">").replaceAll("&lt", "<")
                 .replaceAll("\n", "").replaceAll("\t", " ");
     }
