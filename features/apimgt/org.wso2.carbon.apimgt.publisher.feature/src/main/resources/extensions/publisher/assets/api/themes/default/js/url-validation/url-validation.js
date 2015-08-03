@@ -7,18 +7,22 @@ $(document).ready(function(){
         if (typeof attr !== typeof undefined && attr !== false) {
             type = $(btn).attr('url-type');
         } else {
-            type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+            if($("#endpoint_config").val() != 'null'){
+                type = $.parseJSON($("#endpoint_config").val())['endpoint_type']
+            }
         }
         $(btn).parent().parent().find('.url_validate_label').remove();
         $(btn).addClass("loadingButton-small");
         $(btn).html("Validating..");
 
         if (url == '') {
-            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
-            var toFade = $(btn).next();
+            $(btn).parent().after(' <span class="label label-warning url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
             $(btn).removeClass("loadingButton-small");
-            $(btn).val("Test URI");
-            var foo = setTimeout(function(){$(toFade).hide()},3000);
+            $(btn).html("Test URI");
+            var toFade = $(btn).parent().parent().find('.url_validate_label');
+            var foo = setTimeout(function() {
+                $(toFade).hide();
+            }, 3000);
             return;
         }
         if (!type) {
