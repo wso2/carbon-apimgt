@@ -33,12 +33,16 @@ require('/modules/publisher.js').exec(function (ctx) {
     var API_SUBSCRIPTIONS_URL = '/{context}/assets/{type}/apis/{pageName}/{action}';
     var uriMatcher = new URIMatcher(req.getRequestURI());
     var uriOptions;
+    
+    var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
     switch (httpMethod) {
         case 'POST':// POST endpoints
             uriOptions = uriMatcher.match(API_SUBSCRIPTIONS_URL);
             var apiPublisher = require('apipublisher').provider;
-            var apiProxy = apiPublisher.instance(user.username);
+            var apiProxy = apiPublisher.instance(user);
 
             if (uriOptions.action == 'getUUID') {
                 var apiUUIDResult = apiProxy.getUUIDByApi(params.apiProvider, params.apiName, params.apiVersion);

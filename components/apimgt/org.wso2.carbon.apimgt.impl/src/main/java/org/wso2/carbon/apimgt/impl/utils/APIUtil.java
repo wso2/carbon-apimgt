@@ -5337,5 +5337,33 @@ public final class APIUtil {
         }
         return true;
     }
+    
+    public static String getTenantDomainFromId(String id)throws APIManagementException{
+    	String tenantDomain = null;
+    	try {
+    		tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenant(Integer.valueOf(id)).getDomain();
+		} catch (Exception e) {
+			throw new APIManagementException(" Can't get tenant Domain for given tenant Id "+ id);
+		} 
+    	return tenantDomain;
+    }
+    
+    public static String appendDomainByTenantId(String id, String username)throws APIManagementException{   	
+    	String domain = getTenantDomainFromId(id);
+    	return appendDomainWithUser(username, domain);
+    	
+    }
+    
+    public static String appendDomainWithUser(String username, String domain){
+    	if(username.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR) || username.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) || MultitenantConstants.SUPER_TENANT_NAME.equalsIgnoreCase(username)){
+    		return username;
+    	}
+    	return username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
+    }
+    
+    public static APIIdentifier replaceEmailDomain(final APIIdentifier apiId){
+    	APIIdentifier id = new APIIdentifier(replaceEmailDomain(apiId.getProviderName()), apiId.getApiName(), apiId.getVersion());
+    	return id;
+    }
 
 }

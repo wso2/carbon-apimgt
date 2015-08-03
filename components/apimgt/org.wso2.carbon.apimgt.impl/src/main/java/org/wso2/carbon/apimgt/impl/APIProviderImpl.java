@@ -134,9 +134,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     // API definitions from swagger v2.0
     static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    private String username;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
+        this.username = username;
     }
 
     /**
@@ -245,7 +247,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String providerPath = APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                                                      RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
                               APIConstants.PROVIDERS_PATH +
-                              RegistryConstants.PATH_SEPARATOR + providerName;
+                              RegistryConstants.PATH_SEPARATOR + APIUtil.replaceEmailDomain(providerName);
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.PROVIDER_KEY);
@@ -512,7 +514,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void updateWsdl(API api) throws APIManagementException, RegistryException {
 
         //registry.beginTransaction();
-        String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
+        String apiArtifactId = registry.get(APIUtil.getAPIPath(APIUtil.replaceEmailDomain(api.getId()))).getUUID();
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                 APIConstants.API_KEY);
         GenericArtifact artifact = artifactManager.getGenericArtifact(apiArtifactId);
@@ -710,7 +712,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void updateApiArtifact(API api, boolean updateMetadata,boolean updatePermissions) throws APIManagementException {
-
+    	//registry id
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(api.getId());
+    	
         //Validate Transports
         validateAndSetTransports(api);
 
@@ -777,13 +781,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             saveAPIStatus(artifactPath, apiStatus);
             String[] visibleRoles = new String[0];
             if(updatePermissions){
-                clearResourcePermissions(artifactPath, api.getId());
+                clearResourcePermissions(artifactPath, apiId);
                 String visibleRolesList = api.getVisibleRoles();
 
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
                 }
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),visibleRoles,artifactPath);
+                APIUtil.setResourcePermissions(apiId.getProviderName(), api.getVisibility(),visibleRoles,artifactPath);
 
 
             }
@@ -792,38 +796,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                                              getAPIManagerConfigurationService().getAPIManagerConfiguration();
             boolean isSetDocLevelPermissions = Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
-            String docRootPath=  APIUtil.getAPIDocPath(api.getId());
+            String docRootPath=  APIUtil.getAPIDocPath(apiId);
                 if (isSetDocLevelPermissions) {
                     // Retain the docs
-                    List<Documentation> docs = getAllDocumentation(api.getId());
+                    List<Documentation> docs = getAllDocumentation(apiId);
 
                     for (Documentation doc : docs) {
                         if ((APIConstants.DOC_API_BASED_VISIBILITY).equalsIgnoreCase(doc.getVisibility().name())) {
                             
-                            String documentationPath = APIUtil.getAPIDocPath(api.getId()) + doc.getName();
-                            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                            String documentationPath = APIUtil.getAPIDocPath(apiId) + doc.getName();
+                            APIUtil.setResourcePermissions(apiId.getProviderName(), api.getVisibility(),
                                                            visibleRoles, documentationPath);
                             if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
                                 
-                                String contentPath = APIUtil.getAPIDocContentPath(api.getId(), doc.getName());
-                                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                                APIUtil.setResourcePermissions(apiId.getProviderName(), api.getVisibility(),
                                                                visibleRoles, contentPath);
                             } else if (Documentation.DocumentSourceType.FILE.equals(doc.getSourceType()) &&
                                        doc.getFilePath() != null) {
                                 
                                 String filePath =
-                                                  APIUtil.getDocumentationFilePath(api.getId(),
+                                                  APIUtil.getDocumentationFilePath(apiId,
                                                                                    doc.getFilePath()
                                                                                       .split("files" +
                                                                                                      RegistryConstants.PATH_SEPARATOR)[1]);
-                                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(),
+                                APIUtil.setResourcePermissions(apiId.getProviderName(), api.getVisibility(),
                                                                visibleRoles, filePath);
                             }
                         }
 
                     }
                 } else {
-                    APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                    APIUtil.setResourcePermissions(apiId.getProviderName(), api.getVisibility(), visibleRoles,
                                                    docRootPath);
                 }
             }
@@ -918,7 +922,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return
      * @throws APIManagementException
      */
-    public boolean checkIfAPIExists(APIIdentifier identifier) throws APIManagementException {
+    public boolean checkIfAPIExists(APIIdentifier identifier)throws APIManagementException{
+    	 boolean isTenantFlowStarted = false;
+    	 boolean result = false;
+         try {
+             String tenantDomain = MultitenantUtils.
+                     getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+             if (tenantDomain != null &&
+                 !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                 isTenantFlowStarted = true;
+                 PrivilegedCarbonContext.startTenantFlow();
+                 PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                         setTenantDomain(tenantDomain, true);
+             }
+             result = checkIfAPIExistsInRegistry(APIUtil.replaceEmailDomain(identifier));
+         } catch (Exception e) {
+             handleException("Error occurred while checking if API exists " + identifier.getApiName() +
+                             "-" + identifier.getVersion(), e);
+         } finally {
+             if (isTenantFlowStarted) {
+                 PrivilegedCarbonContext.endTenantFlow();
+             }
+         }
+         return result;
+    }
+    
+    private boolean checkIfAPIExistsInRegistry(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
@@ -952,6 +981,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return false;
         }
     }
+    
+    
+    
 
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
         String provider = api.getId().getProviderName();
@@ -1035,7 +1067,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public List<String> removeDefaultAPIFromGateway(API api) {
         String tenantDomain = null;
         if (api.getId().getProviderName().contains("AT")) {
-            String provider = api.getId().getProviderName().replace("-AT-", "@");
+            String provider = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
             tenantDomain = MultitenantUtils.getTenantDomain( provider);
         }
 
@@ -1044,15 +1076,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
-    private boolean isAPIPublished(API api) throws APIManagementException{
-            String tenantDomain = null;
-			if (api.getId().getProviderName().contains("AT")) {
-				String provider = api.getId().getProviderName().replace("-AT-", "@");
-				tenantDomain = MultitenantUtils.getTenantDomain( provider);
-			}
-            APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-            return gatewayManager.isAPIPublished(api, tenantDomain);
-        }
+	private boolean isAPIPublished(API api) throws APIManagementException {
+
+		String provider = APIUtil.replaceEmailDomainBack(api.getId().getProviderName());
+		String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+		APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+		return gatewayManager.isAPIPublished(api, tenantDomain);
+	}
 
     private APITemplateBuilder getAPITemplateBuilder(API api){
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
@@ -1093,9 +1123,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return vtb;
     }
 
-    public void updateDefaultAPIInRegistry(APIIdentifier apiIdentifier,boolean value) throws APIManagementException{
+    public void updateDefaultAPIInRegistry(APIIdentifier id,boolean value) throws APIManagementException{
+    	APIIdentifier apiIdentifier = APIUtil.replaceEmailDomain(id);
         try {
-
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             String defaultAPIPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1131,7 +1161,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public boolean createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException ,APIManagementException {
 	    boolean success = false;
 	    boolean isTenantFlowStarted = false;
-	    String providerName = api.getId().getProviderName();
+	    String providerName = APIUtil.replaceEmailDomain(api.getId()).getProviderName();
 	    try {
 		    String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
 		    if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -1371,8 +1401,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to remove documentation
      */
-    public void removeDocumentation(APIIdentifier apiId, String docName, String docType)
+    public void removeDocumentation(APIIdentifier id, String docName, String docType)
             throws APIManagementException {
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(id);
         String docPath = APIUtil.getAPIDocPath(apiId) + docName;
 
         try {
@@ -1429,7 +1460,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 		Icon icon = new Icon(file.getContent(), contentType);
 		String fileName = file.getFileName();
-		String filePath = APIUtil.getDocumentationFilePath(apiId, fileName);
+		String filePath = APIUtil.getDocumentationFilePath(APIUtil.replaceEmailDomain(apiId), fileName);
 		String visibleRolesList = api.getVisibleRoles();
 		String[] visibleRoles = new String[0];
 		if (visibleRolesList != null) {
@@ -1464,7 +1495,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addDocumentationContent(API api, String documentationName, String text)
             throws APIManagementException {
     	
-    	APIIdentifier identifier = api.getId();
+    	APIIdentifier identifier = APIUtil.replaceEmailDomain(api.getId());
     	String documentationPath = APIUtil.getAPIDocPath(identifier) + documentationName;
     	String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
     			RegistryConstants.PATH_SEPARATOR + documentationName;
@@ -1528,8 +1559,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to update docs
      */
-    public void updateDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException {
-
+    public void updateDocumentation(APIIdentifier id, Documentation documentation) throws APIManagementException {
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(id);
         String apiPath = APIUtil.getAPIPath(apiId);
         API api = getAPI(apiPath);
         String docPath =
@@ -1817,7 +1848,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.updateSubscription(apiId,subStatus,appId);
     }
 
-    public boolean deleteAPI(APIIdentifier identifier) throws APIManagementException {
+    public boolean deleteAPI(final APIIdentifier apiId) throws APIManagementException {
+    	APIIdentifier identifier = APIUtil.replaceEmailDomain(apiId);
 	    String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                       identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                       identifier.getApiName()+RegistryConstants.PATH_SEPARATOR+identifier.getVersion();
@@ -2633,7 +2665,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 		saveAPI(api, true);
 
-		return getUuuidOfAPI(apiIdentifier);
+		return getUuuidOfAPI(apiId);
 	}
 
 	public boolean updateAPIDesign(API api, String tags, String swagger) throws APIManagementException {
@@ -2876,7 +2908,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	}
 
 	public String getUuuidOfAPI(APIIdentifier identifier) throws APIManagementException {
-		String apiPath = APIUtil.getAPIPath(identifier);
+		String apiPath = APIUtil.getAPIPath(APIUtil.replaceEmailDomain(identifier));
 		Resource apiResource = null;
 		try {
 			apiResource = registry.get(apiPath);

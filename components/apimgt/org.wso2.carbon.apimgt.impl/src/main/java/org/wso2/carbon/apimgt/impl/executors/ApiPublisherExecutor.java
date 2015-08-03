@@ -32,11 +32,14 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.registry.extensions.interfaces.Execution;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 
@@ -76,11 +79,20 @@ public class ApiPublisherExecutor implements Execution {
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
         String user = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userWithDomain = APIUtil.appendDomainWithUser(user, domain);
+        userWithDomain = APIUtil.replaceEmailDomainBack(userWithDomain);
+        
         try {
+        	String tenantUserName = MultitenantUtils.getTenantAwareUsername(userWithDomain);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(domain);
+            
             GenericArtifactManager artifactManager = APIUtil
                     .getArtifactManager(context.getSystemRegistry(), APIConstants.API_KEY);
+            /*Registry registry = ServiceReferenceHolder.getInstance().
+                    getRegistryService().getGovernanceUserRegistry(APIUtil.replaceEmailDomain(userWithDomain));*/
             Registry registry = ServiceReferenceHolder.getInstance().
-                    getRegistryService().getGovernanceUserRegistry(user);
+                    getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
             Resource apiResource = context.getResource();
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
@@ -88,10 +100,11 @@ public class ApiPublisherExecutor implements Execution {
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             API api = APIUtil.getAPI(apiArtifact);
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(user);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
 	        executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
+            
             apiResource = registry.get(apiPath);
             context.setResource(apiResource);
         } catch (RegistryException e) {
@@ -100,7 +113,9 @@ public class ApiPublisherExecutor implements Execution {
             log.error("Failed to publish service to API store, While executing ApiPublisherExecutor. ", e);
         } catch (FaultGatewaysException e) {
 	        log.error("Failed to publish service gateway, While executing ApiPublisherExecutor. ", e);
-        }
+        } catch (UserStoreException e) {
+        	log.error("Failed to publish service gateway, While executing ApiPublisherExecutor. ", e);
+		}
 	    return executed;
     }
 }

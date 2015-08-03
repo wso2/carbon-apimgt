@@ -59,45 +59,76 @@ var provider = {};
     var log = new Log("jaggery-modules.api-manager.publisher");
     var utils = require("utils");
     var ref = utils.file;
+    var APIConstants = Packages.org.wso2.carbon.apimgt.impl.APIConstants;
 
-    function APIProviderProxy(username) {
-        this.username = username;
-        this.impl = APIManagerFactory.getInstance().getAPIProvider(this.username);
+    function appendDomainByUser(user){
+        
+        var username = user.username;
+        var domain = user.domain;
+        var superTenantDomain = user.superTenantDomain;
+        if(superTenantDomain == domain || (user.username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > -1  ||  user.username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) > -1)){
+            username = APIUtil.replaceEmailDomainBack(username);
+        } else{
+            username = username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
+        }
+        
+        return username;
     }
 
-    provider.instance = function(username){
-        return new APIProviderProxy(username);
+    APIProviderProxy.prototype.appendDomainToUser = function (username){
+        
+        var domain = this.user.domain;
+        var superTenantDomain = this.user.superTenantDomain;
+        if(superTenantDomain == domain || (username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > -1  ||  username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) > -1)){
+            username = APIUtil.replaceEmailDomainBack(username);
+            return username;
+        }
+
+        return username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
+    }
+
+
+    function APIProviderProxy(user) {
+        var usrName = user.username;
+        this.user = user;
+        var userNameWithDomain = appendDomainByUser(user);
+        this.username = userNameWithDomain;
+        this.impl = APIManagerFactory.getInstance().getAPIProvider(userNameWithDomain);
+    }
+
+    provider.instance = function(user){
+        return new APIProviderProxy(user);
     };
 
     APIProviderProxy.prototype.getAllProviders = function () {
-    	var providers = [];
+        var providers = [];
 
-    	try{
-    		providerSet = this.impl.getAllProviders();
-    		for (var i = 0 ; i < providerSet.size(); i++) {
-    			var provider = providerSet.get(i);
-        		providers.push({
-        			"name":provider.getName(),
-        			"email":provider.getEmail(),
-        			"description":provider.getDescription()
-        		});
+        try{
+            providerSet = this.impl.getAllProviders();
+            for (var i = 0 ; i < providerSet.size(); i++) {
+                var provider = providerSet.get(i);
+                providers.push({
+                    "name":provider.getName(),
+                    "email":provider.getEmail(),
+                    "description":provider.getDescription()
+                });
             }
-    		return {
+            return {
                 error:false,
                 providers:providers
             };
-    	}catch(e){
-    		log.error(e.message);
+        }catch(e){
+            log.error(e.message);
             return {
                 error:e,
                 providers:null
             };
-    	}
+        }
 
     };
 
     APIProviderProxy.prototype.createAPI = function (api) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var uuid;
         try {
             uuid = this.impl.createAPI(identifier, api.context);
@@ -117,7 +148,7 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.implementAPI = function (api) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.apiName, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
         apiOb.setImplementation(api.implementation_type);
         apiOb.setWsdlUrl(api.wsdl);
@@ -131,12 +162,12 @@ var provider = {};
         apiOb.setEndpointUTPassword(api.endpointUTPassword);
         apiOb.setEndpointConfig(api.endpoint_config);
         apiOb.setDestinationStatsEnabled(api.destinationStats);
-        apiOb.setSwagger(api.swagger);
+        apiOb.setSwagger((api.swagger != null && api.swagger != 'null') ? api.swagger : null);
         return this.impl.updateAPIImplementation(apiOb);
     };
 
     APIProviderProxy.prototype.updateDesignAPI = function (api) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
         apiOb.setContext(api.context);
         apiOb.setDescription(api.description);
@@ -151,11 +182,12 @@ var provider = {};
             image.setExtension(extension);
             image.getContentType(mediaType);
         }
-        return this.impl.updateAPIDesign(apiOb,  api.tags, api.swagger);
+        var apiSwagger = (api.swagger != null && api.swagger != 'null')? api.swagger : null;
+        return this.impl.updateAPIDesign(apiOb,  api.tags, apiSwagger);
     };
 
     APIProviderProxy.prototype.addDocumentation = function (api, document) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var docType = document.docType;
         var sourceType = document.sourceType;
         var sourceURL = document.sourceURL;
@@ -179,7 +211,7 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.updateDocumentation = function (api, document) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var docType = document.docType;
         var sourceType = document.sourceType;
         var sourceURL = document.sourceURL;
@@ -207,7 +239,7 @@ var provider = {};
      };
 
      APIProviderProxy.prototype.getAllDocumentation = function (api) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var docs = this.impl.getAllDocumentation(identifier);
         var json = APIUtil.convertToString(docs);
         var docsJSON = {};
@@ -219,24 +251,24 @@ var provider = {};
      };
 
     APIProviderProxy.prototype.addInlineContent = function (api, docName, content) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
         apiOb.setVisibility(api.visibility);
         return this.impl.addDocumentationContent(apiOb, docName, content);
     };
 
     APIProviderProxy.prototype.getInlineContent = function (api, docName) {
-        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         return this.impl.getDocumentationContent(apiId, docName);
     };
 
     APIProviderProxy.prototype.removeDocumentation = function (api, docName, docType) {
-        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         return this.impl.removeDocumentation(apiId, docName, docType);
     };
 
     APIProviderProxy.prototype.createNewAPIVersion = function (api, newVersion) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
         if('default_version' == api.defaultVersion) {
             apiOb.setAsDefaultVersion(true);
@@ -247,37 +279,37 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.getAllAPIUsageByProvider = function (providerName) {
-    	var apisJSON;
-    	try{
-    		apisArray = this.impl.getAllAPIUsageByProvider(providerName);
-    		var json = APIUtil.convertToString(apisArray);
-    		if(json != null){
-    			apisJSON = JSON.parse(json);
-    		}
-    		return {
+        var apisJSON;
+        try{
+            apisArray = this.impl.getAllAPIUsageByProvider(this.appendDomainToUser(providerName));
+            var json = APIUtil.convertToString(apisArray);
+            if(json != null){
+                apisJSON = JSON.parse(json);
+            }
+            return {
                 error:false,
                 apis:apisJSON
             };
-    	}catch(e){
-    		log.error(e.message);
+        }catch(e){
+            log.error(e.message);
             return {
                 error:e,
                 apis:null
             };
-    	}
+        }
 
     };
 
     APIProviderProxy.prototype.getSubscribersOfAPI = function (apiId) {
-    	var subscribers = [];
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiId.provider, apiId.name, apiId.version);
+        var subscribers = [];
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiId.provider), apiId.name, apiId.version);
         try{
-    		subscriberSet = this.impl.getSubscribersOfAPI(identifier);
+            subscriberSet = this.impl.getSubscribersOfAPI(identifier);
             var iterator = subscriberSet.iterator();
-    		while(iterator.hasNext()) {
-    			var subscriber = iterator.next();
-    			subscribers.push({
-    				"name":subscriber.getName(),
+            while(iterator.hasNext()) {
+                var subscriber = iterator.next();
+                subscribers.push({
+                    "name":subscriber.getName(),
                     "description": subscriber.getDescription(),
                     "subscribedDate": new Date(subscriber.getSubscribedDate().getTime()),
                     "id": subscriber.getId(),
@@ -285,23 +317,23 @@ var provider = {};
                     "email": subscriber.getEmail()
                 });
             }
-    		return {
+            return {
                 error:false,
                 subscribers:subscribers
             };
-    	}catch(e){
-    		log.error(e.message);
+        }catch(e){
+            log.error(e.message);
             return {
                 error:e,
                 subscribers:subscribers
             };
-    	}
+        }
 
     };
 
     APIProviderProxy.prototype.getAPIsByProvider = function (providerName) {
-    	apis = this.impl.getAPIsByProvider(providerName);
-    	var apisJSON = JSON.parse(APIUtil.convertToString(apis));
+        apis = this.impl.getAPIsByProvider(this.appendDomainToUser(providerName));
+        var apisJSON = JSON.parse(APIUtil.convertToString(apis));
         return apisJSON;
     };
 
@@ -309,7 +341,7 @@ var provider = {};
      * This method returns the UUID of an artifact
      */
     APIProviderProxy.prototype.getUUIDByApi = function (provider, name, version) {
-        return this.impl.getUUIDByApi(provider, name, version);
+        return this.impl.getUUIDByApi(this.appendDomainToUser(provider), name, version);
     };
 
     APIProviderProxy.prototype.getDefaultVersion = function (apiId) {
@@ -425,7 +457,8 @@ var provider = {};
      * This method is used to update the application wise and user wise subscription status
      */
     APIProviderProxy.prototype.updateSubscription = function (apiProvider, apiName, apiVersion, appId, status) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        //apiProvider = APIUtil.appendDomainWithUserName();
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
         return this.impl.updateSubscription(identifier, status, parseInt(appId));
     };
 
@@ -439,7 +472,7 @@ var provider = {};
      * @returns {boolean} whether successfully removed or not
      */
     APIProviderProxy.prototype.deleteAPI = function (apiProvider, apiName, apiVersion) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
         var success, log = new Log();
         try {
             success = result = this.impl.deleteAPI(identifier);
@@ -459,7 +492,7 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.getAPI = function (apiProvider, apiName, apiVersion) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
         var defaultVersion = this.getDefaultVersion(identifier);
         var hasDefaultVersion = (defaultVersion != null);
         var apiOb;
@@ -660,7 +693,7 @@ var provider = {};
     APIProviderProxy.prototype.checkIfAPIExists = function (apiProvider, apiName, apiVersion) {
 
         var exists;
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
         try {
             exists = this.impl.checkIfAPIExists(identifier);
             if (log.isDebugEnabled()) {
@@ -698,7 +731,7 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.getSwagger20Definition = function (apiProvider, apiName, apiVersion) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
         var data;
         try {
             data = JSON.parse(this.impl.getSwagger20Definition(identifier));
@@ -740,7 +773,7 @@ var provider = {};
         var success;
         var log = new Log();
         try {
-            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.apiName, api.version);
             var apiOb = new Packages.org.wso2.carbon.apimgt.api.model.API(identifier);
 
             if(api.tier != null && api.tier != "") {
@@ -773,7 +806,7 @@ var provider = {};
             apiOb.setEnvironments(environments);
             apiOb.setResponseCache(api.responseCache);
             apiOb.setCacheTimeout(api.cacheTimeout);
-            apiOb.setSwagger(api.swagger);
+            apiOb.setSwagger((api.swagger != null && api.swagger != 'null')? api.swagger : null);
             success = this.impl.updateAPIManagePhase(apiOb);
             if (log.isDebugEnabled()) {
                 log.debug("manageAPI : " + api.name + "-" + api.version);
@@ -897,12 +930,12 @@ var provider = {};
     APIProviderProxy.prototype.updateAPIStatus = function (api) {
         var log = new Log();
         try {
-            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.apiName, api.version);
+            var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.apiName, api.version);
             var success = this.impl.changeLifeCycleStatus(identifier, api.status, true, api.deprecateOldVersions, api.makeKeysForwardCompatible);
             if (log.isDebugEnabled()) {
                 log.debug("updateAPIStatus : " + api.name + "-" + api.version);
             }
-            if (success) {
+            if (!success) {
                 return {
                     error:false
                 };
@@ -967,7 +1000,7 @@ var provider = {};
     };
 
     APIProviderProxy.prototype.isAPIOlderVersionExist = function (apiProvider, apiName, apiVersion) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(apiProvider, apiName, apiVersion);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
         try {
             var exist = this.impl.isAPIOlderVersionExist(identifier);
             if (log.isDebugEnabled()) {
@@ -1061,4 +1094,5 @@ var provider = {};
     };
 
 })(provider);
+
 
