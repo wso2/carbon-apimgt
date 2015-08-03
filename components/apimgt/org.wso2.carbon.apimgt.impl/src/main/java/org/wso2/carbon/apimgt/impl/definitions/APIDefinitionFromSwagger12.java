@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -28,18 +31,14 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.registry.api.Resource;
 
 import java.util.*;
 
@@ -95,10 +94,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                         }
                     }
                 }
-                //String apiPath = APIUtil.getAPIPath(apiIdentifier);
-                if (endpoint.endsWith(RegistryConstants.PATH_SEPARATOR)) {
-                    endpoint.substring(0, endpoint.length() - 1);
-                }
+
                 // We do not need the version in the base path since with the context version strategy, the version is
                 // embedded in the context
                 String basePath = endpoint + api.getContext();
@@ -234,15 +230,15 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
                 JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
 
-                for (int k = 0; k < pathConfigs.size(); k++) {
-                    JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
-                    String pathName = (String) pathConfig.get("path");
+                for (Object pathConfig : pathConfigs) {
+                    JSONObject jsonObjPathConfig = (JSONObject) pathConfig;
+                    String pathName = (String) jsonObjPathConfig.get("path");
                     pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
 
                     Resource pathResource = registry.get(resourcePath + pathName);
                     String pathContent = new String((byte[]) pathResource.getContent());
                     JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
-                    pathConfig.put("file", pathJSON);
+                    jsonObjPathConfig.put("file", pathJSON);
                 }
             }
         } catch (RegistryException e) {
@@ -252,8 +248,11 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
             handleException("Error while parsing Swagger Definition for " + apiIdentifier.getApiName() + "-" +
                     apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
-        return apiJSON.toJSONString();
 
+        if (apiJSON != null) {
+            return apiJSON.toJSONString();
+        }
+        return null;
     }
 
     @Override
