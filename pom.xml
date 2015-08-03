@@ -16,6 +16,7 @@
         <version>1</version>
     </parent>
 
+
     <scm>
         <url>https://github.com/wso2/carbon-apimgt.git</url>
         <developerConnection>scm:git:https://github.com/wso2/carbon-apimgt.git</developerConnection>
