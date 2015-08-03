@@ -115,15 +115,15 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
                     JSONArray operations = (JSONArray) subResource.get("operations");
                     //Iterating each operation config
-                    for (Object operation1 : operations) {
-                        JSONObject operation = (JSONObject) operation1;
-                        String httpVerb = (String) operation.get("method");
+                    for (Object operation : operations) {
+                        JSONObject jsonObjectOperation = (JSONObject) operation;
+                        String httpVerb = (String) jsonObjectOperation.get("method");
                         /* Right Now PATCH is not supported. Need to remove this check when PATCH is supported*/
                         if (!"PATCH".equals(httpVerb)) {
                             URITemplate template = new URITemplate();
-                            Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON), (String) operation.get("scope"));
+                            Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON), (String) jsonObjectOperation.get("scope"));
 
-                            String authType = (String) operation.get("auth_type");
+                            String authType = (String) jsonObjectOperation.get("auth_type");
                             if (authType != null) {
                                 if (authType.equals("Application & Application User")) {
                                     authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -134,8 +134,8 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                             } else {
                                 authType = APIConstants.AUTH_NO_AUTHENTICATION;
                             }
-                            template.setThrottlingTier((String) operation.get("throttling_tier"));
-                            template.setMediationScript((String) operation.get("mediation_script"));
+                            template.setThrottlingTier((String) jsonObjectOperation.get("throttling_tier"));
+                            template.setMediationScript((String) jsonObjectOperation.get("mediation_script"));
                             template.setUriTemplate(uriTempVal);
                             template.setHTTPVerb(httpVerb);
                             template.setAuthType(authType);
