@@ -2919,19 +2919,17 @@ public class APIUsageStatisticsClient {
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
                 
-                if (APIUsageStatisticsClientConstants.GROUP_BY_WEEK.equals(groupBy)) {
-                    groupByStmt = "week";
-                } else if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)){
+                if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)){
                     groupByStmt = "year, month, day";
                 } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)){
-                    groupByStmt = "time";
+                    groupByStmt = "year, month, day, time";
                 } else {
                     throw new APIMgtUsageQueryServiceClientException(
                             "Unsupported group by parameter " + groupBy +
                                     " for retrieving throttle data of API and app.");
                 }
 
-                query = "SELECT api, api_version, apiPublisher, time, year, month, day, week, " +
+                query = "SELECT " + groupByStmt + " ," +
                         "SUM(COALESCE(success_request_count,0)) AS success_request_count, " +
                         "SUM(COALESCE(throttleout_count,0)) AS throttleout_count " +
                         "FROM API_THROTTLED_OUT_SUMMARY " +
@@ -2942,7 +2940,7 @@ public class APIUsageStatisticsClient {
                         (StringUtils.isEmpty(appName) ? "" : " AND applicationName = ?") +
                         "AND time BETWEEN ? AND ? " +
                         "GROUP BY " + groupByStmt + " " +
-                        "ORDER BY time ASC";
+                        "ORDER BY " + groupByStmt + " ASC";
 
                 statement = connection.prepareStatement(query);
                 int index = 1;
@@ -2959,18 +2957,19 @@ public class APIUsageStatisticsClient {
 
                 rs = statement.executeQuery();
                 while (rs.next()) {
-                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
-                    String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
                     int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
                     int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
+                    int year =  rs.getInt(APIUsageStatisticsClientConstants.YEAR);
+                    int month =  rs.getInt(APIUsageStatisticsClientConstants.MONTH);
                     String time;
                     if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
                         time = rs.getString(APIUsageStatisticsClientConstants.TIME);
                     } else {
-                        time = rs.getString(APIUsageStatisticsClientConstants.TIME).split(" ")[0] + " 00:00:00";
+                        int day =  rs.getInt(APIUsageStatisticsClientConstants.DAY);
+                        time = year + "-" + month + "-" + day + " 00:00:00";
                     }
                     throttlingData.add(
-                            new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
+                            new APIThrottlingOverTimeDTO(apiName, provider, successRequestCount, throttledOutCount,
                                     time)
                     );
                 }
@@ -3043,7 +3042,7 @@ public class APIUsageStatisticsClient {
 
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
 
-                query = "SELECT api, api_version, apiPublisher, time, SUM(COALESCE(success_request_count,0)) " +
+                query = "SELECT api, apiPublisher, SUM(COALESCE(success_request_count,0)) " +
                         "AS success_request_count, SUM(COALESCE(throttleout_count,0)) as throttleout_count " +
                         "FROM API_THROTTLED_OUT_SUMMARY " +
                         "WHERE tenantDomain = ? " +
@@ -3142,7 +3141,8 @@ public class APIUsageStatisticsClient {
                 query = "SELECT DISTINCT api FROM API_THROTTLED_OUT_SUMMARY " +
                         "WHERE tenantDomain = ? " +
                         (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
-                                "AND apiPublisher = ?");
+                                "AND apiPublisher = ? ") +
+                        "ORDER BY api ASC";
 
                 statement = connection.prepareStatement(query);
                 statement.setString(1, tenantDomain);
@@ -3223,8 +3223,9 @@ public class APIUsageStatisticsClient {
                 query = "SELECT DISTINCT applicationName FROM API_THROTTLED_OUT_SUMMARY " +
                         "WHERE tenantDomain = ? " +
                         (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
-                                "AND apiPublisher = ?") +
-                        (apiName == null ? "" : "AND api = ? ");
+                                "AND apiPublisher = ? ") +
+                        (apiName == null ? "" : "AND api = ? ") +
+                        "ORDER BY applicationName ASC";
 
                 statement = connection.prepareStatement(query);
                 int index = 1;
