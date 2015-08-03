@@ -258,6 +258,8 @@
                                     </propertyDef>
                                 </properties>
                             </adviceFile>
+
+
                             <bundles>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${apimgt.api.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${apimgt.impl.version}</bundleDef>
@@ -270,7 +272,34 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core:${apimgt.core.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
-                                <!--bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub:${carbon.platform.version}</bundleDef-->
+                                <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</bundleDef>
+                                <bundleDef>org.apache.woden.wso2:woden</bundleDef>
+                            </bundles>
+                            <importBundles>
+                                <importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
+                                <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
+                                <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v1</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
+                            </importBundles>
+                            <importFeatures>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}</importFeatureDef>
+                            </importFeatures>
+
+                            <!--<bundles>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${apimgt.api.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${apimgt.impl.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${apimgt.keymgt.stub.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${apimgt.keymgt.client.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${apimgt.keymgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${apimgt.usage.publisher}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${apimgt.usage.client}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core:${apimgt.core.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
+                                &lt;!&ndash;bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub:${carbon.platform.version}</bundleDef&ndash;&gt;
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                             </bundles>
                             <importBundles>
@@ -284,7 +313,7 @@
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}</importFeatureDef>
-                            </importFeatures>
+                            </importFeatures>-->
                         </configuration>
                     </execution>
                 </executions>

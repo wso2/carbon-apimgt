@@ -26,11 +26,8 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
     private static final Log log = LogFactory.getLog(ExtendedClientCredentialsGrantHandler.class);

@@ -257,7 +257,7 @@
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${apimgt.handlers.security.stub.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd;version="${carbon.apimgt.imp.pkg.version}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",

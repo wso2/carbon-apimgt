@@ -103,7 +103,6 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${apimgt.handlers.security.stub.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.stub:4.2.0</bundleDef>
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
@@ -111,7 +110,7 @@
                                 <importFeatureDef>org.wso2.carbon.identity.self.registration.server:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.hostobjects.sso:${carbon.commons.version}</importBundleDef>
                             </importBundles>
                         </configuration>
                     </execution>

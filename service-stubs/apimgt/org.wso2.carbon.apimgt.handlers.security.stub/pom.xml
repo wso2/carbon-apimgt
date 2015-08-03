@@ -98,7 +98,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${apimgt.handlers.security.stub.version}",
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,
