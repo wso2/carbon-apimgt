@@ -350,7 +350,7 @@ jsonform.elementTypes = {
       '</div>'+
       '<div class="custom-form-right col-lg-5">'+
       '<button class="btn btn-success advance_endpoint_config" ep-config-data="{}" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
-      '<button class="btn btn-default check_url_valid" type="button" >Test</button>'+
+      '<button class="btn btn-default check_url_valid" type="button" >Test URI</button>'+
       '</div>',
 
     'fieldtemplate': true,
