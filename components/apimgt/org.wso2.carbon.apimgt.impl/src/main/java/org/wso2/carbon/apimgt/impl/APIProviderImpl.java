@@ -509,7 +509,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
-            try {
 
                 String previousDefaultVersion = getDefaultVersion(api.getId());
                 String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
@@ -675,9 +674,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     contextCache.put(api.getContext(), true);
                 }
 
-            } catch (APIManagementException e) {
-                handleException("Error while updating the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
-            }
+
         } else {
             // We don't allow API status updates via this method.
             // Use changeAPIStatus for that kind of updates.
