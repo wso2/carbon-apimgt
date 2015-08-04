@@ -225,6 +225,7 @@
 	"techOwner" : "Propietario técnica" ,
 	"techOwnerMail" : "Técnico Propietario Enviar",
 
-    "apiUnavailable" : "API no existe"
+    "apiUnavailable" : "API no existe",
+    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint."
 
 }
