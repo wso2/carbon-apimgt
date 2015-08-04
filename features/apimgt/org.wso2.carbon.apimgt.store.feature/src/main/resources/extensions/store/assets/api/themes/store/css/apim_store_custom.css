@@ -244,6 +244,7 @@ legend {
 
 .curlurl-genbtn {
     white-space: nowrap;
+    margin-left:-10px;
 }
 
 .editable-div {
@@ -387,6 +388,7 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
 
 .curl-testurlp-wrapper {
     display: none;
+    margin-left: 220px;
 }
 
 .curl-copyinfo {
@@ -415,7 +417,8 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
     /*border-radius: 5px;*/
     background: #292E38;
     color: #ffffff;
-    width: 70%;
+    width: 626px;
+    margin-left: -10px;
 }
 
 .editable-div-wrapper i.fa {
@@ -433,6 +436,9 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
 .editable-div {
     padding: 5px 100px 5px 10px;
     outline: 0;
+    width: 700px;
+    text-transform: none;
+    font-weight: 100;
 }
 
 .editable-div span {
@@ -550,4 +556,17 @@ div.top-menu-right-custom {
 }
 .action-title {
     font-weight: 100;
+}
+.dropdown-menu {
+    background-color: #333;
+    color: #ccc;
+    left: 70px;
+    max-height: 402px;
+    overflow: hidden;
+    padding-bottom: 10px;
+    padding-left: 0;
+    padding-top: 10px;
+    top: 7px;
+    width: auto;
+    border-radius: 0px;
 }
