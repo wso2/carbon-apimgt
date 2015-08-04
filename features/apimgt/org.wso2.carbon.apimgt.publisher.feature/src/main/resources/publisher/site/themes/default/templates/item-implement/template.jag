@@ -227,7 +227,7 @@
 
                             <a style="margin-left:3px" class="icon-question-sign help_popup" help_data="endpoint_test_help"></a>
                             <div id="endpoint_test_help" class="hide">
-                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+                                <p><%=i18n.localize("validityCheckMessage")%></p>
                             </div>
 
                         </div>
