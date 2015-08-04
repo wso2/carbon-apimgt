@@ -20,6 +20,7 @@ asset.manager = function(ctx) {
     var apiPublisher =  require('apipublisher').provider;
     var LOGGED_IN_USER = 'LOGGED_IN_USER';
     var log = new Log('default-asset');
+    var server = require('store').server;
     var user = server.current(ctx.session);
     var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
     var constants = require('rxt').constants;
