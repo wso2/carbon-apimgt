@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -2839,7 +2840,7 @@ public class APIUsageStatisticsClient {
             statement = connection.createStatement();
             String query;
             //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exist
+            if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exists
                 query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY
                         + " WHERE " + APIUsageStatisticsClientConstants.API + " = '" + apiName + "'";
                 if (apiVersion != null) {
@@ -2886,6 +2887,399 @@ public class APIUsageStatisticsClient {
         }
     }
 
+    /** Given API name and Application, returns throttling request counts over time for a given time span
+     * 
+     * @param apiName Name of the API
+     * @param provider Provider name
+     * @param appName Application name
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @param groupBy Group by parameter. Supported parameters are :day,hour
+     * @return Throttling counts over time
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
+            String appName, String fromDate, String toDate, String groupBy)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String query, groupByStmt;
+            List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
+                
+                if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)){
+                    groupByStmt = "year, month, day";
+                } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)){
+                    groupByStmt = "year, month, day, time";
+                } else {
+                    throw new APIMgtUsageQueryServiceClientException(
+                            "Unsupported group by parameter " + groupBy +
+                                    " for retrieving throttle data of API and app.");
+                }
+
+                query = "SELECT " + groupByStmt + " ," +
+                        "SUM(COALESCE(success_request_count,0)) AS success_request_count, " +
+                        "SUM(COALESCE(throttleout_count,0)) AS throttleout_count " +
+                        "FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE tenantDomain = ? " +
+                        "AND api = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ?") +
+                        (StringUtils.isEmpty(appName) ? "" : " AND applicationName = ?") +
+                        "AND time BETWEEN ? AND ? " +
+                        "GROUP BY " + groupByStmt + " " +
+                        "ORDER BY " + groupByStmt + " ASC";
+
+                statement = connection.prepareStatement(query);
+                int index = 1;
+                statement.setString(index++, tenantDomain);
+                statement.setString(index++, apiName);
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(index++, provider);
+                }
+                if (!StringUtils.isEmpty(appName)) {
+                    statement.setString(index++, appName);
+                }
+                statement.setString(index++, fromDate);
+                statement.setString(index, toDate);
+
+                rs = statement.executeQuery();
+                while (rs.next()) {
+                    int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
+                    int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
+                    int year =  rs.getInt(APIUsageStatisticsClientConstants.YEAR);
+                    int month =  rs.getInt(APIUsageStatisticsClientConstants.MONTH);
+                    String time;
+                    if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
+                        time = rs.getString(APIUsageStatisticsClientConstants.TIME);
+                    } else {
+                        int day =  rs.getInt(APIUsageStatisticsClientConstants.DAY);
+                        time = year + "-" + month + "-" + day + " 00:00:00";
+                    }
+                    throttlingData.add(
+                            new APIThrottlingOverTimeDTO(apiName, provider, successRequestCount, throttledOutCount,
+                                    time)
+                    );
+                }
+
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
+            }
+
+            return throttlingData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
+
+    /** Given Application name and the provider, returns throttle data for the APIs of the provider invoked by the 
+     *  given application
+     * 
+     * @param appName Application name
+     * @param provider Provider name
+     * @param fromDate Start date of the time span
+     * @param toDate End date of time span
+     * @return Throttling counts of APIs of the provider invoked by the given app
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
+            String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String query;
+            List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
+
+                query = "SELECT api, apiPublisher, SUM(COALESCE(success_request_count,0)) " +
+                        "AS success_request_count, SUM(COALESCE(throttleout_count,0)) as throttleout_count " +
+                        "FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE tenantDomain = ? " +
+                        "AND applicationName = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ?") +
+                        "AND time BETWEEN ? AND ? " +
+                        "GROUP BY api, apiPublisher " +
+                        "ORDER BY api ASC";
+
+                statement = connection.prepareStatement(query);
+                int index = 1;
+                statement.setString(index++, tenantDomain);
+                statement.setString(index++, appName);
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(index++, provider);
+                }
+                statement.setString(index++, fromDate);
+                statement.setString(index, toDate);
+
+                rs = statement.executeQuery();
+                while (rs.next()) {
+                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
+                    String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
+                    int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
+                    int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
+                    throttlingData
+                            .add(new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
+                                    null));
+                }
+
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
+            }
+
+            return throttlingData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
+
+    /** Get APIs of the provider that consist of throttle data 
+     * 
+     * @param provider Provider name
+     * @return List of APIs of the provider that consist of throttle data
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<String> getAPIsForThrottleStats(String provider)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String query;
+            List<String> throttlingAPIData = new ArrayList<String>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
+
+                query = "SELECT DISTINCT api FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE tenantDomain = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ? ") +
+                        "ORDER BY api ASC";
+
+                statement = connection.prepareStatement(query);
+                statement.setString(1, tenantDomain);
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(2, provider);
+                }
+                
+                rs = statement.executeQuery();
+                while (rs.next()) {
+                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
+                    throttlingAPIData.add(api);
+                }
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
+            }
+
+            return throttlingAPIData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
+
+    /** Given provider name and the API name, returns a list of applications through which the corresponding API is
+     *  invoked and which consist of success/throttled requests
+     * 
+     * @param provider Provider name
+     * @param apiName Name of th API
+     * @return A list of applications through which the corresponding API is invoked and which consist of throttle data
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    public List<String> getAppsForThrottleStats(String provider, String apiName)
+            throws APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
+                    "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            String query;
+            List<String> throttlingAppData = new ArrayList<String>();
+            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+
+            //check whether table exist first
+            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
+                query = "SELECT DISTINCT applicationName FROM API_THROTTLED_OUT_SUMMARY " +
+                        "WHERE tenantDomain = ? " +
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                                "AND apiPublisher = ? ") +
+                        (apiName == null ? "" : "AND api = ? ") +
+                        "ORDER BY applicationName ASC";
+
+                statement = connection.prepareStatement(query);
+                int index = 1;
+                statement.setString(index++, tenantDomain);
+                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    statement.setString(index++, provider);
+                }
+                if( apiName != null ){
+                    statement.setString(index, apiName);
+                }
+
+                rs = statement.executeQuery();
+                while (rs.next()) {
+                    String applicationName = rs.getString(APIUsageStatisticsClientConstants.APPLICATION_NAME);
+                    throttlingAppData.add(applicationName);
+                }
+
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
+                                " does not exist.");
+            }
+
+            return throttlingAppData;
+
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    //this is logged and the process is continued because the query has executed
+                    log.error("Error occurred while closing the JDBC database connection.", e);
+                }
+            }
+        }
+    }
 
     private static class AppUsage {
 

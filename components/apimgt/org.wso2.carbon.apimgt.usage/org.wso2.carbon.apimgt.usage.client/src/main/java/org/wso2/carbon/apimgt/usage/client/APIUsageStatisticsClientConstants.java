@@ -22,7 +22,9 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API_REQUEST_SUMMARY = "API_REQUEST_SUMMARY";
 
-    public static final String CONSUMERKEY = "consumerKey";
+    public static final String API_THROTTLED_OUT_SUMMARY = "API_THROTTLED_OUT_SUMMARY";
+    
+    public static final String CONSUMERKEY = "consumerkey";
 
     public static final String RESOURCE = "resourcepath";
 
@@ -88,6 +90,8 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API_PUBLISHER = "APIPUBLISHER";
 
+    public static final String API_PUBLISHER_THROTTLE_TABLE = "apiPublisher";
+
     public static final String YEAR= "year";
 
     public static final String DAY= "day";
@@ -111,5 +115,19 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_USAGE_JDBC_Password =  API_USAGE_TRACKING + "JDBCPassword";
     
     public static final String API_USAGEBY_DESTINATION_SUMMARY = "API_DESTINATION_SUMMARY";
+    
+    public static final String APPLICATION_NAME = "applicationName";
+
+    public static final String SUCCESS_REQUEST_COUNT = "success_request_count";
+
+    public static final String THROTTLED_OUT_COUNT = "throttleout_count";
+
+    public static final String FOR_ALL_API_VERSIONS = "FOR_ALL_API_VERSIONS";
+
+    public static final String GROUP_BY_HOUR = "hour";
+
+    public static final String GROUP_BY_DAY = "day";
+
+    public static final String GROUP_BY_WEEK = "week";
 
 }
