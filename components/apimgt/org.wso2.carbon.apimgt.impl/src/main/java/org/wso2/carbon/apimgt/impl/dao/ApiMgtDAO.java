@@ -105,6 +105,7 @@ import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.identity.oauth2.util.OAuth2Util;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -3605,7 +3606,7 @@ public class ApiMgtDAO {
         // Update Access Token
         String sqlUpdateNewAccessToken = "UPDATE " + accessTokenStoreTable +
                                          " SET USER_TYPE=?, VALIDITY_PERIOD=? " +
-                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
+                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? AND TOKEN_SCOPE_HASH = ?";
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -3622,6 +3623,7 @@ public class ApiMgtDAO {
             }
             prepStmt.setString(3, APIUtil.encryptToken(newAccessToken));
             prepStmt.setString(4, keyType);
+            prepStmt.setString(5, OAuth2Util.hashScopes(keyType));
 
             prepStmt.execute();
             prepStmt.close();
@@ -3819,8 +3821,8 @@ public class ApiMgtDAO {
         // Add Access Token
         String sqlAddAccessToken = "INSERT" +
                                    " INTO " + accessTokenStoreTable +
-                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE) " +
-                                   " VALUES (?,?,?,?)";
+                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, TOKEN_SCOPE_HASH) " +
+                                   " VALUES (?,?,?,?,?)";
 
         String getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +
                                    "FROM " +
@@ -3877,6 +3879,7 @@ public class ApiMgtDAO {
             prepStmt.setString(2, consumerKey);
             prepStmt.setString(3, APIConstants.TokenStatus.ACTIVE);
             prepStmt.setString(4, "default");
+            prepStmt.setString(5, OAuth2Util.hashScopes("default"));
             prepStmt.execute();
             prepStmt.close();
 
@@ -3986,7 +3989,7 @@ public class ApiMgtDAO {
         // Add Access Token
         String sqlAddAccessToken = "INSERT INTO " +  accessTokenStoreTable +
                 " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
-                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
+                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD,TOKEN_SCOPE_HASH)  VALUES (?,?,?,?,?,?,?,?,?,?)";
 
 //        ///////////////////////////
 //
@@ -4028,6 +4031,7 @@ public class ApiMgtDAO {
             } else {
                 prepStmt.setLong(9, validityPeriod * 1000);
             }
+            prepStmt.setString(10, OAuth2Util.hashScopes(tokenScope));
             prepStmt.execute();
             prepStmt.close();
 
