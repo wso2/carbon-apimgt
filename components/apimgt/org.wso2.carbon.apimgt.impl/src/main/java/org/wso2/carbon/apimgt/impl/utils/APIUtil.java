@@ -2071,7 +2071,10 @@ public final class APIUtil {
         long currentTime = System.currentTimeMillis();
 
         //If the validity period is not an never expiring value
-        if (validityPeriod != Long.MAX_VALUE) {
+        if (validityPeriod != Long.MAX_VALUE &&
+            // For cases where validityPeriod is closer to Long.MAX_VALUE (then issuedTime + validityPeriod would spill
+            // over and would produce a negative value)
+            (currentTime - timestampSkew) > validityPeriod) {
             //check the validity of cached OAuth2AccessToken Response
 
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
