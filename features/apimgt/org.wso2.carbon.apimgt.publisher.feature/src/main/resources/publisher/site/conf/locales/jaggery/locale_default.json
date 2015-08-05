@@ -111,6 +111,8 @@
     "propagateChangesToGateway":"Propagate Changes to API Gateway",
     "requireReSubscription":"Require Re-Subscription",
     "deprecateOldVersions":"Deprecate Old Versions",
+    "retireApiTitle":"API Retired",
+    "retireApi":"API will loose all its subscription when its state changed to RETIRED",
 
     "created":"CREATED",
     "published":"PUBLISHED",

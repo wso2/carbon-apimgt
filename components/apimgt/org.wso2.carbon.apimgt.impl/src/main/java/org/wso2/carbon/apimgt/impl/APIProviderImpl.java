@@ -823,8 +823,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }    
 
-    public void changeAPIStatus(API api, APIStatus status, String userId,
-                                boolean updateGatewayConfig)
+    public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException {
         Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         APIStatus currentStatus = api.getStatus();
@@ -851,22 +850,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         status.equals(APIStatus.BLOCKED) || status.equals(APIStatus.PROTOTYPED)) {
                         Map<String, String> failedToPublishEnvironments = publishToGateway(api);
                         if (!failedToPublishEnvironments.isEmpty()) {
-                            Set<String> publishedEnvironments =
-                                    new HashSet<String>(api.getEnvironments());
-                            publishedEnvironments
-                                    .removeAll(new ArrayList<String>(failedToPublishEnvironments.keySet()));
+                            Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
+                            publishedEnvironments.removeAll(new ArrayList<String>(failedToPublishEnvironments.keySet()));
                             api.setEnvironments(publishedEnvironments);
                             updateApiArtifact(api, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", Collections.EMPTY_MAP);
-                            failedGateways
-                                    .put("PUBLISHED", failedToPublishEnvironments);
+                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                         }
-                    } else {
+                    } else { // API Status : RETIRED
                         Map<String, String> failedToRemoveEnvironments = removeFromGateway(api);
+                        apiMgtDAO.removeAllSubscriptions(api.getId());
                         if (!failedToRemoveEnvironments.isEmpty()) {
-                            Set<String> publishedEnvironments =
-                                    new HashSet<String>(api.getEnvironments());
+                            Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
                             publishedEnvironments.addAll(failedToRemoveEnvironments.keySet());
                             api.setEnvironments(publishedEnvironments);
                             updateApiArtifact(api, true, false);
@@ -1743,8 +1739,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             Resource apiResource = registry.get(path);
             String artifactId = apiResource.getUUID();
             
@@ -1763,9 +1758,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
 
 			if (dependenciesArray.length > 0) {
-				for (int i = 0; i < dependenciesArray.length; i++) {
-					registry.delete(dependenciesArray[i].getPath());
-				}
+                for (GovernanceArtifact artifact : dependenciesArray)   {
+                    registry.delete(artifact.getPath());
+                }
 			}
             String isDefaultVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION);
             artifactManager.removeGenericArtifact(artifactId);
@@ -1782,8 +1777,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             	registry.delete(apiDefinitionFilePath);
             }
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
             boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
@@ -1822,8 +1817,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-            		identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-            		identifier.getApiName();            
+            		identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
             if(registry.resourceExists(apiCollectionPath)){
             	Resource apiCollection=registry.get(apiCollectionPath);
             	CollectionImpl collection=(CollectionImpl)apiCollection;
@@ -1837,7 +1831,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String apiProviderPath=APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-            		identifier.getProviderName();            
+                                   identifier.getProviderName();
             if(registry.resourceExists(apiProviderPath)){
             	Resource providerCollection=registry.get(apiProviderPath);
             	CollectionImpl collection=(CollectionImpl)providerCollection;
@@ -1898,7 +1892,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 					}
 					if (apiConstant != null) {
 						matcher = pattern.matcher(apiConstant);
-						if (matcher != null && matcher.find()) {
+						if (matcher.find()) {
                             foundApiList.add(api);
 						}
 					}
@@ -1907,7 +1901,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 						if (urls.size() > 0) {
 							for (URITemplate url : urls) {
 								matcher = pattern.matcher(url.getUriTemplate());
-								if (matcher != null && matcher.find()) {
+								if (matcher.find()) {
                                     foundApiList.add(api);
 									break;
 								}

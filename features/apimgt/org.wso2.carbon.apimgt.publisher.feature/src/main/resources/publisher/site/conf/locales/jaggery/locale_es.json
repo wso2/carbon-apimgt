@@ -91,6 +91,8 @@
     "propagateChangesToGateway":"Propagar Cambios en API Gateway",
     "requireReSubscription":"Requerir Re-suscripcion",
     "deprecateOldVersions":"Desprobar Versiones Anteriores",
+    "retireApiTitle":"API Jubilado",
+    "retireApi":"API perderá todo su suscripción cuando su estado cambia a JUBILADO",
 
     "created":"CREADO",
     "published":"PUBLICADO",
