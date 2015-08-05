@@ -51,10 +51,10 @@
             <groupId>org.wso2.carbon.registry</groupId>
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
         </dependency>
-      <dependency>
+      <!--<dependency>
           <groupId>org.apache.poi</groupId>
           <artifactId>poi-ooxml</artifactId>
-      </dependency>
+      </dependency>-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
@@ -249,6 +249,7 @@
                             org.wso2.carbon.apimgt.impl.internal.*
                         </Private-Package>
                         <Export-Package>
+                            !org.wso2.carbon.apimgt.impl.dto.xsd.*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
                         </Export-Package>
                         <Import-Package>
@@ -257,7 +258,7 @@
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.apimgt.handlers.stub.package.import.version.range}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd;version="${carbon.apimgt.imp.pkg.version}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",

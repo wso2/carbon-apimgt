@@ -75,19 +75,14 @@
             <artifactId>org.wso2.carbon.ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-            <version>4.2.3</version>
+            <version>${carbon.identity.version}</version>
         </dependency>
         <dependency>
              <groupId>org.wso2.carbon</groupId>
              <artifactId>org.wso2.carbon.utils</artifactId>       			 
          </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-            <version>4.2.3</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -122,7 +117,7 @@
                             !javax.servlet.http,
                             !org.wso2.carbon.apimgt.gateway.internal,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
-                            org.wso2.throttle.*
+                            <!--org.wso2.throttle.*-->
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
