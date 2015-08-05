@@ -45,7 +45,7 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.api.model.xsd;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.api.model.*;version="${carbon.apimgt.version}",
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

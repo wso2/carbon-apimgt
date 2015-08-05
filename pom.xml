@@ -197,11 +197,11 @@
                 <version>${com.nimbusds.jwt.version}</version>
             </dependency>
 
-            <dependency>
+            <!--<dependency>
                 <groupId>org.wso2.carbon.deployment</groupId>
                 <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
                 <version>${carbon.deployment.version}</version>
-            </dependency>
+            </dependency>-->
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -381,11 +381,11 @@
                 <version>${jaggery.version}</version>
             </dependency>
 
-            <dependency>
+            <!--<dependency>
                 <groupId>org.wso2.carbon.hostobjects</groupId>
                 <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
                 <version>${hostobject.version}</version>
-            </dependency>
+            </dependency>-->
 
             <dependency>
                 <groupId>org.jaggeryjs</groupId>
@@ -439,11 +439,11 @@
                 <version>${carbon.kernel.version}</version>
             </dependency>
 
-            <dependency>
+            <!--<dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency>-->
 
             <dependency>
                 <groupId>org.wso2.carbon.commons</groupId>
@@ -842,6 +842,7 @@
         <carbon.platform.version>4.4.0</carbon.platform.version>
         <carbon.platform.package.export.version>4.4.0</carbon.platform.package.export.version>
         <carbon.platform.package.import.version.range>[4.4.0, 4.5.0)</carbon.platform.package.import.version.range>
+        <carbon.apimgt.handlers.stub.package.import.version.range>[4.3.0, 4.4.0)</carbon.apimgt.handlers.stub.package.import.version.range>
 
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
@@ -913,6 +914,7 @@
         <httpcomponents.version>4.2.5</httpcomponents.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <com.nimbusds.jwt.version>2.26.1.wso2v2</com.nimbusds.jwt.version>
+        <carbon.hostobjects.sso.version>4.4.3</carbon.hostobjects.sso.version>
     </properties>
 </project>
 
