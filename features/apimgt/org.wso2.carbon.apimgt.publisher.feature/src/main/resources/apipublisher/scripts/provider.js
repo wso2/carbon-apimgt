@@ -935,7 +935,7 @@ var provider = {};
             if (log.isDebugEnabled()) {
                 log.debug("updateAPIStatus : " + api.name + "-" + api.version);
             }
-            if (!success) {
+            if (success) {
                 return {
                     error:false
                 };
