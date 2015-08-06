@@ -1776,7 +1776,7 @@ public class ApiMgtDAO {
                 "AND LOWER(SUB.USER_ID) = LOWER(?)))" ; 
         String whereClause = " AND SUB.USER_ID = ? ";
         String whereClauseCaseSensitive =" AND LOWER(SUB.USER_ID) = LOWER(?) ";
-
+        
         try {
             connection = APIMgtDBUtil.getConnection();
              if (groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()) {
@@ -2807,20 +2807,18 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IATA.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         " AKM.STATE AS STATE "+
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
                         accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA," +
-                        " IDN_OAUTH2_SCOPE_ASSOCIATION IATA" +
+                        " IDN_OAUTH_CONSUMER_APPS ICA " +
                         " WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " IAT.TOKEN_ID = IATA.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'PRODUCTION' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
@@ -2866,20 +2864,18 @@ public class ApiMgtDAO {
                         "ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
                         "IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
                         "IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
-                        "IATA.TOKEN_SCOPE AS TOKEN_SCOPE, " +
+                        "IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
                         "AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         "AKM.STATE AS STATE " +
                         "FROM " +
                         "AM_APPLICATION_KEY_MAPPING AKM, " +
                         accessTokenStoreTable + " IAT, " +
-                        "IDN_OAUTH_CONSUMER_APPS ICA," +
-                        "IDN_OAUTH2_SCOPE_ASSOCIATION IATA " +
+                        "IDN_OAUTH_CONSUMER_APPS ICA" +
                         "WHERE " +
                         "AKM.APPLICATION_ID = ? AND " +
                         "IAT.USER_TYPE = ? AND " +
                         "ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND " +
                         "IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND " +
-                        "IAT.TOKEN_ID = IATA.TOKEN_ID AND " +
                         "AKM.KEY_TYPE = 'PRODUCTION' AND " +
                         "(IAT.TOKEN_STATE = 'ACTIVE' OR " +
                         "IAT.TOKEN_STATE = 'EXPIRED' OR " +
@@ -2957,19 +2953,17 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IATA.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
                         accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA," +
-                        " IDN_OAUTH2_SCOPE_ASSOCIATION IATA" +
+                        " IDN_OAUTH_CONSUMER_APPS ICA" +
                         " WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " IAT.TOKEN_ID = IATA.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
@@ -2983,19 +2977,16 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IATA.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
                         accessTokenStoreTable + " IAT," +
-                        " IDN_OAUTH_CONSUMER_APPS ICA," +
-                        " IDN_OAUTH2_SCOPE_ASSOCIATION IATA" +
+                        " IDN_OAUTH_CONSUMER_APPS ICA" +
                         " WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-                        " IAT.TOKEN_ID = IATA.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
@@ -3606,7 +3597,7 @@ public class ApiMgtDAO {
         // Update Access Token
         String sqlUpdateNewAccessToken = "UPDATE " + accessTokenStoreTable +
                                          " SET USER_TYPE=?, VALIDITY_PERIOD=? " +
-                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? AND TOKEN_SCOPE_HASH = ?";
+                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -3623,7 +3614,6 @@ public class ApiMgtDAO {
             }
             prepStmt.setString(3, APIUtil.encryptToken(newAccessToken));
             prepStmt.setString(4, keyType);
-            prepStmt.setString(5, OAuth2Util.hashScopes(keyType));
 
             prepStmt.execute();
             prepStmt.close();
@@ -3821,8 +3811,8 @@ public class ApiMgtDAO {
         // Add Access Token
         String sqlAddAccessToken = "INSERT" +
                                    " INTO " + accessTokenStoreTable +
-                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, TOKEN_SCOPE_HASH) " +
-                                   " VALUES (?,?,?,?,?)";
+                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE " +
+                                   " VALUES (?,?,?,?)";
 
         String getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +
                                    "FROM " +
@@ -3879,7 +3869,6 @@ public class ApiMgtDAO {
             prepStmt.setString(2, consumerKey);
             prepStmt.setString(3, APIConstants.TokenStatus.ACTIVE);
             prepStmt.setString(4, "default");
-            prepStmt.setString(5, OAuth2Util.hashScopes("default"));
             prepStmt.execute();
             prepStmt.close();
 
@@ -3989,7 +3978,7 @@ public class ApiMgtDAO {
         // Add Access Token
         String sqlAddAccessToken = "INSERT INTO " +  accessTokenStoreTable +
                 " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
-                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD,TOKEN_SCOPE_HASH)  VALUES (?,?,?,?,?,?,?,?,?,?)";
+                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
 
 //        ///////////////////////////
 //
@@ -4031,7 +4020,6 @@ public class ApiMgtDAO {
             } else {
                 prepStmt.setLong(9, validityPeriod * 1000);
             }
-            prepStmt.setString(10, OAuth2Util.hashScopes(tokenScope));
             prepStmt.execute();
             prepStmt.close();
 
