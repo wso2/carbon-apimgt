@@ -16,32 +16,18 @@
 * under the License.
 */
 
-package org.apache.synapse.rest.dispatch;
+package org.apache.synapse.commons.templates.uri.parser;
 
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.commons.templates.uri.URITemplate;
 import org.apache.synapse.commons.templates.uri.URITemplateException;
 
-public class URITemplateHelper implements DispatcherHelper {
+public class PathSegmentExpression extends LabelExpression {
 
-    private String templateString;
-
-    private URITemplate uriTemplate;
-
-    public URITemplateHelper(String templateString) {
-        this.templateString = templateString;
-        try {
-            this.uriTemplate = new URITemplate(templateString);
-        } catch (URITemplateException e) {
-            throw new SynapseException("Error while parsing the URI template", e);
-        }
+    public PathSegmentExpression(String token) throws URITemplateException {
+        super(token);
     }
 
-    public URITemplate getUriTemplate() {
-        return uriTemplate;
-    }
-
-    public String getString() {
-        return templateString;
+    @Override
+    protected char getSeparator() {
+        return '/';
     }
 }
