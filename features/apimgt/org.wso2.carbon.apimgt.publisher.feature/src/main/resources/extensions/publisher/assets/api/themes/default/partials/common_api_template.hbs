@@ -124,7 +124,7 @@
         <div class='form-group'>
             <label class='custom-form-label col-lg-2' for='overview_name'>Name:<span class="requiredAstrix">*</span></label>
             <div class='custom-form-right col-lg-5 '>
-                <input type='text' id='overview_name' class="form-control required" name='overview_name' >
+                <input type='text' id='overview_name' class="form-control apiNameExists noSpace required" name='overview_name' >
                 <a class="icon-question-sign help_popup" help_data="name_help"></a>
                 <p id="name_help" class="hide">{{ t "Display name to be shown in the API Store."}}</p>
             </div>
@@ -132,7 +132,7 @@
         <div class='form-group'>
             <label class='custom-form-label   col-lg-2'>Context:<span class="requiredAstrix">*</span></label>
             <div class='custom-form-right col-lg-5 '>
-                <input type='text' id='overview_context' name='overview_context' class="form-control required" onchange="getContextValue()" value="" onkeyup="updateContextPattern()">
+                <input type='text' id='overview_context' name='overview_context' class="form-control contextExists noSpace required" onchange="getContextValue()" value="" onkeyup="updateContextPattern()">
                 <a class="icon-question-sign help_popup" help_data="context_help"></a>
                 <p id="context_help" class="hide">{{t "contextHelpMsg"}}</p>
             </div>

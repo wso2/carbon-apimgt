@@ -39,10 +39,10 @@ require('/modules/publisher.js').exec(function (ctx) {
 		case 'POST':// GET endpoints
 			var apiPublisher = require('apipublisher').provider;
 			var apiProxy = apiPublisher.instance(user);
-			var action = request.getParameter("action");
+			var action = request.getContent().action;
 			if (uriMatcher.match(GET_VALIDATION_URL)) {//return assets by type
 				if (action === "isAPINameExist") {
-					var apiName = request.getParameter("apiName");
+					var apiName = request.getContent().apiName;
 					result = apiProxy.isApiNameExist(apiName);
 					if (result.error) {
 						obj = {
@@ -57,8 +57,8 @@ require('/modules/publisher.js').exec(function (ctx) {
 					}
 					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "isContextExist") {
-					var context = request.getParameter("context");
-					var oldContext = request.getParameter("oldContext");
+					var context =request.getContent().context;
+					var oldContext = request.getContent().oldContext;
 					result = apiProxy.isContextExist(context);
 					if (result.error) {
 						obj = {

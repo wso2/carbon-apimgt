@@ -10,30 +10,32 @@ $(document).ready(function() {
         var oldContext=$('#spanContext').text();
         var data = { action:"isContextExist", context:value,oldContext:oldContext };
         $.ajax({
+                   async: false,
                    url: url,
                    type: 'POST',
                    data: JSON.stringify(data),
                    contentType: 'application/json',
                    success: function(responseData) {
-                       contextExist = responseData.exist;
+                       contextExist = responseData.data.exist;
                    }
                });
-        return this.optional(element) || contextExist != "true";
+        return this.optional(element) || contextExist != true;
     }, 'Duplicate context value.');
 
     $.validator.addMethod('apiNameExists', function(value, element) {
         var apiNameExist = false;
         var data =  { action:"isAPINameExist", apiName:value };
         $.ajax({
+                   async: false,
                    url: url,
                    type: 'POST',
                    data: JSON.stringify(data),
                    contentType: 'application/json',
                    success: function(responseData) {
-                       apiNameExist = responseData.exist;
+                       apiNameExist = responseData.data.exist;
                    }
                });
-        return this.optional(element) || apiNameExist != "true";
+        return this.optional(element) || apiNameExist != true;
     }, 'Duplicate api name.');
 
     $.validator.addMethod('selected', function(value, element) {
