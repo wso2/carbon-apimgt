@@ -68,15 +68,15 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 for (Iterator pathsIterator = paths.keySet().iterator(); pathsIterator.hasNext(); ) {
                     String uriTempVal = (String) pathsIterator.next();
                     //if url template is a custom attribute "^x-" ignore.
-                    if(uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")){
+                    if (uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")) {
                         continue;
                     }
                     JSONObject path = (JSONObject) paths.get(uriTempVal);
                     // Following code check is done to handle $ref objects supported by swagger spec
                     // See field types supported by "Path Item Object" in swagger spec.
-                    if(path.containsKey("$ref")){
-                        log.info("Reference "+uriTempVal+" path object was ignored when generating URL template for api \""
-                                 + api.getId().getApiName() +"\"");
+                    if (path.containsKey("$ref")) {
+                        log.info("Reference " + uriTempVal + " path object was ignored when generating URL template for api \""
+                                + api.getId().getApiName() + "\"");
                         continue;
                     }
                     for (Iterator pathIterator = path.keySet().iterator(); pathIterator.hasNext(); ) {
@@ -99,7 +99,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                             } else {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
-                            template.setThrottlingTier((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER ));
+                            template.setThrottlingTier((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
                             template.setMediationScript((String) operation.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
                             template.setUriTemplate(uriTempVal);
                             template.setHTTPVerb(httpVerb.toUpperCase());
@@ -110,8 +110,6 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                         }
                     }
                 }
-            } else {
-                //@todo generate default paths
             }
         } catch (ParseException e) {
             handleException("Invalid resource configuration ", e);
@@ -190,16 +188,12 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             resource.setMediaType("application/json");
             registry.put(resourcePath, resource);
 
-            //@todo Set visibility as same as the API visibility
             //Need to set anonymous if the visibility is public
             APIUtil.setResourcePermissions(apiProviderName, null, null, resourcePath);
 
         } catch (RegistryException e) {
             handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
-        } catch (APIManagementException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
         }
-
     }
 
 
@@ -251,7 +245,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     @SuppressWarnings("unchecked")
     public String generateAPIDefinition(API api) throws APIManagementException {
         APIIdentifier identifier = api.getId();
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
@@ -287,8 +282,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         //Create licence object # no need for this since this is not mandatory
         //JSONObject licenceObject = new JSONObject();
-
         //infoObject.put("license", licenceObject);
+
         infoObject.put(APIConstants.SWAGGER_VER, identifier.getVersion());
 
         //add info object to swaggerObject

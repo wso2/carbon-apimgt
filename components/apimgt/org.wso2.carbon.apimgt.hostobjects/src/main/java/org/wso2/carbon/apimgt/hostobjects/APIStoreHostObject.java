@@ -3479,7 +3479,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
 
         if (args != null && args.length > 5 && isStringArray(args)) {
-            String name = (String) args[0];
+            String newName = (String) args[0];
             String oldName = (String) args[1];
             String username = (String) args[2];
             String tier = (String) args[3];
@@ -3504,13 +3504,13 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             
             // check whether there is an app with same name
-            if (!name.equals(oldName) && appsMap.containsKey(name)) {
-                handleException("An application already exist by the name " + name);
+            if (!newName.equals(oldName) && appsMap.containsKey(newName)) {
+                handleException("An application already exist by the name " + newName);
             }
 
             for (Application app : apps) {
                 if (app.getName().equals(oldName)) {
-                    Application application = new Application(name, subscriber);
+                    Application application = new Application(newName, subscriber);
                     application.setId(app.getId());
                     application.setTier(tier);
                     application.setCallbackUrl(callbackUrl);
