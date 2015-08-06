@@ -326,5 +326,6 @@
 	"techOwnerMail" : "Technical Owner Email",
 
     "apiUnavailable" : "API does not exist",
-    "removeAPIFromExternalStoresWarning" : "This API is not PUBLISHED. Please remove from external stores."
+    "removeAPIFromExternalStoresWarning" : "This API is not PUBLISHED. Please remove from external stores.",
+    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint."
 }
