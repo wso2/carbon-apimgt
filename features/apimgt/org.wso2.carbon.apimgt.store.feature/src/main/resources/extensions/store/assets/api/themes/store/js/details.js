@@ -102,8 +102,9 @@ $(document).ready(function () {
 );
 $('#application-list').change(
             function(){
-                if($(this).val() == "createNewApp"){                   
-                    window.location.href =caramel.context+ '/assets/api/my_applications';
+                if($(this).val() == "createNewApp"){
+                    window.location.href = caramel.context + '/assets/api/my_applications?goBack=yes&goBackAPIId=' +
+                    window.location.href.split('/').pop();
                 }
             }
             );
