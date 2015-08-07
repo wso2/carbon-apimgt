@@ -395,49 +395,21 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
-        String[] stringArray = subscriberApps.toArray(new String[subscriberApps.size()]);
-        String concatenatedKeySetString = "''";
+        String concatenatedKeySetString = "";
 
-        if (stringArray.length > 0) {
-            concatenatedKeySetString = buildKeySetString(stringArray);
+        int size = subscriberApps.size();
+        if (size > 0) {
+            concatenatedKeySetString += "'" + subscriberApps.get(0) + "'";
+        } else {
+            return new ArrayList<AppCallTypeDTO>();
         }
-        Collection<AppCallType> usageData = getAPICallTypeUsageData
-                (APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, concatenatedKeySetString);
-
-        List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
-        AppCallTypeDTO appCallTypeDTO;
-        for (AppCallType usage : usageData) {
-            for (String subscriberApp : subscriberApps) {
-                if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
-                    String consumerKey = usage.consumerKey;
-                    String api = usage.apiName;
-                    Boolean count = false;
-                    for (AppCallTypeDTO usageDTO : appApiCallTypeList) {
-                        if (usageDTO.getconsumerKey().equals(consumerKey) && usageDTO.getApiName().equals(api)) {
-                            if (!usageDTO.getCallType().contains(usage.resource + " (" + usage.callType + ")")) {
-                                usageDTO.getCallType().add(usage.resource + " (" + usage.callType + ")");
-
-
-                            }
-                            count = true;
-                            break;
-
-                        }
-                    }
-                    if (!count) {
-                        List<String> callType = new ArrayList<String>();
-                        callType.add(usage.resource + " (" + usage.callType + ")");
-                        appCallTypeDTO = new AppCallTypeDTO();
-                        appCallTypeDTO.setApiName(api);
-                        appCallTypeDTO.setappName(subscriberAppsMap.get(consumerKey));
-                        appCallTypeDTO.setconsumerKey(consumerKey);
-                        appCallTypeDTO.setCallType(callType);
-                        appApiCallTypeList.add(appCallTypeDTO);
-                    }
-                }
-            }
+        for (int i = 1; i < subscriberApps.size(); i++) {
+            concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
-        return appApiCallTypeList;
+
+        return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
+                concatenatedKeySetString);
+
     }
 
     /**
@@ -448,13 +420,13 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to API call types
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<AppCallType> getAPICallTypeUsageData(String tableName, String keyString)
+    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
-        Collection<AppCallType> topAppUsageDataList = new ArrayList<AppCallType>();
+        List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
 
         try {
             connection = dataSource.getConnection();
@@ -469,18 +441,29 @@ public class APIUsageStatisticsClient {
                         " FROM " + tableName +
                         " WHERE " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
-                        " GROUP BY " +
-                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD;
+                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
+                        + "resourcePath";
 
 
                 resultSet = statement.executeQuery(query);
-
+                AppCallTypeDTO appCallTypeDTO;
                 while (resultSet.next()) {
                     String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
                     String callType = resultSet.getString(APIUsageStatisticsClientConstants.METHOD);
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
                     String resource = resultSet.getString(APIUsageStatisticsClientConstants.RESOURCE);
-                    topAppUsageDataList.add(new AppCallType(apiName, callType, consumerKey, resource));
+
+                    List<String> callTypeList = new ArrayList<String>();
+                    callTypeList.add(resource + " (" + callType + ")");
+
+                    appCallTypeDTO = new AppCallTypeDTO();
+                    appCallTypeDTO.setApiName(apiName);
+                    appCallTypeDTO.setappName(subscriberAppsMap.get(consumerKey));
+                    appCallTypeDTO.setconsumerKey(consumerKey);
+                    appCallTypeDTO.setCallType(callTypeList);
+                    appApiCallTypeList.add(appCallTypeDTO);
+
                 }
             }
         } catch (SQLException e) {
@@ -515,7 +498,7 @@ public class APIUsageStatisticsClient {
                 }
             }
         }
-        return topAppUsageDataList;
+        return appApiCallTypeList;
     }
 
     private Collection<AppCallType> getCallTypeUsageData(OMElement data) {
