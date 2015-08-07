@@ -200,44 +200,20 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
-        String[] stringArray = subscriberApps.toArray(new String[subscriberApps.size()]);
-        String concatenatedKeySetString = "''";
+        String concatenatedKeySetString = "";
 
-        if (stringArray.length > 0) {
-            concatenatedKeySetString = buildKeySetString(stringArray);
+        int size = subscriberApps.size();
+        if (size > 0) {
+            concatenatedKeySetString += "'" + subscriberApps.get(0) + "'";
+        } else {
+            return new ArrayList<AppUsageDTO>();
+        }
+        for (int i = 1; i < subscriberApps.size(); i++) {
+            concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        Collection<AppUsage> usageData = getTopAppUsageData
-                (APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString);
+        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString);
 
-        List<AppUsageDTO> appUsageList = new ArrayList<AppUsageDTO>();
-        AppUsageDTO appUsageDTO;
-        for (AppUsage usage : usageData) {
-            for (String subscriberApp : subscriberApps) {
-                if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
-                    String consumerKey = usage.consumerKey;
-                    String user = usage.userid;
-                    Boolean count = false;
-                    for (AppUsageDTO usageDTO : appUsageList) {
-                        if (usageDTO.getconsumerKey().equals(consumerKey) && usageDTO.getUserid().equals(user)) {
-                            usageDTO.setCount(usageDTO.getCount() + usage.requestCount);
-                            count = true;
-                            break;
-                        }
-                    }
-                    if (!count) {
-                        appUsageDTO = new AppUsageDTO();
-                        appUsageDTO.setUserid(user);
-                        appUsageDTO.setappName(subscriberAppsMap.get(consumerKey));
-                        appUsageDTO.setconsumerKey(consumerKey);
-                        appUsageDTO.setCount(usage.requestCount);
-                        appUsageList.add(appUsageDTO);
-                    }
-                }
-            }
-        }
-        Collections.sort(appUsageList, AppUsageDTO.compareCount);
-        return appUsageList;
     }
 
     /**
@@ -248,13 +224,13 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to App usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<AppUsage> getTopAppUsageData(String tableName, String keyString)
+    private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
-        Collection<AppUsage> topAppUsageDataList = new ArrayList<AppUsage>();
+        List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
 
         try {
             connection = dataSource.getConnection();
@@ -268,14 +244,22 @@ public class APIUsageStatisticsClient {
                         "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS net_total_requests" +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
-                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY;
+                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
+                        + " ORDER BY net_total_requests DESC";
 
                 resultSet = statement.executeQuery(query);
+                AppUsageDTO appUsageDTO;
                 while (resultSet.next()) {
                     String userId = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
                     long requestCount = resultSet.getLong("net_total_requests");
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
-                    topAppUsageDataList.add(new AppUsage(userId, requestCount, consumerKey));
+
+                    appUsageDTO = new AppUsageDTO();
+                    appUsageDTO.setUserid(userId);
+                    appUsageDTO.setappName(subscriberAppsMap.get(consumerKey));
+                    appUsageDTO.setconsumerKey(consumerKey);
+                    appUsageDTO.setCount(requestCount);
+                    topAppUsageDataList.add(appUsageDTO);
                 }
             }
         } catch (SQLException e) {
