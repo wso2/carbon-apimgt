@@ -447,6 +447,7 @@ public final class APIConstants {
     
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
+    public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";

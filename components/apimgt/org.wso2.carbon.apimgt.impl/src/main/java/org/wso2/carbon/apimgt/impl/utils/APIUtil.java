@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONObject;
@@ -2568,6 +2569,44 @@ public final class APIUtil {
             return serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable();
         }
         return false;
+    }
+
+
+    /**
+     * If Analytics is enabled through api-manager.xml this method will write the details to registry.
+     *
+     * @param configuration api-manager.xml
+     */
+    public static void writeAnalyticsConfigurationToRegistry(APIManagerConfiguration configuration) {
+        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
+        String usageEnabled = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+        if (usageEnabled != null && serviceDataPublisherAdmin != null) {
+            log.debug("APIUsageTracking set to : " + usageEnabled);
+            boolean usageEnabledState = JavaUtils.isTrueExplicitly(usageEnabled);
+            EventingConfigData eventingConfigData = serviceDataPublisherAdmin.getEventingConfigData();
+            eventingConfigData.setServiceStatsEnable(usageEnabledState);
+            try {
+                if (usageEnabledState) {
+                    String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+                    String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+                    String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+                    eventingConfigData.setUrl(bamServerURL);
+                    eventingConfigData.setUserName(bamServerUser);
+                    eventingConfigData.setPassword(bamServerPassword);
+                    if (log.isDebugEnabled()) {
+                        log.debug("BAMServerURL : " + bamServerURL + " , BAMServerUserName : " + bamServerUser + " , " +
+                                  "BAMServerPassword : " + bamServerPassword);
+                    }
+                    APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, MultitenantConstants.SUPER_TENANT_ID);
+                }
+
+                serviceDataPublisherAdmin.configureEventing(eventingConfigData);
+            } catch (APIManagementException e) {
+                log.error("Error occurred while adding BAMServerProfile");
+            } catch (Exception e) {
+                log.error("Error occurred while updating EventingConfiguration");
+            }
+        }
     }
 
     public static Map<String, String> getAnalyticsConfigFromRegistry() {
