@@ -86,6 +86,7 @@
     "sandboxKeyCreatedMsg" : "Request to register this application has been sent.",
     "sandboxKeyRejectedMsg" : "This application has been rejected of creating Sandbox keys.",
     "sandboxKeyApprovedMsg" : "This Application is approved to create Sandbox Keys. Please click the Create Keys button to obtain an Access Token",
+    "returnBackToAPIDetailPageMsg" : "Return back to API detail page?",
 
     "actions" : "Actions",
     "add" : "Add",
