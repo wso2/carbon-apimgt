@@ -2663,6 +2663,7 @@ public class APIUsageStatisticsClient {
         return paymentPlan.evaluate(param, calls);
     }
 
+    //todo remove
     private Collection<APIFirstAccess> getFirstAccessTime(OMElement data) {
         List<APIFirstAccess> usageData = new ArrayList<APIFirstAccess>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2679,20 +2680,19 @@ public class APIUsageStatisticsClient {
     public List<String> getFirstAccessTime(String providerName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryFirstAccess(
+        APIFirstAccess firstAccess = this.queryFirstAccess(
                 APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
-        Collection<APIFirstAccess> usageData = getFirstAccessTime(omElement);
         List<String> APIFirstAccessList = new ArrayList<String>();
 
-        for (APIFirstAccess usage : usageData) {
-            APIFirstAccessList.add(usage.year);
-            APIFirstAccessList.add(usage.month);
-            APIFirstAccessList.add(usage.day);
+        if (firstAccess != null) {
+            APIFirstAccessList.add(firstAccess.getYear());
+            APIFirstAccessList.add(firstAccess.getMonth());
+            APIFirstAccessList.add(firstAccess.getDay());
         }
         return APIFirstAccessList;
     }
 
-    private OMElement queryFirstAccess(String columnFamily)
+    private APIFirstAccess queryFirstAccess(String columnFamily)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -2721,21 +2721,19 @@ public class APIUsageStatisticsClient {
 
             }
             rs = statement.executeQuery(query);
-            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
-            int columnCount = rs.getMetaData().getColumnCount();
+            String year;
+            String month;
+            String day;
+            APIFirstAccess firstAccess = null;
+
             while (rs.next()) {
-                returnStringBuilder.append("<row>");
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = rs.getMetaData().getColumnName(i);
-                    String columnValue = rs.getString(columnName);
-                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + columnValue +
-                            "</" + columnName.toLowerCase() + ">");
-                }
-                returnStringBuilder.append("</row>");
+                year = rs.getString("year");
+                month = rs.getString("month");
+                day = rs.getString("day");
+                firstAccess = new APIFirstAccess(year, month, day);
             }
-            returnStringBuilder.append("</rows></omElement>");
-            String returnString = returnStringBuilder.toString();
-            return AXIOMUtil.stringToOM(returnString);
+
+            return firstAccess;
 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database" +
@@ -3629,6 +3627,24 @@ public class APIUsageStatisticsClient {
         private String month;
         private String day;
         //private long requestCount;
+
+        public APIFirstAccess(String year, String month, String day) {
+            this.year = year;
+            this.month = month;
+            this.day = day;
+        }
+
+        public String getYear() {
+            return year;
+        }
+
+        public String getMonth() {
+            return month;
+        }
+
+        public String getDay() {
+            return day;
+        }
 
         public APIFirstAccess(OMElement row) {
             year = row.getFirstChildWithName(new QName(
