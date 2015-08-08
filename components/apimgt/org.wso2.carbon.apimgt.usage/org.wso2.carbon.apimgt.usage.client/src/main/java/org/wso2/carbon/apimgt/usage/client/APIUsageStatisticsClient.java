@@ -169,7 +169,8 @@ public class APIUsageStatisticsClient {
             concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeySetString);
+        return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeySetString,
+                fromDate, toDate, limit);
 
     }
 
@@ -189,7 +190,8 @@ public class APIUsageStatisticsClient {
             concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString);
+        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString,
+                fromDate, toDate, limit);
 
     }
 
@@ -201,7 +203,8 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to App usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString)
+    private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString, String fromDate, String toDate,
+            int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
@@ -221,6 +224,7 @@ public class APIUsageStatisticsClient {
                         "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS net_total_requests" +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
+                        " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
                         " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
                         + " ORDER BY net_total_requests DESC";
 
@@ -282,7 +286,8 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<APIResponseFaultCountDTO> getFaultAppUsageData(String tableName, String keyString)
+    private List<APIResponseFaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
@@ -302,6 +307,7 @@ public class APIUsageStatisticsClient {
                         "consumerKey, api,SUM(" + APIUsageStatisticsClientConstants.FAULT + ") AS total_faults " +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                        " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
                         " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
                         + APIUsageStatisticsClientConstants.API;
 
@@ -389,7 +395,7 @@ public class APIUsageStatisticsClient {
         }
 
         return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
-                concatenatedKeySetString);
+                concatenatedKeySetString, fromDate, toDate, limit);
 
     }
 
@@ -401,7 +407,8 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to API call types
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString)
+    private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
@@ -422,6 +429,7 @@ public class APIUsageStatisticsClient {
                         " FROM " + tableName +
                         " WHERE " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                        " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
                         " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
                         APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
                         + "resourcePath";
@@ -603,7 +611,8 @@ public class APIUsageStatisticsClient {
             concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString);
+        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString,
+                fromDate, toDate, limit);
     }
 
     /**
@@ -637,7 +646,8 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to per App API usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<APIUsageDTO> getPerAppAPIUsageData(String tableName, String keyString)
+    private List<APIUsageDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate, String toDate,
+            int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
@@ -658,6 +668,7 @@ public class APIUsageStatisticsClient {
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
                         " WHERE " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                        " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
                         " GROUP BY " +
                         APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.CONSUMERKEY;
 
