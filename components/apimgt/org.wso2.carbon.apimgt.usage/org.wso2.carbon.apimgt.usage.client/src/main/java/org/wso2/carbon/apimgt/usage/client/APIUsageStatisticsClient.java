@@ -157,43 +157,20 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
-        String[] stringArray = subscriberApps.toArray(new String[subscriberApps.size()]);
+        String concatenatedKeySetString = "";
 
-        String concatenatedKeySetString = "''";
-
-        if (stringArray.length > 0) {
-            concatenatedKeySetString = buildKeySetString(stringArray);
+        int size = subscriberApps.size();
+        if (size > 0) {
+            concatenatedKeySetString += "'" + subscriberApps.get(0) + "'";
+        } else {
+            return new ArrayList<APIResponseFaultCountDTO>();
         }
-        Collection<AppAPIResponseFaultCount> faultUsageData = getFaultAppUsageData
-                (APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeySetString);
-
-        List<APIResponseFaultCountDTO> perAppFaultCountList = new ArrayList<APIResponseFaultCountDTO>();
-        APIResponseFaultCountDTO apiUsageDTO;
-        for (AppAPIResponseFaultCount usage : faultUsageData) {
-            for (String subscriberApp : subscriberApps) {
-                if (subscriberApp != null && subscriberApp.equals(usage.consumerKey)) {
-                    String consumerKey = usage.consumerKey;
-                    String api = usage.apiName;
-                    Boolean count = false;
-                    for (APIResponseFaultCountDTO usageDTO : perAppFaultCountList) {
-                        if (usageDTO.getconsumerKey().equals(consumerKey) && usageDTO.getApiName().equals(api)) {
-                            usageDTO.setCount(usageDTO.getCount() + usage.faultCount);
-                            count = true;
-                            break;
-                        }
-                    }
-                    if (!count) {
-                        apiUsageDTO = new APIResponseFaultCountDTO();
-                        apiUsageDTO.setApiName(api);
-                        apiUsageDTO.setappName(subscriberAppsMap.get(consumerKey));
-                        apiUsageDTO.setconsumerKey(consumerKey);
-                        apiUsageDTO.setCount(usage.faultCount);
-                        perAppFaultCountList.add(apiUsageDTO);
-                    }
-                }
-            }
+        for (int i = 1; i < subscriberApps.size(); i++) {
+            concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
-        return perAppFaultCountList;
+
+        return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeySetString);
+
     }
 
     public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate, int limit)
@@ -305,13 +282,13 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<AppAPIResponseFaultCount> getFaultAppUsageData(String tableName, String keyString)
+    private List<APIResponseFaultCountDTO> getFaultAppUsageData(String tableName, String keyString)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
-        Collection<AppAPIResponseFaultCount> falseAppUsageDataList = new ArrayList<AppAPIResponseFaultCount>();
+        List<APIResponseFaultCountDTO> falseAppUsageDataList = new ArrayList<APIResponseFaultCountDTO>();
 
         try {
             connection = dataSource.getConnection();
@@ -322,21 +299,25 @@ public class APIUsageStatisticsClient {
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "*,SUM(" + APIUsageStatisticsClientConstants.FAULT + ") AS total_faults " +
+                        "consumerKey, api,SUM(" + APIUsageStatisticsClientConstants.FAULT + ") AS total_faults " +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
-                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY;
+                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + ","
+                        + APIUsageStatisticsClientConstants.API;
 
                 resultSet = statement.executeQuery(query);
-
+                APIResponseFaultCountDTO apiUsageDTO;
                 while (resultSet.next()) {
                     String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
-                    String apiVersion = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
-                    String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
                     long faultCount = resultSet.getLong("total_faults");
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
-                    falseAppUsageDataList.add(new AppAPIResponseFaultCount
-                            (apiName, apiVersion, context, faultCount, consumerKey));
+
+                    apiUsageDTO = new APIResponseFaultCountDTO();
+                    apiUsageDTO.setApiName(apiName);
+                    apiUsageDTO.setappName(subscriberAppsMap.get(consumerKey));
+                    apiUsageDTO.setconsumerKey(consumerKey);
+                    apiUsageDTO.setCount(faultCount);
+                    falseAppUsageDataList.add(apiUsageDTO);
                 }
             }
         } catch (SQLException e) {
