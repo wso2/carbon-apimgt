@@ -2943,6 +2943,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		return true;
 	}
 
+    public boolean hasCreatePermission() throws APIManagementException {
+        try {
+            APIUtil.checkPermission(this.username, APIConstants.Permissions.API_CREATE);
+        } catch (APIManagementException e) {
+            //Returning false here by catching the exception which indicates the failure
+            //that user doesn't has the permission
+            return false;
+        }
+        return true;
+    }
+
 	public boolean validateRoles(String[] inputRoles) {
 		boolean valid=false;
 		try {
