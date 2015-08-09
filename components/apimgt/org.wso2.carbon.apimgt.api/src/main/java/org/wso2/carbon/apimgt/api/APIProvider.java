@@ -464,6 +464,13 @@ public interface APIProvider extends APIManager {
 	 */
 	public boolean hasPublishPermission() throws APIManagementException;
 
+    /**
+     * Check whether user has create permission
+     *
+     * @return true if user has create permission else false
+     */
+    public boolean hasCreatePermission() throws APIManagementException;
+
 	/**
 	 * This method is to functionality of update implementation of an API in API-Provider
 	 *

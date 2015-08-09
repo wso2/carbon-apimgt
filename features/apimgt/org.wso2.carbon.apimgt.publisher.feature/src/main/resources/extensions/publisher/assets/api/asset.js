@@ -438,6 +438,10 @@ asset.configure = function (ctx) {
 asset.renderer = function (ctx) {
     var type = ctx.assetType;
     var log = new Log();
+    var server = require('store').server;
+    var user = server.current(ctx.session);
+    var apiPublisher =  require('apipublisher').provider;
+    var apiProxy = apiPublisher.instance(user);
     var listLinks = function (ribbon, utils) {
         ribbon.enabled = false;
         ribbon.list = [];
@@ -472,7 +476,10 @@ asset.renderer = function (ctx) {
 
     var buildListLeftNav = function (page, util) {
         var navList = util.navList();
-        navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('start'));
+        var createPermitted = apiProxy.hasCreatePermission();
+        if(createPermitted.permitted){
+            navList.push('ADD ' + type.toUpperCase(), 'btn-add-new', util.buildUrl('start'));
+        }
         navList.push('All Statistics', 'btn-stats', '/assets/' + type + '/statistics');
         navList.push('Subscriptions', 'btn-subscribe', '/assets/' + type + '/api-subscriptions');
         navList.push('Statistics', 'btn-stats', '/assets/' + type + '/statistics');
@@ -481,14 +488,18 @@ asset.renderer = function (ctx) {
     };
 
     var buildDefaultLeftNav = function (page, util) {
+        var publishPermitted = apiProxy.hasPublishPermission();
+        var createPermitted = apiProxy.hasCreatePermission();
         var id = page.assets.id;
         var navList = util.navList();
         //Edit option will only be available if asset has created
-        if(id) {
+        if(id && createPermitted.permitted) {
             navList.push('Edit', 'btn-edit', util.buildUrl('design') + '/' + id);
         }
         navList.push('Overview', 'btn-overview', util.buildUrl('details') + '/' + id);
-        navList.push('Life Cycle', 'btn-lifecycle', util.buildUrl('lifecycle') + '/' + id);
+        if(publishPermitted.permitted){
+            navList.push('Life Cycle', 'btn-lifecycle', util.buildUrl('lifecycle') + '/' + id);
+        }
         navList.push('Versions', 'btn-versions', util.buildUrl('versions') + '/' + id);
         navList.push('Docs', 'btn-docs', util.buildUrl('docs') + '/' + id);
         navList.push('Users', 'btn-users', util.buildUrl('users') + '/' + id);
