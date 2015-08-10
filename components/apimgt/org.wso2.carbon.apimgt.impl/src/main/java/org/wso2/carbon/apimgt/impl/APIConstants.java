@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import javax.ws.rs.POST;
 import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -448,6 +447,7 @@ public final class APIConstants {
     
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
+    public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
@@ -733,6 +733,26 @@ public final class APIConstants {
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+
+    //swagger v1.2 constants
+    public static final String SWAGGER_RESOURCES = "resources";
+    public static final String ENVIRONMENTS_NONE = "none";
+    public static final String SWAGGER_BASEPATH = "basePath";
+    public static final String SWAGGER_OPERATIONS = "operations";
+    public static final String METHOD_PATCH = "PATCH";
+    public static final String SWAGGER_SCOPE = "scope";
+    public static final String SWAGGER_AUTH_TYPE = "auth_type";
+    public static final String API_THROTTLING_TIER = "throttling_tier";
+    public static final String API_MEDIATION_SCRIPT = "mediation_script";
+    public static final String API_SWAGGER_DOC = "api_doc";
+    public static final String SWAGGER_12_AUTH = "authorizations";
+    public static final String SWAGGER_12_OAUTH2 = "oauth2";
+    public static final String SWAGGER_12_SCOPES = "scopes";
+    public static final String API_ARRAY_NAME = "apis";
+    public static final String SWAGGER_HTTP_METHOD = "method";
+    public static final String SWAGGER_FILE = "file";
+    public static final String SWAGGER_RESOURCE_PATH = "resourcePath";
+    public static final String API_VERSION = "apiVersion";
 
 
 }

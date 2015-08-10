@@ -385,7 +385,7 @@ APIDesigner.prototype.init_controllers = function(){
         var operation = deleteDataArray[3];
         var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
 
-        jagg.message({content: 'Do you want to delete the parameter <strong>' + paramName + '</strong> ?',
+        jagg.message({content: i18n.t('confirm.deleteParam') + ' <strong>' + paramName + '</strong> ?',
             type: 'confirm', title: "Delete Parameter",
             okCallback: function () {
                 API_DESIGNER = APIDesigner();

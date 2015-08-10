@@ -91,6 +91,8 @@
     "propagateChangesToGateway":"Propagar Cambios en API Gateway",
     "requireReSubscription":"Requerir Re-suscripcion",
     "deprecateOldVersions":"Desprobar Versiones Anteriores",
+    "retireApiTitle":"API Jubilado",
+    "retireApi":"API perderá todo su suscripción cuando su estado cambia a JUBILADO",
 
     "created":"CREADO",
     "published":"PUBLICADO",
@@ -225,6 +227,7 @@
 	"techOwner" : "Propietario técnica" ,
 	"techOwnerMail" : "Técnico Propietario Enviar",
 
-    "apiUnavailable" : "API no existe"
+    "apiUnavailable" : "API no existe",
+    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint."
 
 }

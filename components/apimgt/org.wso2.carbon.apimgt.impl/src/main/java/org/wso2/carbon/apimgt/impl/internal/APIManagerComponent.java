@@ -167,6 +167,12 @@ public class APIManagerComponent {
                     configurationService, null);
             APIStatusObserverList.getInstance().init(configuration);
 
+            log.debug("Reading Analytics Configuration from file...");
+
+            // This method is called in two places. Mostly by the time activate hits,
+            // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
+            // when ServiceDataPublisherAdmin is set.
+            APIUtil.writeAnalyticsConfigurationToRegistry(configuration);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
 
@@ -428,6 +434,7 @@ public class APIManagerComponent {
 					"Error while saving defined sequences to the registry ", e);
 		}
 	}
+
 
     private void setupSelfRegistration(APIManagerConfiguration config) throws APIManagementException {
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));

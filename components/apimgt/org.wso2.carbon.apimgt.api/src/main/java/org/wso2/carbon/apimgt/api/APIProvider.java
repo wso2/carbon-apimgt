@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -393,7 +394,8 @@ public interface APIProvider extends APIManager {
     public boolean isSynapseGateway() throws APIManagementException;
     
     /**
-     * Search API by Document Content
+     * Search APIs by swagger document content. This method searches the given search term in the registry and returns
+     * a set of APIs which satisfies the given search term
      *
      * @param searchTerm  Search Term
      * @param searchType  Search Type

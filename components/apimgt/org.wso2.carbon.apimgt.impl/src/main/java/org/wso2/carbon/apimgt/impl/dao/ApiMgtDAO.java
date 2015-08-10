@@ -1415,7 +1415,8 @@ public class ApiMgtDAO {
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
                     deleteSubscriptionByApiIDAndAppID(apiId, applicationId, identifier.getTier(), conn);
-                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus))  {
+                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
+                           || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus))  {
                     log.error("Subscription to API " + identifier.getApiName() + " through application "
                               + applicationId + " was blocked");
                     throw new APIManagementException("Subscription to API " + identifier.getApiName()
@@ -1472,21 +1473,17 @@ public class ApiMgtDAO {
         return subscriptionId;
     }
 
-    public void removeSubscription(APIIdentifier identifier, int applicationId)
-            throws APIManagementException {
+    public void removeSubscription(APIIdentifier identifier, int applicationId) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStForUpdateOrDelete = null;
-        int subscriptionId = -1;
         int apiId = -1;
         String subStatus = null;
 
         try {
             conn = APIMgtDBUtil.getConnection();
-                        
             apiId = getAPIID(identifier, conn);
-
             String subscriptionStatusQuery = "SELECT " +
                                              "SUB_STATUS FROM AM_SUBSCRIPTION" +
                                              " WHERE " +
@@ -1497,7 +1494,6 @@ public class ApiMgtDAO {
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
             resultSet = ps.executeQuery();
-
 
             if (resultSet.next())   {
                 subStatus = resultSet.getString("SUB_STATUS");
@@ -1549,7 +1545,6 @@ public class ApiMgtDAO {
 
     public void removeSubscriptionById(int subscription_id) throws APIManagementException {
         Connection conn = null;
-        ResultSet resultSet = null;
         PreparedStatement ps = null;
 
         try {
@@ -1575,7 +1570,40 @@ public class ApiMgtDAO {
             }
             handleException("Failed to remove subscription data ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    public void removeAllSubscriptions(APIIdentifier apiIdentifier) throws APIManagementException   {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        int apiId;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            apiId = getAPIID(apiIdentifier, conn);
+
+            // Remove all entries from AM_SUBSCRIPTION table
+            String sqlQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback remove all subscription ", e);
+                }
+            }
+            handleException("Failed to remove all subscriptions data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
