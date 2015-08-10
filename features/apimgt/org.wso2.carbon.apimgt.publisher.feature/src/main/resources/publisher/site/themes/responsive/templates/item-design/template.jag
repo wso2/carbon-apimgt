@@ -424,7 +424,15 @@
 <div class="resource_body_padding">
     <h5>Description :</h5>
         <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>     
-    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="produces" class="content_type produces" data-type="text" data-pk="1" data-title="Response Content Type">{{ produces }}</a></h5>
+    <br/>
+    <br/>
+    <table>
+    <tr>
+    <td><h5>Produces : <a href="#" data-path="{{resource_path}}" data-attr="produces" data-attr-type="comma_seperated" class="content_type produces" data-type="text" data-pk="1" data-title="Produces">{{ produces }}</a></h5></td>
+    <td width="100px">
+    <td><h5>Consumes : <a href="#" data-path="{{resource_path}}" data-attr="consumes" data-attr-type="comma_seperated" class="content_type consumes" data-type="text" data-pk="1" data-title="Consumes">{{ consumes }}</a></h5></td>
+    </tr>
+    </table>
     <h5>Parameters :</h5>
     {{#if parameters}}
     <table class="table table-condensed table-hover table-bordered">
