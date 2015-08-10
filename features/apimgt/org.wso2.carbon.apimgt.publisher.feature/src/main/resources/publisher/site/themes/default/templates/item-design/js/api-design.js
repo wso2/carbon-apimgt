@@ -165,17 +165,18 @@ function APIDesigner(){
     		        var method = $(this).val();               
                     var tempPara = parameters.concat();                
                          
-                    if(method == "POST" || method == "PUT") {   
-                            tempPara.push({
-    		            name : "body",
-    		      	    "description": "Request Body",
-    		            "allowMultiple": false,
-    		            "required": false,
-    		            "in": "body",
-    		            "type":"string"
-                            });
-                    } 
-                    resource[method] = { 
+                    if(method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
+                        tempPara.push({
+                            "name" : "Payload",
+                            "description": "Request Body",
+                            "required": false,
+                            "in": "body",
+                            "schema": {
+                                "type" : "object"
+                            }
+                        });
+                    }
+                    resource[method] = {
                         responses : { '200':{}}
                     };
                     if(tempPara.length > 0){
@@ -283,6 +284,9 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     if(obj["$ref"]!=undefined){
         var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
         var obj = obj[0];      
+    }
+    if ($(this).attr('data-attr-type') == "comma_seperated") {
+        newValue = $.map(newValue.split(","), $.trim);
     }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
@@ -567,7 +571,10 @@ APIDesigner.prototype.render_resource = function(container){
         success : this.update_elements
     });
     container.find('.produces').editable({
-        value : "application/json",
+        source: content_types,
+        success : this.update_elements
+    });
+    container.find('.consumes').editable({
         source: content_types,
         success : this.update_elements
     });
@@ -899,4 +906,3 @@ function updateContextPattern(){
         $('#resource_url_pattern_refix').text(context);
     }
 }
-
