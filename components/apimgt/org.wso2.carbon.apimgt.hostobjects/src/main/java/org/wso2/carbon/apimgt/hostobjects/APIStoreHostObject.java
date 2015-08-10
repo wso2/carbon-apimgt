@@ -2484,7 +2484,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String subsStatus = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
             return subsStatus;
         } catch (APIManagementException e) {
-            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage(), e);
+            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());
             return null;
         } finally {
             if (isTenantFlowStarted) {
