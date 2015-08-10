@@ -1415,7 +1415,8 @@ public class ApiMgtDAO {
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
                     deleteSubscriptionByApiIDAndAppID(apiId, applicationId, identifier.getTier(), conn);
-                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus))  {
+                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
+                           || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus))  {
                     log.error("Subscription to API " + identifier.getApiName() + " through application "
                               + applicationId + " was blocked");
                     throw new APIManagementException("Subscription to API " + identifier.getApiName()
