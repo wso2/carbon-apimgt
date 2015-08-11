@@ -51,7 +51,8 @@ $(document).ready(function(){
                    type: "POST",
                    url: "../apis/validation",
                    dataType:"json",
-                   data: { action:"isURLValid", type:type ,url:url },
+                   data: JSON.stringify ({ action:"isURLValid", type:type ,url:url }),
+                   contentType: "application/json",
                    success: function (response) {
                        if (!response.error) {
                            if(response.data.response === "success") {

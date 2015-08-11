@@ -91,8 +91,8 @@ require('/modules/publisher.js').exec(function (ctx) {
 				}
 
 				else if (action === "isURLValid") {
-					var type = request.getParameter("type");
-					var url = request.getParameter("url");
+	                	        var type = request.getContent().type;
+            		        	var url = request.getContent().url;
 					result = apiProxy.isURLValid(type, url);
 					if (result.error) {
 						obj = {
