@@ -308,7 +308,18 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             String httpVerb = uriTemplate.getHTTPVerb();
             if (pathItemObject != null) {
                 operationObject = new JSONObject();
-                operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, uriTemplate.getAuthType());
+                //Handle auth type specially as swagger need to show exact value
+                String authType = uriTemplate.getAuthType();
+                if (authType.equals(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN)) {
+                    authType = "Application & Application User";
+                }
+                if (authType.equals(APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN)) {
+                    authType = "Application User";
+                }
+                if (authType.equals(APIConstants.AUTH_APPLICATION_LEVEL_TOKEN)) {
+                    authType = "Application";
+                }
+                operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
                 operationObject.put(APIConstants.SWAGGER_X_THROTTLING_TIER, uriTemplate.getThrottlingTier());
                 operationObject.put(APIConstants.SWAGGER_RESPONSES, responseObject);
                 pathItemObject.put(httpVerb.toLowerCase(), operationObject);
