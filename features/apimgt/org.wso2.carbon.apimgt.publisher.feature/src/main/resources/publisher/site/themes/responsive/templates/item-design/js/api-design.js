@@ -170,18 +170,19 @@ function APIDesigner(){
                     parameters = $.extend(true, [], parameters);
     		
     		        var method = $(this).val();               
-                    var tempPara = parameters.concat();                
-                         
-                    if(method == "POST" || method == "PUT") {   
-                            tempPara.push({
-    		            name : "body",
-    		      	    "description": "Request Body",
-    		            "allowMultiple": false,
-    		            "required": false,
-    		            "in": "body",
-    		            "type":"string"
-                            });
-                    } 
+                    var tempPara = parameters.concat();
+
+                    if(method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
+                        tempPara.push({
+                            "name" : "Payload",
+                            "description": "Request Body",
+                            "required": false,
+                            "in": "body",
+                            "schema": {
+                                "type" : "object"
+                            }
+                        });
+                    }
                     resource[method] = { 
                         responses : { '200':{}}
                     };
@@ -290,6 +291,9 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     if(obj["$ref"]!=undefined){
         var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
         var obj = obj[0];      
+    }
+    if ($(this).attr('data-attr-type') == "comma_seperated") {
+        newValue = $.map(newValue.split(","), $.trim);
     }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
@@ -576,6 +580,10 @@ APIDesigner.prototype.render_resource = function(container){
     });
     container.find('.produces').editable({
         type:"text",
+        success : this.update_elements
+    });
+    container.find('.consumes').editable({
+        source: content_types,
         success : this.update_elements
     });
     container.find('.param_desc').editable({
