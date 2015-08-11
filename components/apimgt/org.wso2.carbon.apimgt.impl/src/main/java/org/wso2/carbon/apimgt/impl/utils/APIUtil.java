@@ -5106,7 +5106,10 @@ public final class APIUtil {
 
     public JSONObject stringifyAPISubscriptions(Map<String, Object> subscriptions) {
         List<APISubscription> subs = (List<APISubscription>) subscriptions.get("applications");
-        int subscriptionCount = (Integer) subscriptions.get("totalLength");
+        int subscriptionCount = 0;
+        if(subscriptions.containsKey("totalLength")){
+        	subscriptionCount = (Integer) subscriptions.get("totalLength");
+        }
         JSONArray applicationList = new JSONArray();
         JSONObject result = new JSONObject();
         if (subs != null) {

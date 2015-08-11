@@ -1914,7 +1914,7 @@ public class ApiMgtDAO {
      * @param applicationName the application to which the api's are subscribed
      * @param startSubIndex the start index for pagination
      * @param endSubIndex end index for pagination
-     * @param groupId the group id of the application
+     * @param groupingId the group id of the application
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */
@@ -2807,7 +2807,7 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        //" IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         " AKM.STATE AS STATE "+
                         "FROM" +
@@ -2855,7 +2855,7 @@ public class ApiMgtDAO {
                 "CONSUMER_SECRET, " +
                 "ACCESS_TOKEN, " +
                 "VALIDITY_PERIOD, " +
-                "TOKEN_SCOPE, " +
+                //"TOKEN_SCOPE, " +
                 "TOKEN_TYPE, " +
                 "STATE " +
                 "FROM (" +
@@ -2864,7 +2864,7 @@ public class ApiMgtDAO {
                         "ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
                         "IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
                         "IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
-                        "IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
+                        //"IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
                         "AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         "AKM.STATE AS STATE " +
                         "FROM " +
@@ -2919,14 +2919,14 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
-                String tokenScope = resultSet.getString("TOKEN_SCOPE");
+                //String tokenScope = resultSet.getString("TOKEN_SCOPE");
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
 
-                apiKey.setTokenScope(tokenScope);
+                //apiKey.setTokenScope(tokenScope);
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
@@ -2953,7 +2953,7 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        //" IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
@@ -3030,13 +3030,13 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
-                String tokenScope = resultSet.getString("TOKEN_SCOPE");
+                //String tokenScope = resultSet.getString("TOKEN_SCOPE");
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
-                apiKey.setTokenScope(tokenScope);
+                //apiKey.setTokenScope(tokenScope);
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
@@ -3597,7 +3597,8 @@ public class ApiMgtDAO {
         // Update Access Token
         String sqlUpdateNewAccessToken = "UPDATE " + accessTokenStoreTable +
                                          " SET USER_TYPE=?, VALIDITY_PERIOD=? " +
-                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
+                                         " WHERE ACCESS_TOKEN=?";
+                                         //" WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? "; //remove when support token scope
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -3977,8 +3978,9 @@ public class ApiMgtDAO {
 
         // Add Access Token
         String sqlAddAccessToken = "INSERT INTO " +  accessTokenStoreTable +
-                " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
-                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
+               // " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
+                " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE," +
+                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?)";
 
 //        ///////////////////////////
 //
@@ -5278,6 +5280,9 @@ public class ApiMgtDAO {
             return false;
         }
         Subscriber subscriber = getSubscriber(username);
+        if(subscriber == null){
+        	return false;
+        }
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
