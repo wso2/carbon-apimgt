@@ -979,6 +979,32 @@ var provider = {};
             };
         }
     };
+    
+    APIProviderProxy.prototype.hasCreatePermission = function () {
+        var success, log = new Log();
+        try {
+            success = this.impl.hasCreatePermission();
+            if (log.isDebugEnabled()) {
+                log.debug("check whether user has create permission" );
+            }
+            if(success){
+                return {
+                    error:false,
+                    permitted:success
+                };
+            }else{
+                return {
+                    error:true,
+                    permitted:success
+                }; }
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:true,
+                permitted:false
+            };
+        }
+    };
 
     APIProviderProxy.prototype.isScopeExist = function (scope, tenantId) {
         var result, log = new Log();

@@ -3812,7 +3812,7 @@ public class ApiMgtDAO {
         // Add Access Token
         String sqlAddAccessToken = "INSERT" +
                                    " INTO " + accessTokenStoreTable +
-                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE " +
+                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE)" +
                                    " VALUES (?,?,?,?)";
 
         String getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +

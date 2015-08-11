@@ -48,6 +48,9 @@ $(function () {
         return caramel.context + '/apis/applications/' + action;
     };
 
+    var goBack = $("#goBack").val();
+    var goBackAPIId = $("#goBackAPIId").val();
+
     var partial = function (name) {
         return '/extensions/assets/api/themes/' + caramel.themer + '/partials/' + name + '.hbs';
     };
@@ -256,6 +259,17 @@ $(function () {
                             label: 'Ok',
                             action: function (dialogItself) {
                                 dialogItself.close();
+                                if(goBack == "yes"){
+                                    BootstrapDialog.confirm('Return back to API detail page?', function(result){
+                                        if(result) {
+                                            window.location.href = caramel.context + '/assets/api/details/'+goBackAPIId;
+                                        }else {
+                                            window.location.reload(true);
+                                        }
+                                    });
+                                } else{
+                                    window.location.reload(true);
+                                }
                             }
                         }]
 
