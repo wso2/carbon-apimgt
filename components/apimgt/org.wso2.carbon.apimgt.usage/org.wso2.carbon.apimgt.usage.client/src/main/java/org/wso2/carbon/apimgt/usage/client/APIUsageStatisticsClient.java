@@ -1076,20 +1076,21 @@ public class APIUsageStatisticsClient {
     public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDaysForAPIUsageByUser(providerName, fromDate, toDate, null);
+        List<APIUsageByUserName> usageData = this.queryBetweenTwoDaysForAPIUsageByUser(providerName, fromDate, toDate, null);
         
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         
-        Collection<APIUsageByUserName> usageData = getUsageDataByAPIName(omElement, tenantDomain);
         List<APIUsageByUserDTO> usageByName = new ArrayList<APIUsageByUserDTO>();
 
         for (APIUsageByUserName usage : usageData) {
-            APIUsageByUserDTO usageDTO = new APIUsageByUserDTO();
-            usageDTO.setApiName(usage.apiName);
-            usageDTO.setVersion(usage.apiVersion);
-            usageDTO.setUserID(usage.userID);
-            usageDTO.setCount(usage.requestCount);
-            usageByName.add(usageDTO);
+            if (tenantDomain.equals(MultitenantUtils.getTenantDomain(usage.apipublisher))) {
+                APIUsageByUserDTO usageDTO = new APIUsageByUserDTO();
+                usageDTO.setApiName(usage.apiName);
+                usageDTO.setVersion(usage.apiVersion);
+                usageDTO.setUserID(usage.userID);
+                usageDTO.setCount(usage.requestCount);
+                usageByName.add(usageDTO);
+            }
         }
 
         return usageByName;
@@ -2196,7 +2197,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private OMElement queryBetweenTwoDaysForAPIUsageByUser(String providerName, String fromDate, String toDate, Integer limit)
+    private List<APIUsageByUserName> queryBetweenTwoDaysForAPIUsageByUser(String providerName, String fromDate, String toDate, Integer limit)
             throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
@@ -2255,21 +2256,28 @@ public class APIUsageStatisticsClient {
             }
 
             rs = statement.executeQuery(query);
-            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
-            int columnCount = rs.getMetaData().getColumnCount();
+            List<APIUsageByUserName> usageByName = new ArrayList<APIUsageByUserName>();
+            String apiName;
+            String apiVersion;
+            String context;
+            String userID;
+            long requestCount;
+            String publisher;
+
             while (rs.next()) {
-                returnStringBuilder.append("<row>");
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = rs.getMetaData().getColumnName(i);
-                    String columnValue = rs.getString(columnName);
-                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + columnValue +
-                            "</" + columnName.toLowerCase() + ">");
+                apiName = rs.getString("api");
+                apiVersion = rs.getString("version");
+                context = rs.getString("api");
+                userID = rs.getString("userid");
+                requestCount = rs.getLong("total_request_count");
+                publisher = rs.getString("apipublisher");
+                if (publisher != null) {
+                    APIUsageByUserName usage = new APIUsageByUserName(apiName, apiVersion, context, userID,
+                            requestCount, publisher);
+                    usageByName.add(usage);
                 }
-                returnStringBuilder.append("</row>");
             }
-            returnStringBuilder.append("</rows></omElement>");
-            String returnString = returnStringBuilder.toString();
-            return AXIOMUtil.stringToOM(returnString);
+            return usageByName;
 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
@@ -2383,6 +2391,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    @Deprecated
     private Collection<APIUsageByUserName> getUsageDataByAPIName(OMElement data, String tenantDomain) {
         List<APIUsageByUserName> usageData = new ArrayList<APIUsageByUserName>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -3410,8 +3419,20 @@ public class APIUsageStatisticsClient {
         private String apiVersion;
         private String context;
         private String userID;
+        private String apipublisher;
         private long requestCount;
 
+        public APIUsageByUserName(String apiName, String apiVersion, String context, String userID, long requestCount,
+                String apipublisher) {
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.context = context;
+            this.userID = userID;
+            this.requestCount = requestCount;
+            this.apipublisher = apipublisher;
+        }
+
+        @Deprecated
         public APIUsageByUserName(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
