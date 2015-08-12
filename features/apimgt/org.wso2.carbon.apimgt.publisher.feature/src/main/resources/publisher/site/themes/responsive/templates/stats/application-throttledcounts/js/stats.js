@@ -1,12 +1,10 @@
-appName = "";
-var currentLocation;
-
+var appName = "";
+var currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
-currentLocation=window.location.pathname;
 
 //setting default date
-to = new Date();
-from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 $( document ).ready(function() {
 
@@ -16,7 +14,6 @@ $( document ).ready(function() {
             if (!json.error) {
                 if (json.usage && json.usage.length > 0) {
                     var d = new Date();
-                    //var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
 
                     //day picker
@@ -27,12 +24,12 @@ $( document ).ready(function() {
                     //hour picker
                     $('#hour-btn').on('click', function () {
                         getDateTime(currentDay, currentDay - 3600000);
-                    })
+                    });
 
                     //week picker
                     $('#week-btn').on('click', function () {
                         getDateTime(currentDay, currentDay - 604800000);
-                    })
+                    });
 
                     //month picker
                     $('#month-btn').on('click', function () {
@@ -124,7 +121,7 @@ var populateAppList = function() {
             }
         }
     , "json");
-}
+};
 
 var drawThrottledTimeGraph = function (fromDate, toDate) {
 
@@ -233,8 +230,8 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){  
-    to = convertTimeString(currentDay);
-    from = convertTimeString(fromDay);
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
