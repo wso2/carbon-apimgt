@@ -943,7 +943,7 @@ public class APIUsageStatisticsClient {
                 .queryBetweenTwoDaysForAPIUsageByVersion(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
                         null, null, apiName);
 //        Collection<APIUsage> usageData = getUsageData(omElement);
-        List<API> providerAPIs = getAPIsByProvider(providerName);log.info("getUsageByAPIVersions");
+        List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
 
         for (APIUsage usage : usageData) {
