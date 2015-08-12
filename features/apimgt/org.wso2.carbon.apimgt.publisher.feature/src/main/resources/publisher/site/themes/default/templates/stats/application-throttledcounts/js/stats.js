@@ -1,12 +1,10 @@
-appName = "";
-var currentLocation;
-
+var appName = "";
+var currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
-currentLocation=window.location.pathname;
 
 //setting default date
-to = new Date();
-from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 require(["dojo/dom", "dojo/domReady!"], function (dom) {
     jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action:"getFirstAccessTime", currentLocation : currentLocation},
@@ -25,12 +23,12 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     //hour picker
                     $('#hour-btn').on('click', function () {
                         getDateTime(currentDay, currentDay - 3600000);
-                    })
+                    });
 
                     //week picker
                     $('#week-btn').on('click', function () {
                         getDateTime(currentDay, currentDay - 604800000);
-                    })
+                    });
 
                     //month picker
                     $('#month-btn').on('click', function () {
@@ -130,7 +128,7 @@ var populateAppList = function() {
             }
         }
     , "json");
-}
+};
 
 var drawThrottledTimeGraph = function (fromDate, toDate) {
 
@@ -217,7 +215,7 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
             }
         }
     , "json");
-}
+};
 
 var convertTimeString = function(date){
     var d = new Date(date);
@@ -254,8 +252,8 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){  
-    to = convertTimeString(currentDay);
-    from = convertTimeString(fromDay);
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
@@ -270,7 +268,7 @@ function convertDateToLong(date){
     var timeSegments=allSegments[1].split(":");
     var newDate = new Date(dateSegments[0],(dateSegments[1]-1),dateSegments[2],timeSegments[0],timeSegments[1],timeSegments[2]);
     return newDate.getTime();
-};
+}
 
 function isDataPublishingEnabled(){
     jagg.post("/site/blocks/stats/application-throttledcounts/ajax/stats.jag", { action: "isDataPublishingEnabled"},
