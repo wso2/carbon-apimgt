@@ -1011,9 +1011,9 @@ public class APIUsageStatisticsClient {
     public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryToGetAPIUsageByResourcePath(
-                APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, fromDate, toDate);
-        Collection<APIUsageByResourcePath> usageData = getUsageDataByResourcePath(omElement);
+        Collection<APIUsageByResourcePath> usageData = this
+                .queryToGetAPIUsageByResourcePath(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
+                        fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResourcePathUsageDTO> usageByResourcePath = new ArrayList<APIResourcePathUsageDTO>();
 
@@ -1997,7 +1997,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private OMElement queryToGetAPIUsageByResourcePath(String columnFamily, String fromDate, String toDate)
+    private List<APIUsageByResourcePath> queryToGetAPIUsageByResourcePath(String columnFamily, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -2008,6 +2008,7 @@ public class APIUsageStatisticsClient {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
+        List<APIUsageByResourcePath> usage=new ArrayList<APIUsageByResourcePath>();
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
@@ -2017,21 +2018,19 @@ public class APIUsageStatisticsClient {
                     + columnFamily + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                     "\'" + fromDate + "\' AND \'" + toDate + "\'";
             rs = statement.executeQuery(query);
-            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
-            int columnCount = rs.getMetaData().getColumnCount();
+            APIUsageByResourcePath apiUsageByResourcePath;
+
             while (rs.next()) {
-                returnStringBuilder.append("<row>");
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = rs.getMetaData().getColumnName(i);
-                    String columnValue = rs.getString(columnName);
-                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + columnValue +
-                            "</" + columnName.toLowerCase() + ">");
-                }
-                returnStringBuilder.append("</row>");
+                String apiName = rs.getString("api");
+                String version = rs.getString("version");
+                String context = rs.getString("context");
+                String method = rs.getString("method");
+                long hits = rs.getLong("total_request_count");
+                String time = rs.getString("time");
+                apiUsageByResourcePath = new APIUsageByResourcePath(apiName, version, method, context, hits, time);
+                usage.add(apiUsageByResourcePath);
             }
-            returnStringBuilder.append("</rows></omElement>");
-            String returnString = returnStringBuilder.toString();
-            return AXIOMUtil.stringToOM(returnString);
+            return usage;
 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
@@ -2361,6 +2360,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    @Deprecated
     private Collection<APIUsageByResourcePath> getUsageDataByResourcePath(OMElement data) {
         List<APIUsageByResourcePath> usageData = new ArrayList<APIUsageByResourcePath>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -3375,6 +3375,17 @@ public class APIUsageStatisticsClient {
         private long requestCount;
         private String time;
 
+        public APIUsageByResourcePath(String apiName, String apiVersion, String method, String context,
+                long requestCount, String time) {
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.method = method;
+            this.context = context;
+            this.requestCount = requestCount;
+            this.time = time;
+        }
+
+        @Deprecated
         public APIUsageByResourcePath(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
