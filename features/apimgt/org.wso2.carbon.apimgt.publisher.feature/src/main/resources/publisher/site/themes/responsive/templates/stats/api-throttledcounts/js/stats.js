@@ -1,14 +1,12 @@
-apiName = "";
-appName = "";
+var apiName = "";
+var appName = "";
 
-var currentLocation;
-
+var currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
-currentLocation=window.location.pathname;
 
 //setting default date
-to = new Date();
-from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
+var to = new Date();
+var from = new Date(to.getTime() - 1000 * 60 * 60 * 24 * 30);
 
 $( document ).ready(function() {
 
@@ -29,12 +27,12 @@ $( document ).ready(function() {
                     //hour picker
                     $('#hour-btn').on('click', function () {
                         getDateTime(currentDay, currentDay - 3600000);
-                    })
+                    });
 
                     //week picker
                     $('#week-btn').on('click', function () {
                         getDateTime(currentDay, currentDay - 604800000);
-                    })
+                    });
 
                     //month picker
                     $('#month-btn').on('click', function () {
@@ -164,7 +162,7 @@ var pupulateAppList = function(apiName) {
             }
         }
     , "json");
-}
+};
 
 var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
     
@@ -204,11 +202,11 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
 
                         var normalizeTime = function(time) {
                             return (time - convertDateToLong(result[0].time)) /timeUnitMili;
-                        }
+                        };
 
                         var denormalizeTime = function(time) {
                             return time * timeUnitMili + convertDateToLong(result[0].time);
-                        }
+                        };
 
                         nv.addGraph(function() {
                         var chart =  nv.models.stackedAreaChart();
@@ -324,8 +322,8 @@ function btnActiveToggle(button){
 }
 
 function getDateTime(currentDay,fromDay){  
-    to = convertTimeString(currentDay);
-    from = convertTimeString(fromDay);
+    var to = convertTimeString(currentDay);
+    var from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
@@ -341,7 +339,7 @@ function convertDateToLong(date){
     var timeSegments=allSegments[1].split(":");
     var newDate = new Date(dateSegments[0],(dateSegments[1]-1),dateSegments[2],timeSegments[0],timeSegments[1],timeSegments[2]);
     return newDate.getTime();
-};
+}
 
 function isDataPublishingEnabled(){
     jagg.post("/site/blocks/stats/api-throttledcounts/ajax/stats.jag", { action: "isDataPublishingEnabled"},
