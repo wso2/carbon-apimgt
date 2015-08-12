@@ -936,13 +936,14 @@ public class APIUsageStatisticsClient {
      * @return a List of APIVersionUsageDTO objects, possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
-    public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName,
-                                                          String apiName) throws APIMgtUsageQueryServiceClientException {
+    public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName)
+            throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDaysForAPIUsageByVersion(
-                APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY, null, null, apiName);
-        Collection<APIUsage> usageData = getUsageData(omElement);
-        List<API> providerAPIs = getAPIsByProvider(providerName);
+        List<APIUsage> usageData = this
+                .queryBetweenTwoDaysForAPIUsageByVersion(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
+                        null, null, apiName);
+//        Collection<APIUsage> usageData = getUsageData(omElement);
+        List<API> providerAPIs = getAPIsByProvider(providerName);log.info("getUsageByAPIVersions");
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
 
         for (APIUsage usage : usageData) {
@@ -977,9 +978,9 @@ public class APIUsageStatisticsClient {
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName,
                                                           String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDaysForAPIUsageByVersion(
+        List<APIUsage> usageData = this.queryBetweenTwoDaysForAPIUsageByVersion(
                 APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY, fromDate, toDate, apiName);
-        Collection<APIUsage> usageData = getUsageData(omElement);
+//        Collection<APIUsage> usageData = getUsageData(omElement);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
 
@@ -2121,7 +2122,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private OMElement queryBetweenTwoDaysForAPIUsageByVersion(String columnFamily, String fromDate, String toDate,
+    private List<APIUsage> queryBetweenTwoDaysForAPIUsageByVersion(String columnFamily, String fromDate, String toDate,
                                                               String apiName)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -2133,6 +2134,8 @@ public class APIUsageStatisticsClient {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
+        List<APIUsage> usageDataList = new ArrayList<APIUsage>();
+
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
@@ -2152,21 +2155,15 @@ public class APIUsageStatisticsClient {
                         " GROUP BY api,version,apiPublisher,context";
             }
             rs = statement.executeQuery(query);
-            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
-            int columnCount = rs.getMetaData().getColumnCount();
+
             while (rs.next()) {
-                returnStringBuilder.append("<row>");
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = rs.getMetaData().getColumnName(i);
-                    String columnValue = rs.getString(columnName);
-                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + columnValue +
-                            "</" + columnName.toLowerCase() + ">");
-                }
-                returnStringBuilder.append("</row>");
+                String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
+                String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
+                long requestCount = rs.getLong("total_request_count");
+                usageDataList.add(new APIUsage(apiName, context, version, requestCount));
             }
-            returnStringBuilder.append("</rows></omElement>");
-            String returnString = returnStringBuilder.toString();
-            return AXIOMUtil.stringToOM(returnString);
+
+            return usageDataList;
 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
@@ -2329,6 +2326,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
+    @Deprecated
     private Collection<APIUsage> getUsageData(OMElement data) {
         List<APIUsage> usageData = new ArrayList<APIUsage>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
