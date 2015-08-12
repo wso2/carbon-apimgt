@@ -310,13 +310,13 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 operationObject = new JSONObject();
                 //Handle auth type specially as swagger need to show exact value
                 String authType = uriTemplate.getAuthType();
-                if (authType.equals(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN)) {
+                if (APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN.equals(authType)) {
                     authType = "Application & Application User";
                 }
-                if (authType.equals(APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN)) {
+                if (APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN.equals(authType)) {
                     authType = "Application User";
                 }
-                if (authType.equals(APIConstants.AUTH_APPLICATION_LEVEL_TOKEN)) {
+                if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authType)) {
                     authType = "Application";
                 }
                 operationObject.put(APIConstants.SWAGGER_X_AUTH_TYPE, authType);
