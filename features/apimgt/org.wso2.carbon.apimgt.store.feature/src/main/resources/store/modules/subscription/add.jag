@@ -30,7 +30,9 @@ var addAPISubscription = function (api, tier, applicationName, username) {
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        status = store.addAPISubscription(api.provider, api.name, api.version, tier, applicationName, username);
+        var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var applicationId = APIUtil.getApplicationId(applicationName,username);
+        status = store.addSubscription(api.provider, api.name, api.version, tier, applicationId,  username);
         if (log.isDebugEnabled()) {
             log.debug("addAPISubscription");
         }
