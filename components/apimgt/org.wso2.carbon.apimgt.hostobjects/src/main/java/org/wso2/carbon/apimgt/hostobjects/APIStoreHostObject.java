@@ -2493,38 +2493,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static boolean jsFunction_addAPISubscription(Context cx,
-                                                        Scriptable thisObj, Object[] args, Function funObj) throws APIManagementException {
-        if (!isStringArray(args)) {
-            throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
-        }
-
-        APIConsumer apiConsumer = getAPIConsumer(thisObj);
-        String providerName = APIUtil.replaceEmailDomain(args[0].toString());
-        String apiName = args[1].toString();
-        String version = args[2].toString();
-        String tier = args[3].toString();
-        String applicationName = ((String) args[4]);
-        String userId = args[5].toString();
-        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-
-        //Check whether tier is denied or not before adding
-        Set<String> tiers = apiConsumer.getDeniedTiers();
-        if (!tiers.contains(tier)) {
-            apiIdentifier.setTier(tier);
-            try {
-                int applicationId = APIUtil.getApplicationId(applicationName, userId);
-                apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
-            } catch (APIManagementException e) {
-                handleException("Error while adding the subscription for user: " + userId, e);
-            }
-            return true;
-        } else {
-            handleException("Cannot add subscription to with the denied tier");
-            return false;
-        }
-    }
-
     public static boolean jsFunction_removeSubscriber(Context cx,
                                                       Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
