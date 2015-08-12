@@ -1445,9 +1445,8 @@ public class APIUsageStatisticsClient {
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        OMElement omElement = this.queryBetweenTwoDaysForFaulty(
-                APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, fromDate, toDate);
-        Collection<APIResponseFaultCount> faultyData = getAPIResponseFaultCount(omElement);
+        List<APIResponseFaultCount> faultyData = this
+                .queryBetweenTwoDaysForFaulty(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResponseFaultCountDTO> faultyCount = new ArrayList<APIResponseFaultCountDTO>();
         List<APIVersionUsageDTO> apiVersionUsageList;
@@ -1933,7 +1932,8 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private OMElement queryBetweenTwoDaysForFaulty(String columnFamily, String fromDate, String toDate)
+    private List<APIResponseFaultCount> queryBetweenTwoDaysForFaulty(String columnFamily, String fromDate,
+            String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -1944,6 +1944,8 @@ public class APIUsageStatisticsClient {
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
+        List<APIResponseFaultCount> faultusage = new ArrayList<APIResponseFaultCount>();
+
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
@@ -1954,21 +1956,17 @@ public class APIUsageStatisticsClient {
                     "\'" + fromDate + "\' AND \'" + toDate + "\'" + " GROUP BY api,version,apiPublisher,context";
 
             rs = statement.executeQuery(query);
-            StringBuilder returnStringBuilder = new StringBuilder("<omElement><rows>");
-            int columnCount = rs.getMetaData().getColumnCount();
+            APIResponseFaultCount apiResponseFaultCount;
+
             while (rs.next()) {
-                returnStringBuilder.append("<row>");
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = rs.getMetaData().getColumnName(i);
-                    String columnValue = rs.getString(columnName);
-                    returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + columnValue +
-                            "</" + columnName.toLowerCase() + ">");
-                }
-                returnStringBuilder.append("</row>");
+                String apiName = rs.getString("api");
+                String version = rs.getString("version");
+                String context = rs.getString("context");
+                long requestCount = rs.getLong("total_fault_count");
+                apiResponseFaultCount = new APIResponseFaultCount(apiName, version, context, requestCount);
+                faultusage.add(apiResponseFaultCount);
             }
-            returnStringBuilder.append("</rows></omElement>");
-            String returnString = returnStringBuilder.toString();
-            return AXIOMUtil.stringToOM(returnString);
+            return faultusage;
 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
@@ -2415,6 +2413,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    @Deprecated
     private Collection<APIResponseFaultCount> getAPIResponseFaultCount(OMElement data) {
         List<APIResponseFaultCount> faultyData = new ArrayList<APIResponseFaultCount>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -3474,9 +3473,17 @@ public class APIUsageStatisticsClient {
         private String apiName;
         private String apiVersion;
         private String context;
-        private String requestTime;
+//        private String requestTime;
         private long faultCount;
 
+        public APIResponseFaultCount(String apiName, String apiVersion, String context, long faultCount) {
+            this.apiName = apiName;
+            this.apiVersion = apiVersion;
+            this.context = context;
+            this.faultCount = faultCount;
+        }
+
+        @Deprecated
         public APIResponseFaultCount(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
@@ -3488,9 +3495,9 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.INVOCATION_TIME));
             OMElement faultCountEle = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.FAULT));
-            if (invocationTimeEle != null) {
-                requestTime = invocationTimeEle.getText();
-            }
+//            if (invocationTimeEle != null) {
+//                requestTime = invocationTimeEle.getText();
+//            }
             if (faultCountEle != null) {
                 faultCount = (long) Double.parseDouble(faultCountEle.getText());
             }
