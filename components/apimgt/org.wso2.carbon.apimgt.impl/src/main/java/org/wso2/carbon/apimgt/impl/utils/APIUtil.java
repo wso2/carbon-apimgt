@@ -4052,7 +4052,7 @@ public final class APIUtil {
      */
 
     public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain)
+                                                  String tenantDomain, int tenantId)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4066,9 +4066,7 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
-        int tenantId;
         try {
-           tenantId = APIUtil.getTenantId(userName);
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
