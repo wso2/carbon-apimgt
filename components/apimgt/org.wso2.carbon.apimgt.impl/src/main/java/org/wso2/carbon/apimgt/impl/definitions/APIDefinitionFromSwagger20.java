@@ -341,7 +341,6 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
                 xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
                 xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
-
                 xWso2ScopesArray.add(xWso2ScopesObject);
             }
         }
