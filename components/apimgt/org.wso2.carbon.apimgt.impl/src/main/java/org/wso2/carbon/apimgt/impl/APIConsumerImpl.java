@@ -2934,7 +2934,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> result = new HashMap<String, Object>();
         List<APISubscription> subs = new ArrayList<APISubscription>();
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
         try {
             if (tenantDomain != null &&
                 !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2943,9 +2943,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-            Subscriber subscriber = new Subscriber(username);
+            Subscriber subscriber = new Subscriber(userName);
             Application[] applications;
-            applications = getApplications(new Subscriber(username), groupId);
+            applications = getApplications(new Subscriber(userName), groupId);
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {
