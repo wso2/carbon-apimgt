@@ -4080,12 +4080,10 @@ public final class APIUtil {
                 documentMap.put("name", content[content.length - 1]);
             }
         }  catch (RegistryException e) {
-            log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
-                      e);
-            handleException(
-                    "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
-                    e);
-        }
+            String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
+            log.error(msg, e);
+            handleException(msg, e);
+
         return documentMap;
     }
 
