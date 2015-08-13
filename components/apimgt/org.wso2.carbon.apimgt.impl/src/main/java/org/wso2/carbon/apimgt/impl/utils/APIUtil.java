@@ -4079,14 +4079,13 @@ public final class APIUtil {
                 String[] content = apiDocResource.getPath().split("/");
                 documentMap.put("name", content[content.length - 1]);
             }
-        }  catch (RegistryException e) {
+        } catch (RegistryException e) {
             String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
             log.error(msg, e);
             handleException(msg, e);
-
+        }
         return documentMap;
     }
-
     /**
      * this method used to set environments values to api object.
      *
