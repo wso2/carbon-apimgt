@@ -115,7 +115,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     // API definitions from swagger v2.0
-    private static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     // The zero-argument constructor used for create instances for runtime
     public APIProviderHostObject() throws APIManagementException {

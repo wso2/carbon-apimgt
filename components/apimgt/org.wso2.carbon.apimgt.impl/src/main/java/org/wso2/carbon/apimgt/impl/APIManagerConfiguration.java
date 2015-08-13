@@ -211,7 +211,7 @@ public class APIManagerConfiguration {
                     }
                 }
             } else if (APIConstants.EXTERNAL_API_STORES.equals(localName)) {  //Initialize 'externalAPIStores' config elements
-                Iterator apistoreIterator = element.getChildrenWithLocalName(APIConstants.EXTERNAL_API_STORE);
+                Iterator apistoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
                 externalAPIStores = new HashSet<APIStore>();
                 while (apistoreIterator.hasNext()) {
                     APIStore store = new APIStore();

@@ -24,7 +24,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -42,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.utils.*;
@@ -62,13 +62,11 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.util.*;
 import java.util.Collection;
@@ -2444,31 +2442,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getConsumerKeys(apiIdentifier);
     }
 
-    /**
-     * This method is used to get the swagger v2.0 definition for given API Identifier
-     *
-     * @param apiId id of the APIIdentifier
-     * @return swagger definition
-     * @throws APIManagementException
-     */
     @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
         return definitionFromSwagger20.getAPIDefinition(apiId, registry);
     }
 
-    /**
-     * This method is used to save swagger v2.0 definition in the registry
-     *
-     * @param apiId    id of the APIIdentifier
-     * @param jsonText json text to be saved in the registry
-     * @throws APIManagementException
-     */
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
+
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
