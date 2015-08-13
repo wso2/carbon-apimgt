@@ -8,7 +8,7 @@ function changeAppNameMode(linkObj){
     $('td:eq(3)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="callback_new validInput" maxlength="256" value="'
         +'" type="text" /> </div></div> ');
     $('td:eq(3)',theTr).find(".callback_new").val(theTr.attr('callback-value'));
-    $('td:eq(4)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="description-new" maxlength="70" value="'
+    $('td:eq(4)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="description-new" maxlength="256" value="'
         +'" type="text" /> </div></div> ');
     $('td:eq(4)',theTr).find(".description-new").val(theTr.attr('description-value'));
     //Hide the Edit link

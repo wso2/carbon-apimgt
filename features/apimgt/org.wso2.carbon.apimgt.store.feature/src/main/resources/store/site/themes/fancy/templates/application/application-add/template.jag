@@ -81,7 +81,7 @@ An application is a logical collection of APIs. Applications allow you to use a 
                 <div class="control-group">
                      <label style="padding-top: 5px;" for="description" class="control-label">Description</label>
                      <div class="controls">
-                         <textarea id="description" maxlength="70" style="width:400px;" type="text"></textarea>
+                         <textarea id="description" maxlength="256" style="width:400px;" type="text"></textarea>
                 </div>
                 <div class="form-actions">
                     <input type="submit" id="application-add-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("add")%>"/>
