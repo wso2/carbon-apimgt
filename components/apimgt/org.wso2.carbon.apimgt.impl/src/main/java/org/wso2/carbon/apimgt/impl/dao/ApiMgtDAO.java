@@ -5280,6 +5280,9 @@ public class ApiMgtDAO {
             return false;
         }
         Subscriber subscriber = getSubscriber(username);
+        if(subscriber == null){
+        	return false;
+        }
 
         Connection connection = null;
         PreparedStatement preparedStatement = null;
