@@ -187,10 +187,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             resource.setContent(apiDefinitionJSON);
             resource.setMediaType("application/json");
             registry.put(resourcePath, resource);
-
             //Need to set anonymous if the visibility is public
             APIUtil.setResourcePermissions(apiProviderName, null, null, resourcePath);
-
         } catch (RegistryException e) {
             handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
         }
@@ -329,12 +327,11 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         swaggerObject.put(APIConstants.SWAGGER_PATHS, pathsObject);
         swaggerObject.put(APIConstants.SWAGGER, APIConstants.SWAGGER_V2);
-
         JSONObject securityDefinitionObject = new JSONObject();
         JSONObject scopesObject = new JSONObject();
-
         JSONArray xWso2ScopesArray = new JSONArray();
         JSONObject xWso2ScopesObject;
+
         if (scopes != null) {
             for (Scope scope : scopes) {
                 xWso2ScopesObject = new JSONObject();
@@ -349,9 +346,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
 
         scopesObject.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xWso2ScopesArray);
         securityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, scopesObject);
-
         swaggerObject.put(APIConstants.SWAGGER_X_WSO2_SECURITY, securityDefinitionObject);
-
         return swaggerObject.toJSONString();
     }
 }

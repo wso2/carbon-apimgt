@@ -2430,18 +2430,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getConsumerKeys(apiIdentifier);
     }
 
+    /**
+     * This method is used to get the swagger v2.0 definition for given API Identifier
+     *
+     * @param apiId id of the APIIdentifier
+     * @return swagger definition
+     * @throws APIManagementException
+     */
     @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
         return definitionFromSwagger20.getAPIDefinition(apiId, registry);
     }
 
+    /**
+     * This method is used to save swagger v2.0 definition in the registry
+     *
+     * @param apiId    id of the APIIdentifier
+     * @param jsonText json text to be saved in the registry
+     * @throws APIManagementException
+     */
     @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
-
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
