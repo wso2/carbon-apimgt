@@ -26,18 +26,12 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -217,7 +211,7 @@ public class APIManagerConfiguration {
                     }
                 }
             } else if (APIConstants.EXTERNAL_API_STORES.equals(localName)) {  //Initialize 'externalAPIStores' config elements
-                Iterator apistoreIterator = element.getChildrenWithLocalName("ExternalAPIStore");
+                Iterator apistoreIterator = element.getChildrenWithLocalName(APIConstants.EXTERNAL_API_STORE);
                 externalAPIStores = new HashSet<APIStore>();
                 while (apistoreIterator.hasNext()) {
                     APIStore store = new APIStore();

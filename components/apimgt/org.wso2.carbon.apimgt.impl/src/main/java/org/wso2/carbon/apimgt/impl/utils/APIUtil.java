@@ -967,12 +967,20 @@ public final class APIUtil {
 
     //remove getSwagger12DefinitionFilePath once getSwagger20DefinitionFilePath operates
     public static String getSwagger12DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
-    	String resourcePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
-    			apiName +"-"  + apiVersion + "-" + apiProvider + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_1_2_LOCATION;
+        String resourcePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiName + "-" + apiVersion + "-" + apiProvider + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_1_2_LOCATION;
 
-    	return resourcePath;
+        return resourcePath;
     }
 
+    /**
+     * This method will return the location of thw swagger file for given api
+     *
+     * @param apiName     Name of the api
+     * @param apiVersion  The version of the API
+     * @param apiProvider Provider of the API
+     * @return swagger file path
+     */
     public static String getSwagger20DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
