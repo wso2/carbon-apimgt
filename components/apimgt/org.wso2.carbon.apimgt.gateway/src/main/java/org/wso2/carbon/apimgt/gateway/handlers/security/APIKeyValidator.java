@@ -383,7 +383,8 @@ public class APIKeyValidator {
             for (API api : synCtx.getConfiguration().getAPIs()) {
                 if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
+
+                        log.debug("Selected API: " + apiContext + ", Version: " + apiVersion);
                     }
                     selectedApi = api;
                     break;
@@ -402,8 +403,9 @@ public class APIKeyValidator {
 
             if (selectedResource == null) {
                 //No matching resource found.
-                log.error("Could not find matching resource for " + requestPath);
-                throw new ResourceNotFoundException("Could not find matching resource for " + requestPath);
+                String msg = "Could not find matching resource for " + requestPath;
+                log.error(msg);
+                throw new ResourceNotFoundException(msg);
             }
 
             resourceString = selectedResource.getDispatcherHelper().getString();

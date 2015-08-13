@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
@@ -267,7 +268,7 @@ public class Utils {
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
         messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
+        messageContext.setProperty(SynapseConstants.RESPONSE, "true");
         messageContext.setTo(null);
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Axis2Sender.sendBack(messageContext);
