@@ -73,7 +73,7 @@ An application is a logical collection of APIs. Applications allow you to use a 
                 <div class="control-group">
                     <label class="control-label" for="callback-url" style="padding-top: 5px;"><%=i18n.localize("callbackUrl")%></label>
                     <div class="controls">
-                        <input type="text" class="validInput" style="width:400px;" maxlength="70" name="callback-url"  id="callback-url"/>
+                        <input type="text" class="validInput" style="width:400px;" maxlength="256" name="callback-url"  id="callback-url"/>
                         <a class="icon-question-sign help_popup"></a>
                         <div id="callback_help"></div>
                     </div>

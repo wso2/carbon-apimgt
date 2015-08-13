@@ -5,7 +5,7 @@ function changeAppNameMode(linkObj){
     $('td:first',theTr).html('<div class="row-fluid"><div class="span6"> <input class="app_name_new" maxlength="70" value="'
         +'" type="text" /> </div></div> ');
     $('td:first',theTr).find(".app_name_new").val(theTr.attr('data-value'));
-    $('td:eq(3)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="callback_new validInput" maxlength="70" value="'
+    $('td:eq(3)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="callback_new validInput" maxlength="256" value="'
         +'" type="text" /> </div></div> ');
     $('td:eq(3)',theTr).find(".callback_new").val(theTr.attr('callback-value'));
     $('td:eq(4)',theTr).html('<div class="row-fluid"><div class="span6"> <input class="description-new" maxlength="70" value="'
