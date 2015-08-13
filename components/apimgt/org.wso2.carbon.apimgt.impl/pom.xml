@@ -178,6 +178,10 @@
           <groupId>org.wso2.carbon.deployment</groupId>
           <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
       </dependency>
+      <dependency>
+          <groupId>org.wso2.carbon.apimgt</groupId>
+          <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
+      </dependency>
     </dependencies>
     <build>
         <plugins>
