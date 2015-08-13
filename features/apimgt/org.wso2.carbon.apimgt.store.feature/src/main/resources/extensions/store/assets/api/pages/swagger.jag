@@ -29,20 +29,28 @@ require('/modules/store.js').exec(function (ctx) {
     var am;
     var tenantId=-1234;
     var server = require('store').server;
+    var carbon = require('carbon');
     var user = server.current(ctx.session);
     var username='_wso2.am.anon_';
     if (user) {
-    am = asset.createUserAssetManager(ctx.session, type);
-    tenantId = tenantId ? tenantId : user.tenantId;
-    username=user.username;
+        am = asset.createUserAssetManager(ctx.session, type);
+        tenantId = user.tenantId;
+        username=user.username;
+        var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+        user.domain = domain;
+        
     } else {
-    am = asset.createAnonAssetManager(ctx.session, type, tenantId);
+        user = {};
+        am = asset.createAnonAssetManager(ctx.session, type, tenantId);
     }
     //var am = asset.createUserAssetManager(ctx.session, type);
     var page = ui.buildPage(ctx.session, ctx.request);
     var output = am.renderBasic(page)._custom();
 
-    var apistore = require('apistore').apistore.instance(username);
+    var constants = require("rxt").constants;    
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+
+    var apistore = require('apistore').apistore.instance(user);
     var carbon = require('carbon');
 
     var uri = request.getRequestURI();
@@ -103,7 +111,9 @@ require('/modules/store.js').exec(function (ctx) {
             var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
             var apiUtil = new APIUtil();
             var swaggerPath = apiUtil.getSwagger20DefinitionFilePath(apiNameVal,apiVersionVal, providerVal);
-    		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry(username, tenantID);
+            
+            //"wso2.anonymous.user"
+    		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry(username, tenantId);
 
     		url = swaggerPath + "swagger.json";
     		var data = registry.get(url);
@@ -159,10 +169,10 @@ require('/modules/store.js').exec(function (ctx) {
 
         jsonObj.basePath = api.context;
 
-	//assign default value to host with first environment address
-	if (urlArr.length > 0 ) {
-	        jsonObj.host = 'localhost:8243';
-	}
+    	//assign default value to host with first environment address
+    	if (urlArr.length > 0 ) {
+    	        jsonObj.host = 'localhost:8243';
+    	}
 
 
         var paths = {}; //fix for /*, {url-template}*
@@ -175,7 +185,7 @@ require('/modules/store.js').exec(function (ctx) {
        response.contentType = 'application/json';
        output=jsonObj;
 
-   }
+    }
 
  caramel.render(output);
 }, request, response, session);

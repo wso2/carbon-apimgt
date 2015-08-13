@@ -24,7 +24,15 @@ require('/modules/store.js').exec(function (ctx) {
 	var responseProcessor = require('utils').response;
 	var server = require('store').server;
 	var user = server.current(ctx.session);
-	var apistore = require('apistore').apistore.instance(user.username);
+	
+	var tenantUser = carbon.server.tenantUser(user.username);
+    var tenantId = tenantUser.tenantId;
+	var constants = require("rxt").constants;
+	var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+
+	var apistore = require('apistore').apistore.instance(user);
 	var options = request.getAllParameters('UTF-8');
 	var httpMethod = request.getMethod();
 	var response = ctx.response;
