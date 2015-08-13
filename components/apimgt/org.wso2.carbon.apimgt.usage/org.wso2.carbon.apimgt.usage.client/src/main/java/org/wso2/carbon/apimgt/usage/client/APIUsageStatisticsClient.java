@@ -1933,7 +1933,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private List<APIResponseFaultCount> queryBetweenTwoDaysForFaulty(String columnFamily, String fromDate,
+    private List<APIResponseFaultCount> queryBetweenTwoDaysForFaulty(String tableName, String fromDate,
             String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1953,7 +1953,7 @@ public class APIUsageStatisticsClient {
             String query;
 
             query = "SELECT api,version,apiPublisher,context,SUM(total_fault_count) as total_fault_count FROM  "
-                    + columnFamily + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
+                    + tableName + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                     "\'" + fromDate + "\' AND \'" + toDate + "\'" + " GROUP BY api,version,apiPublisher,context";
 
             rs = statement.executeQuery(query);
@@ -1996,7 +1996,8 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private List<APIUsageByResourcePath> queryToGetAPIUsageByResourcePath(String columnFamily, String fromDate, String toDate)
+    private List<APIUsageByResourcePath> queryToGetAPIUsageByResourcePath(String tableName, String fromDate,
+            String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -2014,7 +2015,7 @@ public class APIUsageStatisticsClient {
             String query;
 
             query = "SELECT api,version,apiPublisher,context,method,total_request_count,time FROM "
-                    + columnFamily + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
+                    + tableName + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                     "\'" + fromDate + "\' AND \'" + toDate + "\'";
             rs = statement.executeQuery(query);
             APIUsageByResourcePath apiUsageByResourcePath;
@@ -2058,7 +2059,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private List<APIUsageByDestination> queryToGetAPIUsageByDestination(String columnFamily, String fromDate,
+    private List<APIUsageByDestination> queryToGetAPIUsageByDestination(String tableName, String fromDate,
             String toDate)
             throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
@@ -2077,7 +2078,7 @@ public class APIUsageStatisticsClient {
             String query;
 
             query = "SELECT api,version,apiPublisher,context,destination,SUM(total_request_count) as total_request_count FROM  "
-                    + columnFamily + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
+                    + tableName + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                     "\'" + fromDate + "\' AND \'" + toDate + "\'" + " GROUP BY api,version,apiPublisher,context,destination";
 
             rs = statement.executeQuery(query);
@@ -2122,8 +2123,8 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private List<APIUsage> queryBetweenTwoDaysForAPIUsageByVersion(String columnFamily, String fromDate, String toDate,
-                                                              String apiName)
+    private List<APIUsage> queryBetweenTwoDaysForAPIUsageByVersion(String tableName, String fromDate, String toDate,
+            String apiName)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -2142,7 +2143,7 @@ public class APIUsageStatisticsClient {
             String query;
             if (fromDate != null && toDate != null) {
                 query = "SELECT api,version,apiPublisher,context,SUM(total_request_count) as total_request_count" +
-                        " FROM  " + columnFamily +
+                        " FROM  " + tableName +
                         " WHERE api =\'" + apiName + "\' " +
                         " AND " + APIUsageStatisticsClientConstants.TIME +
                         " BETWEEN " + "\'" + fromDate + "\' " +
@@ -2150,7 +2151,7 @@ public class APIUsageStatisticsClient {
                         " GROUP BY api,version,apiPublisher,context";
             } else {
                 query = "SELECT api,version,apiPublisher,context,SUM(total_request_count) as total_request_count" +
-                        " FROM  " + columnFamily +
+                        " FROM  " + tableName +
                         " WHERE api =\'" + apiName + "\' " +
                         " GROUP BY api,version,apiPublisher,context";
             }
