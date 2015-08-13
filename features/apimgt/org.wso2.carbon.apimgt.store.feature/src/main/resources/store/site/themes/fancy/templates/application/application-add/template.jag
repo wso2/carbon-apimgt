@@ -73,7 +73,7 @@ An application is a logical collection of APIs. Applications allow you to use a 
                 <div class="control-group">
                     <label class="control-label" for="callback-url" style="padding-top: 5px;"><%=i18n.localize("callbackUrl")%></label>
                     <div class="controls">
-                        <input type="text" class="validInput" style="width:400px;" maxlength="400" name="callback-url"  id="callback-url"/>
+                        <input type="text" class="validInput" style="width:400px;" maxlength="70" name="callback-url"  id="callback-url"/>
                         <a class="icon-question-sign help_popup"></a>
                         <div id="callback_help"></div>
                     </div>
@@ -81,7 +81,7 @@ An application is a logical collection of APIs. Applications allow you to use a 
                 <div class="control-group">
                      <label style="padding-top: 5px;" for="description" class="control-label">Description</label>
                      <div class="controls">
-                         <textarea id="description" maxlength="400" style="width:400px;" type="text"></textarea>
+                         <textarea id="description" maxlength="70" style="width:400px;" type="text"></textarea>
                 </div>
                 <div class="form-actions">
                     <input type="submit" id="application-add-button" class="btn btn-primary" onclick="jagg.sessionAwareJS({redirect:'/site/pages/applications.jag'})" value="<%=i18n.localize("add")%>"/>
