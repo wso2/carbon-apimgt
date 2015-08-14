@@ -219,9 +219,9 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient{
             String apiConfig = builder.getConfigStringForDefaultAPITemplate(defaultVersion);
             if (tenantDomain != null && !("").equals(tenantDomain)
                     && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                apiGatewayAdminStub.addApiForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(),apiConfig, tenantDomain);
+                apiGatewayAdminStub.addDefaultAPIForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(),apiConfig, tenantDomain);
             }else {
-                apiGatewayAdminStub.addApi(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(),apiConfig);
+                apiGatewayAdminStub.addDefaultAPI(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(),apiConfig);
             }
         } catch (Exception e) {
             throw new AxisFault("Error publishing default API to the Gateway. " + e.getMessage(), e);
@@ -254,9 +254,9 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient{
             APIData apiData;
             if (tenantDomain != null && !("").equals(tenantDomain)
                     && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                apiData = apiGatewayAdminStub.getApiForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(),tenantDomain);
+                apiData = apiGatewayAdminStub.getDefaultApiForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(),tenantDomain);
             }else {
-                apiData = apiGatewayAdminStub.getApi(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion());
+                apiData = apiGatewayAdminStub.getDefaultApi(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion());
             }
             return (APIData) apiData;
         } catch (Exception e) {
@@ -311,9 +311,9 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient{
             if (tenantDomain != null && !("").equals(tenantDomain) &&
                     !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
 
-                apiGatewayAdminStub.updateApiForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(), apiConfig, tenantDomain);
+                apiGatewayAdminStub.updateDefaultApiForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(), apiConfig, tenantDomain);
             } else {
-                apiGatewayAdminStub.updateApi(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(), apiConfig);
+                apiGatewayAdminStub.updateDefaultApi(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(), apiConfig);
             }
         } catch (Exception e) {
             throw new AxisFault("Error while updating default API in the gateway. " + e.getMessage(), e);
@@ -344,9 +344,9 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient{
         try {
             if (tenantDomain != null && !("").equals(tenantDomain) &&
                     !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                apiGatewayAdminStub.deleteApiForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(), tenantDomain);
+                apiGatewayAdminStub.deleteDefaultApiForTenant(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion(), tenantDomain);
             } else {
-                apiGatewayAdminStub.deleteApi(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion());
+                apiGatewayAdminStub.deleteDefaultApi(apiId.getProviderName(),apiId.getApiName(), apiId.getVersion());
             }
 
         } catch (Exception e) {
