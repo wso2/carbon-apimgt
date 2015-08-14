@@ -53,25 +53,74 @@ var apistore = {};
     var attributes=new HashMap();
     var log = new Log("jaggery-modules.api-manager.store");
 
-    function StoreAPIProxy(username) {
-        this.username = username;
-        this.impl = APIManagerFactory.getInstance().getAPIConsumer(username);
+    function appendDomainByUser(user){
+        
+        var username = user.username;
+        var domain = user.domain;
+        var carbon = require('carbon');
+        if(domain == null || domain == 'null'){
+            domain = carbon.server.tenantDomain();
+        }
+        log.info('================================================== tenantUser : '+carbon.server.tenantDomain());
+        
+        if(username == '__wso2.am.anon__'){
+
+        }else{
+           var superTenantDomain = user.superTenantDomain;
+           if(superTenantDomain == domain || (user.username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > -1  ||  user.username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) > -1)){
+            username = APIUtil.replaceEmailDomainBack(username);
+            } else{
+                username = username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
+            } 
+        } 
+        log.info('================================================== user name : '+username);
+        return username;
     }
 
-    apistore.instance = function (username) {
-        return new StoreAPIProxy(username);
+    StoreAPIProxy.prototype.appendDomainToUser = function (username){
+        var tenantUser = username;
+        if(username == '__wso2.am.anon__'){
+
+        }else{
+            var domain = this.user.domain;
+            if(domain == null || domain == 'null'){
+                var carbon = require('carbon');
+                domain = carbon.server.tenantDomain();
+                log.info('================================================== domain : '+domain);
+            }
+            var superTenantDomain = this.user.superTenantDomain;
+            if(superTenantDomain == domain || (username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > -1  ||  username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) > -1)){
+                tenantUser = APIUtil.replaceEmailDomainBack(username);
+            }else{
+                tenantUser = username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
+            }
+        }
+        
+
+        return tenantUser;
+    }
+
+    function StoreAPIProxy(user) {
+        this.user = user;
+        var userNameWithDomain = appendDomainByUser(user);
+        this.username = userNameWithDomain;
+        this.impl = APIManagerFactory.getInstance().getAPIConsumer(userNameWithDomain);
+    }
+
+    apistore.instance = function (user) {
+        return new StoreAPIProxy(user);
 
     };
 
     StoreAPIProxy.prototype.getAllSubscriptions = function (userName, appName, startSubIndex, endSubIndex) {
-        var result=this.impl.getAllSubscriptions(userName, appName, startSubIndex, endSubIndex,null);
+        var result=this.impl.getAllSubscriptions(this.appendDomainToUser(userName), appName, startSubIndex, endSubIndex,null);
         return new APIUtil().stringifyAPISubscriptions(result);
     };
 
     StoreAPIProxy.prototype.getApplications = function (userName) {
         var resultArray = new Packages.org.json.simple.JSONArray();
         //var applications=new Application[];
-        var subscriber = new APISubscriber(userName);
+        var subscriber = new APISubscriber(this.appendDomainToUser(userName));
         var applications=this.impl.getApplications(subscriber,null);
         if (applications) {
             for (var i=0;i<applications.length;i++) {
@@ -104,7 +153,7 @@ var apistore = {};
 
 
     StoreAPIProxy.prototype.addApplication = function (appName, userName, tier, callbackUrl, description) {
-        var subscriber = new APISubscriber(username);
+        var subscriber = new APISubscriber(this.appendDomainToUser(userName));
         var application = new Application(appName, subscriber);
         application.setTier(tier);
         application.setCallbackUrl(callbackUrl);
@@ -113,14 +162,14 @@ var apistore = {};
         if (groupId != null) {
             application.setGroupId(groupId);
         }
-        return this.impl.addApplication(application,userName);
+        return this.impl.addApplication(application,this.appendDomainToUser(userName));
     };
 
     /*
      * This function update the application according to the given arguments.
      */
     StoreAPIProxy.prototype.updateApplication = function (appName, userName, appId, tier, callbackUrl, description) {
-        var subscriber = new APISubscriber(userName);
+        var subscriber = new APISubscriber(this.appendDomainToUser(userName));
         var application = new Application(appName, subscriber);
         application.setId(appId);
         application.setTier(tier);
@@ -133,7 +182,7 @@ var apistore = {};
      * This function delete the application according to the arguments.
      */
     StoreAPIProxy.prototype.removeApplication = function (appName, userName, appId) {
-        var subscriber = new APISubscriber(userName);
+        var subscriber = new APISubscriber(this.appendDomainToUser(userName));
         var application = new Application(appName, subscriber);
         application.setId(appId);
         return this.impl.removeApplication(application);
@@ -149,17 +198,17 @@ var apistore = {};
         for (var index = 0; index < domains.length; index++) {
             arr.add(domains[index]);
         }
-        var jsonParams={"username":userId};
-        return this.impl.generateApplicationKey(userId, applicationName, tokenType,
+        var jsonParams={"username":this.appendDomainToUser(userId)};
+        return this.impl.generateApplicationKey(this.appendDomainToUser(userId), applicationName, tokenType,
                                                 tokenScopes, validityPeriod, callbackUrl, arr,stringify(jsonParams),null);
     };
 
     StoreAPIProxy.prototype.getSubscriber = function (userName) {
-        return this.impl.getSubscriber(userName);
+        return this.impl.getSubscriber(this.appendDomainToUser(userName));
     };
 
     StoreAPIProxy.prototype.addSubscriber = function (userName, tenantId) {
-        var subscriber = new APISubscriber(userName);
+        var subscriber = new APISubscriber(this.appendDomainToUser(userName));
         subscriber.setSubscribedDate(new Date());
         subscriber.setEmail("");
         subscriber.setTenantId(tenantId);
@@ -168,11 +217,11 @@ var apistore = {};
     };
 
     StoreAPIProxy.prototype.getAPISubscriptions = function (provider, apiname, version, username) {
-        return this.impl.getSubscriptions(provider, apiname, version, username,null);
+        return this.impl.getSubscriptions(this.appendDomainToUser(provider), apiname, version, this.appendDomainToUser(username),null);
     };
 
     StoreAPIProxy.prototype.getAPI = function (provider, name, version) {
-        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(provider, name, version);
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(provider), name, version);
 
         var apiOb;
         try {
@@ -299,10 +348,10 @@ var apistore = {};
     };
 
     StoreAPIProxy.prototype.addSubscription = function (apiname, version, provider, user, tier, appId) {
-        provider = APIUtil.replaceEmailDomain(provider);
+        provider = APIUtil.replaceEmailDomain(this.appendDomainToUser(provider));
         var apiIdentifier = new APIIdentifier(provider, apiname, version);
         apiIdentifier.setTier(tier);
-        return this.impl.addSubscription(apiIdentifier, user, appId);
+        return this.impl.addSubscription(apiIdentifier, this.appendDomainToUser(user), appId);
     };
 
     /*
@@ -334,10 +383,10 @@ var apistore = {};
      * This function remove the subscription for the application.
      */
     StoreAPIProxy.prototype.removeSubscription = function (apiname, version, provider, user, tier, appId) {
-        provider = APIUtil.replaceEmailDomain(provider);
+        provider = APIUtil.replaceEmailDomain(this.appendDomainToUser(provider));
         var apiIdentifier = new APIIdentifier(provider, apiname, version);
         apiIdentifier.setTier(tier);
-        return this.impl.removeSubscription(apiIdentifier, user, appId);
+        return this.impl.removeSubscription(apiIdentifier, this.appendDomainToUser(user), appId);
     };
 
     /*
@@ -368,7 +417,7 @@ var apistore = {};
      * This method returns the UUID of an artifact
      */
     StoreAPIProxy.prototype.getUUIDByApi = function (provider, name, version) {
-        return this.impl.getUUIDByApi(provider, name, version);
+        return this.impl.getUUIDByApi(this.appendDomainToUser(provider), name, version);
     };
 
     /*
@@ -377,7 +426,7 @@ var apistore = {};
     StoreAPIProxy.prototype.getAllDocumentation = function (provider, name, version, loggedInUser) {
         try {
             var documentList = [];
-            var apiIdentifier = new APIIdentifier(provider, name, version);
+            var apiIdentifier = new APIIdentifier(this.appendDomainToUser(provider), name, version);
             var documents = this.impl.getAllDocumentation(apiIdentifier, loggedInUser);
             for (var i = 0 ; i < documents.size() ; i ++) {
                 document = documents.get(i);
@@ -434,7 +483,8 @@ var apistore = {};
             };
         }
     };
- StoreAPIProxy.prototype.getSwaggerContent=function(providerVal,apiNameVal,apiVersionVal,envName){       
+ StoreAPIProxy.prototype.getSwaggerContent=function(providerVal,apiNameVal,apiVersionVal,envName){  
+        providerVal = this.appendDomainToUser(providerVal);     
 
         var url = request.getRequestURL();
         var host = getLocation(url).host;
@@ -626,6 +676,7 @@ function getLocation(href) {
     StoreAPIProxy.prototype.getDocument = function (username, resourcepath, tenantDomain) {
         var document = {};
         try {
+            username = this.appendDomainToUser(username);
             if (username == null || username == '') {
                 username = APIConstants.END_USER_ANONYMOUS;
             }
@@ -652,7 +703,7 @@ function getLocation(href) {
     StoreAPIProxy.prototype.getInlineContent = function (provider, name, version, docName) {
         var document = {}, result;
         try {
-            var apiIdentifier = new APIIdentifier(provider, name, version);
+            var apiIdentifier = new APIIdentifier(this.appendDomainToUser(provider), name, version);
             result = this.impl.getDocumentationContent(apiIdentifier, docName);
             document.docName = docName;
             if (result != null && result != '') {

@@ -33,8 +33,16 @@ require('/modules/store.js').exec(function (ctx) {
     var output = am.renderBasic(page)._custom();
     var server = require('store').server;
     var user = server.current(ctx.session);
-    var apistore = require('apistore').apistore.instance(user.username);
-    var goBack = request.getParameter('goBack');
+        
+    var tenantUser = carbon.server.tenantUser(user.username);
+    var tenantId = tenantUser.tenantId;
+    var constants = require("rxt").constants;
+    var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+    user.domain = domain;
+    user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+
+    var apistore = require('apistore').apistore.instance(user);
+	var goBack = request.getParameter('goBack');
     var goBackAPIId = request.getParameter('goBackAPIId');
     output.goBack = goBack;
     output.goBackAPIId = goBackAPIId;
