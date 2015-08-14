@@ -17,6 +17,8 @@ import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.apache.axiom.om.OMElement;
 
+import java.io.StringWriter;
+
 public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
     private APIGatewayAdminStub apiGatewayAdminStub;
@@ -375,11 +377,13 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     public void addSequence(OMElement sequence, String tenantDomain) throws AxisFault {
         try {
+            StringWriter writer = new StringWriter();
+            sequence.serializeAndConsume(writer);
             if (tenantDomain != null && !("").equals(tenantDomain) &&
                 !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                apiGatewayAdminStub.addSequenceForTenant(sequence, tenantDomain);
+                apiGatewayAdminStub.addSequenceForTenant(writer.toString(), tenantDomain);
             } else {
-                apiGatewayAdminStub.addSequence(sequence);
+                apiGatewayAdminStub.addSequence(writer.toString());
             }
 
         } catch (Exception e) {
