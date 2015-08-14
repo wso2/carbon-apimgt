@@ -235,22 +235,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     }
 
-    /**
-     * Deploy the sequence to the gateway
-     *
-     * @param sequence     - The sequence element , which to be deployed in synapse
-     * @param tenantDomain
-     * @throws AxisFault
-     */
-    public void addSequence(OMElement sequence) throws AxisFault {
-        SequenceAdminServiceClient client = new SequenceAdminServiceClient();
-        client.addSequence(sequence);
-    }
-
-    public void addSequenceForTenant(OMElement sequence, String tenantDomain) throws AxisFault {
-        SequenceAdminServiceClient client = new SequenceAdminServiceClient();
-        client.addSequenceForTenant(sequence, tenantDomain);
-    }
 
     /**
      * Deploy the sequence to the gateway
