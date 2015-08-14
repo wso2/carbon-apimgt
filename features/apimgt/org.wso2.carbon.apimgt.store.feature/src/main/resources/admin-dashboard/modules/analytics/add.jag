@@ -30,6 +30,10 @@ var enableAnalytics = function (enable) {
             stub.configureEventing(eventingConfigData);
             configReaderService.setAnalyticsEnabled(false);
             log.info("Analytics disabled");
+            var storePublisherStatUpdater = new org.wso2.carbon.apimgt.impl.utils.StatUpdateStorePublisherDomain();
+            var statUpdateDriver = org.wso2.carbon.apimgt.impl.utils.StatsUpdateUtil.getInstance();
+            var emptyText = '';
+            statUpdateDriver.callStatupdateService(emptyText, emptyText, emptyText, false);
         } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
             log.info("Enabling Analytics...");
 	        eventingConfigData.setServiceStatsEnable(true);
@@ -94,6 +98,10 @@ var addAnalyticsConfig = function (configData) {
         configReaderService.setBamServerUser(configData.eventReceiverUsername);
         configReaderService.setBamServerPassword(configData.eventReceiverPassword);
         log.info("Analytics config saved in registry.");
+
+        var storePublisherStatUpdater = new org.wso2.carbon.apimgt.impl.utils.StatUpdateStorePublisherDomain();
+        var statUpdateDriver = org.wso2.carbon.apimgt.impl.utils.StatsUpdateUtil.getInstance();
+        statUpdateDriver.callStatupdateService(configData.eventReceiverURL, configData.eventReceiverUsername, configData.eventReceiverPassword, true);
 
         return {
             error: false
