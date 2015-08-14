@@ -7137,6 +7137,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if (id == -1) {
                 String msg = "Unable to find the API: " + apiId + " in the database";
                 log.error(msg);
+                throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
@@ -8745,7 +8746,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 				apiIds.add(getAPIID(identifier, conn));
 			}
 
-			String commaSeperatedIds = StringUtils.join(apiIds, ',');
+			String commaSeperatedIds = StringUtils.join(apiIds.iterator(), ",");
 
 			String sqlQuery =
 					"SELECT DISTINCT A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES " +
