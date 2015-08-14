@@ -867,6 +867,11 @@ $('#go_to_implement').click(function(e){
     thisID = $(this).attr('id');
 });
 
+//To reset the tab to overview
+$('.goTo_api_overview').mousedown(function () {
+    $.cookie("selectedTab", "view");
+});
+
 function getContextValue() {
     var context = $('#context').val();
     var version = $('#apiVersion').val();
