@@ -149,7 +149,6 @@ function APIDesigner(){
             parameters.push({
                 name : m[0].replace("{","").replace("}",""),
                 "in": "path",
-                "allowMultiple": false,
                 "required": true,
 				"type":"string"
             })            
