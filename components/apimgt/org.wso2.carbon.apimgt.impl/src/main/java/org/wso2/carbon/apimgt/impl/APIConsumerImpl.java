@@ -1271,7 +1271,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
             Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
             String providerPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                    providerId;
+                    APIUtil.replaceEmailDomain(providerId);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             Association[] associations = registry.getAssociations(providerPath,
@@ -1347,10 +1347,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    public Set<API> getPublishedAPIsByProvider(String providerId, String loggedUsername, int limit, String apiOwner,
+    public Set<API> getPublishedAPIsByProvider(String provider, String loggedUsername, int limit, String apiOwner,
                                                String apiBizOwner) throws APIManagementException {
 
         try {
+        	String providerId = APIUtil.replaceEmailDomain(provider);
             Boolean allowMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
             Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
@@ -1429,13 +1430,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             return new HashSet<API>(apiCollection.values());
 
         } catch (RegistryException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
+            handleException("Failed to get Published APIs for provider : " + provider, e);
             return null;
         } catch (org.wso2.carbon.user.core.UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
+            handleException("Failed to get Published APIs for provider : " + provider, e);
             return null;
         } catch (UserStoreException e) {
-            handleException("Failed to get Published APIs for provider : " + providerId, e);
+            handleException("Failed to get Published APIs for provider : " + provider, e);
             return null;
         }
     }
@@ -2934,7 +2935,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Map<String, Object> result = new HashMap<String, Object>();
         List<APISubscription> subs = new ArrayList<APISubscription>();
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
         try {
             if (tenantDomain != null &&
                 !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2943,9 +2944,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-            Subscriber subscriber = new Subscriber(username);
+            Subscriber subscriber = new Subscriber(userName);
             Application[] applications;
-            applications = getApplications(new Subscriber(username), groupId);
+            applications = getApplications(new Subscriber(userName), groupId);
             if (applications != null) {
                 int i = 0;
                 for (Application application : applications) {

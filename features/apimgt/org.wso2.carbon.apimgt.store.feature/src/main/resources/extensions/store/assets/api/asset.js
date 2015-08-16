@@ -90,12 +90,21 @@ asset.configure = function(ctx) {
 };
 asset.server = function(ctx) {
     return {
-        onUserLoggedIn : function(){
-            var userName=ctx.username;
-            var apistore = require('apistore').apistore.instance(userName);
+        onUserLoggedIn : function(context){
+            var userName=context.username;
+            var user = {};
+            user.username= userName;
+            var tenantId = context.tenantId;
+            var constants = require("rxt").constants;
+            var carbon = require('carbon');
+            var domain = carbon.server.tenantDomain({tenantId: tenantId});
+            user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            user.domain = domain;
+
+            var apistore = require('apistore').apistore.instance(user);
             var subscriber=apistore.getSubscriber(userName);
             if(!subscriber){
-                apistore.addSubscriber(userName,ctx.tenantId);
+                apistore.addSubscriber(userName,tenantId);
             }
         },
         endpoints: {
@@ -177,9 +186,23 @@ asset.renderer = function(ctx) {
                                                                  tenantId : user.tenantId
                                                              });
                 userName = user.username;
+                var tenantUser = carbon.server.tenantUser(user.username);
+                var tenantId = tenantUser.tenantId;
+                var constants = require("rxt").constants;
+                var domain = carbon.server.tenantDomain({tenantId: user.tenantId});
+                user.domain = domain;
+                user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }else{
+                user = {};
+                var constants = require("rxt").constants;
+                user.username = userName;
+                user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
             var lenI=0,lenJ=0,i,j,result,apidata,deniedTiers,tiers,appsList=[],subscribedToDefault=false,showSubscribe=false,status,selectedDefault=false;
-            var apistore = require('apistore').apistore.instance(userName);
+            
+            
+
+            var apistore = require('apistore').apistore.instance(user);
 
             //Doing this because when there are no value specified in column such as thumbnail column it return string "null"
             // value which need be explicitly set to null
