@@ -1148,6 +1148,7 @@ $(function () {
         var elem = oBtnElement;
         var i = elem.attr("iteration");
         var keyType = elem.attr("data-keytype");
+        var appData = findAppDetails(appName);
         var authoDomains;
         var clientId;
         var clientSecret;
@@ -1181,7 +1182,7 @@ $(function () {
         saveAuthAppParams.keytype = keyType;
         saveAuthAppParams.authorizedDomains = authoDomains;
         saveAuthAppParams.validityTime = validityTime;
-        saveAuthAppParams.callbackUrl = "dummyUrl";
+        saveAuthAppParams.callbackUrl = appData.callbackUrl;
         saveAuthAppParams.jsonParams = JSON.stringify(oJsonParams);
         saveAuthAppParams.client_id = clientId;
 
