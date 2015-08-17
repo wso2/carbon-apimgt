@@ -5182,6 +5182,22 @@ public final class APIUtil {
         return result;
 
     }
+    public JSONObject stringifyKeyDetails(Map<String, Object> keyDetails){
+        JSONObject result = new JSONObject();
+        String validityTime = (String)keyDetails.get("validityTime");
+        String accessToken = (String)keyDetails.get("accessToken");
+        String consumerKey = (String)keyDetails.get("consumerKey");
+        String consumerSecret = (String)keyDetails.get("consumerSecret");
+        String appDetails = (String)keyDetails.get("appDetails");
+
+        result.put("validityTime", validityTime);
+        result.put("accessToken", accessToken);
+        result.put("consumerKey", consumerKey);
+        result.put("consumerSecret", consumerSecret);
+        result.put("appDetails", appDetails);
+
+        return result;
+    }
 	public static String isURLValid(String type, String urlVal) throws APIManagementException {
 
 		String response = "";

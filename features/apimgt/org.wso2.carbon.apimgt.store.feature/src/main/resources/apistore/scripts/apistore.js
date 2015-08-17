@@ -743,6 +743,20 @@ function getLocation(href) {
             };
         }
     };
+    
+    StoreAPIProxy.prototype.mapExistingOauthClient = function(saveAuthAppParams){
+        try {
+            var result = this.impl.mapExistingOAuthClient(saveAuthAppParams.jsonParams, saveAuthAppParams.username,
+                saveAuthAppParams.client_id, saveAuthAppParams.applicationName, saveAuthAppParams.keytype, [saveAuthAppParams.authorizedDomains]);
+            result = APIUtil().stringifyKeyDetails(result);
+            return result;
+        }catch(e){
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
 
 })(apistore);
 
