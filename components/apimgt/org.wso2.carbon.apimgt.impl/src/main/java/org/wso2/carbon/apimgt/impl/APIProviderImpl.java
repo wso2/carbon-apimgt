@@ -24,6 +24,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -45,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -60,6 +62,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -68,6 +71,7 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,6 +94,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     // API definitions from swagger v2.0
     static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    private Map<String, Environment> gatewyEnvironments;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -2417,6 +2422,54 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             handleException("Issue is in getting custom Fault Sequences from the Registry", e);
         }
         return sequenceList;
+    }
+
+    /**
+     * This method is used to initiate the web service calls and cluster messages related to stats publishing status
+     *
+     * @param receiverUrl   event receiver url
+     * @param user          username of the event receiver
+     * @param password      password of the event receiver
+     * @param updatedStatus status of the stat publishing state
+     */
+    public void callStatupdateService(String receiverUrl, String user, String password, boolean updatedStatus) {
+
+        try {
+            gatewyEnvironments = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                    getAPIManagerConfiguration().getApiGatewayEnvironments();
+
+            for (String gatewayEnvironmentName : gatewyEnvironments.keySet()) {
+                Environment currentGatewayEnvironment = gatewyEnvironments.get(gatewayEnvironmentName);
+                String gatewayServiceUrl = currentGatewayEnvironment.getServerURL();
+                String gatewayUserName = currentGatewayEnvironment.getUserName();
+                String gatewayPassword = currentGatewayEnvironment.getPassword();
+
+                //get the stub and the call the admin service with the credentials
+                GatewayStatsUpdateServiceStub stub =
+                        new GatewayStatsUpdateServiceStub(gatewayServiceUrl + "GatewayStatsUpdateService");
+                StatUpdateStorePublisherDomain storePublisherMessageAgent = new StatUpdateStorePublisherDomain();
+                ServiceClient gatewayServiceClient = stub._getServiceClient();
+                CarbonUtils.setBasicAccessSecurityHeaders(gatewayUserName, gatewayPassword, gatewayServiceClient);
+
+                //send an empty string if at least one mandatory parameter is null
+                if (receiverUrl == null || user == null || password == null) {
+                    receiverUrl = "";
+                    user = "";
+                    password = "";
+                }
+                stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
+
+                //send cluster message to publisher-store domain
+                storePublisherMessageAgent.updateStatsPublishStore(updatedStatus);
+            }
+        } catch (AxisFault axisFault) {
+            //error is only logged because the process should be executed in all gateway environments
+            log.error("Error in calling Statsupdate web service in Gateway Environment." + axisFault);
+        } catch (RemoteException remoteException) {
+            //error is only logged because the change is affected in gateway environments,
+            // and the process should be executed in all environments
+            log.error("Error in updating Stats publish status in Gataways. " + remoteException);
+        }
     }
 
 	@Override
