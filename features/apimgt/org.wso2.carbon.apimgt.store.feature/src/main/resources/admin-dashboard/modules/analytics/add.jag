@@ -29,6 +29,10 @@ var enableAnalytics = function (enable) {
             eventingConfigData.setServiceStatsEnable(false);
             stub.configureEventing(eventingConfigData);
             configReaderService.setAnalyticsEnabled(false);
+            var userInSession = session.get("LOGGED_IN_USER");
+            var emptyText = '';
+            var statUpdateDriver = new org.wso2.carbon.apimgt.impl.APIProviderImpl(userInSession);
+            statUpdateDriver.callStatupdateService(emptyText, emptyText, emptyText, false);
             log.info("Analytics disabled");
         } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
             log.info("Enabling Analytics...");
@@ -94,6 +98,11 @@ var addAnalyticsConfig = function (configData) {
         configReaderService.setBamServerUser(configData.eventReceiverUsername);
         configReaderService.setBamServerPassword(configData.eventReceiverPassword);
         log.info("Analytics config saved in registry.");
+
+        var userInSession = session.get("LOGGED_IN_USER");
+        var statUpdateDriver = new org.wso2.carbon.apimgt.impl.APIProviderImpl(userInSession);
+        statUpdateDriver.callStatupdateService
+                (configData.eventReceiverURL, configData.eventReceiverUsername, configData.eventReceiverPassword, true);
 
         return {
             error: false
