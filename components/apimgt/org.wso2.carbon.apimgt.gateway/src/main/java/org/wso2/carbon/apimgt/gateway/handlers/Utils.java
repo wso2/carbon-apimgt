@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
@@ -95,14 +96,9 @@ public class Utils {
     }
     
     public static void setFaultPayload(MessageContext messageContext, OMElement payload) {
-        Iterator<OMElement> childElements = messageContext.getEnvelope().getBody().getChildElements();
-
-        if(childElements != null){
-            while(childElements.hasNext()){
-                OMElement child = childElements.next();
-                child.detach();
-            }
-        }
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        JsonUtil.removeJsonPayload(axis2MC);
         messageContext.getEnvelope().getBody().addChild(payload);
     }
     
