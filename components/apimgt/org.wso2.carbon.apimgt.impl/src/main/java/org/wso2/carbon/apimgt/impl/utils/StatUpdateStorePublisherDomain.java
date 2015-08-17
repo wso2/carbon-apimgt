@@ -39,7 +39,9 @@ public class StatUpdateStorePublisherDomain {
      */
     public void updateStatsPublishStore(boolean statUpdateStatus) {
 
-        log.debug("Started updating Stats publishing status to : " + statUpdateStatus);
+        if(log.isDebugEnabled()) {
+            log.debug("Started updating Stats publishing status to : " + statUpdateStatus);
+        }
 
         ClusteringAgent clusteringAgent = ServiceReferenceHolder.getContextService().getServerConfigContext().
                                             getAxisConfiguration().getClusteringAgent();
@@ -53,7 +55,9 @@ public class StatUpdateStorePublisherDomain {
                 log.error("Failed to send cluster message to Publisher/Store domain " +
                         "and update stats publishing status.");
             }
-            log.debug("Successfully updated Stats publishing status to : " + statUpdateStatus);
+            if(log.isDebugEnabled()) {
+                log.debug("Successfully updated Stats publishing status to : " + statUpdateStatus);
+            }
         }
     }
 }

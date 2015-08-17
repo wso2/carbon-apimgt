@@ -51,12 +51,17 @@ public class GatewayStatsUpdater extends AbstractAdmin {
      */
     public void updateStatPublishGateway(String receiverUrl, String user, String password, Boolean statUpdateStatus) {
 
-        log.debug("Updating stats publishing status in Gateway.");
+        if(log.isDebugEnabled()) {
+            log.debug("Updating stats publishing status in Gateway.");
+        }
 
         //updating stat publishing at the receiver node, self update
         APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
         analyticsConfiguration.setAnalyticsEnabled(statUpdateStatus);
-        log.debug("Updated stats publishing status in Gateway to : " + statUpdateStatus);
+
+        if(log.isDebugEnabled()) {
+            log.debug("Updated stats publishing status in Gateway to : " + statUpdateStatus);
+        }
 
         ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
         EventingConfigData eventingConfigData = null;
@@ -68,7 +73,9 @@ public class GatewayStatsUpdater extends AbstractAdmin {
             if (eventingConfigData != null) {
                 //config values are updated if the stats publishing is true
                 if (statUpdateStatus) {
-                    log.debug("Updating values related to stats publishing status.");
+                    if(log.isDebugEnabled()) {
+                        log.debug("Updating values related to stats publishing status.");
+                    }
                     //values related to stats publishing status are only updated if all of them are non-empty
                     if (!(receiverUrl.isEmpty()) && !(user.isEmpty()) && !(password.isEmpty())) {
                         analyticsConfiguration.setBamServerUrlGroups(receiverUrl);
@@ -78,8 +85,10 @@ public class GatewayStatsUpdater extends AbstractAdmin {
                         eventingConfigData.setUrl(receiverUrl);
                         eventingConfigData.setUserName(user);
                         eventingConfigData.setPassword(password);
-                        log.debug("BAMServerURL : " + receiverUrl + " , BAMServerUserName : " + user + " , " +
-                                "BAMServerPassword : " + password);
+                        if(log.isDebugEnabled()) {
+                            log.debug("BAMServerURL : " + receiverUrl + " , BAMServerUserName : " + user + " , " +
+                                    "BAMServerPassword : " + password);
+                        }
                         APIUtil.addBamServerProfile
                                 (receiverUrl, user, password, MultitenantConstants.SUPER_TENANT_ID);
                     }
@@ -93,7 +102,9 @@ public class GatewayStatsUpdater extends AbstractAdmin {
             //send the cluster message to other nodes in the cluster to update stats publishing status
             ClusteringAgent clusteringAgent = this.getConfigContext().getAxisConfiguration().getClusteringAgent();
             if (clusteringAgent != null) {
-                log.debug("Sending cluster message to Gateway domain to update stats publishing status.");
+                if(log.isDebugEnabled()) {
+                    log.debug("Sending cluster message to Gateway domain to update stats publishing status.");
+                }
                 clusteringAgent.sendMessage(new StatUpdateClusterMessage(statUpdateStatus), true);
             }
         } catch (ClusteringFault clusteringFault) {
