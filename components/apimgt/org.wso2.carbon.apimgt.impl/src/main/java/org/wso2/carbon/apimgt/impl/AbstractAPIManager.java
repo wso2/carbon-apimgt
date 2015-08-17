@@ -366,8 +366,9 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException {
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(identifier);
         String path = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                      identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                      apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                       identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         try {
             return registry.resourceExists(path);
@@ -439,8 +440,9 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public boolean isDocumentationExist(APIIdentifier identifier, String docName)
             throws APIManagementException {
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(identifier);
         String docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
                 APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + docName;
@@ -454,7 +456,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
-        String apiResourcePath = APIUtil.getAPIPath(apiId);
+        APIIdentifier registryFriendlyId = APIUtil.replaceEmailDomain(apiId);
+        String apiResourcePath = APIUtil.getAPIPath(registryFriendlyId);
         try {
         	Association[] docAssociations = registry.getAssociations(apiResourcePath,
                                                                      APIConstants.DOCUMENTATION_ASSOCIATION);
@@ -470,7 +473,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 Date contentLastModifiedDate;
                 Date docLastModifiedDate = docResource.getLastModified();
                 if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
-                    String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
+                    String contentPath = APIUtil.getAPIDocContentPath(registryFriendlyId, doc.getName());
                     contentLastModifiedDate = registry.get(contentPath).getLastModified();
                     doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
                                         contentLastModifiedDate : docLastModifiedDate));
@@ -488,8 +491,9 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentationList;
     }
 
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws
+    public List<Documentation> getAllDocumentation(APIIdentifier identifier, String loggedUsername) throws
 		    APIManagementException {
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(identifier);
 	    List<Documentation> documentationList = new ArrayList<Documentation>();
 	    boolean isTenantFlowStarted = false;
 	    String apiName = apiId.getApiName();
@@ -576,7 +580,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType,
                                           String docName) throws APIManagementException {
         Documentation documentation = null;
-        String docPath = APIUtil.getAPIDocPath(apiId) + docName;
+        String docPath = APIUtil.getAPIDocPath(APIUtil.replaceEmailDomain(apiId)) + docName;
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                             APIConstants.DOCUMENTATION_KEY);
         try {
@@ -591,10 +595,11 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public String getDocumentationContent(APIIdentifier identifier, String documentationName)
             throws APIManagementException {
-        String contentPath = APIUtil.getAPIDocPath(identifier) +
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(identifier);
+        String contentPath = APIUtil.getAPIDocPath( APIUtil.replaceEmailDomain(apiId)) +
                              APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
                              documentationName;
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         Registry registry;
         try {
 	        /* If the API provider is a tenant, load tenant registry*/
@@ -605,7 +610,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     registry = ServiceReferenceHolder.getInstance().
-                            getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                            getRegistryService().getGovernanceUserRegistry(apiId.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
                 } else {
                     registry = this.registry;
                 }
@@ -679,9 +684,10 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public Icon getIcon(APIIdentifier identifier) throws APIManagementException {
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(identifier);
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                              identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                              identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+        		apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                              apiId.getApiName() + RegistryConstants.PATH_SEPARATOR + apiId.getVersion();
 
         String thumbPath = artifactPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
         try {
@@ -774,9 +780,9 @@ public abstract class AbstractAPIManager implements APIManager {
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException{
         return apiMgtDAO.getAPIByAccessToken(accessToken);
     }
-    public API getAPI(APIIdentifier identifier,APIIdentifier oldIdentifier, String oldContext) throws
-                                                                                          APIManagementException {
-        String apiPath = APIUtil.getAPIPath(identifier);
+    public API getAPI(APIIdentifier identifier,APIIdentifier oldIdentifier, String oldContext) throws APIManagementException {
+    	APIIdentifier apiId = APIUtil.replaceEmailDomain(identifier);
+        String apiPath = APIUtil.getAPIPath(apiId);
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);

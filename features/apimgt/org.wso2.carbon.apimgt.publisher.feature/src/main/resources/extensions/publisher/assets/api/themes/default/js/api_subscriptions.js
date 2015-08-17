@@ -22,23 +22,6 @@ var updateSubscription;
 
 $(function () {
 
-    //var TD_API_CONTAINER = '#td-apis';
-
-    //var EV_TD_API = 'eventTDAPISelection';
-
-    //events.register(EV_TD_API);
-
-    // Views.extend('view', {
-    //        id: 'apiListView',
-    //        container: TD_API_CONTAINER,
-    //        partial: 'td-apis-subscriptions',
-    //        beforeRender: function (data) {
-    //     var user = data;
-    //        },
-    //        subscriptions: [EV_TD_API],
-    //        afterRender: function () {}
-    //    });
-
     /*
      *This function generate the location of the templates used in the rendering
      */

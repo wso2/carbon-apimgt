@@ -41,6 +41,9 @@ require('/modules/publisher.js').exec(function (ctx) {
     user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
     var apiProxy = apiPublisher.instance(user);
 
+    var API_BLOCKED = "BLOCKED";
+    var API_PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
+    var API_ON_HOLD = "ON_HOLD";
 
     var apiSubDataResult = apiProxy.getAllAPIUsageByProvider(user.username);
 
@@ -59,9 +62,9 @@ require('/modules/publisher.js').exec(function (ctx) {
                 var apisJson = subscriptions[a];
                 apiDataArr.push({
                     "apiStatus": apisJson.subStatus,
-                    "isBlocked": apisJson.subStatus == "BLOCKED" ? true : false,
-                    "isProdOnly": apisJson.subStatus == "PROD_ONLY_BLOCKED" ? true : false,
-                    "isNotHold": apisJson.subStatus != "ON_HOLD" ? true : false,
+                    "isBlocked": apisJson.subStatus == API_BLOCKED ? true : false,
+                    "isProdOnly": apisJson.subStatus == API_PROD_ONLY_BLOCKED ? true : false,
+                    "isNotHold": apisJson.subStatus != API_ON_HOLD ? true : false,
                     "apiName": apisJson.apiId.apiName,
                     "apiVersion": apisJson.apiId.version
                 });
