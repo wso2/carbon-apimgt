@@ -231,18 +231,14 @@ $(function () {
         } else if(action == 'ProvideKeys'){
             if(environment == 'Production'){
                 appData.prodValidityTime = newDetails.validityTime;
-                //appData.prodAuthorizedDomains = newDetails.accessallowdomains;
                 appData.prodKey = newDetails.accessToken;
                 appData.prodConsumerKey = newDetails.consumerKey;
-                //appData.prodRegenarateOption = newDetails.enableRegenarate;
                 appData.prodConsumerSecret = newDetails.consumerSecret;
 
             }else if(environment == 'Sandbox'){
                 appData.sandValidityTime = newDetails.validityTime;
-                //appData.prodAuthorizedDomains = newDetails.accessallowdomains;
                 appData.sandboxKey = newDetails.accessToken;
                 appData.sandboxConsumerKey = newDetails.consumerKey;
-                //appData.prodRegenarateOption = newDetails.enableRegenarate;
                 appData.sandboxConsumerSecret = newDetails.consumerSecret;
             }
 

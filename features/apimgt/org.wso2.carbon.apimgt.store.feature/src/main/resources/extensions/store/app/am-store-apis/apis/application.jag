@@ -102,31 +102,19 @@ require('/modules/store.js').exec(function (ctx) {
 				}
 				response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, uuid);
 			} else if(uriOptions.action == "mapExistingOauthClient"){
-                log.info("inside mapExistingOAuthClient.......................................................");
-                <!--if (!user) {-->
-                    <!--print({-->
-                        <!--error:true,-->
-                        <!--message:msg.error.loginRequired(action)-->
-                    <!--});-->
-                    <!--return;-->
-                <!--}-->
-                log.info("options is............"+options);
                 var saveAuthAppParams = {};
                 saveAuthAppParams.username = user.username;
-                saveAuthAppParams.jsonParams = options.jsonParams;//request.getParameter("jsonParams");
-                saveAuthAppParams.client_id = options.client_id;//request.getParameter("client_id");
-                saveAuthAppParams.validityTime = options.validityTime;//request.getParameter("validityTime");
-                saveAuthAppParams.keytype = options.keytype;//request.getParameter("keytype");
-                saveAuthAppParams.authorizedDomains = options.authorizedDomains;//request.getParameter("authorizedDomains");
+                saveAuthAppParams.jsonParams = options.jsonParams;
+                saveAuthAppParams.client_id = options.client_id;
+                saveAuthAppParams.validityTime = options.validityTime;
+                saveAuthAppParams.keytype = options.keytype;
+                saveAuthAppParams.authorizedDomains = options.authorizedDomains;
 
                 if(saveAuthAppParams.authorizedDomains == null){
                     saveAuthAppParams.authorizedDomains = "ALL";
                 }
 
-                saveAuthAppParams.applicationName = options.applicationName;//request.getParameter("applicationName");
-
-                log.info("saveAuthAppParams is............"+stringify(saveAuthAppParams));
-
+                saveAuthAppParams.applicationName = options.applicationName;
 
                 var result = apistore.mapExistingOauthClient(saveAuthAppParams);
                 result = JSON.parse(result);
