@@ -35,6 +35,7 @@ require('/modules/store.js').exec(function (ctx) {
     var user = server.current(ctx.session);
     var options2 = request.getAllParameters('UTF-8');
     var apistore = require('apistore').apistore.instance(user.username);
+    var site = require("/extensions/assets/api/config/site.json");
 
 // room to add session management.
     if (options2.subscription_selection == null) {
@@ -49,6 +50,7 @@ require('/modules/store.js').exec(function (ctx) {
 
     var gatewayEP = apistore.getGatewayendpoint('http,https');
     output.gatewayEndpoint = gatewayEP;
+    output.mapExistingAuthApps = site.mapExistingAuthApps;
 
     caramel.render(output);
 }, request, response, session);

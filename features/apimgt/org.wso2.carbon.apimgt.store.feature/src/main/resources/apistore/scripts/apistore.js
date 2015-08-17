@@ -692,6 +692,23 @@ function getLocation(href) {
             };
         }
     };
+    
+    StoreAPIProxy.prototype.mapExistingOauthClient = function(saveAuthAppParams){
+        log.info("inside mapExistingOauthClient method............");
+        try {
+            var result = this.impl.mapExistingOAuthClient(saveAuthAppParams.jsonParams, saveAuthAppParams.username, saveAuthAppParams.client_id, saveAuthAppParams.applicationName, saveAuthAppParams.keytype, ["ALL"]);
+//            log.info("result before stringify.............."+result);
+            result = APIUtil().stringifyKeyDetails(result);
+//            log.info("result after stringify.............."+result);
+            log.info("result.consumerKey after stringify.............."+result);
+            return result;
+        }catch(e){
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
 
 })(apistore);
 

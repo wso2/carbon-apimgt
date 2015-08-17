@@ -228,6 +228,24 @@ $(function () {
                     appData.isScopeAvailable = false;
                 }
             }
+        } else if(action == 'ProvideKeys'){
+            if(environment == 'Production'){
+                appData.prodValidityTime = newDetails.validityTime;
+                //appData.prodAuthorizedDomains = newDetails.accessallowdomains;
+                appData.prodKey = newDetails.accessToken;
+                appData.prodConsumerKey = newDetails.consumerKey;
+                //appData.prodRegenarateOption = newDetails.enableRegenarate;
+                appData.prodConsumerSecret = newDetails.consumerSecret;
+
+            }else if(environment == 'Sandbox'){
+                appData.sandValidityTime = newDetails.validityTime;
+                //appData.prodAuthorizedDomains = newDetails.accessallowdomains;
+                appData.sandboxKey = newDetails.accessToken;
+                appData.sandboxConsumerKey = newDetails.consumerKey;
+                //appData.prodRegenarateOption = newDetails.enableRegenarate;
+                appData.sandboxConsumerSecret = newDetails.consumerSecret;
+            }
+
         }
         updateAppDetails(appName, appData);
     };
@@ -319,6 +337,20 @@ $(function () {
     var attachGenerateProdToken = function () {
         ///We need to prevent the afterRender function from been inherited by child views
         //otherwise this method will be invoked by child views
+        $('#btnProvideKeyProduction').on('click', function () {
+            $('.cDivParentOfManualAuthAppCreateProduction').show();
+            $('.defaultBtnSetForProduction').hide();
+        });
+
+        $('#btnProvideKeyProductionCancel').on('click', function () {
+            $('.cDivParentOfManualAuthAppCreateProduction').hide();
+            $('.defaultBtnSetForProduction').show();
+        });
+
+        $("#btnProvideKeyProductionSave").on('click', function () {
+            mapExistingOauthClient($(this));
+        });
+
         $('#btn-generate-Production-token').on('click', function () {
             var appName = $('#subscription_selection').val();
             var appDetails = findAppDetails(appName);
@@ -364,6 +396,21 @@ $(function () {
      The function invokes when generating fresh sandbox tokens
      */
     var attachGenerateSandToken = function () {
+
+        $('#btnProvideKeySandbox').on('click', function () {
+            $('.cDivParentOfManualAuthAppCreateSandbox').show();
+            $('.defaultBtnSetForSandbox').hide();
+        });
+
+        $('#btnProvideKeySandboxCancel').on('click', function () {
+            $('.cDivParentOfManualAuthAppCreateSandbox').hide();
+            $('.defaultBtnSetForSandbox').show();
+        });
+
+        $("#btnProvideKeySandboxSave").on('click', function () {
+            mapExistingOauthClient($(this));
+        });
+
 
         $('#btn-generate-Sandbox-token').on('click', function () {
             var appName = $('#subscription_selection').val();
@@ -709,6 +756,7 @@ $(function () {
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
             data.environment = Views.translate('Production');
+            data.mapExistingAuthApps = metadata.mapExistingAuthApps;
 
             // Checking whether application name is selected.
             if (data.appName == null) {
@@ -796,6 +844,7 @@ $(function () {
         afterRender: attachRegenerateProductionToken
     });
 
+
     //Sandbox view
     Views.extend('defaultSandboxKeyView', {
         id: 'defaultSandboxKeyView',
@@ -803,6 +852,7 @@ $(function () {
         partial: 'sub-keys-generate-prod',
         beforeRender: function (data) {
             data.environment = Views.translate('Sandbox');
+            data.mapExistingAuthApps = metadata.mapExistingAuthApps;
 
             // Checking whether application name is selected.
             if (data.appName == null) {
@@ -1097,8 +1147,82 @@ $(function () {
         events.publish(EV_APP_SELECT, {appName: appName});
     });
 
-    
+    var mapExistingOauthClient=function(oBtnElement){
+        var appName = $('#subscription_selection').val();
+        var elem = oBtnElement;
+        var i = elem.attr("iteration");
+        var keyType = elem.attr("data-keytype");
+        var authoDomains;
+        var clientId;
+        var clientSecret;
+        //var userName = elem.attr("data-username");
+        var userName = "admin";
+        var validityTime;
+        if (keyType == 'Production') {
+            authoDomains = $('#input-Production-allowedDomains').val();
+            validityTime = $('#input-Production-validityTime').val();
+            clientId = $('#inputConsumerKeyProduction').val();
+            clientSecret = $('#inputConsumerSecretProduction').val();
+        } else {
+            authoDomains = $('#input-Sandbox-allowedDomains').val();
+            validityTime = $('#input-Sandbox-validityTime').val();
+            clientId = $('#inputConsumerKeySandbox').val();
+            clientSecret = $('#inputConsumerSecretSandbox').val();
+        }
 
+        /*
+         if we have additional parameters we can pass them as a json object.
+         */
+        var oJsonParams = {
+            "username" : userName,
+            "key_type" : keyType,
+            "client_secret":clientSecret,
+            "applicationName" : appName
+        };
+        console.log(oJsonParams);
+        var saveAuthAppParams={};
+        saveAuthAppParams.applicationName = appName;
+        saveAuthAppParams.keytype = keyType;
+        saveAuthAppParams.authorizedDomains = authoDomains;
+        saveAuthAppParams.validityTime = validityTime;
+        saveAuthAppParams.callbackUrl = "dummyUrl";
+        saveAuthAppParams.jsonParams = JSON.stringify(oJsonParams);
+        saveAuthAppParams.client_id = clientId;
+
+        $.ajax({
+            type: 'POST',
+            url: getSubscriptionAPI(appName, 'mapExistingOauthClient'),
+            data: saveAuthAppParams,
+            success: function (responseData) {
+                if(keyType == 'Production'){
+                    var data = responseData.data.response;
+                    APP_STORE.productionKeys = data;
+                    updateMetadata(appName, data, keyType, 'ProvideKeys');
+                    events.publish(EV_GENERATE_PROD_TOKEN, findAppDetails(appName));
+                }
+                else{
+                    var data = responseData.data.response;
+                    APP_STORE.sandboxKeys = data;
+                    updateMetadata(appName, data, keyType, 'ProvideKeys');
+                    events.publish(EV_GENERATE_SAND_TOKEN, findAppDetails(appName));
+                }
+
+            }, error : function(data) {
+                BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Error',
+                    message: "Error while generating the "+keyType+" token",
+                    buttons: [{
+                        label: 'Ok',
+                        action: function(dialogItself){
+                            dialogItself.close();
+                        }
+                    }]
+                });
+            }
+        });
+
+    }
 
 });
 

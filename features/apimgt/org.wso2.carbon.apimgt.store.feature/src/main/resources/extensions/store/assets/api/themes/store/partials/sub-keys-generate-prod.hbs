@@ -69,7 +69,45 @@
 
 
 			{{/if}}
-			<input type='button' class='btn btn-primary' value='Generate' id='btn-generate-{{ environment }}-token'/>
+            <div class='defaultBtnSetFor{{ environment }}'>
+                <input type='button' class='btn btn-primary' value='Generate keys'
+                       id='btn-generate-{{ environment }}-token'/>
+            {{#if mapExistingAuthApps}}
+                <input type='button' class='btn btn-primary' value='Provide keys' id='btnProvideKey{{ environment }}'/>
+            {{/if}}
+            </div>
+            <div class='cDivParentOfManualAuthAppCreate{{ environment }}' style="display:none">
+                <div class="cDivRowOfElements">
+                    <div class="cDivTextMappingExternalAuthApp">
+                        Consumer key :
+                    </div>
+                    <div class="cDivInputMappingExternalAuthApp">
+                        <input type="text" class="input-xlarge token-validity-input"
+                               id="inputConsumerKey{{ environment }}" value="" maxlength="200"
+                               autofocus="autofocus"
+                               style="margin-top:5px;"/>
+                    </div>
+                </div>
+                <div class="cDivRowOfElements">
+                    <div class="cDivTextMappingExternalAuthApp">
+                        Consumer secret :
+                    </div>
+                    <div class="cDivInputMappingExternalAuthApp">
+                        <input type="text" class="input-xlarge token-validity-input"
+                               id="inputConsumerSecret{{ environment }}" value="" maxlength="200"
+                               autofocus="autofocus"
+                               style="margin-top:5px;"/>
+                    </div>
+                </div>
+                <input type="button" class="btn btn-primary"
+                       id='btnProvideKey{{ environment }}Save' data-application="dummy"
+                       data-callbackUrl="dummy"
+                       data-keytype="{{ environment }}"
+                       data-username="dummy"
+                       iteration="200" value="Save"/>
+                <input type="button" class="btn btn-primary "
+                       id='btnProvideKey{{ environment }}Cancel' value="Cancel"/>
+            </div>
 		</div>
 	</div>
 {{/if}}
