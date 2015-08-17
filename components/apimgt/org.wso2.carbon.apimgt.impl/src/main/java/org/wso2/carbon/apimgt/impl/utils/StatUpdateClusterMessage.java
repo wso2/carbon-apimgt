@@ -53,7 +53,9 @@ public class StatUpdateClusterMessage extends ClusteringMessage implements Seria
         //update the service variable, a boolean variable representing the stat data publishing in the node
         APIManagerAnalyticsConfiguration instanceOfAPIAnalytics = APIManagerAnalyticsConfiguration.getInstance();
         instanceOfAPIAnalytics.setAnalyticsEnabled(statUpdateStatus);
-        log.debug("Updated Stat publishing status to : " + statUpdateStatus);
+        if(log.isDebugEnabled()) {
+            log.debug("Updated Stat publishing status to : " + statUpdateStatus);
+        }
 
     }
 }
