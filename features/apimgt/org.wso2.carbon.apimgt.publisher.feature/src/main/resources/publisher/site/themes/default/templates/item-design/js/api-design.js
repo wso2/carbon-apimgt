@@ -149,7 +149,6 @@ function APIDesigner(){
             parameters.push({
                 name : m[0].replace("{","").replace("}",""),
                 "in": "path",
-                "allowMultiple": false,
                 "required": true,
 				"type":"string"
             })            
@@ -396,8 +395,12 @@ APIDesigner.prototype.init_controllers = function(){
 
     this.container.delegate(".delete_scope","click", function(){
         var i = $(this).attr("data-index");
-        API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
-        API_DESIGNER.render_scopes();
+        jagg.message({content: i18n.t('confirm.deleteScope'),
+            type: 'confirm', title: "Delete Scope",
+            okCallback: function () {
+                API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
+                API_DESIGNER.render_scopes();
+            }});
     });
 
     this.container.delegate("#define_scopes" ,'click', function(){
@@ -861,6 +864,11 @@ $('#saveBtn').click(function(e){
 
 $('#go_to_implement').click(function(e){
     thisID = $(this).attr('id');
+});
+
+//To reset the tab to overview
+$('.goTo_api_overview').mousedown(function () {
+    $.cookie("selectedTab", "view");
 });
 
 function getContextValue() {

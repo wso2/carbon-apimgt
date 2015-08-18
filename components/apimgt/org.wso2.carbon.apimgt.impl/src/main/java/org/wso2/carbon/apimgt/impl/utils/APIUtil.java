@@ -4079,16 +4079,13 @@ public final class APIUtil {
                 String[] content = apiDocResource.getPath().split("/");
                 documentMap.put("name", content[content.length - 1]);
             }
-        }  catch (RegistryException e) {
-            log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
-                      e);
-            handleException(
-                    "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
-                    e);
+        } catch (RegistryException e) {
+            String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
+            log.error(msg, e);
+            handleException(msg, e);
         }
         return documentMap;
     }
-
     /**
      * this method used to set environments values to api object.
      *
@@ -4248,5 +4245,14 @@ public final class APIUtil {
         return null;
     }
 
+	 public static boolean isStringArray(Object[] args) {
+        int argsCount = args.length;
+        for (int i = 0; i < argsCount; i++) {
+            if (!(args[i] instanceof String)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

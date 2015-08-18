@@ -298,7 +298,7 @@
     "availableToAllTenants" : "Available to all the tenants",
     "availableToSpecificTenants" : "Available to specific tenants",
     "tenantsHelpMsg":"Comma separated list (e.g.,: tenant1,tenant2,tenant3)",
-    "subscriptionHelpMsg" : "This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the AP",
+    "subscriptionHelpMsg" : "This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API",
 
     "productionFailoverEp": "Production Fail-over Endpoint(s)",
     "sandboxFailoverEp"   : "Sandbox Fail-over Endpoint(s)",

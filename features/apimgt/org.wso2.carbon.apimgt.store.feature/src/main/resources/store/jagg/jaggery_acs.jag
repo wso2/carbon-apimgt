@@ -19,13 +19,6 @@
                 if(samlResponse!=null){
                     isLogoutResponse =ssoRelyingParty.isLogoutResponse(samlResponse);
                     if(!Boolean(isLogoutResponse)) {
-                        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-                        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-                        var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
-                        var domainName = null
-                        if(fullUserName != null){
-                            domainName = MultitenantUtils.getTenantDomain(fullUserName);
-                        }
                     // relay state value should be a valid value, this value is mapped with request uri.
                         var relayState = request.getParameter("RelayState");
 
@@ -44,7 +37,13 @@
                                 return;
                             }
                         }
-
+                        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+                        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                        var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
+                        var domainName = null
+                        if (fullUserName != null){
+                            domainName = MultitenantUtils.getTenantDomain(fullUserName);
+                        }
 
                         // validating the signature
                         if(site.ssoConfiguration.responseSigningEnabled === 'true'){
