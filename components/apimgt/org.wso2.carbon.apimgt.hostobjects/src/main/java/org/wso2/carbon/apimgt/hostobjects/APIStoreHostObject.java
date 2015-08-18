@@ -3331,7 +3331,6 @@ public class APIStoreHostObject extends ScriptableObject {
             String username = (String) args[1];
             String tier = (String) args[2];
 
-
             if(StringUtils.isEmpty(tier.trim())){
                 handleException("No tier is defined for the Application.");
             }
