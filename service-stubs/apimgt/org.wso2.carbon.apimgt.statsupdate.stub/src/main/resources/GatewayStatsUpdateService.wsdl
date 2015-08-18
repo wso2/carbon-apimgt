@@ -1,0 +1,63 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://statshandler.gateway.apimgt.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://statshandler.gateway.apimgt.carbon.wso2.org">
+   <wsdl:documentation>GatewayStatsUpdateService</wsdl:documentation>
+   <wsdl:types>
+      <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://statshandler.gateway.apimgt.carbon.wso2.org">
+         <xs:element name="updateStatPublishGateway">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="receiverUrl" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="user" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="password" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="statUpdateStatus" type="xs:boolean"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+      </xs:schema>
+   </wsdl:types>
+   <wsdl:message name="updateStatPublishGatewayRequest">
+      <wsdl:part name="parameters" element="ns:updateStatPublishGateway"></wsdl:part>
+   </wsdl:message>
+   <wsdl:portType name="GatewayStatsUpdateServicePortType">
+      <wsdl:operation name="updateStatPublishGateway">
+         <wsdl:input message="ns:updateStatPublishGatewayRequest" wsaw:Action="urn:updateStatPublishGateway"></wsdl:input>
+      </wsdl:operation>
+   </wsdl:portType>
+   <wsdl:binding name="GatewayStatsUpdateServiceSoap11Binding" type="ns:GatewayStatsUpdateServicePortType">
+      <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap:binding>
+      <wsdl:operation name="updateStatPublishGateway">
+         <soap:operation soapAction="urn:updateStatPublishGateway" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:binding name="GatewayStatsUpdateServiceSoap12Binding" type="ns:GatewayStatsUpdateServicePortType">
+      <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap12:binding>
+      <wsdl:operation name="updateStatPublishGateway">
+         <soap12:operation soapAction="urn:updateStatPublishGateway" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:binding name="GatewayStatsUpdateServiceHttpBinding" type="ns:GatewayStatsUpdateServicePortType">
+      <http:binding verb="POST"></http:binding>
+      <wsdl:operation name="updateStatPublishGateway">
+         <http:operation location="updateStatPublishGateway"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="GatewayStatsUpdateService">
+      <wsdl:port name="GatewayStatsUpdateServiceHttpsSoap11Endpoint" binding="ns:GatewayStatsUpdateServiceSoap11Binding">
+         <soap:address location="https://localhost:8245/services/GatewayStatsUpdateService.GatewayStatsUpdateServiceHttpsSoap11Endpoint"></soap:address>
+      </wsdl:port>
+      <wsdl:port name="GatewayStatsUpdateServiceHttpsSoap12Endpoint" binding="ns:GatewayStatsUpdateServiceSoap12Binding">
+         <soap12:address location="https://localhost:8245/services/GatewayStatsUpdateService.GatewayStatsUpdateServiceHttpsSoap12Endpoint"></soap12:address>
+      </wsdl:port>
+      <wsdl:port name="GatewayStatsUpdateServiceHttpsEndpoint" binding="ns:GatewayStatsUpdateServiceHttpBinding">
+         <http:address location="https://localhost:8245/services/GatewayStatsUpdateService.GatewayStatsUpdateServiceHttpsEndpoint"></http:address>
+      </wsdl:port>
+   </wsdl:service>
+</wsdl:definitions>

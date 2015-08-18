@@ -17,7 +17,7 @@
 *
 */
 
-package org.wso2.carbon.apimgt.impl.observers;
+package org.wso2.carbon.apimgt.gateway.internal;
 
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axis2.AxisFault;
@@ -78,6 +78,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String throttleOutSequenceName = "_throttle_out_handler_";
     private String faultSequenceName = "fault";
     private String mainSequenceName = "main";
+    private String corsSequenceName = "_cors_request_handler_";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
     private SequenceMediator authFailureHandlerSequence = null;
     private SequenceMediator resourceMisMatchSequence = null;
@@ -148,18 +149,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
 
     }
 
-    private void initPersistence(String configName,
-                                 ConfigurationContext configurationContext,
-                                 ServerContextInformation contextInfo)
-            throws RegistryException, AxisFault {
-
-    }
-
-    private ServerContextInformation initESB(String configurationName,
-                                             ConfigurationContext configurationContext)
-            throws AxisFault {
-        return null;
-    }
+   
 
     /**
      * Create the file system for holding the synapse configuration for a new tanent.
@@ -216,11 +206,10 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 productionKeyErrorSequence.setFileName(productionKeyErrorSequenceName + ".xml");
             }
             if (corsSequence == null) {
-                in = FileUtils
-                        .openInputStream(new File(synapseConfigRootPath + APIConstants.CORS_SEQUENCE_NAME + ".xml"));
+                in = FileUtils.openInputStream(new File(synapseConfigRootPath + corsSequenceName + ".xml"));
                 builder = new StAXOMBuilder(in);
                 corsSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                corsSequence.setFileName(APIConstants.CORS_SEQUENCE_NAME + ".xml");
+                corsSequence.setFileName(corsSequenceName + ".xml");
             }
             FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
                     new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + mainSequenceName + ".xml"));
