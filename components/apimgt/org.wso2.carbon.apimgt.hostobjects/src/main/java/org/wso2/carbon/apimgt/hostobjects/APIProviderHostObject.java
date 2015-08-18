@@ -1009,7 +1009,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
-        if(tier == null || "".equals(tier.trim())){
+        if(StringUtils.isEmpty(tier.trim())){
             handleException("No tier defined for the API");
         }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
@@ -1254,7 +1254,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
 
         String endpointConfig = (String) apiData.get("endpoint_config", apiData);
-        if(endpointConfig == null || "".equals(endpointConfig) ){
+        if(StringUtils.isEmpty(endpointConfig)){
             handleException("Endpoint Configuration is missing");
         } else{
             api.setEndpointConfig(endpointConfig);
@@ -4677,7 +4677,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
                 Object epType = jsonObject.get("endpoint_type");
-                if(epType == null || "".equals(epType.toString().trim()) ){
+                if(StringUtils.isEmpty(epType.toString().trim())){
                     handleException("No endpoint type defined.");
 
                 } else if (epType instanceof String && "http".equals(epType)) {
@@ -4691,7 +4691,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     if (prodEPs instanceof JSONObject) {
                         Object url = ((JSONObject) prodEPs).get("url");//check whether the URL is null or not
 
-                        if(url == null || "".equals(url.toString().trim()) ){
+                        if(StringUtils.isEmpty(url.toString().trim())){
                             handleException("URL of production Endpoint is not defined.");
                         }
                         if (url instanceof String && !isValidURI(url.toString())) {
@@ -4703,7 +4703,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     if (sandEPs instanceof JSONObject) {
                         Object url = ((JSONObject) sandEPs).get("url");
 
-                        if(url == null || "".equals(url.toString().trim()) ){
+                        if(StringUtils.isEmpty(url.toString().trim())){
                             handleException("URL of sandbox Endpoint is not defined.");
                         }
                         if (url instanceof String && !isValidURI(url.toString())) {
