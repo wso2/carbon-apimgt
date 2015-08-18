@@ -24,6 +24,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -4677,7 +4678,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
                 Object epType = jsonObject.get("endpoint_type");
-                if(StringUtils.isEmpty(epType.toString().trim())){
+
+                if(StringUtils.isEmpty(ObjectUtils.toString(epType))){
                     handleException("No endpoint type defined.");
 
                 } else if (epType instanceof String && "http".equals(epType)) {

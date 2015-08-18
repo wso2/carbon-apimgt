@@ -25,6 +25,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
@@ -3323,8 +3324,16 @@ public class APIStoreHostObject extends ScriptableObject {
         String status = null;
         if (args != null && args.length >= 4 && isStringArray(args)) {
             String name = (String) args[0];
+
+            if(StringUtils.isEmpty(name.trim())){
+                handleException("Application Name is empty.");
+            }
             String username = (String) args[1];
             String tier = (String) args[2];
+
+            if(StringUtils.isEmpty(tier.trim())){
+                handleException("No tier is defined for the Application.");
+            }
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
@@ -3345,6 +3354,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
             status = apiConsumer.addApplication(application, username);
             return status;
+        } else{
+            handleException("Missing parameters.");
         }
 
         return status;
