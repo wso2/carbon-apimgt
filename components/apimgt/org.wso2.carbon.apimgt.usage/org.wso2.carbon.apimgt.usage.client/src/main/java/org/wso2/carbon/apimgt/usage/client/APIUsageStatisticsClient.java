@@ -1297,16 +1297,18 @@ public class APIUsageStatisticsClient {
                     "dataTable.* " +
                     " FROM (" +
                     " SELECT " +
-                    APIUsageStatisticsClientConstants.API + "," +
+                    APIUsageStatisticsClientConstants.API + ",apiPublisher," +
                     "MAX(" + APIUsageStatisticsClientConstants.TIME + ") " + "AS maxTime " +
                     " FROM " + tableName +
-                    " GROUP BY " + APIUsageStatisticsClientConstants.API + ") maxTimesTable " +
+                    " GROUP BY " + APIUsageStatisticsClientConstants.API + ",apiPublisher) maxTimesTable " +
                     " INNER JOIN " +
                     "(SELECT * " +
                     " FROM " +
                     tableName + ") dataTable " +
                     " ON maxTimesTable." +
                     APIUsageStatisticsClientConstants.API + "=dataTable." + APIUsageStatisticsClientConstants.API +
+                    " AND " +
+                    "maxTimesTable.apiPublisher=dataTable.apiPublisher" +
                     " AND " +
                     "maxTimesTable.maxTime=dataTable." + APIUsageStatisticsClientConstants.TIME;
 
