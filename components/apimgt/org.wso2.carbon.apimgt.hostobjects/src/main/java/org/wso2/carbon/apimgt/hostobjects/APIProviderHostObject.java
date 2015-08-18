@@ -1783,10 +1783,39 @@ public class APIProviderHostObject extends ScriptableObject {
                     return false;
                 }
             }
-            apiProvider.updateAPI(api);
-            boolean hasAPIUpdated=false;
-            if(!oldApi.equals(api)){
-            hasAPIUpdated=true;
+
+            if (apiData.get("swagger", apiData) != null) {
+                // Read URI Templates from swagger resource and set to api object
+                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                        String.valueOf(apiData.get("swagger", apiData)));
+                api.setUriTemplates(uriTemplates);
+
+                // scopes
+                Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+                api.setScopes(scopes);
+
+                try {
+                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        Scope scope = uriTemplate.getScope();
+                        if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                            if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                                handleException("Scope " + scope.getKey() + " is already assigned by another API");
+                            }
+                        }
+                    }
+                } catch (UserStoreException e) {
+                    handleException("Error while reading tenant information ", e);
+                }
+
+                // Save swagger in the registry
+                apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+                saveAPI(apiProvider, api, null, false);
+            } else {
+                String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+                apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
+                apiProvider.updateAPI(api);
             }
 
             success = true;
@@ -1799,38 +1828,6 @@ public class APIProviderHostObject extends ScriptableObject {
         	}
         }
         
-        if (apiData.get("swagger", apiData) != null) {
-            // Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
-                                                                     String.valueOf(apiData.get("swagger", apiData)));
-            api.setUriTemplates(uriTemplates);
-
-            // scopes
-            Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
-            api.setScopes(scopes);
-            
-            try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                                     .getTenantId(tenantDomain);
-                for (URITemplate uriTemplate : uriTemplates) {
-                    Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
-                        if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
-                            handleException("Scope " + scope.getKey() + " is already assigned by another API");
-                        }
-                    }
-                }
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
-            }
-
-            // Save swagger in the registry
-            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
-            saveAPI(apiProvider, api, null, false);
-        } else {
-            String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
-            apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);            
-        }
         return success;
     }
 
