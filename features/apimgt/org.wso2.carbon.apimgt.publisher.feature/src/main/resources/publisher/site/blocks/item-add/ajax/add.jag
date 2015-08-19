@@ -201,7 +201,8 @@ include("/jagg/jagg.jag");
             mod = jagg.module("api");
             var type = request.getParameter("type");
             var url = request.getParameter("url");
-            result = mod.isURLValid(type,url);
+            var invalidStatusCodesRegex = "404"; //A regex expression for invalid status codes
+            result = mod.isURLValid(type, url, invalidStatusCodesRegex);
             if (result.error) {
                 obj = {
                     error:true,
