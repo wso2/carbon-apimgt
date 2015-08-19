@@ -31,7 +31,7 @@ APISamples.prototype.deploySample1 = function(defaultTier){
         $(".modal-title").html("Please wait");
         $(".modal-body").addClass("loadingButton");
         $(".modal-body").css({"margin-left":25});
-        $(".modal-body").html("Sample API is Deploying" );
+        $(".modal-body").html("The Sample API is being Deployed");
         $(".modal").css({width:550});
 
 	request.onreadystatechange=function()
