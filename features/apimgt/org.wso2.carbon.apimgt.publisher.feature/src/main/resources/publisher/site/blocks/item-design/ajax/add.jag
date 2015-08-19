@@ -13,6 +13,7 @@ function loadSwaggerObj(path)
     return obj;
 }
 
+if(jagg.isCSRFTokenValid())
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
     response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.

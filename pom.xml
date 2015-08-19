@@ -16,6 +16,7 @@
         <version>1</version>
     </parent>
 
+
     <scm>
         <url>https://github.com/wso2/carbon-apimgt.git</url>
         <developerConnection>scm:git:https://github.com/wso2/carbon-apimgt.git</developerConnection>
@@ -200,6 +201,13 @@
                 <version>${apimgt.keymgt.stub.version}</version>
             </dependency>
 
+	    <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
+                <version>${apimgt.gateway.version}</version>
+            </dependency>
+
+
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
@@ -364,6 +372,18 @@
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.interceptor</artifactId>
                 <version>${apimgt.interceptor.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
+                <version>4.2.2-SNAPSHOT</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-kernel</artifactId>
+                <version>1.6.2</version>
             </dependency>
 
             <dependency>
@@ -719,6 +739,12 @@
                 <version>${carbon.platform.version}</version>
             </dependency>
 
+			<dependency>
+				<groupId>net.sf.saxon.wso2</groupId>
+				<artifactId>saxon.he</artifactId>
+				<version>${saxon.wso2.version}</version>
+		   </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -823,6 +849,7 @@
 
         <javax.xml.soap.imp.pkg.version>[1.0.0, 1.1.0)</javax.xml.soap.imp.pkg.version>
         <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
+		<saxon.wso2.version>9.4.0.wso2v1</saxon.wso2.version>
     </properties>
 </project>
 

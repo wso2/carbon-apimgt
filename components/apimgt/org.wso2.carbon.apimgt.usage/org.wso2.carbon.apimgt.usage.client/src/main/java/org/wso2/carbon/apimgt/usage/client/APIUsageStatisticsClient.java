@@ -361,6 +361,7 @@ public class APIUsageStatisticsClient {
         return falseAppUsageDataList;
     }
 
+    @Deprecated
     private Collection<AppUsage> getAppUsageData(OMElement data) {
         List<AppUsage> usageData = new ArrayList<AppUsage>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -490,6 +491,7 @@ public class APIUsageStatisticsClient {
         return appApiCallTypeList;
     }
 
+    @Deprecated
     private Collection<AppCallType> getCallTypeUsageData(OMElement data) {
         List<AppCallType> usageData = new ArrayList<AppCallType>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -1297,16 +1299,18 @@ public class APIUsageStatisticsClient {
                     "dataTable.* " +
                     " FROM (" +
                     " SELECT " +
-                    APIUsageStatisticsClientConstants.API + "," +
+                    APIUsageStatisticsClientConstants.API + ",apiPublisher," +
                     "MAX(" + APIUsageStatisticsClientConstants.TIME + ") " + "AS maxTime " +
                     " FROM " + tableName +
-                    " GROUP BY " + APIUsageStatisticsClientConstants.API + ") maxTimesTable " +
+                    " GROUP BY " + APIUsageStatisticsClientConstants.API + ",apiPublisher) maxTimesTable " +
                     " INNER JOIN " +
                     "(SELECT * " +
                     " FROM " +
                     tableName + ") dataTable " +
                     " ON maxTimesTable." +
                     APIUsageStatisticsClientConstants.API + "=dataTable." + APIUsageStatisticsClientConstants.API +
+                    " AND " +
+                    "maxTimesTable.apiPublisher=dataTable.apiPublisher" +
                     " AND " +
                     "maxTimesTable.maxTime=dataTable." + APIUsageStatisticsClientConstants.TIME;
 
@@ -1516,7 +1520,6 @@ public class APIUsageStatisticsClient {
     }
 
     public List<APIVersionUserUsageDTO> getUsageBySubscriber(String subscriberName, String period) throws Exception, APIManagementException {
-        OMElement omElement;
 
         List<APIVersionUserUsageDTO> apiUserUsages = new ArrayList<APIVersionUserUsageDTO>();
 
@@ -1868,6 +1871,7 @@ public class APIUsageStatisticsClient {
         }
     }
 
+    @Deprecated
     private OMElement queryBetweenTwoDaysForAPIsFromAPIRequestsPerHourTable(String columnFamily, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -2343,6 +2347,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    @Deprecated
     private Collection<AppAPIUsage> getAppAPIUsageData(OMElement data) {
         List<AppAPIUsage> usageData = new ArrayList<AppAPIUsage>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2374,6 +2379,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    @Deprecated
     private Collection<APIUsageByDestination> getUsageDataByDestination(OMElement data) {
         List<APIUsageByDestination> usageData = new ArrayList<APIUsageByDestination>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2428,6 +2434,7 @@ public class APIUsageStatisticsClient {
         return faultyData;
     }
 
+    @Deprecated
     private Collection<AppAPIResponseFaultCount> getAppAPIResponseFaultCount(OMElement data) {
         List<AppAPIResponseFaultCount> faultyData = new ArrayList<AppAPIResponseFaultCount>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2443,6 +2450,7 @@ public class APIUsageStatisticsClient {
         return faultyData;
     }
 
+    @Deprecated
     private Collection<APIResponseTime> getResponseTimeData(OMElement data) {
         List<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
 
@@ -2463,6 +2471,7 @@ public class APIUsageStatisticsClient {
         return responseTimeData;
     }
 
+    @Deprecated
     private Collection<APIAccessTime> getAccessTimeData(OMElement data) {
         List<APIAccessTime> accessTimeData = new ArrayList<APIAccessTime>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2478,6 +2487,7 @@ public class APIUsageStatisticsClient {
         return accessTimeData;
     }
 
+    @Deprecated
     private Collection<APIUsageByUser> getUsageBySubscriber(OMElement data) {
         List<APIUsageByUser> usageData = new ArrayList<APIUsageByUser>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2493,6 +2503,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    @Deprecated
     private Collection<APIUserAgent> getUserAgent(OMElement data) {
         List<APIUserAgent> userAgentData = new ArrayList<APIUserAgent>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2508,6 +2519,7 @@ public class APIUsageStatisticsClient {
         return userAgentData;
     }
 
+    @Deprecated
     private Collection<APIRequestsByHour> getAPIRequestsByHour(OMElement data) {
         List<APIRequestsByHour> apiRequestsByHours = new ArrayList<APIRequestsByHour>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2526,6 +2538,7 @@ public class APIUsageStatisticsClient {
         return apiRequestsByHours;
     }
 
+    @Deprecated
     private Collection<String> getAPIsFromAPIRequestByHour(OMElement data) {
         List<String> apisList = new ArrayList<String>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2542,6 +2555,7 @@ public class APIUsageStatisticsClient {
         return apisList;
     }
 
+    @Deprecated
     private Collection<APIVersionUsageByUser> getUsageAPIBySubscriber(OMElement data) {
         List<APIVersionUsageByUser> usageData = new ArrayList<APIVersionUsageByUser>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2567,6 +2581,7 @@ public class APIUsageStatisticsClient {
         return usageData;
     }
 
+    @Deprecated
     private Collection<APIVersionUsageByUserMonth> getUsageAPIBySubscriberMonthly(OMElement data) {
         List<APIVersionUsageByUserMonth> usageData = new ArrayList<APIVersionUsageByUserMonth>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2671,7 +2686,7 @@ public class APIUsageStatisticsClient {
         return paymentPlan.evaluate(param, calls);
     }
 
-    //todo remove
+    @Deprecated
     private Collection<APIFirstAccess> getFirstAccessTime(OMElement data) {
         List<APIFirstAccess> usageData = new ArrayList<APIFirstAccess>();
         OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -3235,6 +3250,7 @@ public class APIUsageStatisticsClient {
         private long requestCount;
         private String consumerKey;
 
+        @Deprecated
         public AppUsage(OMElement row) {
 
             userid = row.getFirstChildWithName(new QName(
@@ -3261,6 +3277,7 @@ public class APIUsageStatisticsClient {
         private String consumerKey;
         private String resource;
 
+        @Deprecated
         public AppCallType(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
@@ -3288,6 +3305,7 @@ public class APIUsageStatisticsClient {
         private String context;
         private long requestCount;
 
+        @Deprecated
         public APIUsage(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
@@ -3316,6 +3334,7 @@ public class APIUsageStatisticsClient {
         private long requestCount;
         private String consumerKey;
 
+        @Deprecated
         public AppAPIUsage(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
@@ -3346,6 +3365,7 @@ public class APIUsageStatisticsClient {
         private long requestCount;
         private String apiVersion;
 
+        @Deprecated
         public APIUsageByUser(OMElement row) {
             context = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.CONTEXT)).getText();
@@ -3512,6 +3532,7 @@ public class APIUsageStatisticsClient {
         private long faultCount;
         private String consumerKey;
 
+        @Deprecated
         public AppAPIResponseFaultCount(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
@@ -3554,7 +3575,7 @@ public class APIUsageStatisticsClient {
         private String apiVersion;
         private String apiName;
 
-
+        @Deprecated
         public APIVersionUsageByUser(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
@@ -3579,6 +3600,7 @@ public class APIUsageStatisticsClient {
         private String apiName;
         private String month;
 
+        @Deprecated
         public APIVersionUsageByUserMonth(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API)).getText();
@@ -3613,6 +3635,7 @@ public class APIUsageStatisticsClient {
         private double responseTime;
         private long responseCount;
 
+        @Deprecated
         public APIResponseTime(OMElement row) {
             String nameVersion = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API_VERSION)).getText();
@@ -3646,6 +3669,7 @@ public class APIUsageStatisticsClient {
         private double accessTime;
         private String username;
 
+        @Deprecated
         public APIAccessTime(OMElement row) {
             String nameVersion = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API_VERSION)).getText();
@@ -3695,6 +3719,7 @@ public class APIUsageStatisticsClient {
             return day;
         }
 
+        @Deprecated
         public APIFirstAccess(OMElement row) {
             year = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.YEAR)).getText();
@@ -3706,11 +3731,14 @@ public class APIUsageStatisticsClient {
                     APIUsageStatisticsClientConstants.REQUEST)).getText());*/
         }
     }
+
     public static class APIUserAgent{
         private String apiName;
         private String apiVersion;
         private String userAgent;
         private int totalRequestCount;
+
+        @Deprecated
         public APIUserAgent(OMElement row){
             String nameVersion = row.getFirstChildWithName(new QName(
                     APIUsageStatisticsClientConstants.API_VERSION)).getText();
@@ -3730,6 +3758,7 @@ public class APIUsageStatisticsClient {
         private String date;
         private String tier;
 
+        @Deprecated
         public APIRequestsByHour(OMElement row){
             apiName = row.getFirstChildWithName(new QName("api")).getText();
             apiVersion = row.getFirstChildWithName(new QName("api_version")).getText();

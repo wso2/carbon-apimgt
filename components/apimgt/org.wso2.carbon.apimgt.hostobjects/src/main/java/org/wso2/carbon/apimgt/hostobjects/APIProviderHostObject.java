@@ -24,6 +24,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1009,6 +1010,9 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
+        if(StringUtils.isEmpty(tier.trim())){
+            handleException("No tier defined for the API");
+        }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
         String contextVal = (String) apiData.get("context", apiData);
         APIProvider apiProvider = getAPIProvider(thisObj);
@@ -1250,11 +1254,14 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
 
-        // @todo needs to be validated
-        api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
-        //Validate endpoint URI format
-        validateEndpointURI(api.getEndpointConfig());
-
+        String endpointConfig = (String) apiData.get("endpoint_config", apiData);
+        if(StringUtils.isEmpty(endpointConfig)){
+            handleException("Endpoint Configuration is missing");
+        } else{
+            api.setEndpointConfig(endpointConfig);
+            //Validate endpoint URI format
+            validateEndpointURI(api.getEndpointConfig());
+        }
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
@@ -1777,10 +1784,39 @@ public class APIProviderHostObject extends ScriptableObject {
                     return false;
                 }
             }
-            apiProvider.updateAPI(api);
-            boolean hasAPIUpdated=false;
-            if(!oldApi.equals(api)){
-            hasAPIUpdated=true;
+
+            if (apiData.get("swagger", apiData) != null) {
+                // Read URI Templates from swagger resource and set to api object
+                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                        String.valueOf(apiData.get("swagger", apiData)));
+                api.setUriTemplates(uriTemplates);
+
+                // scopes
+                Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+                api.setScopes(scopes);
+
+                try {
+                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        Scope scope = uriTemplate.getScope();
+                        if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                            if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                                handleException("Scope " + scope.getKey() + " is already assigned by another API");
+                            }
+                        }
+                    }
+                } catch (UserStoreException e) {
+                    handleException("Error while reading tenant information ", e);
+                }
+
+                // Save swagger in the registry
+                apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+                saveAPI(apiProvider, api, null, false);
+            } else {
+                String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+                apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
+                apiProvider.updateAPI(api);
             }
 
             success = true;
@@ -1793,38 +1829,6 @@ public class APIProviderHostObject extends ScriptableObject {
         	}
         }
         
-        if (apiData.get("swagger", apiData) != null) {
-            // Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
-                                                                     String.valueOf(apiData.get("swagger", apiData)));
-            api.setUriTemplates(uriTemplates);
-
-            // scopes
-            Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
-            api.setScopes(scopes);
-            
-            try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                                     .getTenantId(tenantDomain);
-                for (URITemplate uriTemplate : uriTemplates) {
-                    Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
-                        if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
-                            handleException("Scope " + scope.getKey() + " is already assigned by another API");
-                        }
-                    }
-                }
-            } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
-            }
-
-            // Save swagger in the registry
-            apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
-            saveAPI(apiProvider, api, null, false);
-        } else {
-            String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
-            apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);            
-        }
         return success;
     }
 
@@ -4671,20 +4675,36 @@ public class APIProviderHostObject extends ScriptableObject {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
                 Object epType = jsonObject.get("endpoint_type");
-                if (epType instanceof String && "http".equals(epType)) {
+
+                if(StringUtils.isEmpty(ObjectUtils.toString(epType))){
+                    handleException("No endpoint type defined.");
+
+                } else if (epType instanceof String && "http".equals(epType)) {
                     // extract production uri from config
                     Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
+                    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
+
+                    if(prodEPs == null && sandEPs == null){
+                        handleException("No Endpoint is defined");
+                    }
                     if (prodEPs instanceof JSONObject) {
-                        Object url = ((JSONObject) prodEPs).get("url");
+                        Object url = ((JSONObject) prodEPs).get("url");//check whether the URL is null or not
+
+                        if(StringUtils.isEmpty(url.toString().trim())){
+                            handleException("URL of production Endpoint is not defined.");
+                        }
                         if (url instanceof String && !isValidURI(url.toString())) {
                             handleException("Invalid Production Endpoint URI. Please refer HTTP Endpoint " +
                                             "documentation of the WSO2 ESB for details.");
                         }
                     }
                     // extract sandbox uri from config
-                    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
                     if (sandEPs instanceof JSONObject) {
                         Object url = ((JSONObject) sandEPs).get("url");
+
+                        if(StringUtils.isEmpty(url.toString().trim())){
+                            handleException("URL of sandbox Endpoint is not defined.");
+                        }
                         if (url instanceof String && !isValidURI(url.toString())) {
                             handleException("Invalid Sandbox Endpoint URI. Please refer HTTP Endpoint " +
                                             "documentation of the WSO2 ESB for details.");
