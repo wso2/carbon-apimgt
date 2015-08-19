@@ -462,7 +462,7 @@
                     <% }else{ %>
                         <span class="add-on" id="resource_url_pattern_refix">/{context}/{version}/</span>
                     <% } %>
-                    <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern"/>
+                    <input style="width:500px" id="resource_url_pattern" type="text" placeholder="Url Pattern E.g.: path/to/resource" class="resource_url_pattern"/>
                 </div>
             </div>
         </div>

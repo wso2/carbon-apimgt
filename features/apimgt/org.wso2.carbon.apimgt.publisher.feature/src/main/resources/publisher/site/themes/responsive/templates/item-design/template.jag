@@ -473,7 +473,7 @@
                     <% }else{ %>
                         <span class="input-group-addon" id="resource_url_pattern_refix">/{context}/{version}/</span>
                     <% } %>
-                    <input id="resource_url_pattern" type="text" placeholder="Url Pattern Ex: path/to/resource" class="resource_url_pattern form-control"/>
+                    <input id="resource_url_pattern" type="text" placeholder="Url Pattern E.g.: path/to/resource" class="resource_url_pattern form-control"/>
                 </div>
             </div>
         </div>
