@@ -109,7 +109,7 @@ if(tenant!=null) {
                 <td>
                         <table  style="float:left">
                             <tbody>
-                            <% if(user&&isRatingActivated){%>
+                            <% if(isRatingActivated){%>
                             <tr>
                                 <th><%=i18n.localize("rating")%>:</th>
                                 <%
