@@ -121,6 +121,8 @@ if(tenant!=null) {
                                 <td>
                                     <div class="average-rating"><%=api.rates%></div>
                                 </td>
+                                <%} else {%>
+                                 <td>N/A</td>
                                 <%}%>
                                 <td class="rate_td" colspan="<%=colspan%>">
                                     Your Rating : <span class="your_rating"><% if(api.userRate){%><%= api.userRate %>/5<% }else{ %>N/A<% } %></span><br />

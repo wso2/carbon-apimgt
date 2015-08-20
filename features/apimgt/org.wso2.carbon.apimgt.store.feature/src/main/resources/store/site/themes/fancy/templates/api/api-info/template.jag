@@ -125,6 +125,8 @@ if(tenant!=null) {
                                 <td>
                                     <div class="average-rating"><%=api.rates%></div>
                                 </td>
+                                <%} else {%>
+                                 <td>N/A</td>
                                 <%}%>
                                 <td colspan="<%=colspan%>">
                                     <div class="star-ratings">
