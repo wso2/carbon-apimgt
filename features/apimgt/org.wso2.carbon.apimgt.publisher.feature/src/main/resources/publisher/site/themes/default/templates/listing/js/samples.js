@@ -68,6 +68,13 @@ APISamples.prototype.deploySample1 = function (defaultTier) {
                                 }
                             }, 'json');
                     }, 'json');
+            } else {
+                $(".modal-body").removeClass("loadingButton");
+                jagg.message({
+                    content: "Error occurred while adding sample API",
+                    type: "error",
+                    title: "Error"
+                });
             }
         }, 'json');
 };
