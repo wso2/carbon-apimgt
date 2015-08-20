@@ -25,6 +25,8 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.clustering.ClusteringAgent;
+import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -46,6 +48,9 @@ import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -94,7 +99,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
     // API definitions from swagger v2.0
     static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
-    private Map<String, Environment> gatewyEnvironments;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -2432,43 +2436,76 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param password      password of the event receiver
      * @param updatedStatus status of the stat publishing state
      */
-    public void callStatupdateService(String receiverUrl, String user, String password, boolean updatedStatus) {
+    public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus) {
 
-        try {
-            gatewyEnvironments = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                    getAPIManagerConfiguration().getApiGatewayEnvironments();
+        //all mandatory parameters should not be null in order to start the process
+        if (receiverUrl != null && user != null && password != null) {
 
-            for (String gatewayEnvironmentName : gatewyEnvironments.keySet()) {
-                Environment currentGatewayEnvironment = gatewyEnvironments.get(gatewayEnvironmentName);
+            if (log.isDebugEnabled()) {
+                log.debug("Updating Stats publishing status of Store/Publisher domain to : " + updatedStatus);
+            }
+
+            //get the cluster message agent to publisher-store domain
+            ClusteringAgent clusteringAgent = ServiceReferenceHolder.getContextService().getServerConfigContext().
+                    getAxisConfiguration().getClusteringAgent();
+
+            if (clusteringAgent != null) {
+                //changing stat publishing status at other nodes via a cluster message
+                try {
+                    clusteringAgent.sendMessage(new StatUpdateClusterMessage(updatedStatus), true);
+                } catch (ClusteringFault clusteringFault) {
+                    //error is only logged because initially gateway has modified the status
+                    log.error("Failed to send cluster message to Publisher/Store domain " +
+                            "and update stats publishing status.");
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated Stats publishing status to : " + updatedStatus);
+                }
+            }
+
+            Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
+
+            Set gatewayEntries = gatewayEnvironments.entrySet();
+            Iterator<Map.Entry<String,Environment>> gatewayIterator = gatewayEntries.iterator();
+
+            while(gatewayIterator.hasNext()){
+
+                Environment currentGatewayEnvironment = gatewayIterator.next().getValue();
                 String gatewayServiceUrl = currentGatewayEnvironment.getServerURL();
                 String gatewayUserName = currentGatewayEnvironment.getUserName();
                 String gatewayPassword = currentGatewayEnvironment.getPassword();
 
-                //get the stub and the call the admin service with the credentials
-                GatewayStatsUpdateServiceStub stub =
-                        new GatewayStatsUpdateServiceStub(gatewayServiceUrl + "GatewayStatsUpdateService");
-                StatUpdateStorePublisherDomain storePublisherMessageAgent = new StatUpdateStorePublisherDomain();
-                ServiceClient gatewayServiceClient = stub._getServiceClient();
-                CarbonUtils.setBasicAccessSecurityHeaders(gatewayUserName, gatewayPassword, gatewayServiceClient);
-
-                //send an empty string if at least one mandatory parameter is null
-                if (receiverUrl == null || user == null || password == null) {
-                    receiverUrl = "";
-                    user = "";
-                    password = "";
+                try {
+                    //get the stub and the call the admin service with the credentials
+                    GatewayStatsUpdateServiceStub stub =
+                            new GatewayStatsUpdateServiceStub(gatewayServiceUrl + "GatewayStatsUpdateService");
+                    ServiceClient gatewayServiceClient = stub._getServiceClient();
+                    CarbonUtils.setBasicAccessSecurityHeaders(gatewayUserName, gatewayPassword, gatewayServiceClient);
+                    stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
+                } catch (AxisFault e) {
+                    //error is only logged because the process should be executed in all gateway environments
+                    log.error("Error in calling Stats update web service in Gateway Environment." + e.getMessage());
+                } catch (RemoteException e) {
+                    //error is only logged because the change is affected in gateway environments,
+                    // and the process should be executed in all environments and domains
+                    log.error("Error in updating Stats publish status in Gataways. " + e.getMessage());
+                } catch (GatewayStatsUpdateServiceAPIManagementExceptionException e) {
+                    //error is only logged because the process should continue in other gateways
+                    log.error("Error in Stat Update web service call to Gateway. " + e.getMessage());
+                } catch (GatewayStatsUpdateServiceClusteringFaultException e) {
+                    //error is only logged because the status should be updated in other gateways
+                    log.error("Failed to send cluster message to Gateway domain and update stats publishing status. "
+                            + e.getMessage());
+                } catch (GatewayStatsUpdateServiceExceptionException e) {
+                    //error is only logged because the process should continue in other gateways
+                    log.error("Error occurred while updating EventingConfiguration, " +
+                            "it contains a dirty value about Stat publishing." + e.getMessage());
                 }
-                stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
-
-                //send cluster message to publisher-store domain
-                storePublisherMessageAgent.updateStatsPublishStore(updatedStatus);
             }
-        } catch (AxisFault axisFault) {
-            //error is only logged because the process should be executed in all gateway environments
-            log.error("Error in calling Statsupdate web service in Gateway Environment." + axisFault);
-        } catch (RemoteException remoteException) {
-            //error is only logged because the change is affected in gateway environments,
-            // and the process should be executed in all environments
-            log.error("Error in updating Stats publish status in Gataways. " + remoteException);
+        } else {
+            //if at least one mandatory parameter is null, the process is not initiated
+            log.error("Event receiver URL and username and password all should not be null.");
         }
     }
 

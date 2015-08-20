@@ -32,7 +32,7 @@ var enableAnalytics = function (enable) {
             var userInSession = session.get("LOGGED_IN_USER");
             var emptyText = '';
             var statUpdateDriver = new org.wso2.carbon.apimgt.impl.APIProviderImpl(userInSession);
-            statUpdateDriver.callStatupdateService(emptyText, emptyText, emptyText, false);
+            statUpdateDriver.callStatUpdateService(emptyText, emptyText, emptyText, false);
             log.info("Analytics disabled");
         } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
             log.info("Enabling Analytics...");
@@ -99,10 +99,18 @@ var addAnalyticsConfig = function (configData) {
         configReaderService.setBamServerPassword(configData.eventReceiverPassword);
         log.info("Analytics config saved in registry.");
 
-        var userInSession = session.get("LOGGED_IN_USER");
-        var statUpdateDriver = new org.wso2.carbon.apimgt.impl.APIProviderImpl(userInSession);
-        statUpdateDriver.callStatupdateService
-                (configData.eventReceiverURL, configData.eventReceiverUsername, configData.eventReceiverPassword, true);
+        var eventReceiver = configData.eventReceiverURL;
+        var eventReceiverUser = configData.eventReceiverUsername;
+        var eventReceiverPassword = configData.eventReceiverPassword;
+
+        if(eventReceiver != null && eventReceiverUser != null && eventReceiverPassword != null){
+            var userInSession = session.get("LOGGED_IN_USER");
+            var statUpdateDriver = new org.wso2.carbon.apimgt.impl.APIProviderImpl(userInSession);
+            statUpdateDriver.callStatUpdateService
+                (eventReceiver, eventReceiverUser, eventReceiverPassword, true);
+        } else {
+            log.error("Event receiver URL and username and password should not be null.");
+        }
 
         return {
             error: false
