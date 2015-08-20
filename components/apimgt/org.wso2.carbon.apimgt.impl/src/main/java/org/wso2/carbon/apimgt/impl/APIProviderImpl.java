@@ -1171,7 +1171,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		    }
 
         String targetPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                            api.getId().getProviderName() +
+        					providerName +
                             RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
                             RegistryConstants.PATH_SEPARATOR + newVersion +
                             APIConstants.API_RESOURCE_NAME;
@@ -1203,7 +1203,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private boolean copyAPI(API api,String newVersion,String targetPath) throws APIManagementException {
         boolean success=false;
-        String apiSourcePath = APIUtil.getAPIPath(api.getId());
+        APIIdentifier apiId = APIUtil.replaceEmailDomain(api.getId());
+        String apiSourcePath = APIUtil.getAPIPath(apiId);
         try{
         //registry.beginTransaction();
         Resource apiSourceArtifact = registry.get(apiSourcePath);
@@ -1226,12 +1227,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if(api.isDefaultVersion()){
             artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
             //Check whether an existing API is set as default version.
-            String defaultVersion = getDefaultVersion(api.getId());
+            String defaultVersion = getDefaultVersion(apiId);
 
             //if so, change its DefaultAPIVersion attribute to false
 
             if(defaultVersion!=null){
-                APIIdentifier defaultAPIId=new APIIdentifier(api.getId().getProviderName(),api.getId().getApiName(),defaultVersion);
+                APIIdentifier defaultAPIId=new APIIdentifier(apiId.getProviderName(),api.getId().getApiName(),defaultVersion);
                 updateDefaultAPIInRegistry(defaultAPIId,false);
             }
         }else{
@@ -1240,13 +1241,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Check whether the existing api has its own thumbnail resource and if yes,add that image
         //thumb to new API                                       thumbnail path as well.
         String thumbUrl = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                          api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                          apiId.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                           api.getId().getApiName() + RegistryConstants.PATH_SEPARATOR +
                           api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR + APIConstants.API_ICON_IMAGE;
         if (registry.resourceExists(thumbUrl)) {
             Resource oldImage = registry.get(thumbUrl);
             apiSourceArtifact.getContentStream();
-            APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+            APIIdentifier newApiId = new APIIdentifier(apiId.getProviderName(),
                                                        api.getId().getApiName(), newVersion);
             Icon icon = new Icon(oldImage.getContentStream(), oldImage.getMediaType());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
@@ -1262,20 +1263,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         artifactManager.addGenericArtifact(artifact);
         String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-        registry.addAssociation(APIUtil.getAPIProviderPath(api.getId()), targetPath,
+        registry.addAssociation(APIUtil.getAPIProviderPath(apiId), targetPath,
                                 APIConstants.PROVIDER_ASSOCIATION);
         String roles=artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
         String[] rolesSet = new String[0];
         if (roles != null) {
             rolesSet = roles.split(",");
         }
-        APIUtil.setResourcePermissions(api.getId().getProviderName(),
+        APIUtil.setResourcePermissions(apiId.getProviderName(),
                                        artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY), rolesSet, artifactPath);
         //Here we have to set permission specifically to image icon we added
         String iconPath = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
         if (iconPath != null) {
             iconPath=iconPath.substring(iconPath.lastIndexOf("/apimgt"));
-            APIUtil.copyResourcePermissions(api.getId().getProviderName(),thumbUrl,iconPath);
+            APIUtil.copyResourcePermissions(apiId.getProviderName(),thumbUrl,iconPath);
         }
         // Retain the tags
         org.wso2.carbon.registry.core.Tag[] tags = registry.getTags(apiSourcePath);
@@ -1287,10 +1288,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
         // Retain the docs
-        List<Documentation> docs = getAllDocumentation(api.getId());
-        APIIdentifier newId = new APIIdentifier(api.getId().getProviderName(),
+        List<Documentation> docs = getAllDocumentation(apiId);
+        APIIdentifier newId = new APIIdentifier(apiId.getProviderName(),
                                                 api.getId().getApiName(), newVersion);
-        API newAPI = getAPI(newId,api.getId(), oldContext);
+        API newAPI = getAPI(newId,apiId, oldContext);
 
         if(api.isDefaultVersion()){
             newAPI.setAsDefaultVersion(true);
@@ -1332,19 +1333,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 doc.setFilePath(prependPath + targetFilePath);
             }
             createDocumentation(newAPI, doc);
-            String content = getDocumentationContent(api.getId(), doc.getName());
+            String content = getDocumentationContent(apiId, doc.getName());
             if (content != null) {
                 addDocumentationContent(newAPI, doc.getName(), content);
             }
         }
 
         //Copy Swagger 2.0 resources for New version.
-        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(),
-                                                                     api.getId().getVersion(),
-                                                                     api.getId().getProviderName());
+        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiId.getApiName(),
+                                                                     apiId.getVersion(),
+                                                                     apiId.getProviderName());
         if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
             JSONObject swaggerObject = (JSONObject) new JSONParser()
-                    .parse(definitionFromSwagger20.getAPIDefinition(api.getId(), registry));
+                    .parse(definitionFromSwagger20.getAPIDefinition(apiId, registry));
             JSONObject infoObject = (JSONObject) swaggerObject.get("info");
             infoObject.remove("version");
             infoObject.put("version", newAPI.getId().getVersion());

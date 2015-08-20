@@ -905,7 +905,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     public String getUUIDByApi(String provider, String name, String version)
             throws APIManagementException {
-        APIIdentifier identifier = new APIIdentifier(provider, name, version);
+        APIIdentifier identifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
         String path = APIUtil.getAPIPath(identifier);
         String artifactId = null;
         try {
