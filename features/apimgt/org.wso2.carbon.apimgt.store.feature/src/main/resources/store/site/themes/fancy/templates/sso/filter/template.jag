@@ -70,7 +70,7 @@
         if (acsURL) {
             consumerUrl = acsURL;
         } else {
-            consumerUrl = jagg.getHttpsUrl("/jagg/jaggery_acs.jag");
+            consumerUrl = jagg.getAbsoluteUrl("/jagg/jaggery_acs.jag");
         }
         if(site.ssoConfiguration.passive == "true")    {
             samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(consumerUrl, isPassiveAuthRequired);
