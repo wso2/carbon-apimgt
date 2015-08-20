@@ -4115,6 +4115,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String urlVal = (String) args[1];
         String type = (String) args[0];
+        String invalidStatusCodesRegex = args.length > 2 ? (String) args[2] : "404";
         if (urlVal != null && !urlVal.isEmpty()) {
             urlVal = urlVal.trim();
             URLConnection conn = null;
@@ -4134,9 +4135,9 @@ public class APIProviderHostObject extends ScriptableObject {
                     System.setProperty("javax.net.ssl.trustStore", trustStorePath);
                     System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
-                    return sendHttpHEADRequest(urlVal);
+                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
                 } else if (url.getProtocol().matches("http")) {
-                    return sendHttpHEADRequest(urlVal);
+                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
                 } else {
                     return "error while connecting";
                 }
@@ -4767,7 +4768,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param urlVal - backend URL
      * @return - status of HTTP HEAD Request to backend
      */
-    private static String sendHttpHEADRequest(String urlVal) {
+    private static String sendHttpHEADRequest(String urlVal, String invalidStatusCodesRegex) {
 
         String response = "error while connecting";
 
@@ -4790,11 +4791,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
         try {
             HttpResponse httpResponse = client.execute(head);
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
+            String statusCode = String.valueOf(httpResponse.getStatusLine().getStatusCode());
 
-            //If the endpoint doesn't support HTTP HEAD or if status code is < 400
-            if (statusCode == 405 || statusCode / 100 < 4) {
-                if (log.isDebugEnabled() && statusCode == 405) {
+            //If the endpoint doesn't match the regex which specify invalid status codes, it will return success.
+            if (!statusCode.matches(invalidStatusCodesRegex)) {
+                if (log.isDebugEnabled() && statusCode.equals("405")) {
                     log.debug("Endpoint doesn't support HTTP HEAD");
                 }
                 response = "success";

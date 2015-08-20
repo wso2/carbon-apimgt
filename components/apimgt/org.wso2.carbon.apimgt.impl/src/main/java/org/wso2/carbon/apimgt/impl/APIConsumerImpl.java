@@ -1794,7 +1794,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
-        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
+
+        // Checking if a domain mapping is already there for this consumer Key.
+        String domain = apiMgtDAO.getAuthorizedDomainsByConsumerKey(clientId);
+
+        if (domain == null) {
+            apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
+        }
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
