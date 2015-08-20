@@ -61,7 +61,6 @@ var apistore = {};
         if(domain == null || domain == 'null'){
             domain = carbon.server.tenantDomain();
         }
-        log.info('================================================== tenantUser : '+carbon.server.tenantDomain());
         
         if(username == '__wso2.am.anon__'){
 
@@ -72,8 +71,7 @@ var apistore = {};
             } else{
                 username = username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
             } 
-        } 
-        log.info('================================================== user name : '+username);
+        }
         return username;
     }
 
@@ -86,7 +84,6 @@ var apistore = {};
             if(domain == null || domain == 'null'){
                 var carbon = require('carbon');
                 domain = carbon.server.tenantDomain();
-                log.info('================================================== domain : '+domain);
             }
             var superTenantDomain = this.user.superTenantDomain;
             if(superTenantDomain == domain || (username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR) > -1  ||  username.indexOf(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) > -1)){
