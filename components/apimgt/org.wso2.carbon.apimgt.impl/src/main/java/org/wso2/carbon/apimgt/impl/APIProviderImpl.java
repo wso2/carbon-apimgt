@@ -1749,7 +1749,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
             if(subsCount > 0){
-                handleException("Cannot remove the API. Active Subscriptions Exist", null);
+                handleException("Cannot remove the API as active subscriptions exist.", null);
             }
 
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
