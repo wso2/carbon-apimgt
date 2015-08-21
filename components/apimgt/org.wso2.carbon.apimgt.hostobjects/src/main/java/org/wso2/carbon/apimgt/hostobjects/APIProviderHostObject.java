@@ -2941,6 +2941,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String docType = (String) args[4];
         String summary = (String) args[5];
         String sourceType = (String) args[6];
+        String otherTypeName = (String) args[9];
 
         //validate Source Type
         if (!isValidSourceType(sourceType)) {
@@ -2971,7 +2972,11 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
             if (doc.getType() == DocumentationType.OTHER) {
-                doc.setOtherTypeName(args[9].toString());
+                //validate otherTypeName
+                if (otherTypeName == null || otherTypeName.matches("(\\s)+") || otherTypeName.isEmpty()) {
+                    throw new APIManagementException("Other Type Name Cannot be Empty.");
+                }
+                doc.setOtherTypeName(otherTypeName);
             }
 
             if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
