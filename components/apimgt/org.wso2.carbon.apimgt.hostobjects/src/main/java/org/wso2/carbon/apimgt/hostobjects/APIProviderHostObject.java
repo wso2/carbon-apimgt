@@ -956,6 +956,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String visibleRoles = "";
 
+        if (version != null) {
+            version = version.trim();
+            if (version.isEmpty()) {
+                handleException("Version not specified for API " + name);
+            }
+        }
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
