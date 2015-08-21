@@ -2941,6 +2941,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String docType = (String) args[4];
         String summary = (String) args[5];
         String sourceType = (String) args[6];
+
+        //validate Source Type
+        if (!isValidSourceType(sourceType)) {
+            throw new APIManagementException("Invalid Source Type.");
+        }
+
         String visibility = (String) args[11];
         FileHostObject fileHostObject = null;
         String sourceURL = null;
@@ -2971,6 +2977,11 @@ public class APIProviderHostObject extends ScriptableObject {
             if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.URL);
                 sourceURL = args[7].toString();
+                //validate urls
+                if (!isURL(sourceURL)) {
+                    throw new APIManagementException("Invalid Document Url Format.");
+                }
+                doc.setSourceUrl(sourceURL);
             } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.FILE);
                 fileHostObject = (FileHostObject) args[8];
@@ -2978,13 +2989,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
             }
 
-            //validate urls
-            if (!isURL(sourceURL)) {
-                throw new APIManagementException("Invalid Document Url Format.");
-            }
-
             doc.setSummary(summary);
-            doc.setSourceUrl(sourceURL);
 
             if (visibility == null) {
                 visibility = APIConstants.DOC_API_BASED_VISIBILITY;
@@ -5036,12 +5041,28 @@ public class APIProviderHostObject extends ScriptableObject {
      * Allow any url without fully qualified domain
      *
      * @param url Url as string
-     * @return boolean type stating validated ot not
+     * @return boolean type stating validated or not
      */
     private static boolean isURL(String url) {
         try {
             Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(url);
+            return matcher.matches();
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    /**
+     * SourceType validator,
+     *
+     * @param srcType source type as a sting
+     * @return boolean type stating validated or not
+     */
+    private static boolean isValidSourceType(String srcType) {
+        try {
+            Pattern pattern = Pattern.compile("(inline|url|file)", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(srcType);
             return matcher.matches();
         } catch (RuntimeException e) {
             return false;
