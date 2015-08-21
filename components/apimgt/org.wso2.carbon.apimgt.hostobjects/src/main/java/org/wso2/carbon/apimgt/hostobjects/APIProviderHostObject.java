@@ -2978,6 +2978,11 @@ public class APIProviderHostObject extends ScriptableObject {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
             }
 
+            //validate urls
+            if (!isURL(sourceURL)) {
+                throw new APIManagementException("Invalid Document Url Format.");
+            }
+
             doc.setSummary(summary);
             doc.setSourceUrl(sourceURL);
 
@@ -5024,5 +5029,22 @@ public class APIProviderHostObject extends ScriptableObject {
             userBrowser = "Other";
         }
         return userBrowser;
+    }
+
+    /**
+     * Url validator, Allow any url with https and http.
+     * Allow any url without fully qualified domain
+     *
+     * @param url Url as string
+     * @return boolean type stating validated ot not
+     */
+    private static boolean isURL(String url) {
+        try {
+            Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(url);
+            return matcher.matches();
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 }
