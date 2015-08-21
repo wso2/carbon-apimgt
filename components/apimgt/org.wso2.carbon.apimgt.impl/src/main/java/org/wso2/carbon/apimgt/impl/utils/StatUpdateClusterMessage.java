@@ -27,13 +27,11 @@ import org.apache.commons.logging.LogFactory;
 
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 
-import java.io.Serializable;
-
 /**
  * This class provides the definition of the cluster message which is initiated from the
  * web service call from publisher node
  */
-public class StatUpdateClusterMessage extends ClusteringMessage implements Serializable  {
+public class StatUpdateClusterMessage extends ClusteringMessage  {
 
     private static final Log log = LogFactory.getLog(StatUpdateClusterMessage.class);
     private Boolean statUpdateStatus;
