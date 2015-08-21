@@ -133,8 +133,11 @@ var log = new Log();
         var paths = {}; //fix for /*, {url-template}*
         for (var property in jsonObj.paths) {
             if (jsonObj.paths.hasOwnProperty(property)) {
-                paths[property.replace("/*","/*")] = jsonObj.paths[property];
-            }
+                var tempResource = property.replace("*","");
+                if(tempResource.lastIndexOf("/")==(tempResource.length-1)){
+                   tempResource += "*";
+                }
+            paths[tempResource] = jsonObj.paths[property];            }
         }
         jsonObj.paths = paths;
 
