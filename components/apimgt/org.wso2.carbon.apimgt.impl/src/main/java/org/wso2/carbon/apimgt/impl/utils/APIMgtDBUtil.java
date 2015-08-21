@@ -157,12 +157,34 @@ public final class APIMgtDBUtil {
      * Close Connection
      * @param dbConnection Connection
      */
-    private static void closeConnection(Connection dbConnection) {
+    public static void closeConnection(Connection dbConnection) {
         if (dbConnection != null) {
             try {
-                dbConnection.close();
+            	dbConnection.close();
             } catch (SQLException e) {
                 log.warn("Database error. Could not close database connection. Continuing with " +
+                        "others. - " + e.getMessage(), e);
+            }
+        }
+    }
+    
+    public static void transactionRollback(Connection dbConnection) {
+        if (dbConnection != null) {
+            try {
+                dbConnection.rollback();
+            } catch (SQLException e) {
+                log.warn("Database error. Could not rollback transaction. Continuing with " +
+                        "others. - " + e.getMessage(), e);
+            }
+        }
+    }
+    
+    public static void transactionCommit(Connection dbConnection) {
+        if (dbConnection != null) {
+            try {
+                dbConnection.commit();
+            } catch (SQLException e) {
+                log.warn("Database error. Could not commit transaction. Continuing with " +
                         "others. - " + e.getMessage(), e);
             }
         }

@@ -28,8 +28,11 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -75,15 +78,25 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 		
 
 		ApiMgtDAO dao = new ApiMgtDAO();
-
+		Connection conn = null;
 		try {
-            dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO)workFlowDTO,false);
-            generateKeysForApplication(regWFDTO);
+			conn = APIMgtDBUtil.getConnection();
+            dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO)workFlowDTO,false, conn);
+            generateKeysForApplication(regWFDTO, conn);
+            APIMgtDBUtil.transactionCommit(conn);
 		} catch (APIManagementException e) {
+			APIMgtDBUtil.transactionRollback(conn);
 			String msg = "Error occured when updating the status of the Application creation process";
 			log.error(msg, e);
 			throw new WorkflowException(msg, e);
+		}catch (SQLException e) {
+        	APIMgtDBUtil.transactionRollback(conn);
+        	log.error("occured when updating the status of the Application creation process", e);
+            throw new WorkflowException("occured when updating the status of the Application creation process", e);
+		}finally{
+			APIMgtDBUtil.closeConnection(conn);
 		}
+		
 	}
 
 	@Override

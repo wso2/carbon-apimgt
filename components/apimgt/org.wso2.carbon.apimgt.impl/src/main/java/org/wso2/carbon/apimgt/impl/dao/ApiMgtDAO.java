@@ -277,10 +277,10 @@ public class ApiMgtDAO {
      * AM_APPLICATION_KEY_MAPPING tables.
      */
 
-    public void createApplicationRegistrationEntry(ApplicationRegistrationWorkflowDTO dto, boolean onlyKeyMappingEntry)
+    public void createApplicationRegistrationEntry(ApplicationRegistrationWorkflowDTO dto, boolean onlyKeyMappingEntry, final Connection conn)
             throws APIManagementException {
 
-        Connection conn = null;
+        /*Connection conn = null;*/
         PreparedStatement ps = null;
         ResultSet rs = null;
         Application application = dto.getApplication();
@@ -297,7 +297,7 @@ public class ApiMgtDAO {
                 "VALUES(?,?,?)";
 
         try {
-            conn = APIMgtDBUtil.getConnection();
+            /*conn = APIMgtDBUtil.getConnection();*/
             conn.setAutoCommit(false);
             
             if (!onlyKeyMappingEntry) {
@@ -321,17 +321,17 @@ public class ApiMgtDAO {
             ps.execute();
             ps.close();
             
-            conn.commit();
+            /*conn.commit();*/
         } catch (SQLException e) {
-            try {
+            /*try {
                 conn.rollback();
             } catch (SQLException e1) {
                 handleException("Error occurred while Roling back changes done on Application Registration", e1);
-            }
+            }*/
             handleException("Error occurred while creating an " +
                     "Application Registration Entry for Application : " + application.getName(), e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+           /* APIMgtDBUtil.closeAllConnections(ps, conn, rs);*/
         }
 
     }
@@ -3674,18 +3674,18 @@ public class ApiMgtDAO {
         }
     }
 
-    public static void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains) throws
+    public void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains, final Connection connection) throws
             APIManagementException {
 
         String sqlAddAccessAllowDomains = "INSERT" +
                 " INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
                 " VALUES (?,?)";
 
-        Connection connection = null;
+        /*Connection connection = null;*/
         PreparedStatement prepStmt = null;
 
         try {
-            connection = APIMgtDBUtil.getConnection();
+           /* connection = APIMgtDBUtil.getConnection();*/
             connection.setAutoCommit(false);
 
             if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
@@ -3703,24 +3703,24 @@ public class ApiMgtDAO {
                 prepStmt.execute();
                 prepStmt.close();
             }
-            connection.commit();
+            /*connection.commit();*/
         } catch (SQLException e) {
             handleException("Error while adding allowed domains for application identified " +
                     "by consumer key :" + oAuthConsumerKey, e);
-            if (connection != null) {
-                try {
+           /* if (connection != null) {
+               try {
                     connection.rollback();
                 } catch (SQLException e1) {
                     log.error("Failed to rollback the add access token ", e);
                 }
-            }
+            }*/
         } catch (CryptoException e) {
             log.error("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
                       " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
             throw new APIManagementException("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
                     " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
         } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+            /*IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);*/
         }
 
     }
