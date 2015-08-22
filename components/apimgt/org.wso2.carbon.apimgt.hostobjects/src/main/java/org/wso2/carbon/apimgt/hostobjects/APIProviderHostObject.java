@@ -2944,9 +2944,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String otherTypeName = (String) args[9];
 
         //validate Source Type
-        if (!isValidSourceType(sourceType)) {
+        if (sourceType==null) {
             throw new APIManagementException("Invalid Source Type.");
         }
+        sourceType=sourceType.trim();
 
         String visibility = (String) args[11];
         FileHostObject fileHostObject = null;
@@ -2973,25 +2974,28 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if (doc.getType() == DocumentationType.OTHER) {
                 //validate otherTypeName
-                if (otherTypeName == null || otherTypeName.matches("(\\s)+") || otherTypeName.isEmpty()) {
+                if (otherTypeName == null || otherTypeName.trim().isEmpty()) {
                     throw new APIManagementException("Other Type Name Cannot be Empty.");
                 }
-                doc.setOtherTypeName(otherTypeName);
+                doc.setOtherTypeName(otherTypeName.trim());
             }
 
             if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.URL);
                 sourceURL = args[7].toString();
                 //validate urls
-                if (!isURL(sourceURL)) {
+                if (sourceURL==null || !isURL(sourceURL.trim())) {
                     throw new APIManagementException("Invalid Document Url Format.");
                 }
+                sourceURL=sourceURL.trim();
                 doc.setSourceUrl(sourceURL);
             } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.FILE);
                 fileHostObject = (FileHostObject) args[8];
-            } else {
+            } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            } else {
+                throw new APIManagementException("Invalid Source Type.");
             }
 
             doc.setSummary(summary);
@@ -5049,28 +5053,11 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return boolean type stating validated or not
      */
     private static boolean isURL(String url) {
-        try {
-            Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(url);
-            return matcher.matches();
-        } catch (RuntimeException e) {
-            return false;
-        }
+
+        Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(url);
+        return matcher.matches();
+
     }
 
-    /**
-     * SourceType validator,
-     *
-     * @param srcType source type as a sting
-     * @return boolean type stating validated or not
-     */
-    private static boolean isValidSourceType(String srcType) {
-        try {
-            Pattern pattern = Pattern.compile("(inline|url|file)", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(srcType);
-            return matcher.matches();
-        } catch (RuntimeException e) {
-            return false;
-        }
-    }
 }
