@@ -2944,10 +2944,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String otherTypeName = (String) args[9];
 
         //validate Source Type
-        if (sourceType==null) {
+        if (sourceType == null) {
             throw new APIManagementException("Invalid Source Type.");
         }
-        sourceType=sourceType.trim();
+        sourceType = sourceType.trim();
 
         String visibility = (String) args[11];
         FileHostObject fileHostObject = null;
@@ -2984,10 +2984,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 doc.setSourceType(Documentation.DocumentSourceType.URL);
                 sourceURL = args[7].toString();
                 //validate urls
-                if (sourceURL==null || !isURL(sourceURL.trim())) {
+                if (sourceURL == null || !isURL(sourceURL.trim())) {
                     throw new APIManagementException("Invalid Document Url Format.");
                 }
-                sourceURL=sourceURL.trim();
+                sourceURL = sourceURL.trim();
                 doc.setSourceUrl(sourceURL);
             } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
                 doc.setSourceType(Documentation.DocumentSourceType.FILE);
