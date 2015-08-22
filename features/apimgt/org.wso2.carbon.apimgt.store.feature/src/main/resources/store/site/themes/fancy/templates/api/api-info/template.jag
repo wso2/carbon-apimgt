@@ -113,7 +113,7 @@ if(tenant!=null) {
                     <div class="span6">
                         <table cellspacing="0" cellpadding="0" class="table">
                             <tbody>
-                            <% if(user&&isRatingActivated){%>
+                            <% if(isRatingActivated){%>
                             <tr>
                                 <th><%=i18n.localize("rating")%>:</th>
                                 <%
@@ -125,6 +125,8 @@ if(tenant!=null) {
                                 <td>
                                     <div class="average-rating"><%=api.rates%></div>
                                 </td>
+                                <%} else {%>
+                                 <td>N/A</td>
                                 <%}%>
                                 <td colspan="<%=colspan%>">
                                     <div class="star-ratings">

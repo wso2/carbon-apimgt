@@ -440,5 +440,5 @@ public interface APIProvider extends APIManager {
      * @param password      password of the event receiver
      * @param updatedStatus status of the stat publishing state
      */
-    public void callStatupdateService(String receiverUrl, String user, String password, boolean updatedStatus);
+    public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus);
 }

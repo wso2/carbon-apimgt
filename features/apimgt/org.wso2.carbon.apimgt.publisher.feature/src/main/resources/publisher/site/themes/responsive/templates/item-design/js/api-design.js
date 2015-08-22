@@ -592,7 +592,7 @@ APIDesigner.prototype.render_resource = function(container){
     });
     container.find('.param_paramType').editable({
         emptytext: '+ Set Param Type',
-        source: [ { value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", value:"formData"} ],
+        source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", value:"formData"} ],
         success : this.update_elements
     });
     container.find('.param_type').editable({
@@ -770,7 +770,7 @@ $(document).ready(function(){
 
         if(designer.has_resources() == false){
             jagg.message({
-                content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)." ,
+                content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)?" ,
                 type:"confirm",
                 title:"Resource not specified",
                 anotherDialog:true,

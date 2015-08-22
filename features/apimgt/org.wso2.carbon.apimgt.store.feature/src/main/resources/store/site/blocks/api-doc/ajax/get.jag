@@ -112,25 +112,13 @@ var log = new Log();
             var environmentsToType = splitVal[type];
             for(var name in environmentsToType ){
                 var environmentURL;
-                if(envName == name){
+                if(envName == name || envName == "undefined" || envName == null){
                     environmentURL = environmentsToType[name];
                     urlArr[count] = environmentURL[accessProtocol.replace(":","")];
                     count++;
                     break;
                 }
            
-            }
-        }
-        if(urlArr.length===1){
-            // We do not need to append the version since with the context versioning, the version is embedded in the context.
-            jsonObj.basePath=urlArr[0]+context;
-            //jsonObj.basePath=urlArr[0]+context+"/"+apiVersionVal;
-        }else{
-            for(var i=0; i < urlArr.length ; i++){
-                if(urlArr[i].indexOf(accessProtocol) > -1){
-                    jsonObj.basePath=urlArr[i]+context;
-                    // jsonObj.basePath=urlArr[i]+context+"/"+apiVersionVal;
-                }
             }
         }
 
@@ -145,8 +133,11 @@ var log = new Log();
         var paths = {}; //fix for /*, {url-template}*
         for (var property in jsonObj.paths) {
             if (jsonObj.paths.hasOwnProperty(property)) {
-                paths[property.replace("/*","/*")] = jsonObj.paths[property];
-            }
+                var tempResource = property.replace("*","");
+                if(tempResource.lastIndexOf("/")==(tempResource.length-1)){
+                   tempResource += "*";
+                }
+            paths[tempResource] = jsonObj.paths[property];            }
         }
         jsonObj.paths = paths;
 

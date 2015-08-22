@@ -44,14 +44,19 @@ public class GatewayStatsUpdater extends AbstractAdmin {
     /**
      * This method updates the stat publishing status in gateway domain
      *
-     * @param receiverUrl      event receiver url
-     * @param user             username for the event receiver
-     * @param password         password for the event receiver
+     * @param receiverUrl event receiver url
+     * @param user username for the event receiver
+     * @param password password for the event receiver
      * @param statUpdateStatus status of the stat publishing state
+     * @throws APIManagementException if an error occurs while adding BAMServerProfile
+     * @throws ClusteringFault if it fails to send cluster message to Gateway domain and update stats publishing status
+     * @throws Exception if an error occurs while updating EventingConfiguration
      */
-    public void updateStatPublishGateway(String receiverUrl, String user, String password, Boolean statUpdateStatus) {
 
-        if(log.isDebugEnabled()) {
+    public void updateStatPublishGateway(String receiverUrl, String user, String password, Boolean statUpdateStatus)
+            throws APIManagementException, ClusteringFault, Exception {
+
+        if (log.isDebugEnabled()) {
             log.debug("Updating stats publishing status in Gateway.");
         }
 
@@ -59,7 +64,7 @@ public class GatewayStatsUpdater extends AbstractAdmin {
         APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
         analyticsConfiguration.setAnalyticsEnabled(statUpdateStatus);
 
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Updated stats publishing status in Gateway to : " + statUpdateStatus);
         }
 
@@ -69,56 +74,43 @@ public class GatewayStatsUpdater extends AbstractAdmin {
             eventingConfigData = serviceDataPublisherAdmin.getEventingConfigData();
         }
 
-        try {
-            if (eventingConfigData != null) {
-                //config values are updated if the stats publishing is true
-                if (statUpdateStatus) {
-                    if(log.isDebugEnabled()) {
-                        log.debug("Updating values related to stats publishing status.");
-                    }
-                    //values related to stats publishing status are only updated if all of them are non-empty
-                    if (!(receiverUrl.isEmpty()) && !(user.isEmpty()) && !(password.isEmpty())) {
-                        analyticsConfiguration.setBamServerUrlGroups(receiverUrl);
-                        analyticsConfiguration.setBamServerUser(user);
-                        analyticsConfiguration.setBamServerPassword(password);
-
-                        eventingConfigData.setUrl(receiverUrl);
-                        eventingConfigData.setUserName(user);
-                        eventingConfigData.setPassword(password);
-                        if(log.isDebugEnabled()) {
-                            log.debug("BAMServerURL : " + receiverUrl + " , BAMServerUserName : " + user + " , " +
-                                    "BAMServerPassword : " + password);
-                        }
-                        APIUtil.addBamServerProfile
-                                (receiverUrl, user, password, MultitenantConstants.SUPER_TENANT_ID);
-                    }
+        if (eventingConfigData != null) {
+            //config values must be updated if the stats publishing is true
+            if (statUpdateStatus) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Updating values related to stats publishing status.");
                 }
-                //eventingConfigData must be updated irrespective of the value of statUpdateStatus
-                eventingConfigData.setServiceStatsEnable(statUpdateStatus);
+                //values related to stats publishing status are only updated if all of them are non-empty
+                if (!(receiverUrl.isEmpty()) && !(user.isEmpty()) && !(password.isEmpty())) {
+                    analyticsConfiguration.setBamServerUrlGroups(receiverUrl);
+                    analyticsConfiguration.setBamServerUser(user);
+                    analyticsConfiguration.setBamServerPassword(password);
 
-                //this may throw an Exception (type : Exception)
-                serviceDataPublisherAdmin.configureEventing(eventingConfigData);
-            }
-            //send the cluster message to other nodes in the cluster to update stats publishing status
-            ClusteringAgent clusteringAgent = this.getConfigContext().getAxisConfiguration().getClusteringAgent();
-            if (clusteringAgent != null) {
-                if(log.isDebugEnabled()) {
-                    log.debug("Sending cluster message to Gateway domain to update stats publishing status.");
+                    eventingConfigData.setUrl(receiverUrl);
+                    eventingConfigData.setUserName(user);
+                    eventingConfigData.setPassword(password);
+                    if (log.isDebugEnabled()) {
+                        log.debug("BAMServerURL : " + receiverUrl + " , BAMServerUserName : " + user + " , " +
+                                "BAMServerPassword : " + password);
+                    }
+                    APIUtil.addBamServerProfile
+                            (receiverUrl, user, password, MultitenantConstants.SUPER_TENANT_ID);
                 }
-                clusteringAgent.sendMessage(new StatUpdateClusterMessage(statUpdateStatus), true);
             }
-        } catch (ClusteringFault clusteringFault) {
-            //error is only logged because initial gateway has modified the status, only the sub nodes are ignored
-            //and the process should continue
-            log.error("Failed to send cluster message to Gateway domain and update stats publishing status.");
-        } catch (APIManagementException e) {
-            //error is only logged because only BAM configurations are invalid, but change is successful in gateway
-            log.error("Error occurred while adding BAMServerProfile, BAMServerProfile might show incorrect values.");
-        } catch (Exception e) {
-            //type : Exception is thrown by serviceDataPublisherAdmin.configureEventing
-            //error is only logged because only configuration values in registry are outdated
-            log.error("Error occurred while updating EventingConfiguration, " +
-                    "it contains a dirty value about Stat publishing.");
+            //eventingConfigData must be updated irrespective of the value of statUpdateStatus
+            eventingConfigData.setServiceStatsEnable(statUpdateStatus);
+
+            //this may throw an Exception (type : Exception)
+            serviceDataPublisherAdmin.configureEventing(eventingConfigData);
+        }
+
+        //send the cluster message to other nodes in the cluster to update stats publishing status
+        ClusteringAgent clusteringAgent = this.getConfigContext().getAxisConfiguration().getClusteringAgent();
+        if (clusteringAgent != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Sending cluster message to Gateway domain to update stats publishing status.");
+            }
+            clusteringAgent.sendMessage(new StatUpdateClusterMessage(statUpdateStatus), true);
         }
     }
 }
