@@ -167,28 +167,15 @@
 
         </div>
     </div>
-{{#if api }}
-        <div class="form-group" id="rolesDiv" {{#unless private_visibility}}style="display: none;"{{/unless}}>
-            <label class="custom-form-label col-lg-2 " for="roles" id="rolesLabel" name="rolesLabel">
-                {{t "roles"}}:<span class="requiredAstrix">*</span>
-            </label>
-            <div class="custom-form-right col-lg-5 ">
-                <input type="text" class="form-control required validInput validateRoles" id="roles" name="roles"  value="{{roles}}"/>
-                <p class="help-block" id="rolesHelp">{{t "Comma separated list (e.g.,: role1,role2,role3)"}}</p>
-            </div>
+    <div class="form-group" id="rolesDiv" {{#unless private_visibility}} style="display: none;"{{/unless}}>
+        <label class="custom-form-label col-lg-2 " for="roles" id="rolesLabel" name="rolesLabel">
+            {{t "roles"}}:<span class="requiredAstrix">*</span>
+        </label>
+        <div class="custom-form-right col-lg-5 ">
+            <input type="text" class="form-control required validInput validateRoles" id="roles" name="roles"  value="{{roles}}"/>
+            <p class="help-block" id="rolesHelp">{{t "Comma separated list (e.g.,: role1,role2,role3)"}}</p>
         </div>
-{{else}}
-        <div class="form-group" id="rolesDiv" style="display: none;">
-            <label class="custom-form-label col-lg-2" for="roles" id="rolesLabel" name="rolesLabel">
-                {{t "roles"}}:<span class="requiredAstrix">*</span>
-            </label>
-
-            <div class="custom-form-right col-lg-5">
-                <input type="text" class="form-control required validInput validateRoles" id="roles" name="roles"/>
-                <p class="help-block" id="rolesHelp">{{t "Comma separated list (e.g.,: role1,role2,role3)"}}</p>
-            </div>
-        </div>
-{{/if}}
+    </div>
 
 {{#if api}}
         <div class="form-group">

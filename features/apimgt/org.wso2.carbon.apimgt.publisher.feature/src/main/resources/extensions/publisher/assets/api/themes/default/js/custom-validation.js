@@ -72,10 +72,11 @@ $(document).ready(function() {
         $.ajax({
                    url: url,
                    type: 'POST',
+                   async: false,
                    data: JSON.stringify(data),
                    contentType: 'application/json',
-                   success: function(data) {
-                       valid = data.response;
+                   success: function(result) {
+                       valid = result.data.response;
                    }
                });
         return this.optional(element) || valid == true;
