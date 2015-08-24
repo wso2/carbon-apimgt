@@ -871,7 +871,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.10.1</jaggery.version>
+        <jaggery.version>0.10.3</jaggery.version>
 
 	<!-- carbon mediation -->
 	<carbon.mediation.version>4.4.2</carbon.mediation.version>

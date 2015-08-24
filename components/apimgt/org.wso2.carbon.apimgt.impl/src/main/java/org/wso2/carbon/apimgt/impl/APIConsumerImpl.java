@@ -18,6 +18,23 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.cache.Caching;
+
 import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -57,6 +74,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -92,20 +110,6 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-import javax.cache.Caching;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -1773,10 +1777,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
+        
+        Connection connection = null;
+		try {
+			connection = APIMgtDBUtil.getConnection();
+			 //Do application mapping with consumerKey.
+	        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
+	        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray,connection);
+			APIMgtDBUtil.transactionCommit(connection);
+		} catch (Exception ex) {
+			APIMgtDBUtil.transactionRollback(connection);
+			throw new APIManagementException(ex);
+		}finally{
+			APIMgtDBUtil.closeConnection(connection);
+		}
 
-        //Do application mapping with consumerKey.
-        apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
-        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
+       
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
@@ -2466,7 +2482,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void addAccessAllowDomains(String oauthConsumerKey, String[] accessAllowDomains)
             throws APIManagementException {
-        apiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains);
+    	Connection connection = null;
+		try {
+			connection = APIMgtDBUtil.getConnection();
+			apiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains, connection);
+			APIMgtDBUtil.transactionCommit(connection);
+		} catch (Exception ex) {
+			APIMgtDBUtil.transactionRollback(connection);
+			throw new APIManagementException(ex);
+		}finally{
+			APIMgtDBUtil.closeConnection(connection);
+		}
+        
     }
 
 
