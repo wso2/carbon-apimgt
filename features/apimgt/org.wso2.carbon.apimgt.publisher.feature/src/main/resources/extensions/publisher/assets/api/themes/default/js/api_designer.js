@@ -844,7 +844,6 @@ function checkNested(obj) {
             else {
                 $("#rolesDiv").show();
             }
-
         });
 
         $('#import_swagger').attr('disabled','disabled');
