@@ -20,6 +20,8 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import java.sql.Connection;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -167,8 +169,8 @@ public class ApplicationUtils {
     }
 
     public static void updateOAuthAppAssociation(Application application, String keyType,
-                                                 OAuthApplicationInfo oAuthApplication) throws APIManagementException {
+                                                 OAuthApplicationInfo oAuthApplication, final Connection conn) throws APIManagementException {
         application.addOAuthApp(keyType,oAuthApplication);
-        dao.updateApplicationKeyTypeMapping(application,keyType);
+        dao.updateApplicationKeyTypeMapping(application,keyType, conn);
     }
 }
