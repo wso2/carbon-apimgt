@@ -18,25 +18,12 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tag;
 
 /**
  * APIConsumer responsible for providing helper functionality
@@ -574,4 +561,18 @@ public interface APIConsumer extends APIManager {
 
 	public JSONObject resumeWorkflow(Object[] args);
 
+
+    /**
+     * This method added to returned APIs with only returned governance artifact attributes without accessing registry again
+     *
+     * @param searchTerm   term which search for
+     * @param searchType   search type
+     * @param tenantDomain tenant domain
+     * @param start        starting offset
+     * @param end          number APIs to be returned
+     * @return search results map
+     * @throws APIManagementException
+     */
+    public Map<String, Object> searchPaginatedLightweightAPIs(String searchTerm, String searchType, String tenantDomain,
+                                                              int start, int end) throws APIManagementException;
 }

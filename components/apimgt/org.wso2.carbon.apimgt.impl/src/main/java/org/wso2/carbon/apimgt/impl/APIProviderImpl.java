@@ -1652,9 +1652,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void createDocumentation(API api, Documentation documentation)
             throws APIManagementException {
         try {
-        	APIIdentifier apiId = api.getId();
-        	GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-        			APIConstants.DOCUMENTATION_KEY);
+            APIIdentifier apiId = api.getId();
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+                    APIConstants.DOCUMENTATION_KEY);
             GenericArtifact artifact =
                     artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(
@@ -1662,29 +1662,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiPath = APIUtil.getAPIPath(apiId);
             //Adding association from api to documentation . (API -----> doc)
             registry.addAssociation(apiPath, artifact.getPath(),
-                                    APIConstants.DOCUMENTATION_ASSOCIATION);
-            String docVisibility=documentation.getVisibility().name();
-            String[] authorizedRoles=getAuthorizedRoles(apiPath);
-            String visibility=api.getVisibility();
-            if(docVisibility!=null){
-            if(APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)){
-            authorizedRoles=null;
-            visibility=APIConstants.DOC_SHARED_VISIBILITY;
-            } else if(APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)){
-            authorizedRoles=null;
-            visibility=APIConstants.DOC_OWNER_VISIBILITY;
-            }
+                    APIConstants.DOCUMENTATION_ASSOCIATION);
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = getAuthorizedRoles(apiPath);
+            String visibility = api.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
             }
             APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                   visibility, authorizedRoles, artifact.getPath());
+                    visibility, authorizedRoles, artifact.getPath());
             String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-            if(docFilePath != null && !docFilePath.equals("")){
+            if (docFilePath != null && !docFilePath.equals("")) {
                 //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
                 int startIndex = docFilePath.indexOf("governance") + "governance".length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                        visibility,authorizedRoles, filePath);
+                        visibility, authorizedRoles, filePath);
                 registry.addAssociation(artifact.getPath(), filePath,
                         APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
