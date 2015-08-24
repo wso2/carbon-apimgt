@@ -4079,7 +4079,7 @@ public class ApiMgtDAO {
      * @param application
      * @param keyType
      */
-    public void updateApplicationKeyTypeMapping(Application application, String keyType) throws APIManagementException {
+    public void updateApplicationKeyTypeMapping(Application application, String keyType, final Connection connection) throws APIManagementException {
 
         OAuthApplicationInfo app = application.getOAuthApp(keyType);
         String consumerKey = null;
@@ -4094,7 +4094,7 @@ public class ApiMgtDAO {
                 "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
             try {
-                Connection connection = APIMgtDBUtil.getConnection();
+                /*Connection connection = APIMgtDBUtil.getConnection();*/
                 PreparedStatement ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, APIUtil.encryptToken(consumerKey));
 //                ps.setString(2,APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
@@ -4103,8 +4103,8 @@ public class ApiMgtDAO {
 
                 ps.executeUpdate();
                 ps.close();
-                connection.commit();
-                APIMgtDBUtil.closeAllConnections(ps,connection,null);
+                /*connection.commit();
+                APIMgtDBUtil.closeAllConnections(ps,connection,null);*/
             } catch (SQLException e) {
                 handleException("Error updating the CONSUMER KEY of the AM_APPLICATION_KEY_MAPPING table where " +
                         "APPLICATION_ID = " + application.getId() + " and KEY_TYPE = " + keyType, e);
@@ -4182,8 +4182,7 @@ public class ApiMgtDAO {
      * @param appId ID of the Application.
      * @throws APIManagementException if updating fails.
      */
-    public void updateApplicationRegistration(String state, String keyType, int appId) throws APIManagementException {
-        Connection conn = null;
+    public void updateApplicationRegistration(String state, String keyType, int appId, final Connection conn ) throws APIManagementException {
         PreparedStatement ps = null;
         ResultSet rs = null;
 
@@ -4191,7 +4190,6 @@ public class ApiMgtDAO {
                 "SET STATE = ? WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
         try {
-            conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
             
             ps = conn.prepareStatement(sqlStmt);
@@ -4201,11 +4199,11 @@ public class ApiMgtDAO {
             ps.execute();
             ps.close();
                         
-            conn.commit();
+            /*conn.commit();*/
         } catch (SQLException e) {
             handleException("Error while updating registration entry.", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
         }
 
     }
