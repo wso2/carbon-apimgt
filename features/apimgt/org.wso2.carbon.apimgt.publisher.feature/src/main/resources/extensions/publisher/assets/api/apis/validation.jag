@@ -74,8 +74,8 @@ require('/modules/publisher.js').exec(function (ctx) {
 					response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, obj);
 				} else if (action === "validateRoles") {
 					var user = username;
-					var roles = request.getParameter("roles");
-					result = apiProxy.validateRoles(roles, user);
+					var roles = request.getContent().roles;
+					result = apiProxy.validateRoles(roles);
 					if (result.error) {
 						obj = {
 							error: true,

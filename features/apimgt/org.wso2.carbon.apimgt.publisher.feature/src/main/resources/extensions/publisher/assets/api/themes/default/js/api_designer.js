@@ -837,6 +837,15 @@ function checkNested(obj) {
             $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
         });
 
+        $("#visibility").on("change", function() {
+            if(this.value == "public") {
+                $("#rolesDiv").hide();
+            }
+            else {
+                $("#rolesDiv").show();
+            }
+        });
+
         $('#import_swagger').attr('disabled','disabled');
         $('.toggleRadios input[type=radio]').click(function(){
             if (($(this).val() == 'swagger_import_file' &&
