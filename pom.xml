@@ -782,7 +782,7 @@
         <apimgt.store.feature.version>1.2.5-SNAPSHOT</apimgt.store.feature.version>
         <apimgt.synapse.feature.version>1.2.5-SNAPSHOT</apimgt.synapse.feature.version>
 
-        <identity.component.version>4.2.7-SNAPSHOT</identity.component.version>
+        <identity.component.version>4.2.7</identity.component.version>
         <identity.authentication.version>4.2.1</identity.authentication.version>
 
         <!-- Carbon kernel version -->
