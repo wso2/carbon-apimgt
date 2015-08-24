@@ -1024,8 +1024,7 @@ public final class APIUtil {
      * @return Doc content path
      */
     public static String getAPIDocContentPath(APIIdentifier apiId, String documentationName) {
-        return getAPIDocPath(apiId) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
-        		RegistryConstants.PATH_SEPARATOR + documentationName;
+        return getAPIDocPath(apiId) + RegistryConstants.PATH_SEPARATOR + documentationName;
     }
 
     /**

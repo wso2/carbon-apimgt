@@ -6,6 +6,9 @@ jagg.module("search", {
     },
     searchPaginatedAPIs:function () {
         return jagg.require(jagg.getModulesDir() + "search/apis.jag").searchPaginatedAPIs.apply(this, arguments);
+    },
+    searchPaginatedLightweightAPIsByType:function () {
+        return jagg.require(jagg.getModulesDir() + "search/apis.jag").searchPaginatedLightweightAPIsByType.apply(this, arguments);
     }
 });
 %>
