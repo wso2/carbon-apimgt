@@ -1491,6 +1491,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String tenantDomain = (String) args[1];
             int start = Integer.parseInt((String) args[2]);
             int end = Integer.parseInt((String) args[3]);
+            boolean limitAttributes = Boolean.parseBoolean((String) args[4]);
             String searchTerm;
             String searchType = null;
             Set<API> apiSet = null;
@@ -1520,7 +1521,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             searchTerm = "*"+searchTerm ;
                         }
                         }
-                        result = apiConsumer.searchPaginatedAPIs(searchTerm, searchType, tenantDomain, start, end);
+                        result = apiConsumer.searchPaginatedAPIs(searchTerm, searchType, tenantDomain, start, end, limitAttributes);
                     } else {
                         noSearchTerm = true;
                     }
@@ -1531,7 +1532,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }if (!searchValue.startsWith("*")) {
                         searchValue = "*"+searchValue ;
                     }
-                    result = apiConsumer.searchPaginatedAPIs(searchValue, "Name", tenantDomain, start, end);
+                    result = apiConsumer.searchPaginatedAPIs(searchValue, "Name", tenantDomain, start, end, limitAttributes);
                 }
 
             } catch (APIManagementException e) {

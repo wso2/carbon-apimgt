@@ -1522,7 +1522,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end)
+    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end, boolean isLazyLoad)
             throws APIManagementException {
         Map<String,Object> result = new HashMap<String,Object>();
         try {
@@ -1556,7 +1556,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 result = APIUtil.searchAPIsByURLPattern(userRegistry, searchTerm, start,end);               ;
 
             }else {
-            	result=searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end);
+            	result=searchPaginatedAPIs(userRegistry, searchTerm, searchType,start,end,isLazyLoad);
             }
 
         } catch (Exception e) {
@@ -1575,7 +1575,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	 * @throws APIManagementException
 	 */
 
-    public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end) throws APIManagementException {
+    public Map<String,Object> searchPaginatedAPIs(Registry registry, String searchTerm, String searchType,int start,int end, boolean limitAttributes) throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         List<API> apiList = new ArrayList<API>();
 
@@ -1612,7 +1612,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 maxPaginationLimit = Integer.MAX_VALUE;
             }
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
+            PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             if (artifactManager != null) {
 
                 if (searchType.equalsIgnoreCase("Provider")) {
@@ -1680,14 +1680,24 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                     if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
                         if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
-                            API resultAPI = APIUtil.getAPI(artifact, registry);
+                            API resultAPI;
+                            if (limitAttributes) {
+                                resultAPI = APIUtil.getAPI(artifact);
+                            } else {
+                                resultAPI = APIUtil.getAPI(artifact, registry);
+                            }
                             if (resultAPI != null) {
                                 apiList.add(resultAPI);
                             }
                         }
                     } else {
                         if (status.equals(APIConstants.PUBLISHED)) {
-                            API resultAPI = APIUtil.getAPI(artifact, registry);
+                            API resultAPI;
+                            if (limitAttributes) {
+                                resultAPI = APIUtil.getAPI(artifact);
+                            } else {
+                                resultAPI = APIUtil.getAPI(artifact, registry);
+                            }
                             if (resultAPI != null) {
                                 apiList.add(resultAPI);
                             }
