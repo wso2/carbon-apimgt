@@ -184,7 +184,7 @@ public class Axis2SynapseEnvironment implements SynapseEnvironment {
         String receivingSequence = (String) synCtx.getProperty(SynapseConstants.RECEIVING_SEQUENCE);
         Boolean isContinuationCall =
                 (Boolean) synCtx.getProperty(SynapseConstants.CONTINUATION_CALL);
-        // remove the receivingSequence property
+        // clear the message context properties related to endpoint in last service invocation
         Set keySet = synCtx.getPropertyKeySet();
         if (keySet != null) {
             keySet.remove(SynapseConstants.RECEIVING_SEQUENCE);

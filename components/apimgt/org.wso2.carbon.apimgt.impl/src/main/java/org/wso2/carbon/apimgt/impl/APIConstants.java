@@ -756,4 +756,25 @@ public final class APIConstants {
     public static final String API_VERSION = "apiVersion";
 
 
+    //API Constants
+    public static final String API_DATA_NAME = "name";
+    public static final String API_DATA_PROVIDER = "provider";
+    public static final String API_DATA_VERSION = "version";
+    public static final String API_DATA_DESCRIPTION = "description";
+    public static final String API_DATA_RATES = "rates";
+    public static final String API_DATA_ENDPOINT = "endpoint";
+    public static final String API_DATA_THUMB_URL= "thumbnailurl";
+    public static final String API_DATA_VISIBILITY = "visibility";
+    public static final String API_DATA_VISIBLE_ROLES = "visibleRoles";
+    public static final String DOC_DATA_NAME = "docName";
+    public static final String DOC_DATA_SUMMARY = "docSummary";
+    public static final String DOC_DATA_SOURCEURL = "docSourceURL";
+    public static final String DOC_DATA_FILEPATH = "docFilePath";
+    public static final String API_DATA_DEFAULT_THUMB = "images/api-default.png";
+    public static final String API_DATA_APIS = "apis";
+    public static final String API_DATA_TOT_LENGTH = "totalLength";
+    public static final String API_DATA_LENGTH = "length";
+    public static final String API_DATA_ISMORE = "isMore";
+
+
 }

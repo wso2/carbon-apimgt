@@ -46,6 +46,7 @@ import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.util.MessageHelper;
 
 import javax.xml.namespace.QName;
+import java.util.Set;
 
 public class BlockingMsgSender {
     public final static String DEFAULT_CLIENT_REPO = "./repository/deployment/client";
@@ -81,6 +82,13 @@ public class BlockingMsgSender {
         if (!abstractEndpoint.isLeafEndpoint()) {
             handleException("Endpoint Type not supported");
         }
+
+        // clear the message context properties related to endpoint in last service invocation
+        Set keySet = synapseInMsgCtx.getPropertyKeySet();
+        if (keySet != null) {
+            keySet.remove(EndpointDefinition.DYNAMIC_URL_VALUE);
+        }
+
         abstractEndpoint.executeEpTypeSpecificFunctions(synapseInMsgCtx);
         EndpointDefinition endpointDefinition = abstractEndpoint.getDefinition();
 
