@@ -82,7 +82,7 @@ asset.manager = function(ctx) {
                 api.apiName = options.attributes.overview_name;
                 api.name = options.attributes.overview_name;
                 api.version = options.attributes.overview_version;
-                if (options.attributes.provider == null) {
+                if (options.attributes.overview_provider == null) {
                     api.provider = ctx.username;
                 } else {
                     api.provider = options.attributes.overview_provider;
@@ -156,7 +156,7 @@ asset.manager = function(ctx) {
                 api.apiName = options.attributes.overview_name;
                 api.name = options.attributes.overview_name;
                 api.version = options.attributes.overview_version;
-                if (options.attributes.provider == null) {
+                if (options.attributes.overview_provider == null) {
                     api.provider = ctx.username;
                 } else {
                     api.provider = options.attributes.overview_provider;
