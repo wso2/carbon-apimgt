@@ -277,6 +277,7 @@ APIDesigner.prototype.display_elements = function(value,source){
 };
 
 APIDesigner.prototype.update_elements = function(resource, newValue){
+    var swaggerSchema = JSON.parse('{"type":"object"}');
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
@@ -289,6 +290,17 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
+    if (i == "in") {
+        //Add body parameter to the swagger
+        if (newValue == "body") {
+            delete obj.type;
+            obj['schema'] = swaggerSchema;
+        } else { //other parameters
+            delete obj.schema;
+            obj['type'] = "string";
+        }
+    }
+        
 };
 
 APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
@@ -552,9 +564,13 @@ APIDesigner.prototype.render_resources = function(){
 };
 
 APIDesigner.prototype.render_resource = function(container){
+    var isBodyRequired = false;
     var operation = this.query(container.attr('data-path'));
     var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
+    if (context.resource_path.match(/post/i) || context.resource_path.match(/put/i)) {
+        isBodyRequired = true;
+    }
     var output = Handlebars.partials['designer-resource-template'](context);
     container.html(output);
     container.show();
@@ -585,11 +601,20 @@ APIDesigner.prototype.render_resource = function(container){
         emptytext: '+ Empty',
         success : this.update_elements
     });
-    container.find('.param_paramType').editable({
-        emptytext: '+ Set Param Type',
-        source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", value:"formData"} ],
-        success : this.update_elements
-    });
+    if(isBodyRequired){
+        container.find('.param_paramType').editable({
+            emptytext: '+ Set Param Type',
+            source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
+            success : this.update_elements
+        });
+    } else {
+        container.find('.param_paramType').editable({
+            emptytext: '+ Set Param Type',
+            source: [{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
+            success : this.update_elements
+        });
+    }
+
     container.find('.param_type').editable({
         emptytext: '+ Empty',
         success : this.update_elements

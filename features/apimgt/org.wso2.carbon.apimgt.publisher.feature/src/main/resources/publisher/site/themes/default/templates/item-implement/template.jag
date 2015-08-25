@@ -145,7 +145,7 @@
                             </div>
                         </div>
 
-                        <% if(isDataPublishingEnabled) { %>
+                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
                         <!--Southboud statistics -->
                         <div class="control-group">
                             <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
