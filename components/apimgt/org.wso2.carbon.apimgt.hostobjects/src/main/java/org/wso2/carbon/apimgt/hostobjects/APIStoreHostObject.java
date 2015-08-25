@@ -2137,7 +2137,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
             Map<String, String> domains = new HashMap<String, String>();
 
-            domains = apiConsumer.getTenantDomainMappings(MultitenantUtils.getTenantDomain(userName));
+            domains = apiConsumer.getTenantDomainMappings(MultitenantUtils.getTenantDomain(userName), APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
             if (domains != null && domains.size() > 0) {
                 int index = 0;
                 Iterator it = domains.entrySet().iterator();
@@ -4836,7 +4836,7 @@ public class APIStoreHostObject extends ScriptableObject {
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         Map<String, String> domains = new HashMap<String, String>();
         if (args.length > 0 && args[0] != null) {
-            domains = apiConsumer.getTenantDomainMappings((String) args[0]);
+            domains = apiConsumer.getTenantDomainMappings((String) args[0], APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         }
         if(domains == null || domains.size() == 0 ){
             return null;

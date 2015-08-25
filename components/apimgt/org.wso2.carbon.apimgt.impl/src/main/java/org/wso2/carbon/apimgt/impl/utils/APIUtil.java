@@ -3996,12 +3996,12 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of gateway domains for the tenant
+     * Returns a map of gateway / store domains for the tenant
      *
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMappings(String tenantDomain) throws APIManagementException {
+    public static Map<String, String> getDomainMappings(String tenantDomain, String appType) throws APIManagementException {
         Map<String, String> domains = new HashMap<String, String>();
         String resourcePath;
         try {
@@ -4013,8 +4013,8 @@ public final class APIUtil {
                 String content = new String((byte[]) resource.getContent());
                 JSONParser parser = new JSONParser();
                 JSONObject mappings = (JSONObject) parser.parse(content);
-                if(mappings.get("gateway") != null) {
-                    mappings = (JSONObject) mappings.get("gateway");
+                if(mappings.get(appType) != null) {
+                    mappings = (JSONObject) mappings.get(appType);
                     Iterator entries = mappings.entrySet().iterator();
                     while (entries.hasNext()) {
                         Entry thisEntry = (Entry) entries.next();

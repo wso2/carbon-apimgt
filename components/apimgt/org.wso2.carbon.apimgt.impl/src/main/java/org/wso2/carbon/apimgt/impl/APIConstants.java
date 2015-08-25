@@ -70,6 +70,9 @@ public final class APIConstants {
 
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
+    //domain mapping app keys
+    public static final String API_DOMAIN_MAPPINGS_GATEWAY = "gateway";
+    public static final String API_DOMAIN_MAPPINGS_STORE = "store";
 
 
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";

@@ -4690,9 +4690,24 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
     public static String jsFunction_getAPIStoreURL(Context cx,Scriptable thisObj, Object[] args,
-                                                   Function funObj) {
+                                                   Function funObj) throws APIManagementException {
 
 	    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+
+        //if a tenant is passed return the tenant store url
+        if(args != null && args.length > 0 && args[0] != null){
+            String tenantDomain = args[0].toString();
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            Map<String, String> domains = apiProvider.getTenantDomainMappings(tenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
+            if(domains != null && domains.size() != 0 ){
+                Iterator entries = domains.entrySet().iterator();
+                while (entries.hasNext()) {
+                    Map.Entry thisEntry = (Map.Entry) entries.next();
+                    return "https://" + (String) thisEntry.getValue();
+                }
+            }
+        }
+
 	    if	(config != null)	{
 	    	return config.getFirstProperty(APIConstants.API_STORE_URL);
 	    }	else	{
