@@ -517,7 +517,14 @@ var jagg = jagg || (function () {
 
     var getSiteContext = function(){
         if(isReverseProxyEnabled()){
-            return site.reverseProxy.context
+            //If we use a custom domain mapping we will not use the context.
+            if( site.reverseProxy.tenantHeader != null && 
+                request.getHeader(site.reverseProxy.tenantHeader) != null){
+                return "";
+            }
+            else{
+                return site.reverseProxy.context
+            }
         }
 
         var proxyContext = getCarbonProxyContextPath();
@@ -732,7 +739,8 @@ var jagg = jagg || (function () {
     var getTenantDomain = function(){
         if(isReverseProxyEnabled()){
             // check if tenant header exists
-            if(site.reverseProxy.tenantHeader != undefined && site.reverseProxy.tenantHeader != null){
+            if(site.reverseProxy.tenantHeader != undefined && site.reverseProxy.tenantHeader != null
+                && request.getHeader(site.reverseProxy.tenantHeader) != null){
                 return request.getHeader(site.reverseProxy.tenantHeader);
             }
         }
