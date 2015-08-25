@@ -29,7 +29,7 @@ function getSelectedValue(oldStatus) {
         $('#deprecateOldVersionsDiv').hide();
         $('#requireResubscriptionDiv').hide();
         if(newStatus == "RETIRED")  {
-            $('#messageModal').html($('#confirmation-data').html());
+            $('#messageModal').html($('#retire-confirmation').html());
             $('#messageModal').modal();
         }
     }
@@ -149,7 +149,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 
 </div></div>
 
-<div id="confirmation-data" style="display:none;">
+<div id="retire-confirmation" style="display:none;">
     <div class="modal-header">
         <button class="close" data-dismiss="modal">x</button>
         <h3 class="modal-title"><%=i18n.localize("retireApiTitle")%></h3>
@@ -158,8 +158,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
         <p><%=i18n.localize("retireApi")%></p>
     </div>
     <div class="modal-footer">
-        <a href="#" class="btn btn-other" data-dismiss="modal">Close</a>
-        <a href="#" class="btn btn-primary">Save Changes</a>
+        <a href="#" class="btn btn-primary" data-dismiss="modal">Continue</a>
     </div>
 </div>
 
