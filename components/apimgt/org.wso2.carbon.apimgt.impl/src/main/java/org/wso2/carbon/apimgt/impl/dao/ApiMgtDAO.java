@@ -7125,7 +7125,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         ResultSet rs = null;
         int id = -1;
 
-        String deleteLCEventQuery = "DELETE FROM AM_API_LC_EVENT WHERE API_ID=? ";
+        //String deleteLCEventQuery = "DELETE FROM AM_API_LC_EVENT WHERE API_ID=? ";
         String deleteCommentQuery = "DELETE FROM AM_API_COMMENTS WHERE API_ID=? ";
         String deleteRatingsQuery = "DELETE FROM AM_API_RATINGS WHERE API_ID=? ";
         String deleteSubscriptionQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID=?";
@@ -7153,9 +7153,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt.setInt(1, id);
             prepStmt.execute();
 
-            prepStmt = connection.prepareStatement(deleteLCEventQuery);
-            prepStmt.setInt(1, id);
-            prepStmt.execute();
             //Delete all external APIStore details associated with a given API
             prepStmt = connection.prepareStatement(deleteExternalAPIStoresQuery);
             prepStmt.setInt(1, id);

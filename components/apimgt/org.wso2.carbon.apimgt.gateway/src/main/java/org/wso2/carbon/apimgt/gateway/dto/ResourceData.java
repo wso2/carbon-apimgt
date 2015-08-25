@@ -105,6 +105,9 @@ private String[] methods = new String[4];
     }
 
     public void setInSeqXml(String inSeqXml) {
+        if(inSeqXml == null){
+            return;
+        }
         this.inSeqXml = inSeqXml.trim().replaceAll("&gt", ">").replaceAll("&lt", "<")
                 .replaceAll("\n", "").replaceAll("\t", " ");
     }
