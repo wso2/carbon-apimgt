@@ -707,6 +707,7 @@ public final class APIConstants {
         POST,
         PUT,
         DELETE,
+        HEAD,
         OPTIONS
     }
 

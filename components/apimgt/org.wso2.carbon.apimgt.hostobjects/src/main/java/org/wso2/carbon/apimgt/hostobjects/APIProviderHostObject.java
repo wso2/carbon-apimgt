@@ -1021,6 +1021,15 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
         String contextVal = (String) apiData.get("context", apiData);
+
+        if (contextVal.isEmpty()) {
+            handleException("Context not defined for API");
+        }
+
+        if (contextVal.endsWith("/")) {
+            handleException("Context cannot end with '/' character");
+        }
+
         APIProvider apiProvider = getAPIProvider(thisObj);
         //check for context exists
         if (apiProvider.isDuplicateContextTemplate(contextVal)) {
@@ -1134,7 +1143,14 @@ public class APIProviderHostObject extends ScriptableObject {
                         String uriTempVal = (String) resource.get("url_pattern");
                         uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
                         template.setUriTemplate(uriTempVal);
-                        template.setHTTPVerb((String) mapEntry.getKey());
+                        String verb = (String) mapEntry.getKey();
+                        if (isHTTPMethodValid(verb)) {
+                            template.setHTTPVerb(verb);
+                        }
+                        else {
+                            handleException("Specified HTTP verb " + verb + " is invalid");
+                        }
+
                         String authType = (String) mapEntryValue.get("auth_type");
                         if (authType.equals("Application & Application User")) {
                             authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -1180,7 +1196,14 @@ public class APIProviderHostObject extends ScriptableObject {
                                         String uriTempVal = uriTemp.startsWith("/") ? uriTemp : ("/" + uriTemp);
                                         template.setUriTemplate(uriTempVal);
                                         String throttlingTier = throttlingTierArray[j];
-                                        template.setHTTPVerb(uriMethodArray[k]);
+
+                                        if (isHTTPMethodValid(uriMethodArray[k])) {
+                                            template.setHTTPVerb(uriMethodArray[k]);
+                                        }
+                                        else {
+                                            handleException("Specified HTTP verb " + uriMethodArray[k] + " is invalid");
+                                        }
+
                                         String authType = authTypeArray[j];
                                         if (authType.equals("Application & Application User")) {
                                             authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -1245,7 +1268,19 @@ public class APIProviderHostObject extends ScriptableObject {
         String[] tierNames;
         if (tier != null) {
             tierNames = tier.split(",");
+            Set<Tier> definedTiers = apiProvider.getTiers();
             for (String tierName : tierNames) {
+                boolean isTierValid =  false;
+                for (Tier definedTier : definedTiers) {
+                    if (tierName.equals(definedTier.getName())) {
+                        isTierValid = true;
+                        break;
+                    }
+                }
+
+                if (!isTierValid) {
+                    handleException("Specified tier " + tierName + " does not exist");
+                }
                 availableTier.add(new Tier(tierName));
             }
             api.addAvailableTiers(availableTier);
@@ -1384,6 +1419,18 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return success;
 
+    }
+
+    private static boolean isHTTPMethodValid(String httpMethod) {
+        boolean isValid = false;
+
+        for (APIConstants.SupportedHTTPVerbs verb : APIConstants.SupportedHTTPVerbs.values()) {
+            if (verb.name().equalsIgnoreCase(httpMethod)) {
+                isValid = true;
+            }
+        }
+
+        return isValid;
     }
 
     private static String checkAndSetVersionParam(String context) {
