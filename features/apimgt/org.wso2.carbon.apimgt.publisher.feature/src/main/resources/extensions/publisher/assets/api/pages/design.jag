@@ -56,6 +56,9 @@ require('/modules/publisher.js').exec(function(ctx) {
 		var apiPublisher =  require('apipublisher').provider;
 		var apiProxy = apiPublisher.instance(user);
 		var api = apiProxy.getAPI(assets.attributes.overview_provider, assets.attributes.overview_name, assets.attributes.overview_version).api;
+		if(api.thumb=="null"){
+        api.thumb=null;
+        }
 		output.api = api;
 		output.wsdl = api.wsdl;
 		api.id = options.id;
