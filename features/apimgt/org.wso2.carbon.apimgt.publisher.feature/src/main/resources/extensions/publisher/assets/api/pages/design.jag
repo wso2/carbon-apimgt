@@ -64,7 +64,7 @@ require('/modules/publisher.js').exec(function(ctx) {
 		if(api.visibility == 'public') {
 			public_visibility = true;
 		}
-		if(api.visibility == 'private') {
+		if(api.visibility == 'restricted') {
 			private_visibility = true;
 		}
 		output.id=api.id;
