@@ -154,16 +154,22 @@ $(function () {
     /*
      * This function triggers the api function for removeApplication
      */
-    removeApplication = function (appName, userName, appId) {
+    removeApplication = function (appName, userName, appId, apiCount) {
         setMetadataForDelRow(appName, appId);
-        BootstrapDialog.show({
-            type: BootstrapDialog.TYPE_WARNING,
-            title: 'Warning!',
+        var apiCountMsg = '';
+        if(apiCount > 0){
+            apiCountMsg = 'This will cancel all the existing subscriptions and keys associated with the application. Currently '+apiCount +' APIs associated with the application';
+        }
+        BootstrapDialog.confirm({
+            type: BootstrapDialog.TYPE_PRIMARY,
+            title: 'Confirm Delete',
             message: '<div><i class="fw fw-warning"></i>Are you sure you want to remove the application ' + appName +
-            '? This will cancel all the existing subscriptions and keys associated with the application.</div>',
-            buttons: [{
-                label: 'Yes',
-                action: function (dialogItself) {
+            '? '+ apiCountMsg+'</div>',
+            btnCancelLabel:'No'  ,
+            btnOKLabel: 'Yes',
+            callback: function(result) {
+                // result will be true if button was click, while it will be false if users close the dialog directly.
+                if(result) {
                     var removeApplicationData = {};
                     removeApplicationData.appName = appName;
                     removeApplicationData.userName = userName;
@@ -190,14 +196,12 @@ $(function () {
                                                  });
                         }
                     });
-                    dialogItself.close();
+                    
+                }else {
+                    
                 }
-            }, {
-                label: 'No',
-                action: function (dialogItself) {
-                    dialogItself.close();
-                }
-            }]
+            }
+           
 
         });
     };
