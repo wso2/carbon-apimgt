@@ -9,7 +9,7 @@ $(document).ready(function () {
 
                       // $('#modal-redirect').modal('show');
                        if(result.result != null && result.result.error != false){
-                      console.log(result);
+                      
                     
                           BootstrapDialog.show({
                               title: 'Warning!',
