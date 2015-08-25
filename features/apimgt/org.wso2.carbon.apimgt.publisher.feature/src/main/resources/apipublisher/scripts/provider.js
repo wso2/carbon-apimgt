@@ -473,8 +473,16 @@ var provider = {};
      */
     APIProviderProxy.prototype.deleteAPI = function (apiProvider, apiName, apiVersion) {
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
-        var success, log = new Log();
+        var success, subscriberCount, log = new Log();
         try {
+            subscriberCount = this.impl.getSubscriberCount(identifier);
+            if(subscriberCount > 0){
+                log.error("Error while deleting the API : " + apiName + " : " + 'Subscriptions exists');
+                return {
+                    error:'Cannot remove the API. Active Subscriptions Exist'
+                    
+                };
+            }
             success = result = this.impl.deleteAPI(identifier);
             if (log.isDebugEnabled()) {
                 log.debug("Error while deleting the API : " + apiName + " : " + exists);

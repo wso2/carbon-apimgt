@@ -4,9 +4,25 @@ $(document).ready(function () {
         $.ajax({
                    url: getDeleteUrl(id, type),
                    type: 'POST',
-                   data: {_method: 'delete'},
+                   data: {method: 'delete'},
                    success: function (result) {
-                       $('#modal-redirect').modal('show');
+
+                      // $('#modal-redirect').modal('show');
+                       if(result.result != null && result.result.error != false){
+                      console.log(result);
+                    
+                          BootstrapDialog.show({
+                              title: 'Warning!',
+                              message: result.result.data.error,
+                              type: BootstrapDialog.TYPE_DANGER,
+                              buttons: [{
+                                  label: 'Close',
+                                  action: function(dialogItself){
+                                      dialogItself.close();
+                                  }
+                              }]
+                          });
+                        }
                        setTimeout(function () {
                            window.location.reload();
                        }, 2000);
