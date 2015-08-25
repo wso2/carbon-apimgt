@@ -31,6 +31,7 @@ require('/modules/store.js').exec(function (ctx) {
 	var server = require('store').server;
 	var user = server.current(ctx.session);
 	var username='_wso2.am.anon_';
+       var tenantId=-1234;
 	if (user) {
 		am = asset.createUserAssetManager(ctx.session, type);
 		var tenantUser = carbon.server.tenantUser(user.username);
