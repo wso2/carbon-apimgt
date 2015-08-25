@@ -157,11 +157,11 @@
             <select class="select required" id="visibility" name="visibility">
                 {{#if api}}
                     <option value="public"  {{#if public_visibility}} selected="selected" {{/if}}>Public</option>
-                    <option value="private" {{#if private_visibility}} selected="selected" {{/if}}>Restricted by Roles</option>
+                    <option value="restricted" {{#if private_visibility}} selected="selected" {{/if}}>Restricted by Roles</option>
 
                 {{else}}
                     <option value="public">Public</option>
-                    <option value="private">Restricted by Roles</option>
+                    <option value="restricted">Restricted by Roles</option>
                 {{/if}}
             </select>
 
