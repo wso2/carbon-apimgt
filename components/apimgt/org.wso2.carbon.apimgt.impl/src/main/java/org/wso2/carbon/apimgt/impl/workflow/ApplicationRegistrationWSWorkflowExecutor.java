@@ -168,7 +168,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
                         "process";
                 log.error(msg, e);
                 throw new WorkflowException(msg, e);
-            }catch (SQLException e) {
+            }catch (Exception e) {
             	APIMgtDBUtil.transactionRollback(conn);
             	log.error("occured when updating the status of the Application creation process", e);
                 throw new WorkflowException("occured when updating the status of the Application creation process", e);

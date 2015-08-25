@@ -2423,8 +2423,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                 if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(status)) {
                     apiMgtDAO.populateAppRegistrationWorkflowDTO(registrationWorkflowDTO);
+                    Connection conn = null;
                     try {
-                        AbstractApplicationRegistrationWorkflowExecutor.dogenerateKeysForApplication(registrationWorkflowDTO);
+                    	conn = APIMgtDBUtil.getConnection();
+                        AbstractApplicationRegistrationWorkflowExecutor.dogenerateKeysForApplication(registrationWorkflowDTO, conn);
+                        APIMgtDBUtil.transactionCommit(conn);
                         AccessTokenInfo tokenInfo = registrationWorkflowDTO.getAccessTokenInfo();
                         OAuthApplicationInfo oauthApp = registrationWorkflowDTO.getApplicationInfo();
                         keyDetails = new HashMap<String, String>();
@@ -2440,7 +2443,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                         keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
                         keyDetails.put("appDetails", oauthApp.getJsonString());
                     } catch (APIManagementException e) {
+                    	APIMgtDBUtil.transactionRollback(conn);
                         APIUtil.handleException("Error occurred while Creating Keys.", e);
+                    } catch (Exception e) {
+                    	APIMgtDBUtil.transactionRollback(conn);
+                    	APIUtil.handleException("Error occurred while Creating Keys.", e);
+					}finally{
+                    	APIMgtDBUtil.closeConnection(conn);
                     }
                 }
 
