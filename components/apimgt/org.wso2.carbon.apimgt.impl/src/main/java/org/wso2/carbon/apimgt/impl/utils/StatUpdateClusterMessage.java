@@ -31,13 +31,19 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
  * This class provides the definition of the cluster message which is initiated from the
  * web service call from publisher node
  */
-public class StatUpdateClusterMessage extends ClusteringMessage  {
+public class StatUpdateClusterMessage extends ClusteringMessage {
 
     private static final Log log = LogFactory.getLog(StatUpdateClusterMessage.class);
     private Boolean statUpdateStatus;
+    private String receiverUrl;
+    private String user;
+    private String password;
 
-    public StatUpdateClusterMessage(Boolean statUpdateStatus) {
+    public StatUpdateClusterMessage(Boolean statUpdateStatus, String receiverUrl, String user, String password) {
         this.statUpdateStatus = statUpdateStatus;
+        this.receiverUrl = receiverUrl;
+        this.user = user;
+        this.password = password;
     }
 
     @Override
@@ -51,7 +57,17 @@ public class StatUpdateClusterMessage extends ClusteringMessage  {
         //update the service variable, a boolean variable representing the stat data publishing in the node
         APIManagerAnalyticsConfiguration instanceOfAPIAnalytics = APIManagerAnalyticsConfiguration.getInstance();
         instanceOfAPIAnalytics.setAnalyticsEnabled(statUpdateStatus);
-        if(log.isDebugEnabled()) {
+
+        // Only change Data publishing information only if they are set
+        if (receiverUrl != null && !receiverUrl.isEmpty() &&
+            user != null && !user.isEmpty() &&
+            password != null && !password.isEmpty()) {
+            instanceOfAPIAnalytics.setBamServerUrlGroups(receiverUrl);
+            instanceOfAPIAnalytics.setBamServerUser(user);
+            instanceOfAPIAnalytics.setBamServerPassword(password);
+        }
+
+        if (log.isDebugEnabled()) {
             log.debug("Updated Stat publishing status to : " + statUpdateStatus);
         }
 

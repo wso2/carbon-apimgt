@@ -2452,7 +2452,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (clusteringAgent != null) {
                 //changing stat publishing status at other nodes via a cluster message
                 try {
-                    clusteringAgent.sendMessage(new StatUpdateClusterMessage(updatedStatus), true);
+                    clusteringAgent.sendMessage(new StatUpdateClusterMessage(updatedStatus,receiverUrl,user,password), true);
                 } catch (ClusteringFault clusteringFault) {
                     //error is only logged because initially gateway has modified the status
                     log.error("Failed to send cluster message to Publisher/Store domain " +

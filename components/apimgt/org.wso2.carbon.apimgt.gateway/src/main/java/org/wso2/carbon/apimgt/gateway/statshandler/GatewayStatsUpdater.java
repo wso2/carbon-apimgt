@@ -110,7 +110,7 @@ public class GatewayStatsUpdater extends AbstractAdmin {
             if (log.isDebugEnabled()) {
                 log.debug("Sending cluster message to Gateway domain to update stats publishing status.");
             }
-            clusteringAgent.sendMessage(new StatUpdateClusterMessage(statUpdateStatus), true);
+            clusteringAgent.sendMessage(new StatUpdateClusterMessage(statUpdateStatus, receiverUrl, user, password), true);
         }
     }
 }
