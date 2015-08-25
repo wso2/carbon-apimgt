@@ -1272,12 +1272,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         APIUtil.setResourcePermissions(apiId.getProviderName(),
                                        artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY), rolesSet, artifactPath);
-        //Here we have to set permission specifically to image icon we added
-        String iconPath = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
-        if (iconPath != null) {
-            iconPath=iconPath.substring(iconPath.lastIndexOf("/apimgt"));
-            APIUtil.copyResourcePermissions(apiId.getProviderName(),thumbUrl,iconPath);
-        }
+
+      /* Commented below image permission setting code block as we are now using ES specific asset image saving*/
+      //Here we have to set permission specifically to image icon we added
+      //  String iconPath = artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
+      //  if (iconPath != null) {
+      //      iconPath=iconPath.substring(iconPath.lastIndexOf("/apimgt"));
+      //      APIUtil.copyResourcePermissions(apiId.getProviderName(),thumbUrl,iconPath);
+      //  }
         // Retain the tags
         org.wso2.carbon.registry.core.Tag[] tags = registry.getTags(apiSourcePath);
         if (tags != null) {
