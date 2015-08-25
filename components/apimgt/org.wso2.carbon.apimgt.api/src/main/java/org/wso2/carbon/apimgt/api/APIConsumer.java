@@ -401,7 +401,7 @@ public interface APIConsumer extends APIManager {
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
     public Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
-    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end) throws APIManagementException;
+    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
     public int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
     /**
