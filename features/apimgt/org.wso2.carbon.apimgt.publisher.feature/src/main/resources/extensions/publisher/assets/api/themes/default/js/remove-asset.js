@@ -18,14 +18,22 @@ $(document).ready(function () {
                               buttons: [{
                                   label: 'Close',
                                   action: function(dialogItself){
+                                      //dialogItself.close();
+                                      setTimeout(function () {
+                                           window.location.reload();
+                                       }, 2000);
                                       dialogItself.close();
                                   }
                               }]
                           });
+                        }else{
+                              setTimeout(function () {
+                                   window.location.reload();
+                               }, 2000);
                         }
-                       setTimeout(function () {
+                       /*setTimeout(function () {
                            window.location.reload();
-                       }, 2000);
+                       }, 2000);*/
                    },
                    error: function (result) {
                        //alert("Unable to delete the API.");
