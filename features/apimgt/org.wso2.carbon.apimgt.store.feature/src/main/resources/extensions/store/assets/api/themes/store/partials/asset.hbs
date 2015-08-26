@@ -69,6 +69,7 @@
             <!--</table>-->
         <!--</div>-->
     <!--</div>-->
+    {{#if user}}
     {{#if showSubscribe}}
 
         <div class='col-lg-12 border-top panel appStyleFix'>
@@ -110,6 +111,7 @@
             </div>
         </div>
     </div>
+    {{/if}}
     {{/if}}
     <input type="hidden" id="apiname" value="{{api.name}}">
     <input type="hidden" id="version" value="{{api.version}}">
