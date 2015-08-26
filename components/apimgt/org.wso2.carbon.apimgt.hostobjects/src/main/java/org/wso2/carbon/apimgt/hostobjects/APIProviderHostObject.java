@@ -2238,7 +2238,15 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-            API api = apiProvider.getAPI(apiId);
+
+            API api = null;
+            try {
+                api = apiProvider.getAPI(apiId);
+            } catch (APIManagementException e) {
+                handleException("Cannot find the requested API- " + apiName +
+                        "-" + version);
+            }
+
             if (api != null) {
                 Set<URITemplate> uriTemplates = api.getUriTemplates();
 
@@ -2403,9 +2411,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 handleException("Cannot find the requested API- " + apiName +
                                 "-" + version);
             }
-        } catch (Exception e) {
-            handleException("Error occurred while getting API information of the api- " + apiName +
-                            "-" + version, e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
