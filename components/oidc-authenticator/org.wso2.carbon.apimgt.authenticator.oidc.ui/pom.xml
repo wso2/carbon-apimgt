@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>1.2.5-SNAPSHOT</version>
+        <version>1.2.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -27,7 +27,7 @@
     <artifactId>org.wso2.carbon.apimgt.authenticator.oidc.ui</artifactId>
     <packaging>bundle</packaging>
     <name>OIDC SSO Authenticator - UI bundle</name>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>1.2.5</version>
     <description>OpenID Connect Based SSO Authenticator - UI bundle</description>
     <url>http://wso2.org</url>
 

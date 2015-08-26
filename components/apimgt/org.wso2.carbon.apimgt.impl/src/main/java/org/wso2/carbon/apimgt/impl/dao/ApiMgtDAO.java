@@ -9296,6 +9296,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, APIUtil.encryptToken(consumerKey));
+
             resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
