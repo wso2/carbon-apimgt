@@ -9278,6 +9278,44 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     }
 
     /**
+     * @param consumerKey
+     * @return
+     */
+    public static boolean isMappingExistsforConsumerKey(String consumerKey)
+            throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT APPLICATION_ID " +
+                              " FROM AM_APPLICATION_KEY_MAPPING " +
+                              " WHERE CONSUMER_KEY   = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, consumerKey);
+            resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                String applicationId = resultSet.getString("APPLICATION_ID");
+                if (applicationId != null && !applicationId.isEmpty()) {
+                    return true;
+                }
+                return false;
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get Application ID by consumerKey "
+                    , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return false;
+    }
+
+    /**
      * @param applicationId
      * @param keyType
      * @return
