@@ -641,6 +641,7 @@ public final class APIUtil {
             if (apiId == -1) {
                 return null;
             }
+            api.setUuid(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
@@ -5198,7 +5199,23 @@ public final class APIUtil {
 
         return result;
     }
-	public static String isURLValid(String type, String urlVal) throws APIManagementException {
+
+    public JSONObject stringifyPrototypedAPIResult(Map<String, Object> apiResult) throws IOException {
+        JSONObject result = new JSONObject();
+        int totalLength = (Integer) apiResult.get("totalLength");
+        ArrayList<API> prototypedAPIList = new ArrayList<API>((TreeSet) apiResult.get("apis"));
+        Boolean isMore = (Boolean) apiResult.get("isMore");
+
+        Gson gson = new Gson();
+
+        result.put("totalLength", totalLength);
+        result.put("prototypedAPIList", gson.toJson(prototypedAPIList));
+        result.put("isMore", isMore);
+
+        return result;
+    }
+
+    public static String isURLValid(String type, String urlVal) throws APIManagementException {
 
 		String response = "";
 
@@ -5301,10 +5318,41 @@ public final class APIUtil {
 	return file;
     }
 
-	public static String getLifeCycleTransitionAction(String currentStatus, String nextStatu) {
-		//TODO Implement
-		return "Publish";
-	}
+    public static String getLifeCycleTransitionAction(String currentStatus, String nextStatus) {
+        String action = null;
+        if ("Created".equalsIgnoreCase(currentStatus)) {
+            if ("Prototyped".equalsIgnoreCase(nextStatus)) {
+                action = "Promote";
+            } else if ("Published".equalsIgnoreCase(nextStatus)) {
+                action = "Publish";
+            }
+        } else if ("Prototyped".equalsIgnoreCase(currentStatus)) {
+            if ("Published".equalsIgnoreCase(nextStatus)) {
+                action = "Publish";
+            } else if ("Created".equalsIgnoreCase(nextStatus)) {
+                action = "Demote";
+            }
+        } else if ("Published".equalsIgnoreCase(currentStatus)) {
+            if ("Blocked".equalsIgnoreCase(nextStatus)) {
+                action = "Block";
+            } else if ("Prototyped".equalsIgnoreCase(nextStatus)) {
+                action = "Demote";
+            } else if ("Deprecated".equalsIgnoreCase(nextStatus)) {
+                action = "Deprecate";
+            }
+        } else if ("Blocked".equalsIgnoreCase(currentStatus)) {
+            if ("Deprecated".equalsIgnoreCase(nextStatus)) {
+                action = "Deprecate";
+            } else if ("Published".equalsIgnoreCase(nextStatus)) {
+                action = "Re-Publish";
+            }
+        } else if ("Deprecated".equalsIgnoreCase(currentStatus)) {
+            if ("Retired".equalsIgnoreCase(nextStatus)) {
+                action = "Retire";
+            }
+        }
+        return action;
+    }
 
     public JSONObject getEnvironmentsOfAPI(API api) {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
