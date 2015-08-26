@@ -101,6 +101,8 @@ public class API implements Serializable{
 	//Storing image properties
 	private FileData image;
 
+    private String uuid;
+
     public Set<String> getEnvironments() {
         return environments;
     }
@@ -645,4 +647,12 @@ public class API implements Serializable{
 	public void setImage(FileData image) {
 		this.image = image;
 	}
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 }
