@@ -462,7 +462,23 @@ var provider = {};
         return this.impl.updateSubscription(identifier, status, parseInt(appId));
     };
 
-   
+   APIProviderProxy.prototype.getAPISubscriptionCount = function (apiProvider, apiName, apiVersion) {
+        var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(apiProvider), apiName, apiVersion);
+        var subscriberCount, log = new Log();
+        try {
+            subscriberCount = this.impl.getSubscriberCount(identifier);
+            return {
+                error:false,
+                count:subscriberCount
+            };
+        } catch (e) {
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+
+    };
 
     /**
      * Delete a API

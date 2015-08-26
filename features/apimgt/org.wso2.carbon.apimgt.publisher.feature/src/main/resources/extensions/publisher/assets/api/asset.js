@@ -419,7 +419,7 @@ asset.server = function (ctx) {
                    },{
                        url: 'addDoc',
                        path: 'document_add.jag'
-                   }]
+                   } ]
         }
     }
 };

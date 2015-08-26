@@ -58,6 +58,30 @@ require('/modules/publisher.js').exec(function (ctx) {
             }
             break;
 
+        case 'GET':// POST endpoints
+            uriOptions = uriMatcher.match(API_SUBSCRIPTIONS_URL);
+            var apiPublisher = require('apipublisher').provider;
+            var apiProxy = apiPublisher.instance(user);
+
+            var apiData, data = {};
+            var action = request.getParameter('action', 'UTF-8');
+            var name = request.getParameter('name', 'UTF-8');
+            var version = request.getParameter('version', 'UTF-8');
+            var provider = request.getParameter('provider', 'UTF-8');
+            if (request.getParameter('provider') == null) {
+                provider = username;
+            } else {
+                provider = request.getParameter('provider', 'UTF-8')
+            }
+
+            if(action == "getSubscriptionCount"){
+                    data = apiProxy.getAPISubscriptionCount(provider, name, version);
+                    response = responseProcessor.buildSuccessResponse(response,
+                        constants.STATUS_CODES.OK, data);
+                    log.info(data);
+            }
+            break;
+
         default://other un-implemented endpoints
             response = responseProcessor.buildErrorResponse(response, constants.STATUS_CODES.NOT_IMPLEMENTED,
                     'The endpoint that you have requested is not implemented for the ' + httpMethod +
