@@ -8,6 +8,9 @@
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
     var apiStatus = api.status;
+
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
@@ -407,7 +410,7 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
         });
 
         $('#goToStore-btn').click(function(){
-            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>', '_blank');
+            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
             location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
         });
 
