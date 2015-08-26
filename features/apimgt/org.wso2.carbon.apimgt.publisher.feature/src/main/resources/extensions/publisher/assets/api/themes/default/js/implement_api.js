@@ -203,9 +203,9 @@ $(function() {
              if (!responseText.error) {
                 var designer = APIMangerAPI.APIDesigner();
                 designer.saved_api = {};
-                designer.saved_api.name = responseText.data.apiName;
-                designer.saved_api.version = responseText.data.version;
-                designer.saved_api.provider = responseText.data.provider;
+                designer.saved_api.name = responseText.attributes.name;
+                designer.saved_api.version = responseText.attributes.version;
+                designer.saved_api.provider = responseText.attributes.provider;
                // $('#'+thisID).buttonLoader('stop');
                 $( "body" ).trigger( "prototype_saved" );                             
              } else {
