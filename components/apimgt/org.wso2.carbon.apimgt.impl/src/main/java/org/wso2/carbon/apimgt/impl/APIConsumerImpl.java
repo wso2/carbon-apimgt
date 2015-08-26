@@ -1773,37 +1773,41 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, clientId, callBackURL,
                                                                                  "default",
-                                                                                  jsonString);
+                                                                                 jsonString);
 
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+
+        // Checking if clientId is mapped with another application.
+        if (apiMgtDAO.isMappingExistsforConsumerKey(clientId)) {
+            String message = "Consumer Key " + clientId + " is used for another Application.";
+            log.error(message);
+            throw new APIManagementException(message);
+        }
+        log.debug("Client ID not mapped previously with another application.");
+
         //createApplication on oAuthorization server.
         OAuthApplicationInfo oAuthApplication = keyManager.mapOAuthApplication(oauthAppRequest);
 
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
 
-        // Checking if a domain mapping is already there for this consumer Key.
-        String domain = apiMgtDAO.getAuthorizedDomainsByConsumerKey(clientId);
+        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
-        if (domain == null) {
-            apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
-        }
-
-        AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
+        AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
 
-        if(tokenInfo != null){
+        if (tokenInfo != null) {
             keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
             keyDetails.put("accessToken", tokenInfo.getAccessToken());
         }
 
-        if(oAuthApplication != null){
+        if (oAuthApplication != null) {
             keyDetails.put("consumerKey", oAuthApplication.getClientId());
             keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
-            keyDetails.put("appDetails",oAuthApplication.getJsonString());
+            keyDetails.put("appDetails", oAuthApplication.getJsonString());
         }
 
         return keyDetails;
