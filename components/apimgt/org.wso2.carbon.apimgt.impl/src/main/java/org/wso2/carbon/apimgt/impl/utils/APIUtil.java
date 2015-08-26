@@ -5274,9 +5274,9 @@ public final class APIUtil {
 	    doc.setOtherTypeName(otherTypeName);
 	}
 
-	if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.URL.toString())) {
+	if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
 	    doc.setSourceType(Documentation.DocumentSourceType.URL);
-	} else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
+	} else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
 	    doc.setSourceType(Documentation.DocumentSourceType.FILE);
 	} else {
 	    doc.setSourceType(Documentation.DocumentSourceType.INLINE);
@@ -5285,9 +5285,9 @@ public final class APIUtil {
 	if (visibility == null) {
 	    visibility = APIConstants.DOC_API_BASED_VISIBILITY;
 	}
-	if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
+	if (Documentation.DocumentVisibility.API_LEVEL.toString().equalsIgnoreCase(visibility)) {
 	    doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-	} else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
+	} else if (Documentation.DocumentVisibility.PRIVATE.toString().equalsIgnoreCase(visibility)) {
 	    doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
 	} else {
 	    doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
