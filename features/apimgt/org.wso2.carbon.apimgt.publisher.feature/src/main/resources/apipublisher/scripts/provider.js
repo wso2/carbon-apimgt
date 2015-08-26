@@ -587,6 +587,8 @@ var provider = {};
             var tags;
             if(api.getTagSetAsString()==''){
                 tags=null;
+            }else{
+                tags=api.getTagSetAsString();
             }
 
             apiOb = {
