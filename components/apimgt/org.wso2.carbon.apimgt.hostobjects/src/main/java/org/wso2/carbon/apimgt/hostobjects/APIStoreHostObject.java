@@ -1491,7 +1491,12 @@ public class APIStoreHostObject extends ScriptableObject {
             String tenantDomain = (String) args[1];
             int start = Integer.parseInt((String) args[2]);
             int end = Integer.parseInt((String) args[3]);
-            boolean limitAttributes = Boolean.parseBoolean((String) args[4]);
+            boolean limitAttributes = false;
+
+            if (args.length == 5) {
+                limitAttributes = Boolean.parseBoolean((String) args[4]);
+            }
+
             String searchTerm;
             String searchType = null;
             Set<API> apiSet = null;
