@@ -9290,7 +9290,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT AM_APPLICATION_ID " +
+            String sqlQuery = "SELECT APPLICATION_ID " +
                               " FROM AM_APPLICATION_KEY_MAPPING " +
                               " WHERE CONSUMER_KEY   = ?";
 
@@ -9299,7 +9299,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
-                String applicationId = resultSet.getString("AM_APPLICATION_ID");
+                String applicationId = resultSet.getString("APPLICATION_ID");
                 if (applicationId != null && !applicationId.isEmpty()) {
                     return true;
                 }
