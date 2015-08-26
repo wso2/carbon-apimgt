@@ -20,7 +20,7 @@
     <parent>
         <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
         <groupId>org.wso2.carbon</groupId>
-        <version>1.2.5-SNAPSHOT</version>
+        <version>1.2.5</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -28,7 +28,7 @@
 
     <artifactId>org.wso2.carbon.apimgt.usage.analyzer</artifactId>
     <name>WSO2 Carbon - API Management Usage Analyzer</name>
-    <version>1.2.5-SNAPSHOT</version>
+    <version>1.2.5</version>
     <packaging>bundle</packaging>
 
     <dependencies>

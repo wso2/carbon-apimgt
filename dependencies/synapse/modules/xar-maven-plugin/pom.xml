@@ -23,7 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.synapse</groupId>
     <artifactId>synapse-xar-maven-plugin</artifactId>
-    <version>2.1.2-wso2v8-SNAPSHOT</version>
+    <version>2.1.2-wso2v8</version>
     <packaging>maven-plugin</packaging>
     <name>Apache Synapse - XAR Maven Plugin</name>
     <description>Maven 2 plugin to create Synapse extension archives</description>
