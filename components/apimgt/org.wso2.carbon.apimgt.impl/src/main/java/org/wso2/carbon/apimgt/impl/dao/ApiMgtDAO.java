@@ -9295,7 +9295,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                               " WHERE CONSUMER_KEY   = ?";
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, consumerKey);
+            ps.setString(1, APIUtil.encryptToken(consumerKey));
+
             resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
@@ -9308,6 +9309,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         } catch (SQLException e) {
             handleException("Failed to get Application ID by consumerKey "
+                    , e);
+        } catch (CryptoException e) {
+            log.error("Failed to encrypt the consumer key " + consumerKey, e);
+            handleException("Failed to encrypt the consumer key " + consumerKey
                     , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
