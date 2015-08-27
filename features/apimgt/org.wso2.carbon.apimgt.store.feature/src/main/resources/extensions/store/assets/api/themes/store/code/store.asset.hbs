@@ -1,0 +1,16 @@
+<script type="text/javascript">
+    if (store.asset) {
+        store.asset = {};
+    }
+    store.asset = {
+        type: "{{rxt.shortName}}",
+        paging : {{#if paging}}{{json paging}}{{else}}null{{/if}},
+        count : 0
+    };
+
+    if (store.security) {
+        store.security = {};
+    }
+    store.security = {{#if security}}{{json security}}{{else}}null{{/if}};
+    store.security.details ={};
+</script>
