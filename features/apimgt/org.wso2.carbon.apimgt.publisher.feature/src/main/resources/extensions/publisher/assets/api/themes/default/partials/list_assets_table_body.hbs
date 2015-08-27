@@ -16,7 +16,7 @@
 {{#each .}}
     <div class="ctrl-wr-asset">
         <div class="itm-ast">
-            {{#if thumbnail }}
+            {{#if this.thumbnail }}
             <a class="ast-img" href='{{url ""}}/assets/{{type}}/details/{{this.id}}'><img src='{{url ""}}/storage/{{type}}/{{id}}/{{this.thumbnail}}' /></a>
             {{else}}
 	            <a class="ast-img" href='{{url ""}}/assets/{{type}}/details/{{this.id}}'>
@@ -24,8 +24,8 @@
 	            </a>
             {{/if}}
 	        <div id="delete-btn-div">
-		        <button title="Delete API" type="button" class="close btn-api-del" onclick="removeAPI('{{this.id}}','{{type}}',
-                 '{{attributes.overview_name}}', '{{attributes.overview_provider}}', '{{attributes.overview_version}}');return false;">×</button>
+		        <button title="Delete API" type="button" class="close btn-api-del" onclick="removeAPI('{{this.id}}','{{type}}');
+                        return false;">×</button>
 	        </div>
             <div class="ast-desc">
                 <a href='{{url ""}}/assets/{{type}}/details/{{this.id}}'>
@@ -40,3 +40,7 @@
         </div><br class="c-both" />
     </div>
 {{/each}}
+
+
+
+
