@@ -136,6 +136,9 @@ asset.server = function(ctx) {
                         url: 'forum',
                         path: 'forum.jag'
                     }, {
+                        url: 'document_download',
+                        path: 'document_download.jag'
+                    }, {
                         title: 'Statistics',
                         url: 'statistics',
                         path: 'statistics.jag'
