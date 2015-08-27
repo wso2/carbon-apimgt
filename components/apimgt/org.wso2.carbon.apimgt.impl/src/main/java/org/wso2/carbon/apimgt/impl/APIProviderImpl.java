@@ -896,7 +896,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
                 updateApiArtifact(api, false,false);
-                //apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, status, userId);
+                apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, status, userId);
 
                 if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){ //published default version need to be changed
                     apiMgtDAO.updateDefaultAPIPublishedVersion(api.getId(), currentStatus, status);
