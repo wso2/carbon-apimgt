@@ -29,7 +29,7 @@
 									{{/if}}
 								{{else}}
 									{{#if this.filePath}}
-										<p><a href="#" onclick="downloadDocument('{{this.filePath}}', '{{../../tenant.tenantDomain}}');"
+										<p><a onclick="downloadDocument('{{this.filePath}}', '{{../../tenant.tenantDomain}}');"
 												class="doc-content" download>{{t ../../../../locale.download}}</a></p>
 									{{else}}
 										<div>
