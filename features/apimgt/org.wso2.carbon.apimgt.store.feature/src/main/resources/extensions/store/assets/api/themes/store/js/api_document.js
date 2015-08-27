@@ -26,7 +26,7 @@ $(function () {
 });
 
 function downloadDocument(filePath, tenantDomain) {
-    var url = '/registry/resourceContent?tenant=' + tenantDomain + '&path=' + filePath.split('registry/resource')[1];
+    var url = caramel.context + '/assets/api/document_download?tenant=' + tenantDomain + '&resourceUrl=' + filePath;
     window.open(url, '_blank');
 }
 
