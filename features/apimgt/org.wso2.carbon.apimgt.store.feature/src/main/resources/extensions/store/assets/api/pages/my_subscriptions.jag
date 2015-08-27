@@ -50,6 +50,30 @@ require('/modules/store.js').exec(function (ctx) {
         var subscribedAPIsResult = apistore.getAllSubscriptions(user.username, '', 0, 100);
         var subscribedAPIs = [];
         subscribedAPIs = JSON.parse(subscribedAPIsResult);
+ 
+        var applications = subscribedAPIs.applications;
+        if(applications != null){
+            for (var i = applications.length - 1; i >= 0; i--) {
+            var app = applications[i];
+
+            var subscriptions = app.subscriptions;
+            if(subscriptions != null){
+                for (var j = subscriptions.length - 1; j >= 0; j--) {
+                 var sub = subscriptions[j];
+                
+                 if((typeof sub.thumburl === 'string') && sub.thumburl === 'null'){
+                    sub.thumburl = null;
+                 }
+                 
+             };
+            }            
+            
+            };
+        }
+        
+
+
+        
         if (subscribedAPIs.applications != null) {
             output.appsWithSubs = subscribedAPIs.applications;
         }

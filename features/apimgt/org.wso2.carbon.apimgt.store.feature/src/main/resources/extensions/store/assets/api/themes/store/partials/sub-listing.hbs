@@ -19,7 +19,7 @@ Subscription listing page
                     <div class="itm-ast">
                         <a class="ast-img " href="javascript:getAPIUrl('{{provider}}','{{name}}','{{version}}');" >
                             {{#if thumburl}}
-                                <img src='{{thumburl}}'>
+                                <img src='{{url ""}}/storage/api/{{artifactId}}/{{thumburl}}'>
                             {{else}}
                                 <img src='{{url ""}}/extensions/assets/api/themes/store/imgs/api-default.png'>
                             {{/if}}

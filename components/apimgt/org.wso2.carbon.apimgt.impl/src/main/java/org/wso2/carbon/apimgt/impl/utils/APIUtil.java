@@ -3613,6 +3613,7 @@ public final class APIUtil {
         api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
         api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
         api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+        api.setUuid(artifact.getId());
         } catch (GovernanceException e) {
         String msg = "Failed to get API fro artifact ";
         throw new APIManagementException(msg, e);
@@ -5170,6 +5171,7 @@ public final class APIUtil {
                     apiObj.put("sandAuthorizedDomains", api.get("sandAuthorizedDomains"));
                     apiObj.put("sandValidityTime", api.get("sandValidityTime"));
                     apiObj.put("hasMultipleEndpoints", api.get("hasMultipleEndpoints"));
+                    apiObj.put("artifactId", api.get("artifactId"));
                     apisArray.add(apiObj);
                 }
                 appObj.put("subscriptions",apisArray);
