@@ -66,7 +66,7 @@
                             org.wso2.carbon.apimgt.startup.publisher.*,
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.core,
+                            org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
                             *;resolution:=optional
@@ -74,7 +74,6 @@
                         <Embed-Dependency>
                             scribe;scope=compile|runtime;inline=false;
                         </Embed-Dependency>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
