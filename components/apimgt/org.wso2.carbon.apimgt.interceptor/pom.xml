@@ -92,7 +92,6 @@
                         <Embed-Dependency>
                             scribe;scope=compile|runtime;inline=false;
                         </Embed-Dependency>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
