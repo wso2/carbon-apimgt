@@ -25,7 +25,6 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var asset = require('rxt').asset;
 
 	var server = require('store').server;
-	log.info("=====================================================");
 	var user = server.current(ctx.session);
 	var uriMatcher = new URIMatcher(ctx.request.getRequestURI());
 	var options = uriMatcher.match('/{context}/assets/{type}/{pageName}/{+id}')||uriMatcher.match('/{context}/assets/{type}/{pageName}');
@@ -34,7 +33,6 @@ require('/modules/publisher.js').exec(function(ctx) {
     var constants = require('rxt').constants;
     user.domain = domain;
     user.superTenantDomain = constants.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-    log.info("===================================================== domain   :  "+domain);
 
 	if(!options){
 		response.sendError(400,'Could not locate an endpoint for your request.Make sure that you provide an id');
