@@ -17,6 +17,7 @@
 var resources = function (page, meta) {
     return{
         js: ['list_assets.js', 'list_assets_pagging.js','jquery.cookie.js','notify.min.js','messages.js'],
+        css: ['custom.css'],
         code: ['publisher.assets.hbs']
     }
 };

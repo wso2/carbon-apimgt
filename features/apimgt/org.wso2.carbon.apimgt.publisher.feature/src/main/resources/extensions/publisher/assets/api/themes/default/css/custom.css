@@ -1,0 +1,14 @@
+
+
+.btn-search {
+    display:inline-block;
+    font-size:19px;
+    font-weight:500;
+    color:#333;
+    background:#444;
+    position:relative;
+    padding:5px 10px;
+    right:48px;
+}
+
+
