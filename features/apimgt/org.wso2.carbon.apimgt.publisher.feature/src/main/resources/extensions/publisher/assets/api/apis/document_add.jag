@@ -73,6 +73,13 @@ require('/modules/publisher.js').exec(function(ctx) {
                     data = apiProxy.getInlineContent(apiData, doc.docName);
                 }
 
+                if(action == "getDocumentation"){
+                    data = apiProxy.getDocumentation(apiData, doc.docName);
+                    if(data == null || data == 'null'){
+                        data = null;
+                    }
+                }
+
                 response = responseProcessor.buildSuccessResponse(response, constants.STATUS_CODES.OK, data);
             } else {
                 response = responseProcessor.buildErrorResponse(response,

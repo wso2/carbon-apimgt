@@ -262,6 +262,15 @@ var provider = {};
         return this.impl.getDocumentationContent(apiId, docName);
     };
 
+    APIProviderProxy.prototype.getDocumentation = function (api, docName) {
+        var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
+        var doc = this.impl.getDocumentation(apiId,null, docName);
+        if(doc != null){
+            doc = APIUtil.convertToString(doc);
+        }
+        return doc;
+    };
+
     APIProviderProxy.prototype.removeDocumentation = function (api, docName, docType) {
         var apiId = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         return this.impl.removeDocumentation(apiId, docName, docType);
