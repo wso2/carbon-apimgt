@@ -69,7 +69,7 @@ require('/modules/publisher.js').exec(function (ctx) {
             var version = request.getParameter('version', 'UTF-8');
             var provider = request.getParameter('provider', 'UTF-8');
             if (request.getParameter('provider') == null) {
-                provider = username;
+                provider = user.username;
             } else {
                 provider = request.getParameter('provider', 'UTF-8')
             }

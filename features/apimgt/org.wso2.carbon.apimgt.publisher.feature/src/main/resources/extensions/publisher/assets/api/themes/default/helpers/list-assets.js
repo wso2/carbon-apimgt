@@ -16,8 +16,8 @@
 
 var resources = function (page, meta) {
     return{
-        js: ['list_assets.js', 'list_assets_pagging.js','jquery.cookie.js','notify.min.js','messages.js','remove-asset.js'],
-        css: ['custom.css'],
+        js: ['list_assets.js', 'list_assets_pagging.js','jquery.cookie.js','notify.min.js','messages.js', 'remove-asset.js','bootstrap/bootstrap-dialog.min.js'],
+        css: ['custom.css','styles.css','bootstrap/bootstrap-dialog.min.css'],
         code: ['publisher.assets.hbs']
     }
 };

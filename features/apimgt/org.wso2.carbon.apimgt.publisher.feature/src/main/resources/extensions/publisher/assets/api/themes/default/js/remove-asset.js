@@ -33,9 +33,19 @@ $(document).ready(function () {
                               }]
                           });*/
                         }else{
-                              setTimeout(function () {
-                                   window.location.reload();
-                               }, 2000);
+                              BootstrapDialog.show({
+                                                type: BootstrapDialog.TYPE_DANGER,
+                                                title: 'Error',
+                                                message: 'Error While deleting API ' ,
+                                                buttons: [
+                                                    {
+                                                        label: 'OK',
+                                                        action: function (dialogRef) {
+                                                            dialogRef.close();
+                                                        }
+                                                    }
+                                                ]
+                                            });
                         }
                        /*setTimeout(function () {
                            window.location.reload();
