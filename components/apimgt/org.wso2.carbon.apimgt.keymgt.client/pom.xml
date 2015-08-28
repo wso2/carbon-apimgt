@@ -93,7 +93,6 @@
 						<Export-Package>
 							org.wso2.carbon.apimgt.keymgt.*;version="${apimgt.keymgt.client.version}"
 						</Export-Package>
-						<DynamicImport-Package>*</DynamicImport-Package>
 					</instructions>
 				</configuration>
 			</plugin>

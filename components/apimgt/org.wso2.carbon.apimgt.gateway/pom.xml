@@ -149,7 +149,6 @@
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>org.wso2.throttle.*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
