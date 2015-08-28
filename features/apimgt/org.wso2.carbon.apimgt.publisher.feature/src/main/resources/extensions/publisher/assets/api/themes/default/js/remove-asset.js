@@ -14,42 +14,10 @@ $(document).ready(function () {
                    success: function (result) {
 
                       // $('#modal-redirect').modal('show');
-                       if(result.result != null && result.result.error != false){
                       
-                    /*
-                          BootstrapDialog.show({
-                              title: 'Warning!',
-                              message: result.result.data.error,
-                              type: BootstrapDialog.TYPE_DANGER,
-                              buttons: [{
-                                  label: 'Close',
-                                  action: function(dialogItself){
-                                      //dialogItself.close();
-                                      setTimeout(function () {
-                                           window.location.reload();
-                                       }, 2000);
-                                      dialogItself.close();
-                                  }
-                              }]
-                          });*/
-                        }else{
-                              BootstrapDialog.show({
-                                                type: BootstrapDialog.TYPE_DANGER,
-                                                title: 'Error',
-                                                message: 'Error While deleting API ' ,
-                                                buttons: [
-                                                    {
-                                                        label: 'OK',
-                                                        action: function (dialogRef) {
-                                                            dialogRef.close();
-                                                        }
-                                                    }
-                                                ]
-                                            });
-                        }
-                       /*setTimeout(function () {
+                       setTimeout(function () {
                            window.location.reload();
-                       }, 2000);*/
+                       }, 2000);
                    },
                    error: function (result) {
                        //alert("Unable to delete the API.");
@@ -83,6 +51,7 @@ $(document).ready(function () {
        $.ajax({
               type: "GET",
               url: ajaxURL,
+              async: false,
               data: {
                   action:action,
                   name:apiName,
