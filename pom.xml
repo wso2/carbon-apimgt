@@ -825,12 +825,12 @@
 
         <!-- Carbon kernel version -->
         <wso2carbon.version>4.4.0</wso2carbon.version>
-        <carbon.kernel.version>4.4.0</carbon.kernel.version>
+        <carbon.kernel.version>4.4.1</carbon.kernel.version>
 
-        <carbon.commons.version>4.4.3</carbon.commons.version>
-        <carbon.registry.version>4.4.3</carbon.registry.version>
+        <carbon.commons.version>4.4.4</carbon.commons.version>
+        <carbon.registry.version>4.4.5</carbon.registry.version>
         <carbon.mediation.version>4.4.2</carbon.mediation.version>
-        <carbon.identity.version>4.5.2</carbon.identity.version>
+        <carbon.identity.version>4.5.4</carbon.identity.version>
         <carbon.deployment.version>4.4.1</carbon.deployment.version>
         <carbon.governance.version>4.5.1</carbon.governance.version>
         <carbon.analytics.version>1.0.1</carbon.analytics.version>
