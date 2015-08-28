@@ -162,9 +162,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             serviceProvider.setDescription("Service Provider for application " + applicationName);
 
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
-            appMgtService.createApplication(serviceProvider);
+            appMgtService.createApplication(serviceProvider,tenantDomain,userName);
 
-            ServiceProvider createdServiceProvider = appMgtService.getApplication(applicationName);
+            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName,userName);
 
             if (createdServiceProvider == null) {
                 throw new APIKeyMgtException("Couldn't create Service Provider Application " + applicationName);
@@ -228,7 +228,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             createdServiceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
             // Update the Service Provider app to add OAuthApp as an Inbound Authentication Config
-            appMgtService.updateApplication(createdServiceProvider);
+            appMgtService.updateApplication(createdServiceProvider,tenantDomain,userName);
 
 
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
@@ -296,10 +296,12 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
         try {
 
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
 
             log.debug("Getting OAuth App for " + consumerKey);
-            String spAppName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2");
+            String spAppName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2",tenantDomain);
 
             if (spAppName == null) {
                 log.debug("Couldn't find OAuth App for Consumer Key : " + consumerKey);
@@ -307,7 +309,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
 
             log.debug("Removing Service Provider with name : " + spAppName);
-            appMgtService.deleteApplication(spAppName);
+            appMgtService.deleteApplication(spAppName,tenantAwareUsername,tenantDomain);
 
 
         } catch (IdentityApplicationManagementException e) {
@@ -608,7 +610,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         OAuthCache oauthCache;
         CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
         if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
-            oauthCache = OAuthCache.getInstance();
+            //This needs to be picked up from a constant. Trying to resolve the build breaks
+            oauthCache = OAuthCache.getInstance(900000);
             oauthCache.clearCacheEntry(cacheKey);
         }
     }
