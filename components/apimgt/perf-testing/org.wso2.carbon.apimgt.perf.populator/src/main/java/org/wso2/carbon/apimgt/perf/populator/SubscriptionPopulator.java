@@ -49,7 +49,7 @@ public class SubscriptionPopulator {
     
     public static void addUserKey(String consumerKey, String userId) {
         String INSERT_TOKEN_SQL = "INSERT" +
-                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, AUTHZ_USER) " +
+                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH, AUTHZ_USER) " +
                 " VALUES (?,?,?,?,?)";
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -75,7 +75,7 @@ public class SubscriptionPopulator {
         String INSERT_CONSUMER_APP_SQL = "INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
                 "(CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION) VALUES (?,?,?,?,?) ";
         String INSERT_TOKEN_SQL = "INSERT" +
-                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, AUTHZ_USER) " +
+                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH, AUTHZ_USER) " +
                 " VALUES (?,?,?,?,?)";
         String INSERT_MAPPING_SQL = "INSERT " +
                 "INTO AM_APPLICATION_KEY_MAPPING (APPLICATION_ID, CONSUMER_KEY, KEY_TYPE) " +

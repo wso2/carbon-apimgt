@@ -824,7 +824,7 @@ public class ApiMgtDAO {
                                      "   IAT.USER_TYPE," +
                                      "   IAT.AUTHZ_USER," +
                                      "   IAT.TIME_CREATED," +
-                                     "   IAT.TOKEN_SCOPE," +
+                                     "   IAT.TOKEN_SCOPE_HASH," +
                                      "   SUB.TIER_ID," +
                                      "   SUBS.USER_ID," +
                                      "   SUB.SUB_STATUS," +
@@ -2245,7 +2245,7 @@ public class ApiMgtDAO {
             nestedPS.setString(1, consumerKey);
             ResultSet nestedRS = nestedPS.executeQuery();
             if (nestedRS.next()) {
-                tokenScope = nestedRS.getString("TOKEN_SCOPE");
+                tokenScope = nestedRS.getString("TOKEN_SCOPE_HASH");
             }
         } catch (SQLException e) {
             handleException("Failed to get token scope from consumer key: " + consumerKey, e);
@@ -2265,7 +2265,7 @@ public class ApiMgtDAO {
         }
 
         return "SELECT" +
-               " IAT.TOKEN_SCOPE AS TOKEN_SCOPE " +
+               " IAT.TOKEN_SCOPE_HASH AS TOKEN_SCOPE_HASH " +
                "FROM " +
                tokenStoreTable + " IAT," +
                " IDN_OAUTH_CONSUMER_APPS ICA " +
@@ -2277,7 +2277,7 @@ public class ApiMgtDAO {
 
 	public String getScopesByToken(String accessToken) throws APIManagementException {
 		String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-		String getScopeSql = "SELECT TOKEN_SCOPE " +
+		String getScopeSql = "SELECT TOKEN_SCOPE_HASH " +
 		                     "FROM " + tokenStoreTable +
 		                     " WHERE ACCESS_TOKEN= ? LIMIT 1";
 
@@ -2292,7 +2292,7 @@ public class ApiMgtDAO {
 			ps.setString(1, accessToken);
 			result = ps.executeQuery();
 			if (result.next()) {
-				tokenScope = result.getString("TOKEN_SCOPE");
+				tokenScope = result.getString("TOKEN_SCOPE_HASH");
 			}
 		} catch (SQLException e) {
 			handleException("Failed to get token scope from access token : " + accessToken, e);
@@ -2385,7 +2385,7 @@ public class ApiMgtDAO {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
         }
 
-        String getTokenSql = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
+        String getTokenSql = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE_HASH,CONSUMER_KEY," +
                              "TIME_CREATED,VALIDITY_PERIOD " +
                              "FROM " + accessTokenStoreTable  +
                              " WHERE ACCESS_TOKEN= ? AND TOKEN_STATE='ACTIVE' ";
@@ -2399,7 +2399,7 @@ public class ApiMgtDAO {
                 String decryptedAccessToken = APIUtil.decryptToken(getTokenRS.getString("ACCESS_TOKEN")); // todo - check redundant decryption
                 apiKey.setAccessToken(decryptedAccessToken);
                 apiKey.setAuthUser(getTokenRS.getString("AUTHZ_USER"));
-                apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
+                apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE_HASH"));
                 apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                 String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
@@ -2458,7 +2458,7 @@ public class ApiMgtDAO {
                     APIKey apiKey = new APIKey();
                     apiKey.setAccessToken(accessToken);
                     apiKey.setAuthUser(getTokenRS.getString("AUTHZ_USER"));
-                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
+                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE_HASH"));
                     apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                     apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
@@ -2484,7 +2484,7 @@ public class ApiMgtDAO {
             tokenStoreTable = accessTokenStoreTable;
         }
 
-        return "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
+        return "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE_HASH,CONSUMER_KEY," +
                "TIME_CREATED,VALIDITY_PERIOD " +
                "FROM " + tokenStoreTable + " WHERE TOKEN_STATE='ACTIVE' ";
     }
@@ -2502,7 +2502,7 @@ public class ApiMgtDAO {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(user);
         }
 
-        String getTokenSql = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
+        String getTokenSql = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE_HASH,CONSUMER_KEY," +
                              "TIME_CREATED,VALIDITY_PERIOD " +
                              "FROM " + accessTokenStoreTable +
                              " WHERE AUTHZ_USER= ? AND TOKEN_STATE='ACTIVE' ";
@@ -2519,7 +2519,7 @@ public class ApiMgtDAO {
                     APIKey apiKey = new APIKey();
                     apiKey.setAccessToken(accessToken);
                     apiKey.setAuthUser(authorizedUser);
-                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
+                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE_HASH"));
                     apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                     apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
@@ -2588,7 +2588,7 @@ public class ApiMgtDAO {
                     APIKey apiKey = new APIKey();
                     apiKey.setAccessToken(accessToken);
                     apiKey.setAuthUser(authorizedUser);
-                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
+                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE_HASH"));
                     apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                     apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
@@ -2616,12 +2616,12 @@ public class ApiMgtDAO {
             tokenStoreTable = accessTokenStoreTable;
         }
 
-        querySqlArr[0] = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
+        querySqlArr[0] = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE_HASH,CONSUMER_KEY," +
                          "TIME_CREATED,VALIDITY_PERIOD " +
                          "FROM " + tokenStoreTable  +
                          " WHERE TOKEN_STATE='ACTIVE' AND TIME_CREATED >= ? ";
 
-        querySqlArr[1] = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
+        querySqlArr[1] = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE_HASH,CONSUMER_KEY," +
                          "TIME_CREATED,VALIDITY_PERIOD " +
                          "FROM " + tokenStoreTable +
                          " WHERE TOKEN_STATE='ACTIVE' AND TIME_CREATED <= ? ";
@@ -2800,7 +2800,7 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " IAT.TOKEN_SCOPE_HASH AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         " AKM.STATE AS STATE "+
                         "FROM" +
@@ -2848,7 +2848,7 @@ public class ApiMgtDAO {
                 "CONSUMER_SECRET, " +
                 "ACCESS_TOKEN, " +
                 "VALIDITY_PERIOD, " +
-                "TOKEN_SCOPE, " +
+                "TOKEN_SCOPE_HASH, " +
                 "TOKEN_TYPE, " +
                 "STATE " +
                 "FROM (" +
@@ -2857,7 +2857,7 @@ public class ApiMgtDAO {
                         "ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
                         "IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
                         "IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
-                        "IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
+                        "IAT.TOKEN_SCOPE_HASH AS TOKEN_SCOPE_HASH, " +
                         "AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         "AKM.STATE AS STATE " +
                         "FROM " +
@@ -2912,7 +2912,7 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
-                String tokenScope = resultSet.getString("TOKEN_SCOPE");
+                String tokenScope = resultSet.getString("TOKEN_SCOPE_HASH");
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
@@ -2946,7 +2946,7 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " IAT.TOKEN_SCOPE_HASH AS TOKEN_SCOPE_HASH," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
@@ -2970,7 +2970,7 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " IAT.TOKEN_SCOPE_HASH AS TOKEN_SCOPE_HASH," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
@@ -3024,7 +3024,7 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
-                String tokenScope = resultSet.getString("TOKEN_SCOPE");
+                String tokenScope = resultSet.getString("TOKEN_SCOPE_HASH");
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
@@ -3591,7 +3591,7 @@ public class ApiMgtDAO {
         // Update Access Token
         String sqlUpdateNewAccessToken = "UPDATE " + accessTokenStoreTable +
                                          " SET USER_TYPE=?, VALIDITY_PERIOD=? " +
-                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
+                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE_HASH=? ";
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -3805,7 +3805,7 @@ public class ApiMgtDAO {
         // Add Access Token
         String sqlAddAccessToken = "INSERT" +
                                    " INTO " + accessTokenStoreTable +
-                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE) " +
+                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH) " +
                                    " VALUES (?,?,?,?)";
 
         String getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +
@@ -3971,7 +3971,7 @@ public class ApiMgtDAO {
 
         // Add Access Token
         String sqlAddAccessToken = "INSERT INTO " +  accessTokenStoreTable +
-                " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
+                " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH," +
                 " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
 
 //        ///////////////////////////
@@ -4446,7 +4446,7 @@ public class ApiMgtDAO {
                          accessTokenStoreTable + " IAT" +
                          " WHERE " +
                          " IAT.ACCESS_TOKEN = ? AND" +
-                         " IAT.TOKEN_SCOPE = ? AND" +
+                         " IAT.TOKEN_SCOPE_HASH = ? AND" +
                          " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY";
 
         try {
@@ -7829,7 +7829,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
                 OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
-                                                                                 application.getCallbackUrl(), rs.getString("TOKEN_SCOPE"), rs.getString("INPUTS"));
+                                                                                 application.getCallbackUrl(), rs.getString("TOKEN_SCOPE_HASH"), rs.getString("INPUTS"));
                 workflowDTO.setAppInfoDTO(request);
 
             }
