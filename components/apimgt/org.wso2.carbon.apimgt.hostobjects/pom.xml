@@ -108,7 +108,6 @@
                         <Embed-Dependency>
                             scribe;scope=compile|runtime;inline=false;
                         </Embed-Dependency>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
                     </instructions>
                 </configuration>
