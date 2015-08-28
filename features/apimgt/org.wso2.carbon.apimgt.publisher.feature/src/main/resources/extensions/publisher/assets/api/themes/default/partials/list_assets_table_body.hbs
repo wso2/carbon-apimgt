@@ -16,7 +16,7 @@
 {{#each .}}
     <div class="ctrl-wr-asset">
         <div class="itm-ast">
-            {{#if thumbnail }}
+            {{#if this.thumbnail }}
             <a class="ast-img" href='{{url ""}}/assets/{{type}}/details/{{this.id}}'><img src='{{url ""}}/storage/{{type}}/{{id}}/{{this.thumbnail}}' /></a>
             {{else}}
 	            <a class="ast-img" href='{{url ""}}/assets/{{type}}/details/{{this.id}}'>
@@ -40,3 +40,7 @@
         </div><br class="c-both" />
     </div>
 {{/each}}
+
+
+
+

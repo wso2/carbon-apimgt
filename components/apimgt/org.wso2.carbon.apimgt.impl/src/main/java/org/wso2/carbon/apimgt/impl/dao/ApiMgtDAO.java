@@ -7156,6 +7156,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt = connection.prepareStatement(deleteLCEventQuery);
             prepStmt.setInt(1, id);
             prepStmt.execute();
+
             //Delete all external APIStore details associated with a given API
             prepStmt = connection.prepareStatement(deleteExternalAPIStoresQuery);
             prepStmt.setInt(1, id);

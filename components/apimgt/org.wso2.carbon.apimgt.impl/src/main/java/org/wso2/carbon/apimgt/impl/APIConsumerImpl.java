@@ -3232,6 +3232,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             apiMap.put("subStatus",subscribedAPI.getSubStatus());
             apiMap.put("thumburl",APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
             apiMap.put("context",api.getContext());
+            apiMap.put("artifactId", api.getUuid());
             //Read key from the appObject
             APIKey prodKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_PRODUCTION);
             if (prodKey != null) {

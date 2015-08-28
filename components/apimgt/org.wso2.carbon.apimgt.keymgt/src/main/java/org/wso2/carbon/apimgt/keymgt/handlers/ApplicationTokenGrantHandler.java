@@ -33,6 +33,10 @@ public class ApplicationTokenGrantHandler extends ExtendedClientCredentialsGrant
 
         Long validityPeriod = null;
 
+        if(parameters == null){
+           return true;
+        }
+
         // find out validity period
         for(RequestParameter parameter : parameters){
             if(OPENKM_GRANT_PARAM.equals(parameter.getKey())){
@@ -47,7 +51,7 @@ public class ApplicationTokenGrantHandler extends ExtendedClientCredentialsGrant
             }
         }
 
-        if(validityPeriod != 0) {
+        if(validityPeriod != null && validityPeriod != 0) {
             //set validity time
             tokReqMsgCtx.setValidityPeriod(validityPeriod);
         }

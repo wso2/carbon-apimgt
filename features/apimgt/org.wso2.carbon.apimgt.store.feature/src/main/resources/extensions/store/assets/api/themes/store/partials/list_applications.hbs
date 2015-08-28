@@ -30,7 +30,7 @@
                             <a href="javascript:changeAppRowtoEditView('{{../../name}}','{{../../../cuser.username}}','{{../../id}}','{{../../tier}}','{{isActive}}','{{../../callbackUrl}}','{{../../description}}');"><i class='fa fa-edit'></i> {{t "Edit"}}</a>
                         {{/if}}
                     {{/each}}&nbsp;&nbsp;
-                    <a href="javascript:removeApplication('{{name}}','{{../cuser.username}}','{{id}}');"><i class='fa fa-trash'></i> {{t "Delete"}}</a>
+                    <a href="javascript:removeApplication('{{name}}','{{../cuser.username}}','{{id}}','{{apiCount}}');"><i class='fa fa-trash'></i> {{t "Delete"}}</a>
                 </td>
             </tr>
         {{/each}}

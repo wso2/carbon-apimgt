@@ -82,7 +82,7 @@ asset.manager = function(ctx) {
                 api.apiName = options.attributes.overview_name;
                 api.name = options.attributes.overview_name;
                 api.version = options.attributes.overview_version;
-                if (options.attributes.provider == null) {
+                if (options.attributes.overview_provider == null) {
                     api.provider = ctx.username;
                 } else {
                     api.provider = options.attributes.overview_provider;
@@ -156,7 +156,7 @@ asset.manager = function(ctx) {
                 api.apiName = options.attributes.overview_name;
                 api.name = options.attributes.overview_name;
                 api.version = options.attributes.overview_version;
-                if (options.attributes.provider == null) {
+                if (options.attributes.overview_provider == null) {
                     api.provider = ctx.username;
                 } else {
                     api.provider = options.attributes.overview_provider;
@@ -308,15 +308,29 @@ asset.manager = function(ctx) {
                     }
                 }
                 return obj;
-            } else if (options.attributes._method == "delete") { //This condition added to pass ajax delete requests as post
+            } else if (options.attributes.method == "delete") { //This condition added to pass ajax delete requests as post
                 //requests due to some of the browsers doesn't support ajax requests with type 'delete'
                 var asset = this.get.call(this, options.id);
                 // log.debug("Removing API of Id " +id+ "Name " + asset.attributes.overview_name);
                 var apiProxy = apiPublisher.instance(user);
-                var result;
+                var result, obj;
                 try {
                     result = apiProxy.deleteAPI(asset.attributes.overview_provider, asset.attributes.overview_name, asset.version);
-                    return result;
+                    
+                     if(result != null && result.error != false){
+                            obj = {
+                                error: true,
+                                data: result
+                            }
+                     }else{
+                        obj = {
+                                error: false,
+                                data: result
+                        }
+                     }
+                    return obj;
+
+
                 } catch (e) {
                     log.error("Error while deleting the API-" + asset.attributes.overview_name + "-" + asset.version);
                     throw e;
@@ -405,7 +419,7 @@ asset.server = function (ctx) {
                    },{
                        url: 'addDoc',
                        path: 'document_add.jag'
-                   }]
+                   } ]
         }
     }
 };

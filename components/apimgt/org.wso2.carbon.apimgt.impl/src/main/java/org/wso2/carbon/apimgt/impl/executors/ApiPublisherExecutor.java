@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -101,6 +102,23 @@ public class ApiPublisherExecutor implements Execution {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             API api = APIUtil.getAPI(apiArtifact);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
+            
+            APIStatus oldStatus = api.getStatus();
+            APIStatus newStatus = APIUtil.getApiStatus(targetState);
+            if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
+				    && newStatus.equals(APIStatus.PUBLISHED)) {
+            	Tier[] tiers = api.getTierSetAsArray();
+            	String endPoint = api.getEndpointConfig();
+            	if(endPoint != null && endPoint.trim().length() > 0){
+            		if(tiers != null && tiers.length > 0 ){
+                		
+                	}else{
+                		throw new APIManagementException("Failed to publish service to API store, While executing ApiPublisherExecutor. No Tiers selected");
+                	}
+            	}else{
+            		throw new APIManagementException("Failed to publish service to API store, While executing ApiPublisherExecutor. No endpoint selected");
+            	}
+            }
 	        executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());

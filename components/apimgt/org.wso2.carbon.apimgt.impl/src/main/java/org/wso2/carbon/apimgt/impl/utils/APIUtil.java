@@ -3613,6 +3613,7 @@ public final class APIUtil {
         api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
         api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
         api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+        api.setUuid(artifact.getId());
         } catch (GovernanceException e) {
         String msg = "Failed to get API fro artifact ";
         throw new APIManagementException(msg, e);
@@ -5170,6 +5171,7 @@ public final class APIUtil {
                     apiObj.put("sandAuthorizedDomains", api.get("sandAuthorizedDomains"));
                     apiObj.put("sandValidityTime", api.get("sandValidityTime"));
                     apiObj.put("hasMultipleEndpoints", api.get("hasMultipleEndpoints"));
+                    apiObj.put("artifactId", api.get("artifactId"));
                     apisArray.add(apiObj);
                 }
                 appObj.put("subscriptions",apisArray);
@@ -5291,9 +5293,9 @@ public final class APIUtil {
 	    doc.setOtherTypeName(otherTypeName);
 	}
 
-	if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.URL.toString())) {
+	if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
 	    doc.setSourceType(Documentation.DocumentSourceType.URL);
-	} else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
+	} else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
 	    doc.setSourceType(Documentation.DocumentSourceType.FILE);
 	} else {
 	    doc.setSourceType(Documentation.DocumentSourceType.INLINE);
@@ -5302,9 +5304,9 @@ public final class APIUtil {
 	if (visibility == null) {
 	    visibility = APIConstants.DOC_API_BASED_VISIBILITY;
 	}
-	if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
+	if (Documentation.DocumentVisibility.API_LEVEL.toString().equalsIgnoreCase(visibility)) {
 	    doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-	} else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
+	} else if (Documentation.DocumentVisibility.PRIVATE.toString().equalsIgnoreCase(visibility)) {
 	    doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
 	} else {
 	    doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
