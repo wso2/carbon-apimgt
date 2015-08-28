@@ -53,6 +53,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
@@ -577,18 +578,42 @@ public abstract class AbstractAPIManager implements APIManager {
         return true;
     }
 
-    public Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType,
+    public Documentation getDocumentation(APIIdentifier identifier, DocumentationType docType,
                                           String docName) throws APIManagementException {
         Documentation documentation = null;
+        APIIdentifier apiId = APIUtil.replaceEmailDomain(identifier);
         String docPath = APIUtil.getAPIDocPath(APIUtil.replaceEmailDomain(apiId)) + docName;
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                            APIConstants.DOCUMENTATION_KEY);
+        
+        Registry registry;
+        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         try {
+        	  /* If the API provider is a tenant, load tenant registry*/
+	        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+	            int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+	            registry = ServiceReferenceHolder.getInstance().
+	                    getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    registry = ServiceReferenceHolder.getInstance().
+                            getRegistryService().getGovernanceUserRegistry(apiId.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    registry = this.registry;
+                }
+            }        	
+	        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,APIConstants.DOCUMENTATION_KEY);
             Resource docResource = registry.get(docPath);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getUUID());
-            documentation = APIUtil.getDocumentation(artifact);
+            if(docResource != null){
+            	GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getUUID());
+                documentation = APIUtil.getDocumentation(artifact);
+            }
+            
+        } catch (ResourceNotFoundException e) {
+            //ignore propagating exception
         } catch (RegistryException e) {
             handleException("Failed to get documentation details", e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        	handleException("Failed to get ddocument found for documentation: "
+   				 + docName + " of API: "+identifier.getApiName(), e);
         }
         return documentation;
     }

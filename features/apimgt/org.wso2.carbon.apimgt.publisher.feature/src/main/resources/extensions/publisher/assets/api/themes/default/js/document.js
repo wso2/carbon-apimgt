@@ -224,6 +224,31 @@ var saveOrUpdate = function(action){
     	
     }
 
+    if(action == "createDocument"){
+    	var document = getDocumentation(provider, apiName, version,docName);
+    	if(document != null){
+    		errorMsg = 'Error Occured while Create New Document, Document Already Exist!';
+    		BootstrapDialog.show({
+		                type: BootstrapDialog.TYPE_DANGER,
+		                title: 'Error',
+		                message: errorMsg,
+		                buttons: [{
+		                
+			                label: 'Close',
+			                action: function(dialogItself){
+				                dialogItself.close();
+				                window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+			                }
+			            
+		            	}]
+
+		    });
+
+		    return;
+    	}
+    }
+
+
     $('#form-document-create').ajaxSubmit({
 			    type: "POST",
 			    url: ajaxURL,
@@ -402,6 +427,52 @@ var getInlineContent = function(provider, apiName, version,docName, mode,tenantD
 	}); 
 
 
+}
+
+var getDocumentation = function(provider, apiName, version,docName){
+	var doc = null;
+	var action = 'getDocumentation';
+	var ajaxURL = caramel.context + '/assets/api/apis/addDoc';
+	var errorMsg = 'Error occurred while retrieve Document';
+	 $.ajax({
+			    type: "GET",
+			    async: false,
+			    url: ajaxURL,
+			    data: {
+			        action:action,
+			        name:apiName,
+			        version:version,
+			        provider:provider,			      
+			        docName:docName
+
+			    },
+			    success: function (result) {
+			        doc = result.data;
+ 
+			        },
+			    error : function(result) {		                
+	              BootstrapDialog.show({
+                    type: BootstrapDialog.TYPE_DANGER,
+                    title: 'Error',
+                    message: errorMsg,
+                    buttons: [{
+                    
+                      label: 'Close',
+                      action: function(dialogItself){
+                        dialogItself.close();
+                        
+                      }
+                  
+                  }]
+
+                  });
+               	},
+			          
+			   
+			    dataType: "json"
+	
+	}); 
+	 return doc;
 }
 
 var editInlineContent	 = function (provider, apiName, version, docName, mode,tenantDomain) {
