@@ -274,7 +274,8 @@
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                             </bundles>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.thrift.authentication:${carbon.identity.version}</importBundleDef>
+                                <!--importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.thrift.authentication:${carbon.identity.version}</importBundleDef-->
+				<importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
                                 <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v2</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
