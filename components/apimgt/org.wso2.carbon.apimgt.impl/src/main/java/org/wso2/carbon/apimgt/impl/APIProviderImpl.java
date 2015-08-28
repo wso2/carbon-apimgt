@@ -2606,7 +2606,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
-        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
+    	APIIdentifier apiIdentifier = APIUtil.replaceEmailDomain(apiId);
+        return definitionFromSwagger20.getAPIDefinition(apiIdentifier, registry);
     }
 
     @Override
