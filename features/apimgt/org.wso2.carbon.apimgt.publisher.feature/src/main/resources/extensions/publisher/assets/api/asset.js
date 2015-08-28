@@ -589,6 +589,9 @@ asset.renderer = function (ctx) {
                     case 'tier-permissions':
                         page.leftNav = buildListLeftNav(page, this);
                         break;
+                    case 'design':
+                        page.leftNav = buildListLeftNav(page, this);
+                        break;
                     default:
                         page.leftNav = buildDefaultLeftNav(page, this);
                         break;
