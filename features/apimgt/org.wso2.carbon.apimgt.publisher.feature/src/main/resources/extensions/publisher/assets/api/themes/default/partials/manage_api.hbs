@@ -27,24 +27,20 @@
 <div class="col-sm-12 text-center">
     <ul class="new-sub-menu-wizard" style="margin:0 auto">
         <li>
-            <a href='{{url ""}}/assets/api/design/{{assets.id}}?name={{api.name}}&version={{api
-			.version}}&provider={{api
-			.provider}}' class="wizard-done">
+            <a href='{{url ""}}{{design_w_link}}' class="wizard-done">
                 <div class="wizard-number">1</div>
                 <span>Design</span>
             </a>
         </li>
         <li>
-            <a href='{{url ""}}/assets/api/implement/{{assets.id}}?name={{api.name}}&version={{api.version}}&provider={{api
-			.provider}}'
+            <a href='{{url ""}}{{implement_w_link}}'
                class="wizard-done">
                 <div class="wizard-number">2</div>
                 <span>Implement</span>
             </a>
         </li>
         <li>
-            <a href='{{url ""}}/assets/api/manage/{{assets.id}}?name={{api.name}}&version={{api.version}}&provider={{api
-			.provider}}' class="wizard-active">
+            <a href='{{url ""}}{{manage_w_link}}' class="wizard-active">
                 <div class="wizard-number">3</div>
                 <span>Manage</span>
             </a>

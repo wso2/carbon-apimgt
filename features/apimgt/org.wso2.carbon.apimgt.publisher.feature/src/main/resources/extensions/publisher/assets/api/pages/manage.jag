@@ -182,6 +182,13 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var locale = require('/extensions/assets/api/locale/locale_en.json');
 	output.locale = locale;
 
+    var design_w_link = '/assets/api/design/'+api.id;
+    var implement_w_link = '/assets/api/implement/'+api.id;
+    var manage_w_link = '/assets/api/manage/'+api.id;
+
+    output.design_w_link = design_w_link;
+    output.implement_w_link = implement_w_link;
+    output.manage_w_link = manage_w_link;
 	caramel.render(output);
 }, request, response, session);
 %>
