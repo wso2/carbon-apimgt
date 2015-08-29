@@ -64,7 +64,7 @@ $(document).ready(function () {
                   
                   if(count != null && count > 0){
                     BootstrapDialog.show({
-                                  title: 'Warning!',
+                                  title: 'Error',
                                   message: 'Cannot remove the API. Active Subscriptions Exist',
                                   type: BootstrapDialog.TYPE_DANGER,
                                   buttons: [{

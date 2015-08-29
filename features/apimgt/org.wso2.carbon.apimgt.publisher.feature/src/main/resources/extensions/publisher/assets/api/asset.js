@@ -88,7 +88,12 @@ asset.manager = function(ctx) {
                     api.provider = options.attributes.overview_provider;
                 }
                 api.context = options.attributes.overview_context;
-
+                if (options.attributes.overview_contextTemplate == null) {
+                    options.attributes.overview_contextTemplate =api.context;
+                }
+                 if (options.attributes.overview_versionType == null) {
+                    options.attributes.overview_versionType =api.version;
+                }
                 //TODO now we no need to save Icon through API manager as asset API does it for us
                 //Need to properly cope with that changed
                 api.thumbnailUrl = options.attributes.overview_thumbnail;

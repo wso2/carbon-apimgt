@@ -496,16 +496,6 @@ asset.renderer = function(ctx) {
                 action.iconClass ='fa-tags';
                 action.name ='My Subscriptions';
                 page.actionBar.actions.push(action);
-                action = {};
-                action.url = '/assets/api/forum';
-                action.iconClass ='fa-comment-o';
-                action.name ='Forum';
-                page.actionBar.actions.push(action);
-                action = {};
-                action.url = '/assets/api/statistics';
-                action.iconClass ='fa-line-chart';
-                action.name ='Statistics';
-                page.actionBar.actions.push(action);
             }
         }
     }
