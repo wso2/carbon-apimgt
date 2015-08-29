@@ -92,7 +92,42 @@ require('/modules/publisher.js').exec(function(ctx) {
 
 	//Check configurations specific properties
 	var config = require('/extensions/assets/api/config/config.json');
-	output.config = config;
+
+    if(api){
+        var design_w_link = '/assets/api/design/'+api.id;
+        var implement_w_link = '/assets/api/implement/'+api.id;
+        var manage_w_link = '/assets/api/manage/'+api.id;
+    }
+
+    var implement_wlabel = "";
+    var manage_wlabel = "";
+    if(!api){
+        var design_w_link = '#';
+        var implement_w_link = '#';
+        var manage_w_link = '#';
+    }
+
+    var implement_wlabel = "";
+    if(api && api.implementation != null){
+        implement_wlabel = "wizard-done"
+    }
+    else{
+        implement_w_link = '#';
+    }
+
+    var manage_wlabel = "";
+    if(api && api.availableTiers !=""){
+        manage_wlabel = "wizard-done";
+    }else{
+        var manage_w_link = '';
+    }
+
+    output.config = config;
+    output.design_w_link = design_w_link;
+    output.implement_w_link = implement_w_link;
+    output.manage_w_link = manage_w_link;
+    output.implement_wlabel = implement_wlabel;
+    output.manage_wlabel = manage_wlabel;
 	caramel.render(output);
 }, request, response, session);
 %>

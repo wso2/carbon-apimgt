@@ -86,6 +86,22 @@ require('/modules/publisher.js').exec(function(ctx) {
     Error while loading implement API page after initial page save.
     */
     output.api.endpointConfig = new String(api.endpointConfig);
+
+    var design_w_link = '/assets/api/design/'+api.id;
+    var implement_w_link = '/assets/api/implement/'+api.id;
+    var manage_w_link = '/assets/api/manage/'+api.id;
+
+    var manage_wlabel = "";
+    if( api.availableTiers !=""){
+        manage_wlabel = "wizard-done";
+    }else{
+        var manage_w_link = '';
+    }
+    output.design_w_link = design_w_link;
+    output.implement_w_link = implement_w_link;
+    output.manage_w_link = manage_w_link;
+    output.manage_wlabel = manage_wlabel;
+
     caramel.render(output);
 }, request, response, session);
 %>
