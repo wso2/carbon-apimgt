@@ -754,6 +754,20 @@ function getLocation(href) {
             };
         }
     };
+    
+    
+    StoreAPIProxy.prototype.getAllPaginatedAPIsByStatus = function(domain, start, end, status){
+        try {
+            var result = this.impl.getAllPaginatedAPIsByStatus(domain, start, end, status, false);
+            result = APIUtil().stringifyPrototypedAPIResult(result);         
+            return result;
+        }catch(e){
+            log.error(e.message);
+            return {
+                error:e
+            };
+        }
+    };
 
 })(apistore);
 
