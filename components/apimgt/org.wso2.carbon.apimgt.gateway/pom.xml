@@ -83,11 +83,6 @@
              <groupId>org.wso2.carbon</groupId>
              <artifactId>org.wso2.carbon.utils</artifactId>       			 
          </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-            <version>4.2.3</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -143,11 +138,31 @@
                             org.apache.synapse.endpoints.*,
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
-                            org.wso2.carbon.core,
+                            org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.impl.*,
+                            org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
-                            *;resolution:=optional
+                            org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
+                            edu.emory.mathcs.backport.*,
+                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
+                            javax.activation,
+                            javax.cache,
+                            javax.net.ssl,
+                            javax.xml.namespace,
+                            org.apache.http.*,
+                            org.apache.commons.*,
+                            org.apache.synapse.*,
+                            org.apache.thrift.*,
+                            org.apache.neethi.*,
+                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.throttle.core.*; version="${imp.pkg.version.carbon.throttle}",
+                            org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
+                            org.osgi.service.component,
+                            org.slf4j,
+                            org.wso2.carbon.apimgt.keymgt.stub.validator; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.base.*; version="${imp.pkg.version.carbon.base}",
+                            org.wso2.carbon.context,
+                            org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}"
                         </Import-Package>
                     </instructions>
                 </configuration>
