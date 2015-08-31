@@ -272,6 +272,8 @@
                                 <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub:${carbon.platform.version}</bundleDef-->
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
+                                <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
+                                <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <!--importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.thrift.authentication:${carbon.identity.version}</importBundleDef-->
@@ -285,6 +287,7 @@
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}</importFeatureDef>
                                 <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.internal:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

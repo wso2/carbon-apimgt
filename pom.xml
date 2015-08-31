@@ -815,7 +815,7 @@
         <carbon.mediation.version>4.4.2</carbon.mediation.version>
         <carbon.identity.version>4.5.4</carbon.identity.version>
         <carbon.deployment.version>4.4.1</carbon.deployment.version>
-        <carbon.governance.version>4.5.1</carbon.governance.version>
+        <carbon.governance.version>4.5.3</carbon.governance.version>
         <carbon.analytics.version>1.0.1</carbon.analytics.version>
         <carbon.multitenancy.version>4.4.1</carbon.multitenancy.version>
 
@@ -824,6 +824,8 @@
         <carbon.identity.imp.pkg.version>[4.5.0, 4.6.0)</carbon.identity.imp.pkg.version>
         <carbon.mediation.imp.pkg.version>[4.4.2, 4.5.0)</carbon.mediation.imp.pkg.version>
         <carbon.governance.imp.pkg.version>[4.5.1, 4.6.0)</carbon.governance.imp.pkg.version>
+        <carbon.registry.package.import.version.range>[4.4.0, 4.5.0)
+        </carbon.registry.package.import.version.range>
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.version>4.4.1</carbon.platform.version>
@@ -912,6 +914,8 @@
         <imp.pkg.version.carbon.throttle>[4.2.1, 4.3.0)</imp.pkg.version.carbon.throttle>
         <imp.pkg.version.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.carbon.base>
         <imp.pkg.version.google.code.gson>[2.2.4, 2.3.0)</imp.pkg.version.google.code.gson>
+        <imp.pkg.version.org.wso2.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.org.wso2.carbon.base>
+        <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
 
     </properties>
 </project>
