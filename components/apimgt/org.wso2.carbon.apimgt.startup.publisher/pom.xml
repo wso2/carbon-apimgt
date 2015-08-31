@@ -69,7 +69,19 @@
                             org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
-                            *;resolution:=optional
+                            javax.cache,
+                            javax.activation,
+                            javax.xml.*,
+                            org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
+                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
+                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
+                            org.osgi.framework,
+                            org.osgi.service.component,
+                            org.apache.commons.logging,
+                            org.wso2.carbon.governance.api.*; version="${carbon.governance.imp.pkg.version}",
+                            org.wso2.carbon.user.*;version="${carbon.platform.package.import.version.range}",
                         </Import-Package>
                         <Embed-Dependency>
                             scribe;scope=compile|runtime;inline=false;
