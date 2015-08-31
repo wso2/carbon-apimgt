@@ -1566,6 +1566,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     	APIIdentifier apiId = APIUtil.replaceEmailDomain(id);
         String apiPath = APIUtil.getAPIPath(apiId);
         API api = getAPI(apiPath);
+        FileData file = null;
+    	String docName = documentation.getName();
+    	String version = apiId.getVersion();
+    	DocumentSourceType  sourceType = documentation.getSourceType();
+    	
+    	if (sourceType.equals(Documentation.DocumentSourceType.FILE)) {
+    	    file = documentation.getFile(); 
+        }
         String docPath =
                          APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiId.getProviderName() +
                                  RegistryConstants.PATH_SEPARATOR + apiId.getApiName() +
@@ -1595,6 +1603,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     visibility = APIConstants.DOC_OWNER_VISIBILITY;
                 }
             }
+            
+            if (file != null) {
+        		String contentType = file.getContentType();
+
+        		Icon icon = new Icon(file.getContent(), contentType);
+        		String fileName = file.getFileName();
+        		String filePath = APIUtil.getDocumentationFilePath(APIUtil.replaceEmailDomain(apiId), fileName);
+        		documentation.setFilePath(addIcon(filePath, icon));
+        	} else if (sourceType.equals(Documentation.DocumentSourceType.FILE)) {
+        		throw new APIManagementException("Empty File Attachment.");
+        	}
             
             GenericArtifact updateApiArtifact = APIUtil.createDocArtifactContent(artifact, apiId, documentation);
             artifactManager.updateGenericArtifact(updateApiArtifact);

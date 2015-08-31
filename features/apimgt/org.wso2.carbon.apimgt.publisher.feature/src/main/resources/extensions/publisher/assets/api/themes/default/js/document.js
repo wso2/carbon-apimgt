@@ -509,6 +509,7 @@ function saveContent(provider, apiName, apiVersion, mode) {
   if(mode == 'cancel'){
   	clearDocs();
     // window.location.href = caramel.context+'/assets/api/docs/'+pageId;
+  	return;
   }
   var visibility={};
   var showVisibility = $('#InlineShowVisibility').val();
