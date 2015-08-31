@@ -94,6 +94,9 @@ asset.manager = function(ctx) {
                  if (options.attributes.overview_versionType == null) {
                     options.attributes.overview_versionType =api.version;
                 }
+                if (options.attributes.endpoint_config != null) {
+                    api.endpoint_config = options.attributes.endpoint_config;
+                }
                 //TODO now we no need to save Icon through API manager as asset API does it for us
                 //Need to properly cope with that changed
                 api.thumbnailUrl = options.attributes.overview_thumbnail;

@@ -131,7 +131,7 @@ var provider = {};
         var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(this.appendDomainToUser(api.provider), api.name, api.version);
         var uuid;
         try {
-            uuid = this.impl.createAPI(identifier, api.context);
+            uuid = this.impl.createAPI(identifier, api.context,api.endpoint_config);
             if (log.isDebugEnabled()) {
                 log.debug("Error while creating API" );
             }
