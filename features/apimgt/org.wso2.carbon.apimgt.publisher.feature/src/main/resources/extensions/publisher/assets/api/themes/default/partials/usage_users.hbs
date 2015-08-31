@@ -10,6 +10,9 @@
 <div class="row-fluid">
 	<div class="span12">
 		<h3>{{t locale.activeSubscriptions}}</h3>
+		{{#unless subscribers}}
+		<div class="alert alert-info" role="alert">{{t locale.noActiveSubscribersMsg}}</div>
+		{{else}}
 		<table id="subscribers" class="table table-striped table-bordered" cellspacing="0" width="100%">
 			<thead>
 			<tr>
@@ -18,18 +21,15 @@
 			</tr>
 			</thead>
 			<tbody id="userList">
-			{{#unless subscribers}}
-				<tr><td colspan="3">{{t locale.noActiveSubscribersMsg}}</td></tr>
-			{{else}}
 				{{#each subscribers}}
 					<tr>
 						<td><i class="fa fa-user">&nbsp;</i>{{this.name}}</td>
 						<td class="dateFull">{{this.subscribedDate}}</td>
 					</tr>
 				{{/each}}
-			{{/unless}}
 			</tbody>
 		</table>
+		{{/unless}}
 	</div>
 </div>
 
