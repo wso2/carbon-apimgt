@@ -172,12 +172,14 @@
       <dependency>
           <groupId>com.nimbusds.wso2</groupId>
           <artifactId>nimbus-jose-jwt</artifactId>
-	</dependency>
-	<dependency>
+      </dependency>
+      <dependency>
           <groupId>org.wso2.carbon.deployment</groupId>
           <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
       </dependency>
-    </dependencies>
+
+
+  </dependencies>
     <build>
         <plugins>
             <plugin>
@@ -264,9 +266,55 @@
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
-                            *;resolution:=optional
+                            com.google.gson;version="${imp.pkg.version.google.code.gson}",
+                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
+                            org.apache.commons.*,
+                            org.apache.http.*,
+                            org.apache.synapse.*,
+                            org.osgi.framework.*,
+                            org.osgi.util.*,
+                            org.osgi.service.*,
+                            org.apache.axiom.*; version="${imp.pkg.version.axiom}",
+                            org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.registry.indexing.*; version="${carbon.registry.imp.pkg.version}",
+                            org.pdfbox.*,
+                            org.apache.poi.*,
+                            org.apache.thrift.*,
+                            org.apache.neethi.*,
+                            org.apache.velocity.*,
+                            org.apache.solr.common,
+                            javax.cache,
+                            javax.naming,
+                            javax.sql,
+                            javax.wsdl.*,
+                            javax.xml.*,
+                            org.json.*,
+                            org.slf4j,
+                            org.w3c.dom,
+                            com.nimbusds.*,
+                            com.ibm.wsdl.*,
+                            net.sf.saxon.expr.sort,
+                            org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
+                            org.wso2.carbon.authenticator.stub.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.base;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.core.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.bam.service.data.publisher.*,
+                            org.wso2.carbon.databridge.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.user.core.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.user.api;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.user.mgt.*;version="${carbon.platform.package.import.version.range}",
+                            org.xml.sax,
+                            org.wso2.carbon.rest.api.stub.*,
+                            org.wso2.carbon.um.ws.api.stub,
+                            org.wso2.securevault.*,
+                            org.wso2.carbon.registry.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.sequences.stub.types
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -910,6 +910,7 @@
         <imp.pkg.version.axis2>[1.6.1.wso2v14, 1.7.0)</imp.pkg.version.axis2>
         <imp.pkg.version.carbon.throttle>[4.2.1, 4.3.0)</imp.pkg.version.carbon.throttle>
         <imp.pkg.version.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.carbon.base>
+        <imp.pkg.version.google.code.gson>[2.2.4, 2.3.0)</imp.pkg.version.google.code.gson>
 
     </properties>
 </project>
