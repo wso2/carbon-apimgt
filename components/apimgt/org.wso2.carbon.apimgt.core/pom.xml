@@ -70,12 +70,18 @@
                             org.wso2.carbon.apimgt.core.*;version="${carbon.apimgt.version}",
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.core,
+                            org.wso2.carbon.core.*; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
-                            *;resolution:=optional
+                            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.throttle.*; version="${imp.pkg.version.carbon.throttle}",
+                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
+                            org.apache.commons.*,
+                            org.osgi.framework.*,
+                            org.osgi.util.*,
+                            org.osgi.service.*,
+                            javax.cache.*
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

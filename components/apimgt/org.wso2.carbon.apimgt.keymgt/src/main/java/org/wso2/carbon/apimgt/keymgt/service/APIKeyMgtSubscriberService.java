@@ -296,7 +296,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
         try {
 
-            String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
 
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
 

@@ -92,8 +92,8 @@
                         </Private-Package>
 						<Import-Package>
 							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
-							org.wso2.carbon.identity.base.*,
-							org.wso2.carbon.identity.core.*
+							org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
+							org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
                         </Import-Package>
 						<Export-Package>
                             !org.wso2.carbon.apimgt.keymgt.stub.validator,
@@ -103,7 +103,6 @@
                             !org.wso2.carbon.apimgt.keymgt.stub.types.carbon,
                             !org.wso2.carbon.apimgt.keymgt.client,org.wso2.carbon.apimgt.keymgt.*,
                         </Export-Package>
-						<DynamicImport-Package>*</DynamicImport-Package>
 					</instructions>
 				</configuration>
 			</plugin>
