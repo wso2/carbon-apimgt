@@ -2666,7 +2666,56 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		api.setContext(context);
 		api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
 		api.setLastUpdated(new Date());
+		saveAPI(api, true);
 
+		return getUuuidOfAPI(apiId);
+	}
+
+    public String createAPI(APIIdentifier apiIdentifier, String apiContext,String endpoint) throws APIManagementException {
+
+		String provider = apiIdentifier.getProviderName();
+		String name = apiIdentifier.getApiName();
+		String version = apiIdentifier.getVersion();
+		String contextVal = apiContext;
+
+		String providerDomain = MultitenantUtils.getTenantDomain(provider);
+
+		String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+		if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+			//Create tenant aware context for API
+			context= "/t/" + providerDomain + context;
+		}
+
+		if (provider != null) {
+			provider = APIUtil.replaceEmailDomain(provider);
+		}
+		provider = (provider != null ? provider.trim() : null);
+		name = (name != null ? name.trim() : null);
+		version = (version != null ? version.trim() : null);
+
+		APIIdentifier apiId = new APIIdentifier(provider, name, version);
+
+		if (isAPIAvailable(apiId)) {
+			handleException("Error occurred while adding the API. A duplicate API already exists for " +
+			                name + "-" + version);
+		}
+
+		API api = new API(apiId);
+		api.setStatus(APIStatus.CREATED);
+
+		// This is to support the new Pluggable version strategy
+		// if the context does not contain any {version} segment, we use the default version strategy.
+		context = APIUtil.checkAndSetVersionParam(context);
+		api.setContextTemplate(context);
+
+		context = APIUtil.updateContextWithVersion(version, contextVal, context);
+
+		api.setContext(context);
+		api.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
+		api.setLastUpdated(new Date());
+        if(endpoint!=null){
+        api.setEndpointConfig(endpoint);
+        }
 		saveAPI(api, true);
 
 		return getUuuidOfAPI(apiId);
