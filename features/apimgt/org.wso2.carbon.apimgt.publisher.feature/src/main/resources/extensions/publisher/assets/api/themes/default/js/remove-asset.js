@@ -7,35 +7,40 @@ $(document).ready(function () {
      if(count != null && count > 0){
         return;
      }
-        $.ajax({
-                   url: getDeleteUrl(id, type),
-                   type: 'POST',
-                   data: {method: 'delete'},
-                   success: function (result) {
 
-                      // $('#modal-redirect').modal('show');
-                      
-                       setTimeout(function () {
-                           window.location.reload();
-                       }, 2000);
-                   },
-                   error: function (result) {
-                       //alert("Unable to delete the API.");
-                       BootstrapDialog.show({
-                                                type: BootstrapDialog.TYPE_DANGER,
-                                                title: 'Error',
-                                                message: 'Error While deleting API ' ,
-                                                buttons: [
-                                                    {
-                                                        label: 'OK',
-                                                        action: function (dialogRef) {
-                                                            dialogRef.close();
-                                                        }
-                                                    }
-                                                ]
-                                            });
-                   }
-               });
+        BootstrapDialog.confirm('Are you sure you want to delete the API - '+ apiName +' - '+ version, function(result){
+            if(result) {
+                $.ajax({
+                    url: getDeleteUrl(id, type),
+                    type: 'POST',
+                    data: {method: 'delete'},
+                    success: function (result) {
+
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 2000);
+                    },
+                    error: function (result) {
+                        //alert("Unable to delete the API.");
+                        BootstrapDialog.show({
+                            type: BootstrapDialog.TYPE_DANGER,
+                            title: 'Error',
+                            message: 'Error While deleting API ' ,
+                            buttons: [
+                                {
+                                    label: 'OK',
+                                    action: function (dialogRef) {
+                                        dialogRef.close();
+                                    }
+                                }
+                            ]
+                        });
+                    }
+                });
+            }else {
+                return;
+            }
+        });
      }
     
 
