@@ -153,22 +153,22 @@ public class APIMgtDAOTest extends TestCase {
 		apiInfoDTO.setProviderId("PRABATH");
 		apiInfoDTO.setVersion("V1.0.0");
 		apiInfoDTO.setContext("/api2context");
-
-		apiMgtDAO.registerAccessToken("CON1", "APPLICATION3", "PRABATH",
-		                              MultitenantConstants.SUPER_TENANT_ID, apiInfoDTO, "SANDBOX");
-		String key1 =
-		              apiMgtDAO.getAccessKeyForAPI("PRABATH", "APPLICATION3", apiInfoDTO, "SANDBOX");
-		assertNotNull(key1);
-
-		apiMgtDAO.registerAccessToken("CON1", "APPLICATION3", "PRABATH",
-		                              MultitenantConstants.SUPER_TENANT_ID, apiInfoDTO,
-		                              "PRODUCTION");
-		String key2 =
-		              apiMgtDAO.getAccessKeyForAPI("PRABATH", "APPLICATION3", apiInfoDTO,
-		                                           "PRODUCTION");
-		assertNotNull(key2);
-
-		assertTrue(!key1.equals(key2));
+//   IDENT UNUSED
+//		apiMgtDAO.registerAccessToken("CON1", "APPLICATION3", "PRABATH",
+//		                              MultitenantConstants.SUPER_TENANT_ID, apiInfoDTO, "SANDBOX");
+//		String key1 =
+//		              apiMgtDAO.getAccessKeyForAPI("PRABATH", "APPLICATION3", apiInfoDTO, "SANDBOX");
+//		assertNotNull(key1);
+//
+//		apiMgtDAO.registerAccessToken("CON1", "APPLICATION3", "PRABATH",
+//		                              MultitenantConstants.SUPER_TENANT_ID, apiInfoDTO,
+//		                              "PRODUCTION");
+//		String key2 =
+//		              apiMgtDAO.getAccessKeyForAPI("PRABATH", "APPLICATION3", apiInfoDTO,
+//		                                           "PRODUCTION");
+//		assertNotNull(key2);
+//
+//		assertTrue(!key1.equals(key2));
 	}
 
 	/*public String[] testRegisterApplicationAccessToken() throws Exception {
