@@ -338,19 +338,6 @@ label {
     color: #6C6767;
 }
 
-.advance-search-btn:hover {
-    color: #FFF;
-    background: #2374c8;
-}
-
-.advance-search-btn {
-    color: #FFF;
-    background: #1965b2;
-    margin-left: 10px;
-    height: 54px;
-    padding: 15px 15px;
-}
-
 .navbar-right > li {
     float: right !important;
 }
@@ -496,7 +483,8 @@ header > .wr-global-header {
 }
 
 .container-fluid {
-    padding-right: 13px;
+    
+    padding-right: 0px;
 }
 
 .bookmark-link span {
@@ -569,4 +557,10 @@ div.top-menu-right-custom {
     top: 7px;
     width: auto;
     border-radius: 0px;
+}
+div.navigation-container{
+    padding-left:0px;
+}
+.app-logo img {    
+    padding-left: 15px;
 }
