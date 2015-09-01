@@ -294,7 +294,7 @@
                             org.w3c.dom;resolution:=optional,
                             com.nimbusds.*;resolution:=optional,
                             com.ibm.wsdl.*;resolution:=optional,
-                            net.sf.saxon.expr.sort;resolution:=optional,
+                            net.sf.saxon.*;resolution:=optional,
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
