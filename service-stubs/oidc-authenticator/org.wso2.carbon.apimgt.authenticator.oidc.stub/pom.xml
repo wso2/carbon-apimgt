@@ -55,7 +55,7 @@
                                 </path>
 
 				<java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
-                    <arg line="-uri src/main/resources/OIDCAuthenticationService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.authenticator.oidc.stub                                     -ns2p http://oidc.authenticator.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.authenticator.oidc.stub,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.authenticator.oidc.stub.types.axis2,http://dto.oidc.authenticator.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.authenticator.oidc.stub.types" />
+                    <arg line="-uri src/main/resources/OIDCAuthenticationService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.authenticator.oidc.stub -ns2p http://oidc.authenticator.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.authenticator.oidc.stub,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.authenticator.oidc.stub.types.axis2,http://dto.oidc.authenticator.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.authenticator.oidc.stub.types" />
 				    <classpath refid="wsdl2java.classpath" />
                                 </java>
                             </tasks>
