@@ -16,6 +16,7 @@ import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
 import org.wso2.carbon.identity.oauth2.validators.OAuth2ScopeValidator;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -127,11 +128,9 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
         }
 
-        //TODO : After carbon 4.4.0 upgrade, AccessTokenDO constructor has new parameter for refresh validity time.
-        //Temporally passed the validity period as the validity period
         AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(),
                 apiKeyValidationInfoDTO.getEndUserName(), scopes,
-                null, null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
+                null, null,apiKeyValidationInfoDTO.getValidityPeriod(),apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
