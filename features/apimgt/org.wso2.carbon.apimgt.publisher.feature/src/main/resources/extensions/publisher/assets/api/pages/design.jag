@@ -25,7 +25,6 @@ require('/modules/publisher.js').exec(function(ctx) {
 	var server = require('store').server;
 	var user = server.current(ctx.session);
 	var asset = require('rxt').asset;
-	log.info(user);
 	var request = ctx.request;
 	caramel = require('caramel');
 	var am;
