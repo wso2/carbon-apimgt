@@ -1,4 +1,5 @@
-{{#each prototyped_apis_list}}
+{{#if prototyped_apis_list}}
+    {{#each prototyped_apis_list}}
         <div class="ctrl-wr-asset ">
             <div class="itm-ast">
                 <a class="ast-img " href="{{tenantedUrl "/assets"}}/{{../prototyped_api_type}}/details/{{uuid}}">
@@ -14,4 +15,7 @@
                 </div>
             </div>
         </div>
-{{/each}}
+    {{/each}}
+{{else}}
+    <h1>No prototyped APIs found..!</h1>
+{{/if}}
