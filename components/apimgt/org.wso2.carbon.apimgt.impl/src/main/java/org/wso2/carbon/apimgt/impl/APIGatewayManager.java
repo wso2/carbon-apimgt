@@ -84,7 +84,7 @@ public class APIGatewayManager {
                 client = new APIGatewayAdminClient(api.getId(), environment);
 			String operation;
 			// If the API exists in the Gateway
-			if (client.getApi(tenantDomain,api.getId()) != null) {
+			if (client.getApi(tenantDomain, api.getId()) != null) {
 
 				// If the Gateway type is 'production' and the production url
 				// has been removed
@@ -100,10 +100,10 @@ public class APIGatewayManager {
 					// We need to remove the api from the environment since its
 					// relevant url has been removed.
 					operation ="delete";
-					client.deleteApi(tenantDomain,api.getId());
+					client.deleteApi(tenantDomain, api.getId());
                     if(api.isPublishedDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                            client.deleteDefaultApi(tenantDomain,api.getId());
+                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                            client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
@@ -120,16 +120,16 @@ public class APIGatewayManager {
 
                     //Update the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.updateApiForInlineScript(builder, tenantDomain,api.getId());
+                        client.updateApiForInlineScript(builder, tenantDomain, api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.updateApi(builder, tenantDomain,api.getId());
+                        client.updateApi(builder, tenantDomain, api.getId());
                     }
 
                     if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
-                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                            client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
                         }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                            client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
                         }
                     }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
@@ -163,16 +163,16 @@ public class APIGatewayManager {
 
                     //Add the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.addPrototypeApiScriptImpl(builder, tenantDomain,api.getId());
+                        client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.addApi(builder, tenantDomain,api.getId());
+                        client.addApi(builder, tenantDomain, api.getId());
                     }
 
                     if(api.isDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(), api.getId());
                         }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(), api.getId());
                         }
                     }
 					setSecurevaultProperty(api,tenantDomain,environment,operation);
@@ -218,20 +218,20 @@ public class APIGatewayManager {
                     Environment environment = environments.get(environmentName);
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
-                    if (client.getApi(tenantDomain,api.getId()) != null) {
+                    if (client.getApi(tenantDomain, api.getId()) != null) {
                         if (debugEnabled) {
 					log.debug("Removing API " + api.getId().getApiName() + " From environment " +
 					          environment.getName());
 				}
 				String operation ="delete";
-				client.deleteApi(tenantDomain,api.getId());
+				client.deleteApi(tenantDomain, api.getId());
 				undeployCustomSequences(api, tenantDomain,environment);
 				setSecurevaultProperty(api,tenantDomain,environment,operation);
 			}
 
             if(api.isPublishedDefaultVersion()){
-                if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                    client.deleteDefaultApi(tenantDomain,api.getId());
+                if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                    client.deleteDefaultApi(tenantDomain, api.getId());
                 }
             }
                 } catch (AxisFault axisFault) {
@@ -264,13 +264,13 @@ public class APIGatewayManager {
                 try {
                     Environment environment = environments.get(environmentName);
             APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-            if(client.getDefaultApi(tenantDomain,api.getId())!=null){
+            if(client.getDefaultApi(tenantDomain, api.getId())!=null){
                 if (debugEnabled) {
                     log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
                             environment.getName());
                 }
 
-                client.deleteDefaultApi(tenantDomain,api.getId());
+                client.deleteDefaultApi(tenantDomain, api.getId());
             }
                 } catch (AxisFault axisFault) {
                     /*
@@ -303,7 +303,7 @@ public class APIGatewayManager {
                 APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
                 // If the API exists in at least one environment, consider as
                 // published and return true.
-                if (client.getApi(tenantDomain,api.getId()) != null) {
+                if (client.getApi(tenantDomain, api.getId()) != null) {
                     return true;
                 }
             } catch (AxisFault axisFault) {

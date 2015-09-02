@@ -745,9 +745,9 @@ public class WSO2APIPublisher implements APIPublisher {
 
         
 			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
-                    api.getId().getProviderName()));
+			api.getId().getProviderName()));
 			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
+			.getTenantId(tenantDomain);
 			entity.addPart("redirectURL", new StringBody(getExternalStoreRedirectURL(tenantId)));
 			if (api.getTransports() == null) {
 				entity.addPart("http_checked", new StringBody(""));

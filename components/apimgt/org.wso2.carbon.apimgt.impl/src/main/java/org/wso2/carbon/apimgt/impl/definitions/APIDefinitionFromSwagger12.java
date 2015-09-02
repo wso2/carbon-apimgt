@@ -58,7 +58,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
             for (Object resource : resources) {
                 JSONObject resourceConfig = (JSONObject) resource;
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
                 Map<String, Environment> environments = config.getApiGatewayEnvironments();
                 Environment environment = null;
@@ -261,15 +261,15 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         String pathJsonTemplate = "{\n    \"path\": \"\",\n    \"operations\": []\n}";
         String operationJsonTemplate = "{\n    \"method\": \"\",\n    \"parameters\": []\n}";
         String apiJsonTemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    " +
-                "\"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n       " +
-                " \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        " +
-                "\"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n           " +
-                " \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+            "\"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n       " +
+            " \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        " +
+            "\"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n           " +
+            " \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
         String apiResourceJsontemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    " +
-                "\"resourcePath\":\"\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        " +
-                "\"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        " +
-                "\"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n       " +
-                " \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+            "\"resourcePath\":\"\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        " +
+            "\"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        " +
+            "\"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n       " +
+            " \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
 
 
         APIIdentifier identifier = api.getId();

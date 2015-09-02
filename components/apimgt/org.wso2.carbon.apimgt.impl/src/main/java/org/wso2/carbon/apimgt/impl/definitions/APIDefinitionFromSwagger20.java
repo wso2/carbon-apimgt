@@ -246,7 +246,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     public String generateAPIDefinition(API api) throws APIManagementException {
         APIIdentifier identifier = api.getId();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();

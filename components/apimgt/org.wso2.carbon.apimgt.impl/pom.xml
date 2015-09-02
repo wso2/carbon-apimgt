@@ -93,7 +93,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
         </dependency>
@@ -117,7 +117,7 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
         </dependency>
@@ -144,7 +144,7 @@
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
-		</dependency>
+        </dependency>
         <dependency>
           <groupId>org.wso2.carbon.registry</groupId>
           <artifactId>org.wso2.carbon.registry.indexing</artifactId>

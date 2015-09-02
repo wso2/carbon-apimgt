@@ -1654,15 +1654,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             APIIdentifier apiId = api.getId();
             GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                    APIConstants.DOCUMENTATION_KEY);
+                APIConstants.DOCUMENTATION_KEY);
             GenericArtifact artifact =
-                    artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
+                artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(
-                    APIUtil.createDocArtifactContent(artifact, apiId, documentation));
+                APIUtil.createDocArtifactContent(artifact, apiId, documentation));
             String apiPath = APIUtil.getAPIPath(apiId);
             //Adding association from api to documentation . (API -----> doc)
             registry.addAssociation(apiPath, artifact.getPath(),
-                    APIConstants.DOCUMENTATION_ASSOCIATION);
+                APIConstants.DOCUMENTATION_ASSOCIATION);
             String docVisibility = documentation.getVisibility().name();
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
             String visibility = api.getVisibility();
@@ -1676,7 +1676,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                    visibility, authorizedRoles, artifact.getPath());
+                visibility, authorizedRoles, artifact.getPath());
             String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
             if (docFilePath != null && !docFilePath.equals("")) {
                 //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
@@ -1796,7 +1796,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
+                .getAPIManagerConfiguration();
             boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
@@ -1835,7 +1835,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-            		identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
             if(registry.resourceExists(apiCollectionPath)){
             	Resource apiCollection=registry.get(apiCollectionPath);
             	CollectionImpl collection=(CollectionImpl)apiCollection;
@@ -1857,7 +1857,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             	if(collection.getChildCount() == 0){
                     if(log.isDebugEnabled()){
                         log.debug("No more APIs from the provider " + identifier.getProviderName() + " found. " +
-                                "Removing provider collection from registry");
+                            "Removing provider collection from registry");
                     }
             		registry.delete(apiProviderPath);		
             	}
