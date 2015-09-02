@@ -163,7 +163,8 @@ legend {
 
 .action-wrapper {
     padding: 8px 2px 2px 5px !important;
-    color: #fff !important;
+    margin: 0;
+    height: 50px;
 }
 
 .action-wrapper a {
@@ -199,6 +200,10 @@ legend {
 
 .wr-action-btn-bar {
     height: 50px;
+    display: block;
+    margin: 0;
+    padding: 0;
+    width: 100%;
 }
 
 .form-horizontal {
@@ -499,12 +504,6 @@ header > .wr-global-header {
     color: #333;
 }
 
-.wr-action-btn-bar {
-    margin-left: -15px;
-    padding-left: 0px;
-    width: 102%;
-}
-
 button.close {
     position: absolute;
     top: 0;
@@ -538,9 +537,10 @@ div.top-menu-right-custom {
     float: right;
     padding-right: 10px;
     text-align: right;
-    padding-top: 10px;
+    padding-top: 0;
     font-weight: 100;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 .action-title {
     font-weight: 100;
