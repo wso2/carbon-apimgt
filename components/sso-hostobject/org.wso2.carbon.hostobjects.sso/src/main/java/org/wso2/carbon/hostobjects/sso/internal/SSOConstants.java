@@ -37,7 +37,8 @@ public class SSOConstants {
     public static final String IS_AUTHENTICATED = "authenticated";
     public static final String USERNAME = "username";
 
-    public static final String SAML2_NAME_ID_POLICY = "urn:oasis:names:tc:SAML:2.0:nameid-format:entity";
+    public static final String NAME_ID_POLICY = "nameIdPolicy";
+    public static final String NAME_ID_POLICY_DEFAULT = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
     public static final String LOGOUT_USER = "urn:oasis:names:tc:SAML:2.0:logout:user";
 
     public SSOConstants() {
