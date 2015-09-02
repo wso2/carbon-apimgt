@@ -314,10 +314,11 @@
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.sequences.stub.types,
                             org.wso2.carbon.mediation.security.stub.*;version="${carbon.mediation.imp.pkg.version}",
+                            org.wso2.carbon.sequences.stub.*;version="${carbon.mediation.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
+                        <DynamicImport-Package>org.wso2.carbon.apimgt.keymgt</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
