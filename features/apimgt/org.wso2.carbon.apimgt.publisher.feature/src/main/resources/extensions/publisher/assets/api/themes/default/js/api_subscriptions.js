@@ -75,7 +75,7 @@ $(function () {
             "\" id=\"r1-" + metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
             metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
-            "\" value=\"PROD_ONLY_BLOCKED\"> Production Only <input type=\"radio\" name=\"" +
+            "\" value=\"PROD_ONLY_BLOCKED\"> Production Only <br><input type=\"radio\" name=\"" +
             metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
             metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
@@ -91,7 +91,7 @@ $(function () {
             "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
             metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
-            "\" disabled> Production Only <input type=\"radio\" name=\"" +
+            "\" disabled> Production Only <br><input type=\"radio\" name=\"" +
             metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
             metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
@@ -105,7 +105,7 @@ $(function () {
             "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
             metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
-            "\" checked disabled> Production Only <input type=\"radio\" name=\"" +
+            "\" checked disabled> Production Only <br><input type=\"radio\" name=\"" +
             metadata.newRowData.apiProvider + "-" + metadata.newRowData.apiName + "-" +
             metadata.newRowData.apiVersion + "-" + metadata.newRowData.appId + "-" +
             metadata.newRowData.apiUsername + "-" + metadata.newRowData.application +
