@@ -46,7 +46,6 @@
                         <Export-Package>
                             org.wso2.carbon.forum.*;
                         </Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

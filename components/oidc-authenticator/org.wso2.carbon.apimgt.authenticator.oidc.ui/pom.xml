@@ -96,7 +96,6 @@
                             org.apache.commons.logging.* ;version="1.0.4",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                         <Carbon-Component>UIBundle</Carbon-Component>
                     </instructions>
                 </configuration>

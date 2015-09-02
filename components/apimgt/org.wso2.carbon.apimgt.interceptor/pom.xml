@@ -103,7 +103,8 @@
                             org.wso2.carbon.context; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.identity.base; version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.identity.core.util; version="${carbon.identity.imp.pkg.version}",
-                            org.wso2.carbon.tomcat.ext.valves; version="${carbon.platform.package.import.version.range}"
+                            org.wso2.carbon.tomcat.ext.valves; version="${carbon.platform.package.import.version.range}",
+                            *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
                             scribe;scope=compile|runtime;inline=false;
