@@ -93,7 +93,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
         </dependency>
@@ -117,7 +117,7 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
         </dependency>
@@ -133,7 +133,7 @@
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.event.core</artifactId>
         </dependency>
-        <dependency>
+         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
         </dependency>
@@ -144,7 +144,7 @@
         <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
-        </dependency>
+		</dependency>
         <dependency>
           <groupId>org.wso2.carbon.registry</groupId>
           <artifactId>org.wso2.carbon.registry.indexing</artifactId>
@@ -157,6 +157,11 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.apimgt</groupId>
+			<artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
+	  	</dependency>
+
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
@@ -170,6 +175,10 @@
           <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
       </dependency>
       <dependency>
+		<groupId>net.sf.saxon.wso2</groupId>
+		<artifactId>saxon.he</artifactId>
+	  </dependency>
+      <dependency>
           <groupId>com.nimbusds.wso2</groupId>
           <artifactId>nimbus-jose-jwt</artifactId>
       </dependency>
@@ -177,8 +186,10 @@
           <groupId>org.wso2.carbon.deployment</groupId>
           <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
       </dependency>
-
-
+        <dependency>
+          <groupId>org.wso2.carbon.apimgt</groupId>
+          <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
+        </dependency>
   </dependencies>
     <build>
         <plugins>
@@ -297,6 +308,9 @@
                             net.sf.saxon.expr.sort;resolution:=optional,
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.statsupdate.stub.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.gateway.stub.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.authenticator.stub.*;version="${carbon.platform.package.import.version.range}",

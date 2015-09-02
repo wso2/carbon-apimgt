@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Map;
@@ -61,6 +62,9 @@ public class APIManagerAnalyticsConfiguration {
         return instance;
     }
     public static synchronized APIManagerAnalyticsConfiguration createNewInstance(){
+            log.debug("Writing Analytics Configuration to Registry...");
+            APIUtil.writeAnalyticsConfigurationToRegistry(ServiceReferenceHolder.getInstance()
+                                                                  .getAPIManagerConfigurationService().getAPIManagerConfiguration());
             instance = new APIManagerAnalyticsConfiguration();
         return instance;
     }
