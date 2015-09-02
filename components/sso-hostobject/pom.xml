@@ -151,7 +151,10 @@
     </pluginRepositories>
 
    <properties>
-   	<carbon.kernel.version>4.4.0</carbon.kernel.version>
+   	    <carbon.kernel.version>4.4.1</carbon.kernel.version>
+        <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
+        <jaggery.version>0.10.0</jaggery.version>
+       <commons-lang.version>2.6.0.wso2v1</commons-lang.version>
    </properties>
 
 </project>

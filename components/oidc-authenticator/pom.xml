@@ -35,7 +35,7 @@
     <modules>
         <module>org.wso2.carbon.apimgt.authenticator.oidc.ui</module>
         <module>org.wso2.carbon.apimgt.authenticator.oidc</module>
-	<module>org.wso2.carbon.apimgt.hostobjects.oidc</module>
+	    <module>org.wso2.carbon.apimgt.hostobjects.oidc</module>
     </modules>
     
 </project>

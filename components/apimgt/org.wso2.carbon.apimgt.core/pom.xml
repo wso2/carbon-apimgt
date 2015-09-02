@@ -80,7 +80,8 @@
                             org.osgi.framework.*,
                             org.osgi.util.*,
                             org.osgi.service.*,
-                            javax.cache.*
+                            javax.cache.*,
+                            *;resolution:=optional
                         </Import-Package>
                     </instructions>
                 </configuration>
