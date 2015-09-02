@@ -314,7 +314,7 @@
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.sequences.stub.types,
+                            org.wso2.carbon.sequences.stub.types;version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.mediation.security.stub.*;version="${carbon.mediation.imp.pkg.version}"
                         </Import-Package>
                     </instructions>
