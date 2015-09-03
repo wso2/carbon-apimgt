@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.apimgt.publisher.category.feature</artifactId>   
     <packaging>pom</packaging>
-    <name>API Publisher</name>
+    <name>API Publisher ${project.version}</name>
     <url>http://wso2.org</url>
     <description>Includes features for APIPublisher component.</description>
 
