@@ -2871,7 +2871,7 @@ public class ApiMgtDAO {
                         "AM_APPLICATION_KEY_MAPPING AKM, " +
                         accessTokenStoreTable + " IAT, " +
                         "IDN_OAUTH_CONSUMER_APPS ICA" +
-                        "WHERE " +
+                        " WHERE " +
                         "AKM.APPLICATION_ID = ? AND " +
                         "IAT.USER_TYPE = ? AND " +
                         "ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND " +
