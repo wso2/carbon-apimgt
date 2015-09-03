@@ -130,7 +130,12 @@ asset.manager = function(ctx) {
                     }
                 }
                 api.description = options.attributes.overview_description;
-                api.tags = options.attributes.overview_tags;
+                if(options.attributes.overview_tags){
+                    api.tags = options.attributes.overview_tags;
+                }
+                else{
+                    api.tags = null;
+                }
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
                 api.swagger = options.attributes.swagger;
@@ -192,7 +197,12 @@ asset.manager = function(ctx) {
                  }*/
                 var apiProxy = apiPublisher.instance(user);
                 api.description = options.attributes.overview_description;
-                api.tags = options.attributes.overview_tags;
+                if(options.attributes.overview_tags){
+                    api.tags = options.attributes.overview_tags;
+                }
+                else{
+                    api.tags = null;
+                }
                 api.visibility = options.attributes.visibility;
                 api.visibleRoles = options.attributes.roles;
                 api.swagger = options.attributes.swagger;
