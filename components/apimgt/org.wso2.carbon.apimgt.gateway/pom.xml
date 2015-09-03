@@ -79,24 +79,14 @@
             <artifactId>org.wso2.carbon.ui</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-            <version>4.2.3</version>
-        </dependency>
-        <dependency>
              <groupId>org.wso2.carbon</groupId>
              <artifactId>org.wso2.carbon.utils</artifactId>       			 
          </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-            <version>4.2.3</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-        </dependency> 
-		<dependency>
            <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
         </dependency> 
@@ -116,10 +106,7 @@
 			<groupId>org.wso2.carbon.mediation</groupId>
 			<artifactId>org.wso2.carbon.rest.api.stub</artifactId>
 		</dependency>
-		<dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.utils</artifactId>
-        </dependency>
+		
     </dependencies>
 
     <build>
