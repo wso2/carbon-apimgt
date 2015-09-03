@@ -482,7 +482,7 @@ asset.renderer = function (ctx) {
 
     var isActivatedAsset = function (assetType) {
         var app = require('rxt').app;
-        var activatedAssets = app.getActivatedAssets(ctx.tenantId); //ctx.tenantConfigs.assets;
+        var activatedAssets = app.getUIActivatedAssets(ctx.tenantId); //ctx.tenantConfigs.assets;
         //return true;
         if (!activatedAssets) {
             throw 'Unable to load all activated assets for current tenant: ' + ctx.tenatId + '.Make sure that the assets property is present in the tenant config';
