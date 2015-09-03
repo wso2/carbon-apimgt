@@ -32,7 +32,7 @@
               {{#each assetCategoryDetails.values}}
               <li><a tabindex="-1" href="#">{{this}}</a></li>
               {{/each}}
-          </ul>          
+          </ul>
       </div>
       {{/if}}
 
@@ -67,17 +67,16 @@
         <div class="ast-container" id="list_assets_table_body">
             {{#if assets}}
                 <div id="list_assets_content">
-                    {{>list_assets_table_body .}}
+                    {{>list_assets_table_body assets}}
                 </div>
             {{else}}
                 <div class="emptyAssets-MsgDiv">
-                    
+
                     <p class="emptyAssets">We are sorry! we couldn't find anything for you ...</p>
 
                 </div>
             {{/if}}
         </div>
-    </div> 
+    </div>
 </div>
-
 

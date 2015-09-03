@@ -34,7 +34,7 @@ store.infiniteScroll.recalculateRowsAdded = function () {
 };
 /**
  * Initial method for pagination
-* */
+ * */
 store.infiniteScroll.addItemsToPage = function () {
     var screen_width = $(window).width();
     var screen_height = $(window).height();
@@ -51,9 +51,18 @@ store.infiniteScroll.addItemsToPage = function () {
     row_current = row_current + 3; // We increase the row current by 2 since we need to provide one additional row to scroll down without loading it from backend
     var from = 0;
     var to = 0;
+    var assetsAddedFromBackEnd = $('.ctrl-wr-asset').length;
+    //debugger;
     if (row_current > rows_added && doPagination) {
-        from = rows_added * items_per_row;
-        to = row_current * items_per_row;
+        if(assetsAddedFromBackEnd == parseInt(store.publisher.itemsPerPage)){
+            from = parseInt(store.publisher.itemsPerPage);
+            to = from + row_current*items_per_row;
+        }else if (assetsAddedFromBackEnd < parseInt(store.publisher.itemsPerPage)){ //no need of paging
+            return;
+        }else{
+            from = rows_added * items_per_row;
+            to = row_current*items_per_row;
+        }
         last_to = to; //We store this os we can recalculate rows_added when resolution change
         rows_added = row_current;
         //console.info("from = " + from + " count = " + (to - from) + " row_current = ", row_current + " screen_height = " + screen_height + " scroll_pos = " + scroll_pos + " thumb_height = " + thumb_height);
@@ -81,6 +90,7 @@ store.infiniteScroll.getItems = function (from, to) {
         var loadingAnimationTop = $(document).height() - 320;
         $('.loading-animation-big').css('top',loadingAnimationTop+'px');
     });
+    //console.info('loading','Loading assets from ' + from + ' to ' + to + '.');
     //var url = caramel.tenantedUrl(store.asset.paging.url+"&start="+from+"&count="+count);     //TODO enable tenanted url thing..
     var loadAssets = function () {
         $.ajax({
@@ -93,8 +103,11 @@ store.infiniteScroll.getItems = function (from, to) {
                 if (response) {
                     var assets = convertTimeToUTC(response.list);
                     assets=convertStringNull(response.list);
+                    if(assets.length == 0 ){
+                        doPagination = false;
+                    }
                     caramel.render('list_assets_table_body', assets, function (info, content) {
-                        $('.loading-animation').addClass('loading-animation-big').remove();
+                        $('.loading-animation-big').addClass('loading-animation-big').remove();
                         $('#list_assets_content').append($(content));
                     });
                 } else { //if no assets retrieved for this page
@@ -133,7 +146,7 @@ store.infiniteScroll.getItems = function (from, to) {
  * This method binds scroll and resize events to addItemsToPage callback
  */
 store.infiniteScroll.showAll = function () {
-    $('.assets-container section').empty();
+    //$('.assets-container section').empty();
     store.infiniteScroll.addItemsToPage();
     $(window).scroll(function () {
         store.infiniteScroll.addItemsToPage();

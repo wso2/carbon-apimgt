@@ -831,7 +831,7 @@
         <carbon.apimgt.handlers.stub.package.import.version.range>[2.0.0, 3.0.0)</carbon.apimgt.handlers.stub.package.import.version.range>
 
 	<!-- Carbon Governance -->
-        <carbon.governance.version>4.5.5</carbon.governance.version>
+        <carbon.governance.version>4.5.6</carbon.governance.version>
 
         <!-- Carbon Registry -->
         <carbon.registry.version>4.4.7</carbon.registry.version>
