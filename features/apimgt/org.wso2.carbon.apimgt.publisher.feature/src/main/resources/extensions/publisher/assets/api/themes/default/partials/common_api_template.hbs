@@ -358,7 +358,7 @@
     <div class="form-actions" id="saveButtons">
         <input type="submit" class="btn btn-primary" value="Save" action="design"/>
         <button class="btn btn-primary" id="go_to_implement">{{t "Next"}}: {{t "Implement"}} ></button>
-        <input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href='./'"/>
+        <input type="reset" class="btn" value="{{t "Cancel"}}" onclick="javascript:window.location.href=window.location.href.replace(/design.*/i, 'list')"/>
     </div>
 </form>
     <script id="designer-apidoc-template" type="text/x-handlebars-template">
