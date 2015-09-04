@@ -289,7 +289,7 @@ asset.renderer = function(ctx) {
                 page.tiersAvailable = tiersAvailable;
                 page.tiers = allowedTiers;
                 page.subscribedToDefault = subscribedToDefault;
-                page.subscriptions=subscriptions;
+                page.subscriptionsList=subscriptions;
                 page.anonymous=false;
             }
 
