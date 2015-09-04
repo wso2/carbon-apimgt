@@ -111,12 +111,9 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.impl.dto.xsd.*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.api.xsd*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.api.model.xsd*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.api.impl.dto.xsd*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.identity.base.xsd.*;version="${carbon.platform.package.export.version}",
+                            org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,
