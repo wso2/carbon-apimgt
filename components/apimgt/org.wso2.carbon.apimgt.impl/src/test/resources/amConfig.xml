@@ -20,7 +20,7 @@
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
     <APIKeyValidator>
-        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
+        <ServerURL>https://localhost:9443/services/</ServerURL>
         <Username>${admin.username}</Username>
         <Password>${admin.password}</Password>
         <EnableJWTCache>false</EnableJWTCache>
