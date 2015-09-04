@@ -78,7 +78,6 @@ require('/modules/publisher.js').exec(function (ctx) {
                     data = apiProxy.getAPISubscriptionCount(provider, name, version);
                     response = responseProcessor.buildSuccessResponse(response,
                         constants.STATUS_CODES.OK, data);
-                    log.info(data);
             }
             break;
 
