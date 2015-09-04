@@ -79,7 +79,6 @@
                             org.osgi.framework.*,
                             org.osgi.util.*,
                             org.osgi.service.*,
-
                             javax.cache.*,
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",

@@ -86,8 +86,8 @@
         <!--ConsumerDialectURI>http://wso2.org/claims</ConsumerDialectURI-->
 
         <!--
-        Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE".
-    -->
+		Signature algorithm. Accepts "SHA256withRSA" or "NONE". To disable signing explicitly specify "NONE".
+	-->
         <!--SignatureAlgorithm>SHA256withRSA</SignatureAlgorithm-->
 
         <!--
@@ -102,8 +102,8 @@
     </APIConsumerAuthentication>
 
     <!-- Primary/secondary login configuration for APIstore. If user likes to keep two login attributes in a distributed setup, to login the APIstore,
-        he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
-        is associated with a claimuri.-->
+		he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
+		is associated with a claimuri.-->
     <!-- <LoginConfig>
             <UserIdLogin  primary="true">
         <ClaimUri></ClaimUri>
@@ -195,9 +195,9 @@
 
             An event can also be published to multiple Receiver Groups each having 1 or more receivers. Receiver
             Groups are delimited by curly braces whereas receivers are delimited by commas.
-        Ex - Multiple Receivers within a single group
-         tcp://localhost:7612/,tcp://localhost:7613/,tcp://localhost:7614/
-        Ex - Multiple Receiver Groups with two receivers each
+	    Ex - Multiple Receivers within a single group
+		 tcp://localhost:7612/,tcp://localhost:7613/,tcp://localhost:7614/
+	    Ex - Multiple Receiver Groups with two receivers each
                  {tcp://localhost:7612/,tcp://localhost:7613},{tcp://localhost:7712/,tcp://localhost:7713/}
         -->
         <BAMServerURL>tcp://localhost:7612/</BAMServerURL>
@@ -290,12 +290,12 @@
         <!--ThriftServerHost>localhost</ThriftServerHost-->
         <EnableThriftServer>true</EnableThriftServer>
 
-        <!-- 
+        <!--
         Scope used for marking Application Tokens. If a token is generated with this scope, they will be treated as Application Access Tokens
         -->
         <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
 
-        <!-- 
+        <!--
         Specifies the implementation to be used for KeyValidationHandler. Steps for validating a token can be controlled by plugging in a custom KeyValidation Handler
         -->
         <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
@@ -431,7 +431,7 @@
     </StatusObservers-->
 
     <!--
-    Use this configuration Create APIs at the Server startup
+	Use this configuration Create APIs at the Server startup
     -->
     <StartupAPIPublisher>
 
@@ -483,10 +483,10 @@
 
 
     <!--
-    When an API is invoked, a list of handlers get engaged to its execution flow. This
-    property defines the position of the Extension Handler.
-    Supported values: top, bottom
-    Defaults to: bottom
+	When an API is invoked, a list of handlers get engaged to its execution flow. This
+	property defines the position of the Extension Handler.
+	Supported values: top, bottom
+	Defaults to: bottom
     -->
     <!--ExtensionHandlerPosition>top|bottom</ExtensionHandlerPosition-->
 
@@ -507,7 +507,7 @@
 
     </CORSConfiguration>
     <!-- This property is there to configure velocity log output into existing Log4j carbon Logger.
-	 You can enable this and set preferable Logger name.
+	  You can enable this and set preferable Logger name.
 	-->
     <!--VelocityLogger>VELOCITY</VelocityLogger-->
 </APIManager>
