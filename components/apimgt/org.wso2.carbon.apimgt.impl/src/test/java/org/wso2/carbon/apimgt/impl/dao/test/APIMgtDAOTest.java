@@ -147,6 +147,7 @@ public class APIMgtDAOTest extends TestCase {
 		apiMgtDAO.addSubscription(apiIdentifier, api.getContext(), 100, "UNBLOCKED");
 	}
 
+	/*
 	public void testRegisterAccessToken() throws Exception {
 		APIInfoDTO apiInfoDTO = new APIInfoDTO();
 		apiInfoDTO.setApiName("API2");
@@ -170,6 +171,7 @@ public class APIMgtDAOTest extends TestCase {
 
 		assertTrue(!key1.equals(key2));
 	}
+	*/
 
 	/*public String[] testRegisterApplicationAccessToken() throws Exception {
 		String validityTime = "5000";
