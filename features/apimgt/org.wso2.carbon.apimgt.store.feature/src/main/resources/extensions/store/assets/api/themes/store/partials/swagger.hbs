@@ -7,7 +7,7 @@
         <div class="controls form-inline">
 	<label class="label-align" for="inputEmail">Try</label>
           <select id="sub_app_list" class="inline">
-          {{#each subscriptions}}
+          {{#each subscriptionsList}}
             <option value="{{application}}" data-sandbox="{{SANDBOX_KEY}}"
                    data-production="{{PRODUCTION_KEY}}">{{application}}
             </option>
