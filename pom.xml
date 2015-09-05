@@ -33,6 +33,7 @@
         <module>features/forum</module>
         <!--module>features/synapse</module-->
         <module>features/oidc-authenticator</module>
+        <module>features/categories</module>
     </modules>
 
     <build>
