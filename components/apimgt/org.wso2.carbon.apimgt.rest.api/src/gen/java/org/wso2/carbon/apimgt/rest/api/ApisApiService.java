@@ -29,13 +29,13 @@ public abstract class ApisApiService {
       public abstract Response apisCopyApiPost(String newVersion,String apiId)
       throws NotFoundException;
   
-      public abstract Response apisApiIdGet(String accept,String ifNoneMatch,String ifModifiedSince)
+      public abstract Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince)
       throws NotFoundException;
   
-      public abstract Response apisApiIdPut(API body,String contentType,String ifMatch,String ifUnmodifiedSince)
+      public abstract Response apisApiIdPut(String apiId,API body,String contentType,String ifMatch,String ifUnmodifiedSince)
       throws NotFoundException;
   
-      public abstract Response apisApiIdDelete(String ifMatch,String ifUnmodifiedSince)
+      public abstract Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince)
       throws NotFoundException;
   
       public abstract Response apisApiIdDocumentsGet(String limit,String offset,String query,String accept,String ifNoneMatch)

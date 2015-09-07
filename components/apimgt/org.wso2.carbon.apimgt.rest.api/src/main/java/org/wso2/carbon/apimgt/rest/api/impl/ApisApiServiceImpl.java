@@ -46,21 +46,21 @@ public class ApisApiServiceImpl extends ApisApiService {
   }
   
       @Override
-      public Response apisApiIdGet(String accept,String ifNoneMatch,String ifModifiedSince)
+      public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince)
       throws NotFoundException {
       // do some magic!
       return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
   }
   
       @Override
-      public Response apisApiIdPut(API body,String contentType,String ifMatch,String ifUnmodifiedSince)
+      public Response apisApiIdPut(String apiId,API body,String contentType,String ifMatch,String ifUnmodifiedSince)
       throws NotFoundException {
       // do some magic!
       return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
   }
   
       @Override
-      public Response apisApiIdDelete(String ifMatch,String ifUnmodifiedSince)
+      public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince)
       throws NotFoundException {
       // do some magic!
       return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();

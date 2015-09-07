@@ -119,11 +119,12 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
-    public Response apisApiIdGet(@ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
+    public Response apisApiIdGet(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
+    @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     throws NotFoundException {
-    return delegate.apisApiIdGet(accept,ifNoneMatch,ifModifiedSince);
+    return delegate.apisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/{apiId}")
@@ -141,12 +142,13 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
-    public Response apisApiIdPut(@ApiParam(value = "API object that needs to be added" ,required=true ) API body,
+    public Response apisApiIdPut(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
+    @ApiParam(value = "API object that needs to be added" ,required=true ) API body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
-    return delegate.apisApiIdPut(body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.apisApiIdPut(apiId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
     @Path("/{apiId}")
@@ -162,10 +164,11 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
-    public Response apisApiIdDelete(@ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
+    public Response apisApiIdDelete(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
+    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
-    return delegate.apisApiIdDelete(ifMatch,ifUnmodifiedSince);
+    return delegate.apisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/{apiId}/documents")
