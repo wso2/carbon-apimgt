@@ -277,7 +277,7 @@
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
-                            com.google.gson;version="${imp.pkg.version.google.code.gson}",
+                            com.google.gson,
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,
@@ -328,9 +328,11 @@
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.sequences.stub.types,
-                            org.wso2.carbon.mediation.security.stub.*;version="${carbon.mediation.imp.pkg.version}"
+                            org.wso2.carbon.mediation.security.stub.*;version="${carbon.mediation.imp.pkg.version}",
+                            org.wso2.carbon.sequences.stub.*;version="${carbon.mediation.imp.pkg.version}",
+                            *;resolution:=optional
                         </Import-Package>
+                        <DynamicImport-Package>org.wso2.carbon.apimgt.keymgt</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

@@ -449,6 +449,12 @@
 
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
+                <version>4.2.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
                 <version>${project.version}</version>
             </dependency>

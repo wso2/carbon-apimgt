@@ -77,7 +77,6 @@
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-            <version>${carbon.identity.version}</version>
         </dependency>
         <dependency>
              <groupId>org.wso2.carbon</groupId>
@@ -197,7 +196,7 @@
                             org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
                             edu.emory.mathcs.backport.*,
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
-                            javax.activation; version="[0.0.0, 1.0.0)",
+                            javax.activation.*; version="[0.0.0, 1.0.0)",
                             javax.cache,
                             javax.net.ssl,
                             javax.xml.namespace,
@@ -218,7 +217,8 @@
                             org.wso2.carbon.rest.api.stub.*;resolution:=optional,
                             org.wso2.carbon.sequences.stub.types;resolution:=optional,
                             org.wso2.carbon.context,
-                            org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}"
+                            org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
+                            *;resolution:=optional
                         </Import-Package>
                     </instructions>
                 </configuration>

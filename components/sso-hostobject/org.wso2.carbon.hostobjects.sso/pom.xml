@@ -35,7 +35,7 @@
         <dependency>
             <groupId>rhino.wso2</groupId>
             <artifactId>js</artifactId>
-            <version>1.7.0.R4.wso2v1</version>
+            <version>${rhino.js.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -60,12 +60,12 @@
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
-            <version>0.9.0.ALPHA4.wso2v1</version>
+            <version>${jaggery.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6.0.wso2v1</version>
+            <version>${commons-lang.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
@@ -101,7 +101,6 @@
                         <Export-Package>
                             org.wso2.carbon.hostobjects.sso.*;
                         </Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
