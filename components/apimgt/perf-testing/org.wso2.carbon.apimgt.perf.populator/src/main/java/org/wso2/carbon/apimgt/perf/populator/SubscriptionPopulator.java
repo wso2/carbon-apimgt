@@ -46,74 +46,74 @@ public class SubscriptionPopulator {
             }
         }
 	}
-    
-    public static void addUserKey(String consumerKey, String userId) {
-        String INSERT_TOKEN_SQL = "INSERT" +
-                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, AUTHZ_USER) " +
-                " VALUES (?,?,?,?,?)";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DriverManager.getConnection(URL, USER, PASS);
-            stmt = conn.prepareStatement(INSERT_TOKEN_SQL);
-            stmt.setString(1, userId + "_token");
-            stmt.setString(2, consumerKey);
-            stmt.setString(3, "ACTIVE");
-            stmt.setString(4, "PRODUCTION");
-            stmt.setString(5, userId);
-            stmt.execute();
-        } catch (SQLException e)  {
-            e.printStackTrace();
-        } finally {
-            closeConnection(conn, stmt, rs);
-        }
-    }
-
-    public static void addKey(String userId, int applicationId) {
-        String INSERT_CONSUMER_APP_SQL = "INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
-                "(CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION) VALUES (?,?,?,?,?) ";
-        String INSERT_TOKEN_SQL = "INSERT" +
-                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE, AUTHZ_USER) " +
-                " VALUES (?,?,?,?,?)";
-        String INSERT_MAPPING_SQL = "INSERT " +
-                "INTO AM_APPLICATION_KEY_MAPPING (APPLICATION_ID, CONSUMER_KEY, KEY_TYPE) " +
-                "VALUES (?,?,?)";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            conn = DriverManager.getConnection(URL, USER, PASS);
-            //conn.setAutoCommit(false);
-            stmt = conn.prepareStatement(INSERT_CONSUMER_APP_SQL);
-            stmt.setString(1, userId + "_key");
-            stmt.setString(2, userId + "_secret");
-            stmt.setString(3, userId);
-            stmt.setInt(4, -1234);
-            stmt.setString(5, "OAuth-1.0a");
-            stmt.execute();
-
-            stmt = conn.prepareStatement(INSERT_TOKEN_SQL);
-            stmt.setString(1, userId + "_token");
-            stmt.setString(2, userId + "_key");
-            stmt.setString(3, "ACTIVE");
-            stmt.setString(4, "PRODUCTION");
-            stmt.setString(5, userId);
-            stmt.execute();
-
-            stmt = conn.prepareStatement(INSERT_MAPPING_SQL);
-            stmt.setInt(1, applicationId);
-            stmt.setString(2, userId + "_key");
-            stmt.setString(3, "PRODUCTION");
-            stmt.execute();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            closeConnection(conn, stmt, rs);
-        }
-    }
+ // IDENT UNUSED
+//    public static void addUserKey(String consumerKey, String userId) {
+//        String INSERT_TOKEN_SQL = "INSERT" +
+//                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH, AUTHZ_USER) " +
+//                " VALUES (?,?,?,?,?)";
+//        Connection conn = null;
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//
+//        try {
+//            conn = DriverManager.getConnection(URL, USER, PASS);
+//            stmt = conn.prepareStatement(INSERT_TOKEN_SQL);
+//            stmt.setString(1, userId + "_token");
+//            stmt.setString(2, consumerKey);
+//            stmt.setString(3, "ACTIVE");
+//            stmt.setString(4, "PRODUCTION");
+//            stmt.setString(5, userId);
+//            stmt.execute();
+//        } catch (SQLException e)  {
+//            e.printStackTrace();
+//        } finally {
+//            closeConnection(conn, stmt, rs);
+//        }
+//    }
+//
+//    public static void addKey(String userId, int applicationId) {
+//        String INSERT_CONSUMER_APP_SQL = "INSERT INTO IDN_OAUTH_CONSUMER_APPS " +
+//                "(CONSUMER_KEY, CONSUMER_SECRET, USERNAME, TENANT_ID, OAUTH_VERSION) VALUES (?,?,?,?,?) ";
+//        String INSERT_TOKEN_SQL = "INSERT" +
+//                " INTO IDN_OAUTH2_ACCESS_TOKEN (ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH, AUTHZ_USER) " +
+//                " VALUES (?,?,?,?,?)";
+//        String INSERT_MAPPING_SQL = "INSERT " +
+//                "INTO AM_APPLICATION_KEY_MAPPING (APPLICATION_ID, CONSUMER_KEY, KEY_TYPE) " +
+//                "VALUES (?,?,?)";
+//        Connection conn = null;
+//        PreparedStatement stmt = null;
+//        ResultSet rs = null;
+//
+//        try {
+//            conn = DriverManager.getConnection(URL, USER, PASS);
+//            //conn.setAutoCommit(false);
+//            stmt = conn.prepareStatement(INSERT_CONSUMER_APP_SQL);
+//            stmt.setString(1, userId + "_key");
+//            stmt.setString(2, userId + "_secret");
+//            stmt.setString(3, userId);
+//            stmt.setInt(4, -1234);
+//            stmt.setString(5, "OAuth-1.0a");
+//            stmt.execute();
+//
+//            stmt = conn.prepareStatement(INSERT_TOKEN_SQL);
+//            stmt.setString(1, userId + "_token");
+//            stmt.setString(2, userId + "_key");
+//            stmt.setString(3, "ACTIVE");
+//            stmt.setString(4, "PRODUCTION");
+//            stmt.setString(5, userId);
+//            stmt.execute();
+//
+//            stmt = conn.prepareStatement(INSERT_MAPPING_SQL);
+//            stmt.setInt(1, applicationId);
+//            stmt.setString(2, userId + "_key");
+//            stmt.setString(3, "PRODUCTION");
+//            stmt.execute();
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        } finally {
+//            closeConnection(conn, stmt, rs);
+//        }
+//    }
 
     public static int addSubscription(int applicationId, int apiId) {
         int subscriptionId = -1;

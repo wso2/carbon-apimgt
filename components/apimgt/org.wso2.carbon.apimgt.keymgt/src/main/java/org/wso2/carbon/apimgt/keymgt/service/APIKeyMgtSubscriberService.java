@@ -86,35 +86,35 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     private static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
 
-    /**
-     * Get the access token for a user per given API. Users/developers can use this access token
-     * to consume the API by directly passing it as a bearer token as per the OAuth 2.0 specification.
-     *
-     * @param userId     User/Developer name
-     * @param apiInfoDTO Information about the API to which the Access token will be issued.
-     *                   Provider name, API name and the version should be provided to uniquely identify
-     *                   an API.
-     * @param tokenType  Type (scope) of the required access token
-     * @return Access Token
-     * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
-     */
-    public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
-                                 String applicationName, String tokenType, String callbackUrl) throws APIKeyMgtException,
-            APIManagementException, IdentityException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        String accessToken = apiMgtDAO.getAccessKeyForAPI(userId, applicationName, apiInfoDTO, tokenType);
-        if (accessToken == null) {
-            //get the tenant id for the corresponding domain
-            String tenantAwareUserId = userId;
-            int tenantId = IdentityUtil.getTenantIdOFUser(userId);
-
-            String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
-
-            accessToken = apiMgtDAO.registerAccessToken(credentials[0], applicationName,
-                    tenantAwareUserId, tenantId, apiInfoDTO, tokenType);
-        }
-        return accessToken;
-    }
+//    /**
+//     * Get the access token for a user per given API. Users/developers can use this access token
+//     * to consume the API by directly passing it as a bearer token as per the OAuth 2.0 specification.
+//     *
+//     * @param userId     User/Developer name
+//     * @param apiInfoDTO Information about the API to which the Access token will be issued.
+//     *                   Provider name, API name and the version should be provided to uniquely identify
+//     *                   an API.
+//     * @param tokenType  Type (scope) of the required access token
+//     * @return Access Token
+//     * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
+//     */
+//    public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
+//                                 String applicationName, String tokenType, String callbackUrl) throws APIKeyMgtException,
+//            APIManagementException, IdentityException {
+//        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+//        String accessToken = apiMgtDAO.getAccessKeyForAPI(userId, applicationName, apiInfoDTO, tokenType);
+//        if (accessToken == null) {
+//            //get the tenant id for the corresponding domain
+//            String tenantAwareUserId = userId;
+//            int tenantId = IdentityUtil.getTenantIdOFUser(userId);
+//
+//            String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
+//
+//            accessToken = apiMgtDAO.registerAccessToken(credentials[0], applicationName,
+//                    tenantAwareUserId, tenantId, apiInfoDTO, tokenType);
+//        }
+//        return accessToken;
+//    }
 
     /**
      * Register an OAuth application for the given user
@@ -163,7 +163,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
 
-            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, userName);
+            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName,tenantDomain);
+            //ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, userName);
 
             if (createdServiceProvider == null) {
                 throw new APIKeyMgtException("Couldn't create Service Provider Application " + applicationName);
@@ -227,7 +228,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             createdServiceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
             // Update the Service Provider app to add OAuthApp as an Inbound Authentication Config
-            appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);
+            appMgtService.updateApplication(createdServiceProvider,tenantDomain,userName);
 
 
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
@@ -320,65 +321,65 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         }
     }
 
-    /**
-     * Get the access token for the specified application. This token can be used as an OAuth
-     * 2.0 bearer token to access any API in the given application.
-     *
-     * @param userId          User/Developer name
-     * @param applicationName Name of the application
-     * @param tokenType       Type (scope) of the required access token
-     * @param tokenScope      Scope of the token
-     * @return Access token
-     * @throws APIKeyMgtException on error
-     */
-    public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
-                                                        String callbackUrl, String[] allowedDomains,
-                                                        String validityTime, String tokenScope)
-            throws APIKeyMgtException, APIManagementException, IdentityException {
-
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-
-        OAuthApplicationInfo oAuthApplicationInfo = null;
-        String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
-
-        Application application = apiMgtDAO.getApplicationByName(applicationName, userId, null);
-        oAuthApplicationInfo = apiMgtDAO.getClientOfApplication(application.getId(), tokenType);
-        if (oAuthApplicationInfo == null) {
-            throw new APIKeyMgtException("Unable to locate oAuth Application");
-        } else {
-            if (oAuthApplicationInfo.getClientId() == null) {
-                throw new APIKeyMgtException("Consumer key value is null can not get application access token");
-            } else if (oAuthApplicationInfo.getParameter("client_secret") == null) {
-                throw new APIKeyMgtException("Consumer secret value is null can not get application access token");
-
-            }
-
-            String consumerKey = oAuthApplicationInfo.getClientId();
-            String consumerSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
-            if (accessToken == null) {
-                //get the tenant id for the corresponding domain
-                String tenantAwareUserId = userId;
-
-                String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
-                if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
-                    //credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
-
-                    accessToken = apiMgtDAO.registerApplicationAccessToken(oAuthApplicationInfo.getClientId(), application.getId(),
-                            applicationName,
-                            tenantAwareUserId, tokenType, allowedDomains, validityTime,tokenScope);
-                }
-
-            }
-
-            ApplicationKeysDTO keys = new ApplicationKeysDTO();
-            keys.setApplicationAccessToken(accessToken);
-            keys.setConsumerKey(consumerKey);
-            keys.setConsumerSecret(consumerSecret);
-            keys.setValidityTime(validityTime);
-            return keys;
-        }
-
-    }
+//    /**
+//     * Get the access token for the specified application. This token can be used as an OAuth
+//     * 2.0 bearer token to access any API in the given application.
+//     *
+//     * @param userId          User/Developer name
+//     * @param applicationName Name of the application
+//     * @param tokenType       Type (scope) of the required access token
+//     * @param tokenScope      Scope of the token
+//     * @return Access token
+//     * @throws APIKeyMgtException on error
+//     */
+//    public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
+//                                                        String callbackUrl, String[] allowedDomains,
+//                                                        String validityTime, String tokenScope)
+//            throws APIKeyMgtException, APIManagementException, IdentityException {
+//
+//        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+//
+//        OAuthApplicationInfo oAuthApplicationInfo = null;
+//        String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
+//
+//        Application application = apiMgtDAO.getApplicationByName(applicationName, userId, null);
+//        oAuthApplicationInfo = apiMgtDAO.getClientOfApplication(application.getId(), tokenType);
+//        if (oAuthApplicationInfo == null) {
+//            throw new APIKeyMgtException("Unable to locate oAuth Application");
+//        } else {
+//            if (oAuthApplicationInfo.getClientId() == null) {
+//                throw new APIKeyMgtException("Consumer key value is null can not get application access token");
+//            } else if (oAuthApplicationInfo.getParameter("client_secret") == null) {
+//                throw new APIKeyMgtException("Consumer secret value is null can not get application access token");
+//
+//            }
+//
+//            String consumerKey = oAuthApplicationInfo.getClientId();
+//            String consumerSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
+//            if (accessToken == null) {
+//                //get the tenant id for the corresponding domain
+//                String tenantAwareUserId = userId;
+//
+//                String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
+//                if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
+//                    //credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
+//
+//                    accessToken = apiMgtDAO.registerApplicationAccessToken(oAuthApplicationInfo.getClientId(), application.getId(),
+//                            applicationName,
+//                            tenantAwareUserId, tokenType, allowedDomains, validityTime,tokenScope);
+//                }
+//
+//            }
+//
+//            ApplicationKeysDTO keys = new ApplicationKeysDTO();
+//            keys.setApplicationAccessToken(accessToken);
+//            keys.setConsumerKey(consumerKey);
+//            keys.setConsumerSecret(consumerSecret);
+//            keys.setValidityTime(validityTime);
+//            return keys;
+//        }
+//
+//    }
 
     /**
      * Get the list of subscribed APIs of a user
@@ -608,8 +609,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         OAuthCache oauthCache;
         CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
         if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
-            //This needs to be picked up from a constant. Trying to resolve the build breaks
-            oauthCache = OAuthCache.getInstance(900000);
+            oauthCache = OAuthCache.getInstance(OAuthServerConfiguration.getInstance().getOAuthCacheTimeout());
             oauthCache.clearCacheEntry(cacheKey);
         }
     }
