@@ -161,8 +161,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
 
-            //ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName,tenantDomain);
-            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, userName);
+            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
 
             if (createdServiceProvider == null) {
                 throw new APIKeyMgtException("Couldn't create Service Provider Application " + applicationName);

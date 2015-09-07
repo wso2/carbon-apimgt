@@ -79,6 +79,7 @@ public class APIMgtDAOTest extends TestCase {
 		assertTrue(apis.length > 1);
 	}
 
+    //Commented out due to identity version update and cannot use apiMgtDAO.validateKey to validate anymore
 	/*public void testValidateApplicationKey() throws Exception {
 		APIKeyValidationInfoDTO apiKeyValidationInfoDTO =
 		                                                  apiMgtDAO.validateKey("/context1",
