@@ -50,14 +50,21 @@ store.infiniteScroll.addItemsToPage = function(){
 
     var from = 0;
     var to = 0;
+    var assetsAddedFromBackEnd = $('.ctrl-wr-asset').length;
     if(row_current > rows_added && doPagination){
-        from = rows_added * items_per_row;
-        to = row_current*items_per_row;
+        if(assetsAddedFromBackEnd == store.asset.paging.size){
+            from = store.asset.paging.size;
+            to = from + row_current*items_per_row;
+        }else if (assetsAddedFromBackEnd < store.asset.paging.size){ //no need of paging
+            return;
+        }else{
+            from = rows_added * items_per_row;
+            to = row_current*items_per_row;
+        }
         last_to = to; //We store this os we can recalculate rows_added when resolution change
         rows_added = row_current;
-        store.infiniteScroll.getItems(from,to);
-        console.info('getting items from ' + from + " to " + to + " screen_width " + screen_width + " items_per_row " + items_per_row);
 
+        store.infiniteScroll.getItems(from,to);
 
     }
 
@@ -83,6 +90,7 @@ store.infiniteScroll.getItems = function(from,to){
          }, {
              url : url,
              success : function(data, status, xhr) {
+                 if(data.body.assets.context.assets.length == 0) doPagination = false;
                  caramel.partials(data._.partials, function() {
                      caramel.render('assets-thumbnails', data.body.assets.context, function (info, content) {
                          $('.assets-container section').append($(content));
@@ -99,7 +107,7 @@ store.infiniteScroll.getItems = function(from,to){
 
 };
 store.infiniteScroll.showAll = function(){
-    $('.assets-container section').empty();
+    //$('.assets-container section').empty();
     store.infiniteScroll.addItemsToPage();
     $(window).scroll(function(){
         store.infiniteScroll.addItemsToPage();
@@ -134,7 +142,7 @@ $(function() {
     * */
     $('#assets-container').on('click', '.js_bookmark', function () {
         var elem = $(this);
-        asset.process(elem.data('type'), elem.data('aid'), location.href);
+        asset.process(elem.data('type'), elem.data('aid'), location.href, elem);
     });
 
     /*
@@ -142,7 +150,7 @@ $(function() {
     * */
 	$(document).on('click', '#assets-container .asset-add-btn', function(event) {
 		var parent = $(this).parent().parent().parent();
-		asset.process(parent.data('type'), parent.data('id'), location.href);
+		asset.process(parent.data('type'), parent.data('id'), location.href, parent);
 		event.stopPropagation();
 	});
     /*
