@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -56,7 +55,6 @@ import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
@@ -161,9 +159,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             serviceProvider.setDescription("Service Provider for application " + applicationName);
 
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
-            appMgtService.createApplication(serviceProvider,tenantDomain,userName);
+            appMgtService.createApplication(serviceProvider, tenantDomain, userName);
 
-            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName,tenantDomain);
+            //ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName,tenantDomain);
+            ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, userName);
 
             if (createdServiceProvider == null) {
                 throw new APIKeyMgtException("Couldn't create Service Provider Application " + applicationName);
@@ -296,12 +295,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         try {
 
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-
-
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
 
             log.debug("Getting OAuth App for " + consumerKey);
-            String spAppName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2",tenantDomain);
+            String spAppName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2", tenantDomain);
 
             if (spAppName == null) {
                 log.debug("Couldn't find OAuth App for Consumer Key : " + consumerKey);
@@ -309,7 +306,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
 
             log.debug("Removing Service Provider with name : " + spAppName);
-            appMgtService.deleteApplication(spAppName,tenantDomain,tenantAwareUsername);
+            appMgtService.deleteApplication(spAppName, tenantDomain, tenantAwareUsername);
 
 
         } catch (IdentityApplicationManagementException e) {
