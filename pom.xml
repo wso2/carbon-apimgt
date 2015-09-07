@@ -785,34 +785,35 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
-        <carbon.apimgt.version>2.0.0-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>2.0.0</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[2.0.0, 3.0.0)</carbon.apimgt.imp.pkg.version>
 
-        <apimgt.api.version>2.0.0-SNAPSHOT</apimgt.api.version>
-        <apimgt.impl.version>2.0.0-SNAPSHOT</apimgt.impl.version>
-        <apimgt.core.version>2.0.0-SNAPSHOT</apimgt.core.version>
-        <apimgt.gateway.version>2.0.0-SNAPSHOT</apimgt.gateway.version>
-        <apimgt.hostobjects.version>2.0.0-SNAPSHOT</apimgt.hostobjects.version>
-        <apimgt.interceptor.version>2.0.0-SNAPSHOT</apimgt.interceptor.version>
-        <apimgt.keymgt.version>2.0.0-SNAPSHOT</apimgt.keymgt.version>
-        <apimgt.keymgt.client.version>2.0.0-SNAPSHOT</apimgt.keymgt.client.version>
-        <apimgt.startup.publisher.version>2.0.0-SNAPSHOT</apimgt.startup.publisher.version>
-        <apimgt.usage.client>2.0.0-SNAPSHOT</apimgt.usage.client>
-        <apimgt.usage.publisher>2.0.0-SNAPSHOT</apimgt.usage.publisher>
-        <apimgt.keymgt.stub.version>2.0.0-SNAPSHOT</apimgt.keymgt.stub.version>
-        <apimgt.handlers.security.stub.version>2.0.0-SNAPSHOT</apimgt.handlers.security.stub.version>
-        <carbon.forum.version>2.0.0-SNAPSHOT</carbon.forum.version>
-        <carbon.forum.feature.version>2.0.0-SNAPSHOT</carbon.forum.feature.version>
-        <carbon.forum.server.feature.version>2.0.0-SNAPSHOT</carbon.forum.server.feature.version>
+        <apimgt.api.version>2.0.0</apimgt.api.version>
+        <apimgt.impl.version>${apimgt.api.version}</apimgt.impl.version>
+        <apimgt.core.version>${apimgt.api.version}</apimgt.core.version>
+        <apimgt.gateway.version>${apimgt.api.version}</apimgt.gateway.version>
+        <apimgt.hostobjects.version>${apimgt.api.version}</apimgt.hostobjects.version>
+        <apimgt.interceptor.version>${apimgt.api.version}</apimgt.interceptor.version>
+        <apimgt.keymgt.version>${apimgt.api.version}</apimgt.keymgt.version>
+        <apimgt.keymgt.client.version>${apimgt.api.version}</apimgt.keymgt.client.version>
+        <apimgt.startup.publisher.version>${apimgt.api.version}</apimgt.startup.publisher.version>
+        <apimgt.usage.client>${apimgt.api.version}</apimgt.usage.client>
+        <apimgt.usage.publisher>${apimgt.api.version}</apimgt.usage.publisher>
+        <apimgt.keymgt.stub.version>${apimgt.api.version}</apimgt.keymgt.stub.version>
+        <apimgt.handlers.security.stub.version>${apimgt.api.version}</apimgt.handlers.security.stub.version>
+        <carbon.forum.version>${apimgt.api.version}</carbon.forum.version>
+        <carbon.forum.feature.version>${apimgt.api.version}</carbon.forum.feature.version>
+        <carbon.forum.server.feature.version>${apimgt.api.version}</carbon.forum.server.feature.version>
 
-        <apimgt.core.feature.version>2.0.0-SNAPSHOT</apimgt.core.feature.version>
-        <apimgt.feature.version>2.0.0-SNAPSHOT</apimgt.feature.version>
-        <apimgt.gateway.feature>2.0.0-SNAPSHOT</apimgt.gateway.feature>
-        <apimgt.interceptor.feature>2.0.0-SNAPSHOT</apimgt.interceptor.feature>
-        <apimgt.publisher.feature.version>2.0.0-SNAPSHOT</apimgt.publisher.feature.version>
-        <apimgt.startup.publisher.feature.version>2.0.0-SNAPSHOT</apimgt.startup.publisher.feature.version>
-        <apimgt.store.feature.version>2.0.0-SNAPSHOT</apimgt.store.feature.version>
-        <apimgt.synapse.feature.version>2.0.0-SNAPSHOT</apimgt.synapse.feature.version>
+        <apimgt.core.feature.version>${apimgt.api.version}</apimgt.core.feature.version>
+        <apimgt.feature.version>${apimgt.api.version}</apimgt.feature.version>
+        <apimgt.gateway.feature>${apimgt.api.version}</apimgt.gateway.feature>
+        <apimgt.interceptor.feature>${apimgt.api.version}</apimgt.interceptor.feature>
+        <apimgt.publisher.feature.version>${apimgt.api.version}</apimgt.publisher.feature.version>
+        <apimgt.startup.publisher.feature.version>${apimgt.api.version}</apimgt.startup.publisher.feature.version>
+        <apimgt.store.feature.version>${apimgt.api.version}</apimgt.store.feature.version>
+        <apimgt.synapse.feature.version>${apimgt.api.version}</apimgt.synapse.feature.version>
+	<apim.version>${apimgt.api.version}</apim.version>	
 
 	<nimbusds.version>2.26.1.wso2v3</nimbusds.version>
 
@@ -864,7 +865,6 @@
         <axiom.osgi.version.range>[1.2.11.wso2v6, 1.3.0)</axiom.osgi.version.range>
         <version.axiom>1.2.11-wso2v6</version.axiom>
 
-        <apim.version>2.0.0-SNAPSHOT</apim.version>
 
         <!-- Servlet API -->
         <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
