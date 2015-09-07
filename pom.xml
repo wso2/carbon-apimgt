@@ -203,6 +203,14 @@
                 <artifactId>org.wso2.carbon.apimgt.core</artifactId>
                 <version>${apimgt.core.version}</version>
             </dependency>
+            
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
+                <version>${apimgt.handlers.security.stub.version}</version>
+            </dependency>
+            
+    
 
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -792,7 +800,7 @@
         <apimgt.impl.version>2.0.0-SNAPSHOT</apimgt.impl.version>
         <apimgt.core.version>2.0.0-SNAPSHOT</apimgt.core.version>
         <apimgt.gateway.version>2.0.0-SNAPSHOT</apimgt.gateway.version>
-        <apimgt.hostobjects.version>2.0.0-SNAPSHOT</apimgt.hostobjects.version>
+        <!--apimgt.hostobjects.version>2.0.0-SNAPSHOT</apimgt.hostobjects.version-->
         <apimgt.interceptor.version>2.0.0-SNAPSHOT</apimgt.interceptor.version>
         <apimgt.keymgt.version>2.0.0-SNAPSHOT</apimgt.keymgt.version>
         <apimgt.keymgt.client.version>2.0.0-SNAPSHOT</apimgt.keymgt.client.version>
@@ -802,18 +810,18 @@
         <apimgt.keymgt.stub.version>2.0.0-SNAPSHOT</apimgt.keymgt.stub.version>
         <apimgt.handlers.security.stub.version>2.0.0-SNAPSHOT</apimgt.handlers.security.stub.version>
         <carbon.forum.version>2.0.0-SNAPSHOT</carbon.forum.version>
-        <carbon.forum.feature.version>2.0.0-SNAPSHOT</carbon.forum.feature.version>
+        <!-- carbon.forum.feature.version>2.0.0-SNAPSHOT</carbon.forum.feature.version-->
         <carbon.forum.server.feature.version>2.0.0-SNAPSHOT</carbon.forum.server.feature.version>
 
         <apimgt.core.feature.version>2.0.0-SNAPSHOT</apimgt.core.feature.version>
-        <apimgt.feature.version>2.0.0-SNAPSHOT</apimgt.feature.version>
+        <!-- apimgt.feature.version>2.0.0-SNAPSHOT</apimgt.feature.version-->
         <apimgt.gateway.feature>2.0.0-SNAPSHOT</apimgt.gateway.feature>
-        <apimgt.interceptor.feature>2.0.0-SNAPSHOT</apimgt.interceptor.feature>
+        <!-- apimgt.interceptor.feature>2.0.0-SNAPSHOT</apimgt.interceptor.feature-->
         <apimgt.publisher.feature.version>2.0.0-SNAPSHOT</apimgt.publisher.feature.version>
         <apimgt.startup.publisher.feature.version>2.0.0-SNAPSHOT</apimgt.startup.publisher.feature.version>
         <apimgt.store.feature.version>2.0.0-SNAPSHOT</apimgt.store.feature.version>
-        <apimgt.synapse.feature.version>2.0.0-SNAPSHOT</apimgt.synapse.feature.version>
-	<apim.version>2.0.0-SNAPSHOT</apim.version>
+        <!-- apimgt.synapse.feature.version>2.0.0-SNAPSHOT</apimgt.synapse.feature.version-->
+	<!--apim.version>2.0.0-SNAPSHOT</apim.version-->
 
 	<nimbusds.version>2.26.1.wso2v3</nimbusds.version>
 

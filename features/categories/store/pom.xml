@@ -196,10 +196,10 @@
                                 </importFeatureDef>
          
                                 <importFeatureDef>
-                                    org.wso2.carbon.apimgt.core:${apimgt.feature.version}
+                                    org.wso2.carbon.apimgt.core:${apimgt.core.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
-                                    org.wso2.carbon.apimgt.store:${apimgt.feature.version}
+                                    org.wso2.carbon.apimgt.store:${apimgt.core.version}
                                 </importFeatureDef>
                                 <importFeatureDef>
                                     org.wso2.carbon.registry.extensions:${carbon.governance.version}
