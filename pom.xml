@@ -813,6 +813,7 @@
         <identity.authentication.version>4.2.1</identity.authentication.version>
 
         <!-- Carbon kernel version -->
+
         <wso2carbon.version>4.4.1</wso2carbon.version>
         <carbon.kernel.version>4.4.1</carbon.kernel.version>
 
@@ -822,6 +823,7 @@
         <carbon.identity.version>4.5.4</carbon.identity.version>
         <carbon.deployment.version>4.5.0</carbon.deployment.version>
         <carbon.governance.version>4.5.3</carbon.governance.version>
+        
         <carbon.analytics.version>1.0.1</carbon.analytics.version>
         <carbon.multitenancy.version>4.4.1</carbon.multitenancy.version>
 
@@ -835,6 +837,7 @@
 
         <!-- Carbon platform version comes here-->
         <carbon.platform.version>4.4.1</carbon.platform.version>
+
         <carbon.platform.package.export.version>4.4.1</carbon.platform.package.export.version>
         <carbon.platform.package.import.version.range>[4.4.1, 4.5.0)</carbon.platform.package.import.version.range>
 
@@ -870,7 +873,7 @@
         <javax.servlet.imp.pkg.version>[2.6.0, 3.0.0)</javax.servlet.imp.pkg.version>
 
         <!-- Jaggery Version -->
-        <jaggery.version>0.10.0</jaggery.version>
+        <jaggery.version>0.10.3</jaggery.version>
 
         <!-- Misc Versions -->
         <orbit.version.h2.engine>1.2.140.wso2v3</orbit.version.h2.engine>
