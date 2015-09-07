@@ -789,31 +789,31 @@
         <carbon.apimgt.imp.pkg.version>[2.0.0, 3.0.0)</carbon.apimgt.imp.pkg.version>
 
         <apimgt.api.version>2.0.0</apimgt.api.version>
-        <apimgt.impl.version>${apimgt.api.version}</apimgt.impl.version>
-        <apimgt.core.version>${apimgt.api.version}</apimgt.core.version>
-        <apimgt.gateway.version>${apimgt.api.version}</apimgt.gateway.version>
-        <apimgt.hostobjects.version>${apimgt.api.version}</apimgt.hostobjects.version>
-        <apimgt.interceptor.version>${apimgt.api.version}</apimgt.interceptor.version>
-        <apimgt.keymgt.version>${apimgt.api.version}</apimgt.keymgt.version>
-        <apimgt.keymgt.client.version>${apimgt.api.version}</apimgt.keymgt.client.version>
-        <apimgt.startup.publisher.version>${apimgt.api.version}</apimgt.startup.publisher.version>
-        <apimgt.usage.client>${apimgt.api.version}</apimgt.usage.client>
-        <apimgt.usage.publisher>${apimgt.api.version}</apimgt.usage.publisher>
-        <apimgt.keymgt.stub.version>${apimgt.api.version}</apimgt.keymgt.stub.version>
-        <apimgt.handlers.security.stub.version>${apimgt.api.version}</apimgt.handlers.security.stub.version>
-        <carbon.forum.version>${apimgt.api.version}</carbon.forum.version>
-        <carbon.forum.feature.version>${apimgt.api.version}</carbon.forum.feature.version>
-        <carbon.forum.server.feature.version>${apimgt.api.version}</carbon.forum.server.feature.version>
+        <apimgt.impl.version>2.0.0</apimgt.impl.version>
+        <apimgt.core.version>2.0.0</apimgt.core.version>
+        <apimgt.gateway.version>2.0.0</apimgt.gateway.version>
+        <apimgt.hostobjects.version>2.0.0</apimgt.hostobjects.version>
+        <apimgt.interceptor.version>2.0.0</apimgt.interceptor.version>
+        <apimgt.keymgt.version>2.0.0</apimgt.keymgt.version>
+        <apimgt.keymgt.client.version>2.0.0</apimgt.keymgt.client.version>
+        <apimgt.startup.publisher.version>2.0.0</apimgt.startup.publisher.version>
+        <apimgt.usage.client>2.0.0</apimgt.usage.client>
+        <apimgt.usage.publisher>2.0.0</apimgt.usage.publisher>
+        <apimgt.keymgt.stub.version>2.0.0</apimgt.keymgt.stub.version>
+        <apimgt.handlers.security.stub.version>2.0.0</apimgt.handlers.security.stub.version>
+        <carbon.forum.version>2.0.0</carbon.forum.version>
+        <carbon.forum.feature.version>2.0.0</carbon.forum.feature.version>
+        <carbon.forum.server.feature.version>2.0.0</carbon.forum.server.feature.version>
 
-        <apimgt.core.feature.version>${apimgt.api.version}</apimgt.core.feature.version>
-        <apimgt.feature.version>${apimgt.api.version}</apimgt.feature.version>
-        <apimgt.gateway.feature>${apimgt.api.version}</apimgt.gateway.feature>
-        <apimgt.interceptor.feature>${apimgt.api.version}</apimgt.interceptor.feature>
-        <apimgt.publisher.feature.version>${apimgt.api.version}</apimgt.publisher.feature.version>
-        <apimgt.startup.publisher.feature.version>${apimgt.api.version}</apimgt.startup.publisher.feature.version>
-        <apimgt.store.feature.version>${apimgt.api.version}</apimgt.store.feature.version>
-        <apimgt.synapse.feature.version>${apimgt.api.version}</apimgt.synapse.feature.version>
-	<apim.version>${apimgt.api.version}</apim.version>	
+        <apimgt.core.feature.version>2.0.0</apimgt.core.feature.version>
+        <apimgt.feature.version>2.0.0</apimgt.feature.version>
+        <apimgt.gateway.feature>2.0.0</apimgt.gateway.feature>
+        <apimgt.interceptor.feature>2.0.0</apimgt.interceptor.feature>
+        <apimgt.publisher.feature.version>2.0.0</apimgt.publisher.feature.version>
+        <apimgt.startup.publisher.feature.version>2.0.0</apimgt.startup.publisher.feature.version>
+        <apimgt.store.feature.version>2.0.0</apimgt.store.feature.version>
+        <apimgt.synapse.feature.version>2.0.0</apimgt.synapse.feature.version>
+	<apim.version>2.0.0</apim.version>	
 
 	<nimbusds.version>2.26.1.wso2v3</nimbusds.version>
 
