@@ -124,12 +124,11 @@ paths:
           schema:
             $ref: "#/definitions/Error"
   /apis/{apiId}:
-    parameters:
-      -  
-        $ref: "#/parameters/apiId"
     get:
       description: Get details of an API
       parameters:
+        -
+          $ref: "#/parameters/apiId"
         -
           $ref : "#/parameters/Accept"
         -
@@ -164,6 +163,8 @@ paths:
     put:
       description: Update an existing API
       parameters:
+        -
+          $ref: "#/parameters/apiId"
         - in: body
           name: body
           description: "API object that needs to be added"
@@ -213,6 +214,8 @@ paths:
     delete:
       description: Delete an existing API
       parameters:
+        -
+          $ref: "#/parameters/apiId"
         -
           $ref : "#/parameters/If-Match"
         -
