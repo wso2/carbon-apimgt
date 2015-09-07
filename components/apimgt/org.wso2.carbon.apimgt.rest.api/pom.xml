@@ -106,24 +106,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.tomcat.maven</groupId>
-                    <artifactId>tomcat7-maven-plugin</artifactId>
-                    <version>2.0</version>
-                    <executions>
-                        <execution>
-                            <id>default-cli</id>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <port>13000</port>
-                                <path>/jaxrs-service</path>
-                                <useSeparateTomcatClassLoader>true</useSeparateTomcatClassLoader>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <configuration>
@@ -131,6 +113,19 @@
                         <target>1.7</target>
                     </configuration>
                 </plugin>
+				<plugin>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>2.2</version>
+					<configuration>
+						<webResources>
+							<resource>
+								<!-- this is relative to the pom.xml directory -->
+								<directory>src/main/webapp</directory>
+							</resource>
+						</webResources>
+						<warName>api#v1</warName>
+					</configuration>
+				</plugin>
             </plugins>
         </pluginManagement>
         <plugins>
