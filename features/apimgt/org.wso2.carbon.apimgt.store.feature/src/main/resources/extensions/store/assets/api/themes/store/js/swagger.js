@@ -49,6 +49,8 @@ $(document).ready(function(){
             $("#environment_name").hide();
             $("#OnEnvironment").hide();
         }
+        $(".swagger").attr('href', '/store/assets/api/swagger/' + store.publisher.apiIdentifier.provider + '/' +
+        store.publisher.apiIdentifier.name + '/' + store.publisher.apiIdentifier.version);
         select_environment();
     };
     var select_environment = function(){
