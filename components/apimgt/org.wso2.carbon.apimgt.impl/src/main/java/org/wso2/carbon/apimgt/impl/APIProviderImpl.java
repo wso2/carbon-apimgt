@@ -24,7 +24,9 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
-import org.apache.commons.lang.StringUtils;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.clustering.ClusteringAgent;
+import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -42,9 +44,14 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
+import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
 import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
+import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceStub;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
@@ -60,16 +67,16 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
+import java.rmi.RemoteException;
 import java.util.*;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -509,7 +516,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
         if (oldApi.getStatus().equals(api.getStatus())) {
-            try {
 
                 String previousDefaultVersion = getDefaultVersion(api.getId());
                 String publishedDefaultVersion = getPublishedDefaultVersion(api.getId());
@@ -675,9 +681,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     contextCache.put(api.getContext(), true);
                 }
 
-            } catch (APIManagementException e) {
-                handleException("Error while updating the API :" + api.getId().getApiName() + ". " + e.getMessage(), e);
-            }
+
         } else {
             // We don't allow API status updates via this method.
             // Use changeAPIStatus for that kind of updates.
@@ -823,8 +827,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }    
 
-    public void changeAPIStatus(API api, APIStatus status, String userId,
-                                boolean updateGatewayConfig)
+    public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException {
         Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         APIStatus currentStatus = api.getStatus();
@@ -851,22 +854,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         status.equals(APIStatus.BLOCKED) || status.equals(APIStatus.PROTOTYPED)) {
                         Map<String, String> failedToPublishEnvironments = publishToGateway(api);
                         if (!failedToPublishEnvironments.isEmpty()) {
-                            Set<String> publishedEnvironments =
-                                    new HashSet<String>(api.getEnvironments());
-                            publishedEnvironments
-                                    .removeAll(new ArrayList<String>(failedToPublishEnvironments.keySet()));
+                            Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
+                            publishedEnvironments.removeAll(new ArrayList<String>(failedToPublishEnvironments.keySet()));
                             api.setEnvironments(publishedEnvironments);
                             updateApiArtifact(api, true, false);
                             failedGateways.clear();
                             failedGateways.put("UNPUBLISHED", Collections.EMPTY_MAP);
-                            failedGateways
-                                    .put("PUBLISHED", failedToPublishEnvironments);
+                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                         }
-                    } else {
+                    } else { // API Status : RETIRED
                         Map<String, String> failedToRemoveEnvironments = removeFromGateway(api);
+                        apiMgtDAO.removeAllSubscriptions(api.getId());
                         if (!failedToRemoveEnvironments.isEmpty()) {
-                            Set<String> publishedEnvironments =
-                                    new HashSet<String>(api.getEnvironments());
+                            Set<String> publishedEnvironments = new HashSet<String>(api.getEnvironments());
                             publishedEnvironments.addAll(failedToRemoveEnvironments.keySet());
                             api.setEnvironments(publishedEnvironments);
                             updateApiArtifact(api, true, false);
@@ -1031,7 +1031,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
-    private boolean isAPIPublished(API api) {
+    private boolean isAPIPublished(API api)throws APIManagementException {
             String tenantDomain = null;
 			if (api.getId().getProviderName().contains("AT")) {
 				String provider = api.getId().getProviderName().replace("-AT-", "@");
@@ -1044,12 +1044,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private APITemplateBuilder getAPITemplateBuilder(API api){
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
-        corsProperties.put("inline", api.getImplementation());
-        if (!StringUtils.isEmpty(api.getAllowedHeaders())) {
-            corsProperties.put("allowHeaders", api.getAllowedHeaders());
+        corsProperties.put("apiImplementationType", api.getImplementation());
+        if (api.getAllowedHeaders() != null && !api.getAllowedHeaders().isEmpty()) {
+            StringBuffer allowHeaders = new StringBuffer();
+            for (String header : api.getAllowedHeaders()) {
+                allowHeaders.append(header + ",");
+            }
+            if (!allowHeaders.toString().isEmpty()) {
+                allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+            }
+            corsProperties.put("allowHeaders", allowHeaders.toString());
         }
-        if (!StringUtils.isEmpty(api.getAllowedOrigins())) {
-            corsProperties.put("allowedOrigins", api.getAllowedOrigins());
+        if (api.getAllowedOrigins() != null && !api.getAllowedOrigins().isEmpty()) {
+            StringBuffer allowOrigins = new StringBuffer();
+            for (String origin : api.getAllowedOrigins()) {
+                allowOrigins.append(origin + ",");
+            }
+            if (!allowOrigins.toString().isEmpty()) {
+                allowOrigins.deleteCharAt(allowOrigins.length() - 1);
+            }
+            corsProperties.put("allowedOrigins", allowOrigins.toString());
         }
         vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
@@ -1638,39 +1652,39 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void createDocumentation(API api, Documentation documentation)
             throws APIManagementException {
         try {
-        	APIIdentifier apiId = api.getId();
-        	GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-        			APIConstants.DOCUMENTATION_KEY);
+            APIIdentifier apiId = api.getId();
+            GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
+                APIConstants.DOCUMENTATION_KEY);
             GenericArtifact artifact =
-                    artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
+                artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(
-                    APIUtil.createDocArtifactContent(artifact, apiId, documentation));
+                APIUtil.createDocArtifactContent(artifact, apiId, documentation));
             String apiPath = APIUtil.getAPIPath(apiId);
             //Adding association from api to documentation . (API -----> doc)
             registry.addAssociation(apiPath, artifact.getPath(),
-                                    APIConstants.DOCUMENTATION_ASSOCIATION);
-            String docVisibility=documentation.getVisibility().name();
-            String[] authorizedRoles=getAuthorizedRoles(apiPath);
-            String visibility=api.getVisibility();
-            if(docVisibility!=null){
-            if(APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)){
-            authorizedRoles=null;
-            visibility=APIConstants.DOC_SHARED_VISIBILITY;
-            } else if(APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)){
-            authorizedRoles=null;
-            visibility=APIConstants.DOC_OWNER_VISIBILITY;
-            }
+                APIConstants.DOCUMENTATION_ASSOCIATION);
+            String docVisibility = documentation.getVisibility().name();
+            String[] authorizedRoles = getAuthorizedRoles(apiPath);
+            String visibility = api.getVisibility();
+            if (docVisibility != null) {
+                if (APIConstants.DOC_SHARED_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_SHARED_VISIBILITY;
+                } else if (APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(docVisibility)) {
+                    authorizedRoles = null;
+                    visibility = APIConstants.DOC_OWNER_VISIBILITY;
+                }
             }
             APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                   visibility, authorizedRoles, artifact.getPath());
+                visibility, authorizedRoles, artifact.getPath());
             String docFilePath = artifact.getAttribute(APIConstants.DOC_FILE_PATH);
-            if(docFilePath != null && !docFilePath.equals("")){
+            if (docFilePath != null && !docFilePath.equals("")) {
                 //The docFilePatch comes as /t/tenanatdoman/registry/resource/_system/governance/apimgt/applicationdata..
                 //We need to remove the /t/tenanatdoman/registry/resource/_system/governance section to set permissions.
                 int startIndex = docFilePath.indexOf("governance") + "governance".length();
                 String filePath = docFilePath.substring(startIndex, docFilePath.length());
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                        visibility,authorizedRoles, filePath);
+                        visibility, authorizedRoles, filePath);
                 registry.addAssociation(artifact.getPath(), filePath,
                         APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
@@ -1739,12 +1753,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             long subsCount = apiMgtDAO.getAPISubscriptionCountByAPI(identifier);
             if(subsCount > 0){
-                handleException("Cannot remove the API. Active Subscriptions Exist", null);
+                handleException("Cannot remove the API as active subscriptions exist.", null);
             }
 
             GovernanceUtils.loadGovernanceArtifacts((UserRegistry) registry);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
             Resource apiResource = registry.get(path);
             String artifactId = apiResource.getUUID();
             
@@ -1763,9 +1776,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			GovernanceArtifact[] dependenciesArray = apiArtifact.getDependencies();
 
 			if (dependenciesArray.length > 0) {
-				for (int i = 0; i < dependenciesArray.length; i++) {
-					registry.delete(dependenciesArray[i].getPath());
-				}
+                for (GovernanceArtifact artifact : dependenciesArray)   {
+                    registry.delete(artifact.getPath());
+                }
 			}
             String isDefaultVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION);
             artifactManager.removeGenericArtifact(artifactId);
@@ -1782,8 +1795,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             	registry.delete(apiDefinitionFilePath);
             }
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
             boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
             String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 
@@ -1822,8 +1835,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-            		identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-            		identifier.getApiName();            
+                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
             if(registry.resourceExists(apiCollectionPath)){
             	Resource apiCollection=registry.get(apiCollectionPath);
             	CollectionImpl collection=(CollectionImpl)apiCollection;
@@ -1837,7 +1849,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             String apiProviderPath=APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-            		identifier.getProviderName();            
+                                   identifier.getProviderName();
             if(registry.resourceExists(apiProviderPath)){
             	Resource providerCollection=registry.get(apiProviderPath);
             	CollectionImpl collection=(CollectionImpl)providerCollection;
@@ -1845,7 +1857,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             	if(collection.getChildCount() == 0){
                     if(log.isDebugEnabled()){
                         log.debug("No more APIs from the provider " + identifier.getProviderName() + " found. " +
-                                "Removing provider collection from registry");
+                            "Removing provider collection from registry");
                     }
             		registry.delete(apiProviderPath);		
             	}
@@ -1898,7 +1910,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 					}
 					if (apiConstant != null) {
 						matcher = pattern.matcher(apiConstant);
-						if (matcher != null && matcher.find()) {
+						if (matcher.find()) {
                             foundApiList.add(api);
 						}
 					}
@@ -1907,7 +1919,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 						if (urls.size() > 0) {
 							for (URITemplate url : urls) {
 								matcher = pattern.matcher(url.getUriTemplate());
-								if (matcher != null && matcher.find()) {
+								if (matcher.find()) {
                                     foundApiList.add(api);
 									break;
 								}
@@ -2416,6 +2428,87 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return sequenceList;
     }
 
+    /**
+     * This method is used to initiate the web service calls and cluster messages related to stats publishing status
+     *
+     * @param receiverUrl   event receiver url
+     * @param user          username of the event receiver
+     * @param password      password of the event receiver
+     * @param updatedStatus status of the stat publishing state
+     */
+    public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus) {
+
+        //all mandatory parameters should not be null in order to start the process
+        if (receiverUrl != null && user != null && password != null) {
+
+            if (log.isDebugEnabled()) {
+                log.debug("Updating Stats publishing status of Store/Publisher domain to : " + updatedStatus);
+            }
+
+            //get the cluster message agent to publisher-store domain
+            ClusteringAgent clusteringAgent = ServiceReferenceHolder.getContextService().getServerConfigContext().
+                    getAxisConfiguration().getClusteringAgent();
+
+            if (clusteringAgent != null) {
+                //changing stat publishing status at other nodes via a cluster message
+                try {
+                    clusteringAgent.sendMessage(new StatUpdateClusterMessage(updatedStatus,receiverUrl,user,password), true);
+                } catch (ClusteringFault clusteringFault) {
+                    //error is only logged because initially gateway has modified the status
+                    log.error("Failed to send cluster message to Publisher/Store domain " +
+                            "and update stats publishing status.");
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated Stats publishing status to : " + updatedStatus);
+                }
+            }
+
+            Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
+
+            Set gatewayEntries = gatewayEnvironments.entrySet();
+            Iterator<Map.Entry<String,Environment>> gatewayIterator = gatewayEntries.iterator();
+
+            while(gatewayIterator.hasNext()){
+
+                Environment currentGatewayEnvironment = gatewayIterator.next().getValue();
+                String gatewayServiceUrl = currentGatewayEnvironment.getServerURL();
+                String gatewayUserName = currentGatewayEnvironment.getUserName();
+                String gatewayPassword = currentGatewayEnvironment.getPassword();
+
+                try {
+                    //get the stub and the call the admin service with the credentials
+                    GatewayStatsUpdateServiceStub stub =
+                            new GatewayStatsUpdateServiceStub(gatewayServiceUrl + "GatewayStatsUpdateService");
+                    ServiceClient gatewayServiceClient = stub._getServiceClient();
+                    CarbonUtils.setBasicAccessSecurityHeaders(gatewayUserName, gatewayPassword, gatewayServiceClient);
+                    stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
+                } catch (AxisFault e) {
+                    //error is only logged because the process should be executed in all gateway environments
+                    log.error("Error in calling Stats update web service in Gateway Environment." + e.getMessage());
+                } catch (RemoteException e) {
+                    //error is only logged because the change is affected in gateway environments,
+                    // and the process should be executed in all environments and domains
+                    log.error("Error in updating Stats publish status in Gataways. " + e.getMessage());
+                } catch (GatewayStatsUpdateServiceAPIManagementExceptionException e) {
+                    //error is only logged because the process should continue in other gateways
+                    log.error("Error in Stat Update web service call to Gateway. " + e.getMessage());
+                } catch (GatewayStatsUpdateServiceClusteringFaultException e) {
+                    //error is only logged because the status should be updated in other gateways
+                    log.error("Failed to send cluster message to Gateway domain and update stats publishing status. "
+                            + e.getMessage());
+                } catch (GatewayStatsUpdateServiceExceptionException e) {
+                    //error is only logged because the process should continue in other gateways
+                    log.error("Error occurred while updating EventingConfiguration, " +
+                            "it contains a dirty value about Stat publishing." + e.getMessage());
+                }
+            }
+        } else {
+            //if at least one mandatory parameter is null, the process is not initiated
+            log.error("Event receiver URL and username and password all should not be null.");
+        }
+    }
+
 	@Override
 	public boolean isSynapseGateway() throws APIManagementException {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
@@ -2451,8 +2544,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
 
-        } catch (APIManagementException e) {
-            handleException("Error while adding Swagger v2.0 Definition for " + apiId.getApiName() + "-" + apiId.getVersion(), e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
