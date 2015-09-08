@@ -78,8 +78,8 @@ public class API implements Serializable{
     
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
-    private Set<String> allowedHeaders;
-    private Set<String> allowedOrigins;
+    private String allowedHeaders;
+    private String allowedOrigins;
 
     private String endpointConfig;
     
@@ -589,19 +589,19 @@ public class API implements Serializable{
         return isPublishedDefaultVersion;
     }
 
-    public Set<String> getAllowedOrigins() {
+    public String getAllowedOrigins() {
         return allowedOrigins;
     }
 
-    public void setAllowedOrigins(Set<String> allowedOrigins) {
+    public void setAllowedOrigins(String allowedOrigins) {
         this.allowedOrigins = allowedOrigins;
     }
 
-    public Set<String> getAllowedHeaders() {
+    public String getAllowedHeaders() {
         return allowedHeaders;
     }
 
-    public void setAllowedHeaders(Set<String> allowedHeaders) {
+    public void setAllowedHeaders(String allowedHeaders) {
         this.allowedHeaders = allowedHeaders;
     }
 }

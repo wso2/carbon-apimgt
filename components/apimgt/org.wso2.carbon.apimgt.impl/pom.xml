@@ -133,7 +133,7 @@
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.event.core</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
         </dependency>
@@ -157,11 +157,6 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.apimgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
-	  	</dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
@@ -175,10 +170,6 @@
           <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
       </dependency>
       <dependency>
-		<groupId>net.sf.saxon.wso2</groupId>
-		<artifactId>saxon.he</artifactId>
-	  </dependency>
-      <dependency>
           <groupId>com.nimbusds.wso2</groupId>
           <artifactId>nimbus-jose-jwt</artifactId>
       </dependency>
@@ -186,10 +177,8 @@
           <groupId>org.wso2.carbon.deployment</groupId>
           <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
       </dependency>
-        <dependency>
-          <groupId>org.wso2.carbon.apimgt</groupId>
-          <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
-        </dependency>
+
+
   </dependencies>
     <build>
         <plugins>
@@ -308,11 +297,8 @@
                             net.sf.saxon.*,
                             org.wso2.carbon.identity.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.statsupdate.stub.*,
-                            org.wso2.carbon.apimgt.gateway.stub.*,
-                            org.wso2.carbon.apimgt.gateway.dto.stub.*,
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
+                            org.wso2.carbon.mediation.*; resolution:=optional,
                             org.wso2.carbon.authenticator.stub.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
                             org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",

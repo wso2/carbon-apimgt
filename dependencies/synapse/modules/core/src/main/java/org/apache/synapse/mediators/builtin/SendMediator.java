@@ -25,11 +25,8 @@ import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseLog;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.endpoints.Endpoint;
-import org.apache.synapse.endpoints.EndpointDefinition;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.mediators.Value;
-
-import java.util.Set;
 
 /**
  * SendMediator sends a message using specified semantics. If it contains an endpoint it will
@@ -64,14 +61,6 @@ public class SendMediator extends AbstractMediator implements ManagedLifecycle {
 
         if (buildMessage) {
               synCtx.getEnvelope().buildWithAttachments();
-        }
-
-        // clear the message context properties related to endpoint in last service invocation
-        Set keySet = synCtx.getPropertyKeySet();
-        if (keySet != null) {
-            keySet.remove(SynapseConstants.RECEIVING_SEQUENCE);
-            keySet.remove(SynapseConstants.CONTINUATION_CALL);
-            keySet.remove(EndpointDefinition.DYNAMIC_URL_VALUE);
         }
 
         if (receivingSequence != null) {

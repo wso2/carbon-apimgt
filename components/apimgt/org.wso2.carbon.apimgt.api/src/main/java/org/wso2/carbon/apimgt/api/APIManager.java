@@ -293,12 +293,12 @@ public interface APIManager {
     public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
-     * Returns a list of domain name mappings store / gateway.
+     * Returns a list of domain name mappings.
      *
      * @return Set<Tier>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
-    public Map<String,String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
+    public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException;
 
     /**
      * Check whether the given scope key is already available under given tenant

@@ -59,7 +59,6 @@ import org.apache.synapse.util.MessageHelper;
 
 import javax.xml.namespace.QName;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This is a simple client that handles both in only and in out
@@ -486,12 +485,6 @@ public class Axis2FlexibleMEPClient {
             axisOutMsgCtx.setTransportOut((TransportOutDescription) o);
             clientOptions.setTransportOut((TransportOutDescription) o);
             clientOptions.setProperty("TRANSPORT_OUT_DESCRIPTION", o);
-        }
-
-        // clear the message context properties related to endpoint in last service invocation
-        Set keySet = synapseOutMessageContext.getPropertyKeySet();
-        if (keySet != null) {
-            keySet.remove(EndpointDefinition.DYNAMIC_URL_VALUE);
         }
 
         mepClient.execute(true);

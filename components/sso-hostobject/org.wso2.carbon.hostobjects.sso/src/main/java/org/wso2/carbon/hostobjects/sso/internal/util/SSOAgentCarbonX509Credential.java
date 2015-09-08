@@ -65,7 +65,7 @@ public class SSOAgentCarbonX509Credential implements SSOAgentX509Credential {
             KeyStore keyStore = null;
             try {
                 keyStore = tenantKSM.getKeyStore(jksName);
-            } catch (Exception e) { // getKeyStore() method throws a generic Exception
+            } catch (Exception e) {
                 throw new Exception("Error occurred while retrieving " +
                         "key store of tenant " + tenantDomain, e);
             }
@@ -80,13 +80,13 @@ public class SSOAgentCarbonX509Credential implements SSOAgentX509Credential {
         } else {
             try {
                 entityCertificate = tenantKSM.getDefaultPrimaryCertificate();
-            } catch (Exception e) { // getDefaultPrimaryCertificate() method throws a generic Exception
+            } catch (Exception e) {
                 throw new Exception("Error retrieving default primary certificate of " +
                         MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, e);
             }
             try {
                 privateKey = tenantKSM.getDefaultPrivateKey();
-            } catch (Exception e) { //getDefaultPrivateKey() method throws a generic Exception
+            } catch (Exception e) {
                 throw new Exception("Error retrieving default private key of " +
                         MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, e);
             }
