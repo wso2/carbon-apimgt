@@ -1427,7 +1427,8 @@ public class ApiMgtDAO {
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
                     deleteSubscriptionByApiIDAndAppID(apiId, applicationId, identifier.getTier(), conn);
-                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus))  {
+                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
+                        || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus))  {
                     log.error("Subscription to API " + identifier.getApiName() + " through application "
                               + applicationId + " was blocked");
                     throw new APIManagementException("Subscription to API " + identifier.getApiName()
@@ -1484,21 +1485,17 @@ public class ApiMgtDAO {
         return subscriptionId;
     }
 
-    public void removeSubscription(APIIdentifier identifier, int applicationId)
-            throws APIManagementException {
+    public void removeSubscription(APIIdentifier identifier, int applicationId) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStForUpdateOrDelete = null;
-        int subscriptionId = -1;
         int apiId = -1;
         String subStatus = null;
 
         try {
             conn = APIMgtDBUtil.getConnection();
-                        
             apiId = getAPIID(identifier, conn);
-
             String subscriptionStatusQuery = "SELECT " +
                                              "SUB_STATUS FROM AM_SUBSCRIPTION" +
                                              " WHERE " +
@@ -1509,7 +1506,6 @@ public class ApiMgtDAO {
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
             resultSet = ps.executeQuery();
-
 
             if (resultSet.next())   {
                 subStatus = resultSet.getString("SUB_STATUS");
@@ -1561,7 +1557,6 @@ public class ApiMgtDAO {
 
     public void removeSubscriptionById(int subscription_id) throws APIManagementException {
         Connection conn = null;
-        ResultSet resultSet = null;
         PreparedStatement ps = null;
 
         try {
@@ -1587,7 +1582,40 @@ public class ApiMgtDAO {
             }
             handleException("Failed to remove subscription data ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    public void removeAllSubscriptions(APIIdentifier apiIdentifier) throws APIManagementException   {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        int apiId;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            apiId = getAPIID(apiIdentifier, conn);
+
+            // Remove all entries from AM_SUBSCRIPTION table
+            String sqlQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback remove all subscription ", e);
+                }
+            }
+            handleException("Failed to remove all subscriptions data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
@@ -5865,6 +5893,49 @@ public class ApiMgtDAO {
         }
     }
 
+    public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        ArrayList<APIKey> consumerKeys = new ArrayList<APIKey>();
+
+        String getConsumerKeyQuery = "SELECT" +
+                                     " CONSUMER_KEY, KEY_TYPE" +
+                                     " FROM" +
+                                     " AM_APPLICATION_KEY_MAPPING " +
+                                     " WHERE" +
+                                     " APPLICATION_ID = ? AND " +
+                                     " CREATE_MODE = ?";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmt.setInt(1, appId);
+            prepStmt.setString(2, mode);
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                String consumerKey = rs.getString("CONSUMER_KEY");
+
+                if (consumerKey != null && !consumerKey.isEmpty()) {
+                    APIKey apiKey = new APIKey();
+                    apiKey.setConsumerKey(consumerKey);
+                    apiKey.setType(rs.getString("KEY_TYPE"));
+                    consumerKeys.add(apiKey);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys";
+            log.error(msg);
+            throw new APIManagementException(msg);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return consumerKeys.toArray(new APIKey[0]);
+    }
+
     /**
      * Returns the consumer Key for a given Application Name, Subscriber Name, Key Type, Grouping Id combination.
      * @param applicationName Name of the Application.
@@ -7172,6 +7243,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if (id == -1) {
                 String msg = "Unable to find the API: " + apiId + " in the database";
                 log.error(msg);
+                throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
@@ -8780,7 +8852,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 				apiIds.add(getAPIID(identifier, conn));
 			}
 
-			String commaSeperatedIds = StringUtils.join(apiIds, ',');
+			String commaSeperatedIds = StringUtils.join(apiIds.iterator(), ",");
 
 			String sqlQuery =
 					"SELECT DISTINCT A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES " +
@@ -9305,6 +9377,49 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             return count > 0;
         } catch (SQLException e) {
             handleException("Failed to count contexts which match " + contextTemplate, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return false;
+    }
+
+    /**
+     * @param consumerKey
+     * @return
+     */
+    public static boolean isMappingExistsforConsumerKey(String consumerKey)
+            throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT APPLICATION_ID " +
+                              " FROM AM_APPLICATION_KEY_MAPPING " +
+                              " WHERE CONSUMER_KEY   = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, APIUtil.encryptToken(consumerKey));
+
+            resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                String applicationId = resultSet.getString("APPLICATION_ID");
+                if (applicationId != null && !applicationId.isEmpty()) {
+                    return true;
+                }
+                return false;
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get Application ID by consumerKey "
+                    , e);
+        } catch (CryptoException e) {
+            log.error("Failed to encrypt the consumer key " + consumerKey, e);
+            handleException("Failed to encrypt the consumer key " + consumerKey
+                    , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }

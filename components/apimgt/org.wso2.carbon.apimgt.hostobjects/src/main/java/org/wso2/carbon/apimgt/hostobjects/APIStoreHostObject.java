@@ -25,6 +25,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
@@ -60,6 +61,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
+import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
@@ -126,7 +128,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
             } catch (RegistryException e) {
-                log.error("Could not load tenant registry. Error while loading tenant registry " + tenantDomain);
+                log.error("Could not load tenant registry for tenant " + tenantDomain);
             }
         }
 
@@ -796,6 +798,153 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
+    public static NativeObject jsFunction_searchPaginatedLightweightAPIsByType(Context cx,
+                                                                               Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
+        NativeArray apiArray = new NativeArray(0);
+        NativeObject resultObj = new NativeObject();
+        Map<String, Object> result = new HashMap<String, Object>();
+        if (args != null && args.length != 0) {
+            String searchValue = (String) args[0];
+            String tenantDomain = (String) args[1];
+            int start = Integer.parseInt((String) args[2]);
+            int end = Integer.parseInt((String) args[3]);
+            String searchTerm;
+            String searchType = null;
+            Set<API> apiSet = null;
+            boolean noSearchTerm = false;
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+            boolean isTenantFlowStarted = false;
+            try {
+                if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                } else {
+                    tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                    isTenantFlowStarted = true;
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                }
+                if (searchValue.contains(":")) {
+                    if (searchValue.split(":").length > 1) {
+                        searchType = searchValue.split(":")[0];
+                        searchTerm = searchValue.split(":")[1];
+                        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchType)) {
+                            if (!searchTerm.endsWith("*")) {
+                                searchTerm = searchTerm + "*";
+                            }
+                            if (!searchTerm.startsWith("*")) {
+                                searchTerm = "*" + searchTerm;
+                            }
+                        }
+                        result = apiConsumer.searchPaginatedLightweightAPIs(searchTerm, searchType, tenantDomain, start, end);
+                    } else {
+                        noSearchTerm = true;
+                    }
+                } else {
+                    if (!searchValue.endsWith("*")) {
+                        searchValue = searchValue + "*";
+                    }
+                    if (!searchValue.startsWith("*")) {
+                        searchTerm = "*" + searchValue;
+                    }
+                    result = apiConsumer.searchPaginatedLightweightAPIs(searchValue, "Name", tenantDomain, start, end);
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while searching APIs by type", e);
+                return resultObj;
+            } catch (Exception e) {
+                log.error("Error while searching APIs by type", e);
+                return resultObj;
+            } finally {
+                if (isTenantFlowStarted) {
+                    PrivilegedCarbonContext.endTenantFlow();
+                }
+            }
+            if (noSearchTerm) {
+                throw new APIManagementException("Search term is missing. Try again with valid search query.");
+            }
+            if (result != null) {
+                if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchType)) {
+                    Map<Documentation, API> apiDocMap = new HashMap<Documentation, API>();
+                    apiDocMap = (Map<Documentation, API>) result.get(APIConstants.API_DATA_APIS);
+                    if (apiDocMap != null) {
+                        int i = 0;
+                        for (Map.Entry<Documentation, API> entry : apiDocMap.entrySet()) {
+                            Documentation doc = entry.getKey();
+                            API api = entry.getValue();
+                            APIIdentifier apiIdentifier = api.getId();
+                            NativeObject currentApi = new NativeObject();
+                            currentApi.put(APIConstants.API_DATA_NAME, currentApi, apiIdentifier.getApiName());
+                            currentApi.put(APIConstants.API_DATA_PROVIDER, currentApi,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            currentApi.put(APIConstants.API_DATA_VERSION, currentApi,
+                                    apiIdentifier.getVersion());
+                            currentApi.put(APIConstants.API_DATA_DESCRIPTION, currentApi, api.getDescription());
+                            currentApi.put(APIConstants.API_DATA_RATES, currentApi, api.getRating());
+                            currentApi.put(APIConstants.API_DATA_DESCRIPTION, currentApi, api.getDescription());
+                            currentApi.put(APIConstants.API_DATA_ENDPOINT, currentApi, api.getUrl());
+                            if (api.getThumbnailUrl() == null) {
+                                currentApi.put(APIConstants.API_DATA_THUMB_URL, currentApi, APIConstants.API_DATA_DEFAULT_THUMB);
+                            } else {
+                                currentApi.put(APIConstants.API_DATA_THUMB_URL, currentApi,
+                                        APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                            }
+                            currentApi.put(APIConstants.API_DATA_VISIBILITY, currentApi, api.getVisibility());
+                            currentApi.put(APIConstants.API_DATA_VISIBLE_ROLES, currentApi, api.getVisibleRoles());
+                            currentApi.put(APIConstants.API_DATA_DESCRIPTION, currentApi, api.getDescription());
+                            currentApi.put(APIConstants.DOC_DATA_NAME, currentApi, doc.getName());
+                            currentApi.put(APIConstants.DOC_DATA_SUMMARY, currentApi, doc.getSummary());
+                            currentApi.put(APIConstants.DOC_DATA_SOURCEURL, currentApi, doc.getSourceUrl());
+                            currentApi.put(APIConstants.DOC_DATA_FILEPATH, currentApi, doc.getFilePath());
+                            apiArray.put(i, apiArray, currentApi);
+                            i++;
+                        }
+                        resultObj.put(APIConstants.API_DATA_APIS, resultObj, apiArray);
+                        resultObj.put(APIConstants.API_DATA_TOT_LENGTH, resultObj, result.get(APIConstants.API_DATA_LENGTH));
+                        resultObj.put(APIConstants.API_DATA_ISMORE, resultObj, result.get(APIConstants.API_DATA_ISMORE));
+                    }
+                } else {
+                    apiSet = (Set<API>) result.get(APIConstants.API_DATA_APIS);
+                    if (apiSet != null) {
+                        Iterator it = apiSet.iterator();
+                        int i = 0;
+                        while (it.hasNext()) {
+                            NativeObject currentApi = new NativeObject();
+                            Object apiObject = it.next();
+                            API api = (API) apiObject;
+                            APIIdentifier apiIdentifier = api.getId();
+                            currentApi.put(APIConstants.API_DATA_NAME, currentApi, apiIdentifier.getApiName());
+                            currentApi.put(APIConstants.API_DATA_PROVIDER, currentApi,
+                                    APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                            currentApi.put(APIConstants.API_DATA_VERSION, currentApi,
+                                    apiIdentifier.getVersion());
+                            currentApi.put(APIConstants.API_DATA_DESCRIPTION, currentApi, api.getDescription());
+                            currentApi.put(APIConstants.API_DATA_RATES, currentApi, api.getRating());
+                            currentApi.put(APIConstants.API_DATA_DESCRIPTION, currentApi, api.getDescription());
+                            currentApi.put(APIConstants.API_DATA_ENDPOINT, currentApi, api.getUrl());
+                            if (api.getThumbnailUrl() == null) {
+                                currentApi.put(APIConstants.API_DATA_THUMB_URL, currentApi, APIConstants.API_DATA_DEFAULT_THUMB);
+                            } else {
+                                currentApi.put(APIConstants.API_DATA_THUMB_URL, currentApi,
+                                        APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
+                            }
+                            currentApi.put(APIConstants.API_DATA_VISIBILITY, currentApi, api.getVisibility());
+                            currentApi.put(APIConstants.API_DATA_VISIBLE_ROLES, currentApi, api.getVisibleRoles());
+                            currentApi.put(APIConstants.API_DATA_DESCRIPTION, currentApi, api.getDescription());
+                            apiArray.put(i, apiArray, currentApi);
+                            i++;
+                        }
+                        resultObj.put(APIConstants.API_DATA_APIS, resultObj, apiArray);
+                        resultObj.put(APIConstants.API_DATA_TOT_LENGTH, resultObj, result.get(APIConstants.API_DATA_LENGTH));
+                        resultObj.put(APIConstants.API_DATA_ISMORE, resultObj, result.get(APIConstants.API_DATA_ISMORE));
+                    }
+                }
+            }
+        }
+        return resultObj;
+    }
 
     /**
      * This method is responsible for update given oAuthApplication.
@@ -1181,7 +1330,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
         try {
 
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmService = OAuthComponentServiceHolder.getRealmService();
 
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(MultitenantUtils.getTenantDomain(username));
 
@@ -1344,6 +1493,12 @@ public class APIStoreHostObject extends ScriptableObject {
             String tenantDomain = (String) args[1];
             int start = Integer.parseInt((String) args[2]);
             int end = Integer.parseInt((String) args[3]);
+            boolean limitAttributes = false;
+
+            if (args.length == 5) {
+                limitAttributes = Boolean.parseBoolean((String) args[4]);
+            }
+
             String searchTerm;
             String searchType = null;
             Set<API> apiSet = null;
@@ -1373,7 +1528,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             searchTerm = "*"+searchTerm ;
                         }
                         }
-                        result = apiConsumer.searchPaginatedAPIs(searchTerm, searchType, tenantDomain, start, end);
+                        result = apiConsumer.searchPaginatedAPIs(searchTerm, searchType, tenantDomain, start, end, limitAttributes);
                     } else {
                         noSearchTerm = true;
                     }
@@ -1384,7 +1539,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }if (!searchValue.startsWith("*")) {
                         searchValue = "*"+searchValue ;
                     }
-                    result = apiConsumer.searchPaginatedAPIs(searchValue, "Name", tenantDomain, start, end);
+                    result = apiConsumer.searchPaginatedAPIs(searchValue, "Name", tenantDomain, start, end, limitAttributes);
                 }
 
             } catch (APIManagementException e) {
@@ -1989,7 +2144,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
             Map<String, String> domains = new HashMap<String, String>();
 
-            domains = apiConsumer.getTenantDomainMappings(MultitenantUtils.getTenantDomain(userName));
+            domains = apiConsumer.getTenantDomainMappings(MultitenantUtils.getTenantDomain(userName), APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
             if (domains != null && domains.size() > 0) {
                 int index = 0;
                 Iterator it = domains.entrySet().iterator();
@@ -2301,6 +2456,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Documentation documentation = (Documentation) docObject;
                     Object objectSourceType = documentation.getSourceType();
                     String strSourceType = objectSourceType.toString();
+
                     row.put("name", row, documentation.getName());
                     row.put("sourceType", row, strSourceType);
                     row.put("summary", row, documentation.getSummary());
@@ -2485,44 +2641,12 @@ public class APIStoreHostObject extends ScriptableObject {
             String subsStatus = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
             return subsStatus;
         } catch (APIManagementException e) {
-            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage(), e);
+            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());
             return null;
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
-        }
-    }
-
-    public static boolean jsFunction_addAPISubscription(Context cx,
-                                                        Scriptable thisObj, Object[] args, Function funObj) throws APIManagementException {
-        if (!isStringArray(args)) {
-            throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
-        }
-
-        APIConsumer apiConsumer = getAPIConsumer(thisObj);
-        String providerName = APIUtil.replaceEmailDomain(args[0].toString());
-        String apiName = args[1].toString();
-        String version = args[2].toString();
-        String tier = args[3].toString();
-        String applicationName = ((String) args[4]);
-        String userId = args[5].toString();
-        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, version);
-
-        //Check whether tier is denied or not before adding
-        Set<String> tiers = apiConsumer.getDeniedTiers();
-        if (!tiers.contains(tier)) {
-            apiIdentifier.setTier(tier);
-            try {
-                int applicationId = APIUtil.getApplicationId(applicationName, userId);
-                apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
-            } catch (APIManagementException e) {
-                handleException("Error while adding the subscription for user: " + userId, e);
-            }
-            return true;
-        } else {
-            handleException("Cannot add subscription to with the denied tier");
-            return false;
         }
     }
 
@@ -3215,6 +3339,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("hasMultipleEndpoints", apiObj, String.valueOf(api.getSandboxUrl() != null));
             apisArray.put(apisArray.getIds().length, apisArray, apiObj);
         } catch (APIManagementException e) {
+            // we didn't throw this exception if registry corruption occured as mentioned in https://wso2.org/jira/browse/APIMANAGER-2046
             log.error("Error while obtaining application metadata", e);
         }
     }
@@ -3355,8 +3480,16 @@ public class APIStoreHostObject extends ScriptableObject {
         String status = null;
         if (args != null && args.length >= 4 && isStringArray(args)) {
             String name = (String) args[0];
+
+            if(StringUtils.isEmpty(name.trim())){
+                handleException("Application Name is empty.");
+            }
             String username = (String) args[1];
             String tier = (String) args[2];
+
+            if(StringUtils.isEmpty(tier.trim())){
+                handleException("No tier is defined for the Application.");
+            }
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
@@ -3377,6 +3510,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
             status = apiConsumer.addApplication(application, username);
             return status;
+        } else{
+            handleException("Missing parameters.");
         }
 
         return status;
@@ -3479,7 +3614,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
 
         if (args != null && args.length > 5 && isStringArray(args)) {
-            String name = (String) args[0];
+            String newName = (String) args[0];
             String oldName = (String) args[1];
             String username = (String) args[2];
             String tier = (String) args[3];
@@ -3504,13 +3639,13 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             
             // check whether there is an app with same name
-            if (!name.equals(oldName) && appsMap.containsKey(name)) {
-                handleException("An application already exist by the name " + name);
+            if (!newName.equals(oldName) && appsMap.containsKey(newName)) {
+                handleException("An application already exist by the name " + newName);
             }
 
             for (Application app : apps) {
                 if (app.getName().equals(oldName)) {
-                    Application application = new Application(name, subscriber);
+                    Application application = new Application(newName, subscriber);
                     application.setId(app.getId());
                     application.setTier(tier);
                     application.setCallbackUrl(callbackUrl);
@@ -4708,7 +4843,7 @@ public class APIStoreHostObject extends ScriptableObject {
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         Map<String, String> domains = new HashMap<String, String>();
         if (args.length > 0 && args[0] != null) {
-            domains = apiConsumer.getTenantDomainMappings((String) args[0]);
+            domains = apiConsumer.getTenantDomainMappings((String) args[0], APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         }
         if(domains == null || domains.size() == 0 ){
             return null;
@@ -4749,14 +4884,26 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        boolean isTenantFlowStarted = false;
+        try {
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
             data.put("contentType", data, docResourceMap.get("contentType"));
             data.put("name", data, docResourceMap.get("name"));
         }
-
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
         return data;
     }
 
