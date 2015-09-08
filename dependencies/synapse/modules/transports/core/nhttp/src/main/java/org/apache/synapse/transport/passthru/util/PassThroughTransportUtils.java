@@ -149,7 +149,6 @@ public class PassThroughTransportUtils {
                 HTTP.TRANSFER_ENCODING.equalsIgnoreCase(headerName) ||
                 HTTP.DATE_HEADER.equalsIgnoreCase(headerName) ||
                 HTTP.CONTENT_LEN.equalsIgnoreCase(headerName) ||
-                HTTP.CONTENT_TYPE.equalsIgnoreCase(headerName) ||
                 HTTP.CONN_KEEP_ALIVE.equalsIgnoreCase(headerName)) {
                 iter.remove();
             }

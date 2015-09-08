@@ -26,16 +26,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
-import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceAPIKeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceAPIManagementException;
-import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceIdentityException;
 import org.wso2.carbon.apimgt.keymgt.stub.subscriber.APIKeyMgtSubscriberServiceStub;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.net.URL;
-import java.rmi.RemoteException;
 
 public class SubscriberKeyMgtClient {
 
@@ -87,13 +83,6 @@ public class SubscriberKeyMgtClient {
     public OAuthApplicationInfo getOAuthApplication(String consumerKey) throws Exception {
         OAuthApplicationInfo oAuthApplicationInfo = subscriberServiceStub.retrieveOAuthApplication(consumerKey);
         return oAuthApplicationInfo;
-    }
-
-    public OAuthApplicationInfo updateOAuthApplication(String userId, String applicationName, String callbackUrl,
-                                                       String consumerKey, String[] grantTypes)
-            throws RemoteException, APIKeyMgtSubscriberServiceAPIManagementException,
-                   APIKeyMgtSubscriberServiceAPIKeyMgtException, APIKeyMgtSubscriberServiceIdentityException {
-        return subscriberServiceStub.updateOAuthApplication(userId, applicationName, callbackUrl, consumerKey, null);
     }
 
     public void deleteOAuthApplication(String consumerKey) throws Exception {

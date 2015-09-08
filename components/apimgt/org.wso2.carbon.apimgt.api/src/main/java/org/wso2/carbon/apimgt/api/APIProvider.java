@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -394,8 +393,7 @@ public interface APIProvider extends APIManager {
     public boolean isSynapseGateway() throws APIManagementException;
     
     /**
-     * Search APIs by swagger document content. This method searches the given search term in the registry and returns
-     * a set of APIs which satisfies the given search term
+     * Search API by Document Content
      *
      * @param searchTerm  Search Term
      * @param searchType  Search Type
@@ -431,14 +429,4 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException;
-
-    /**
-     * This method is used to initiate the web service calls and cluster messages related to stats publishing status
-     *
-     * @param receiverUrl   event receiver url
-     * @param user          username of the event receiver
-     * @param password      password of the event receiver
-     * @param updatedStatus status of the stat publishing state
-     */
-    public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus);
 }

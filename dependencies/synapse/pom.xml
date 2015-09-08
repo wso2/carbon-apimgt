@@ -716,11 +716,11 @@
             <scope>test</scope>
         </dependency>
 
-	<!--<dependency>
+	<dependency>
 	    <groupId>org.wso2.uri.template</groupId>
 	    <artifactId>wso2-uri-templates</artifactId>
 	    <version>1.6.5</version>
-	</dependency>-->
+	</dependency>
         
         <!-- Caching dependencies -->
         <dependency>

@@ -34,7 +34,7 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
  */
 public class SignupObserver extends AbstractAxis2ConfigurationContextObserver {
 
-    private static final Log log = LogFactory.getLog(SignupObserver.class);
+    private static final Log log = LogFactory.getLog(TenantServiceCreator.class);
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();

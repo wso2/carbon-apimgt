@@ -37,7 +37,6 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
-import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -206,11 +205,6 @@ public class APIThrottleHandler extends AbstractHandler {
             // logic from getting executed
             return;
         }
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        // This property need to be set to avoid sending the content in pass-through pipe (request message)
-        // as the response.
-        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
 
         // By default we send a 503 response back
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {

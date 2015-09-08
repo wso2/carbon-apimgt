@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONObject;
@@ -1024,7 +1023,8 @@ public final class APIUtil {
      * @return Doc content path
      */
     public static String getAPIDocContentPath(APIIdentifier apiId, String documentationName) {
-        return getAPIDocPath(apiId) + RegistryConstants.PATH_SEPARATOR + documentationName;
+        return getAPIDocPath(apiId) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
+        		RegistryConstants.PATH_SEPARATOR + documentationName;
     }
 
     /**
@@ -2071,10 +2071,7 @@ public final class APIUtil {
         long currentTime = System.currentTimeMillis();
 
         //If the validity period is not an never expiring value
-        if (validityPeriod != Long.MAX_VALUE &&
-            // For cases where validityPeriod is closer to Long.MAX_VALUE (then issuedTime + validityPeriod would spill
-            // over and would produce a negative value)
-            (currentTime - timestampSkew) > validityPeriod) {
+        if (validityPeriod != Long.MAX_VALUE) {
             //check the validity of cached OAuth2AccessToken Response
 
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
@@ -2568,44 +2565,6 @@ public final class APIUtil {
             return serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable();
         }
         return false;
-    }
-
-
-    /**
-     * If Analytics is enabled through api-manager.xml this method will write the details to registry.
-     *
-     * @param configuration api-manager.xml
-     */
-    public static void writeAnalyticsConfigurationToRegistry(APIManagerConfiguration configuration) {
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        String usageEnabled = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
-        if (usageEnabled != null && serviceDataPublisherAdmin != null) {
-            log.debug("APIUsageTracking set to : " + usageEnabled);
-            boolean usageEnabledState = JavaUtils.isTrueExplicitly(usageEnabled);
-            EventingConfigData eventingConfigData = serviceDataPublisherAdmin.getEventingConfigData();
-            eventingConfigData.setServiceStatsEnable(usageEnabledState);
-            try {
-                if (usageEnabledState) {
-                    String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-                    String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
-                    String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-                    eventingConfigData.setUrl(bamServerURL);
-                    eventingConfigData.setUserName(bamServerUser);
-                    eventingConfigData.setPassword(bamServerPassword);
-                    if (log.isDebugEnabled()) {
-                        log.debug("BAMServerURL : " + bamServerURL + " , BAMServerUserName : " + bamServerUser + " , " +
-                                  "BAMServerPassword : " + bamServerPassword);
-                    }
-                    APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, MultitenantConstants.SUPER_TENANT_ID);
-                }
-
-                serviceDataPublisherAdmin.configureEventing(eventingConfigData);
-            } catch (APIManagementException e) {
-                log.error("Error occurred while adding BAMServerProfile");
-            } catch (Exception e) {
-                log.error("Error occurred while updating EventingConfiguration");
-            }
-        }
     }
 
     public static Map<String, String> getAnalyticsConfigFromRegistry() {
@@ -3368,7 +3327,7 @@ public final class APIUtil {
         return token;
     }
 
-    public static void loadTenantRegistry(int tenantId) throws RegistryException {
+    public static void loadTenantRegistry(int tenantId) throws RegistryException{
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
         ServiceReferenceHolder.getInstance().getIndexLoaderService().loadTenantIndex(tenantId);
         tenantRegistryLoader.loadTenantRegistry(tenantId);
@@ -3996,12 +3955,12 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of gateway / store domains for the tenant
+     * Returns a map of gateway domains for the tenant
      *
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMappings(String tenantDomain, String appType) throws APIManagementException {
+    public static Map<String, String> getDomainMappings(String tenantDomain) throws APIManagementException {
         Map<String, String> domains = new HashMap<String, String>();
         String resourcePath;
         try {
@@ -4013,8 +3972,8 @@ public final class APIUtil {
                 String content = new String((byte[]) resource.getContent());
                 JSONParser parser = new JSONParser();
                 JSONObject mappings = (JSONObject) parser.parse(content);
-                if(mappings.get(appType) != null) {
-                    mappings = (JSONObject) mappings.get(appType);
+                if(mappings.get("gateway") != null) {
+                    mappings = (JSONObject) mappings.get("gateway");
                     Iterator entries = mappings.entrySet().iterator();
                     while (entries.hasNext()) {
                         Entry thisEntry = (Entry) entries.next();
@@ -4051,7 +4010,7 @@ public final class APIUtil {
      */
 
     public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain, int tenantId)
+                                                  String tenantDomain)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4065,7 +4024,9 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
+        int tenantId;
         try {
+           tenantId = APIUtil.getTenantId(userName);
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4078,13 +4039,16 @@ public final class APIUtil {
                 String[] content = apiDocResource.getPath().split("/");
                 documentMap.put("name", content[content.length - 1]);
             }
-        } catch (RegistryException e) {
-            String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
-            log.error(msg, e);
-            handleException(msg, e);
+        }  catch (RegistryException e) {
+            log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
+                      e);
+            handleException(
+                    "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
+                    e);
         }
         return documentMap;
     }
+
     /**
      * this method used to set environments values to api object.
      *
@@ -4244,14 +4208,5 @@ public final class APIUtil {
         return null;
     }
 
-	 public static boolean isStringArray(Object[] args) {
-        int argsCount = args.length;
-        for (int i = 0; i < argsCount; i++) {
-            if (!(args[i] instanceof String)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
 }
