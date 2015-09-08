@@ -124,6 +124,7 @@ public final class APIConstants {
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
+    public static final String TOKEN_SCOPE_ASSOCIATION_TABLE = "IDN_OAUTH2_SCOPE_ASSOCIATION";
 
     public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
     
