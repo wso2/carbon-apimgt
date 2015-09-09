@@ -20,8 +20,8 @@ public class UpdateTierPermissionApiServiceImpl extends UpdateTierPermissionApiS
       @Override
       public Response updateTierPermissionPost(String tierName,TierPermission permissions,String contentType,String ifMatch,String ifUnmodifiedSince)
       throws NotFoundException {
-      // do some magic!
-      return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-  }
+          // do some magic!
+          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+      }
   
 }

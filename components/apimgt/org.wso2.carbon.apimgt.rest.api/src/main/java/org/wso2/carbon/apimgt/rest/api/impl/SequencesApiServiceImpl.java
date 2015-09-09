@@ -18,8 +18,8 @@ public class SequencesApiServiceImpl extends SequencesApiService {
       @Override
       public Response sequencesGet(String type,String accept,String ifNoneMatch)
       throws NotFoundException {
-      // do some magic!
-      return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-  }
+          // do some magic!
+          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+      }
   
 }
