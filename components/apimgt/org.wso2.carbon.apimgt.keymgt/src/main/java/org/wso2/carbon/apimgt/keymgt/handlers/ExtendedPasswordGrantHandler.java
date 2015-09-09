@@ -3,14 +3,17 @@ package org.wso2.carbon.apimgt.keymgt.handlers;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
-import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.application.common.cache.BaseCache;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
+import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.ResponseHeader;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2AccessTokenReqDTO;
@@ -24,7 +27,10 @@ import org.wso2.carbon.user.core.config.RealmConfiguration;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
+import javax.cache.Cache;
+import javax.cache.Caching;
 import javax.xml.namespace.QName;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -100,7 +106,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
                 throw new IdentityOAuth2Exception(e.getMessage(), e);
             }
 
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmService = OAuthComponentServiceHolder.getRealmService();
             UserStoreManager userStoreManager = null;
             try {
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
@@ -263,7 +269,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         }
 
         try {
-            RealmService realmSvc = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmSvc = OAuthComponentServiceHolder.getRealmService();
             RealmConfiguration config = new RealmConfiguration();
             UserRealm realm = realmSvc.getUserRealm(config);
             org.wso2.carbon.user.core.UserStoreManager storeManager = realm.getUserStoreManager();

@@ -1,0 +1,1203 @@
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ns="http://service.gateway.apimgt.carbon.wso2.org" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ax282="http://dto.gateway.apimgt.carbon.wso2.org/xsd" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.gateway.apimgt.carbon.wso2.org">
+   <wsdl:documentation>APIGatewayAdmin</wsdl:documentation>
+   <wsdl:types>
+      <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.gateway.apimgt.carbon.wso2.org/xsd">
+         <xs:complexType name="APIData">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="fileName" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="host" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="port" type="xs:int"></xs:element>
+               <xs:element maxOccurs="unbounded" minOccurs="0" name="resources" nillable="true" type="ax282:ResourceData"></xs:element>
+            </xs:sequence>
+         </xs:complexType>
+         <xs:complexType name="ResourceData">
+            <xs:sequence>
+               <xs:element minOccurs="0" name="contentType" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="faultSeqXml" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="faultSequenceKey" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="inSeqXml" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="inSequenceKey" nillable="true" type="xs:string"></xs:element>
+               <xs:element maxOccurs="unbounded" minOccurs="0" name="methods" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="outSeqXml" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="outSequenceKey" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="protocol" type="xs:int"></xs:element>
+               <xs:element minOccurs="0" name="uriTemplate" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="urlMapping" nillable="true" type="xs:string"></xs:element>
+               <xs:element minOccurs="0" name="userAgent" nillable="true" type="xs:string"></xs:element>
+            </xs:sequence>
+         </xs:complexType>
+      </xs:schema>
+      <xs:schema xmlns:ax283="http://dto.gateway.apimgt.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://service.gateway.apimgt.carbon.wso2.org">
+         <xs:import namespace="http://dto.gateway.apimgt.carbon.wso2.org/xsd"></xs:import>
+         <xs:element name="getSequence">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequenceName" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getSequenceResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="xs:anyType"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addSequence">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequence" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addApiForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getDefaultApiForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getDefaultApiForTenantResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax283:APIData"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateApiForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateApiForInlineScriptForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateApiForInlineScript">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateDefaultApiForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="updateDefaultApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="deleteApiForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="deleteApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="deleteDefaultApiForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="deleteDefaultApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addPrototypeApiScriptImplForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addPrototypeApiScriptImpl">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addDefaultAPIForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addDefaultAPI">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiConfig" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getApiForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getApiForTenantResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax283:APIData"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getDefaultApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getDefaultApiResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax283:APIData"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addSequenceForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequence" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="deleteSequence">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequenceName" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="deleteSequenceForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequenceName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getSequenceForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequenceName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getSequenceForTenantResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="xs:anyType"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="isExistingSequence">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequenceName" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="isExistingSequenceResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" type="xs:boolean"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="isExistingSequenceForTenant">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="sequenceName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="tenantDomain" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="isExistingSequenceForTenantResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" type="xs:boolean"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="doEncryption">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="plainTextPass" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="doEncryptionResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getApi">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="apiProviderName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"></xs:element>
+                  <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="getApiResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" nillable="true" type="ax283:APIData"></xs:element>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+      </xs:schema>
+   </wsdl:types>
+   <wsdl:message name="addDefaultAPIForTenantRequest">
+      <wsdl:part name="parameters" element="ns:addDefaultAPIForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getApiForTenantRequest">
+      <wsdl:part name="parameters" element="ns:getApiForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getApiForTenantResponse">
+      <wsdl:part name="parameters" element="ns:getApiForTenantResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getSequenceForTenantRequest">
+      <wsdl:part name="parameters" element="ns:getSequenceForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getSequenceForTenantResponse">
+      <wsdl:part name="parameters" element="ns:getSequenceForTenantResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="deleteSequenceForTenantRequest">
+      <wsdl:part name="parameters" element="ns:deleteSequenceForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="addPrototypeApiScriptImplForTenantRequest">
+      <wsdl:part name="parameters" element="ns:addPrototypeApiScriptImplForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getSequenceRequest">
+      <wsdl:part name="parameters" element="ns:getSequence"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getSequenceResponse">
+      <wsdl:part name="parameters" element="ns:getSequenceResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="deleteDefaultApiRequest">
+      <wsdl:part name="parameters" element="ns:deleteDefaultApi"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="addApiRequest">
+      <wsdl:part name="parameters" element="ns:addApi"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="isExistingSequenceForTenantRequest">
+      <wsdl:part name="parameters" element="ns:isExistingSequenceForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="isExistingSequenceForTenantResponse">
+      <wsdl:part name="parameters" element="ns:isExistingSequenceForTenantResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="doEncryptionRequest">
+      <wsdl:part name="parameters" element="ns:doEncryption"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="doEncryptionResponse">
+      <wsdl:part name="parameters" element="ns:doEncryptionResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="deleteApiRequest">
+      <wsdl:part name="parameters" element="ns:deleteApi"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="addSequenceForTenantRequest">
+      <wsdl:part name="parameters" element="ns:addSequenceForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="deleteApiForTenantRequest">
+      <wsdl:part name="parameters" element="ns:deleteApiForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="addDefaultAPIRequest">
+      <wsdl:part name="parameters" element="ns:addDefaultAPI"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="deleteDefaultApiForTenantRequest">
+      <wsdl:part name="parameters" element="ns:deleteDefaultApiForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="updateDefaultApiForTenantRequest">
+      <wsdl:part name="parameters" element="ns:updateDefaultApiForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="updateApiRequest">
+      <wsdl:part name="parameters" element="ns:updateApi"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="updateApiForTenantRequest">
+      <wsdl:part name="parameters" element="ns:updateApiForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="addApiForTenantRequest">
+      <wsdl:part name="parameters" element="ns:addApiForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getApiRequest">
+      <wsdl:part name="parameters" element="ns:getApi"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getApiResponse">
+      <wsdl:part name="parameters" element="ns:getApiResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="addSequenceRequest">
+      <wsdl:part name="parameters" element="ns:addSequence"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="updateApiForInlineScriptForTenantRequest">
+      <wsdl:part name="parameters" element="ns:updateApiForInlineScriptForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getDefaultApiForTenantRequest">
+      <wsdl:part name="parameters" element="ns:getDefaultApiForTenant"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getDefaultApiForTenantResponse">
+      <wsdl:part name="parameters" element="ns:getDefaultApiForTenantResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="addPrototypeApiScriptImplRequest">
+      <wsdl:part name="parameters" element="ns:addPrototypeApiScriptImpl"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="isExistingSequenceRequest">
+      <wsdl:part name="parameters" element="ns:isExistingSequence"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="isExistingSequenceResponse">
+      <wsdl:part name="parameters" element="ns:isExistingSequenceResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="updateApiForInlineScriptRequest">
+      <wsdl:part name="parameters" element="ns:updateApiForInlineScript"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="updateDefaultApiRequest">
+      <wsdl:part name="parameters" element="ns:updateDefaultApi"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="deleteSequenceRequest">
+      <wsdl:part name="parameters" element="ns:deleteSequence"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getDefaultApiRequest">
+      <wsdl:part name="parameters" element="ns:getDefaultApi"></wsdl:part>
+   </wsdl:message>
+   <wsdl:message name="getDefaultApiResponse">
+      <wsdl:part name="parameters" element="ns:getDefaultApiResponse"></wsdl:part>
+   </wsdl:message>
+   <wsdl:portType name="APIGatewayAdminPortType">
+      <wsdl:operation name="addDefaultAPIForTenant">
+         <wsdl:input message="ns:addDefaultAPIForTenantRequest" wsaw:Action="urn:addDefaultAPIForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApiForTenant">
+         <wsdl:input message="ns:getApiForTenantRequest" wsaw:Action="urn:getApiForTenant"></wsdl:input>
+         <wsdl:output message="ns:getApiForTenantResponse" wsaw:Action="urn:getApiForTenantResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="getSequenceForTenant">
+         <wsdl:input message="ns:getSequenceForTenantRequest" wsaw:Action="urn:getSequenceForTenant"></wsdl:input>
+         <wsdl:output message="ns:getSequenceForTenantResponse" wsaw:Action="urn:getSequenceForTenantResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequenceForTenant">
+         <wsdl:input message="ns:deleteSequenceForTenantRequest" wsaw:Action="urn:deleteSequenceForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImplForTenant">
+         <wsdl:input message="ns:addPrototypeApiScriptImplForTenantRequest" wsaw:Action="urn:addPrototypeApiScriptImplForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getSequence">
+         <wsdl:input message="ns:getSequenceRequest" wsaw:Action="urn:getSequence"></wsdl:input>
+         <wsdl:output message="ns:getSequenceResponse" wsaw:Action="urn:getSequenceResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApi">
+         <wsdl:input message="ns:deleteDefaultApiRequest" wsaw:Action="urn:deleteDefaultApi"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApi">
+         <wsdl:input message="ns:addApiRequest" wsaw:Action="urn:addApi"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequenceForTenant">
+         <wsdl:input message="ns:isExistingSequenceForTenantRequest" wsaw:Action="urn:isExistingSequenceForTenant"></wsdl:input>
+         <wsdl:output message="ns:isExistingSequenceForTenantResponse" wsaw:Action="urn:isExistingSequenceForTenantResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="doEncryption">
+         <wsdl:input message="ns:doEncryptionRequest" wsaw:Action="urn:doEncryption"></wsdl:input>
+         <wsdl:output message="ns:doEncryptionResponse" wsaw:Action="urn:doEncryptionResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApi">
+         <wsdl:input message="ns:deleteApiRequest" wsaw:Action="urn:deleteApi"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addSequenceForTenant">
+         <wsdl:input message="ns:addSequenceForTenantRequest" wsaw:Action="urn:addSequenceForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApiForTenant">
+         <wsdl:input message="ns:deleteApiForTenantRequest" wsaw:Action="urn:deleteApiForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addDefaultAPI">
+         <wsdl:input message="ns:addDefaultAPIRequest" wsaw:Action="urn:addDefaultAPI"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApiForTenant">
+         <wsdl:input message="ns:deleteDefaultApiForTenantRequest" wsaw:Action="urn:deleteDefaultApiForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApiForTenant">
+         <wsdl:input message="ns:updateDefaultApiForTenantRequest" wsaw:Action="urn:updateDefaultApiForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApi">
+         <wsdl:input message="ns:updateApiRequest" wsaw:Action="urn:updateApi"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForTenant">
+         <wsdl:input message="ns:updateApiForTenantRequest" wsaw:Action="urn:updateApiForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApiForTenant">
+         <wsdl:input message="ns:addApiForTenantRequest" wsaw:Action="urn:addApiForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApi">
+         <wsdl:input message="ns:getApiRequest" wsaw:Action="urn:getApi"></wsdl:input>
+         <wsdl:output message="ns:getApiResponse" wsaw:Action="urn:getApiResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addSequence">
+         <wsdl:input message="ns:addSequenceRequest" wsaw:Action="urn:addSequence"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScriptForTenant">
+         <wsdl:input message="ns:updateApiForInlineScriptForTenantRequest" wsaw:Action="urn:updateApiForInlineScriptForTenant"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApiForTenant">
+         <wsdl:input message="ns:getDefaultApiForTenantRequest" wsaw:Action="urn:getDefaultApiForTenant"></wsdl:input>
+         <wsdl:output message="ns:getDefaultApiForTenantResponse" wsaw:Action="urn:getDefaultApiForTenantResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImpl">
+         <wsdl:input message="ns:addPrototypeApiScriptImplRequest" wsaw:Action="urn:addPrototypeApiScriptImpl"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequence">
+         <wsdl:input message="ns:isExistingSequenceRequest" wsaw:Action="urn:isExistingSequence"></wsdl:input>
+         <wsdl:output message="ns:isExistingSequenceResponse" wsaw:Action="urn:isExistingSequenceResponse"></wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScript">
+         <wsdl:input message="ns:updateApiForInlineScriptRequest" wsaw:Action="urn:updateApiForInlineScript"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApi">
+         <wsdl:input message="ns:updateDefaultApiRequest" wsaw:Action="urn:updateDefaultApi"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequence">
+         <wsdl:input message="ns:deleteSequenceRequest" wsaw:Action="urn:deleteSequence"></wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApi">
+         <wsdl:input message="ns:getDefaultApiRequest" wsaw:Action="urn:getDefaultApi"></wsdl:input>
+         <wsdl:output message="ns:getDefaultApiResponse" wsaw:Action="urn:getDefaultApiResponse"></wsdl:output>
+      </wsdl:operation>
+   </wsdl:portType>
+   <wsdl:binding name="APIGatewayAdminSoap11Binding" type="ns:APIGatewayAdminPortType">
+      <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap:binding>
+      <wsdl:operation name="addDefaultAPIForTenant">
+         <soap:operation soapAction="urn:addDefaultAPIForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApiForTenant">
+         <soap:operation soapAction="urn:getApiForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="getSequenceForTenant">
+         <soap:operation soapAction="urn:getSequenceForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImplForTenant">
+         <soap:operation soapAction="urn:addPrototypeApiScriptImplForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequenceForTenant">
+         <soap:operation soapAction="urn:deleteSequenceForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getSequence">
+         <soap:operation soapAction="urn:getSequence" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApi">
+         <soap:operation soapAction="urn:deleteDefaultApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApi">
+         <soap:operation soapAction="urn:addApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequenceForTenant">
+         <soap:operation soapAction="urn:isExistingSequenceForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="doEncryption">
+         <soap:operation soapAction="urn:doEncryption" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApi">
+         <soap:operation soapAction="urn:deleteApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addSequenceForTenant">
+         <soap:operation soapAction="urn:addSequenceForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApiForTenant">
+         <soap:operation soapAction="urn:deleteApiForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addDefaultAPI">
+         <soap:operation soapAction="urn:addDefaultAPI" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApiForTenant">
+         <soap:operation soapAction="urn:deleteDefaultApiForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApi">
+         <soap:operation soapAction="urn:updateApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApiForTenant">
+         <soap:operation soapAction="urn:updateDefaultApiForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForTenant">
+         <soap:operation soapAction="urn:updateApiForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApiForTenant">
+         <soap:operation soapAction="urn:addApiForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApi">
+         <soap:operation soapAction="urn:getApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addSequence">
+         <soap:operation soapAction="urn:addSequence" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScriptForTenant">
+         <soap:operation soapAction="urn:updateApiForInlineScriptForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApiForTenant">
+         <soap:operation soapAction="urn:getDefaultApiForTenant" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImpl">
+         <soap:operation soapAction="urn:addPrototypeApiScriptImpl" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequence">
+         <soap:operation soapAction="urn:isExistingSequence" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScript">
+         <soap:operation soapAction="urn:updateApiForInlineScript" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApi">
+         <soap:operation soapAction="urn:updateDefaultApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequence">
+         <soap:operation soapAction="urn:deleteSequence" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApi">
+         <soap:operation soapAction="urn:getDefaultApi" style="document"></soap:operation>
+         <wsdl:input>
+            <soap:body use="literal"></soap:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"></soap:body>
+         </wsdl:output>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:binding name="APIGatewayAdminSoap12Binding" type="ns:APIGatewayAdminPortType">
+      <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"></soap12:binding>
+      <wsdl:operation name="addDefaultAPIForTenant">
+         <soap12:operation soapAction="urn:addDefaultAPIForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApiForTenant">
+         <soap12:operation soapAction="urn:getApiForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="getSequenceForTenant">
+         <soap12:operation soapAction="urn:getSequenceForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImplForTenant">
+         <soap12:operation soapAction="urn:addPrototypeApiScriptImplForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequenceForTenant">
+         <soap12:operation soapAction="urn:deleteSequenceForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getSequence">
+         <soap12:operation soapAction="urn:getSequence" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApi">
+         <soap12:operation soapAction="urn:deleteDefaultApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApi">
+         <soap12:operation soapAction="urn:addApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequenceForTenant">
+         <soap12:operation soapAction="urn:isExistingSequenceForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="doEncryption">
+         <soap12:operation soapAction="urn:doEncryption" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApi">
+         <soap12:operation soapAction="urn:deleteApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addSequenceForTenant">
+         <soap12:operation soapAction="urn:addSequenceForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApiForTenant">
+         <soap12:operation soapAction="urn:deleteApiForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addDefaultAPI">
+         <soap12:operation soapAction="urn:addDefaultAPI" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApiForTenant">
+         <soap12:operation soapAction="urn:deleteDefaultApiForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApi">
+         <soap12:operation soapAction="urn:updateApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApiForTenant">
+         <soap12:operation soapAction="urn:updateDefaultApiForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForTenant">
+         <soap12:operation soapAction="urn:updateApiForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApiForTenant">
+         <soap12:operation soapAction="urn:addApiForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApi">
+         <soap12:operation soapAction="urn:getApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addSequence">
+         <soap12:operation soapAction="urn:addSequence" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScriptForTenant">
+         <soap12:operation soapAction="urn:updateApiForInlineScriptForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApiForTenant">
+         <soap12:operation soapAction="urn:getDefaultApiForTenant" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImpl">
+         <soap12:operation soapAction="urn:addPrototypeApiScriptImpl" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequence">
+         <soap12:operation soapAction="urn:isExistingSequence" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScript">
+         <soap12:operation soapAction="urn:updateApiForInlineScript" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApi">
+         <soap12:operation soapAction="urn:updateDefaultApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequence">
+         <soap12:operation soapAction="urn:deleteSequence" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApi">
+         <soap12:operation soapAction="urn:getDefaultApi" style="document"></soap12:operation>
+         <wsdl:input>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"></soap12:body>
+         </wsdl:output>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:binding name="APIGatewayAdminHttpBinding" type="ns:APIGatewayAdminPortType">
+      <http:binding verb="POST"></http:binding>
+      <wsdl:operation name="addDefaultAPIForTenant">
+         <http:operation location="addDefaultAPIForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApiForTenant">
+         <http:operation location="getApiForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="getSequenceForTenant">
+         <http:operation location="getSequenceForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImplForTenant">
+         <http:operation location="addPrototypeApiScriptImplForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequenceForTenant">
+         <http:operation location="deleteSequenceForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getSequence">
+         <http:operation location="getSequence"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApi">
+         <http:operation location="deleteDefaultApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApi">
+         <http:operation location="addApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequenceForTenant">
+         <http:operation location="isExistingSequenceForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="doEncryption">
+         <http:operation location="doEncryption"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApi">
+         <http:operation location="deleteApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addSequenceForTenant">
+         <http:operation location="addSequenceForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteApiForTenant">
+         <http:operation location="deleteApiForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addDefaultAPI">
+         <http:operation location="addDefaultAPI"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteDefaultApiForTenant">
+         <http:operation location="deleteDefaultApiForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApi">
+         <http:operation location="updateApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApiForTenant">
+         <http:operation location="updateDefaultApiForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForTenant">
+         <http:operation location="updateApiForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="addApiForTenant">
+         <http:operation location="addApiForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getApi">
+         <http:operation location="getApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addSequence">
+         <http:operation location="addSequence"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScriptForTenant">
+         <http:operation location="updateApiForInlineScriptForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApiForTenant">
+         <http:operation location="getDefaultApiForTenant"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addPrototypeApiScriptImpl">
+         <http:operation location="addPrototypeApiScriptImpl"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="isExistingSequence">
+         <http:operation location="isExistingSequence"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="updateApiForInlineScript">
+         <http:operation location="updateApiForInlineScript"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="updateDefaultApi">
+         <http:operation location="updateDefaultApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="deleteSequence">
+         <http:operation location="deleteSequence"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+      </wsdl:operation>
+      <wsdl:operation name="getDefaultApi">
+         <http:operation location="getDefaultApi"></http:operation>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"></mime:content>
+         </wsdl:output>
+      </wsdl:operation>
+   </wsdl:binding>
+   <wsdl:service name="APIGatewayAdmin">
+      <wsdl:port name="APIGatewayAdminHttpsSoap11Endpoint" binding="ns:APIGatewayAdminSoap11Binding">
+         <soap:address location="https://Amilas-MacBook-Pro.local:8243/services/APIGatewayAdmin.APIGatewayAdminHttpsSoap11Endpoint"></soap:address>
+      </wsdl:port>
+      <wsdl:port name="APIGatewayAdminHttpsSoap12Endpoint" binding="ns:APIGatewayAdminSoap12Binding">
+         <soap12:address location="https://Amilas-MacBook-Pro.local:8243/services/APIGatewayAdmin.APIGatewayAdminHttpsSoap12Endpoint"></soap12:address>
+      </wsdl:port>
+      <wsdl:port name="APIGatewayAdminHttpsEndpoint" binding="ns:APIGatewayAdminHttpBinding">
+         <http:address location="https://Amilas-MacBook-Pro.local:8243/services/APIGatewayAdmin.APIGatewayAdminHttpsEndpoint"></http:address>
+      </wsdl:port>
+   </wsdl:service>
+</wsdl:definitions>
