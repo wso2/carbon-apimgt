@@ -401,7 +401,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-                <version>4.2.1</version>
+                <version>${apimgt.handlers.security.stub.version}</version>
             </dependency>
 
             <dependency>
@@ -764,7 +764,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
-                <version>4.2.0</version>
+                <version>${ganalytics.version}</version>
             </dependency>
 
         </dependencies>
