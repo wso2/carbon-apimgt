@@ -18,15 +18,15 @@ public class ExternalStoresApiServiceImpl extends ExternalStoresApiService {
       @Override
       public Response externalStoresGet(String limit,String offset,String query,String accept,String ifNoneMatch)
       throws NotFoundException {
-      // do some magic!
-      return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-  }
+          // do some magic!
+          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+      }
   
       @Override
       public Response externalStoresPublishExternalstorePost(String apiId,String externalStoreId)
       throws NotFoundException {
-      // do some magic!
-      return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-  }
+          // do some magic!
+          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+      }
   
 }

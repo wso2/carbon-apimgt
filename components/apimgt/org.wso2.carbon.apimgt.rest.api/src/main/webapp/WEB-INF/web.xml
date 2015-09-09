@@ -22,7 +22,7 @@
     version="2.4">
 
     <display-name>WSO2 APIM REST API</display-name>
-    <description>Wso2 API Manager REST API</description>
+    <description>WSO2 API Manager REST API</description>
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>WEB-INF/beans.xml</param-value>
