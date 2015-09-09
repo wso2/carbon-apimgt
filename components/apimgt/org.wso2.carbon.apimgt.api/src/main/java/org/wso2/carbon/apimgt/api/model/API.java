@@ -64,6 +64,7 @@ public class API implements Serializable{
     private String visibleTenants;
 
     private boolean endpointSecured = false;
+    private boolean endpointAuthDigest = false;
 	private String endpointUTUsername;
     private String endpointUTPassword;
 
@@ -471,6 +472,16 @@ public class API implements Serializable{
  	public void setEndpointSecured(boolean endpointSecured) {
  		this.endpointSecured = endpointSecured;
  	}
+
+    /**
+     * @return the endpointAuthDigest
+     */
+    public boolean isEndpointAuthDigest() { return endpointAuthDigest; }
+
+    /**
+     * @param endpointAuthDigest the endpointAuthDigest to set
+     */
+    public void setEndpointAuthDigest(boolean endpointAuthDigest) { this.endpointAuthDigest = endpointAuthDigest; }
  	
     public String getInSequence() {
  		return inSequence;
