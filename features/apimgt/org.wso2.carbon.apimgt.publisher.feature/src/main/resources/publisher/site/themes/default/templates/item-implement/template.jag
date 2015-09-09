@@ -137,6 +137,18 @@
                             </div>
                         </div>
 
+                        <div class="control-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+                            <label class="control-label" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span></label>
+                            <div class="controls">
+                            <select class="select required" id="endpointAuthType" name="endpointAuthType" >
+                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
+                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
+                            </select>
+                            <a class="icon-question-sign help_popup" help_data="endpointAuth_help"></a>
+                            <p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+                            </div>
+                        </div>
+
                         <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
                             <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
                             <div class="controls">
