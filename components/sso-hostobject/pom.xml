@@ -29,7 +29,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.hostobjects</groupId>
     <artifactId>sso-hostobject</artifactId>
-    <version>4.2.4-SNAPSHOT</version>
+    <version>4.2.4</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Hostobjects Aggregator Module</name>
     <url>http://wso2.org</url>

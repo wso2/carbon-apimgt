@@ -18,21 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
@@ -69,6 +56,16 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
@@ -812,11 +809,11 @@ public abstract class AbstractAPIManager implements APIManager {
      *
      * @return Map<String, String>
      */
-    public Map<String,String> getTenantDomainMappings(String tenantDomain) throws APIManagementException {
+    public Map<String,String> getTenantDomainMappings(String tenantDomain, String apiType) throws APIManagementException {
         boolean isTenantFlowStarted = false;
         Map<String,String> domains;
 
-        domains = APIUtil.getDomainMappings(tenantDomain);
+        domains = APIUtil.getDomainMappings(tenantDomain, apiType);
 
         return domains;
     }

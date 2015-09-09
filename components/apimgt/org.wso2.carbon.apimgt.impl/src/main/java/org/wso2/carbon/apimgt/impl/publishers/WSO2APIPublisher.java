@@ -43,7 +43,6 @@ import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.Resource;
@@ -670,13 +669,12 @@ public class WSO2APIPublisher implements APIPublisher {
 
     }
 
-    private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action) 
-    		throws org.wso2.carbon.registry.api.RegistryException, IOException, UserStoreException, APIManagementException {
+    private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action)
+            throws org.wso2.carbon.registry.api.RegistryException, IOException, UserStoreException, APIManagementException {
 
 		MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 
         try {
-
 
 			entity.addPart(APIConstants.API_ACTION, new StringBody(action));
 
@@ -690,7 +688,9 @@ public class WSO2APIPublisher implements APIPublisher {
 			entity.addPart("wadl", new StringBody(checkValue(api.getWadlUrl())));
 			entity.addPart("endpoint_config", new StringBody(checkValue(api.getEndpointConfig())));
 
-			URL url = new URL(getFullRegistryIconUrl(api.getThumbnailUrl()));
+            String registryIconUrl = getFullRegistryIconUrl(api.getThumbnailUrl());
+			URL url = new URL(getIconUrlWithHttpRedirect(registryIconUrl));
+
 			File fileToUpload = new File("tmp/icon");
 			if (!fileToUpload.exists()) {
 				fileToUpload.createNewFile();
@@ -744,12 +744,10 @@ public class WSO2APIPublisher implements APIPublisher {
 			entity.addPart("advertiseOnly", new StringBody("true"));
 
         
-			String tenantDomain =
-			                      MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
-			                                                                                         .getProviderName()));
-			int tenantId =
-			               ServiceReferenceHolder.getInstance().getRealmService()
-			                                     .getTenantManager().getTenantId(tenantDomain);
+			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
+			api.getId().getProviderName()));
+			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+			.getTenantId(tenantDomain);
 			entity.addPart("redirectURL", new StringBody(getExternalStoreRedirectURL(tenantId)));
 			if (api.getTransports() == null) {
 				entity.addPart("http_checked", new StringBody(""));
@@ -771,8 +769,7 @@ public class WSO2APIPublisher implements APIPublisher {
 
 				}
 			}
-			entity.addPart("resourceCount",
-			               new StringBody(String.valueOf(api.getUriTemplates().size())));
+			entity.addPart("resourceCount", new StringBody(String.valueOf(api.getUriTemplates().size())));
 
 			Iterator urlTemplate = api.getUriTemplates().iterator();
 			int i = 0;
@@ -783,11 +780,9 @@ public class WSO2APIPublisher implements APIPublisher {
 				entity.addPart("resourceMethod-" + i,
 				               new StringBody(template.getMethodsAsString().replaceAll("\\s", ",")));
 				entity.addPart("resourceMethodAuthType-" + i,
-				               new StringBody(String.valueOf(template.getAuthTypeAsString()
-				                                                     .replaceAll("\\s", ","))));
+				               new StringBody(String.valueOf(template.getAuthTypeAsString().replaceAll("\\s", ","))));
 				entity.addPart("resourceMethodThrottlingTier-" + i,
-				               new StringBody(template.getThrottlingTiersAsString()
-				                                      .replaceAll("\\s", ",")));
+				               new StringBody(template.getThrottlingTiersAsString().replaceAll("\\s", ",")));
 				i++;
 			}
 			return entity;
@@ -910,6 +905,21 @@ public class WSO2APIPublisher implements APIPublisher {
 
         }
         return added;
+    }
+
+    private String getIconUrlWithHttpRedirect(String imageUrl) throws IOException {
+        URL url = new URL(imageUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        int statusCode = conn.getResponseCode();
+
+        if (statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                statusCode == HttpURLConnection.HTTP_SEE_OTHER) {
+            String newUrl = conn.getHeaderField("Location");
+            return newUrl;
+        } else {
+            return imageUrl;
+        }
     }
 
 }
