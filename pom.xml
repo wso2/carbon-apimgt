@@ -807,7 +807,7 @@
         <!-- APIM Component Version -->
         <carbon.apimgt.version>1.3.0-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[1.3.0, 1.4.0)</carbon.apimgt.imp.pkg.version>
-
+        <carbon.apimgt.stub.imp.pkg.version>[4.3.0, 4.4.0)</carbon.apimgt.stub.imp.pkg.version>
         <apimgt.api.version>1.3.0-SNAPSHOT</apimgt.api.version>
         <apimgt.impl.version>1.3.0-SNAPSHOT</apimgt.impl.version>
         <apimgt.core.version>1.3.0-SNAPSHOT</apimgt.core.version>
