@@ -303,12 +303,11 @@ paths:
           schema: 
             $ref: "#/definitions/Error"  
   /apis/{apiId}/documents:
-    parameters:
-      -
-        $ref: "#/parameters/apiId"
     get:
       description: Get a list of documents belonging to an API. 
       parameters:
+        -
+          $ref : "#/parameters/apiId"
         - 
           $ref : "#/parameters/limit"
         - 
@@ -360,6 +359,8 @@ paths:
     post:
       description: Add a new document to an API
       parameters:
+        -
+          $ref : "#/parameters/apiId"
         - in: body
           name: body
           description: "Document object that needs to be added"
@@ -390,19 +391,18 @@ paths:
         415:
           description: "Unsupported media type. The entity of the request was in a not supported format."
   /apis/{apiId}/documents/{documentId}:
-    parameters:
-      -
-        $ref: "#/parameters/apiId"
-      -
-        name: documentId
-        in: path
-        description: Document Id
-        required: true
-        type: number
-        format: integer
     get:
       description: Get a particular document associated with an API.
       parameters:
+        -
+          $ref: "#/parameters/apiId"
+        -
+          name: documentId
+          in: path
+          description: Document Id
+          required: true
+          type: number
+          format: integer
         -
           $ref : "#/parameters/Accept"
         -
@@ -439,6 +439,15 @@ paths:
     put:
       description: Update document details.
       parameters:
+        -
+          $ref: "#/parameters/apiId"
+        -
+          name: documentId
+          in: path
+          description: Document Id
+          required: true
+          type: number
+          format: integer
         - in: body
           name: body
           description: "Document object that needs to be added"
@@ -484,6 +493,15 @@ paths:
     delete:
       description: Delete a document of an API
       parameters:
+        -
+          $ref: "#/parameters/apiId"
+        -
+          name: documentId
+          in: path
+          description: Document Id
+          required: true
+          type: number
+          format: integer
         -
           $ref : "#/parameters/If-Match"
         -
@@ -584,6 +602,8 @@ paths:
     get:
       description: Get application details
       parameters:
+        - 
+          $ref : "#/parameters/applicationId"
         -
           $ref : "#/parameters/Accept"
         -
@@ -618,6 +638,8 @@ paths:
     put:
       description: Update application details
       parameters:
+        - 
+          $ref : "#/parameters/applicationId"
         - in: body
           name: body
           description: "Application object that needs to be updated"
@@ -663,6 +685,8 @@ paths:
     delete:
       description: Remove an application
       parameters:
+        - 
+          $ref : "#/parameters/applicationId"
         -
           $ref : "#/parameters/If-Match"
         -
