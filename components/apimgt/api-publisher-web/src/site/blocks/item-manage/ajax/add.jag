@@ -45,6 +45,7 @@ include("/jagg/jagg.jag");
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
             apiData.visibleTenants = request.getParameter("allowTenants","UTF-8");
             apiData.endpointSecured = request.getParameter("endpointType");
+            apiData.endpointAuthDigest = request.getParameter("endpointAuthType");
             apiData.endpointUTUsername = request.getParameter("epUsername");
             apiData.endpointUTPassword = request.getParameter("epPassword");   
             apiData.inSequence = request.getParameter("inSequence");

@@ -24,7 +24,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpEntity;  //changed
+import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.synapse.ManagedLifecycle;
@@ -34,7 +34,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 
 import java.io.IOException;
-import java.io.InputStream; //Changed line numbers 41 to 44
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.util.*;
@@ -52,7 +52,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
     private String realm;
     private String serverNonce;
     private String qop;
-    private String cnonce; //changed line numbers 59 to 60
+    private String cnonce;
     private String nc;
 
     @Override
@@ -160,7 +160,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                 }
 
 
-                String ha2; //changed
+                String ha2;
 
                 //Consider all qop types other than "auth-int" as auth and compute ha2 here
 
@@ -171,7 +171,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                     ha2StringBuilder.append(postFix);
                     ha2 = DigestUtils.md5Hex(ha2StringBuilder.toString());
 
-                }else{ //changed line numbers 178 to 203
+                }else{
 
                     //Extracting the entity body for calculating ha2 for qop="auth-int"
 
@@ -203,9 +203,9 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                 }
 
 
-                String serverResponse; //changed
+                String serverResponse;
 
-                if(qop!=null){ //changed line numbers 212 to 220
+                if(qop!=null){
 
                     int ncount=0;
 
@@ -234,7 +234,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                     serverResponse = DigestUtils.md5Hex(serverResponseStringBuilder.toString());
                 }
 
-                else{ //changed line numbers 239 to 249
+                else{
 
                     StringBuilder serverResponseStringBuilder =  new StringBuilder(ha1);
                     serverResponseStringBuilder.append(":");
@@ -260,7 +260,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                 header.append("uri=\"" + postFix + "\"" + ", ");
 
 
-                if(qop!=null) { //changed line numbers 265 to 271
+                if(qop!=null) {
 
                     header.append("qop=" + qop + ", ");
                     header.append("nc=" + nc + ", ");

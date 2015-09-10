@@ -299,6 +299,18 @@ var RESOURCES = [
                                    
                      </div>
                 </div>
+
+                <div class="control-group" id="endpointAuthType" style="display:none;">
+                    <label class="control-label" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                    <select class="select required" id="endpointAuthType" name="endpointAuthType" >
+                        <option value="basicAuth"><%=i18n.localize("basicAuth")%></option>
+                        <option value="digestAuth"><%=i18n.localize("digestAuth")%></option>
+                    </select>
+
+                    </div>
+                </div>
+
                 <div class="control-group" id="credentials" style="display:none;">
                     <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">

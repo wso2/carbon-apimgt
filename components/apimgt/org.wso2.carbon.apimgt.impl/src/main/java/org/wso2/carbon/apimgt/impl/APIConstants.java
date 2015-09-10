@@ -183,6 +183,7 @@ public final class APIConstants {
     public static final String API_URI_AUTH_TYPE ="URITemplate_authType";
     public static final String API_URI_MEDIATION_SCRIPT ="URITemplate_mediationScript";
     public static final String API_OVERVIEW_ENDPOINT_SECURED = "overview_endpointSecured";
+    public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";

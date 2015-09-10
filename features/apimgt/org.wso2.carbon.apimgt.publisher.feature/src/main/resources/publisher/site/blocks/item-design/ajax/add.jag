@@ -162,6 +162,7 @@ function loadSwaggerObj(path)
             apiData.wsdl = request.getParameter("wsdl");
             apiData.wadl = request.getParameter("wadl");
             apiData.endpointSecured = request.getParameter("endpointType");
+            apiData.endpointAuthDigest = request.getParameter("endpointAuthType");
             apiData.endpointUTUsername = request.getParameter("epUsername");
             apiData.endpointUTPassword = request.getParameter("epPassword");
             apiData.endpoint_config= request.getParameter("endpoint_config","UTF-8");

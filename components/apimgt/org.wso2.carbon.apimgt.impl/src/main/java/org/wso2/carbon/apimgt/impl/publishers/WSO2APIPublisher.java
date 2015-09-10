@@ -581,6 +581,7 @@ public class WSO2APIPublisher implements APIPublisher {
         params.add(new BasicNameValuePair("visibility", api.getVisibility()));
         params.add(new BasicNameValuePair("roles", api.getVisibleRoles()));
         params.add(new BasicNameValuePair("endpointType", String.valueOf(api.isEndpointSecured())));
+        params.add(new BasicNameValuePair("endpointAuthType", String.valueOf(api.isEndpointAuthDigest())));
         params.add(new BasicNameValuePair("epUsername", api.getEndpointUTUsername()));
         params.add(new BasicNameValuePair("epPassword", api.getEndpointUTPassword()));
         
@@ -737,6 +738,8 @@ public class WSO2APIPublisher implements APIPublisher {
 			entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
 			entity.addPart("endpointType",
 			               new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
+            entity.addPart("endpointAuthType",
+                    new StringBody(checkValue(String.valueOf(api.isEndpointAuthDigest()))));
 			entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
 			entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
 
