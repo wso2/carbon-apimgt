@@ -55,7 +55,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
     private String cnonce;
     private String nc;
 
-    @Override
+
     public boolean mediate(MessageContext messageContext) {
 
         if (log.isDebugEnabled()) {
@@ -297,12 +297,12 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
     }
 
 
-    @Override
+
     public void init(SynapseEnvironment synapseEnvironment) {
 
     }
 
-    @Override
+
     public void destroy() {
         // ignore
     }
