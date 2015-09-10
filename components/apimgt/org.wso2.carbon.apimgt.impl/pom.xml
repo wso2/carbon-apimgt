@@ -14,7 +14,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -175,10 +175,6 @@
           <artifactId>org.wso2.carbon.identity.application.mgt.stub</artifactId>
       </dependency>
       <dependency>
-		<groupId>net.sf.saxon.wso2</groupId>
-		<artifactId>saxon.he</artifactId>
-	  </dependency>
-      <dependency>
           <groupId>com.nimbusds.wso2</groupId>
           <artifactId>nimbus-jose-jwt</artifactId>
       </dependency>
@@ -270,7 +266,7 @@
                             org.wso2.carbon.registry.ws.client.*,
                             org.apache.woden.*,
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.apimgt.handlers.security.stub.*;version="${carbon.apimgt.stub.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd;version="${carbon.apimgt.imp.pkg.version}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
