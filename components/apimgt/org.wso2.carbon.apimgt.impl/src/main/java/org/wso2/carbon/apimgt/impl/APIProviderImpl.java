@@ -1371,7 +1371,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiMgtDAO.addAPI(newAPI,tenantId);
             registry.commitTransaction();
-            new APIUtil().associateLifeCycle(targetPath,registry);
 
         } catch (ParseException e) {
             String msg =
@@ -1662,7 +1661,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, artifactPath);
             registry.commitTransaction();
-            new APIUtil().associateLifeCycle(artifactPath,registry);
             if(log.isDebugEnabled()){
             	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" created";
             	log.debug(logMessage);
