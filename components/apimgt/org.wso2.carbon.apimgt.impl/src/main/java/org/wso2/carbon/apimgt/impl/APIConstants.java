@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import javax.ws.rs.POST;
 import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -71,6 +70,9 @@ public final class APIConstants {
 
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
+    //domain mapping app keys
+    public static final String API_DOMAIN_MAPPINGS_GATEWAY = "gateway";
+    public static final String API_DOMAIN_MAPPINGS_STORE = "store";
 
 
     public static final String API_IMAGE_LOCATION = API_APPLICATION_DATA_LOCATION + "/icons";
@@ -122,6 +124,7 @@ public final class APIConstants {
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
+    public static final String TOKEN_SCOPE_ASSOCIATION_TABLE = "IDN_OAUTH2_SCOPE_ASSOCIATION";
 
     public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
     
@@ -284,6 +287,10 @@ public final class APIConstants {
         public static final String REJECTED = "REJECTED";
     }
 
+    public static enum OAuthAppMode {
+        CREATED, MAPPED
+    }
+
     public static class SubscriptionCreatedStatus   {
         public static final String SUBSCRIBE = "SUBSCRIBE";
         public static final String UN_SUBSCRIBE = "UN_SUBSCRIBE";
@@ -444,6 +451,7 @@ public final class APIConstants {
     
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
+    public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
     public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
@@ -703,6 +711,7 @@ public final class APIConstants {
         POST,
         PUT,
         DELETE,
+        HEAD,
         OPTIONS
     }
 
@@ -729,6 +738,47 @@ public final class APIConstants {
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+
+    //swagger v1.2 constants
+    public static final String SWAGGER_RESOURCES = "resources";
+    public static final String ENVIRONMENTS_NONE = "none";
+    public static final String SWAGGER_BASEPATH = "basePath";
+    public static final String SWAGGER_OPERATIONS = "operations";
+    public static final String METHOD_PATCH = "PATCH";
+    public static final String SWAGGER_SCOPE = "scope";
+    public static final String SWAGGER_AUTH_TYPE = "auth_type";
+    public static final String API_THROTTLING_TIER = "throttling_tier";
+    public static final String API_MEDIATION_SCRIPT = "mediation_script";
+    public static final String API_SWAGGER_DOC = "api_doc";
+    public static final String SWAGGER_12_AUTH = "authorizations";
+    public static final String SWAGGER_12_OAUTH2 = "oauth2";
+    public static final String SWAGGER_12_SCOPES = "scopes";
+    public static final String API_ARRAY_NAME = "apis";
+    public static final String SWAGGER_HTTP_METHOD = "method";
+    public static final String SWAGGER_FILE = "file";
+    public static final String SWAGGER_RESOURCE_PATH = "resourcePath";
+    public static final String API_VERSION = "apiVersion";
+
+
+    //API Constants
+    public static final String API_DATA_NAME = "name";
+    public static final String API_DATA_PROVIDER = "provider";
+    public static final String API_DATA_VERSION = "version";
+    public static final String API_DATA_DESCRIPTION = "description";
+    public static final String API_DATA_RATES = "rates";
+    public static final String API_DATA_ENDPOINT = "endpoint";
+    public static final String API_DATA_THUMB_URL= "thumbnailurl";
+    public static final String API_DATA_VISIBILITY = "visibility";
+    public static final String API_DATA_VISIBLE_ROLES = "visibleRoles";
+    public static final String DOC_DATA_NAME = "docName";
+    public static final String DOC_DATA_SUMMARY = "docSummary";
+    public static final String DOC_DATA_SOURCEURL = "docSourceURL";
+    public static final String DOC_DATA_FILEPATH = "docFilePath";
+    public static final String API_DATA_DEFAULT_THUMB = "images/api-default.png";
+    public static final String API_DATA_APIS = "apis";
+    public static final String API_DATA_TOT_LENGTH = "totalLength";
+    public static final String API_DATA_LENGTH = "length";
+    public static final String API_DATA_ISMORE = "isMore";
 
 
 }

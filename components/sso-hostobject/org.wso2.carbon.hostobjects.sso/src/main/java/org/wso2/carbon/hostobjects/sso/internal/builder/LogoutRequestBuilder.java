@@ -21,22 +21,16 @@ package org.wso2.carbon.hostobjects.sso.internal.builder;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.LogoutRequest;
-import org.opensaml.saml2.core.NameID;
 import org.opensaml.saml2.core.SessionIndex;
 import org.opensaml.saml2.core.impl.IssuerBuilder;
-import org.opensaml.saml2.core.impl.NameIDBuilder;
 import org.opensaml.saml2.core.impl.SessionIndexBuilder;
-import org.opensaml.xml.XMLObject;
-import org.opensaml.xml.XMLObjectBuilder;
 import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
+import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.*;
 import org.opensaml.xml.util.Base64;
-import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.hostobjects.sso.internal.util.*;
-
-import javax.xml.namespace.QName;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +47,7 @@ public class LogoutRequestBuilder {
      * @return LogoutRequest object
      */
     public LogoutRequest buildLogoutRequest(String subject,String sessionIndexId, String reason,
-                                            String issuerId) {
+                                            String issuerId, String nameIdFormat) {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -67,10 +61,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(Util.buildNameID(nameIdFormat, subject));
 
         SessionIndex sessionIndex = new SessionIndexBuilder().buildObject();
         sessionIndex.setSessionIndex(sessionIndexId);
@@ -88,7 +79,8 @@ public class LogoutRequestBuilder {
      * @return LogoutRequest object
      */
     public LogoutRequest buildSignedLogoutRequest(String subject,String sessionIndexId, String reason,
-            String issuerId, int tenantId, String tenantDomain, String destination) throws Exception {
+            String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
+            throws Exception {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -102,10 +94,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(Util.buildNameID(nameIdFormat, subject));
 
         SessionIndex sessionIndex = new SessionIndexBuilder().buildObject();
         sessionIndex.setSessionIndex(sessionIndexId);
@@ -130,7 +119,7 @@ public class LogoutRequestBuilder {
      * @return
      */
     public LogoutRequest buildLogoutRequest(String subject, String reason,
-                                            String issuerId) {
+                                            String issuerId, String nameIdFormat) {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -144,10 +133,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(Util.buildNameID(nameIdFormat, subject));
 
         logoutReq.setReason(reason);
 
@@ -162,7 +148,8 @@ public class LogoutRequestBuilder {
      * @return
      */
     public LogoutRequest buildSignedLogoutRequest(String subject, String reason,
-            String issuerId, int tenantId, String tenantDomain, String destination) throws Exception {
+            String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
+            throws Exception {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -176,10 +163,7 @@ public class LogoutRequestBuilder {
         issuer.setValue(issuerId);
         logoutReq.setIssuer(issuer);
 
-        NameID nameId = new NameIDBuilder().buildObject();
-        nameId.setFormat(SSOConstants.SAML2_NAME_ID_POLICY);
-        nameId.setValue(subject);
-        logoutReq.setNameID(nameId);
+        logoutReq.setNameID(Util.buildNameID(nameIdFormat, subject));
 
         logoutReq.setReason(reason);
         logoutReq.setDestination(destination);
@@ -203,27 +187,23 @@ public class LogoutRequestBuilder {
 
 
     public static LogoutRequest setSignature(LogoutRequest logoutRequest, String signatureAlgorithm,
-            X509Credential cred) throws Exception {
+            X509Credential cred) throws SignatureException {
         try {
-            Signature signature = (Signature) buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
+            Signature signature = (Signature) Util.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
             signature.setSigningCredential(cred);
             signature.setSignatureAlgorithm(signatureAlgorithm);
             signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
 
-            try {
-                KeyInfo keyInfo = (KeyInfo) buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
-                X509Data data = (X509Data) buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
-                org.opensaml.xml.signature.X509Certificate cert =
-                        (org.opensaml.xml.signature.X509Certificate) buildXMLObject(
-                                org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
-                String value = Base64.encodeBytes(cred.getEntityCertificate().getEncoded());
-                cert.setValue(value);
-                data.getX509Certificates().add(cert);
-                keyInfo.getX509Datas().add(data);
-                signature.setKeyInfo(keyInfo);
-            } catch (CertificateEncodingException e) {
-                throw new SecurityException("Error getting certificate", e);
-            }
+            KeyInfo keyInfo = (KeyInfo) Util.buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
+            X509Data data = (X509Data) Util.buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
+            org.opensaml.xml.signature.X509Certificate cert =
+                    (org.opensaml.xml.signature.X509Certificate) Util.buildXMLObject(
+                            org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
+            String value = Base64.encodeBytes(cred.getEntityCertificate().getEncoded());
+            cert.setValue(value);
+            data.getX509Certificates().add(cert);
+            keyInfo.getX509Datas().add(data);
+            signature.setKeyInfo(keyInfo);
 
             logoutRequest.setSignature(signature);
 
@@ -239,27 +219,15 @@ public class LogoutRequestBuilder {
 
             Signer.signObjects(signatureList);
             return logoutRequest;
-
-        } catch (Exception e) {
-            throw new Exception("Error while signing the Logout Request message", e);
+        } catch (CertificateEncodingException e) {
+            throw new SignatureException("Error getting certificate", e);
+        } catch (MarshallingException e) {
+            throw new SignatureException("Error while marshalling logout request", e);
+        } catch (SignatureException e) {
+            throw new SignatureException("Error while signing the SAML logout request", e);
+        } catch (Exception e) { //buildXMLObject() throws a generic Exception
+            throw new SignatureException("Error while signing the SAML logout request", e);
         }
     }
 
-    /**
-     * Builds SAML Elements
-     *
-     * @param objectQName
-     * @return
-     */
-    private static XMLObject buildXMLObject(QName objectQName) throws Exception {
-        XMLObjectBuilder builder =
-                org.opensaml.xml.Configuration.getBuilderFactory()
-                        .getBuilder(objectQName);
-        if (builder == null) {
-            throw new Exception("Unable to retrieve builder for object QName " +
-                    objectQName);
-        }
-        return builder.buildObject(objectQName.getNamespaceURI(), objectQName.getLocalPart(),
-                objectQName.getPrefix());
-    }
 }
