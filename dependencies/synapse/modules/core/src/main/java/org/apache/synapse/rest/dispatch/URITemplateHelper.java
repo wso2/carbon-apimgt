@@ -19,8 +19,8 @@
 package org.apache.synapse.rest.dispatch;
 
 import org.apache.synapse.SynapseException;
-import org.wso2.uri.template.URITemplate;
-import org.wso2.uri.template.URITemplateException;
+import org.apache.synapse.commons.templates.uri.URITemplate;
+import org.apache.synapse.commons.templates.uri.URITemplateException;
 
 public class URITemplateHelper implements DispatcherHelper {
 

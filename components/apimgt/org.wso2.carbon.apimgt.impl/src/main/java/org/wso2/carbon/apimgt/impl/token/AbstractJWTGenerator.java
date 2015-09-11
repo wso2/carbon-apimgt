@@ -223,9 +223,11 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     private byte[] signJWT(String assertion, String endUserName)
             throws APIManagementException {
 
+        String tenantDomain = null;
+
         try {
             //get tenant domain
-            String tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
+            tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
             //get tenantId
             int tenantId = APIUtil.getTenantId(endUserName);
 
@@ -281,8 +283,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             String error = "Error in signature";
             //do not log
             throw new APIManagementException(error);
-        } catch (RegistryException e1) {
-            String error = "Error in load tenant from registry";
+        } catch (RegistryException e) {
+            String error = "Error in loading tenant registry for " + tenantDomain;
             //do not log
             throw new APIManagementException(error);
         }

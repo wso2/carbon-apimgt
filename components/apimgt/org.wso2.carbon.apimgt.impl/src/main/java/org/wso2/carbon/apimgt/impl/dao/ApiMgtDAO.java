@@ -793,7 +793,6 @@ public class ApiMgtDAO {
         String apiName;
         String consumerKey;
         String apiPublisher;
-        String scopeString;
 
         boolean defaultVersionInvoked = false;
         String versionCheckStr = "   AND API.API_VERSION = ? ";
@@ -814,6 +813,7 @@ public class ApiMgtDAO {
                 "  AND CONTEXT = ? ";
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String tokenScopeAssociationTable= APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
@@ -825,40 +825,42 @@ public class ApiMgtDAO {
         ResultSet rs = null;
 
         String applicationSqlQuery = "SELECT " +
-                                     "   IAT.VALIDITY_PERIOD, " +
-                                     "   IAT.TIME_CREATED ," +
-                                     "   IAT.TOKEN_STATE," +
-                                     "   IAT.USER_TYPE," +
-                                     "   IAT.AUTHZ_USER," +
-                                     "   IAT.TIME_CREATED," +
-                                     "   IAT.TOKEN_SCOPE," +
-                                     "   SUB.TIER_ID," +
-                                     "   SUBS.USER_ID," +
-                                     "   SUB.SUB_STATUS," +
-                                     "   APP.APPLICATION_ID," +
-                                     "   APP.NAME," +
-                                     "   APP.APPLICATION_TIER," +
-                                     "   AKM.KEY_TYPE," +
-                                     "   API.API_NAME," +
-                                     "   AKM.CONSUMER_KEY," +
-                                     "   API.API_PROVIDER" +
-                                     " FROM " + accessTokenStoreTable + " IAT," +
-                                     "   AM_SUBSCRIPTION SUB," +
-                                     "   AM_SUBSCRIBER SUBS," +
-                                     "   AM_APPLICATION APP," +
-                                     "   AM_APPLICATION_KEY_MAPPING AKM," +
-                                     "   AM_API API" +
-                                     " WHERE " +
-                                     "   IAT.ACCESS_TOKEN = ? " +
-                                     "   AND API.CONTEXT = ? " +
-                                     //versionCheckStr +
+                                    "   IAT.VALIDITY_PERIOD, " +
+                                    "   IAT.TIME_CREATED ," +
+                                    "   IAT.TOKEN_STATE," +
+                                    "   IAT.USER_TYPE," +
+                                    "   IAT.AUTHZ_USER," +
+                                    "   IAT.TIME_CREATED," +
+                                    "   ISAT.TOKEN_SCOPE," +
+                                    "   SUB.TIER_ID," +
+                                    "   SUBS.USER_ID," +
+                                    "   SUB.SUB_STATUS," +
+                                    "   APP.APPLICATION_ID," +
+                                    "   APP.NAME," +
+                                    "   APP.APPLICATION_TIER," +
+                                    "   AKM.KEY_TYPE," +
+                                    "   API.API_NAME," +
+                                    "   AKM.CONSUMER_KEY," +
+                                    "   API.API_PROVIDER" +
+                                    " FROM " + accessTokenStoreTable + " IAT,"
+                                    + tokenScopeAssociationTable + " ISAT," +
+                                    "   AM_SUBSCRIPTION SUB," +
+                                    "   AM_SUBSCRIBER SUBS," +
+                                    "   AM_APPLICATION APP," +
+                                    "   AM_APPLICATION_KEY_MAPPING AKM," +
+                                    "   AM_API API" +
+                                    " WHERE " +
+                                    "   IAT.ACCESS_TOKEN = ? " +
+                                    "   AND API.CONTEXT = ? " +
+                                    "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
+                                    //versionCheckStr +
                                     (defaultVersionInvoked ? "" : " AND API.API_VERSION = ? ") +
-                                     "   AND IAT.CONSUMER_KEY=AKM.CONSUMER_KEY " +
-                                     //"   AND APP.APPLICATION_ID = APP.APPLICATION_ID" +
-                                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
-                                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
-                                     "   AND API.API_ID = SUB.API_ID" +
-                                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
+                                    "   AND IAT.CONSUMER_KEY=AKM.CONSUMER_KEY " +
+                                    //"   AND APP.APPLICATION_ID = APP.APPLICATION_ID" +
+                                    "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
+                                    "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
+                                    "   AND API.API_ID = SUB.API_ID" +
+                                    "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
         try {
             conn = APIMgtDBUtil.getConnection();            
@@ -886,7 +888,6 @@ public class ApiMgtDAO {
                 endUserName = rs.getString(APIConstants.IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER);
                 issuedTime = rs.getTimestamp(APIConstants.IDENTITY_OAUTH2_FIELD_TIME_CREATED,
                                              Calendar.getInstance(TimeZone.getTimeZone("UTC"))).getTime();
-                scopeString = rs.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE);
                 validityPeriod = rs.getLong(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD);
                 timestampSkew = OAuthServerConfiguration.getInstance().
                         getTimeStampSkewInSeconds() * 1000;
@@ -912,12 +913,16 @@ public class ApiMgtDAO {
                
                 keyValidationInfoDTO.setAuthorizedDomains(ApiMgtDAO.getAuthorizedDomainList(accessToken));
                 keyValidationInfoDTO.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                Set<String> scopes = new HashSet<String>();
 
-                if(scopeString != null && !"".equals(scopeString)){
-                    Set<String> scopes = new HashSet<String>(Arrays.asList(scopeString.split(" ")));
-                    keyValidationInfoDTO.setScopes(scopes);
-                }
+                do {
+                    String scope = rs.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE);
+                    if(scope != null && !"".equals(scope)){
+                        scopes.add(scope);
+                    }
+                }while(rs.next());
 
+                keyValidationInfoDTO.setScopes(scopes);
                 
                 /* If Subscription Status is PROD_ONLY_BLOCKED, block production access only */
                 if (subscriptionStatus.equals(APIConstants.SubscriptionStatus.BLOCKED)) {
@@ -1422,7 +1427,8 @@ public class ApiMgtDAO {
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
                     deleteSubscriptionByApiIDAndAppID(apiId, applicationId, identifier.getTier(), conn);
-                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus))  {
+                } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
+                        || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus))  {
                     log.error("Subscription to API " + identifier.getApiName() + " through application "
                               + applicationId + " was blocked");
                     throw new APIManagementException("Subscription to API " + identifier.getApiName()
@@ -1479,21 +1485,17 @@ public class ApiMgtDAO {
         return subscriptionId;
     }
 
-    public void removeSubscription(APIIdentifier identifier, int applicationId)
-            throws APIManagementException {
+    public void removeSubscription(APIIdentifier identifier, int applicationId) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStForUpdateOrDelete = null;
-        int subscriptionId = -1;
         int apiId = -1;
         String subStatus = null;
 
         try {
             conn = APIMgtDBUtil.getConnection();
-                        
             apiId = getAPIID(identifier, conn);
-
             String subscriptionStatusQuery = "SELECT " +
                                              "SUB_STATUS FROM AM_SUBSCRIPTION" +
                                              " WHERE " +
@@ -1504,7 +1506,6 @@ public class ApiMgtDAO {
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
             resultSet = ps.executeQuery();
-
 
             if (resultSet.next())   {
                 subStatus = resultSet.getString("SUB_STATUS");
@@ -1556,7 +1557,6 @@ public class ApiMgtDAO {
 
     public void removeSubscriptionById(int subscription_id) throws APIManagementException {
         Connection conn = null;
-        ResultSet resultSet = null;
         PreparedStatement ps = null;
 
         try {
@@ -1582,7 +1582,40 @@ public class ApiMgtDAO {
             }
             handleException("Failed to remove subscription data ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
+    public void removeAllSubscriptions(APIIdentifier apiIdentifier) throws APIManagementException   {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        int apiId;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            apiId = getAPIID(apiIdentifier, conn);
+
+            // Remove all entries from AM_SUBSCRIPTION table
+            String sqlQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.executeUpdate();
+
+            // Commit transaction
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback remove all subscription ", e);
+                }
+            }
+            handleException("Failed to remove all subscriptions data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
@@ -2251,9 +2284,11 @@ public class ApiMgtDAO {
             PreparedStatement nestedPS = connection.prepareStatement(getScopeSql);
             nestedPS.setString(1, consumerKey);
             ResultSet nestedRS = nestedPS.executeQuery();
-            if (nestedRS.next()) {
-                tokenScope = nestedRS.getString("TOKEN_SCOPE");
+            ArrayList<String> scopes = new ArrayList<String>();
+            while (nestedRS.next()) {
+                scopes.add(nestedRS.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
             }
+            tokenScope = getScopeString(scopes);
         } catch (SQLException e) {
             handleException("Failed to get token scope from consumer key: " + consumerKey, e);
         } catch (CryptoException e) {
@@ -2267,26 +2302,31 @@ public class ApiMgtDAO {
 
     private String getScopeSql(String accessTokenStoreTable) {
         String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         if (accessTokenStoreTable != null) {
             tokenStoreTable = accessTokenStoreTable;
         }
 
+        //TODO : this wont work due to 'IAT.AUTHZ_USER = ICA.USERNAME' changes
         return "SELECT" +
-               " IAT.TOKEN_SCOPE AS TOKEN_SCOPE " +
-               "FROM " +
-               tokenStoreTable + " IAT," +
-               " IDN_OAUTH_CONSUMER_APPS ICA " +
-               "WHERE" +
-               " IAT.CONSUMER_KEY = ?" +
-               " AND IAT.CONSUMER_KEY = ICA.CONSUMER_KEY" +
-               " AND IAT.AUTHZ_USER = ICA.USERNAME";
+                " ISAT.TOKEN_SCOPE AS TOKEN_SCOPE " +
+                "FROM " +
+                tokenStoreTable + " IAT, " +
+                scopeAssociationTable + " ISAT, " +
+                " IDN_OAUTH_CONSUMER_APPS ICA " +
+                "WHERE" +
+                " IAT.CONSUMER_KEY = ?" +
+                " AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
+                " AND IAT.CONSUMER_KEY = ICA.CONSUMER_KEY" +
+                " AND IAT.AUTHZ_USER = ICA.USERNAME";
     }
 
 	public String getScopesByToken(String accessToken) throws APIManagementException {
 		String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-		String getScopeSql = "SELECT TOKEN_SCOPE " +
-		                     "FROM " + tokenStoreTable +
-		                     " WHERE ACCESS_TOKEN= ? LIMIT 1";
+        String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
+        String getScopeSql = "SELECT ISAT.TOKEN_SCOPE " +
+                "FROM " + tokenStoreTable + " IAT,"+scopeAssociationTable + " ISAT " +
+                " WHERE IAT.ACCESS_TOKEN= ?  AND IAT.TOKEN_ID = ISAT.TOKEN_ID";
 
 		Connection connection = null;
 		PreparedStatement ps = null;
@@ -2298,9 +2338,11 @@ public class ApiMgtDAO {
 			ps = connection.prepareStatement(getScopeSql);
 			ps.setString(1, accessToken);
 			result = ps.executeQuery();
-			if (result.next()) {
-				tokenScope = result.getString("TOKEN_SCOPE");
-			}
+            List<String> scopes = new ArrayList<String>();
+            while (result.next()) {
+                scopes.add(result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
+            }
+            tokenScope = getScopeString(scopes);
 		} catch (SQLException e) {
 			handleException("Failed to get token scope from access token : " + accessToken, e);
 		} finally {
@@ -2387,31 +2429,37 @@ public class ApiMgtDAO {
         APIKey apiKey=new APIKey();
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String tokenScopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
         }
 
-        String getTokenSql = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
-                             "TIME_CREATED,VALIDITY_PERIOD " +
-                             "FROM " + accessTokenStoreTable  +
-                             " WHERE ACCESS_TOKEN= ? AND TOKEN_STATE='ACTIVE' ";
+        String getTokenSql = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+                            "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
+                            "FROM " + accessTokenStoreTable  + " IAT,"+
+                            tokenScopeAssociationTable + " ISAT " +
+                            " WHERE IAT.TOKEN_ID = ISAT.TOKEN_ID " +
+                            " IAT.ACCESS_TOKEN= ? AND IAT.TOKEN_STATE='ACTIVE' ";
         try {
             connection = APIMgtDBUtil.getConnection();
             PreparedStatement getToken = connection.prepareStatement(getTokenSql);
             getToken.setString(1, APIUtil.encryptToken(accessToken));
             ResultSet getTokenRS = getToken.executeQuery();
-            while (getTokenRS.next()) {
+            if (getTokenRS.next()) {
 
                 String decryptedAccessToken = APIUtil.decryptToken(getTokenRS.getString("ACCESS_TOKEN")); // todo - check redundant decryption
                 apiKey.setAccessToken(decryptedAccessToken);
                 apiKey.setAuthUser(getTokenRS.getString("AUTHZ_USER"));
-                apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
                 apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                 String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 apiKey.setValidityPeriod(getTokenRS.getLong("VALIDITY_PERIOD"));
-
+                List<String> scopes = new ArrayList<String>();
+                do{
+                    scopes.add(getTokenRS.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
+                }while(getTokenRS.next());
+                apiKey.setTokenScope(getScopeString(scopes));
             }
         } catch (SQLException e) {
             handleException("Failed to get the access token data. ", e);
@@ -2453,7 +2501,10 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             PreparedStatement getToken = connection.prepareStatement(getTokenSql);
             ResultSet getTokenRS = getToken.executeQuery();
-            while (getTokenRS.next()) {
+            boolean accessTokenRowBreaker=false;
+
+            while (accessTokenRowBreaker||getTokenRS.next()) {
+                accessTokenRowBreaker=false;
                 String accessToken = APIUtil.decryptToken(getTokenRS.getString("ACCESS_TOKEN"));
                 String regex = "(?i)[a-zA-Z0-9_.-|]*" + query.trim() + "(?i)[a-zA-Z0-9_.-|]*";
                 Pattern pattern;
@@ -2465,13 +2516,27 @@ public class ApiMgtDAO {
                     APIKey apiKey = new APIKey();
                     apiKey.setAccessToken(accessToken);
                     apiKey.setAuthUser(getTokenRS.getString("AUTHZ_USER"));
-                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
-                    apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
+                    apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split(
+                            "\\.")[0]);
                     String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                     apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                     apiKey.setValidityPeriod(getTokenRS.getLong("VALIDITY_PERIOD"));
+                    // Load all the rows to in memory and build the scope string
+                    List<String> scopes = new ArrayList<String>();
+                    String tokenString = getTokenRS.getString("ACCESS_TOKEN");
+                    do{
+                        String currentRowTokenString = getTokenRS.getString("ACCESS_TOKEN");
+                        if(tokenString.equals(currentRowTokenString)){
+                            scopes.add(getTokenRS.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
+                        }else{
+                            accessTokenRowBreaker =true;
+                            break;
+                        }
+                    }while(getTokenRS.next());
+                    apiKey.setTokenScope(getScopeString(scopes));
                     tokenDataMap.put(i, apiKey);
                     i++;
+
                 }
             }
         } catch (SQLException e) {
@@ -2486,14 +2551,17 @@ public class ApiMgtDAO {
     }
 
     private String getTokenSql (String accessTokenStoreTable) {
-        String tokenStoreTable = "IDN_OAUTH2_ACCESS_TOKEN";
+        String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         if (accessTokenStoreTable != null) {
             tokenStoreTable = accessTokenStoreTable;
         }
 
-        return "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
-               "TIME_CREATED,VALIDITY_PERIOD " +
-               "FROM " + tokenStoreTable + " WHERE TOKEN_STATE='ACTIVE' ";
+        return "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+                "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
+                "FROM " + tokenStoreTable + " IAT," + scopeAssociationTable +
+                " ISAT WHERE IAT.TOKEN_STATE='ACTIVE' AND IAT.TOKEN_ID = ISAT.TOKEN_ID ORDER BY IAT.TOKEN_ID";
+
     }
 
     public Map<Integer, APIKey> getAccessTokensByUser(String user, String loggedInUser)
@@ -2504,33 +2572,49 @@ public class ApiMgtDAO {
         Map<Integer, APIKey> tokenDataMap = new HashMap<Integer, APIKey>();
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(user);
         }
 
-        String getTokenSql = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
-                             "TIME_CREATED,VALIDITY_PERIOD " +
-                             "FROM " + accessTokenStoreTable +
-                             " WHERE AUTHZ_USER= ? AND TOKEN_STATE='ACTIVE' ";
+        String getTokenSql = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+                             "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
+                             "FROM " + accessTokenStoreTable + " IAT, " + scopeAssociationTable +" ISAT"+
+                             " WHERE IAT.AUTHZ_USER= ? AND IAT.TOKEN_STATE='ACTIVE' AND IAT.TOKEN_ID = ISAT" +
+                             ".TOKEN_ID ORDER BY IAT.TOKEN_ID";
         try {
             connection = APIMgtDBUtil.getConnection();
             PreparedStatement getToken = connection.prepareStatement(getTokenSql);
             getToken.setString(1, user);
             ResultSet getTokenRS = getToken.executeQuery();
             Integer i = 0;
-            while (getTokenRS.next()) {
+            boolean accessTokenRowBreaker=false;
+            while (accessTokenRowBreaker||getTokenRS.next()) {
+                accessTokenRowBreaker=false;
                 String authorizedUser = getTokenRS.getString("AUTHZ_USER");
                 if (APIUtil.isLoggedInUserAuthorizedToRevokeToken(loggedInUser, authorizedUser)) {
                     String accessToken = APIUtil.decryptToken(getTokenRS.getString("ACCESS_TOKEN"));
                     APIKey apiKey = new APIKey();
                     apiKey.setAccessToken(accessToken);
                     apiKey.setAuthUser(authorizedUser);
-                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
                     apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                     apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                     apiKey.setValidityPeriod(getTokenRS.getLong("VALIDITY_PERIOD"));
+                    // Load all the rows to in memory and build the scope string
+                    List<String> scopes = new ArrayList<String>();
+                    String tokenString = getTokenRS.getString("ACCESS_TOKEN");
+                    do{
+                        String currentRowTokenString = getTokenRS.getString("ACCESS_TOKEN");
+                        if(tokenString.equals(currentRowTokenString)){
+                            scopes.add(getTokenRS.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
+                        }else{
+                            accessTokenRowBreaker =true;
+                            break;
+                        }
+                    }while(getTokenRS.next());
+                    apiKey.setTokenScope(getScopeString(scopes));
                     tokenDataMap.put(i, apiKey);
                     i++;
                 }
@@ -2588,18 +2672,32 @@ public class ApiMgtDAO {
 
             ResultSet getTokenRS = getToken.executeQuery();
             Integer i = 0;
-            while (getTokenRS.next()) {
+            boolean accessTokenRowBreaker = false;
+            while (accessTokenRowBreaker || getTokenRS.next()) {
+                accessTokenRowBreaker = true;
                 String authorizedUser = getTokenRS.getString("AUTHZ_USER");
                 if (APIUtil.isLoggedInUserAuthorizedToRevokeToken(loggedInUser, authorizedUser)) {
                     String accessToken = APIUtil.decryptToken(getTokenRS.getString("ACCESS_TOKEN"));
                     APIKey apiKey = new APIKey();
                     apiKey.setAccessToken(accessToken);
                     apiKey.setAuthUser(authorizedUser);
-                    apiKey.setTokenScope(getTokenRS.getString("TOKEN_SCOPE"));
                     apiKey.setCreatedDate(getTokenRS.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = getTokenRS.getString("CONSUMER_KEY");
                     apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                     apiKey.setValidityPeriod(getTokenRS.getLong("VALIDITY_PERIOD"));
+                    // Load all the rows to in memory and build the scope string
+                    List<String> scopes = new ArrayList<String>();
+                    String tokenString = getTokenRS.getString("ACCESS_TOKEN");
+                    do{
+                        String currentRowTokenString = getTokenRS.getString("ACCESS_TOKEN");
+                        if(tokenString.equals(currentRowTokenString)){
+                            scopes.add(getTokenRS.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
+                        }else{
+                            accessTokenRowBreaker =true;
+                            break;
+                        }
+                    }while(getTokenRS.next());
+                    apiKey.setTokenScope(getScopeString(scopes));
                     tokenDataMap.put(i, apiKey);
                     i++;
                 }
@@ -2619,19 +2717,22 @@ public class ApiMgtDAO {
     public String[] getTokenByDateSqls (String accessTokenStoreTable) {
         String[] querySqlArr = new String[2];
         String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         if (accessTokenStoreTable != null) {
             tokenStoreTable = accessTokenStoreTable;
         }
 
-        querySqlArr[0] = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
-                         "TIME_CREATED,VALIDITY_PERIOD " +
-                         "FROM " + tokenStoreTable  +
-                         " WHERE TOKEN_STATE='ACTIVE' AND TIME_CREATED >= ? ";
+        querySqlArr[0] = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+                         "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
+                         "FROM " + tokenStoreTable  + " IAT, "+ scopeAssociationTable + " ISAT"+
+                         " WHERE IAT.TOKEN_STATE='ACTIVE' AND IAT.TIME_CREATED >= ? AND IAT.TOKEN_ID" +
+                         " = ISAT.TOKEN_ID ORDER BY IAT.TOKEN_ID";
 
-        querySqlArr[1] = "SELECT ACCESS_TOKEN,AUTHZ_USER,TOKEN_SCOPE,CONSUMER_KEY," +
-                         "TIME_CREATED,VALIDITY_PERIOD " +
-                         "FROM " + tokenStoreTable +
-                         " WHERE TOKEN_STATE='ACTIVE' AND TIME_CREATED <= ? ";
+        querySqlArr[1] = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+                        "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
+                        "FROM " + tokenStoreTable  + " IAT, "+ scopeAssociationTable + " ISAT"+
+                        " WHERE IAT.TOKEN_STATE='ACTIVE' AND IAT.TIME_CREATED <= ? AND IAT.TOKEN_ID" +
+                        " = ISAT.TOKEN_ID ORDER BY IAT.TOKEN_ID";
 
         return querySqlArr;
     }
@@ -2800,25 +2901,26 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-
+        String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         //The part of the sql query that remain common across databases.
         String statement =
                 " ICA.CONSUMER_KEY AS CONSUMER_KEY," +
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " ISAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         " AKM.STATE AS STATE "+
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
-                        accessTokenStoreTable + " IAT," +
+                        accessTokenStoreTable + " IAT, " + scopeAssociationTable+" ISAT,"+
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.TOKEN_ID = ISAT.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'PRODUCTION' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
@@ -2869,27 +2971,28 @@ public class ApiMgtDAO {
                         "AKM.STATE AS STATE " +
                         "FROM " +
                         "AM_APPLICATION_KEY_MAPPING AKM, " +
-                        accessTokenStoreTable + " IAT, " +
+                        accessTokenStoreTable + " IAT, " + scopeAssociationTable+" ISAT,"+
                         "IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE " +
                         "AKM.APPLICATION_ID = ? AND " +
                         "IAT.USER_TYPE = ? AND " +
                         "ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND " +
                         "IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND " +
+                        "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         "AKM.KEY_TYPE = 'PRODUCTION' AND " +
                         "(IAT.TOKEN_STATE = 'ACTIVE' OR " +
                         "IAT.TOKEN_STATE = 'EXPIRED' OR " +
                         "IAT.TOKEN_STATE = 'REVOKED') " +
-                        "ORDER BY IAT.TIME_CREATED DESC) " +
-                "WHERE ROWNUM < 2";
+                        "ORDER BY IAT.TIME_CREATED DESC) ";
+               // "WHERE ROWNUM < 2";
 
-        mySQLSQL = "SELECT" + statement + " LIMIT 1";
+        mySQLSQL = "SELECT" + statement ;//+ " LIMIT 1";
 
-        db2SQL = "SELECT" + statement + " FETCH FIRST 1 ROWS ONLY";
+        db2SQL = "SELECT" + statement; //+ " FETCH FIRST 1 ROWS ONLY";
 
-        msSQL = "SELECT TOP 1" + statement;
+        msSQL = "SELECT " + statement;
 
-        postgreSQL = "SELECT * FROM (SELECT" + statement + ") AS TOKEN LIMIT 1";
+        postgreSQL = "SELECT * FROM (SELECT" + statement + ") AS TOKEN";
 
         String authorizedDomains;
         String accessToken;
@@ -2916,22 +3019,32 @@ public class ApiMgtDAO {
             preparedStatement.setInt(1, applicationId);
             preparedStatement.setString(2, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
             resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
-                String tokenScope = resultSet.getString("TOKEN_SCOPE");
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
 
-                apiKey.setTokenScope(tokenScope);
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 apiKey.setState(resultSet.getString("STATE"));
+
+                // Load all the rows to in memory and build the scope string
+                List<String> scopes = new ArrayList<String>();
+                String tokenString = resultSet.getString("ACCESS_TOKEN");
+
+                do{
+                    String currentRowTokenString = resultSet.getString("ACCESS_TOKEN");
+                    if(tokenString.equals(currentRowTokenString)){
+                        scopes.add(resultSet.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
+                    }
+                }while(resultSet.next());
+                apiKey.setTokenScope(getScopeString(scopes));
                 return apiKey;
             }
             return null;
@@ -2947,23 +3060,25 @@ public class ApiMgtDAO {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
 
+        String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
         //The part of the sql query that remain common across databases.
         String statement =
                 " ICA.CONSUMER_KEY AS CONSUMER_KEY," +
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " ISAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
-                        accessTokenStoreTable + " IAT," +
+                        accessTokenStoreTable + " IAT, " + scopeAssociationTable+" ISAT,"+
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.TOKEN_ID = ISAT.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
@@ -2977,31 +3092,32 @@ public class ApiMgtDAO {
                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
                         " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
                         " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
+                        " ISAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
                         " AKM.KEY_TYPE AS TOKEN_TYPE " +
                         "FROM" +
                         " AM_APPLICATION_KEY_MAPPING AKM," +
-                        accessTokenStoreTable + " IAT," +
+                        accessTokenStoreTable + " IAT, " + scopeAssociationTable+" ISAT,"+
                         " IDN_OAUTH_CONSUMER_APPS ICA " +
                         "WHERE" +
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
                         " IAT.TOKEN_STATE = 'REVOKED')" +
-                        " AND ROWNUM < 2 " +
+                        //" AND ROWNUM < 2 " +
                         " ORDER BY IAT.TIME_CREATED DESC ";
 
-        mySQLSQL = "SELECT" + statement + " LIMIT 1";
+        mySQLSQL = "SELECT" + statement;// + " LIMIT 1";
 
-        db2SQL = "SELECT" + statement + " FETCH FIRST 1 ROWS ONLY";
+        db2SQL = "SELECT" + statement;// + " FETCH FIRST 1 ROWS ONLY";
 
-        msSQL = "SELECT TOP 1" + statement;
+        msSQL = "SELECT " + statement;
 
-        postgreSQL = "SELECT * FROM (SELECT" + statement + ") AS TOKEN LIMIT 1";
+        postgreSQL = "SELECT * FROM (SELECT" + statement + ") AS TOKEN";
 
         String authorizedDomains;
         String accessToken;
@@ -3031,17 +3147,27 @@ public class ApiMgtDAO {
             while (resultSet.next()) {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
-                String tokenScope = resultSet.getString("TOKEN_SCOPE");
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
-                apiKey.setTokenScope(tokenScope);
                 authorizedDomains = getAuthorizedDomains(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
+
+                // Load all the rows to in memory and build the scope string
+                List<String> scopes = new ArrayList<String>();
+                String tokenString = resultSet.getString("ACCESS_TOKEN");
+
+                do{
+                    String currentRowTokenString = resultSet.getString("ACCESS_TOKEN");
+                    if(tokenString.equals(currentRowTokenString)){
+                        scopes.add(resultSet.getString(APIConstants.IDENTITY_OAUTH2_FIELD_TOKEN_SCOPE));
+                    }
+                }while(resultSet.next());
+                apiKey.setTokenScope(getScopeString(scopes));
                 return apiKey;
             }
             return null;
@@ -3598,7 +3724,7 @@ public class ApiMgtDAO {
         // Update Access Token
         String sqlUpdateNewAccessToken = "UPDATE " + accessTokenStoreTable +
                                          " SET USER_TYPE=?, VALIDITY_PERIOD=? " +
-                                         " WHERE ACCESS_TOKEN=? AND TOKEN_SCOPE=? ";
+                                         " WHERE ACCESS_TOKEN=?";
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -3614,7 +3740,7 @@ public class ApiMgtDAO {
                 prepStmt.setLong(2, validityPeriod * 1000);
             }
             prepStmt.setString(3, APIUtil.encryptToken(newAccessToken));
-            prepStmt.setString(4, keyType);
+           // prepStmt.setString(4, keyType);
 
             prepStmt.execute();
             prepStmt.close();
@@ -3779,147 +3905,147 @@ public class ApiMgtDAO {
     }
 
 
-    /**
-     * @param consumerKey     ConsumerKey
-     * @param applicationName Application name
-     * @param userId          User Id
-     * @param tenantId        Tenant Id of the user
-     * @param apiInfoDTO      Application Info DTO
-     * @param keyType         Type (scope) of the key
-     * @return accessToken
-     * @throws IdentityException if failed to register accessToken
-     */
-    public String registerAccessToken(String consumerKey, String applicationName, String userId,
-                                      int tenantId, APIInfoDTO apiInfoDTO, String keyType)
-            throws IdentityException, APIManagementException {
-
-        //identify loggedinuser
-        String loginUserName = getLoginUserName(userId);
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        String accessToken = OAuthUtil.getRandomNumber();
-
-        if (APIUtil.checkUserNameAssertionEnabled()) {
-            //use ':' for token & userName separation
-            String accessTokenStrToEncode = accessToken + ":" + loginUserName;
-            accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
-
-            if (APIUtil.checkAccessTokenPartitioningEnabled()) {
-                accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(loginUserName);
-            }
-        }
-
-        // Add Access Token
-        String sqlAddAccessToken = "INSERT" +
-                                   " INTO " + accessTokenStoreTable +
-                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE) " +
-                                   " VALUES (?,?,?,?)";
-
-        String getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +
-                                   "FROM " +
-                                   "  AM_SUBSCRIPTION SUBS, " +
-                                   "  AM_APPLICATION APP, " +
-                                   "  AM_SUBSCRIBER SUB, " +
-                                   "  AM_API API " +
-                                   "WHERE " +
-                                   "  SUB.USER_ID = ?" +
-                                   "  AND SUB.TENANT_ID = ?" +
-                                   "  AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
-                                   "  AND APP.NAME = ?" +
-                                   "  AND API.API_PROVIDER = ?" +
-                                   "  AND API.API_NAME = ?" +
-                                   "  AND API.API_VERSION = ?" +
-                                   "  AND APP.APPLICATION_ID = SUBS.APPLICATION_ID" +
-                                   "  AND API.API_ID = SUBS.API_ID";
-
-        if (forceCaseInsensitiveComparisons) {
-            getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +
-                    "FROM " +
-                    "  AM_SUBSCRIPTION SUBS, " +
-                    "  AM_APPLICATION APP, " +
-                    "  AM_SUBSCRIBER SUB, " +
-                    "  AM_API API " +
-                    "WHERE " +
-                    "  LOWER(SUB.USER_ID) = LOWER(?)" +
-                    "  AND SUB.TENANT_ID = ?" +
-                    "  AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
-                    "  AND APP.NAME = ?" +
-                    "  AND API.API_PROVIDER = ?" +
-                    "  AND API.API_NAME = ?" +
-                    "  AND API.API_VERSION = ?" +
-                    "  AND APP.APPLICATION_ID = SUBS.APPLICATION_ID" +
-                    "  AND API.API_ID = SUBS.API_ID";
-        }
-
-        String addSubscriptionKeyMapping = "INSERT " +
-                                           "INTO AM_SUBSCRIPTION_KEY_MAPPING (SUBSCRIPTION_ID, ACCESS_TOKEN, KEY_TYPE) " +
-                                           "VALUES (?,?,?)";
-
-        //String apiId = apiInfoDTO.getProviderId()+"_"+apiInfoDTO.getApiName()+"_"+apiInfoDTO.getVersion();
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        try {
-            consumerKey = APIUtil.encryptToken(consumerKey);
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-                        
-            String encryptedAccessToken = APIUtil.encryptToken(accessToken);
-            //Add access token
-            prepStmt = connection.prepareStatement(sqlAddAccessToken);
-            prepStmt.setString(1, encryptedAccessToken);
-            prepStmt.setString(2, consumerKey);
-            prepStmt.setString(3, APIConstants.TokenStatus.ACTIVE);
-            prepStmt.setString(4, "default");
-            prepStmt.execute();
-            prepStmt.close();
-
-            //Update subscription with new key context mapping
-            int subscriptionId = -1;
-            prepStmt = connection.prepareStatement(getSubscriptionId);
-            prepStmt.setString(1,loginUserName);
-            prepStmt.setInt(2, tenantId);
-            prepStmt.setString(3, applicationName);
-            prepStmt.setString(4, APIUtil.replaceEmailDomainBack(apiInfoDTO.getProviderId()));
-            prepStmt.setString(5, apiInfoDTO.getApiName());
-            prepStmt.setString(6, apiInfoDTO.getVersion());
-            ResultSet getSubscriptionIdResult = prepStmt.executeQuery();
-            while (getSubscriptionIdResult.next()) {
-                subscriptionId = getSubscriptionIdResult.getInt(1);
-            }
-            prepStmt.close();
-
-            prepStmt = connection.prepareStatement(addSubscriptionKeyMapping);
-            prepStmt.setInt(1, subscriptionId);
-            prepStmt.setString(2, encryptedAccessToken);
-            prepStmt.setString(3, keyType);
-            prepStmt.execute();
-            prepStmt.close();
-            
-            connection.commit();
-        } catch (SQLException e) {
-            log.error(e.getMessage(), e);
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
-                }
-            }
-            //  throw new IdentityException("Error when storing the access code for consumer key : " + consumerKey);
-        } catch (CryptoException e) {
-            log.error(e.getMessage(), e);
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
-                }
-            }
-        } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
-        }
-        return accessToken;
-    }
+//    /** IDENT UNUSED
+//     * @param consumerKey     ConsumerKey
+//     * @param applicationName Application name
+//     * @param userId          User Id
+//     * @param tenantId        Tenant Id of the user
+//     * @param apiInfoDTO      Application Info DTO
+//     * @param keyType         Type (scope) of the key
+//     * @return accessToken
+//     * @throws IdentityException if failed to register accessToken
+//     */
+//    public String registerAccessToken(String consumerKey, String applicationName, String userId,
+//                                      int tenantId, APIInfoDTO apiInfoDTO, String keyType)
+//            throws IdentityException, APIManagementException {
+//
+//        //identify loggedinuser
+//        String loginUserName = getLoginUserName(userId);
+//
+//        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+//        String accessToken = OAuthUtil.getRandomNumber();
+//
+//        if (APIUtil.checkUserNameAssertionEnabled()) {
+//            //use ':' for token & userName separation
+//            String accessTokenStrToEncode = accessToken + ":" + loginUserName;
+//            accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
+//
+//            if (APIUtil.checkAccessTokenPartitioningEnabled()) {
+//                accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(loginUserName);
+//            }
+//        }
+//
+//        // Add Access Token
+//        String sqlAddAccessToken = "INSERT" +
+//                                   " INTO " + accessTokenStoreTable +
+//                                   "(ACCESS_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH) " +
+//                                   " VALUES (?,?,?,?)";
+//
+//        String getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +
+//                                   "FROM " +
+//                                   "  AM_SUBSCRIPTION SUBS, " +
+//                                   "  AM_APPLICATION APP, " +
+//                                   "  AM_SUBSCRIBER SUB, " +
+//                                   "  AM_API API " +
+//                                   "WHERE " +
+//                                   "  SUB.USER_ID = ?" +
+//                                   "  AND SUB.TENANT_ID = ?" +
+//                                   "  AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
+//                                   "  AND APP.NAME = ?" +
+//                                   "  AND API.API_PROVIDER = ?" +
+//                                   "  AND API.API_NAME = ?" +
+//                                   "  AND API.API_VERSION = ?" +
+//                                   "  AND APP.APPLICATION_ID = SUBS.APPLICATION_ID" +
+//                                   "  AND API.API_ID = SUBS.API_ID";
+//
+//        if (forceCaseInsensitiveComparisons) {
+//            getSubscriptionId = "SELECT SUBS.SUBSCRIPTION_ID " +
+//                    "FROM " +
+//                    "  AM_SUBSCRIPTION SUBS, " +
+//                    "  AM_APPLICATION APP, " +
+//                    "  AM_SUBSCRIBER SUB, " +
+//                    "  AM_API API " +
+//                    "WHERE " +
+//                    "  LOWER(SUB.USER_ID) = LOWER(?)" +
+//                    "  AND SUB.TENANT_ID = ?" +
+//                    "  AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID" +
+//                    "  AND APP.NAME = ?" +
+//                    "  AND API.API_PROVIDER = ?" +
+//                    "  AND API.API_NAME = ?" +
+//                    "  AND API.API_VERSION = ?" +
+//                    "  AND APP.APPLICATION_ID = SUBS.APPLICATION_ID" +
+//                    "  AND API.API_ID = SUBS.API_ID";
+//        }
+//
+//        String addSubscriptionKeyMapping = "INSERT " +
+//                                           "INTO AM_SUBSCRIPTION_KEY_MAPPING (SUBSCRIPTION_ID, ACCESS_TOKEN, KEY_TYPE) " +
+//                                           "VALUES (?,?,?)";
+//
+//        //String apiId = apiInfoDTO.getProviderId()+"_"+apiInfoDTO.getApiName()+"_"+apiInfoDTO.getVersion();
+//        Connection connection = null;
+//        PreparedStatement prepStmt = null;
+//        try {
+//            consumerKey = APIUtil.encryptToken(consumerKey);
+//            connection = APIMgtDBUtil.getConnection();
+//            connection.setAutoCommit(false);
+//
+//            String encryptedAccessToken = APIUtil.encryptToken(accessToken);
+//            //Add access token
+//            prepStmt = connection.prepareStatement(sqlAddAccessToken);
+//            prepStmt.setString(1, encryptedAccessToken);
+//            prepStmt.setString(2, consumerKey);
+//            prepStmt.setString(3, APIConstants.TokenStatus.ACTIVE);
+//            prepStmt.setString(4, "default");
+//            prepStmt.execute();
+//            prepStmt.close();
+//
+//            //Update subscription with new key context mapping
+//            int subscriptionId = -1;
+//            prepStmt = connection.prepareStatement(getSubscriptionId);
+//            prepStmt.setString(1,loginUserName);
+//            prepStmt.setInt(2, tenantId);
+//            prepStmt.setString(3, applicationName);
+//            prepStmt.setString(4, APIUtil.replaceEmailDomainBack(apiInfoDTO.getProviderId()));
+//            prepStmt.setString(5, apiInfoDTO.getApiName());
+//            prepStmt.setString(6, apiInfoDTO.getVersion());
+//            ResultSet getSubscriptionIdResult = prepStmt.executeQuery();
+//            while (getSubscriptionIdResult.next()) {
+//                subscriptionId = getSubscriptionIdResult.getInt(1);
+//            }
+//            prepStmt.close();
+//
+//            prepStmt = connection.prepareStatement(addSubscriptionKeyMapping);
+//            prepStmt.setInt(1, subscriptionId);
+//            prepStmt.setString(2, encryptedAccessToken);
+//            prepStmt.setString(3, keyType);
+//            prepStmt.execute();
+//            prepStmt.close();
+//
+//            connection.commit();
+//        } catch (SQLException e) {
+//            log.error(e.getMessage(), e);
+//            if (connection != null) {
+//                try {
+//                    connection.rollback();
+//                } catch (SQLException e1) {
+//                    log.error("Failed to rollback the add access token ", e);
+//                }
+//            }
+//            //  throw new IdentityException("Error when storing the access code for consumer key : " + consumerKey);
+//        } catch (CryptoException e) {
+//            log.error(e.getMessage(), e);
+//            if (connection != null) {
+//                try {
+//                    connection.rollback();
+//                } catch (SQLException e1) {
+//                    log.error("Failed to rollback the add access token ", e);
+//                }
+//            }
+//        } finally {
+//            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+//        }
+//        return accessToken;
+//    }
 
 
 
@@ -3950,128 +4076,129 @@ public class ApiMgtDAO {
         return state;
     }
 
-    public String registerApplicationAccessToken(String consumerKey, int appId,String applicationName,
-                                                 String userId, String keyType,
-                                                 String[] accessAllowDomains, String validityTime,
-                                                 String tokenScope)
-            throws IdentityException, APIManagementException {
-
-        //identify loggedinuser
-        String loginUserName = getLoginUserName(userId);
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        String accessToken = OAuthUtil.getRandomNumber();
-        String refreshToken = OAuthUtil.getRandomNumber();
-
-        if (APIUtil.checkUserNameAssertionEnabled()) {
-            //use ':' for token & userName separation
-            String accessTokenStrToEncode = accessToken + ":" + loginUserName ;
-            accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
-
-            String refreshTokenStrToEncode = refreshToken + ":" + loginUserName;
-            refreshToken = Base64Utils.encode(refreshTokenStrToEncode.getBytes());
-
-            if (APIUtil.checkAccessTokenPartitioningEnabled()) {
-                accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(loginUserName);
-            }
-        }
-
-        // Add Access Token
-        String sqlAddAccessToken = "INSERT INTO " +  accessTokenStoreTable +
-                " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE," +
-                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
-
-//        ///////////////////////////
+//    IDENT UNUSED
+// public String registerApplicationAccessToken(String consumerKey, int appId,String applicationName,
+//                                                 String userId, String keyType,
+//                                                 String[] accessAllowDomains, String validityTime,
+//                                                 String tokenScope)
+//            throws IdentityException, APIManagementException {
 //
-//        ////
-//        String addApplicationKeyMapping = "UPDATE " +
-//                                          "AM_APPLICATION_KEY_MAPPING SET " +
-//                                          "CONSUMER_KEY = ?, STATE =? " +
-//                                          "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
-
-        String sqlAddAccessAllowDomains = "INSERT" +
-                                          " INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
-                                          " VALUES (?,?)";
-
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        long validityPeriod = getApplicationAccessTokenValidityPeriod();
-        if(validityTime != null && !"".equals(validityTime)){
-            //When validity time getting passed from Jaggery, it append .0 to the actual value.
-            // Hence final value passed to backend contains decimals (eg: 3600.0)
-            validityPeriod = (long)Double.parseDouble(validityTime);
-        }
-
-        try {
-            consumerKey = APIUtil.encryptToken(consumerKey);
-            connection = APIMgtDBUtil.getConnection();
-            //Add access token
-            prepStmt = connection.prepareStatement(sqlAddAccessToken);
-            prepStmt.setString(1, APIUtil.encryptToken(accessToken));
-            prepStmt.setString(2, APIUtil.encryptToken(refreshToken));
-            prepStmt.setString(3, consumerKey);
-            prepStmt.setString(4, APIConstants.TokenStatus.ACTIVE);
-            prepStmt.setString(5, tokenScope);
-            prepStmt.setString(6, loginUserName.toLowerCase());
-            prepStmt.setString(7, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
-            prepStmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()),
-                                  Calendar.getInstance(TimeZone.getTimeZone("UTC")));
-            if (validityPeriod < 0) {
-                prepStmt.setLong(9, Long.MAX_VALUE);
-            } else {
-                prepStmt.setLong(9, validityPeriod * 1000);
-            }
-            prepStmt.execute();
-            prepStmt.close();
-
-//            prepStmt = connection.prepareStatement(addApplicationKeyMapping);
-//            prepStmt.setString(1, consumerKey);
-//            prepStmt.setString(2, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
-//            prepStmt.setInt(3, appId);
-//            prepStmt.setString(4, keyType);
+//        //identify loggedinuser
+//        String loginUserName = getLoginUserName(userId);
+//
+//        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+//        String accessToken = OAuthUtil.getRandomNumber();
+//        String refreshToken = OAuthUtil.getRandomNumber();
+//
+//        if (APIUtil.checkUserNameAssertionEnabled()) {
+//            //use ':' for token & userName separation
+//            String accessTokenStrToEncode = accessToken + ":" + loginUserName ;
+//            accessToken = Base64Utils.encode(accessTokenStrToEncode.getBytes());
+//
+//            String refreshTokenStrToEncode = refreshToken + ":" + loginUserName;
+//            refreshToken = Base64Utils.encode(refreshTokenStrToEncode.getBytes());
+//
+//            if (APIUtil.checkAccessTokenPartitioningEnabled()) {
+//                accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(loginUserName);
+//            }
+//        }
+//
+//        // Add Access Token
+//        String sqlAddAccessToken = "INSERT INTO " +  accessTokenStoreTable +
+//                " (ACCESS_TOKEN, REFRESH_TOKEN, CONSUMER_KEY, TOKEN_STATE, TOKEN_SCOPE_HASH," +
+//                " AUTHZ_USER, USER_TYPE, TIME_CREATED, VALIDITY_PERIOD)  VALUES (?,?,?,?,?,?,?,?,?)";
+//
+////        ///////////////////////////
+////
+////        ////
+////        String addApplicationKeyMapping = "UPDATE " +
+////                                          "AM_APPLICATION_KEY_MAPPING SET " +
+////                                          "CONSUMER_KEY = ?, STATE =? " +
+////                                          "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
+//
+//        String sqlAddAccessAllowDomains = "INSERT" +
+//                                          " INTO AM_APP_KEY_DOMAIN_MAPPING (CONSUMER_KEY, AUTHZ_DOMAIN) " +
+//                                          " VALUES (?,?)";
+//
+//        Connection connection = null;
+//        PreparedStatement prepStmt = null;
+//        long validityPeriod = getApplicationAccessTokenValidityPeriod();
+//        if(validityTime != null && !"".equals(validityTime)){
+//            //When validity time getting passed from Jaggery, it append .0 to the actual value.
+//            // Hence final value passed to backend contains decimals (eg: 3600.0)
+//            validityPeriod = (long)Double.parseDouble(validityTime);
+//        }
+//
+//        try {
+//            consumerKey = APIUtil.encryptToken(consumerKey);
+//            connection = APIMgtDBUtil.getConnection();
+//            //Add access token
+//            prepStmt = connection.prepareStatement(sqlAddAccessToken);
+//            prepStmt.setString(1, APIUtil.encryptToken(accessToken));
+//            prepStmt.setString(2, APIUtil.encryptToken(refreshToken));
+//            prepStmt.setString(3, consumerKey);
+//            prepStmt.setString(4, APIConstants.TokenStatus.ACTIVE);
+//            prepStmt.setString(5, tokenScope);
+//            prepStmt.setString(6, loginUserName.toLowerCase());
+//            prepStmt.setString(7, APIConstants.ACCESS_TOKEN_USER_TYPE_APPLICATION);
+//            prepStmt.setTimestamp(8, new Timestamp(System.currentTimeMillis()),
+//                                  Calendar.getInstance(TimeZone.getTimeZone("UTC")));
+//            if (validityPeriod < 0) {
+//                prepStmt.setLong(9, Long.MAX_VALUE);
+//            } else {
+//                prepStmt.setLong(9, validityPeriod * 1000);
+//            }
 //            prepStmt.execute();
 //            prepStmt.close();
-
-//            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
-//                for (int i = 0; i < accessAllowDomains.length; i++) {
-//                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-//                    prepStmt.setString(1, consumerKey);
-//                    prepStmt.setString(2, accessAllowDomains[i].trim());
-//                    prepStmt.execute();
-//                    prepStmt.close();
+//
+////            prepStmt = connection.prepareStatement(addApplicationKeyMapping);
+////            prepStmt.setString(1, consumerKey);
+////            prepStmt.setString(2, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
+////            prepStmt.setInt(3, appId);
+////            prepStmt.setString(4, keyType);
+////            prepStmt.execute();
+////            prepStmt.close();
+//
+////            if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
+////                for (int i = 0; i < accessAllowDomains.length; i++) {
+////                    prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+////                    prepStmt.setString(1, consumerKey);
+////                    prepStmt.setString(2, accessAllowDomains[i].trim());
+////                    prepStmt.execute();
+////                    prepStmt.close();
+////                }
+////            } else {
+////                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
+////                prepStmt.setString(1, consumerKey);
+////                prepStmt.setString(2, "ALL");
+////                prepStmt.execute();
+////                prepStmt.close();
+////            }
+//            connection.commit();
+//        } catch (SQLException e) {
+//            handleException("Error while generating the application access token for the application :"+applicationName, e);
+//            if (connection != null) {
+//                try {
+//                    connection.rollback();
+//                } catch (SQLException e1) {
+//                    log.error("Failed to rollback the add access token ", e);
 //                }
-//            } else {
-//                prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-//                prepStmt.setString(1, consumerKey);
-//                prepStmt.setString(2, "ALL");
-//                prepStmt.execute();
-//                prepStmt.close();
 //            }
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while generating the application access token for the application :"+applicationName, e);
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
-                }
-            }
-            //  throw new IdentityException("Error when storing the access code for consumer key : " + consumerKey);
-        } catch (CryptoException e) {
-            log.error(e.getMessage(), e);
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
-                }
-            }
-        } finally {
-            // IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
-        }
-        return accessToken;
-    }
+//            //  throw new IdentityException("Error when storing the access code for consumer key : " + consumerKey);
+//        } catch (CryptoException e) {
+//            log.error(e.getMessage(), e);
+//            if (connection != null) {
+//                try {
+//                    connection.rollback();
+//                } catch (SQLException e1) {
+//                    log.error("Failed to rollback the add access token ", e);
+//                }
+//            }
+//        } finally {
+//            // IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+//        }
+//        return accessToken;
+//    }
 
     /**
      * Update the consumer key and application status for the given key type and application.
@@ -5766,6 +5893,49 @@ public class ApiMgtDAO {
         }
     }
 
+    public APIKey[] getConsumerKeysWithMode(int appId, String mode) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        ArrayList<APIKey> consumerKeys = new ArrayList<APIKey>();
+
+        String getConsumerKeyQuery = "SELECT" +
+                                     " CONSUMER_KEY, KEY_TYPE" +
+                                     " FROM" +
+                                     " AM_APPLICATION_KEY_MAPPING " +
+                                     " WHERE" +
+                                     " APPLICATION_ID = ? AND " +
+                                     " CREATE_MODE = ?";
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+            prepStmt = connection.prepareStatement(getConsumerKeyQuery);
+            prepStmt.setInt(1, appId);
+            prepStmt.setString(2, mode);
+            rs = prepStmt.executeQuery();
+            while (rs.next()) {
+                String consumerKey = rs.getString("CONSUMER_KEY");
+
+                if (consumerKey != null && !consumerKey.isEmpty()) {
+                    APIKey apiKey = new APIKey();
+                    apiKey.setConsumerKey(consumerKey);
+                    apiKey.setType(rs.getString("KEY_TYPE"));
+                    consumerKeys.add(apiKey);
+                }
+            }
+        } catch (SQLException e) {
+            String msg = "Error occurred while getting consumer keys";
+            log.error(msg);
+            throw new APIManagementException(msg);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return consumerKeys.toArray(new APIKey[0]);
+    }
+
     /**
      * Returns the consumer Key for a given Application Name, Subscriber Name, Key Type, Grouping Id combination.
      * @param applicationName Name of the Application.
@@ -7073,6 +7243,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if (id == -1) {
                 String msg = "Unable to find the API: " + apiId + " in the database";
                 log.error(msg);
+                throw new APIManagementException(msg);
             }
         } catch (SQLException e) {
             handleException("Error while locating API: " + apiId + " from the database", e);
@@ -8681,7 +8852,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 				apiIds.add(getAPIID(identifier, conn));
 			}
 
-			String commaSeperatedIds = StringUtils.join(apiIds, ',');
+			String commaSeperatedIds = StringUtils.join(apiIds.iterator(), ",");
 
 			String sqlQuery =
 					"SELECT DISTINCT A.SCOPE_KEY, A.NAME, A.DESCRIPTION, A.ROLES " +
@@ -9213,6 +9384,49 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     }
 
     /**
+     * @param consumerKey
+     * @return
+     */
+    public static boolean isMappingExistsforConsumerKey(String consumerKey)
+            throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = "SELECT APPLICATION_ID " +
+                              " FROM AM_APPLICATION_KEY_MAPPING " +
+                              " WHERE CONSUMER_KEY   = ?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, APIUtil.encryptToken(consumerKey));
+
+            resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                String applicationId = resultSet.getString("APPLICATION_ID");
+                if (applicationId != null && !applicationId.isEmpty()) {
+                    return true;
+                }
+                return false;
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get Application ID by consumerKey "
+                    , e);
+        } catch (CryptoException e) {
+            log.error("Failed to encrypt the consumer key " + consumerKey, e);
+            handleException("Failed to encrypt the consumer key " + consumerKey
+                    , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return false;
+    }
+
+    /**
      * @param applicationId
      * @param keyType
      * @return
@@ -9281,6 +9495,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
         return version;
+    }
+
+    private String getScopeString(List<String> scopes){
+        return StringUtils.join(scopes," ");
     }
 
 

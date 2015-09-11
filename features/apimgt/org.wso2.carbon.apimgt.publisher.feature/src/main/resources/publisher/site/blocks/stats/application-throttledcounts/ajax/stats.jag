@@ -1,0 +1,140 @@
+<%
+include("/jagg/jagg.jag");
+var log = new Log();
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result,
+            action = request.getParameter("action"), 
+            appName = request.getParameter("appName"),
+            apiName = request.getParameter("apiName"),
+            fromDate = request.getParameter("fromDate"),
+            toDate = request.getParameter("toDate"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag"),
+            allProviders = "__all_providers__";
+
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'AuthenticateError'
+        });
+    } else {
+        var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
+
+        var provider = jagg.getUser().username;
+        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+        var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        var usageStatClient;
+
+        var currentLocation = request.getParameter("currentLocation");
+        if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
+            provider = allProviders;
+        }
+
+        if (provider.indexOf("@") == -1) {
+            provider = provider + "@" + tenantDomain;
+        }
+
+        if (action === "getThrottleDataOfApplication"){
+
+            if(appName && fromDate && toDate){
+
+                try {
+                    usageStatClient = new APIUsageStatisticsClient(provider);
+                    var throttleData = usageStatClient.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
+                    var result = [];
+
+                    for (var i = 0; i < throttleData.size(); i++) {
+                        var throttleDataObj = throttleData.get(i);
+                        result.push({
+                            apiName : throttleDataObj.getAPIName(),
+                            success_request_count : throttleDataObj.getSuccessRequestCount(),
+                            throttleout_count : throttleDataObj.getThrottleOutCount()
+                        });
+                    }
+
+                    print({
+                        error: false,
+                        usage: result
+                    });
+                } catch (e) {
+                    log.error(e);
+                    print({
+                        error: true,
+                        message: "Error in retrieving throttle data for application: " + appName
+                    });
+                }
+
+            }else{
+                print({
+                    error: true,
+                    message: 'Please provide Application Name, From Date and To Date'
+                });
+            }
+
+        } else if (action === "getAppsForThrottleStats") {
+
+            try {
+                usageStatClient = new APIUsageStatisticsClient(provider);
+                var apps = usageStatClient.getAppsForThrottleStats(provider, apiName);
+                var result = [];
+
+                for (var i = 0; i < apps.size(); i++) {
+                    result.push(apps.get(i));
+                }
+
+                print({
+                    error: false,
+                    usage: result
+                });
+            } catch (e) {
+                log.error(e);
+                print({
+                    error: true,
+                    message: "Error in retrieving application names for throttle stats"
+                });
+            }
+
+        } else if (action === "getFirstAccessTime") {
+            mod = jagg.module("statistics");
+            provider = jagg.getUser().username;
+            if (currentLocation.indexOf("all-statistics") >= 0) {
+                result = mod.getFirstAccessTime(allProviders);
+            } else {
+                result = mod.getFirstAccessTime(provider);
+            }
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    usage: result.usage
+                }
+            }
+            print(obj);
+
+        } else if (action === "isDataPublishingEnabled") {
+            mod = jagg.module("statistics");
+            result = mod.isDataPublishingEnabled();
+
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    usage: result.usage
+                }
+            }
+            print(obj);
+
+        };
+        
+    }
+}());
+%>

@@ -46,8 +46,6 @@ import java.util.Map;
 
 public class APIMgtResponseHandler extends AbstractMediator {
 
-    private boolean enabled;
-
     private boolean skipEventReceiverConnection;
 
     private volatile APIMgtUsageDataPublisher publisher;
@@ -60,10 +58,10 @@ public class APIMgtResponseHandler extends AbstractMediator {
 
     private void initializeDataPublisher() {
 
-        enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
         skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                 isSkipEventReceiverConnection();
-        if (!enabled || skipEventReceiverConnection) {
+        if (!DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled() ||
+            skipEventReceiverConnection) {
             return;
         }
         if (publisher == null) {
@@ -100,7 +98,8 @@ public class APIMgtResponseHandler extends AbstractMediator {
         }
 
         try {
-            if (!enabled || skipEventReceiverConnection) {
+            if (!DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled()
+                || skipEventReceiverConnection) {
                 return true;
             }
             long responseSize = 0;
