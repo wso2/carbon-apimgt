@@ -80,17 +80,15 @@ public class ApisApiServiceImpl extends ApisApiService {
           String version = apiIdDetails[1];
           String providerName = apiIdDetails[2];
           String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
-
-          APIIdentifier apiIdentifier = new APIIdentifier(providerNameEmailReplaced, apiName, version);
-          APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
           boolean isTenantFlowStarted = false;
-
           API apiToReturn = new API();
-
           try {
+
+              APIIdentifier apiIdentifier = new APIIdentifier(providerNameEmailReplaced, apiName, version);
+              APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
               String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
               //how to get login details?
-              CarbonContext.getThreadLocalCarbonContext().getTenantDomain(); //<- can this be used as userTenantDomain?
+              /*CarbonContext.getThreadLocalCarbonContext().getTenantDomain(); //<- can this be used as userTenantDomain?
               String userTenantDomain = MultitenantUtils
                       .getTenantDomain(APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
               if (!tenantDomain.equals(userTenantDomain)) {
@@ -98,7 +96,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                           .entity("Cannot access API:" + apiId + " from current tenant")
                           .type(MediaType.APPLICATION_JSON)
                           .build();
-              }
+              }*/
               if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                   isTenantFlowStarted = true;
                   PrivilegedCarbonContext.startTenantFlow();
@@ -107,7 +105,7 @@ public class ApisApiServiceImpl extends ApisApiService {
               org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPI(apiIdentifier);
               if (api != null) {
 
-                  ===============================================================
+                  //===============================================================
                   apiToReturn.setName(api.getId().getApiName());
                   apiToReturn.setVersion(api.getId().getVersion());
                   apiToReturn.setProvider(api.getId().getProviderName());
@@ -149,29 +147,20 @@ public class ApisApiServiceImpl extends ApisApiService {
                   apiToReturn.setSequences(sequences);
 
                   apiToReturn.setStatus(api.getStatus().getStatus());
-                  apiToReturn.setSubscriptionAvailability(api.getSubscriptionAvailability());
+                  //apiToReturn.setSubscriptionAvailability(api.getSubscriptionAvailability());
                   if (api.getSubscriptionAvailability() != null &&
                       api.getSubscriptionAvailability().equals(APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS)) {
                       apiToReturn.setVisibleTenants(Arrays.asList(api.getVisibleTenants().split(",")));
                   }
                   //Get Swagger definition which has URL templates and resource details
-                  // should we use another approach?
-                  APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
-                  RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-                  int tenantId;
-                  UserRegistry registry;
                   String apiSwaggerDefinition;
 
-                  tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                          .getTenantId(userTenantDomain);
-                  registry = registryService.getGovernanceSystemRegistry(tenantId);
-
-                  apiSwaggerDefinition = definitionFromSwagger20.getAPIDefinition(api.getId(), registry);
+                  apiSwaggerDefinition = apiProvider.getSwagger20Definition(api.getId());
 
                   apiToReturn.setSwagger(apiSwaggerDefinition);
 
                   Set<String> apiTags = api.getTags();
-                  List<Tag> tagsToReturn = null;
+                  List<Tag> tagsToReturn = new ArrayList();
                   for (String tag : apiTags) {
                       Tag newTag = new Tag();
                       newTag.setName(tag);
@@ -180,7 +169,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                   apiToReturn.setTags(tagsToReturn);
 
                   Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = api.getAvailableTiers();
-                  List<String> tiersToReturn = null;
+                  List<String> tiersToReturn = new ArrayList();
                   for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
                       tiersToReturn.add(tier.getName());
                   }
@@ -188,10 +177,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 
                   apiToReturn.setTransport(Arrays.asList(api.getTransports().split(",")));
                   //apiToReturn.setType("");   how to get type?
-                  apiToReturn.setVisibility((API.VisibilityEnum) api.getVisibility());
-                  apiToReturn.setVisibleRoles(Arrays.asList(api.getVisibleRoles().split(",")));
+                  apiToReturn.setVisibility(API.VisibilityEnum.valueOf(api.getVisibility()));
+                  //this should only check if visibility is set to roles
+                  //apiToReturn.setVisibleRoles(Arrays.asList(api.getVisibleRoles().split(",")));
 
-                  ===============================================================
+                  /*===============================================================
 
                   Set<APIStore> storesSet = apiProvider.getExternalAPIStores(api.getId());
                   if (storesSet != null && storesSet.size() != 0) {
@@ -222,7 +212,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                       scopeNative.put("roles", scope.getRoles());
                       scopeNative.put("description", scope.getDescription());
                       scopesNative.add(scopeNative);
-                  }
+                  }*/
 
               } else {
                   //log the error
@@ -232,20 +222,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                       .type(MediaType.APPLICATION_JSON)
                       .build();
               }
-          } catch (RegistryException e) {
-              //500
-              System.out.println("Error when create registry instance ");
-              return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                  .entity("Internal server error")
-                  .type(MediaType.APPLICATION_JSON)
-                  .build();
-          } catch (UserStoreException e) {
-              //500
-              System.out.println("Error while reading tenant information ");
-              return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                  .entity("Internal server error")
-                  .type(MediaType.APPLICATION_JSON)
-                  .build();
           } catch (APIManagementException e){
               //500
               e.printStackTrace();
@@ -275,40 +251,36 @@ public class ApisApiServiceImpl extends ApisApiService {
           // do some magic!
           return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
       }
-  
-      @Override
-      public Response apisApiIdDocumentsGet(String limit,String offset,String query,String accept,String ifNoneMatch)
-      throws NotFoundException {
-          // do some magic!
-          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-      }
-  
-      @Override
-      public Response apisApiIdDocumentsPost(Document body,String contentType)
-      throws NotFoundException {
-          // do some magic!
-          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-      }
-  
-      @Override
-      public Response apisApiIdDocumentsDocumentIdGet(String accept,String ifNoneMatch,String ifModifiedSince)
-      throws NotFoundException {
-          // do some magic!
-          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-      }
-  
-      @Override
-      public Response apisApiIdDocumentsDocumentIdPut(Document body,String contentType,String ifMatch,String ifUnmodifiedSince)
-      throws NotFoundException {
-          // do some magic!
-          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-      }
-  
-      @Override
-      public Response apisApiIdDocumentsDocumentIdDelete(String ifMatch,String ifUnmodifiedSince)
-      throws NotFoundException {
-          // do some magic!
-          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-      }
+
+    @Override public Response apisApiIdDocumentsGet(String apiId, String limit, String offset, String query,
+            String accept, String ifNoneMatch) throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
+
+    @Override public Response apisApiIdDocumentsPost(String apiId, Document body, String contentType)
+            throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
+
+    @Override public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept,
+            String ifNoneMatch, String ifModifiedSince) throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
+
+    @Override public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, Document body,
+            String contentType, String ifMatch, String ifUnmodifiedSince) throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
+
+    @Override public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
+            String ifUnmodifiedSince) throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
+
   
 }
