@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -102,8 +102,8 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.gateway.stub.*;version="${apimgt.gateway.version}",
-			org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${apimgt.gateway.version}"	
+                            org.wso2.carbon.apimgt.gateway.stub.*;version="${apimgt.gateway.stub.version}",
+			                org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${apimgt.gateway.stub.version}"
                            
                         </Export-Package>
                         <Import-Package>
