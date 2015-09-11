@@ -825,7 +825,72 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
              handleException("Error while performing registry transaction operation", e);
            
         }
-    }    
+    }
+
+    /**
+     *
+     * @return true if the API was added successfully
+     * @throws APIManagementException
+     */
+    public  boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway, boolean deprecateOldVersions
+            ,boolean makeKeysForwardCompatible)
+            throws APIManagementException, FaultGatewaysException {
+        boolean success = false;
+        String provider = identifier.getProviderName();
+        String providerTenantMode = identifier.getProviderName();
+        provider = APIUtil.replaceEmailDomain(provider);
+        String name = identifier.getApiName();
+        String version = identifier.getVersion();
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIIdentifier apiId = new APIIdentifier(provider, name, version);
+            API api = getAPI(apiId);
+            if (api != null) {
+                APIStatus oldStatus = api.getStatus();
+                APIStatus newStatus = APIUtil.getApiStatus(status);
+                String currentUser = this.username;
+                changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+
+                if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
+                        && newStatus.equals(APIStatus.PUBLISHED)) {
+                    if (makeKeysForwardCompatible) {
+                        makeAPIKeysForwardCompatible(api);
+                    }
+
+                    if (deprecateOldVersions) {
+                        List<API> apiList = getAPIsByProvider(provider);
+                        APIVersionComparator versionComparator = new APIVersionComparator();
+                        for (API oldAPI : apiList) {
+                            if (oldAPI.getId().getApiName().equals(name) &&
+                                    versionComparator.compare(oldAPI, api) < 0 &&
+                                    (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
+                                changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
+                                        currentUser, publishToGateway);
+                            }
+                        }
+                    }
+                }
+                success = true;
+            } else {
+                handleException("Couldn't find an API with the name-" + name + "version-" + version);
+            }
+        } catch (FaultGatewaysException e) {
+            handleException("Error while publishing to/unpublishing from  API gateway");
+            return false;
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return success;
+    }
+
 
     public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException {
@@ -1306,6 +1371,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiMgtDAO.addAPI(newAPI,tenantId);
             registry.commitTransaction();
+            new APIUtil().associateLifeCycle(targetPath,registry);
 
         } catch (ParseException e) {
             String msg =
@@ -1596,7 +1662,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, artifactPath);
             registry.commitTransaction();
-         
+            new APIUtil().associateLifeCycle(artifactPath,registry);
             if(log.isDebugEnabled()){
             	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" created";
             	log.debug(logMessage);
