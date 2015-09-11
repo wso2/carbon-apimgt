@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.util.List;
@@ -400,7 +401,7 @@ public interface APIConsumer extends APIManager {
     public Set<APIIdentifier> getAPIByConsumerKey(String accessToken) throws APIManagementException;
 
     public Set<API> searchAPI(String searchTerm, String searchType,String tenantDomain) throws APIManagementException;
-    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end) throws APIManagementException;
+    public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType,String tenantDomain,int start,int end, boolean limitAttributes) throws APIManagementException;
     public int getUserRating(APIIdentifier apiId, String user) throws APIManagementException;
 
     /**
@@ -558,4 +559,20 @@ public interface APIConsumer extends APIManager {
 
     public String getGroupIds(String response) throws APIManagementException;
 
+	public JSONObject resumeWorkflow(Object[] args);
+
+
+    /**
+     * This method added to returned APIs with only returned governance artifact attributes without accessing registry again
+     *
+     * @param searchTerm   term which search for
+     * @param searchType   search type
+     * @param tenantDomain tenant domain
+     * @param start        starting offset
+     * @param end          number APIs to be returned
+     * @return search results map
+     * @throws APIManagementException
+     */
+    public Map<String, Object> searchPaginatedLightweightAPIs(String searchTerm, String searchType, String tenantDomain,
+                                                              int start, int end) throws APIManagementException;
 }

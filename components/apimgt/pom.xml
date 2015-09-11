@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -38,6 +38,5 @@
         <module>org.wso2.carbon.apimgt.core</module>
         <module>org.wso2.carbon.apimgt.interceptor</module>
         <module>org.wso2.carbon.apimgt.startup.publisher</module>
-        <module>org.wso2.carbon.apimgt.rest.api</module>
   </modules>
 </project>

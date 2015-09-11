@@ -27,8 +27,11 @@ import org.apache.synapse.SynapseLog;
 import org.apache.synapse.continuation.ContinuationStackManager;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.endpoints.Endpoint;
+import org.apache.synapse.endpoints.EndpointDefinition;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.util.MessageHelper;
+
+import java.util.Set;
 
 /**
  * Call Mediator sends a message using specified semantics. If it contains an endpoint it will
@@ -71,6 +74,13 @@ public class CallMediator extends AbstractMediator implements ManagedLifecycle {
         synLog.traceOrDebug("Start : Call mediator");
         if (synLog.isTraceTraceEnabled()) {
             synLog.traceTrace("Message : " + synInCtx.getEnvelope());
+        }
+
+        // clear the message context properties related to endpoint in last service invocation
+        Set keySet = synInCtx.getPropertyKeySet();
+        if (keySet != null) {
+            keySet.remove(SynapseConstants.RECEIVING_SEQUENCE);
+            keySet.remove(EndpointDefinition.DYNAMIC_URL_VALUE);
         }
 
         boolean outOnlyMessage = "true".equals(synInCtx.getProperty(

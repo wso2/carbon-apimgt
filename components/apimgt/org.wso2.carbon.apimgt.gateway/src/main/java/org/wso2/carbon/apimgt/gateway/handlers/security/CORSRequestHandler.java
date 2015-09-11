@@ -75,7 +75,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
 	public void destroy() {
 		if (log.isDebugEnabled()) {
-			log.debug("Destroying CORSRequest Handler handler instance");
+			log.debug("Destroying CORSRequest Handler instance");
 		}
 	}
 
@@ -207,9 +207,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		}
 	}
 
-	public void setAllowedOrigins(String allowedOrigins) {
-		this.allowedOrigins = Arrays.asList(allowedOrigins.split(","));
-	}
+    public void setAllowedOrigins(String allowedOrigins) {
+        this.allowedOrigins = Arrays.asList(allowedOrigins.split(","));
+    }
 
 	public String getApiImplementationType() {
 		return apiImplementationType;

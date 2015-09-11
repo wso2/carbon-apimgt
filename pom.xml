@@ -5,7 +5,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -211,6 +211,13 @@
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
+                <version>${apimgt.gateway.stub.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
                 <version>${apimgt.usage.publisher}</version>
             </dependency>
@@ -373,7 +380,7 @@
             <dependency>
                 <groupId>org.wso2.carbon.hostobjects</groupId>
                 <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
-                <version>${hostobject.version}</version>
+                <version>${org.wso2.carbon.hostobjects.sso.hostobject.version}</version>
             </dependency>
 
             <dependency>
@@ -401,13 +408,25 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-                <version>4.2.1</version>
+                <version>${apimgt.handlers.security.stub.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.interceptor</artifactId>
                 <version>${apimgt.interceptor.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
+                <version>${apimgt.statsupdate.stub.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-kernel</artifactId>
+                <version>1.6.2</version>
             </dependency>
 
             <dependency>
@@ -426,12 +445,6 @@
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.utils</artifactId>
                 <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
-                <version>4.2.3</version>
             </dependency>
 
             <dependency>
@@ -764,7 +777,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
-                <version>4.2.0</version>
+                <version>${ganalytics.version}</version>
             </dependency>
 
         </dependencies>
@@ -774,40 +787,42 @@
         <project.scm.id>my-scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
-        <carbon.apimgt.version>1.3.0-SNAPSHOT</carbon.apimgt.version>
-        <carbon.apimgt.imp.pkg.version>[1.3.0, 1.4.0)</carbon.apimgt.imp.pkg.version>
-
-        <apimgt.api.version>1.3.0-SNAPSHOT</apimgt.api.version>
-        <apimgt.impl.version>1.3.0-SNAPSHOT</apimgt.impl.version>
-        <apimgt.core.version>1.3.0-SNAPSHOT</apimgt.core.version>
-        <apimgt.gateway.version>1.3.0-SNAPSHOT</apimgt.gateway.version>
-        <apimgt.hostobjects.version>1.3.0-SNAPSHOT</apimgt.hostobjects.version>
-        <apimgt.interceptor.version>1.3.0-SNAPSHOT</apimgt.interceptor.version>
-        <apimgt.keymgt.version>1.3.0-SNAPSHOT</apimgt.keymgt.version>
-        <apimgt.keymgt.client.version>1.3.0-SNAPSHOT</apimgt.keymgt.client.version>
-        <apimgt.startup.publisher.version>1.3.0-SNAPSHOT</apimgt.startup.publisher.version>
-        <apimgt.usage.client>1.3.0-SNAPSHOT</apimgt.usage.client>
-        <apimgt.usage.publisher>1.3.0-SNAPSHOT</apimgt.usage.publisher>
+        <carbon.apimgt.version>4.3.0-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.imp.pkg.version>[4.3.0, 4.4.0)</carbon.apimgt.imp.pkg.version>
+        <carbon.apimgt.stub.imp.pkg.version>[4.3.0, 4.4.0)</carbon.apimgt.stub.imp.pkg.version>
+        <apimgt.api.version>4.3.0-SNAPSHOT</apimgt.api.version>
+        <apimgt.impl.version>4.3.0-SNAPSHOT</apimgt.impl.version>
+        <apimgt.core.version>4.3.0-SNAPSHOT</apimgt.core.version>
+        <apimgt.gateway.version>4.3.0-SNAPSHOT</apimgt.gateway.version>
+        <apimgt.hostobjects.version>4.3.0-SNAPSHOT</apimgt.hostobjects.version>
+        <apimgt.interceptor.version>4.3.0-SNAPSHOT</apimgt.interceptor.version>
+        <apimgt.keymgt.version>4.3.0-SNAPSHOT</apimgt.keymgt.version>
+        <apimgt.keymgt.client.version>4.3.0-SNAPSHOT</apimgt.keymgt.client.version>
+        <apimgt.startup.publisher.version>4.3.0-SNAPSHOT</apimgt.startup.publisher.version>
+        <apimgt.usage.client>4.3.0-SNAPSHOT</apimgt.usage.client>
+        <apimgt.usage.publisher>4.3.0-SNAPSHOT</apimgt.usage.publisher>
         <apimgt.keymgt.stub.version>4.3.0-SNAPSHOT</apimgt.keymgt.stub.version>
         <apimgt.handlers.security.stub.version>4.3.0-SNAPSHOT</apimgt.handlers.security.stub.version>
-        <carbon.forum.version>1.3.0-SNAPSHOT</carbon.forum.version>
-        <carbon.forum.feature.version>1.3.0-SNAPSHOT</carbon.forum.feature.version>
-        <carbon.forum.server.feature.version>1.3.0-SNAPSHOT</carbon.forum.server.feature.version>
-        <hostobject.version>4.2.4-SNAPSHOT</hostobject.version>
+        <apimgt.statsupdate.stub.version>4.3.0-SNAPSHOT</apimgt.statsupdate.stub.version>
+        <apimgt.gateway.stub.version>4.3.0-SNAPSHOT</apimgt.gateway.stub.version>
+        <carbon.forum.version>4.3.0-SNAPSHOT</carbon.forum.version>
+        <carbon.forum.feature.version>4.3.0-SNAPSHOT</carbon.forum.feature.version>
+        <carbon.forum.server.feature.version>4.3.0-SNAPSHOT</carbon.forum.server.feature.version>
+        <org.wso2.carbon.hostobjects.sso.hostobject.version>4.3.0-SNAPSHOT</org.wso2.carbon.hostobjects.sso.hostobject.version>
 
-        <apimgt.core.feature.version>1.3.0-SNAPSHOT</apimgt.core.feature.version>
-        <apimgt.feature.version>1.3.0-SNAPSHOT</apimgt.feature.version>
-        <apimgt.gateway.feature>1.3.0-SNAPSHOT</apimgt.gateway.feature>
-        <apimgt.interceptor.feature>1.3.0-SNAPSHOT</apimgt.interceptor.feature>
-        <apimgt.publisher.feature.version>1.3.0-SNAPSHOT</apimgt.publisher.feature.version>
-        <apimgt.startup.publisher.feature.version>1.3.0-SNAPSHOT</apimgt.startup.publisher.feature.version>
-        <apimgt.store.feature.version>1.3.0-SNAPSHOT</apimgt.store.feature.version>
-        <apimgt.synapse.feature.version>1.3.0-SNAPSHOT</apimgt.synapse.feature.version>
-        <apimgt.authenticator.oidc.ui.version>1.3.0-SNAPSHOT</apimgt.authenticator.oidc.ui.version>
-        <apimgt.authenticator.oidc.version>1.3.0-SNAPSHOT</apimgt.authenticator.oidc.version>
-        <apimgt.authenticator.oidc.stub.version>1.3.0-SNAPSHOT</apimgt.authenticator.oidc.stub.version>
-        <apimgt.hostobjects.oidc.version>1.3.0-SNAPSHOT</apimgt.hostobjects.oidc.version>
-        <apimgt.startup.publisher.feature.version>1.3.0-SNAPSHOT</apimgt.startup.publisher.feature.version>
+        <apimgt.core.feature.version>4.3.0-SNAPSHOT</apimgt.core.feature.version>
+        <apimgt.feature.version>4.3.0-SNAPSHOT</apimgt.feature.version>
+        <apimgt.gateway.feature>4.3.0-SNAPSHOT</apimgt.gateway.feature>
+        <apimgt.interceptor.feature>4.3.0-SNAPSHOT</apimgt.interceptor.feature>
+        <apimgt.publisher.feature.version>4.3.0-SNAPSHOT</apimgt.publisher.feature.version>
+        <apimgt.startup.publisher.feature.version>4.3.0-SNAPSHOT</apimgt.startup.publisher.feature.version>
+        <apimgt.store.feature.version>4.3.0-SNAPSHOT</apimgt.store.feature.version>
+        <apimgt.synapse.feature.version>4.3.0-SNAPSHOT</apimgt.synapse.feature.version>
+        <apimgt.authenticator.oidc.ui.version>4.3.0-SNAPSHOT</apimgt.authenticator.oidc.ui.version>
+        <apimgt.authenticator.oidc.version>4.3.0-SNAPSHOT</apimgt.authenticator.oidc.version>
+        <apimgt.authenticator.oidc.stub.version>4.3.0-SNAPSHOT</apimgt.authenticator.oidc.stub.version>
+        <apimgt.hostobjects.oidc.version>4.3.0-SNAPSHOT</apimgt.hostobjects.oidc.version>
+        <apimgt.startup.publisher.feature.version>4.3.0-SNAPSHOT</apimgt.startup.publisher.feature.version>
 
         <identity.component.version>4.2.6</identity.component.version>
         <identity.authentication.version>4.2.1</identity.authentication.version>
@@ -862,7 +877,7 @@
         <axiom.osgi.version.range>[1.2.11.wso2v6, 1.3.0)</axiom.osgi.version.range>
         <version.axiom>1.2.11-wso2v6</version.axiom>
 
-        <apim.version>1.3.0-SNAPSHOT</apim.version>
+        <apim.version>4.3.0-SNAPSHOT</apim.version>
 
         <!-- Servlet API -->
         <exp.pkg.version.javax.servlet>2.6.0</exp.pkg.version.javax.servlet>
@@ -910,6 +925,7 @@
         <com.ibm.wsdl.version>1.6.3</com.ibm.wsdl.version>
         <com.nimbusds.wso2.version>2.26.1.wso2v2</com.nimbusds.wso2.version>
         <net.sf.saxon.version>8.7</net.sf.saxon.version>
+        <saxon.wso2.version>9.4.0.wso2v1</saxon.wso2.version>
         <org.apache.velocity.version>1.7</org.apache.velocity.version>
         <org.apache.pdfbox.version>1.8.10</org.apache.pdfbox.version>
         <org.slf4j.version>1.5.10</org.slf4j.version>
@@ -924,6 +940,18 @@
         <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
 
     </properties>
+    <distributionManagement>
+        <repository>
+            <id>wso2-maven2-repository</id>
+            <name>WSO2 Maven2 Repository</name>
+            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>wso2-maven2-snapshot-repository</id>
+            <name>WSO2 Maven2 Snapshot Repository</name>
+            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/snapshots/maven2/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
 
 

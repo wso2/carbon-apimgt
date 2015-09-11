@@ -30,6 +30,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -170,15 +171,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         // By default we send a 401 response back
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-        try{
-            RelayUtils.buildMessage(axis2MC);
-        }
-        catch (IOException ex){        //In case of an exception, it won't be propagated up, instead, will be logged; because we're setting a fault message in the payload.
-            log.error("Error occurred while building the message", ex);
-        }
-        catch (XMLStreamException ex) {
-            log.error("Error occurred while building the message", ex);
-        }
+        // This property need to be set to avoid sending the content in pass-through pipe (request message)
+        // as the response.
+        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
         int status;
         if (e.getErrorCode() == APISecurityConstants.API_AUTH_GENERAL_ERROR) {
