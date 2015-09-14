@@ -14,12 +14,10 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 
 public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
-  
-      @Override
-      public Response environmentsGet(String apiId)
-      throws NotFoundException {
-          // do some magic!
-          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-      }
-  
+    @Override
+    public Response environmentsGet(String apiId)
+    throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
 }

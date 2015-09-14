@@ -16,8 +16,21 @@
 
 package org.wso2.carbon.apimgt.rest.api.impl;
 
+import org.wso2.carbon.apimgt.rest.api.model.API;
+
 /**
  * Created by jo on 9/13/15.
  */
 public class MappingUtil {
+
+    protected static API mapAPI(org.wso2.carbon.apimgt.api.model.API model){
+        API api = new API();
+        api.setContext(model.getContext());
+        api.setName(model.getId().getApiName());
+        api.setDescription(model.getDescription());
+        api.setVersion(model.getId().getVersion());
+        api.setProvider(model.getId().getProviderName());
+
+        return api;
+    }
 }

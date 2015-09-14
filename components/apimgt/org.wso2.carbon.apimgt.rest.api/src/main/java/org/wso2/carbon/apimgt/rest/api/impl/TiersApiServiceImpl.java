@@ -15,12 +15,10 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 
 public class TiersApiServiceImpl extends TiersApiService {
-  
-      @Override
-      public Response tiersGet(String accept,String ifNoneMatch)
-      throws NotFoundException {
-          // do some magic!
-          return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-      }
-  
+    @Override
+    public Response tiersGet(String accept,String ifNoneMatch)
+    throws NotFoundException {
+        // do some magic!
+        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    }
 }
