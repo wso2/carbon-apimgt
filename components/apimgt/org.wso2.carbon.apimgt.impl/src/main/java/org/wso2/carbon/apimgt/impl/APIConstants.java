@@ -272,6 +272,8 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    public static final String API_LIFE_CYCLE="APILifeCycle";
+
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
