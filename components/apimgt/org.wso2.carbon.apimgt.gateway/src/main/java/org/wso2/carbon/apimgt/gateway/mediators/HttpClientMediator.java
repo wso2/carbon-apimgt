@@ -25,7 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
@@ -49,18 +49,201 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
 
 
     private static final Log log = LogFactory.getLog(HttpClientMediator.class);
-    private String realm;
-    private String serverNonce;
-    private String qop;
-    private String cnonce;
-    private String nc;
+
+    //method to split digest auth header sent from the backend
+    public String[] splitDigestHeader(String[] wwwHeaderSplits){
+
+        String realm = null;
+        String qop = null;
+        String serverNonce = null;
+
+        String wwwHeaderValueString = wwwHeaderSplits[1];
+        String wwwHeaderValueArray[] = wwwHeaderValueString.split(",");
+
+        for (String keyval : wwwHeaderValueArray) {
+
+            String key = keyval.substring(0, keyval.indexOf("="));
+            String value = keyval.substring(keyval.indexOf("=") + 1);
+
+            if ("realm".equals(key.trim())) {
+                realm = value;
+            } else if ("qop".equals(key.trim())) {
+                qop = value;
+            } else if ("nonce".equals(key.trim())) {
+                serverNonce = value;
+            }
+        }
+
+        //remove front and end double quotes.
+        serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
+        realm = realm.substring(1, realm.length() - 1);
+
+        String[] headerAttributes = {realm, serverNonce, qop};
+        return headerAttributes;
+    }
+
+    //method to calculate hash1 for digest authentication
+    public String calculateHA1(String username, String realm, String password){
+
+        StringBuilder ha1StringBuilder = new StringBuilder(username);
+        ha1StringBuilder.append(":");
+        ha1StringBuilder.append(realm);
+        ha1StringBuilder.append(":");
+        ha1StringBuilder.append(password);
+        String ha1 = DigestUtils.md5Hex(ha1StringBuilder.toString());
+
+        return ha1;
+    }
+
+    //hashing the entityBody for qop = auth-int (for calculating ha2)
+    public String findEntityBodyHash(HttpResponse response) throws IOException{
+
+        HttpEntity entity = response.getEntity();
+        InputStream entityBodyStream = entity.getContent();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(entityBodyStream));
+        StringBuilder out = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            out.append(line);
+        }
+        String entityBody = out.toString();
+        reader.close();
+
+        //Get the hash of the entity-body
+        String hash = DigestUtils.md5Hex(entityBody);
+        return hash;
+    }
+
+    //method to calculate hash 2 for digest authentication
+    public String calculateHA2(String qop, String httpMethod, String postFix, HttpResponse response) throws IOException{
+
+        String ha2;
+
+        //Consider all qop types other than "auth-int" as auth and compute ha2 here
+        if (qop!="auth-int") {
+
+            StringBuilder ha2StringBuilder = new StringBuilder(httpMethod);
+            ha2StringBuilder.append(":");
+            ha2StringBuilder.append(postFix);
+            ha2 = DigestUtils.md5Hex(ha2StringBuilder.toString());
+
+        }else{
+
+            //Extracting the entity body for calculating ha2 for qop="auth-int"
+            String entityBodyHash = findEntityBodyHash(response);
+
+            StringBuilder ha2StringBuilder = new StringBuilder(httpMethod);
+            ha2StringBuilder.append(":");
+            ha2StringBuilder.append(postFix);
+            ha2StringBuilder.append(":");
+            ha2StringBuilder.append(entityBodyHash);
+            ha2 = DigestUtils.md5Hex(ha2StringBuilder.toString());
+        }
+
+        return ha2;
+    }
+
+    //method to randomly generate the client nonce
+    public String generateClientNonce(){
+
+        Random rand = new Random();
+        int num = rand.nextInt();
+        String clientNonce = String.format("%08x", num);
+
+        return clientNonce;
+    }
+
+    //method to increment and return the nonce count with each request
+    public String incrementNonceCount(){
+        int counter = 0; //This has to be modified
+        String nonceCount=String.format("%08x" , ++counter);
+        return nonceCount;
+    }
+
+    //generate response hash
+    public String[] generateResponseHash(String ha1, String ha2, String serverNonce, String qop){
+
+        String serverResponse;
+
+        if(qop!=null){
+
+            //generate clientNonce
+           String clientNonce = generateClientNonce();
+
+            //set the nonceCount
+            //nonceCount would always be 00000001 - should be with each request
+           String nonceCount = incrementNonceCount();
 
 
+            StringBuilder serverResponseStringBuilder =  new StringBuilder(ha1);
+            serverResponseStringBuilder.append(":");
+            serverResponseStringBuilder.append(serverNonce);
+            serverResponseStringBuilder.append(":");
+            serverResponseStringBuilder.append(nonceCount);
+            serverResponseStringBuilder.append(":");
+            serverResponseStringBuilder.append(clientNonce);
+            serverResponseStringBuilder.append(":");
+            serverResponseStringBuilder.append(qop);
+            serverResponseStringBuilder.append(":");
+            serverResponseStringBuilder.append(ha2);
+
+            serverResponse = DigestUtils.md5Hex(serverResponseStringBuilder.toString());
+            String[] responseParams = {serverResponse, clientNonce, nonceCount};
+            return responseParams;
+        }
+
+        else{
+
+            StringBuilder serverResponseStringBuilder =  new StringBuilder(ha1);
+            serverResponseStringBuilder.append(":");
+            serverResponseStringBuilder.append(serverNonce);
+            serverResponseStringBuilder.append(":");
+            serverResponseStringBuilder.append(ha2);
+
+            serverResponse = DigestUtils.md5Hex(serverResponseStringBuilder.toString());
+            String[] responseParams = {serverResponse};
+            return responseParams;
+
+        }
+    }
+
+    //method to construct the authorization header
+    public StringBuilder constructAuthHeader(String userName, String realm, String serverNonce, String postFix, String[] serverResponseArray, String qop){
+
+        StringBuilder header = new StringBuilder("Digest ");
+        header.append("username=\"" + userName + "\"" + ", ");
+        header.append("realm=\"" + realm + "\"" + ", ");
+        header.append("nonce=\"" + serverNonce + "\"" + ", ");
+        header.append("uri=\"" + postFix + "\"" + ", ");
+
+
+        if(qop!=null) {
+
+            String nonceCount = serverResponseArray[2];
+            String clientNonce = serverResponseArray[1];
+            header.append("qop=" + qop + ", ");
+            header.append("nonceCount=" + nonceCount + ", ");
+            header.append("clientNonce\"" + clientNonce + "\"" + ", ");
+
+        }
+
+        String serverResponse = serverResponseArray[0];
+        header.append("response=\"" + serverResponse + "\"");
+
+        return header;
+    }
+
+    //method performing overall mediation for digest authentication
     public boolean mediate(MessageContext messageContext) {
+
+        String realm;
+        String serverNonce;
+        String qop;
 
         if (log.isDebugEnabled()) {
             log.debug("Digest auth header creation mediator is activated..");
         }
+
         try {
 
             DefaultHttpClient httpClient = new DefaultHttpClient();
@@ -81,8 +264,22 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                 log.debug("Post Fix value is : " + postFix);
             }
 
+
             //The first request sent by the client
-            HttpGet request = new HttpGet(resourceURL);
+            String httpMethod = (String) axis2MC.getProperty("HTTP_METHOD");
+
+            HttpUriRequest request = null;
+
+            if("GET".equals(httpMethod)){
+                request = new HttpGet(resourceURL);
+            }else if("POST".equals(httpMethod)){
+                request = new HttpPost(resourceURL);
+            }else if("PUT".equals(httpMethod)){
+                request = new HttpPut(resourceURL);
+            }else if("DELETE".equals(httpMethod)){
+                request = new HttpDelete(resourceURL);
+            }
+
             HttpResponse response;
 
             //The 401 response from the backend
@@ -95,30 +292,15 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
             }
 
             String wwwHeaderSplits[] = wwwHeader.split("Digest");
+
+            //Happens if the header supports digest authentication
             if(wwwHeaderSplits.length > 1 && wwwHeaderSplits[1] != null) {
-                // do something
 
-                String wwwHeaderValueString = wwwHeaderSplits[1];
-                String wwwHeaderValueArray[] = wwwHeaderValueString.split(",");
-
-                for (String keyval : wwwHeaderValueArray) {
-
-                    String key = keyval.substring(0, keyval.indexOf("="));
-                    String value = keyval.substring(keyval.indexOf("=") + 1);
-
-                    if ("realm".equals(key.trim())) {
-                        realm = value;
-                    } else if ("qop".equals(key.trim())) {
-                        qop = value;
-                    } else if ("nonce".equals(key.trim())) {
-                        serverNonce = value;
-                    }
-                }
-                //end of extracting info sent in the first header by the backend
-
-                //remove front and end double quotes.
-                serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
-                realm = realm.substring(1, realm.length() - 1);
+                //extracting required header information
+                String[] headerAttributes = splitDigestHeader(wwwHeaderSplits);
+                realm = headerAttributes[0];
+                serverNonce = headerAttributes[1];
+                qop = headerAttributes[2];
 
                 if(log.isDebugEnabled()){
                     log.debug("Server nonce value : " + serverNonce);
@@ -128,7 +310,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                 //get username password given by the client
                 String userNamePassword = (String) axis2MC.getProperty("UNAMEPASSWORD");
 
-                byte[] valueDecoded = Base64.decodeBase64(userNamePassword.getBytes()); //changed getBytes()
+                byte[] valueDecoded = Base64.decodeBase64(userNamePassword.getBytes());
                 String decodedString = new String(valueDecoded);
                 String[] splittedArrayOfUserNamePassword = decodedString.split(":");
 
@@ -140,135 +322,39 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                     log.debug("Password : " + passWord);
                 }
 
-                String httpMethod = (String) axis2MC.getProperty("HTTP_METHOD");
+                //get the Http method (GET, POST, PUT or DELETE)
+
 
                 if(log.isDebugEnabled()){
                     log.debug("HTTP method of request is : " + httpMethod);
                 }
 
                 //Use MD5 algorithm only
-                //String ha1 = DigestUtils.md5Hex(userName + ":" + realm + ":" + passWord);
-                StringBuilder ha1StringBuilder = new StringBuilder(userName);
-                ha1StringBuilder.append(":");
-                ha1StringBuilder.append(realm);
-                ha1StringBuilder.append(":");
-                ha1StringBuilder.append(passWord);
-                String ha1 = DigestUtils.md5Hex(ha1StringBuilder.toString());
+                //calculate ha1
+                String ha1 = calculateHA1(userName, realm, passWord);
 
                 if(log.isDebugEnabled()){
                     log.debug("MD5 value of ha1 is : " + ha1);
                 }
 
-
-                String ha2;
-
-                //Consider all qop types other than "auth-int" as auth and compute ha2 here
-
-                if (qop!="auth-int") {
-                    //String ha2 = DigestUtils.md5Hex(httpMethod + ":" + postFix);
-                    StringBuilder ha2StringBuilder = new StringBuilder(httpMethod);
-                    ha2StringBuilder.append(":");
-                    ha2StringBuilder.append(postFix);
-                    ha2 = DigestUtils.md5Hex(ha2StringBuilder.toString());
-
-                }else{
-
-                    //Extracting the entity body for calculating ha2 for qop="auth-int"
-
-                    HttpEntity entity = response.getEntity();
-                    InputStream entityBodyStream = entity.getContent();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(entityBodyStream));
-                    StringBuilder out = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        out.append(line);
-                    }
-                    String entityBody = out.toString();
-                    reader.close();
-
-                    //Get the hash of the entity-body
-                    String entityBodyHash = DigestUtils.md5Hex(entityBody);
-
-                    //String ha2 = DigestUtils.md5Hex(httpMethod + ":" + postFix + ":" + H(entityBody));
-                    StringBuilder ha2StringBuilder = new StringBuilder(httpMethod);
-                    ha2StringBuilder.append(":");
-                    ha2StringBuilder.append(postFix);
-                    ha2StringBuilder.append(":");
-                    ha2StringBuilder.append(entityBodyHash);
-                    ha2 = DigestUtils.md5Hex(ha2StringBuilder.toString());
-                }
+                //calculate ha2
+                String ha2 = calculateHA2(qop, httpMethod, postFix, response);
 
                 if(log.isDebugEnabled()){
                     log.debug("MD5 value of ha2 is : " + ha2);
                 }
 
+                //generate the final hash (serverResponse)
+                String[] serverResponseArray = generateResponseHash(ha1, ha2, serverNonce, qop);
 
-                String serverResponse;
-
-                if(qop!=null){
-
-                    int ncount=0;
-
-                    //generate a cnonce randomly
-                    Random rand = new Random();
-                    int num = rand.nextInt();
-                    cnonce = String.format("%08x", num);
-
-                    //set the nc
-                    //nc would always be 00000001
-                    nc=String.format("%08x" , ++ncount);
-
-
-                    StringBuilder serverResponseStringBuilder =  new StringBuilder(ha1);
-                    serverResponseStringBuilder.append(":");
-                    serverResponseStringBuilder.append(serverNonce);
-                    serverResponseStringBuilder.append(":");
-                    serverResponseStringBuilder.append(nc);
-                    serverResponseStringBuilder.append(":");
-                    serverResponseStringBuilder.append(cnonce);
-                    serverResponseStringBuilder.append(":");
-                    serverResponseStringBuilder.append(qop);
-                    serverResponseStringBuilder.append(":");
-                    serverResponseStringBuilder.append(ha2);
-
-                    serverResponse = DigestUtils.md5Hex(serverResponseStringBuilder.toString());
-                }
-
-                else{
-
-                    StringBuilder serverResponseStringBuilder =  new StringBuilder(ha1);
-                    serverResponseStringBuilder.append(":");
-                    serverResponseStringBuilder.append(serverNonce);
-                    serverResponseStringBuilder.append(":");
-                    serverResponseStringBuilder.append(ha2);
-
-                    serverResponse = DigestUtils.md5Hex(serverResponseStringBuilder.toString());
-
-                }
+                String serverResponse = serverResponseArray[0];
 
                 if(log.isDebugEnabled()){
                     log.debug("MD5 value of server response  is : " + serverResponse);
                 }
 
-
                 //Construct the authorization header
-
-                StringBuilder header = new StringBuilder("Digest ");
-                header.append("username=\"" + userName + "\"" + ", ");
-                header.append("realm=\"" + realm + "\"" + ", ");
-                header.append("nonce=\"" + serverNonce + "\"" + ", ");
-                header.append("uri=\"" + postFix + "\"" + ", ");
-
-
-                if(qop!=null) {
-
-                    header.append("qop=" + qop + ", ");
-                    header.append("nc=" + nc + ", ");
-                    header.append("cnonce\"" + cnonce + "\"" + ", ");
-
-                }
-
-                header.append("response=\"" + serverResponse + "\"");
+                StringBuilder header = constructAuthHeader(userName, realm, serverNonce, postFix, serverResponseArray, qop);
 
                 if(log.isDebugEnabled()){
                     log.debug("Processed www-header to be sent is : " + header);
@@ -295,6 +381,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
         }
 
     }
+
 
 
 
