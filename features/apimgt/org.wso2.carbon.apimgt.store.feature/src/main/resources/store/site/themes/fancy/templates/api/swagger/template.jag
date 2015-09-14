@@ -33,8 +33,7 @@ var apiName = outputs.api.name;
 var providerValue = outputs.api.provider;
 var version = outputs.api.version;
 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-var util = new APIUtil();
-providerValue = util.replaceEmailDomain(providerValue);
+providerValue = APIUtil.replaceEmailDomain(providerValue);
 
 
 //Calling the jaggery API
