@@ -175,6 +175,11 @@ public interface APIProvider extends APIManager {
                                 boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException;
 
+
+    public boolean updateAPIStatus(APIIdentifier apiId, String status,boolean publishToGateway,boolean deprecateOldVersions,
+                                boolean makeKeysForwardCompatible)
+            throws APIManagementException, FaultGatewaysException;
+
     /**
      * Locate any API keys issued for the previous versions of the given API, which are
      * currently in the PUBLISHED state and make those API keys compatible with this
