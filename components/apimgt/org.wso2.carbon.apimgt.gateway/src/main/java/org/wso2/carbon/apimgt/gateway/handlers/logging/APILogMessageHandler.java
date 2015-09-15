@@ -1,18 +1,19 @@
 /*
- *  Copyright WSO2 Inc.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
+* Copyright (c) 2015, WSO2 Inc.(http://www.wso2.org) All Rights Reserved.
+* WSO2 Inc. licenses this file to you under the Apache License,
+* Version 2.0 (the "License"); you may not use this file except
+* in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+* */
+
 package org.wso2.carbon.apimgt.gateway.handlers.logging;
 
 import org.apache.axis2.AxisFault;
@@ -21,9 +22,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Date;
 import java.util.Map;
@@ -46,8 +51,8 @@ public class APILogMessageHandler extends AbstractHandler {
 
     private boolean mediate(MessageContext messageContext, String direction) {
 
-        String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
-        String endUserName = (String) messageContext.getProperty("END_USER_NAME");
+        String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+        String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
         boolean isLoginRequest = false;
         String logMessage = "";
 
@@ -61,7 +66,7 @@ public class APILogMessageHandler extends AbstractHandler {
             logMessage = logMessage + " , userName=" + endUserName;
         }
         Map headers = (Map) axisMC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        String logID = (String) headers.get("activityID");
+        String logID = (String) headers.get(APIConstants.ACTIVITY_ID);
 
         if (DIRECTION_OUT.equals(direction) && logID == null) {
             try {
@@ -71,20 +76,22 @@ public class APILogMessageHandler extends AbstractHandler {
                     Object inTransportHeaders =
                             inMessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
                     if (inTransportHeaders != null) {
-                        String inID = (String) ((Map) inTransportHeaders).get("activityID");
+                        String inID = (String) ((Map) inTransportHeaders).get(APIConstants.ACTIVITY_ID);
                         if (inID != null) {
                             logID = inID;
                         }
                     }
                 }
             } catch (AxisFault axisFault) {
+                //Ignore Axis fault to continue logging
                 log.error("Cannot get Transport headers from Gateway");
             }
         }
         if (logID != null) {
             logMessage = logMessage + " , transactionId=" + logID;
         }
-        String userAgent = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("User-Agent");
+        String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
         if (userAgent != null) {
             logMessage = logMessage + " , userAgent=" + userAgent;
         }
@@ -97,24 +104,25 @@ public class APILogMessageHandler extends AbstractHandler {
             }
         }
         long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext().getProperty("wso2statistics.request.received.time"));
+                getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
         Date incomingReqTime = new Date(reqIncomingTimestamp);
         logMessage = logMessage + " , requestTime=" + incomingReqTime;
 
-        String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
+        String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP != null) {
             if (remoteIP.indexOf(",") > 0) {
                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
             }
         } else {
-            remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+            remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
         //null check before add it to log message
         if (remoteIP != null) {
             logMessage = logMessage + " , clientIP=" + remoteIP;
         }
         if (DIRECTION_OUT.equals(direction)) {
-            String statusCode = String.valueOf(axisMC.getProperty("HTTP_SC"));
+            String statusCode = String.valueOf(axisMC.getProperty(NhttpConstants.HTTP_SC));
 
             if (StringUtils.isEmpty(statusCode)) {
                 logMessage = logMessage + " , statusCode=" + statusCode;
@@ -133,7 +141,8 @@ public class APILogMessageHandler extends AbstractHandler {
                 log.debug("Inbound API call from client to gateway: " + logMessage);
 
             } else if (DIRECTION_OUT.equals(direction)) {
-                logMessage = logMessage + " , EndPointURL=" + messageContext.getProperty("ENDPOINT_PREFIX");
+                logMessage = logMessage + " , EndPointURL=" + messageContext.getProperty(
+                        SynapseConstants.ENDPOINT_PREFIX);
                 log.debug("Outbound API call from gateway to client: " + logMessage);
             }
         }
