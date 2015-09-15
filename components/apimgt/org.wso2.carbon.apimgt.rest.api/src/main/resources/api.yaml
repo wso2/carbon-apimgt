@@ -1308,7 +1308,7 @@ definitions:
       tags:
         type: array
         items:
-          $ref: '#/definitions/Tag'
+          type: string
       tiers:
         type: array
         items:
