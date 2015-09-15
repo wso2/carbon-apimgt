@@ -7,6 +7,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -50,9 +51,12 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
     private void clearCacheForAccessToken(MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        String revokedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("RevokedAccessToken");
-        String renewedToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("DeactivatedAccessToken");
-        String authorizedUser = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("AuthorizedUser");
+        String revokedToken = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.REVOKED_ACCESS_TOKEN);
+        String renewedToken = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.DEACTIVATED_ACCESS_TOKEN);
+        String authorizedUser = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.AUTHORIZED_USER);
 
         if (revokedToken != null) {
 
