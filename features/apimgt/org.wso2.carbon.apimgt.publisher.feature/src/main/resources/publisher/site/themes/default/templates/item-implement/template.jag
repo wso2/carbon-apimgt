@@ -1,9 +1,10 @@
-<% jagg.template("item-implement", function(inputs, outputs, jagg) { %>
-<% 
+<% jagg.template("item-implement", function(inputs, outputs, jagg) {
+
     var api = outputs.api;
     var permitted=outputs.isPermitted;
     var isCreatePermitted=outputs.isCreatePermitted;
     var mod = jagg.module("api");
+    var isSynapseGateway = mod.isSynapseGateway().isSynapseGateway;
     var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
@@ -16,7 +17,13 @@
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
       { "value": "<%=i18n.localize("applicationUser")%>", "text":"<%=i18n.localize("applicationUser")%>"},
       { "value": "<%=i18n.localize("application&applicationUser")%>", "text":"<%=i18n.localize("application&applicationUser")%>"}
-    ];    
+    ];
+    var insequence = "<%=api.inSequence%>";
+    var outsequence = "<%=api.outSequence%>";
+    var faultsequence = "<%=api.faultSequence%>";
+    var inSequencesLoaded = false;
+    var outSequencesLoaded = false;
+    var faultSequencesLoaded = false;
 </script>   
 <div id="item-add">
 <%
@@ -27,7 +34,7 @@
     var manage_wlabel = "";
     if( api.availableTiers !=""){
         manage_wlabel = "wizard-done";      
-    }else{
+    } else {
         var manage_w_link = '#';        
     } 
 %>
@@ -74,6 +81,71 @@
     </div>
   <%  }%>
 
+  <% if (isSynapseGateway) { %>
+  <div class="row-fluid">
+        <div class="span12">
+              <div class="api-implement-type" value="#managed-mediation">
+                  <div class="span1">
+                      <i class="fa fa-cogs fa-3x"></i>
+                  </div>
+                  <div class="span11">
+                      <h4>Message Mediation Policies</h4>
+                      <p>Provide endpoints of the production API and sandbox API to be managed.</p>
+                  </div>
+              </div>
+
+              <div class="slideContainer" id="managed-policies">
+                 <div class="well" >
+                    <div class="control-group">
+                            <label class="control-label" for="sequence"><%=i18n.localize("sequence")%>:</label>
+                            <div class="controls">
+                                <%=i18n.localize("sequenceMsg")%><label class="checkbox">
+                                    <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
+                                        <% if((api.inSequence && (!"none".equals(api.inSequence)))
+                                        || (api.outSequence && (!"none".equals(api.outSequence)))
+                                        || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %>
+                                    checked="checked" <%}%> >
+                                </label>
+                                <table class="table table-bordered table-striped" id="seqTable"
+                                    <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
+                                    <thead>
+                                        <tr>
+                                            <th><%=i18n.localize("inFlow")%></th>
+                                            <th><%=i18n.localize("outFlow")%></th>
+                                            <th><%=i18n.localize("faultFlow")%></th>
+                                        </tr>
+                                    </thead>
+                                    <tr>
+                                        <td>
+                                            <select id="inSequence"  name="inSequence" >
+                                                <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select id="outSequence"  name="outSequence">
+                                                <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select id="faultSequence"  name="faultSequence">
+                                                <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                    </div>
+
+                    <div class="form-actions" id="saveButtons">
+                        <button class="btn btn-default has-spinner" id="save_policies"><%=i18n.localize("save")%></button>
+                    </div>
+                 </div>
+              </div>
+        </div>
+  </div>
+  <%}%>
+
     <div class="row-fluid">
         <div class="span12">
             <div class="api-implement-type" value="#managed-api">
@@ -114,8 +186,7 @@
                          <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
                         </div>
 
-                        <div id="endpoint_form" class="endpoint_dives" >
-                        </div>
+                        <div id="endpoint_form" class="endpoint_dives"></div>
 
                          <div class="control-group">
                             <div class="controls">
