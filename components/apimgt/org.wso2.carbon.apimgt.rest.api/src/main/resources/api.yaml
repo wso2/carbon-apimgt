@@ -516,7 +516,104 @@ paths:
         412:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema: 
-            $ref: "#/definitions/Error"         
+            $ref: "#/definitions/Error"
+  '/apis/{apiId}/externalStores':
+    get:
+      description: Get a list of external stores where is this API is published.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - name: query
+          in: query
+          description: Search condition.
+          type: string
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+      responses:
+        '200':
+          description: OK. external store list is returned.
+          schema:
+            title: ExternalStoreList
+            properties:
+              count:
+                type: string
+              next:
+                type: string
+                description: Link to next page. Empty if no more external stores to be returned.
+              previous:
+                type: string
+                description: Link to previous page. Empty if current page is first page.
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/ExternalStore'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
+              type: string
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '404':
+          description: Not Found. Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
+          description: Not Acceptable. The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+  '/apis/{apiId}/environments':
+    get:
+      description: Get a list of documents belonging to an API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - name: query
+          in: query
+          description: Search condition.
+          type: string
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+      responses:
+        '200':
+          description: OK. Gateway environment list where this API is published returned.
+          schema:
+            title: EnvironmentList
+            properties:
+              count:
+                type: string
+              next:
+                type: string
+                description: Link to next page. Empty if no more environments  to be returned.
+              previous:
+                type: string
+                description: Link to previous page. Empty if current page is first page.
+              list:
+                type: array
+                items:
+                  $ref: '#/definitions/Environment'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
+              type: string
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '404':
+
+          description: Not Found. Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
+          description: Not Acceptable. The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
   /applications:
     get:
       description: Get a list of applications
@@ -1376,6 +1473,10 @@ definitions:
         type: "string"
       responseCaching:
         type: "string"
+      cacheTimeout:
+        type: integer
+      destinationStatsEnabled:
+        type: string
       isDefaultVersion:
         type: "boolean"
       transport:
@@ -1393,7 +1494,7 @@ definitions:
           type: "string"
       visibility:      
         type: "string"
-        enum: ["PUBLIC","PRIVATE","RESTRICTED"]
+        enum: ["public","private","restricted","controlled"]
       visibleRoles:
         type: "array"
         items: 
@@ -1430,17 +1531,17 @@ definitions:
             type: array
             items:
               $ref : "#/definitions/Endpoint"
-      environments:
-        type: array
-        items:
-          type: "string"
       sequences:
         type: array
         items: 
           $ref : "#/definitions/Sequence"
       subscriptionAvailability:
         type: string
-        enum: ["CurrentTenant","AllTenants","SpecificTenants"]
+        enum: ["current_tenant","all_tenants","specific_tenants"]
+      subscriptionAvailableTenants:
+        type: array
+        items:
+          type: string
       businessInformation:
         properties:
           businessOwner:
