@@ -20,7 +20,9 @@
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>
+            <bean class="org.wso2.carbon.apimgt.rest.api.handlers.BasicAuthenticationHandler"/>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.exception.GlobalThrowableMapper" />
         </jaxrs:providers>
     </jaxrs:server>
 </beans>
