@@ -80,7 +80,7 @@ public class MappingUtil {
         dto.setSequences(sequences);
 
         dto.setStatus(model.getStatus().getStatus());
-        dto.setSubscriptionAvailability(API.SubscriptionAvailabilityEnum.valueOf(model.getSubscriptionAvailability()));
+        //dto.setSubscriptionAvailability(API.SubscriptionAvailabilityEnum.valueOf(model.getSubscriptionAvailability()));
         //do we need to put validity checks? - specific_tenants
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
@@ -111,7 +111,7 @@ public class MappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         //dto.setType("");   //how to get type?
-        dto.setVisibility(API.VisibilityEnum.valueOf(model.getVisibility()));
+        //dto.setVisibility(API.VisibilityEnum.valueOf(model.getVisibility()));
         //do we need to put validity checks? - restricted
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
@@ -197,7 +197,7 @@ public class MappingUtil {
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
         //dto.setType("");   //how to get type?
-        model.setVisibility(dto.getVisibility().name());
+        //model.setVisibility(dto.getVisibility().name());
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
             model.setVisibleRoles(visibleRoles);
@@ -208,7 +208,7 @@ public class MappingUtil {
             model.setVisibleRoles(visibleTenants);
         }
 
-        //endpoint configs, business info and thumbnail still missing
+        //endpoint configs, business info and thumbnail requires mapping
         return model;
 
     }

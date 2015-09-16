@@ -1452,7 +1452,10 @@ parameters:
 definitions:
   API:
     title: "API object"
-    required: [ "name" , "context", "version" ]
+    required:
+      - name
+      - context
+      - version
     properties:
       name:
         type: "string"
@@ -1460,7 +1463,9 @@ definitions:
         type: "string"
       type:
         type: "string"
-        enum: ["REST","SOAP"]
+        enum:
+          - REST
+          - SOAP
       context:
         type: "string"
       version:
@@ -1478,12 +1483,14 @@ definitions:
       destinationStatsEnabled:
         type: string
       isDefaultVersion:
-        type: "boolean"
+        type: boolean
       transport:
         type: "array"
         items:
           type: "string"
-          enum: [ "http", "https" ]
+          enum:
+            - http
+            - https
       tags:
         type: "array"
         items:
@@ -1493,8 +1500,11 @@ definitions:
         items:
           type: "string"
       visibility:      
-        type: "string"
-        enum: ["public","private","restricted","controlled"]
+        type: string
+        enum:
+          - PUBLIC
+          - PRIVATE
+          - RESTRICTED
       visibleRoles:
         type: "array"
         items: 
@@ -1506,8 +1516,13 @@ definitions:
       endpoint:
         properties:
           type:
-            type: "string"
-            enum: ["http","address","wsdl","failover","load_balanced"]
+            type: string
+            enum:
+              - http
+              - address
+              - wsdl
+              - failover
+              - load_balanced
           config:
             properties:
               algorithm:
@@ -1518,7 +1533,11 @@ definitions:
                 type: string
               sessionManagement:
                 type: string
-                enum: ["Transport", "SOAP", "ClientID", "None"]
+                enum:
+                  - Transport
+                  - SOAP
+                  - ClientID
+                  - None
               sessionTimeout:
                 type: integer
               endpointSecured:
@@ -1736,11 +1755,17 @@ definitions:
   
   Endpoint:
     title: "Endpoint"
-    required: ["type", "url"]
+    required:
+      - type
+      - url
     properties:
       type:
         type: string
-        enum: ["Production", "Sandbox", "ProductionFailOver", "SandboxFailOver"]
+        enum:
+          - Production
+          - Sandbox
+          - ProductionFailOver
+          - SandboxFailOver
       url:
         type: string
       config:

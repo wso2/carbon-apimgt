@@ -30,7 +30,7 @@ public class API  {
   private List<Tag> tags = new ArrayList<Tag>() ;
   private List<String> tiers = new ArrayList<String>() ;
   public enum VisibilityEnum {
-     public,  private,  restricted,  controlled, 
+     PUBLIC,  PRIVATE,  RESTRICTED, 
   };
   private VisibilityEnum visibility = null;
   private List<String> visibleRoles = new ArrayList<String>() ;
