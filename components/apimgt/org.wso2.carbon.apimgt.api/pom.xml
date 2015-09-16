@@ -31,6 +31,11 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.registry.api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.governance</groupId>
+            <artifactId>org.wso2.carbon.governance.api</artifactId>
+            <version>4.5.3</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

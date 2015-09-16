@@ -97,6 +97,16 @@ public class API implements Serializable{
 
     private Set<String> environments;
 
+    private String uuid;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public Set<String> getEnvironments() {
         return environments;
     }

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -2610,6 +2611,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    public GenericArtifact getAPIArtifact(String apiPath) throws APIManagementException{
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                APIConstants.API_KEY);
+       // Gson gson = new Gson();
+        try{
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            return artifactManager.getGenericArtifact(artifactId);
+        }
+        catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return null;
         }
     }
 
