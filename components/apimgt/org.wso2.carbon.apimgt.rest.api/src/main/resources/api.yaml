@@ -1,65 +1,69 @@
 swagger: '2.0'
-
 info:
-  version: "0.9.0"
-  title: "WSO2 API Manager"
-  description: |
+  version: 0.9.0
+  title: WSO2 API Manager
+  # this is a comment
+  description: >
     This document describe a ** RESTFul API ** for wso2 **API Manager**.
     
-    You can find the source of this API definition at [here](https://github.com/hevayo/restful-apim). It was written with [swagger 2](http://swagger.io/).
-
+    
+    You can find the source of this API definition at
+    [here](https://github.com/hevayo/restful-apim). It was written with [swagger
+    2](http://swagger.io/).
   contact:
-    name: "WSO2"
-    url: "http://wso2.com/products/api-manager/"
-    email: "architecture@wso2.com"
-  license: 
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-consumes: [ "application/json"]
-produces: [ "application/json"]
-schemes: [ "https" ]
-
+    name: WSO2
+    url: 'http://wso2.com/products/api-manager/'
+    email: architecture@wso2.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+consumes:
+  - application/json
+produces:
+  - application/json
+schemes:
+  - https
 paths:
   /apis:
     get:
       description: Get a list of available APIs qualifying under a given search condition.
       parameters:
-        - 
-          $ref : "#/parameters/limit"
-        - 
-          $ref : "#/parameters/offset"
-        - 
-          name : query
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - name: query
           in: query
-          description: | 
+          description: >
             ** Search condition **.
-            
-            If no advanced attribute modifier is found search will match the given query string against API Name.
-            
-            You can search in attributes by using **"attribute:"** modifier.
-            
-            Eg. "provider:wso2" will match if the API provider is wso2.
-            
-            Supported attribute modifiers are [ **version, context, status, description, subcontext, doc, provider, tag **  ]
 
-          type: "string"
-        - 
-          name: type
+
+            If no advanced attribute modifier is found search will match the
+            given query string against API Name.
+
+
+            You can search in attributes by using **"attribute:"** modifier.
+
+
+            Eg. "provider:wso2" will match if the API provider is wso2.
+
+
+            Supported attribute modifiers are [ **version, context, status,
+            description, subcontext, doc, provider, tag **  ]
+          type: string
+        - name: type
           in: query
-          description: " prototype / production "
-          type: "string"
-          enum: ["PRODUCTION","PROTOTYPE"]
-        - 
-          name: "sort"
+          description: ' prototype / production '
+          type: string
+          enum:
+            - PRODUCTION
+            - PROTOTYPE
+        - name: sort
           in: query
-          type: "string"
-          description: " List supported sorting attributes "
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"
+          type: string
+          description: ' List supported sorting attributes '
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
       responses:
-        200:
+        '200':
           description: OK. List of APIs is returned.
           schema:
             title: APIList
@@ -74,37 +78,36 @@ paths:
                 description: Link for previous page. Empty if current page is first page.
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/API"
+                items:
+                  $ref: '#/definitions/API'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
+        '304':
           description: Not Modified. Empty body because the client has already the latest version of the requested resource.
-        406:
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
     post:
-      description: "Create a new API"
+      description: Create a new API
       parameters:
         - in: body
           name: body
-          description: "API object that needs to be added"
+          description: API object that needs to be added
           required: true
           schema:
-            $ref: "#/definitions/API"
-        -
-          $ref : "#/parameters/Content-Type"
+            $ref: '#/definitions/API'
+        - $ref: '#/parameters/Content-Type'
       responses:
-        201:
-          description: "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity."
+        '201':
+          description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
           schema:
-            $ref: "#/definitions/API"
+            $ref: '#/definitions/API'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -113,75 +116,67 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error."
-          schema: 
-            $ref: "#/definitions/Error"
-        415:
-          description: "Unsupported Media Type. The entity of the request was in a not supported format."
+        '400':
+          description: Bad Request. Invalid request or validation error.
           schema:
-            $ref: "#/definitions/Error"
-  /apis/{apiId}:
+            $ref: '#/definitions/Error'
+        '415':
+          description: Unsupported Media Type. The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+  '/apis/{apiId}':
     get:
       description: Get details of an API
       parameters:
-        -
-          $ref: "#/parameters/apiId"
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"
-        -
-          $ref : "#/parameters/If-Modified-Since"
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
-        200:
+        '200':
           description: OK Requested API is returned
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional requests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional requests.'
               type: string
-          schema: 
-            $ref : "#/definitions/API"
-        304:
+          schema:
+            $ref: '#/definitions/API'
+        '304':
           description: Not Modified. Empty body because the client has already the latest version of the requested resource.
-        404:
+        '404':
           description: Not Found. Requested API does not exist.
-          schema: 
-            $ref: "#/definitions/Error"     
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
     put:
       description: Update an existing API
       parameters:
-        -
-          $ref: "#/parameters/apiId"
+        - $ref: '#/parameters/apiId'
         - in: body
           name: body
-          description: "API object that needs to be added"
+          description: API object that needs to be added
           required: true
           schema:
-            $ref: "#/definitions/API"
-        -
-          $ref : "#/parameters/Content-Type"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+            $ref: '#/definitions/API'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Successful response with updated API object
           schema:
-            $ref: "#/definitions/API"  
+            $ref: '#/definitions/API'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -190,51 +185,48 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional requests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional requests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        403:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '403':
           description: Forbidden. The request must be conditional but no condition has been specified.
-          schema: 
-            $ref: "#/definitions/Error"      
-        404:
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. The resource to be updated does not exist.
-          schema: 
-            $ref: "#/definitions/Error"      
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"  
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       description: Delete an existing API
       parameters:
-        -
-          $ref: "#/parameters/apiId"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Resource successfully deleted.
-        403:
+        '403':
           description: Forbidden. The request must be conditional but no condition has been specified.
-          schema: 
-            $ref: "#/definitions/Error"  
-        404:
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. Resource to be deleted does not exist.
-          schema: 
-            $ref: "#/definitions/Error"   
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"
+          schema:
+            $ref: '#/definitions/Error'
   /apis/copy-api:
     post:
       parameters:
@@ -242,24 +234,23 @@ paths:
           description: Version of the new API.
           type: string
           in: query
-        - 
-          $ref: "#/parameters/apiId-Q"
+        - $ref: '#/parameters/apiId-Q'
       description: Create a new API by copying an existing API
       responses:
-        201:
-          description: "Created. Successful response with the newly created API as entity in the body. Location header contains URL of newly created API."
+        '201':
+          description: Created. Successful response with the newly created API as entity in the body. Location header contains URL of newly created API.
           headers:
             Location:
               description: The URL of the newly created API.
-              type: string          
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+              type: string
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. API to copy does not exist.
-          schema: 
-            $ref: "#/definitions/Error"          
+          schema:
+            $ref: '#/definitions/Error'
   /apis/change-lifecycle:
     post:
       description: Change the lifecycle of an API
@@ -274,55 +265,46 @@ paths:
         - name: resubscription
           type: string
           in: formData
-        - 
-          $ref: "#/parameters/apiId-Q"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+        - $ref: '#/parameters/apiId-Q'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
-          description: OK. Lifecycle changed successfully. 
+        '200':
+          description: OK. Lifecycle changed successfully.
           headers:
             ETag:
-              description: Entity Tag of the changed API. Used by caches, or in conditional request
+              description: 'Entity Tag of the changed API. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the API lifecycle has been modified the last time. Used by caches, or in conditional requests.
+              description: 'Date and time the API lifecycle has been modified the last time. Used by caches, or in conditional requests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. Requested API does not exist.
-          schema: 
-            $ref: "#/definitions/Error" 
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"  
-  /apis/{apiId}/documents:
+          schema:
+            $ref: '#/definitions/Error'
+  '/apis/{apiId}/documents':
     get:
-      description: Get a list of documents belonging to an API. 
+      description: Get a list of documents belonging to an API.
       parameters:
-        -
-          $ref : "#/parameters/apiId"
-        - 
-          $ref : "#/parameters/limit"
-        - 
-          $ref : "#/parameters/offset"
-        - 
-          name : query
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - name: query
           in: query
-          description: Search condition.  
-          type: "string"
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"          
+          description: Search condition.
+          type: string
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
       responses:
-        200:
+        '200':
           description: OK. Document list is returned.
           schema:
             title: DocumentList
@@ -337,112 +319,101 @@ paths:
                 description: Link to previous page. Empty if current page is first page.
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/Document"
+                items:
+                  $ref: '#/definitions/Document'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        404:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '404':
           description: Not Found. Requested API does not exist.
-          schema: 
-            $ref: "#/definitions/Error"
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
     post:
       description: Add a new document to an API
       parameters:
-        -
-          $ref : "#/parameters/apiId"
+        - $ref: '#/parameters/apiId'
         - in: body
           name: body
-          description: "Document object that needs to be added"
+          description: Document object that needs to be added
           required: true
           schema:
-            $ref: "#/definitions/Document"
-        -
-          $ref : "#/parameters/Content-Type"      
+            $ref: '#/definitions/Document'
+        - $ref: '#/parameters/Content-Type'
       responses:
-        201:
-          description: "Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document."
+        '201':
+          description: Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document.
           schema:
-            $ref: "#/definitions/Document"          
+            $ref: '#/definitions/Document'
           headers:
-            Location: 
-              description: "Location to the newly created Document."
-              type: "string"
+            Location:
+              description: Location to the newly created Document.
+              type: string
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
-              type: string               
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"          
-        415:
-          description: "Unsupported media type. The entity of the request was in a not supported format."
-  /apis/{apiId}/documents/{documentId}:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
+              type: string
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '415':
+          description: Unsupported media type. The entity of the request was in a not supported format.
+  '/apis/{apiId}/documents/{documentId}':
     get:
       description: Get a particular document associated with an API.
       parameters:
-        -
-          $ref: "#/parameters/apiId"
-        -
-          name: documentId
+        - $ref: '#/parameters/apiId'
+        - name: documentId
           in: path
           description: Document Id
           required: true
           type: number
           format: integer
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"
-        -
-          $ref : "#/parameters/If-Modified-Since"      
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
-        200:
+        '200':
           description: OK. Document returned.
           schema:
-            $ref: "#/definitions/Document"
+            $ref: '#/definitions/API'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
               type: string
-          schema: 
-            $ref : "#/definitions/API"
-        304:
+        '304':
           description: Not Modified. Empty body because the client has already the latest version of the requested resource.
-        404:
+        '404':
           description: Not Found. Requested Document does not exist.
-          schema: 
-            $ref: "#/definitions/Error"
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"            
+            $ref: '#/definitions/Error'
     put:
       description: Update document details.
       parameters:
-        -
-          $ref: "#/parameters/apiId"
-        -
-          name: documentId
+        - $ref: '#/parameters/apiId'
+        - name: documentId
           in: path
           description: Document Id
           required: true
@@ -450,21 +421,18 @@ paths:
           format: integer
         - in: body
           name: body
-          description: "Document object that needs to be added"
+          description: Document object that needs to be added
           required: true
           schema:
-            $ref: "#/definitions/Document"
-        -
-          $ref : "#/parameters/Content-Type"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"      
+            $ref: '#/definitions/Document'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Document updated
           schema:
-            $ref : "#/definitions/Document"
+            $ref: '#/definitions/Document'
           headers:
             Location:
               description: The URL of the updated document.
@@ -473,64 +441,56 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. The resource to be updated does not exist.
-          schema: 
-            $ref: "#/definitions/Error"      
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"            
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       description: Delete a document of an API
       parameters:
-        -
-          $ref: "#/parameters/apiId"
-        -
-          name: documentId
+        - $ref: '#/parameters/apiId'
+        - name: documentId
           in: path
           description: Document Id
           required: true
           type: number
           format: integer
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Resource successfully deleted.
-        404:
+        '404':
           description: Not Found. Resource to be deleted does not exist.
-          schema: 
-            $ref: "#/definitions/Error"   
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"         
+          schema:
+            $ref: '#/definitions/Error'
   /applications:
     get:
       description: Get a list of applications
       parameters:
-        - 
-          $ref : "#/parameters/limit"
-        - 
-          $ref : "#/parameters/offset"   
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"          
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
       responses:
-        200:
+        '200':
           description: OK. Application list returned.
           schema:
             title: ApplicationList
@@ -545,118 +505,109 @@ paths:
                 description: Link to previous page. Empty if current page is first page.
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/Application"
+                items:
+                  $ref: '#/definitions/Application'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        406:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"                  
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"              
+            $ref: '#/definitions/Error'
     post:
       description: Create a new application
       parameters:
         - in: body
           name: body
-          description: "Application object that is to be created"
+          description: Application object that is to be created
           required: true
           schema:
-            $ref: "#/definitions/Application"
-        -
-          $ref : "#/parameters/Content-Type"            
+            $ref: '#/definitions/Application'
+        - $ref: '#/parameters/Content-Type'
       responses:
-        201:
-          description: "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity."
+        '201':
+          description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
           schema:
-            $ref: "#/definitions/Application"          
+            $ref: '#/definitions/Application'
           headers:
-            Location: 
-              description: "Location of the newly created Application."
-              type: "string"
+            Location:
+              description: Location of the newly created Application.
+              type: string
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
-              type: string          
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"          
-        415:
-          description: "Unsupported media type. The entity of the request was in a not supported format."
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
+              type: string
+        '400':
+          description: Bad Request. Invalid request or validation error
           schema:
-            $ref: "#/definitions/Error"  
-  /applications/{applicationId}:
+            $ref: '#/definitions/Error'
+        '415':
+          description: Unsupported media type. The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+  '/applications/{applicationId}':
     get:
       description: Get application details
       parameters:
-        - 
-          $ref : "#/parameters/applicationId"
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"
-        -
-          $ref : "#/parameters/If-Modified-Since"      
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
-        200:
+        '200':
           description: OK. Application returned.
           schema:
-            $ref: "#/definitions/Application"   
+            $ref: '#/definitions/Application'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
               type: string
-        304:
+        '304':
           description: Not Modified. Empty body because the client has already the latest version of the requested resource.
-        404:
+        '404':
           description: Requested application does not exist.
-          schema: 
-            $ref: "#/definitions/Error"          
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"            
+            $ref: '#/definitions/Error'
     put:
       description: Update application details
       parameters:
-        - 
-          $ref : "#/parameters/applicationId"
+        - $ref: '#/parameters/applicationId'
         - in: body
           name: body
-          description: "Application object that needs to be updated"
+          description: Application object that needs to be updated
           required: true
           schema:
-            $ref: "#/definitions/Application"
-        -
-          $ref : "#/parameters/Content-Type"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"       
+            $ref: '#/definitions/Application'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Application updated.
           schema:
-            $ref: "#/definitions/Application"  
+            $ref: '#/definitions/Application'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -665,67 +616,61 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. The resource to be updated does not exist.
-          schema: 
-            $ref: "#/definitions/Error"      
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"          
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       description: Remove an application
       parameters:
-        - 
-          $ref : "#/parameters/applicationId"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Resource successfully deleted.
-        404:
+        '404':
           description: Not Found. Resource to be deleted does not exist.
-          schema: 
-            $ref: "#/definitions/Error"   
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"         
-    parameters: 
-      - $ref : "#/parameters/applicationId"
-  /applications/{applicationId}/generate-keys:
+          schema:
+            $ref: '#/definitions/Error'
+    parameters:
+      - $ref: '#/parameters/applicationId'
+  '/applications/{applicationId}/generate-keys':
     post:
       description: Generate keys for application
       parameters:
-        - $ref : "#/parameters/applicationId"
+        - $ref: '#/parameters/applicationId'
         - in: body
           name: body
-          description: "Application object that needs to be updated"
+          description: Application object that needs to be updated
           required: true
           schema:
-            $ref: "#/definitions/Application"
-        -
-          $ref : "#/parameters/Content-Type"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"       
+            $ref: '#/definitions/Application'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Application updated.
           schema:
-            $ref: "#/definitions/Application"  
+            $ref: '#/definitions/Application'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -734,43 +679,39 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. The resource to be updated does not exist.
-          schema: 
-            $ref: "#/definitions/Error"      
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"            
+          schema:
+            $ref: '#/definitions/Error'
   /subscriptions:
     get:
       description: Get subscription list
       parameters:
-        - 
-          in: query
+        - in: query
           name: apiId
           description: Will return sunscriptions for the provided API
-          type: "string"
-        -
-          in: query
+          type: string
+        - in: query
           name: applicationId
-          type: "string"
+          type: string
           description: Will return subscriptions for the provided Application
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"      
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
       responses:
-        200:
+        '200':
           description: OK. Subscription list returned.
           schema:
             title: SubscriptionList
@@ -785,112 +726,103 @@ paths:
                 description: Link for previous page. Empty if current page is first page.
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/Subscription"          
+                items:
+                  $ref: '#/definitions/Subscription'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        406:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"          
+            $ref: '#/definitions/Error'
     post:
       description: Add a new subscription
       parameters:
         - in: body
           name: body
-          description: "Subscription object that should to be added"
+          description: Subscription object that should to be added
           required: true
           schema:
-            $ref: "#/definitions/Subscription"
-        -
-          $ref : "#/parameters/Content-Type"            
+            $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/Content-Type'
       responses:
-        201:
-          description: "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity."
+        '201':
+          description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
           schema:
-            $ref: "#/definitions/Subscription"          
+            $ref: '#/definitions/Subscription'
           headers:
-            Location: 
-              description: "Location to the newly created subscription."
-              type: "string"
+            Location:
+              description: Location to the newly created subscription.
+              type: string
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
-              type: string          
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"   
-        415:
-          description: "Unsupported media type. The entity of the request was in a not supported format."       
-
-  /subscriptions/{subscriptionId}:
-    parameters: 
-      -
-        $ref : "#/parameters/subscriptionId" 
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
+              type: string
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '415':
+          description: Unsupported media type. The entity of the request was in a not supported format.
+  '/subscriptions/{subscriptionId}':
+    parameters:
+      - $ref: '#/parameters/subscriptionId'
     get:
       description: Get subscription details
       parameters:
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"
-        -
-          $ref : "#/parameters/If-Modified-Since"      
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
       responses:
-        200:
+        '200':
           description: OK. Subscription returned
           schema:
-            $ref : "#/definitions/Subscription"
+            $ref: '#/definitions/Subscription'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
               type: string
-        304:
+        '304':
           description: Not Modified. Empty body because the client has already the latest version of the requested resource.
-        404:
+        '404':
           description: Not Found. Requested Subscription does not exist.
-          schema: 
-            $ref: "#/definitions/Error"          
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"            
+            $ref: '#/definitions/Error'
     put:
       description: Update subscription details
       parameters:
         - in: body
           name: body
-          description: "Subscription object that needs to be modified"
+          description: Subscription object that needs to be modified
           required: true
           schema:
-            $ref: "#/definitions/Subscription"
-        -
-          $ref : "#/parameters/Content-Type"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"       
+            $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Subscription updated.
           schema:
-            $ref: "#/definitions/Subscription"  
+            $ref: '#/definitions/Subscription'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -899,101 +831,94 @@ paths:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional request
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. The resource to be updated does not exist.
-          schema: 
-            $ref: "#/definitions/Error"      
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"          
+          schema:
+            $ref: '#/definitions/Error'
     delete:
       description: Remove subscription
       parameters:
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       responses:
-        200:
+        '200':
           description: OK. Resource successfully deleted.
-        404:
+        '404':
           description: Not Found. Resource to be deleted does not exist.
-          schema: 
-            $ref: "#/definitions/Error"   
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"         
+          schema:
+            $ref: '#/definitions/Error'
   /block-subscription:
     post:
-      parameters: 
-        -
-          $ref : "#/parameters/subscriptionId-Q"
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+      parameters:
+        - $ref: '#/parameters/subscriptionId-Q'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       description: Block a subscription.
       responses:
-        200:
+        '200':
           description: OK. Subscription was blocked successfully.
           headers:
             ETag:
-              description: Entity Tag of the blocked subscription. Used by caches, or in conditional request
+              description: 'Entity Tag of the blocked subscription. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the subscription has been blocked. Used by caches, or in conditional requests.
+              description: 'Date and time the subscription has been blocked. Used by caches, or in conditional requests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. Requested subscription does not exist.
-          schema: 
-            $ref: "#/definitions/Error"      
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"
+          schema:
+            $ref: '#/definitions/Error'
   /tiers:
     get:
       description: Get available tiers
       parameters:
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"    
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
       responses:
-        200:
+        '200':
           description: OK. List of tiers returned.
           schema:
-            type: "array"
-            items: 
-              $ref : "#/definitions/Tier"
+            type: array
+            items:
+              $ref: '#/definitions/Tier'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        406:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"              
+            $ref: '#/definitions/Error'
   /update-tier-permission:
     post:
       parameters:
@@ -1004,69 +929,61 @@ paths:
         - in: body
           name: permissions
           schema:
-            $ref: "#/definitions/TierPermission"
-        -
-          $ref : "#/parameters/Content-Type"    
-        -
-          $ref : "#/parameters/If-Match"
-        -
-          $ref : "#/parameters/If-Unmodified-Since"
+            $ref: '#/definitions/TierPermission'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       description: Update tier permission
       responses:
-        200:
+        '200':
           description: OK. Successfully updated tier permissions
           schema:
-            type: "array"
-            items: 
-              $ref : "#/definitions/Tier"
+            type: array
+            items:
+              $ref: '#/definitions/Tier'
           headers:
             ETag:
-              description: Entity Tag of the modified tier. Used by caches, or in conditional request
+              description: 'Entity Tag of the modified tier. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the tier has been modified. Used by caches, or in conditional requests.
+              description: 'Date and time the tier has been modified. Used by caches, or in conditional requests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        401:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
           description: Unauthorized. User not allowed to update tier permission
           schema:
-            type: "array"
-            items: 
-              $ref : "#/definitions/Error"
-        403:
+            type: array
+            items:
+              $ref: '#/definitions/Error'
+        '403':
           description: Forbidden. The request must be conditional but no condition has been specified.
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. Requested tier does not exist.
-          schema: 
-            $ref: "#/definitions/Error"     
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"       
+          schema:
+            $ref: '#/definitions/Error'
   /externalStores:
     get:
-      description: Get a list of External API Stores 
+      description: Get a list of External API Stores
       parameters:
-        - 
-          $ref : "#/parameters/limit"
-        - 
-          $ref : "#/parameters/offset"
-        - 
-          name : query
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - name: query
           in: query
-          description: Search condition.  
-          type: "string"
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"          
+          description: Search condition.
+          type: string
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
       responses:
-        200:
+        '200':
           description: OK. External API store list is returned.
           schema:
             title: External Store List
@@ -1075,25 +992,25 @@ paths:
                 type: string
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/ExternalStore"
+                items:
+                  $ref: '#/definitions/ExternalStore'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        404:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '404':
           description: Not Found. Requested API does not exist.
-          schema: 
-            $ref: "#/definitions/Error"
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /externalStores/publish-externalstore:
     post:
       parameters:
@@ -1107,52 +1024,49 @@ paths:
           type: string
       description: Publish to external API store
       responses:
-        200:
+        '200':
           description: OK. Successfully publish to external store
           headers:
             ETag:
-              description: Entity Tag of the modified tier. Used by caches, or in conditional request
+              description: 'Entity Tag of the modified tier. Used by caches, or in conditional request'
               type: string
             Last-Modified:
-              description: Date and time the tier has been modified. Used by caches, or in conditional requests.
+              description: 'Date and time the tier has been modified. Used by caches, or in conditional requests.'
               type: string
-        400:
-          description: "Bad Request. Invalid request or validation error"
-          schema: 
-            $ref: "#/definitions/Error"
-        401:
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '401':
           description: Unauthorized. User not allowed to update tier permission
           schema:
-            type: "array"
-            items: 
-              $ref : "#/definitions/Error"
-        403:
+            type: array
+            items:
+              $ref: '#/definitions/Error'
+        '403':
           description: Forbidden. The request must be conditional but no condition has been specified.
-          schema: 
-            $ref: "#/definitions/Error"
-        404:
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
           description: Not Found. Requested tier does not exist.
-          schema: 
-            $ref: "#/definitions/Error"     
-        412:
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
-          schema: 
-            $ref: "#/definitions/Error"
+          schema:
+            $ref: '#/definitions/Error'
   /sequences:
     get:
-      description: Get a list of predefined sequences 
+      description: Get a list of predefined sequences
       parameters:
-        - 
-          name : type
+        - name: type
           in: query
-          description: sequence type IN | OUT | FAULT.  
-          type: "string"
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"          
+          description: 'sequence type IN | OUT | FAULT.'
+          type: string
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
       responses:
-        200:
+        '200':
           description: OK. sequence list is returned.
           schema:
             title: Sequences List
@@ -1161,49 +1075,56 @@ paths:
                 type: string
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/Sequence"
+                items:
+                  $ref: '#/definitions/Sequence'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        404:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '404':
           description: Not Found. Requested API does not exist.
-          schema: 
-            $ref: "#/definitions/Error"
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /tags:
     get:
-      description: Get a list of predefined sequences 
+      description: Get a list of predefined sequences
       parameters:
-        -
-          $ref : "#/parameters/Accept"
-        -
-          $ref : "#/parameters/If-None-Match"
-        -
-          name : query
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - name: query
           in: query
-          description: | 
+          description: >
             ** Search condition **.
-            
-            If no advanced attribute modifier is found search will match the given query string against Tag Name.
-            
+
+
+
+            If no advanced attribute modifier is found search will match the
+            given query string against Tag Name.
+
+
+
             You can search in attributes by using **"attribute:"** modifier.
-            
-            Eg. "apiName:phoneVerification" will match if the API Name is phoneVerification.
-            
+
+
+
+            Eg. "apiName:phoneVerification" will match if the API Name is
+            phoneVerification.
+
+
+
             Supported attribute modifiers are [ **apiName,version**  ]
-          type: "string"
+          type: string
       responses:
-        200:
+        '200':
           description: OK. tag list is returned.
           schema:
             title: Tag List
@@ -1212,36 +1133,35 @@ paths:
                 type: string
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/Tag"
+                items:
+                  $ref: '#/definitions/Tag'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        404:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '404':
           description: Not Found. Requested API does not exist.
-          schema: 
-            $ref: "#/definitions/Error"
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"
+            $ref: '#/definitions/Error'
   /environments:
     get:
-      description: Get a list of gateway environments configured previously 
+      description: Get a list of gateway environments configured previously
       parameters:
-        - 
-          in: query
+        - in: query
           name: apiId
           description: Will return environment list for the provided API
-          type: "string"
+          type: string
       responses:
-        200:
+        '200':
           description: OK. environment list is returned.
           schema:
             title: Environment List
@@ -1250,60 +1170,56 @@ paths:
                 type: string
               list:
                 type: array
-                items: 
-                  $ref : "#/definitions/Environment"
+                items:
+                  $ref: '#/definitions/Environment'
           headers:
             Content-Type:
               description: The content type of the body.
               type: string
             ETag:
-              description: Entity Tag of the response resource. Used by caches, or in conditional requests.
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional requests.'
               type: string
-        304:
-          description: Not Modified. Empty body because the client has already the latest version of the requested resource.              
-        404:
+        '304':
+          description: Not Modified. Empty body because the client has already the latest version of the requested resource.
+        '404':
           description: Not Found. Requested API does not exist.
-          schema: 
-            $ref: "#/definitions/Error"
-        406:
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
           description: Not Acceptable. The requested media type is not supported
           schema:
-            $ref: "#/definitions/Error"    
+            $ref: '#/definitions/Error'
 parameters:
   apiId:
     name: apiId
     in: path
-    description: |
-     **API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. 
-     Should be formatted as **name/version/provider**
+    description: "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n"
     required: true
     type: string
   apiId-Q:
     name: apiId
     in: query
-    description: |
-     **API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. 
-     Should be formatted as **name/version/provider**
+    description: "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n"
     required: true
     type: string
   applicationId:
     name: applicationId
     in: path
-    description: "Application Id"
+    description: Application Id
     required: true
     type: number
     format: integer
   subscriptionId:
     name: subscriptionId
     in: path
-    description: "Subscription Id"
+    description: Subscription Id
     required: true
     type: number
     format: integer
   subscriptionId-Q:
     name: subscriptionId
     in: query
-    description: "Subscription Id"
+    description: Subscription Id
     required: true
     type: number
     format: integer
@@ -1317,96 +1233,110 @@ parameters:
   offset:
     name: offset
     in: query
-    description: Starting point of the item list.  
+    description: Starting point of the item list.
     required: true
     type: number
     format: integer
   Accept:
-    name : Accept
-    in : header
-    description: Media types acceptable for the response. Should denote XML or JSON, default is JSON.
-    type : "string"
+    name: Accept
+    in: header
+    description: 'Media types acceptable for the response. Should denote XML or JSON, default is JSON.'
+    type: string
   Content-Type:
-    name : Content-Type
-    in : header
-    description: Media type of the entity in the request body. Should denote XML or JSON, default is JSON.
-    type : "string"
+    name: Content-Type
+    in: header
+    description: 'Media type of the entity in the request body. Should denote XML or JSON, default is JSON.'
+    type: string
   If-None-Match:
-    name : If-None-Match
-    in : header
+    name: If-None-Match
+    in: header
     description: Validator for conditional requests; based on ETag.
-    type : "string"
+    type: string
   If-Modified-Since:
-    name : If-Modified-Since
-    in : header
+    name: If-Modified-Since
+    in: header
     description: Validator for conditional requests; based on Last Modified header.
-    type : "string"
+    type: string
   If-Match:
-    name : If-Match
-    in : header
+    name: If-Match
+    in: header
     description: Validator for conditional requests; based on ETag.
-    type : "string"
+    type: string
   If-Unmodified-Since:
-    name : If-Unmodified-Since
-    in : header
+    name: If-Unmodified-Since
+    in: header
     description: Validator for conditional requests; based on Last Modified header.
-    type : "string"
-
+    type: string
 definitions:
   API:
-    title: "API object"
-    required: [ "name" , "context", "version" ]
+    title: API object
+    required:
+      - name
+      - context
+      - version
     properties:
       name:
-        type: "string"
+        type: string
       description:
-        type: "string"
+        type: string
       type:
-        type: "string"
-        enum: ["REST","SOAP"]
+        type: string
+        enum:
+          - REST
+          - SOAP
       context:
-        type: "string"
+        type: string
       version:
-        type: "string"
+        type: string
       provider:
-        type: "string"
+        type: string
       swagger:
-        type: "string"
+        type: string
       status:
-        type: "string"
+        type: string
       responseCaching:
-        type: "string"
+        type: string
       isDefaultVersion:
-        type: "boolean"
+        type: boolean
       transport:
-        type: "array"
+        type: array
         items:
-          type: "string"
-          enum: [ "http", "https" ]
+          type: string
+          enum:
+            - http
+            - https
       tags:
-        type: "array"
+        type: array
         items:
-           $ref : "#/definitions/Tag"
+          type: string
       tiers:
-        type: "array"
+        type: array
         items:
-          type: "string"
-      visibility:      
-        type: "string"
-        enum: ["PUBLIC","PRIVATE","RESTRICTED"]
+          type: string
+      visibility:
+        type: string
+        enum:
+          - PUBLIC
+          - PRIVATE
+          - RESTRICTED
       visibleRoles:
-        type: "array"
-        items: 
-            type: "string"
+        type: array
+        items:
+          type: string
       visibleTenants:
-        type: "array"
-        items: 
-          type: "string"
+        type: array
+        items:
+          type: string
       endpoint:
         properties:
           type:
-            type: "string"
-            enum: ["http","address","wsdl","failover","load_balanced"]
+            type: string
+            enum:
+              - http
+              - address
+              - wsdl
+              - failover
+              - load_balanced
           config:
             properties:
               algorithm:
@@ -1417,7 +1347,11 @@ definitions:
                 type: string
               sessionManagement:
                 type: string
-                enum: ["Transport", "SOAP", "ClientID", "None"]
+                enum:
+                  - Transport
+                  - SOAP
+                  - ClientID
+                  - None
               sessionTimeout:
                 type: integer
               endpointSecured:
@@ -1429,18 +1363,21 @@ definitions:
           endpoints:
             type: array
             items:
-              $ref : "#/definitions/Endpoint"
+              $ref: '#/definitions/Endpoint'
       environments:
         type: array
         items:
-          type: "string"
+          type: string
       sequences:
         type: array
-        items: 
-          $ref : "#/definitions/Sequence"
+        items:
+          $ref: '#/definitions/Sequence'
       subscriptionAvailability:
         type: string
-        enum: ["CurrentTenant","AllTenants","SpecificTenants"]
+        enum:
+          - CurrentTenant
+          - AllTenants
+          - SpecificTenants
       businessInformation:
         properties:
           businessOwner:
@@ -1451,166 +1388,175 @@ definitions:
             type: string
           technicalOwnerEmail:
             type: string
-  # Following is the Application model, note the consumer key and secret
   Application:
-    title: "Application"
-    required: [ "applicationId" ]
+    title: Application
+    required:
+      - applicationId
     properties:
       applicationId:
-        type: "string"
+        type: string
       name:
-        type: "string"
+        type: string
       throttlingTier:
-        type: "string"
+        type: string
       callbackUrl:
-        type: "string"
+        type: string
       description:
-        type: "string"
+        type: string
       key:
         properties:
           production:
             properties:
               consumerKey:
-                type: "string"
+                type: string
               consumerSecret:
-                type: "string"
-              # see if we need to include the following.
+                type: string
               accessToken:
-                type: "string"
+                type: string
               validityTime:
-                type: "integer"
+                type: integer
               allowedDomains:
-                type: "array"
+                type: array
                 items:
-                  type: "string"
+                  type: string
           sandbox:
             properties:
               consumerKey:
-                type: "string"
+                type: string
               consumerSecret:
-                type: "string"
-              # see if we need to include the following.
+                type: string
               accessToken:
-                type: "string"
+                type: string
               validityTime:
-                type: "integer"
+                type: integer
               allowedDomains:
-                type: "array"
+                type: array
                 items:
-                  type: "string"
+                  type: string
   Document:
-    title: "Document"
-    required: ["documentId"]
+    title: Document
+    required:
+      - documentId
     properties:
       documentId:
-        type: "integer"
+        type: integer
       name:
-        type: "string"
+        type: string
       type:
-        type: "string"
+        type: string
       summary:
-        type: "string"      
+        type: string
       content:
-        type: "string"      
+        type: string
       url:
-        type: "string"   
+        type: string
   Tier:
-    title: "Tier"
-    required: [ "name" ]
+    title: Tier
+    required:
+      - name
     properties:
       name:
-        type: "string"
+        type: string
       rate:
-        type: "string"
+        type: string
       roles:
-        type: "string"
-  #Following is the tier permission model
-  TierPermission: 
-    title: "tierPermission"
+        type: string
+  TierPermission:
+    title: tierPermission
     properties:
       enableAccess:
-        type: "string"
+        type: string
       roles:
         type: array
         items:
           type: string
-          
   Subscription:
-    title: "Subscription"
-    required: [ "subscriptionId" ]
+    title: Subscription
+    required:
+      - subscriptionId
     properties:
       subscriptionId:
-        type: "number"
+        type: number
       applicationId:
-        type: "string"
+        type: string
       apiId:
-        type: "string"
+        type: string
       tier:
-        type: "string"
+        type: string
       status:
-        type: "string"
+        type: string
   ExternalStore:
-    title: "ExternalStore"
-    required: [ "name" ]
+    title: ExternalStore
+    required:
+      - name
     properties:
       name:
-        type: "number"
+        type: number
       endpoint:
-        type: "string"
+        type: string
   Sequence:
-    title: "Sequence"
-    required: [ "name" ]
+    title: Sequence
+    required:
+      - name
     properties:
       name:
-        type: "string"
+        type: string
       config:
-        type: "string"
+        type: string
       type:
-        type: "string"
+        type: string
   Tag:
-    title: "Tag"
-    required: [ "name" ]
+    title: Tag
+    required:
+      - name
     properties:
       name:
-        type: "string"
+        type: string
       weight:
-        type: "number"
-        
+        type: number
   Error:
-    title: "Error object returned with 4XX HTTP status"
-    required: [ "code", "message" ]
+    title: Error object returned with 4XX HTTP status
+    required:
+      - code
+      - message
     properties:
       code:
         type: integer
         format: int64
       message:
         type: string
-        description: "Error message."
+        description: Error message.
       description:
         type: string
-        description: "A detail description about the error message."
+        description: A detail description about the error message.
       moreInfo:
         type: string
-        description: "Preferably an url with more details about the error."
+        description: Preferably an url with more details about the error.
       error:
         type: array
-        description: "If there are more than one error list them out. Ex. list out validation errors by each field." 
+        description: If there are more than one error list them out. Ex. list out validation errors by each field.
         items:
-          $ref : "#/definitions/ErrorListItem"
+          $ref: '#/definitions/ErrorListItem'
   ErrorListItem:
     title: Description of individual errors that may have occurred during a request.
-    required: [ "code" , "message"]
+    required:
+      - code
+      - message
     properties:
       code:
         type: integer
         format: int64
       message:
         type: string
-        description: "Description about individual errors occurred"
-        
+        description: Description about individual errors occurred
   Environment:
-    title: "Environment"
-    required: ["name", "type", "apiConsole", "serverUrl", "endpoints"]
+    title: Environment
+    required:
+      - name
+      - type
+      - apiConsole
+      - serverUrl
+      - endpoints
     properties:
       name:
         type: string
@@ -1624,22 +1570,26 @@ definitions:
         properties:
           http:
             type: string
-            description: "HTTP environment URL"
+            description: HTTP environment URL
           https:
             type: string
-            description: "HTTPS environment URL"
-          #do we need to put api-console?
+            description: HTTPS environment URL
           apiConsole:
             type: string
-            description: "API console url"
-  
+            description: API console url
   Endpoint:
-    title: "Endpoint"
-    required: ["type", "url"]
+    title: Endpoint
+    required:
+      - type
+      - url
     properties:
       type:
         type: string
-        enum: ["Production", "Sandbox", "ProductionFailOver", "SandboxFailOver"]
+        enum:
+          - Production
+          - Sandbox
+          - ProductionFailOver
+          - SandboxFailOver
       url:
         type: string
       config:
@@ -1670,12 +1620,9 @@ definitions:
             properties:
               action:
                 type: string
-                enum: ["ExecuteFaultSequence", "DiscardMessage", "NeverTimeOut"]
+                enum:
+                  - ExecuteFaultSequence
+                  - DiscardMessage
+                  - NeverTimeOut
               duration:
                 type: integer
-                  
-                
-          
-  
-        
-        

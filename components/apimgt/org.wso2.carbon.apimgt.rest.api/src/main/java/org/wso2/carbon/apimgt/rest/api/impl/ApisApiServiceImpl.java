@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.rest.api.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.model.API;
 import org.wso2.carbon.apimgt.rest.api.model.Document;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +41,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         List<API> list = new ArrayList<API>();
         try {
             provider = APIManagerFactory.getInstance().getAPIProvider("admin");
-            apis = provider.searchAPIs(query,type);
+
+            apis = provider.getAllAPIs();
             for (org.wso2.carbon.apimgt.api.model.API temp : apis) {
                 list.add(MappingUtil.mapAPI(temp));
             }
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
-
+        int i= Integer.valueOf(limit);
+        if(i==1) {
+            throw new WebApplicationException(500);
+        }
         return Response.ok().entity(list).build();
     }
 
