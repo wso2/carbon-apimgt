@@ -35,9 +35,9 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
         
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported"),
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error"),
         
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error") })
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
     public Response applicationsGet(@ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
     @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,

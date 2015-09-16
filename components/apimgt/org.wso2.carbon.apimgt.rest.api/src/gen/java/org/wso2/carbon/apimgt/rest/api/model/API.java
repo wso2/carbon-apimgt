@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.model;
 
-import org.wso2.carbon.apimgt.rest.api.model.Tag;
 import org.wso2.carbon.apimgt.rest.api.model.Sequence;
 import java.util.*;
 
@@ -27,7 +26,7 @@ public class API  {
   private String destinationStatsEnabled = null;
   private Boolean isDefaultVersion = null;
   private List<String> transport = new ArrayList<String>() ;
-  private List<Tag> tags = new ArrayList<Tag>() ;
+  private List<String> tags = new ArrayList<String>() ;
   private List<String> tiers = new ArrayList<String>() ;
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED, 
@@ -203,10 +202,10 @@ public class API  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("tags")
-  public List<Tag> getTags() {
+  public List<String> getTags() {
     return tags;
   }
-  public void setTags(List<Tag> tags) {
+  public void setTags(List<String> tags) {
     this.tags = tags;
   }
 

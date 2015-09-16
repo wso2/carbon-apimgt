@@ -40,7 +40,7 @@ public class TagsApi  {
 
     public Response tagsGet(@ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "** Search condition **.\n\nIf no advanced attribute modifier is found search will match the given query string against Tag Name.\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\nEg. \"apiName:phoneVerification\" will match if the API Name is phoneVerification.\n\nSupported attribute modifiers are [ **apiName,version**  ]\n") @QueryParam("query") String query)
+    @ApiParam(value = "** Search condition **.\n\n\nIf no advanced attribute modifier is found search will match the given query string against Tag Name.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nEg. \"apiName:phoneVerification\" will match if the API Name is phoneVerification.\n\n\nSupported attribute modifiers are [ **apiName,version**  ]\n") @QueryParam("query") String query)
     throws NotFoundException {
     return delegate.tagsGet(accept,ifNoneMatch,query);
     }

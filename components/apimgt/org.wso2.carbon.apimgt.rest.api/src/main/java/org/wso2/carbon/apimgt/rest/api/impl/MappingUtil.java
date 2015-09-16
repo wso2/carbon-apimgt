@@ -94,12 +94,8 @@ public class MappingUtil {
         dto.setSwagger(apiSwaggerDefinition);
 
         Set<String> apiTags = model.getTags();
-        List<Tag> tagsToReturn = new ArrayList();
-        for (String tag : apiTags) {
-            Tag newTag = new Tag();
-            newTag.setName(tag);
-            tagsToReturn.add(newTag);
-        }
+        List<String> tagsToReturn = new ArrayList();
+        tagsToReturn.addAll(apiTags);
         dto.setTags(tagsToReturn);
 
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
@@ -180,12 +176,10 @@ public class MappingUtil {
             apiProvider.saveSwagger20Definition(model.getId(), apiDefinitionJSON);
         }
 
-        Set<String> apiTags = new HashSet<String>();;
-        List<Tag> tagsFromDTO = dto.getTags();
-        for (Tag tag : tagsFromDTO) {
-            apiTags.add(tag.getName());
+        if (dto.getTags() != null) {
+            Set<String> apiTags = new HashSet<String>(dto.getTags());
+            model.addTags(apiTags);
         }
-        model.addTags(apiTags);
 
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getTiers();
