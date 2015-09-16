@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.model;
 
-import org.wso2.carbon.apimgt.rest.api.model.Tag;
 import org.wso2.carbon.apimgt.rest.api.model.Sequence;
 import java.util.*;
 
@@ -23,9 +22,11 @@ public class API  {
   private String swagger = null;
   private String status = null;
   private String responseCaching = null;
+  private Integer cacheTimeout = null;
+  private String destinationStatsEnabled = null;
   private Boolean isDefaultVersion = null;
   private List<String> transport = new ArrayList<String>() ;
-  private List<Tag> tags = new ArrayList<Tag>() ;
+  private List<String> tags = new ArrayList<String>() ;
   private List<String> tiers = new ArrayList<String>() ;
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED, 
@@ -33,12 +34,12 @@ public class API  {
   private VisibilityEnum visibility = null;
   private List<String> visibleRoles = new ArrayList<String>() ;
   private List<String> visibleTenants = new ArrayList<String>() ;
-  private List<String> environments = new ArrayList<String>() ;
   private List<Sequence> sequences = new ArrayList<Sequence>() ;
   public enum SubscriptionAvailabilityEnum {
-     CurrentTenant,  AllTenants,  SpecificTenants, 
+     current_tenant,  all_tenants,  specific_tenants, 
   };
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+  private List<String> subscriptionAvailableTenants = new ArrayList<String>() ;
 
   
   /**
@@ -152,6 +153,30 @@ public class API  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("cacheTimeout")
+  public Integer getCacheTimeout() {
+    return cacheTimeout;
+  }
+  public void setCacheTimeout(Integer cacheTimeout) {
+    this.cacheTimeout = cacheTimeout;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("destinationStatsEnabled")
+  public String getDestinationStatsEnabled() {
+    return destinationStatsEnabled;
+  }
+  public void setDestinationStatsEnabled(String destinationStatsEnabled) {
+    this.destinationStatsEnabled = destinationStatsEnabled;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
@@ -177,10 +202,10 @@ public class API  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("tags")
-  public List<Tag> getTags() {
+  public List<String> getTags() {
     return tags;
   }
-  public void setTags(List<Tag> tags) {
+  public void setTags(List<String> tags) {
     this.tags = tags;
   }
 
@@ -236,18 +261,6 @@ public class API  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("environments")
-  public List<String> getEnvironments() {
-    return environments;
-  }
-  public void setEnvironments(List<String> environments) {
-    this.environments = environments;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("sequences")
   public List<Sequence> getSequences() {
     return sequences;
@@ -269,6 +282,18 @@ public class API  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscriptionAvailableTenants")
+  public List<String> getSubscriptionAvailableTenants() {
+    return subscriptionAvailableTenants;
+  }
+  public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
+    this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -284,6 +309,8 @@ public class API  {
     sb.append("  swagger: ").append(swagger).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("  responseCaching: ").append(responseCaching).append("\n");
+    sb.append("  cacheTimeout: ").append(cacheTimeout).append("\n");
+    sb.append("  destinationStatsEnabled: ").append(destinationStatsEnabled).append("\n");
     sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
@@ -291,9 +318,9 @@ public class API  {
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
-    sb.append("  environments: ").append(environments).append("\n");
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
+    sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

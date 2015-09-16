@@ -40,7 +40,7 @@ public class ApisApi  {
 
     public Response apisGet(@ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
     @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
-    @ApiParam(value = "** Search condition **.\n\nIf no advanced attribute modifier is found search will match the given query string against API Name.\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match if the API provider is wso2.\n\nSupported attribute modifiers are [ **version, context, status, description, subcontext, doc, provider, tag **  ]\n") @QueryParam("query") String query,
+    @ApiParam(value = "** Search condition **.\n\n\nIf no advanced attribute modifier is found search will match the given query string against API Name.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nEg. \"provider:wso2\" will match if the API provider is wso2.\n\n\nSupported attribute modifiers are [ **version, context, status, description, subcontext, doc, provider, tag **  ]\n") @QueryParam("query") String query,
     @ApiParam(value = " prototype / production ") @QueryParam("type") String type,
     @ApiParam(value = " List supported sorting attributes ") @QueryParam("sort") String sort,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
@@ -274,6 +274,52 @@ public class ApisApi  {
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
     return delegate.apisApiIdDocumentsDocumentIdDelete(apiId,documentId,ifMatch,ifUnmodifiedSince);
+    }
+    @GET
+    @Path("/{apiId}/environments")
+    
+    
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of documents belonging to an API.", response = Void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Gateway environment list where this API is published returned."),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist."),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
+
+    public Response apisApiIdEnvironmentsGet(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
+    @ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
+    @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
+    @ApiParam(value = "Search condition.") @QueryParam("query") String query,
+    @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
+    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    throws NotFoundException {
+    return delegate.apisApiIdEnvironmentsGet(apiId,limit,offset,query,accept,ifNoneMatch);
+    }
+    @GET
+    @Path("/{apiId}/externalStores")
+    
+    
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of external stores where is this API is published.", response = Void.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. external store list is returned."),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist."),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
+
+    public Response apisApiIdExternalStoresGet(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
+    @ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
+    @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
+    @ApiParam(value = "Search condition.") @QueryParam("query") String query,
+    @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
+    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    throws NotFoundException {
+    return delegate.apisApiIdExternalStoresGet(apiId,limit,offset,query,accept,ifNoneMatch);
     }
 }
 

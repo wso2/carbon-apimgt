@@ -40,4 +40,8 @@ public abstract class ApisApiService {
     throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException;
+    public abstract Response apisApiIdEnvironmentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch)
+    throws NotFoundException;
+    public abstract Response apisApiIdExternalStoresGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch)
+    throws NotFoundException;
 }
