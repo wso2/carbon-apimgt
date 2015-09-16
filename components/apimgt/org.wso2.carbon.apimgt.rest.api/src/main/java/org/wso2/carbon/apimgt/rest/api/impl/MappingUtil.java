@@ -16,19 +16,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.rest.api.model.API;
 import org.wso2.carbon.apimgt.rest.api.model.Sequence;
 import org.wso2.carbon.apimgt.rest.api.model.Tag;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MappingUtil {
 
@@ -118,12 +121,14 @@ public class MappingUtil {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
+        //endpoint configs, business info and thumbnail still missing
         return dto;
     }
 
     protected static org.wso2.carbon.apimgt.api.model.API fromDTOtoAPI(API dto) throws APIManagementException {
 
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(dto.getProvider());
+        APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
         APIIdentifier apiId = new APIIdentifier(dto.getName(), dto.getVersion(), dto.getProvider());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
@@ -157,41 +162,53 @@ public class MappingUtil {
             model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
         }
 
-        //Get Swagger definition which has URL templates, scopes and resource details
-        String apiSwaggerDefinition;
+        if (dto.getSwagger() != null) {
+            String apiSwaggerDefinition = dto.getSwagger();
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(model, apiSwaggerDefinition);
+            model.setUriTemplates(uriTemplates);
 
-        apiSwaggerDefinition = apiProvider.getSwagger20Definition(model.getId());
+            // scopes
+            Set<Scope> scopes = definitionFromSwagger20.getScopes(apiSwaggerDefinition);
+            model.setScopes(scopes);
 
-        dto.setSwagger(apiSwaggerDefinition);
+            //scope validation should be done inside validatingUtil
 
-        Set<String> apiTags = model.getTags();
-        List<Tag> tagsToReturn = new ArrayList();
-        for (String tag : apiTags) {
-            Tag newTag = new Tag();
-            newTag.setName(tag);
-            tagsToReturn.add(newTag);
+            apiProvider.saveSwagger20Definition(model.getId(), apiSwaggerDefinition);
+        } else {
+            // this needs to be checked since uri templates are not yet set
+            String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(model);
+            apiProvider.saveSwagger20Definition(model.getId(), apiDefinitionJSON);
         }
-        dto.setTags(tagsToReturn);
 
-        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
-        List<String> tiersToReturn = new ArrayList();
-        for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
-            tiersToReturn.add(tier.getName());
+        Set<String> apiTags = new HashSet<String>();;
+        List<Tag> tagsFromDTO = dto.getTags();
+        for (Tag tag : tagsFromDTO) {
+            apiTags.add(tag.getName());
         }
-        dto.setTiers(tiersToReturn);
+        model.addTags(apiTags);
 
-        dto.setTransport(Arrays.asList(model.getTransports().split(",")));
+        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = new HashSet<>();
+        List<String> tiersFromDTO = dto.getTiers();
+        for (String tier : tiersFromDTO) {
+            apiTiers.add(new Tier(tier));
+        }
+        model.addAvailableTiers(apiTiers);
+
+        String transports = StringUtils.join(dto.getTransport(), ',');
+        model.setTransports(transports);
         //dto.setType("");   //how to get type?
-        dto.setVisibility(API.VisibilityEnum.valueOf(model.getVisibility()));
-        //do we need to put validity checks? - restricted
-        if (model.getVisibleRoles() != null) {
-            dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
-        }
-        //do we need to put validity checks? - controlled
-        if (model.getVisibleTenants() != null) {
-            dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
+        model.setVisibility(dto.getVisibility().name());
+        if (dto.getVisibleRoles() != null) {
+            String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
+            model.setVisibleRoles(visibleRoles);
         }
 
+        if (dto.getVisibleTenants() != null) {
+            String visibleTenants = StringUtils.join(dto.getVisibleTenants(), ',');
+            model.setVisibleRoles(visibleTenants);
+        }
+
+        //endpoint configs, business info and thumbnail still missing
         return model;
 
     }

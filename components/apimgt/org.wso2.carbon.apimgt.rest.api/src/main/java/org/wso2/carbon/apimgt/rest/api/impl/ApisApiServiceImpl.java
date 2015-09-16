@@ -70,9 +70,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisPost(API body,String contentType)
     throws NotFoundException {
 
-        org.wso2.carbon.apimgt.api.model.API apiToAdd = MappingUtil.fromDTOtoAPI(body);
         boolean isTenantFlowStarted = false;
         try {
+            org.wso2.carbon.apimgt.api.model.API apiToAdd = MappingUtil.fromDTOtoAPI(body);
                 String tenantDomain =
                         MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiToAdd.getId().getProviderName()));
                 if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -160,9 +160,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId,API body,String contentType,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException {
-        //get old api
-        org.wso2.carbon.apimgt.api.model.API apiToAdd = MappingUtil.fromDTOtoAPI(body);
+
         try {
+            org.wso2.carbon.apimgt.api.model.API apiToAdd = MappingUtil.fromDTOtoAPI(body);
             provider.updateAPI(apiToAdd);
         } catch (APIManagementException e) {
             //500
