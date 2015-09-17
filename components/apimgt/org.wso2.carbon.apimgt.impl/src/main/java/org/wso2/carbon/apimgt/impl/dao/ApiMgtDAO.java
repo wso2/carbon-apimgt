@@ -4219,24 +4219,26 @@ public class ApiMgtDAO {
                 "CONSUMER_KEY = ? " +
                 "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
+            Connection connection = null;
+            PreparedStatement ps = null;
+
             try {
-                Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement(addApplicationKeyMapping);
+                connection = APIMgtDBUtil.getConnection();
+                ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, APIUtil.encryptToken(consumerKey));
 //                ps.setString(2,APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
-                ps.setInt(2,application.getId());
-                ps.setString(3,keyType);
-
+                ps.setInt(2, application.getId());
+                ps.setString(3, keyType);
                 ps.executeUpdate();
-                ps.close();
                 connection.commit();
-                APIMgtDBUtil.closeAllConnections(ps,connection,null);
             } catch (SQLException e) {
                 handleException("Error updating the CONSUMER KEY of the AM_APPLICATION_KEY_MAPPING table where " +
                         "APPLICATION_ID = " + application.getId() + " and KEY_TYPE = " + keyType, e);
             } catch (CryptoException e) {
                 handleException("Error while encrypting the consumer key " + consumerKey + " before updating the " +
                         "AM_APPLICATION_KEY_MAPPING table", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps,connection,null);
             }
 
         }
@@ -4283,7 +4285,6 @@ public class ApiMgtDAO {
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5,"MAPPED");
                 ps.execute();
-                ps.close();
                 connection.commit();
 
             } catch (SQLException e) {
@@ -7927,6 +7928,40 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
         return false;
+    }
+
+    public static String getAPIContext(APIIdentifier identifier) throws APIManagementException {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement prepStmt = null;
+
+        String  context = null;
+
+        String sql = "SELECT CONTEXT FROM AM_API WHERE " +
+                        "API_PROVIDER = ? " +
+                        "  AND API_NAME = ? " +
+                        "  AND API_VERSION  = ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            resultSet = prepStmt.executeQuery();
+
+            while (resultSet.next()) {
+                context = resultSet.getString(1);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to retrieve the API Context", e);
+
+            handleException("Failed to retrieve the API Context for " +
+                    identifier.getProviderName() + "-" + identifier.getApiName() + "-"
+                                                    + identifier.getVersion(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return context;
     }
 
     public static List<String> getAllAvailableContexts () {

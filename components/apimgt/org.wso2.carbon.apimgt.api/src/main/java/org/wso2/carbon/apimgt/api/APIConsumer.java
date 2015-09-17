@@ -560,19 +560,4 @@ public interface APIConsumer extends APIManager {
     public String getGroupIds(String response) throws APIManagementException;
 
 	public JSONObject resumeWorkflow(Object[] args);
-
-
-    /**
-     * This method added to returned APIs with only returned governance artifact attributes without accessing registry again
-     *
-     * @param searchTerm   term which search for
-     * @param searchType   search type
-     * @param tenantDomain tenant domain
-     * @param start        starting offset
-     * @param end          number APIs to be returned
-     * @return search results map
-     * @throws APIManagementException
-     */
-    public Map<String, Object> searchPaginatedLightweightAPIs(String searchTerm, String searchType, String tenantDomain,
-                                                              int start, int end) throws APIManagementException;
 }
