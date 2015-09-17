@@ -117,7 +117,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         }
 
         // Get client IP
-        String userIP = (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext().getProperty("REMOTE_ADDR");
+        String userIP = (String) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
+                .getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         String path = (String) msgCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         String documentPath = path;
         if (isEmpty(documentPath)) {
