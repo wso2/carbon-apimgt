@@ -124,21 +124,21 @@
                 </configuration>
             </plugin>
             <plugin>
-                                <groupId>org.apache.axis2</groupId>
-                                <artifactId>axis2-java2wsdl-maven-plugin</artifactId>
-                                <executions>
-                                        <execution>
-                                                <goals>
-                                                        <goal>java2wsdl</goal>
-                                                </goals>
-                                        </execution>
-                                </executions>
-                                <configuration>
-                                        <className>
-                                                org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin
-                                        </className>
-                                </configuration>
-                        </plugin>
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-java2wsdl-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java2wsdl</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                     <className>
+                         org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin
+                     </className>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -207,10 +207,10 @@
                             org.slf4j,
                             org.wso2.carbon.apimgt.keymgt.stub.validator; version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.base.*; version="${imp.pkg.version.carbon.base}",
-                            org.osgi.framework.*;resolution:=optional,
-                            org.wso2.carbon.bam.service.data.publisher.*;resolution:=optional,
-                            org.wso2.carbon.rest.api.stub.*;resolution:=optional,
-                            org.wso2.carbon.sequences.stub.types;resolution:=optional,
+                            org.osgi.framework.*,
+                            org.wso2.carbon.bam.service.data.publisher.*,
+                            org.wso2.carbon.rest.api.stub.*,
+                            org.wso2.carbon.sequences.stub.types,
                             org.wso2.carbon.context,
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             *;resolution:=optional
