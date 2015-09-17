@@ -56,7 +56,7 @@
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
         </dependency>
       <dependency>
-          <groupId>org.apache.poi</groupId>
+          <groupId>org.apache.poi.wso2</groupId>
           <artifactId>poi-ooxml</artifactId>
       </dependency>
         <dependency>

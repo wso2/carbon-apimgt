@@ -160,9 +160,9 @@
                             !javax.servlet,
                             !javax.servlet.http,
                             !org.wso2.carbon.apimgt.gateway.internal,
+                            !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
                             org.wso2.throttle.*
-                            org.wso2.carbon.apimgt.gateway.dto
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
