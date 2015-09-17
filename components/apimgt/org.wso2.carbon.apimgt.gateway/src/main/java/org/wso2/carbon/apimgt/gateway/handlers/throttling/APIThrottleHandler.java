@@ -38,6 +38,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -276,13 +277,14 @@ public class APIThrottleHandler extends AbstractHandler {
         String callerId = null;
         boolean canAccess = true;
         //remote ip of the caller
-        String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
+        String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP != null) {
             if (remoteIP.indexOf(",") > 0) {
                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
             }
         } else {
-            remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+            remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         } //domain name of the caller
         String domainName = (String) axisMC.getPropertyNonReplicable(NhttpConstants.REMOTE_HOST);
 
@@ -792,8 +794,8 @@ public class APIThrottleHandler extends AbstractHandler {
 
     private void logMessageDetails(MessageContext messageContext) {
         //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
-        String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
-        String endUserName = (String) messageContext.getProperty("END_USER_NAME");
+        String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+        String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
 
         //Do not change this log format since its using by some external apps
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -809,7 +811,8 @@ public class APIThrottleHandler extends AbstractHandler {
             logMessage = logMessage + " transactionId=" + logID;
         }
         try {
-            String userAgent = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("User-Agent");
+            String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                    .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
             if (userAgent != null) {
                 logMessage = logMessage + " with userAgent=" + userAgent;
             }
@@ -818,15 +821,16 @@ public class APIThrottleHandler extends AbstractHandler {
         }
 
         long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext().getProperty("wso2statistics.request.received.time"));
+                getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
         Date incomingReqTime = new Date(reqIncomingTimestamp);
         if (incomingReqTime != null) {
             logMessage = logMessage + " at requestTime=" + incomingReqTime;
         }
         //If gateway is fronted by hardware load balancer client ip should retrieve from x forward for header
-        String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
+        String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP == null) {
-            remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+            remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
         //null check before add it to log message
         if (remoteIP != null) {
