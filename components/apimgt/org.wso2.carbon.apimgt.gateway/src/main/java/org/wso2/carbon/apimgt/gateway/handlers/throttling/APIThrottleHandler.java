@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.Replicator;
@@ -38,6 +39,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.util.AXIOMUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -45,8 +47,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.throttle.core.*;
+import org.wso2.carbon.throttle.core.factory.ThrottleConfigurationFactory;
 import org.wso2.carbon.throttle.core.factory.ThrottleContextFactory;
 
+import javax.xml.stream.XMLStreamException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -104,6 +108,9 @@ public class APIThrottleHandler extends AbstractHandler {
      */
     private long version;
 
+    private String unitTime;
+
+    private String count;
     /**
      * Does this env. support clustering
      */
@@ -410,6 +417,33 @@ public class APIThrottleHandler extends AbstractHandler {
         boolean canAccess = true;
         ThrottleDataHolder dataHolder = (ThrottleDataHolder)
                 cc.getPropertyNonReplicable(ThrottleConstants.THROTTLE_INFO_KEY);
+
+        ThrottleContext hardcontext = throttle.getThrottleContext(
+                "hard_limit");
+
+        try {
+
+            String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+            String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+            apiContext = apiContext != null ? apiContext : "";
+            apiVersion = apiVersion != null ? apiVersion : "";
+
+            String throttleKey = apiContext+":"+apiVersion;
+            if(hardcontext != null) {
+                roleBasedAccessController.canAccess(hardcontext, throttleKey, "hard_limt");
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle by hard limit " + throttleKey);
+                //    log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
+                }
+            }
+
+        } catch (ThrottleException e) {
+            log.warn("Exception occurred while performing role " +
+                     "based throttling", e);
+            canAccess = false;
+            return canAccess;
+        }
 
         if (throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY) == null) {
             //there is no throttle configuration for RoleBase Throttling
@@ -742,6 +776,20 @@ public class APIThrottleHandler extends AbstractHandler {
                                     ThrottleContextFactory.createThrottleContext(ThrottleConstants.ROLE_BASE, throttleConfiguration);
                             throttle.addThrottleContext(RESOURCE_THROTTLE_KEY, resourceContext);
                         }
+
+                        if(count != null && unitTime!=null){
+                        OMElement newpolicy = createHardLevelThrottlingPolicy(count,unitTime);
+                        Throttle throttle1 = ThrottleFactory.createMediatorThrottle(
+                                PolicyEngine.getPolicy(newpolicy));
+                        ThrottleConfiguration newThrottleConfig = throttle1.getThrottleConfiguration(ThrottleConstants
+                                                                                         .ROLE_BASED_THROTTLE_KEY);
+                        ThrottleContext hardLimit = ThrottleContextFactory.createThrottleContext(ThrottleConstants
+                                                                                                     .ROLE_BASE,
+                                                                          newThrottleConfig);
+                        throttle.addThrottleContext("hard_limit",hardLimit);
+                        }
+
+
                     }
                 }
                 //For non-clustered  environment , must re-initiates
@@ -788,6 +836,46 @@ public class APIThrottleHandler extends AbstractHandler {
     private void handleException(String msg) {
         log.error(msg);
         throw new SynapseException(msg);
+    }
+
+    public String getUnitTime() {
+        return unitTime;
+    }
+
+    public void setUnitTime(String unitTime) {
+        this.unitTime = unitTime;
+    }
+
+    public String getCount() {
+        return count;
+    }
+
+    public void setCount(String count) {
+        this.count = count;
+    }
+
+    private OMElement createHardLevelThrottlingPolicy(String maxCount, String unitTime){
+        String policy = "<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\" xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
+                        "    <throttle:MediatorThrottleAssertion>\n" +
+                        "        <wsp:Policy>\n" +
+                        "            <throttle:ID throttle:type=\"ROLE\">hard_limt</throttle:ID>\n" +
+                        "            <wsp:Policy>\n" +
+                        "                <throttle:Control>\n" +
+                        "                    <wsp:Policy>\n" +
+                        "                        <throttle:MaximumCount>"+maxCount+"</throttle:MaximumCount>\n" +
+                        "                        <throttle:UnitTime>"+unitTime+"</throttle:UnitTime>\n" +
+                        "                    </wsp:Policy>\n" +
+                        "                </throttle:Control>\n" +
+                        "            </wsp:Policy>\n" +
+                        "        </wsp:Policy>\n" +
+                        "    </throttle:MediatorThrottleAssertion>\n" +
+                        "</wsp:Policy>";
+        try {
+           return AXIOMUtil.stringToOM(policy);
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private void logMessageDetails(MessageContext messageContext) {
