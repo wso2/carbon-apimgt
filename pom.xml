@@ -926,7 +926,7 @@
         <owasp.encoder.version>1.1</owasp.encoder.version>
 
         <httpclient.version>4.3.1.wso2v2</httpclient.version>
-        <wss4j.version>1.5.11.wso2v1</wss4j.version>
+        <wss4j.version>1.5.11.wso2v11</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.0.0.wso2v1</commons-io.version>
         <dblock.waffle.version>1.6.wso2v1</dblock.waffle.version>
