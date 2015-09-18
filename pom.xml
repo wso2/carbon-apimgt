@@ -314,7 +314,7 @@
             </dependency>
 
             <dependency>
-                <groupId>org.apache.poi</groupId>
+                <groupId>org.apache.poi.wso2</groupId>
                 <artifactId>poi-ooxml</artifactId>
                 <version>${apache.poi.version}</version>
             </dependency>
@@ -921,7 +921,7 @@
         <json-simple.wso2.version>1.1.wso2v1</json-simple.wso2.version>
         <commons-lang.version>2.6.0.wso2v1</commons-lang.version>
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
-        <apache.poi.version>3.9</apache.poi.version>
+        <apache.poi.version>3.9.0.wso2v3</apache.poi.version>
         <rhino.js.version>1.7.0.R4.wso2v1</rhino.js.version>
         <owasp.encoder.version>1.1</owasp.encoder.version>
 
