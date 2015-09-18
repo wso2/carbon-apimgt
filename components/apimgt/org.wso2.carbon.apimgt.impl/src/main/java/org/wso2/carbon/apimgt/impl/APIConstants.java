@@ -272,6 +272,8 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    public static final String API_LIFE_CYCLE="APILifeCycle";
+
 
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
@@ -501,8 +503,6 @@ public final class APIConstants {
     public static final String AUTH_TYPE_USER = "USER";
     public static final String AUTH_TYPE_APP = "APP";
 
-    public static final String REMOTE_ADDR = "REMOTE_ADDR";
-    
     public static final String TIER_PERMISSION_ALLOW = "allow";
     
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
@@ -780,5 +780,9 @@ public final class APIConstants {
     public static final String API_DATA_LENGTH = "length";
     public static final String API_DATA_ISMORE = "isMore";
 
+    public static final String ACTIVITY_ID = "activityID";
+    public static final String USER_AGENT = "User-Agent";
+
+    public static final long MAX_FILE_SIZE = 1024L;
 
 }

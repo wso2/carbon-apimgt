@@ -43,16 +43,20 @@
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.user.core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.governance</groupId>
-            <artifactId>org.wso2.carbon.governance.api</artifactId>
-        </dependency>
+      <dependency>
+          <groupId>org.wso2.carbon.governance</groupId>
+          <artifactId>org.wso2.carbon.governance.api</artifactId>
+      </dependency>
+      <dependency>
+          <groupId>org.wso2.carbon.governance</groupId>
+          <artifactId>org.wso2.carbon.governance.lcm</artifactId>
+      </dependency>
         <dependency>
             <groupId>org.wso2.carbon.registry</groupId>
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
         </dependency>
       <dependency>
-          <groupId>org.apache.poi</groupId>
+          <groupId>org.apache.poi.wso2</groupId>
           <artifactId>poi-ooxml</artifactId>
       </dependency>
         <dependency>
@@ -74,6 +78,10 @@
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.oauth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.governance</groupId>
+            <artifactId>org.wso2.carbon.governance.registry.extensions</artifactId>
         </dependency>
         <dependency>
             <groupId>org.json.wso2</groupId>
@@ -161,7 +169,6 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
 	  	</dependency>
-
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>

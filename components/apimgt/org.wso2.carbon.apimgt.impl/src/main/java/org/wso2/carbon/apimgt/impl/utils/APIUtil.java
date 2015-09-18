@@ -4260,4 +4260,19 @@ public final class APIUtil {
         return true;
     }
 
+    public static String appendDomainWithUser(String username, String domain){
+        if(username.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR) || username.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) || MultitenantConstants.SUPER_TENANT_NAME.equalsIgnoreCase(username)){
+            return username;
+        }
+        return username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
+    }
+
+    /*
+    Attach the lifecycle to a registry resource
+    */
+    public void associateLifeCycle(String resourcePath, Registry registry) throws RegistryException {
+
+        GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
+    }
+
 }

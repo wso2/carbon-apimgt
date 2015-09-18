@@ -30,19 +30,18 @@ if(secure){
 }
 
 var apiName = outputs.api.name;
-var providerValUe = outputs.api.provider;
+var providerValue = outputs.api.provider;
 var version = outputs.api.version;
-var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-providerValUe = APIUtil.replaceEmailDomain(providerValUe);
+var util = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+providerValue = util.replaceEmailDomain(providerValue);
 
 
 //Calling the jaggery API
-
-var swaggerAPI ;
-if(providerValUe.contains("/")){
-swaggerAPI = jagg.url("/api-docs"+"?provider="+encodeURIComponent(providerValUe)+"&name="+encodeURIComponent(apiName)+"&version="+encodeURIComponent(version));
-  }else{
-swaggerAPI = jagg.url("/api-docs"+"/"+providerValUe+"/"+apiName+"/"+version);
+var swaggerAPI;
+if(providerValue.contains("/")){
+    swaggerAPI = jagg.url("/api-docs" + "?provider=" + encodeURIComponent(providerValue) + "&name=" + encodeURIComponent(apiName) + "&version=" + encodeURIComponent(version));
+}else{
+    swaggerAPI = jagg.url("/api-docs"+"/"+providerValue+"/"+apiName+"/"+version);
   }
 
 var api = outputs.api;%>

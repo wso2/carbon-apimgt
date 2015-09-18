@@ -37,6 +37,13 @@ public class APIMgtGatewayConstants {
     public static final String BACKEND_REQUEST_START_TIME = "api.ut.backendRequestTime";
     public static final String BACKEND_REQUEST_END_TIME = "api.ut.backendRequestEndTime";
     public static final String REQUEST_END_TIME = "api.ut.requestEndTime";
+    public static final String END_USER_NAME = "api.ut.userName";
+    public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+    public static final String REQUEST_RECEIVED_TIME = "wso2statistics.request.received.time";
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
+    public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
+    public static final String AUTHORIZED_USER = "AuthorizedUser";
 
 }
 
