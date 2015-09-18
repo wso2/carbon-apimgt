@@ -25,7 +25,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
@@ -45,10 +45,10 @@ import java.util.*;
  * This mediator would set username and password in to http client request.
  * Then we will send the http request and get the json payload, then we pass it to the api manager for mediation.
  */
-public class HttpClientMediator extends AbstractMediator implements ManagedLifecycle {
+public class DigestAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
 
-    private static final Log log = LogFactory.getLog(HttpClientMediator.class);
+    private static final Log log = LogFactory.getLog(DigestAuthMediator.class);
 
     //method to split digest auth header sent from the backend
     public String[] splitDigestHeader(String[] wwwHeaderSplits){
@@ -77,6 +77,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
         //remove front and end double quotes.
         serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
         realm = realm.substring(1, realm.length() - 1);
+        qop = qop.substring(1, qop.length() - 1);
 
         String[] headerAttributes = {realm, serverNonce, qop};
         return headerAttributes;
@@ -120,7 +121,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
         String ha2;
 
         //Consider all qop types other than "auth-int" as auth and compute ha2 here
-        if (qop!="auth-int") {
+        if(qop!="auth-int"){
 
             StringBuilder ha2StringBuilder = new StringBuilder(httpMethod);
             ha2StringBuilder.append(":");
@@ -154,25 +155,24 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
     }
 
     //method to increment and return the nonce count with each request
-    public String incrementNonceCount(){
-        int counter = 0; //This has to be modified
-        String nonceCount=String.format("%08x" , ++counter);
+    public String incrementNonceCount(String prevCount){
+        int counter = Integer.parseInt(prevCount);
+        String nonceCount = String.format("%08x" , ++counter);
         return nonceCount;
     }
 
     //generate response hash
-    public String[] generateResponseHash(String ha1, String ha2, String serverNonce, String qop){
+    public String[] generateResponseHash(String ha1, String ha2, String serverNonce, String qop, String prevNonceCount){
 
         String serverResponse;
 
         if(qop!=null){
 
             //generate clientNonce
-           String clientNonce = generateClientNonce();
+            String clientNonce = generateClientNonce();
 
-            //set the nonceCount
-            //nonceCount would always be 00000001 - should be with each request
-           String nonceCount = incrementNonceCount();
+            //Increment the nonceCount
+            String nonceCount = incrementNonceCount(prevNonceCount);
 
 
             StringBuilder serverResponseStringBuilder =  new StringBuilder(ha1);
@@ -221,9 +221,9 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
 
             String nonceCount = serverResponseArray[2];
             String clientNonce = serverResponseArray[1];
-            header.append("qop=" + qop + ", ");
-            header.append("nonceCount=" + nonceCount + ", ");
-            header.append("clientNonce\"" + clientNonce + "\"" + ", ");
+            header.append("qop=\"" + qop + "\"" + ", ");
+            header.append("nc=" + nonceCount + ", ");
+            header.append("cnonce=\"" + clientNonce + "\"" + ", ");
 
         }
 
@@ -254,6 +254,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
             String postFix = (String) axis2MC.getProperty("POST_FIX");
 
 
+
             //appending forward slash.
             StringBuilder postFixStringBuilder = new StringBuilder(postFix);
             postFixStringBuilder.append("/");
@@ -263,23 +264,8 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                 log.debug("Complete resource URL is: " + resourceURL);
                 log.debug("Post Fix value is : " + postFix);
             }
-
-
             //The first request sent by the client
-            String httpMethod = (String) axis2MC.getProperty("HTTP_METHOD");
-
-            HttpUriRequest request = null;
-
-            if("GET".equals(httpMethod)){
-                request = new HttpGet(resourceURL);
-            }else if("POST".equals(httpMethod)){
-                request = new HttpPost(resourceURL);
-            }else if("PUT".equals(httpMethod)){
-                request = new HttpPut(resourceURL);
-            }else if("DELETE".equals(httpMethod)){
-                request = new HttpDelete(resourceURL);
-            }
-
+            HttpGet request = new HttpGet(resourceURL);
             HttpResponse response;
 
             //The 401 response from the backend
@@ -323,7 +309,7 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                 }
 
                 //get the Http method (GET, POST, PUT or DELETE)
-
+                String httpMethod = (String) axis2MC.getProperty("HTTP_METHOD");
 
                 if(log.isDebugEnabled()){
                     log.debug("HTTP method of request is : " + httpMethod);
@@ -344,10 +330,21 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
                     log.debug("MD5 value of ha2 is : " + ha2);
                 }
 
+                //getting the previous NonceCount
+                String prevNonceCount = (String) messageContext.getProperty("NonceCount");
+
+                if (prevNonceCount==null){
+                    messageContext.setProperty("NonceCount", "00000000");
+                    prevNonceCount = (String) messageContext.getProperty("NonceCount");
+                }
+
                 //generate the final hash (serverResponse)
-                String[] serverResponseArray = generateResponseHash(ha1, ha2, serverNonce, qop);
+                String[] serverResponseArray = generateResponseHash(ha1, ha2, serverNonce, qop, prevNonceCount);
 
                 String serverResponse = serverResponseArray[0];
+
+                //setting the NonceCount after incrementing
+                messageContext.setProperty("NonceCount", serverResponseArray[2]);
 
                 if(log.isDebugEnabled()){
                     log.debug("MD5 value of server response  is : " + serverResponse);
@@ -381,9 +378,6 @@ public class HttpClientMediator extends AbstractMediator implements ManagedLifec
         }
 
     }
-
-
-
 
     public void init(SynapseEnvironment synapseEnvironment) {
 
