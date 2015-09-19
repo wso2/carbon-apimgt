@@ -27,19 +27,22 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
-import org.wso2.carbon.apimgt.rest.api.model.API;
-import org.wso2.carbon.apimgt.rest.api.model.Sequence;
-import org.wso2.carbon.apimgt.rest.api.model.Tag;
+import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MappingUtil {
 
-    protected static API fromAPItoDTO(org.wso2.carbon.apimgt.api.model.API model) throws APIManagementException {
+    protected static APIDTO fromAPItoDTO(org.wso2.carbon.apimgt.api.model.API model) throws APIManagementException {
 
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(model.getId().getProviderName());
 
-        API dto = new API();
+        APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         dto.setProvider(model.getId().getProviderName());
@@ -51,11 +54,11 @@ public class MappingUtil {
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
 
-        List<Sequence> sequences = null;
+        List<SequenceDTO> sequences = null;
 
         String inSequenceName = model.getInSequence();
         if (inSequenceName != null && !inSequenceName.isEmpty()) {
-            Sequence inSequence = new Sequence();
+            SequenceDTO inSequence = new SequenceDTO();
             inSequence.setName(inSequenceName);
             inSequence.setType("IN");
             sequences.add(inSequence);
@@ -63,7 +66,7 @@ public class MappingUtil {
 
         String outSequenceName = model.getOutSequence();
         if (outSequenceName != null && !outSequenceName.isEmpty()) {
-            Sequence outSequence = new Sequence();
+            SequenceDTO outSequence = new SequenceDTO();
             outSequence.setName(outSequenceName);
             outSequence.setType("OUT");
             sequences.add(outSequence);
@@ -71,7 +74,7 @@ public class MappingUtil {
 
         String faultSequenceName = model.getFaultSequence();
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
-            Sequence faultSequence = new Sequence();
+            SequenceDTO faultSequence = new SequenceDTO();
             faultSequence.setName(faultSequenceName);
             faultSequence.setType("FAULT");
             sequences.add(faultSequence);
@@ -121,7 +124,7 @@ public class MappingUtil {
         return dto;
     }
 
-    protected static org.wso2.carbon.apimgt.api.model.API fromDTOtoAPI(API dto) throws APIManagementException {
+    protected static org.wso2.carbon.apimgt.api.model.API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
 
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(dto.getProvider());
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
@@ -138,10 +141,10 @@ public class MappingUtil {
         model.setDestinationStatsEnabled(dto.getDestinationStatsEnabled());
 
         if (dto.getSequences() != null) {
-            List<Sequence> sequences = dto.getSequences();
+            List<SequenceDTO> sequences = dto.getSequences();
 
             //validate whether provided sequences are available
-            for (Sequence sequence : sequences) {
+            for (SequenceDTO sequence : sequences) {
                 if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equalsIgnoreCase(sequence.getType())) {
                     model.setInSequence(sequence.getName());
                 } else if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equalsIgnoreCase(sequence.getType())) {

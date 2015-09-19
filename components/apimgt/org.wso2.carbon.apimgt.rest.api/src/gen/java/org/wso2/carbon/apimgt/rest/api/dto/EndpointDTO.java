@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 
 import io.swagger.annotations.*;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Endpoint  {
+public class EndpointDTO  {
   
   public enum TypeEnum {
      Production,  Sandbox,  ProductionFailOver,  SandboxFailOver, 
@@ -43,7 +43,7 @@ public class Endpoint  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Endpoint {\n");
+    sb.append("class EndpointDTO {\n");
     
     sb.append("  type: ").append(type).append("\n");
     sb.append("  url: ").append(url).append("\n");

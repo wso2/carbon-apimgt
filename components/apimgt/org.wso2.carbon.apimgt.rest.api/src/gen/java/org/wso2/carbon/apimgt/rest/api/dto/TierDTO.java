@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 
 import io.swagger.annotations.*;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Tier  {
+public class TierDTO  {
   
   private String name = null;
   private String rate = null;
@@ -53,7 +53,7 @@ public class Tier  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Tier {\n");
+    sb.append("class TierDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  rate: ").append(rate).append("\n");

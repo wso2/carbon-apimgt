@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 import java.math.BigDecimal;
 
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Subscription  {
+public class SubscriptionDTO  {
   
   private BigDecimal subscriptionId = null;
   private String applicationId = null;
@@ -80,7 +80,7 @@ public class Subscription  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Subscription {\n");
+    sb.append("class SubscriptionDTO {\n");
     
     sb.append("  subscriptionId: ").append(subscriptionId).append("\n");
     sb.append("  applicationId: ").append(applicationId).append("\n");

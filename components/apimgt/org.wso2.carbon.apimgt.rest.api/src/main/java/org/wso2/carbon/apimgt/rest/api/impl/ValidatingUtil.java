@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.impl;
 
-import org.wso2.carbon.apimgt.rest.api.model.API;
+import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 
 public class ValidatingUtil {
 
-    public static boolean isValidAPI(API dto){
+    public static boolean isValidAPI(APIDTO dto){
         //todo
         return true;
     }

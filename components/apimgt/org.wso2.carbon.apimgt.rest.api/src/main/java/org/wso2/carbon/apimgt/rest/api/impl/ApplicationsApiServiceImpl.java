@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.impl;
 
 import org.wso2.carbon.apimgt.rest.api.*;
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
-import org.wso2.carbon.apimgt.rest.api.model.Application;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -22,7 +22,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response applicationsPost(Application body,String contentType)
+    public Response applicationsPost(ApplicationDTO body,String contentType)
     throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -34,7 +34,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response applicationsApplicationIdPut(String applicationId,Application body,String contentType,String ifMatch,String ifUnmodifiedSince)
+    public Response applicationsApplicationIdPut(String applicationId,ApplicationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -46,7 +46,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response applicationsApplicationIdGenerateKeysPost(String applicationId,Application body,String contentType,String ifMatch,String ifUnmodifiedSince)
+    public Response applicationsApplicationIdGenerateKeysPost(String applicationId,ApplicationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();

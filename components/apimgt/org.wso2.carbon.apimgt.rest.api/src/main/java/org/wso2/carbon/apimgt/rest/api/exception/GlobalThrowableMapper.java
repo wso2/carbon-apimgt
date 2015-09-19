@@ -18,7 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.rest.api.model.Error;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -35,7 +35,7 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable>{
     public Response toResponse(Throwable e) {
         log.error("An Error has been captured by global exception mapper.", e);
 
-        org.wso2.carbon.apimgt.rest.api.model.Error error = new Error();
+        ErrorDTO error = new ErrorDTO();
         error.setCode(new Long(500));
         error.setMessage("Internal server error please contact administrator.");
 

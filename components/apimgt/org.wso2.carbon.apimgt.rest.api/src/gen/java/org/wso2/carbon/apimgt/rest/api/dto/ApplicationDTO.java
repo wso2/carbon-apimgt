@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 
 import io.swagger.annotations.*;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Application  {
+public class ApplicationDTO  {
   
   private String applicationId = null;
   private String name = null;
@@ -79,7 +79,7 @@ public class Application  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Application {\n");
+    sb.append("class ApplicationDTO {\n");
     
     sb.append("  applicationId: ").append(applicationId).append("\n");
     sb.append("  name: ").append(name).append("\n");

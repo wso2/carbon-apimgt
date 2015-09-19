@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 
 import io.swagger.annotations.*;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class ErrorListItem  {
+public class ErrorListItemDTO  {
   
   private Long code = null;
   private String message = null;
@@ -41,7 +41,7 @@ public class ErrorListItem  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ErrorListItem {\n");
+    sb.append("class ErrorListItemDTO {\n");
     
     sb.append("  code: ").append(code).append("\n");
     sb.append("  message: ").append(message).append("\n");

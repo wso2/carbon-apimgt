@@ -1,14 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api;
 
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.UpdateTierPermissionApiService;
 import org.wso2.carbon.apimgt.rest.api.factories.UpdateTierPermissionApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.model.Tier;
-import org.wso2.carbon.apimgt.rest.api.model.TierPermission;
-import org.wso2.carbon.apimgt.rest.api.model.Error;
+import org.wso2.carbon.apimgt.rest.api.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.TierPermissionDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -30,7 +30,7 @@ public class UpdateTierPermissionApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update tier permission", response = Tier.class, responseContainer = "List")
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Update tier permission", response = TierDTO.class, responseContainer = "List")
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successfully updated tier permissions"),
         
@@ -45,7 +45,7 @@ public class UpdateTierPermissionApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response updateTierPermissionPost(@ApiParam(value = "",required=true) @QueryParam("tierName") String tierName,
-    @ApiParam(value = ""  ) TierPermission permissions,
+    @ApiParam(value = ""  ) TierPermissionDTO permissions,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)

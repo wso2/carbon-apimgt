@@ -1,6 +1,6 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
-import org.wso2.carbon.apimgt.rest.api.model.ErrorListItem;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorListItemDTO;
 import java.util.*;
 
 import io.swagger.annotations.*;
@@ -8,13 +8,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Error  {
+public class ErrorDTO  {
   
   private Long code = null;
   private String message = null;
   private String description = null;
   private String moreInfo = null;
-  private List<ErrorListItem> error = new ArrayList<ErrorListItem>() ;
+  private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>() ;
 
   
   /**
@@ -73,10 +73,10 @@ public class Error  {
    **/
   @ApiModelProperty(value = "If there are more than one error list them out. Ex. list out validation errors by each field.")
   @JsonProperty("error")
-  public List<ErrorListItem> getError() {
+  public List<ErrorListItemDTO> getError() {
     return error;
   }
-  public void setError(List<ErrorListItem> error) {
+  public void setError(List<ErrorListItemDTO> error) {
     this.error = error;
   }
 
@@ -85,7 +85,7 @@ public class Error  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Error {\n");
+    sb.append("class ErrorDTO {\n");
     
     sb.append("  code: ").append(code).append("\n");
     sb.append("  message: ").append(message).append("\n");

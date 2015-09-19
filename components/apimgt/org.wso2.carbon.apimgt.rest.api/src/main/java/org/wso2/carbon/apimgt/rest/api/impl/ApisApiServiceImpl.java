@@ -21,24 +21,25 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.model.API;
-import org.wso2.carbon.apimgt.rest.api.model.Document;
+import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.wso2.carbon.apimgt.rest.api.impl.MappingUtil.fromAPItoDTO;
+import static org.wso2.carbon.apimgt.rest.api.impl.MappingUtil.fromDTOtoAPI;
 
 public class ApisApiServiceImpl extends ApisApiService {
 
@@ -48,12 +49,12 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch)
     throws NotFoundException {
         List<org.wso2.carbon.apimgt.api.model.API> apis;
-        List<API> list = new ArrayList<API>();
+        List<APIDTO> list = new ArrayList<APIDTO>();
         try {
             provider = APIManagerFactory.getInstance().getAPIProvider("admin");
             apis = provider.searchAPIs(query,type, "admin");
             for (org.wso2.carbon.apimgt.api.model.API temp : apis) {
-                list.add(MappingUtil.fromAPItoDTO(temp));
+                list.add(fromAPItoDTO(temp));
             }
         } catch (APIManagementException e) {
             e.printStackTrace();
@@ -61,15 +62,13 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         return Response.ok().entity(list).build();
     }
-
-
     @Override
-    public Response apisPost(API body,String contentType)
+    public Response apisPost(APIDTO body,String contentType)
     throws NotFoundException {
 
         boolean isTenantFlowStarted = false;
         try {
-            org.wso2.carbon.apimgt.api.model.API apiToAdd = MappingUtil.fromDTOtoAPI(body);
+            org.wso2.carbon.apimgt.api.model.API apiToAdd = fromDTOtoAPI(body);
              String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
              if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                  isTenantFlowStarted = true;
@@ -114,7 +113,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String providerName = apiIdDetails[2];
         String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
         boolean isTenantFlowStarted = false;
-        API apiToReturn = new API();
+        APIDTO apiToReturn = new APIDTO();
         try {
 
             APIIdentifier apiIdentifier = new APIIdentifier(providerNameEmailReplaced, apiName, version);
@@ -129,7 +128,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPI(apiIdentifier);
             if (api != null) {
 
-                apiToReturn = MappingUtil.fromAPItoDTO(api);
+                apiToReturn = fromAPItoDTO(api);
 
             } else {
                 //log the error
@@ -150,11 +149,11 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
     @Override
-    public Response apisApiIdPut(String apiId,API body,String contentType,String ifMatch,String ifUnmodifiedSince)
+    public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException {
         boolean isTenantFlowStarted = false;
         try {
-            org.wso2.carbon.apimgt.api.model.API apiToAdd = MappingUtil.fromDTOtoAPI(body);
+            org.wso2.carbon.apimgt.api.model.API apiToAdd = fromDTOtoAPI(body);
 
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
@@ -214,7 +213,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDocumentsPost(String apiId,Document body,String contentType)
+    public Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType)
     throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -226,7 +225,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,Document body,String contentType,String ifMatch,String ifUnmodifiedSince)
+    public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -237,15 +236,15 @@ public class ApisApiServiceImpl extends ApisApiService {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
-
-    @Override public Response apisApiIdEnvironmentsGet(String apiId, String limit, String offset, String query,
-            String accept, String ifNoneMatch) throws NotFoundException {
+    @Override
+    public Response apisApiIdEnvironmentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch)
+    throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
-
-    @Override public Response apisApiIdExternalStoresGet(String apiId, String limit, String offset, String query,
-            String accept, String ifNoneMatch) throws NotFoundException {
+    @Override
+    public Response apisApiIdExternalStoresGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch)
+    throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 import java.math.BigDecimal;
 
@@ -7,20 +7,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Tag  {
+public class ExternalStoreDTO  {
   
-  private String name = null;
-  private BigDecimal weight = null;
+  private BigDecimal name = null;
+  private String endpoint = null;
 
   
   /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
-  public String getName() {
+  public BigDecimal getName() {
     return name;
   }
-  public void setName(String name) {
+  public void setName(BigDecimal name) {
     this.name = name;
   }
 
@@ -28,12 +28,12 @@ public class Tag  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("weight")
-  public BigDecimal getWeight() {
-    return weight;
+  @JsonProperty("endpoint")
+  public String getEndpoint() {
+    return endpoint;
   }
-  public void setWeight(BigDecimal weight) {
-    this.weight = weight;
+  public void setEndpoint(String endpoint) {
+    this.endpoint = endpoint;
   }
 
   
@@ -41,10 +41,10 @@ public class Tag  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Tag {\n");
+    sb.append("class ExternalStoreDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  weight: ").append(weight).append("\n");
+    sb.append("  endpoint: ").append(endpoint).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

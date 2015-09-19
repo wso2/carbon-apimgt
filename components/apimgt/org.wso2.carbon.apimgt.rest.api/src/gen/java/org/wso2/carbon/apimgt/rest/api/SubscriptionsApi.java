@@ -1,13 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api;
 
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.factories.SubscriptionsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
-import org.wso2.carbon.apimgt.rest.api.model.Subscription;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.SubscriptionDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -48,7 +48,7 @@ public class SubscriptionsApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new subscription", response = Subscription.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new subscription", response = SubscriptionDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity."),
         
@@ -56,7 +56,7 @@ public class SubscriptionsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format.") })
 
-    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added" ,required=true ) Subscription body,
+    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added" ,required=true ) SubscriptionDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
     throws NotFoundException {
     return delegate.subscriptionsPost(body,contentType);
@@ -65,7 +65,7 @@ public class SubscriptionsApi  {
     @Path("/{subscriptionId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get subscription details", response = Subscription.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get subscription details", response = SubscriptionDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription returned"),
         
@@ -85,7 +85,7 @@ public class SubscriptionsApi  {
     @Path("/{subscriptionId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update subscription details", response = Subscription.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Update subscription details", response = SubscriptionDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription updated."),
         
@@ -95,7 +95,7 @@ public class SubscriptionsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
-    public Response subscriptionsSubscriptionIdPut(@ApiParam(value = "Subscription object that needs to be modified" ,required=true ) Subscription body,
+    public Response subscriptionsSubscriptionIdPut(@ApiParam(value = "Subscription object that needs to be modified" ,required=true ) SubscriptionDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
