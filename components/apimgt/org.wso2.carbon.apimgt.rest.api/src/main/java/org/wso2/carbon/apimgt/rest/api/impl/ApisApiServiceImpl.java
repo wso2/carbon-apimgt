@@ -26,9 +26,10 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -57,9 +58,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 list.add(fromAPItoDTO(temp));
             }
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            throw new InternalServerErrorException(e);
         }
-
         return Response.ok().entity(list).build();
     }
     @Override
@@ -81,8 +81,7 @@ public class ApisApiServiceImpl extends ApisApiService {
              //how to add thumbnail
              //publish to external stores
         } catch (APIManagementException e) {
-            //500
-            e.printStackTrace();
+            throw new InternalServerErrorException(e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -136,10 +135,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                         "-" + version).type(MediaType.APPLICATION_JSON).build();
             }
         } catch (APIManagementException e) {
-            //500
-            e.printStackTrace();
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Internal server error")
-                    .type(MediaType.APPLICATION_JSON).build();
+            throw new InternalServerErrorException(e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -162,10 +158,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             provider.updateAPI(apiToAdd);
         } catch (APIManagementException e) {
-            //500
-            e.printStackTrace();
+            throw new InternalServerErrorException(e);
         } catch (FaultGatewaysException e) {
-            e.printStackTrace();
+            throw new InternalServerErrorException(e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -198,7 +193,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            throw new InternalServerErrorException(e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
