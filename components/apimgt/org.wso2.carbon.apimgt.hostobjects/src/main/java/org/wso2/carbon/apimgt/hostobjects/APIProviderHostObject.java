@@ -589,6 +589,14 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setDestinationStatsEnabled(destinationStats);
 
+        String maxCount = (String) apiData.get("maxCount", apiData);
+        String unitTime = (String) apiData.get("unitTime", apiData);
+
+
+        // TODO: Remove these
+        api.setProductionMaxCount("10");
+        api.setProductionUnitTime("60000");
+
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
         	api.setEndpointSecured(true);
@@ -1384,6 +1392,11 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.updateAPI(api);
 
         }
+
+        //TODO:Remove once params are sent from the front end
+        api.setProductionUnitTime("60000");
+        api.setProductionMaxCount("10");
+
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
@@ -1775,6 +1788,10 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
         //Validate endpoint URI format
         validateEndpointURI(api.getEndpointConfig());
+
+        // TODO:Remove these
+        api.setProductionMaxCount("10");
+        api.setProductionUnitTime("60000");
 
         api.setSubscriptionAvailability(subscriptionAvailability);
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
@@ -2405,6 +2422,10 @@ public class APIProviderHostObject extends ScriptableObject {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                 Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
                 myn.put(45, myn, JSONObject.toJSONString(registeredResource));
+                myn.put(46, myn, checkValue(api.getProductionMaxCount()));
+                myn.put(47, myn, checkValue(api.getProductionUnitTime()));
+                myn.put(48, myn, checkValue(api.getSandboxMaxCount()));
+                myn.put(49, myn, checkValue(api.getSandboxUnitTime()));
 
 
             } else {

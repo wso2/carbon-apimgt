@@ -55,6 +55,12 @@ public class API implements Serializable{
     private String businessOwner;
     private String businessOwnerEmail;
 
+    private String productionMaxCount;
+    private String productionUnitTime;
+
+    private String sandboxMaxCount;
+    private String sandboxUnitTime;
+
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
@@ -130,6 +136,38 @@ public class API implements Serializable{
 
     //TODO: missing - total user count, up time statistics,tier
 
+
+    public String getProductionMaxCount() {
+        return productionMaxCount;
+    }
+
+    public void setProductionMaxCount(String productionMaxCount) {
+        this.productionMaxCount = productionMaxCount;
+    }
+
+    public String getProductionUnitTime() {
+        return productionUnitTime;
+    }
+
+    public void setProductionUnitTime(String productionUnitTime) {
+        this.productionUnitTime = productionUnitTime;
+    }
+
+    public String getSandboxMaxCount() {
+        return sandboxMaxCount;
+    }
+
+    public void setSandboxMaxCount(String sandboxMaxCount) {
+        this.sandboxMaxCount = sandboxMaxCount;
+    }
+
+    public String getSandboxUnitTime() {
+        return sandboxUnitTime;
+    }
+
+    public void setSandboxUnitTime(String sandboxUnitTime) {
+        this.sandboxUnitTime = sandboxUnitTime;
+    }
 
     public boolean isAdvertiseOnly() {
         return advertiseOnly;
