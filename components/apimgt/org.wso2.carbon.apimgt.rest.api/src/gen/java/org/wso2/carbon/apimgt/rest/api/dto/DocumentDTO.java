@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 
 import io.swagger.annotations.*;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Document  {
+public class DocumentDTO  {
   
   private Integer documentId = null;
   private String name = null;
@@ -92,7 +92,7 @@ public class Document  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Document {\n");
+    sb.append("class DocumentDTO {\n");
     
     sb.append("  documentId: ").append(documentId).append("\n");
     sb.append("  name: ").append(name).append("\n");

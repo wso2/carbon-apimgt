@@ -1,13 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api;
 
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.factories.TiersApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.model.Tier;
-import org.wso2.carbon.apimgt.rest.api.model.Error;
+import org.wso2.carbon.apimgt.rest.api.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -29,7 +29,7 @@ public class TiersApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get available tiers", response = Tier.class, responseContainer = "List")
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get available tiers", response = TierDTO.class, responseContainer = "List")
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of tiers returned."),
         

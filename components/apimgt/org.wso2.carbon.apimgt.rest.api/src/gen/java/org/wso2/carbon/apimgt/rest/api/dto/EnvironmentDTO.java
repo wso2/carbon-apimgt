@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 
 import io.swagger.annotations.*;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class Environment  {
+public class EnvironmentDTO  {
   
   private String name = null;
   private String type = null;
@@ -66,7 +66,7 @@ public class Environment  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class Environment {\n");
+    sb.append("class EnvironmentDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  type: ").append(type).append("\n");

@@ -1,11 +1,11 @@
 package org.wso2.carbon.apimgt.rest.api.impl;
 
 import org.wso2.carbon.apimgt.rest.api.*;
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
-import org.wso2.carbon.apimgt.rest.api.model.Subscription;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.SubscriptionDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -22,7 +22,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response subscriptionsPost(Subscription body,String contentType)
+    public Response subscriptionsPost(SubscriptionDTO body,String contentType)
     throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
@@ -34,7 +34,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response subscriptionsSubscriptionIdPut(Subscription body,String contentType,String ifMatch,String ifUnmodifiedSince)
+    public Response subscriptionsSubscriptionIdPut(SubscriptionDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException {
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();

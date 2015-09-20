@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
 import java.util.*;
 
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class TierPermission  {
+public class TierPermissionDTO  {
   
   private String enableAccess = null;
   private List<String> roles = new ArrayList<String>() ;
@@ -41,7 +41,7 @@ public class TierPermission  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TierPermission {\n");
+    sb.append("class TierPermissionDTO {\n");
     
     sb.append("  enableAccess: ").append(enableAccess).append("\n");
     sb.append("  roles: ").append(roles).append("\n");

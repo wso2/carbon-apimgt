@@ -1,12 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api;
 
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.factories.TagsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;

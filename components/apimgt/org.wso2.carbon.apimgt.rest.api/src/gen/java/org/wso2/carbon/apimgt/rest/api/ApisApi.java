@@ -1,14 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api;
 
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.factories.ApisApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
-import org.wso2.carbon.apimgt.rest.api.model.API;
-import org.wso2.carbon.apimgt.rest.api.model.Document;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -52,7 +52,7 @@ public class ApisApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Create a new API", response = API.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Create a new API", response = APIDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity."),
         
@@ -60,7 +60,7 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format.") })
 
-    public Response apisPost(@ApiParam(value = "API object that needs to be added" ,required=true ) API body,
+    public Response apisPost(@ApiParam(value = "API object that needs to be added" ,required=true ) APIDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
     throws NotFoundException {
     return delegate.apisPost(body,contentType);
@@ -109,7 +109,7 @@ public class ApisApi  {
     @Path("/{apiId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get details of an API", response = API.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get details of an API", response = APIDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK Requested API is returned"),
         
@@ -130,7 +130,7 @@ public class ApisApi  {
     @Path("/{apiId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update an existing API", response = API.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Update an existing API", response = APIDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with updated API object"),
         
@@ -143,7 +143,7 @@ public class ApisApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response apisApiIdPut(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
-    @ApiParam(value = "API object that needs to be added" ,required=true ) API body,
+    @ApiParam(value = "API object that needs to be added" ,required=true ) APIDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
@@ -197,7 +197,7 @@ public class ApisApi  {
     @Path("/{apiId}/documents")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new document to an API", response = Document.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new document to an API", response = DocumentDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document."),
         
@@ -206,7 +206,7 @@ public class ApisApi  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format.") })
 
     public Response apisApiIdDocumentsPost(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
-    @ApiParam(value = "Document object that needs to be added" ,required=true ) Document body,
+    @ApiParam(value = "Document object that needs to be added" ,required=true ) DocumentDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
     throws NotFoundException {
     return delegate.apisApiIdDocumentsPost(apiId,body,contentType);
@@ -215,7 +215,7 @@ public class ApisApi  {
     @Path("/{apiId}/documents/{documentId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API.", response = API.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API.", response = APIDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Document returned."),
         
@@ -237,7 +237,7 @@ public class ApisApi  {
     @Path("/{apiId}/documents/{documentId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update document details.", response = Document.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Update document details.", response = DocumentDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Document updated"),
         
@@ -249,7 +249,7 @@ public class ApisApi  {
 
     public Response apisApiIdDocumentsDocumentIdPut(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
     @ApiParam(value = "Document Id",required=true ) @PathParam("documentId") String documentId,
-    @ApiParam(value = "Document object that needs to be added" ,required=true ) Document body,
+    @ApiParam(value = "Document object that needs to be added" ,required=true ) DocumentDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)

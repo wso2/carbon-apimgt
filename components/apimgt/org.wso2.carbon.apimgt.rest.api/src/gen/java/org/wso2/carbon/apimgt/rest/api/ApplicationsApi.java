@@ -1,13 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api;
 
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.factories.ApplicationsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
-import org.wso2.carbon.apimgt.rest.api.model.Application;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -50,7 +50,7 @@ public class ApplicationsApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Create a new application", response = Application.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Create a new application", response = ApplicationDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity."),
         
@@ -58,7 +58,7 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format.") })
 
-    public Response applicationsPost(@ApiParam(value = "Application object that is to be created" ,required=true ) Application body,
+    public Response applicationsPost(@ApiParam(value = "Application object that is to be created" ,required=true ) ApplicationDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
     throws NotFoundException {
     return delegate.applicationsPost(body,contentType);
@@ -67,7 +67,7 @@ public class ApplicationsApi  {
     @Path("/{applicationId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get application details", response = Application.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get application details", response = ApplicationDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Application returned."),
         
@@ -88,7 +88,7 @@ public class ApplicationsApi  {
     @Path("/{applicationId}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update application details", response = Application.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Update application details", response = ApplicationDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Application updated."),
         
@@ -99,7 +99,7 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response applicationsApplicationIdPut(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
-    @ApiParam(value = "Application object that needs to be updated" ,required=true ) Application body,
+    @ApiParam(value = "Application object that needs to be updated" ,required=true ) ApplicationDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
@@ -128,7 +128,7 @@ public class ApplicationsApi  {
     @Path("/{applicationId}/generate-keys")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = Application.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = ApplicationDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Application updated."),
         
@@ -139,7 +139,7 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
-    @ApiParam(value = "Application object that needs to be updated" ,required=true ) Application body,
+    @ApiParam(value = "Application object that needs to be updated" ,required=true ) ApplicationDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)

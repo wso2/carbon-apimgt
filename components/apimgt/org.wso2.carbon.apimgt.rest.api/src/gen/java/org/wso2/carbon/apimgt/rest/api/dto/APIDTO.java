@@ -1,6 +1,6 @@
-package org.wso2.carbon.apimgt.rest.api.model;
+package org.wso2.carbon.apimgt.rest.api.dto;
 
-import org.wso2.carbon.apimgt.rest.api.model.Sequence;
+import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
 import java.util.*;
 
 import io.swagger.annotations.*;
@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 @ApiModel(description = "")
-public class API  {
+public class APIDTO  {
   
   private String name = null;
   private String description = null;
@@ -34,7 +34,7 @@ public class API  {
   private VisibilityEnum visibility = null;
   private List<String> visibleRoles = new ArrayList<String>() ;
   private List<String> visibleTenants = new ArrayList<String>() ;
-  private List<Sequence> sequences = new ArrayList<Sequence>() ;
+  private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>() ;
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
   };
@@ -262,10 +262,10 @@ public class API  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("sequences")
-  public List<Sequence> getSequences() {
+  public List<SequenceDTO> getSequences() {
     return sequences;
   }
-  public void setSequences(List<Sequence> sequences) {
+  public void setSequences(List<SequenceDTO> sequences) {
     this.sequences = sequences;
   }
 
@@ -298,7 +298,7 @@ public class API  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class API {\n");
+    sb.append("class APIDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");

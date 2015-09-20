@@ -1,9 +1,9 @@
 package org.wso2.carbon.apimgt.rest.api;
 
 import org.wso2.carbon.apimgt.rest.api.*;
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -19,3 +19,4 @@ public abstract class ExternalStoresApiService {
     public abstract Response externalStoresPublishExternalstorePost(String apiId,String externalStoreId)
     throws NotFoundException;
 }
+

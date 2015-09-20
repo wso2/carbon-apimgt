@@ -1,9 +1,9 @@
 package org.wso2.carbon.apimgt.rest.api;
 
 import org.wso2.carbon.apimgt.rest.api.*;
-import org.wso2.carbon.apimgt.rest.api.model.*;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 
-import org.wso2.carbon.apimgt.rest.api.model.Error;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.NotFoundException;
@@ -17,3 +17,4 @@ public abstract class SequencesApiService {
     public abstract Response sequencesGet(String type,String accept,String ifNoneMatch)
     throws NotFoundException;
 }
+
