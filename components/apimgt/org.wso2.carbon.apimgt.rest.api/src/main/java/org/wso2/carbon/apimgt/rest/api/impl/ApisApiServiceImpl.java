@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.rest.api.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -47,8 +46,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     APIProvider provider ;
 
     @Override
-    public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch)
-    throws NotFoundException {
+    public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch){
         List<org.wso2.carbon.apimgt.api.model.API> apis;
         List<APIDTO> list = new ArrayList<APIDTO>();
         try {
@@ -63,8 +61,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(list).build();
     }
     @Override
-    public Response apisPost(APIDTO body,String contentType)
-    throws NotFoundException {
+    public Response apisPost(APIDTO body,String contentType){
 
         boolean isTenantFlowStarted = false;
         try {
@@ -91,20 +88,17 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisChangeLifecyclePost(String newState,String publishToGateway,String resubscription,String apiId,String ifMatch,String ifUnmodifiedSince)
-    throws NotFoundException {
+    public Response apisChangeLifecyclePost(String newState,String publishToGateway,String resubscription,String apiId,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisCopyApiPost(String newVersion,String apiId)
-    throws NotFoundException {
+    public Response apisCopyApiPost(String newVersion,String apiId){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince)
-    throws NotFoundException {
+    public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
         //validate API id (provider's tenant = carbon context.tenant domain)
         String[] apiIdDetails = apiId.split("-");
         String apiName = apiIdDetails[0];
@@ -145,8 +139,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(apiToReturn).build();
     }
     @Override
-    public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
-    throws NotFoundException {
+    public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         boolean isTenantFlowStarted = false;
         try {
             org.wso2.carbon.apimgt.api.model.API apiToAdd = fromDTOtoAPI(body);
@@ -170,8 +163,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince)
-    throws NotFoundException {
+    public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince){
         String[] apiIdDetails = apiId.split("-");
         String apiName = apiIdDetails[0];
         String version = apiIdDetails[1];
@@ -202,44 +194,37 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDocumentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch)
-    throws NotFoundException {
+    public Response apisApiIdDocumentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType)
-    throws NotFoundException {
+    public Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince)
-    throws NotFoundException {
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince)
-    throws NotFoundException {
+    public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince)
-    throws NotFoundException {
+    public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdEnvironmentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch)
-    throws NotFoundException {
+    public Response apisApiIdEnvironmentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
-    public Response apisApiIdExternalStoresGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch)
-    throws NotFoundException {
+    public Response apisApiIdExternalStoresGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
