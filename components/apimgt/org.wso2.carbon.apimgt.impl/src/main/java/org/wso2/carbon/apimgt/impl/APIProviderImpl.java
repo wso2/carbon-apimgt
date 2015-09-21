@@ -2636,6 +2636,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
+                                         boolean deprecateOldVersions ,boolean makeKeysForwardCompatible)
+            throws	APIManagementException {
+        String provider = APIUtil.replaceEmailDomain(apiIdentifier.getProviderName());
+        APIIdentifier identifier = new APIIdentifier(provider, apiIdentifier.getApiName(), apiIdentifier.getVersion());
+        String apiPath = APIUtil.getAPIPath(identifier);
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+            String currentStatus = apiArtifact.getLifecycleState();
+            if(!currentStatus.equalsIgnoreCase(targetStatus)) {
+                String action = APIUtil.getLifeCycleTransitionAction(currentStatus, targetStatus);
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+            } else {
+                updateAPIStatus(identifier, targetStatus, publishToGateway, deprecateOldVersions, makeKeysForwardCompatible);
+            }
+            return true;
+        } catch (GovernanceException e) {
+            handleException("Failed to change the life cycle status : ", e);
+            return false;
+        } catch (FaultGatewaysException e) {
+            handleException("Error while publishing to API gateways" + e);
+            return false;
+        } catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return false;
+        }
+    }
+
 }
 
 

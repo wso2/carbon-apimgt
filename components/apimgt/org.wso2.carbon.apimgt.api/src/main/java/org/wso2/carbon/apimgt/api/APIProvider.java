@@ -449,4 +449,8 @@ public interface APIProvider extends APIManager {
     public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus);
 
     public GenericArtifact getAPIArtifact(String apiPath) throws APIManagementException;
+
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
+                                         boolean deprecateOldVersions ,boolean makeKeysForwardCompatible)
+            throws	APIManagementException;
 }

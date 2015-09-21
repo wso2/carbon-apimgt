@@ -900,7 +900,7 @@ public final class APIUtil {
     public static APIStatus getApiStatus(String status) throws APIManagementException {
         APIStatus apiStatus = null;
         for (APIStatus aStatus : APIStatus.values()) {
-            if (aStatus.getStatus().equals(status)) {
+            if (aStatus.getStatus().equalsIgnoreCase(status)) {
                 apiStatus = aStatus;
             }
         }
@@ -4268,6 +4268,42 @@ public final class APIUtil {
     public void associateLifeCycle(String resourcePath, Registry registry) throws RegistryException {
 
         GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
+    }
+
+    public static String getLifeCycleTransitionAction(String currentStatus, String nextStatus) {
+        String action = null;
+        if ("Created".equalsIgnoreCase(currentStatus)) {
+            if ("Prototyped".equalsIgnoreCase(nextStatus)) {
+                action = "Promote";
+            } else if ("Published".equalsIgnoreCase(nextStatus)) {
+                action = "Publish";
+            }
+        } else if ("Prototyped".equalsIgnoreCase(currentStatus)) {
+            if ("Published".equalsIgnoreCase(nextStatus)) {
+                action = "Publish";
+            } else if ("Created".equalsIgnoreCase(nextStatus)) {
+                action = "Demote";
+            }
+        } else if ("Published".equalsIgnoreCase(currentStatus)) {
+            if ("Blocked".equalsIgnoreCase(nextStatus)) {
+                action = "Block";
+            } else if ("Prototyped".equalsIgnoreCase(nextStatus)) {
+                action = "Demote";
+            } else if ("Deprecated".equalsIgnoreCase(nextStatus)) {
+                action = "Deprecate";
+            }
+        } else if ("Blocked".equalsIgnoreCase(currentStatus)) {
+            if ("Deprecated".equalsIgnoreCase(nextStatus)) {
+                action = "Deprecate";
+            } else if ("Published".equalsIgnoreCase(nextStatus)) {
+                action = "Re-Publish";
+            }
+        } else if ("Deprecated".equalsIgnoreCase(currentStatus)) {
+            if ("Retired".equalsIgnoreCase(nextStatus)) {
+                action = "Retire";
+            }
+        }
+        return action;
     }
 
 }
