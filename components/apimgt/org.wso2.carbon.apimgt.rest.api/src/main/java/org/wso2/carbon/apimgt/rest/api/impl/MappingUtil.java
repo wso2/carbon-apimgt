@@ -209,23 +209,23 @@ public class MappingUtil {
     }
 
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
-        //todo: groupId, subscriber
         ApplicationDTO applicationDTO = new ApplicationDTO();
         applicationDTO.setApplicationId(application.getId());
         applicationDTO.setThrottlingTier(application.getTier());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
         applicationDTO.setName(application.getName());
+        applicationDTO.setGroupId(application.getGroupId());
         return applicationDTO;
     }
 
     public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, Subscriber subscriber) {
-        //todo: groupId, subscriber
         Application application = new Application(applicationDTO.getName(), subscriber);
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
         application.setId(applicationDTO.getApplicationId());
+        application.setGroupId(applicationDTO.getGroupId());
         return application;
     }
 }
