@@ -210,7 +210,7 @@ public class DynamicLoadbalanceEndpoint extends LoadbalanceEndpoint {
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) synCtx).getAxis2MessageContext();
 
-        Object o = axis2MessageContext.getProperty("TRANSPORT_HEADERS");
+        Object o = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (o != null && o instanceof Map) {
             return (Map) o;
         }

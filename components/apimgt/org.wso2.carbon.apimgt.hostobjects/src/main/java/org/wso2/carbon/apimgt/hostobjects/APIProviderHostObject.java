@@ -1391,7 +1391,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
             }catch (IOException e){
                 handleException("[Error] Cannot read data from the URL", e);
-                return false;
             }
             apiProvider.updateAPI(api);
 
@@ -1853,7 +1852,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 } catch (IOException e) {
                     handleException("[Error] Cannot read data from the URL", e);
-                    return false;
                 }
             }
 
@@ -2033,7 +2031,7 @@ public class APIProviderHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
         if (fileHostObject != null) {
             long length = fileHostObject.getJavaScriptFile().getLength();
-            if (length / 1024.0 > 1024) {
+            if (length / 1024.0 > APIConstants.MAX_FILE_SIZE) {
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
@@ -2044,7 +2042,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if(file.exists()){
             long length = file.length();
-            if(length/ 1024.0 > 1024){
+            if(length/ 1024 > APIConstants.MAX_FILE_SIZE){
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
