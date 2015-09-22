@@ -20,14 +20,12 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
 
 import java.util.ArrayList;
@@ -208,5 +206,26 @@ public class MappingUtil {
         //endpoint configs, business info and thumbnail requires mapping
         return model;
 
+    }
+
+    public static ApplicationDTO fromApplicationtoDTO (Application application) {
+        //todo: groupId, subscriber
+        ApplicationDTO applicationDTO = new ApplicationDTO();
+        applicationDTO.setApplicationId(application.getId() + "");
+        applicationDTO.setThrottlingTier(application.getTier());
+        applicationDTO.setDescription(application.getDescription());
+        applicationDTO.setCallbackUrl(application.getCallbackUrl());
+        applicationDTO.setName(application.getName());
+        return applicationDTO;
+    }
+
+    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, Subscriber subscriber) {
+        //todo: groupId, subscriber
+        Application application = new Application(applicationDTO.getName(), subscriber);
+        application.setTier(applicationDTO.getThrottlingTier());
+        application.setDescription(applicationDTO.getDescription());
+        application.setCallbackUrl(applicationDTO.getCallbackUrl());
+        application.setId(Integer.parseInt(applicationDTO.getApplicationId()));
+        return application;
     }
 }
