@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application[] applications = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
             for (Application application : applications) {
-                applicationDTOList.add(MappingUtil.fromApplicationtoDTO(application));
+                applicationDTOList.add(ApplicationMappingUtil.fromApplicationtoDTO(application));
             }
             return Response.ok().entity(applicationDTOList).build();
         } catch (APIManagementException e) {
@@ -65,7 +66,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = MappingUtil.fromDTOtoApplication(body, new Subscriber(subscriber));
+            Application application = ApplicationMappingUtil.fromDTOtoApplication(body, new Subscriber(subscriber));
             String status = apiConsumer.addApplication(application, subscriber);  //todo: use "status" properly
             return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, status)).build();
         } catch (APIManagementException e) {
@@ -89,7 +90,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application[] applications = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
             for (Application application : applications) {
                 if (application.getId() == applicationID) {
-                    applicationDTO = MappingUtil.fromApplicationtoDTO(application);
+                    applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                 }
             }
             if (applicationDTO != null) {
@@ -110,7 +111,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             subscriber = username;
         }
         body.setApplicationId(Integer.parseInt(applicationId));
-        Application application = MappingUtil.fromDTOtoApplication(body, new Subscriber(subscriber));
+        Application application = ApplicationMappingUtil.fromDTOtoApplication(body, new Subscriber(subscriber));
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             apiConsumer.updateApplication(application);
