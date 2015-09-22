@@ -194,10 +194,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
 
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
-    public static final String API_PRODUCTION_THROTTLE_MAXCOUNT = "overview_prod_maxcount";
-    public static final String API_PRODUCTION_THROTTLE_UNIT_TIME = "overview_prod_unitTime";
-    public static final String API_SANDBOX_THROTTLE_MAXCOUNT = "overview_sand_maxcount";
-    public static final String API_SANDBOX_THROTTLE_UNIT_TIME = "overview_sand_unitTime";
+    public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
+    public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";

@@ -1138,14 +1138,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Map<String, String> properties = new HashMap<String, String>();
             properties.put("id", "A");
             properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-            if(api.getProductionMaxCount() != null && api.getProductionUnitTime() != null){
-                properties.put("productionUnitTime",api.getProductionMaxCount());
-                properties.put("productionMaxCount",api.getProductionUnitTime());
+            if(api.getProductionMaxTps() != null){
+                properties.put("productionMaxCount",api.getProductionMaxTps());
             }
 
-            if(api.getSandboxMaxCount() != null && api.getSandboxUnitTime() != null){
-                properties.put("sandboxUnitTime",api.getSandboxUnitTime());
-                properties.put("sandboxMaxCount",api.getSandboxMaxCount());
+            if(api.getSandboxMaxTps() != null){
+                properties.put("sandboxMaxCount",api.getSandboxMaxTps());
             }
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);

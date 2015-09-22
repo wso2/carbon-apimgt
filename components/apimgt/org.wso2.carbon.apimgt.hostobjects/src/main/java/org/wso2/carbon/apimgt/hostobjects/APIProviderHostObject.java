@@ -401,7 +401,19 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
 
-		api.removeCustomSequences();
+        String productionTps = (String) apiData.get("productionTps", apiData);
+        String sandboxTps = (String) apiData.get("sandboxTps", apiData);
+
+        api.removeCustomSequences();
+
+        if (!"none".equals(productionTps)) {
+            api.setProductionMaxTps(productionTps);
+        }
+
+        if (!"none".equals(sandboxTps)) {
+            api.setSandboxMaxTps(sandboxTps);
+        }
+
 		if (!"none".equals(inSequence)) {
 			api.setInSequence(inSequence);
 		}
@@ -588,14 +600,6 @@ public class APIProviderHostObject extends ScriptableObject {
             destinationStats = APIConstants.DISABLED;
         }
         api.setDestinationStatsEnabled(destinationStats);
-
-        String maxCount = (String) apiData.get("maxCount", apiData);
-        String unitTime = (String) apiData.get("unitTime", apiData);
-
-
-        // TODO: Remove these
-        api.setProductionMaxCount("10");
-        api.setProductionUnitTime("60000");
 
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
@@ -1393,9 +1397,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         }
 
-        //TODO:Remove once params are sent from the front end
-        api.setProductionUnitTime("60000");
-        api.setProductionMaxCount("10");
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
@@ -1789,9 +1792,8 @@ public class APIProviderHostObject extends ScriptableObject {
         //Validate endpoint URI format
         validateEndpointURI(api.getEndpointConfig());
 
-        // TODO:Remove these
-        api.setProductionMaxCount("10");
-        api.setProductionUnitTime("60000");
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
 
         api.setSubscriptionAvailability(subscriptionAvailability);
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
@@ -2422,11 +2424,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                 Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
                 myn.put(45, myn, JSONObject.toJSONString(registeredResource));
-                myn.put(46, myn, checkValue(api.getProductionMaxCount()));
-                myn.put(47, myn, checkValue(api.getProductionUnitTime()));
-                myn.put(48, myn, checkValue(api.getSandboxMaxCount()));
-                myn.put(49, myn, checkValue(api.getSandboxUnitTime()));
-
+                myn.put(46, myn, checkValue(api.getProductionMaxTps()));
+                myn.put(47, myn, checkValue(api.getSandboxMaxTps()));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +

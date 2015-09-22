@@ -55,11 +55,9 @@ public class API implements Serializable{
     private String businessOwner;
     private String businessOwnerEmail;
 
-    private String productionMaxCount;
-    private String productionUnitTime;
-
-    private String sandboxMaxCount;
-    private String sandboxUnitTime;
+    // Used for keeping Production & Sandbox Throttling limits.
+    private String productionMaxTps;
+    private String sandboxMaxTps;
 
     private String visibility;
     private String visibleRoles;
@@ -137,36 +135,20 @@ public class API implements Serializable{
     //TODO: missing - total user count, up time statistics,tier
 
 
-    public String getProductionMaxCount() {
-        return productionMaxCount;
+    public String getProductionMaxTps() {
+        return productionMaxTps;
     }
 
-    public void setProductionMaxCount(String productionMaxCount) {
-        this.productionMaxCount = productionMaxCount;
+    public void setProductionMaxTps(String productionMaxTps) {
+        this.productionMaxTps = productionMaxTps;
     }
 
-    public String getProductionUnitTime() {
-        return productionUnitTime;
+    public String getSandboxMaxTps() {
+        return sandboxMaxTps;
     }
 
-    public void setProductionUnitTime(String productionUnitTime) {
-        this.productionUnitTime = productionUnitTime;
-    }
-
-    public String getSandboxMaxCount() {
-        return sandboxMaxCount;
-    }
-
-    public void setSandboxMaxCount(String sandboxMaxCount) {
-        this.sandboxMaxCount = sandboxMaxCount;
-    }
-
-    public String getSandboxUnitTime() {
-        return sandboxUnitTime;
-    }
-
-    public void setSandboxUnitTime(String sandboxUnitTime) {
-        this.sandboxUnitTime = sandboxUnitTime;
+    public void setSandboxMaxTps(String sandboxMaxTps) {
+        this.sandboxMaxTps = sandboxMaxTps;
     }
 
     public boolean isAdvertiseOnly() {

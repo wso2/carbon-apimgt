@@ -112,11 +112,11 @@ public class APIThrottleHandler extends AbstractHandler {
      */
     private long version;
 
-    private String sandboxUnitTime;
+    private String sandboxUnitTime = "1000";
+
+    private String productionUnitTime = "1000";
 
     private String sandboxMaxCount;
-
-    private String productionUnitTime;
 
     private String productionMaxCount;
 
@@ -236,7 +236,7 @@ public class APIThrottleHandler extends AbstractHandler {
             Utils.setSOAPFault(messageContext, "Server", "Message Throttled Out",
                                "You have exceeded your quota");
         }
-           Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
+        Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
     }
 
     private OMElement getFaultPayload() {
@@ -428,49 +428,6 @@ public class APIThrottleHandler extends AbstractHandler {
         ThrottleDataHolder dataHolder = (ThrottleDataHolder)
                 cc.getPropertyNonReplicable(ThrottleConstants.THROTTLE_INFO_KEY);
 
-        ThrottleContext hardThrottleContext = throttle.getThrottleContext(
-                HARD_THROTTLING_CONFIGURATION);
-
-        try {
-
-            String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
-            String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-
-            apiContext = apiContext != null ? apiContext : "";
-            apiVersion = apiVersion != null ? apiVersion : "";
-            AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
-
-
-            if(hardThrottleContext != null && authContext.getApiKey() != null) {
-                String throttleKey = apiContext+":"+apiVersion+":"+authContext.getApiKey();
-                AccessInformation info;
-                if(authContext.getApiKey().equals(APIConstants.API_KEY_TYPE_PRODUCTION)){
-                    info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
-                                                                                 PRODUCTION_HARD_LIMIT);
-                } else if(authContext.getApiKey().equals(APIConstants.API_KEY_TYPE_SANDBOX)){
-                    info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
-                                                                                 PRODUCTION_HARD_LIMIT);
-                }
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Throttle by hard limit " + throttleKey);
-                    log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
-                }
-
-                if(info != null && !info.isAccessAllowed()){
-                    canAccess = false;
-                    return false;
-                }
-            }
-
-        } catch (ThrottleException e) {
-            log.warn("Exception occurred while performing role " +
-                     "based throttling", e);
-            log.debug("Throttle limit exceeded for hard_limit");
-            canAccess = false;
-            return canAccess;
-        }
-
         if (throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY) == null) {
             //there is no throttle configuration for RoleBase Throttling
             //skip role base throttling
@@ -590,7 +547,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 APIKeyValidator validator = new APIKeyValidator(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
                 VerbInfoDTO verbInfoDTO = null;
 
-                    //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
+                //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
                 verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
 
                 String resourceLevelRoleId = null;
@@ -744,6 +701,49 @@ public class APIThrottleHandler extends AbstractHandler {
                 }
             }
         }
+
+        ThrottleContext hardThrottleContext = throttle.getThrottleContext(
+                HARD_THROTTLING_CONFIGURATION);
+
+        try {
+
+            String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+            String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+            apiContext = apiContext != null ? apiContext : "";
+            apiVersion = apiVersion != null ? apiVersion : "";
+            AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
+
+
+            if (hardThrottleContext != null && authContext.getKeyType() != null) {
+                String throttleKey = apiContext + ":" + apiVersion + ":" + authContext.getKeyType();
+                AccessInformation info = null;
+                if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
+                    info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
+                                                               PRODUCTION_HARD_LIMIT);
+                } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
+                    info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
+                                                               SANDBOX_HARD_LIMIT);
+                }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle by hard limit " + throttleKey);
+                    log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
+                }
+
+                if (info != null && !info.isAccessAllowed()) {
+                    canAccess = false;
+                    return false;
+                }
+            }
+
+        } catch (ThrottleException e) {
+            log.warn("Exception occurred while performing role " +
+                     "based throttling", e);
+            log.debug("Throttle limit exceeded for hard_limit");
+            canAccess = false;
+            return canAccess;
+        }
         return canAccess;
     }
 
@@ -865,7 +865,6 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
 
-
     public String getSandboxUnitTime() {
         return sandboxUnitTime;
     }
@@ -889,45 +888,43 @@ public class APIThrottleHandler extends AbstractHandler {
             return null;
         }
 
+        OMElement parsedPolicy = null;
+
         StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\" " +
                                                  "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
-                                                 "    <throttle:MediatorThrottleAssertion>\n" +
-                                                 "        <wsp:Policy>\n");
+                                                 "    <throttle:MediatorThrottleAssertion>\n");
 
         if (productionMaxCount != null && productionUnitTime != null) {
-            policy.append("<throttle:ID throttle:type=\"ROLE\">" + PRODUCTION_HARD_LIMIT + "</throttle:ID>\n" +
-                          "            <wsp:Policy>\n" +
-                          "                <throttle:Control>\n" +
-                          "                    <wsp:Policy>\n" +
-                          "                        <throttle:MaximumCount>" + productionMaxCount + "</throttle:MaximumCount>\n" +
-                          "                        <throttle:UnitTime>" + productionUnitTime + "</throttle:UnitTime>\n" +
-                          "                    </wsp:Policy>\n" +
-                          "                </throttle:Control>\n" +
-                          "            </wsp:Policy>\n");
+            policy.append(createPolicyForRole(PRODUCTION_HARD_LIMIT,productionUnitTime,productionMaxCount));
         }
 
         if (sandboxMaxCount != null && sandboxUnitTime != null) {
-            policy.append("            <throttle:ID throttle:type=\"ROLE\">" + SANDBOX_HARD_LIMIT + "</throttle:ID>\n" +
-                          "            <wsp:Policy>\n" +
-                          "                <throttle:Control>\n" +
-                          "                    <wsp:Policy>\n" +
-                          "                        <throttle:MaximumCount>" + sandboxMaxCount + "</throttle:MaximumCount>\n" +
-                          "                        <throttle:UnitTime>" + sandboxUnitTime + "</throttle:UnitTime>\n" +
-                          "                    </wsp:Policy>\n" +
-                          "                </throttle:Control>\n" +
-                          "            </wsp:Policy>\n");
+            policy.append(createPolicyForRole(SANDBOX_HARD_LIMIT,sandboxUnitTime,sandboxMaxCount));
         }
 
-        policy.append("        </wsp:Policy>\n" +
-                      "    </throttle:MediatorThrottleAssertion>\n" +
+        policy.append("    </throttle:MediatorThrottleAssertion>\n" +
                       "</wsp:Policy>");
         try {
-            return AXIOMUtil.stringToOM(policy.toString());
+            parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
         } catch (XMLStreamException e) {
             log.error("Error occurred while creating policy file for Hard Throttling.");
         } finally {
-            return null;
+            return parsedPolicy;
         }
+    }
+
+    private String createPolicyForRole(String roleId, String unitTime, String maxCount){
+        return "<wsp:Policy>\n" +
+               "     <throttle:ID throttle:type=\"ROLE\">" + roleId + "</throttle:ID>\n" +
+               "            <wsp:Policy>\n" +
+               "                <throttle:Control>\n" +
+               "                    <wsp:Policy>\n" +
+               "                        <throttle:MaximumCount>" + maxCount + "</throttle:MaximumCount>\n" +
+               "                        <throttle:UnitTime>" + unitTime + "</throttle:UnitTime>\n" +
+               "                    </wsp:Policy>\n" +
+               "                </throttle:Control>\n" +
+               "            </wsp:Policy>\n" +
+               " </wsp:Policy>\n";
     }
 
     private void logMessageDetails(MessageContext messageContext) {
