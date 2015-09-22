@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ApiModel(description = "")
 public class ApplicationDTO  {
   
-  private String applicationId = null;
+  private Integer applicationId = null;
   private String name = null;
   private String throttlingTier = null;
   private String callbackUrl = null;
@@ -19,10 +19,10 @@ public class ApplicationDTO  {
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("applicationId")
-  public String getApplicationId() {
+  public Integer getApplicationId() {
     return applicationId;
   }
-  public void setApplicationId(String applicationId) {
+  public void setApplicationId(Integer applicationId) {
     this.applicationId = applicationId;
   }
 

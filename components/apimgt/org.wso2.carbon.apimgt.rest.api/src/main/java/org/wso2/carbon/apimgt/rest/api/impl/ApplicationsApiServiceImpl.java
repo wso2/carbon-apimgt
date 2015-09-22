@@ -91,7 +91,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdPut(String applicationId,ApplicationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         Subscriber subscriber = new Subscriber(username);
-        body.setApplicationId(applicationId);
+        body.setApplicationId(Integer.parseInt(applicationId));
         Application application = MappingUtil.fromDTOtoApplication(body, subscriber);
 
         try {

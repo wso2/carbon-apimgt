@@ -1498,7 +1498,7 @@ definitions:
       - applicationId
     properties:
       applicationId:
-        type: string
+        type: integer
       name:
         type: string
       throttlingTier:
@@ -1582,7 +1582,7 @@ definitions:
       subscriptionId:
         type: number
       applicationId:
-        type: string
+        type: integer
       apiId:
         type: string
       tier:

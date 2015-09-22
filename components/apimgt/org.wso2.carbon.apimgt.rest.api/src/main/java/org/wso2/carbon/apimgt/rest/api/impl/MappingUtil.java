@@ -211,7 +211,7 @@ public class MappingUtil {
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
         //todo: groupId, subscriber
         ApplicationDTO applicationDTO = new ApplicationDTO();
-        applicationDTO.setApplicationId(application.getId() + "");
+        applicationDTO.setApplicationId(application.getId());
         applicationDTO.setThrottlingTier(application.getTier());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
@@ -225,7 +225,7 @@ public class MappingUtil {
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
-        application.setId(Integer.parseInt(applicationDTO.getApplicationId()));
+        application.setId(applicationDTO.getApplicationId());
         return application;
     }
 }
