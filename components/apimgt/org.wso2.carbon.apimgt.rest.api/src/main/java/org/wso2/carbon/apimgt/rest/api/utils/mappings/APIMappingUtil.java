@@ -1,46 +1,42 @@
 /*
- *  Copyright WSO2 Inc.
+ *
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
+ * /
  */
 
-package org.wso2.carbon.apimgt.rest.api.impl;
+package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
+import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-public class MappingUtil {
+public class APIMappingUtil {
+    public static APIDTO fromAPItoDTO(org.wso2.carbon.apimgt.api.model.API model) throws APIManagementException {
 
-    protected static APIDTO fromAPItoDTO(org.wso2.carbon.apimgt.api.model.API model) throws APIManagementException {
-
-        APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(model.getId().getProviderName());
+        APIProvider apiProvider = RestApiUtil.getProvider(model.getId().getProviderName());
 
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
@@ -124,16 +120,19 @@ public class MappingUtil {
         return dto;
     }
 
-    protected static org.wso2.carbon.apimgt.api.model.API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
+    public static org.wso2.carbon.apimgt.api.model.API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
 
-        APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(dto.getProvider());
+        APIProvider apiProvider = RestApiUtil.getProvider(dto.getProvider());
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
-        APIIdentifier apiId = new APIIdentifier(dto.getName(), dto.getVersion(), dto.getProvider());
+        APIIdentifier apiId = new APIIdentifier(dto.getProvider(), dto.getName(), dto.getVersion());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
 
         model.setContext(dto.getContext());  //context should change if tenant
+        model.setContextTemplate(dto.getContext());
         model.setDescription(dto.getDescription());
+
+        model.setStatus(APIStatus.CREATED);
 
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
@@ -155,13 +154,17 @@ public class MappingUtil {
             }
         }
 
-        model.setSubscriptionAvailability(dto.getSubscriptionAvailability().name());
+        if (dto.getSubscriptionAvailability() != null) {
+            model.setSubscriptionAvailability(dto.getSubscriptionAvailability().name());
+        }
+
         //do we need to put validity checks? - specific_tenants
         if (dto.getSubscriptionAvailableTenants() != null) {
             model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
         }
 
-        if (dto.getSwagger() != null) {
+        //this should be done after api was added once
+        /*if (dto.getSwagger() != null) {
             String apiSwaggerDefinition = dto.getSwagger();
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(model, apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
@@ -177,7 +180,7 @@ public class MappingUtil {
             // this needs to be checked since uri templates are not yet set
             String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(model);
             apiProvider.saveSwagger20Definition(model.getId(), apiDefinitionJSON);
-        }
+        }*/
 
         if (dto.getTags() != null) {
             Set<String> apiTags = new HashSet<String>(dto.getTags());
@@ -194,7 +197,7 @@ public class MappingUtil {
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
         //dto.setType("");   //how to get type?
-        //model.setVisibility(dto.getVisibility().name());
+        model.setVisibility("Public");
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
             model.setVisibleRoles(visibleRoles);
