@@ -73,7 +73,7 @@ public class ScopesIssuer {
         }
 
         String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
-        String username = tokReqMsgCtx.getAuthorizedUser();
+        String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
         List<String> reqScopeList = Arrays.asList(requestedScopes);
 
         try {
