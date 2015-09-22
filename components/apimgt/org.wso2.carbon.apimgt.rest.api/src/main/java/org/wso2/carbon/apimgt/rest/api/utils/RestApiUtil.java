@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,19 +16,15 @@
  * /
  */
 
-package org.wso2.carbon.apimgt.rest.api.impl;
+package org.wso2.carbon.apimgt.rest.api.utils;
 
-import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 
-public class ValidatingUtil {
+public class RestApiUtil {
 
-    public static boolean isValidAPI(APIDTO dto){
-        //todo
-        return true;
-    }
-
-    public static boolean isValidApiId(String apiId){
-        //todo
-        return true;
+    public static APIProvider getProvider (String providerName) throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIProvider(providerName);
     }
 }

@@ -21,7 +21,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
@@ -29,6 +28,9 @@ import org.wso2.carbon.apimgt.rest.api.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.utils.mappings.APIMappingUtil;
+
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -38,8 +40,6 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.wso2.carbon.apimgt.rest.api.impl.MappingUtil.fromAPItoDTO;
-import static org.wso2.carbon.apimgt.rest.api.impl.MappingUtil.fromDTOtoAPI;
 
 public class ApisApiServiceImpl extends ApisApiService {
 
@@ -49,14 +49,28 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch){
         List<org.wso2.carbon.apimgt.api.model.API> apis;
         List<APIDTO> list = new ArrayList<APIDTO>();
+
+        boolean isTenantFlowStarted = false;
+
         try {
-            provider = APIManagerFactory.getInstance().getAPIProvider("admin");
-            apis = provider.searchAPIs(query,type, "admin");
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            apis = apiProvider.searchAPIs(query,type, loggedInUser);
             for (org.wso2.carbon.apimgt.api.model.API temp : apis) {
-                list.add(fromAPItoDTO(temp));
+                list.add(APIMappingUtil.fromAPItoDTO(temp));
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return Response.ok().entity(list).build();
     }
@@ -65,18 +79,19 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         boolean isTenantFlowStarted = false;
         try {
-            org.wso2.carbon.apimgt.api.model.API apiToAdd = fromDTOtoAPI(body);
-             String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                 isTenantFlowStarted = true;
-                 PrivilegedCarbonContext.startTenantFlow();
-                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-             }
+            org.wso2.carbon.apimgt.api.model.API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            apiProvider.addAPI(apiToAdd);
 
-             provider.addAPI(apiToAdd);
-
-             //how to add thumbnail
-             //publish to external stores
+            //how to add thumbnail
+            //publish to external stores
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         } finally {
@@ -110,7 +125,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
 
             APIIdentifier apiIdentifier = new APIIdentifier(providerNameEmailReplaced, apiName, version);
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -121,7 +137,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPI(apiIdentifier);
             if (api != null) {
 
-                apiToReturn = fromAPItoDTO(api);
+                apiToReturn = APIMappingUtil.fromAPItoDTO(api);
 
             } else {
                 //log the error
@@ -142,14 +158,16 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         boolean isTenantFlowStarted = false;
         try {
-            org.wso2.carbon.apimgt.api.model.API apiToAdd = fromDTOtoAPI(body);
+            org.wso2.carbon.apimgt.api.model.API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
 
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
             }
-            provider.updateAPI(apiToAdd);
+            apiProvider.updateAPI(apiToAdd);
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         } catch (FaultGatewaysException e) {
@@ -172,12 +190,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         APIIdentifier apiIdentifier = new APIIdentifier(providerNameEmailReplaced, apiName, version);
         boolean isTenantFlowStarted = false;
         try{
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
             }
-            provider.deleteAPI(apiIdentifier);
+            apiProvider.deleteAPI(apiIdentifier);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
             if (apiId.toString() != null) {
