@@ -212,6 +212,43 @@
                     </table>
                 </div>
             </div>
+
+            <div class="control-group">
+                            <label class="control-label" for="throttle"><%=i18n.localize("throttle")%></label>
+                            <div class="controls">
+                            <label class="checkbox">
+                                <input type="checkbox" id="toggleThrottle" name="throttle_check" id="throttle_check"
+                            <%
+                            if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
+                            checked="checked"<%}%>><%=i18n.localize("throttleMsg")%>
+                            </label>
+                            <table class="table table-bordered table-striped" id="throttleTable"
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th><%=i18n.localize("maxCount")%></th>
+                                    </tr>
+                                </thead>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("prodLimit")%>    
+                                        </td>
+                                        <td>
+                                            <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("sandLimit")%>    
+                                        </td>
+                                        <td>
+                                            <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
             <%}%>
 
 
@@ -665,6 +702,12 @@
         $('#publish_api').click(function(e){
             $("body").on("api_saved", publish_api);
             thisID = $(this).attr('id');
+                if(!$("#toggleThrottle").attr('checked')) {
+                alert("Checked")
+                // Setting text field values to null if check box is not selected.
+                    $('#productionTps').val(null);
+                    $('#sandboxTps').val(null);
+            } 
             $("#manage_form").submit();
         });
 
