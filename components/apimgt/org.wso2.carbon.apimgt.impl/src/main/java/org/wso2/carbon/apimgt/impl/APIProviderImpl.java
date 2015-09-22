@@ -1890,13 +1890,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 	new WSO2APIPublisher().deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
                 }
             }
-            apiMgtDAO.deleteAPI(identifier);
+
             //if manageAPIs == true
             if (APIUtil.isAPIManagementEnabled()) {
-            	 Cache contextCache = APIUtil.getAPIContextCache();
-                contextCache.remove(api.getContext());
-                contextCache.put(api.getContext(), false);
+                Cache contextCache = APIUtil.getAPIContextCache();
+                String context = apiMgtDAO.getAPIContext(identifier);
+                contextCache.remove(context);
+                contextCache.put(context, false);
             }
+
+            apiMgtDAO.deleteAPI(identifier);
+
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();
