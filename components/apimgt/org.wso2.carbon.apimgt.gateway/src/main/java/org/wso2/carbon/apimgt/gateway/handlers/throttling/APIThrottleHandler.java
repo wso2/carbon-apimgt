@@ -89,11 +89,6 @@ public class APIThrottleHandler extends AbstractHandler {
 
     public static final String RESOURCE_THROTTLE_KEY = "resource_throttle_context";
 
-    public static final String HARD_THROTTLING_CONFIGURATION = "hard_throttling_limits";
-
-    public static final String PRODUCTION_HARD_LIMIT = "PRODUCTION_HARD_LIMIT";
-
-    public static final String SANDBOX_HARD_LIMIT = "SANDBOX_HARD_LIMIT";
 
     /**
      * The property key that used when the ConcurrentAccessController
@@ -214,10 +209,31 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
     private void handleThrottleOut(MessageContext messageContext) {
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, 900800);
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Message throttled out");
 
+        String errorMessage = null;
+        String errorDescription = null;
+        int errorCode = -1;
+        int httpErrorCode = -1;
+
+        if (APIThrottleConstants
+                .HARD_LIMIT_EXCEEDED.equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE;
+            errorMessage = "API Limit Reached";
+            errorDescription = "API not accepting requests";
+            // It it's a hard limit exceeding, we tell it as service not being available.
+            httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
+        } else {
+            errorCode = 900800;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        }
+
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
         Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
+
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
             // If needed user should be able to prevent the rest of the fault handling
@@ -230,28 +246,28 @@ public class APIThrottleHandler extends AbstractHandler {
         // as the response.
         axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
 
-        // By default we send a 503 response back
+
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, getFaultPayload());
+            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));
         } else {
-            Utils.setSOAPFault(messageContext, "Server", "Message Throttled Out",
-                               "You have exceeded your quota");
+            Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
         }
-        Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
+
+        Utils.sendFault(messageContext, httpErrorCode);
     }
 
-    private OMElement getFaultPayload() {
+    private OMElement getFaultPayload(int throttleErrorCode, String message, String description) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APIThrottleConstants.API_THROTTLE_NS,
                                                APIThrottleConstants.API_THROTTLE_NS_PREFIX);
         OMElement payload = fac.createOMElement("fault", ns);
 
         OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(String.valueOf(APIThrottleConstants.THROTTLE_OUT_ERROR_CODE));
+        errorCode.setText(String.valueOf(throttleErrorCode));
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText("Message Throttled Out");
+        errorMessage.setText(message);
         OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText("You have exceeded your quota");
+        errorDetail.setText(description);
 
         payload.addChild(errorCode);
         payload.addChild(errorMessage);
@@ -705,7 +721,7 @@ public class APIThrottleHandler extends AbstractHandler {
         }
 
         ThrottleContext hardThrottleContext = throttle.getThrottleContext(
-                HARD_THROTTLING_CONFIGURATION);
+                APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
 
         try {
 
@@ -722,10 +738,10 @@ public class APIThrottleHandler extends AbstractHandler {
                 AccessInformation info = null;
                 if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
-                                                               PRODUCTION_HARD_LIMIT);
+                                                               APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                 } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
-                                                               SANDBOX_HARD_LIMIT);
+                                                               APIThrottleConstants.SANDBOX_HARD_LIMIT);
                 }
 
                 if (log.isDebugEnabled()) {
@@ -734,7 +750,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 }
 
                 if (info != null && !info.isAccessAllowed()) {
-                    canAccess = false;
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,APIThrottleConstants.HARD_LIMIT_EXCEEDED);
                     return false;
                 }
             }
@@ -742,8 +758,8 @@ public class APIThrottleHandler extends AbstractHandler {
         } catch (ThrottleException e) {
             log.warn("Exception occurred while performing role " +
                      "based throttling", e);
-            log.debug("Throttle limit exceeded for hard_limit");
             canAccess = false;
+            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,APIThrottleConstants.HARD_LIMIT_EXCEEDED);
             return canAccess;
         }
         return canAccess;
@@ -815,7 +831,7 @@ public class APIThrottleHandler extends AbstractHandler {
                             ThrottleContext hardThrottling = ThrottleContextFactory.createThrottleContext(ThrottleConstants
                                                                                                                   .ROLE_BASE,
                                                                                                           newThrottleConfig);
-                            throttle.addThrottleContext(HARD_THROTTLING_CONFIGURATION, hardThrottling);
+                            throttle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
                         }
 
                     }
@@ -885,8 +901,8 @@ public class APIThrottleHandler extends AbstractHandler {
 
     private OMElement createHardThrottlingPolicy() {
 
-        if (productionUnitTime == null && productionMaxCount == null ||
-            sandboxUnitTime == null && sandboxMaxCount == null) {
+        if (productionMaxCount == null &&
+            sandboxMaxCount == null) {
             return null;
         }
 
@@ -897,11 +913,11 @@ public class APIThrottleHandler extends AbstractHandler {
                                                  "    <throttle:MediatorThrottleAssertion>\n");
 
         if (productionMaxCount != null && productionUnitTime != null) {
-            policy.append(createPolicyForRole(PRODUCTION_HARD_LIMIT,productionUnitTime,productionMaxCount));
+            policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT,productionUnitTime,productionMaxCount));
         }
 
         if (sandboxMaxCount != null && sandboxUnitTime != null) {
-            policy.append(createPolicyForRole(SANDBOX_HARD_LIMIT,sandboxUnitTime,sandboxMaxCount));
+            policy.append(createPolicyForRole(APIThrottleConstants.SANDBOX_HARD_LIMIT,sandboxUnitTime,sandboxMaxCount));
         }
 
         policy.append("    </throttle:MediatorThrottleAssertion>\n" +
