@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -30,7 +31,6 @@ import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.utils.mappings.APIMappingUtil;
-
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -215,19 +215,43 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
     @Override
     public Response apisApiIdDocumentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        List<DocumentDTO> list = new ArrayList<DocumentDTO>();
+        try {
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            List<Documentation> docs = apiProvider.getAllDocumentation(APIMappingUtil.getAPIIdentifier(apiId));
+            for (org.wso2.carbon.apimgt.api.model.Documentation temp : docs) {
+                list.add(APIMappingUtil.fromDocumentationtoDTO(temp));
+            }
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
+        return Response.ok().entity(list).build();
     }
     @Override
     public Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType){
         // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        Documentation doc;
+        try {
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            doc = apiProvider.getDocumentation(documentId);
+            if(null != doc){
+                return Response.ok().entity(doc).build();
+            }
+            else{
+                throw new org.wso2.carbon.apimgt.rest.api.exception.NotFoundException();
+            }
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         // do some magic!

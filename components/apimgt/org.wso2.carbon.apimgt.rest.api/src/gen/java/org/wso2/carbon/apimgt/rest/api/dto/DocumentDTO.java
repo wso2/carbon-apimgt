@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ApiModel(description = "")
 public class DocumentDTO  {
   
-  private Integer documentId = null;
+  private String documentId = null;
   private String name = null;
   private String type = null;
   private String summary = null;
@@ -20,10 +20,10 @@ public class DocumentDTO  {
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("documentId")
-  public Integer getDocumentId() {
+  public String getDocumentId() {
     return documentId;
   }
-  public void setDocumentId(Integer documentId) {
+  public void setDocumentId(String documentId) {
     this.documentId = documentId;
   }
 

@@ -27,6 +27,7 @@ import java.util.Date;
  */
 @SuppressWarnings("unused")
 public class Documentation implements Serializable{
+    private String id;
     private DocumentationType type;
     private String name;
     private String summary;
@@ -144,5 +145,13 @@ public class Documentation implements Serializable{
         private DocumentVisibility(String visibility) {
             this.visibility = visibility;
         }
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

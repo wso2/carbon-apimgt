@@ -24,16 +24,34 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class APIMappingUtil {
+
+    public static APIIdentifier getAPIIdentifier(String apiId){
+        String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
+        String apiName = apiIdDetails[0];
+        String version = apiIdDetails[1];
+        String providerName = apiIdDetails[2];
+        String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
+        return new APIIdentifier(providerNameEmailReplaced, apiName, version);
+    }
+
     public static APIDTO fromAPItoDTO(org.wso2.carbon.apimgt.api.model.API model) throws APIManagementException {
 
         APIProvider apiProvider = RestApiUtil.getProvider(model.getId().getProviderName());
@@ -211,5 +229,16 @@ public class APIMappingUtil {
         //endpoint configs, business info and thumbnail requires mapping
         return model;
 
+    }
+
+    public static DocumentDTO fromDocumentationtoDTO(Documentation doc){
+        DocumentDTO d = new DocumentDTO();
+        d.setDocumentId(doc.getId());
+        d.setName(doc.getName());
+        d.setUrl(doc.getFilePath());
+        d.setSummary(doc.getSummary());
+        d.setType(doc.getType().getType());
+        d.setUrl(doc.getFilePath());
+        return d;
     }
 }
