@@ -132,6 +132,14 @@ public class TenantWorkflowConfigHolder implements Serializable {
             loadProperties(workflowElem, workFlowExecutor);
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
 
+            workflowElem = workflowExtensionsElem.getFirstChildWithName(
+                    new QName(WorkflowConstants.SUBSCRIPTION_DELETION));
+            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
+            loadProperties(workflowElem, workFlowExecutor);
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workFlowExecutor);
+
         } catch (RegistryException e) {
             log.error("Error loading Resource from path" + APIConstants.WORKFLOW_EXECUTOR_LOCATION, e);
             handleException("Error loading Resource from path" + APIConstants.WORKFLOW_EXECUTOR_LOCATION, e);

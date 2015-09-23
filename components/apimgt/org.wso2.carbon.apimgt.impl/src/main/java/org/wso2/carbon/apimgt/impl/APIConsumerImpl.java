@@ -1747,7 +1747,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Application application = apiMgtDAO.getApplicationByName(applicationName, userName, groupId);
         String applicationId = String.valueOf(application.getId());
         apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
-        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId , tokenType);
+        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId, tokenType);
         String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
         if(consumerKey != null){
             apiMgtDAO.deleteAccessAllowDomains(consumerKey);
@@ -1858,7 +1858,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupingId) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
-            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,endSubIndex, groupingId);
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex, endSubIndex, groupingId);
             if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
                 Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
                 for(SubscribedAPI subscribedApi:subscribedAPIs) {
@@ -1964,7 +1964,48 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
-        apiMgtDAO.removeSubscription(identifier, applicationId);
+        API api = getAPI(identifier);
+        boolean isTenantFlowStarted = false;
+        /**
+         * TODO:  find if there are set of disallowed api status which can't be unsubscribed
+         */
+        apiMgtDAO.updateSubscription(identifier, APIConstants.SubscriptionStatus.PENDING_REMOVAL, applicationId);
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+
+        try {
+            WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+
+            /**
+             * TODO: Check below items to match the required parameters of deletion workflow
+             */
+            SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+            workflowDTO.setWorkflowReference(String.valueOf(applicationId));
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            workflowDTO.setStatus(WorkflowStatus.CREATED);
+            workflowDTO.setCreatedTime(System.currentTimeMillis());
+            workflowDTO.setTenantDomain(tenantDomain);
+            workflowDTO.setTenantId(tenantId);
+            workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
+            workflowDTO.setSubscriber(userId);
+
+            removeSubscriptionWFExecutor.execute(workflowDTO);
+        } catch (WorkflowException e) {
+            // If the workflow execution fails, roll back transaction by adding the subscription entry.
+            apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
+                    APIConstants.SubscriptionStatus.UNBLOCKED);
+            log.error("Could not execute Workflow", e);
+            throw new APIManagementException("Could not execute Workflow", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
             invalidateCachedKeys(applicationId);
         }
