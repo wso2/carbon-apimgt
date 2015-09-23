@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class SubscriptionDTO  {
   
   private BigDecimal subscriptionId = null;
-  private String applicationId = null;
+  private Integer applicationId = null;
   private String apiId = null;
   private String tier = null;
   private String status = null;
@@ -32,10 +32,10 @@ public class SubscriptionDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("applicationId")
-  public String getApplicationId() {
+  public Integer getApplicationId() {
     return applicationId;
   }
-  public void setApplicationId(String applicationId) {
+  public void setApplicationId(Integer applicationId) {
     this.applicationId = applicationId;
   }
 

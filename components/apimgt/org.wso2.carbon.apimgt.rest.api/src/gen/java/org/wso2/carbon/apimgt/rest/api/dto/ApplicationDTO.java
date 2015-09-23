@@ -8,21 +8,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ApiModel(description = "")
 public class ApplicationDTO  {
   
-  private String applicationId = null;
+  private Integer applicationId = null;
   private String name = null;
   private String throttlingTier = null;
   private String callbackUrl = null;
   private String description = null;
+  private String groupId = null;
 
   
   /**
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("applicationId")
-  public String getApplicationId() {
+  public Integer getApplicationId() {
     return applicationId;
   }
-  public void setApplicationId(String applicationId) {
+  public void setApplicationId(Integer applicationId) {
     this.applicationId = applicationId;
   }
 
@@ -75,6 +76,18 @@ public class ApplicationDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("groupId")
+  public String getGroupId() {
+    return groupId;
+  }
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -86,6 +99,7 @@ public class ApplicationDTO  {
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  groupId: ").append(groupId).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

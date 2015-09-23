@@ -585,6 +585,8 @@ paths:
     get:
       description: Get a list of applications
       parameters:
+        - $ref: '#/parameters/subscriber'
+        - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
@@ -633,6 +635,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Application'
+        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/Content-Type'
       responses:
         '201':
@@ -662,6 +665,7 @@ paths:
       description: Get application details
       parameters:
         - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -700,6 +704,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Application'
+        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -737,6 +742,7 @@ paths:
       description: Remove an application
       parameters:
         - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       responses:
@@ -1309,6 +1315,18 @@ parameters:
     required: true
     type: number
     format: integer
+  groupId:
+    name: groupId
+    in: query
+    description: Application Group Id
+    required: false
+    type: string
+  subscriber:
+    name: subscriber
+    in: query
+    description: Subscriber username
+    required: false
+    type: string
   subscriptionId:
     name: subscriptionId
     in: path
@@ -1498,7 +1516,7 @@ definitions:
       - applicationId
     properties:
       applicationId:
-        type: string
+        type: integer
       name:
         type: string
       throttlingTier:
@@ -1506,6 +1524,8 @@ definitions:
       callbackUrl:
         type: string
       description:
+        type: string
+      groupId:
         type: string
       key:
         properties:
@@ -1582,7 +1602,7 @@ definitions:
       subscriptionId:
         type: number
       applicationId:
-        type: string
+        type: integer
       apiId:
         type: string
       tier:

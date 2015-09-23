@@ -39,12 +39,14 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
-    public Response applicationsGet(@ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
+    public Response applicationsGet(@ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
+    @ApiParam(value = "Application Group Id") @QueryParam("groupId") String groupId,
+    @ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
     @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     throws NotFoundException {
-    return delegate.applicationsGet(limit,offset,accept,ifNoneMatch);
+    return delegate.applicationsGet(subscriber,groupId,limit,offset,accept,ifNoneMatch);
     }
     @POST
     
@@ -59,9 +61,10 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format.") })
 
     public Response applicationsPost(@ApiParam(value = "Application object that is to be created" ,required=true ) ApplicationDTO body,
+    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
     throws NotFoundException {
-    return delegate.applicationsPost(body,contentType);
+    return delegate.applicationsPost(body,subscriber,contentType);
     }
     @GET
     @Path("/{applicationId}")
@@ -78,11 +81,12 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
     public Response applicationsApplicationIdGet(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
+    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     throws NotFoundException {
-    return delegate.applicationsApplicationIdGet(applicationId,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.applicationsApplicationIdGet(applicationId,subscriber,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/{applicationId}")
@@ -100,11 +104,12 @@ public class ApplicationsApi  {
 
     public Response applicationsApplicationIdPut(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
     @ApiParam(value = "Application object that needs to be updated" ,required=true ) ApplicationDTO body,
+    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
-    return delegate.applicationsApplicationIdPut(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.applicationsApplicationIdPut(applicationId,body,subscriber,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
     @Path("/{applicationId}")
@@ -119,10 +124,11 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response applicationsApplicationIdDelete(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
+    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
-    return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince);
+    return delegate.applicationsApplicationIdDelete(applicationId,subscriber,ifMatch,ifUnmodifiedSince);
     }
     @POST
     @Path("/{applicationId}/generate-keys")
