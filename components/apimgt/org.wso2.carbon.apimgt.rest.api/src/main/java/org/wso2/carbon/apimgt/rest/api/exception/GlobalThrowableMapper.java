@@ -50,7 +50,8 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable>{
         }
 
         if(e instanceof NotFoundException){
-            return ((NotFoundException) e).getResponse();        }
+            return ((NotFoundException) e).getResponse();
+        }
 
         if(e instanceof PreconditionFailedException){
             return ((PreconditionFailedException) e).getResponse();

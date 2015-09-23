@@ -553,6 +553,21 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentation;
     }
 
+    public Documentation getDocumentation(String docId) throws APIManagementException {
+        Documentation documentation = null;
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                            APIConstants.DOCUMENTATION_KEY);
+        try {
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            if(null != artifact) {
+                documentation = APIUtil.getDocumentation(artifact);
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to get documentation details", e);
+        }
+        return documentation;
+    }
+
     public String getDocumentationContent(APIIdentifier identifier, String documentationName)
             throws APIManagementException {
         String contentPath = APIUtil.getAPIDocPath(identifier) +

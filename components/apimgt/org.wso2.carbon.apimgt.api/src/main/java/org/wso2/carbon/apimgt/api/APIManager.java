@@ -143,6 +143,15 @@ public interface APIManager {
                                           String docName) throws APIManagementException;
 
     /**
+     * Returns the specified document attached to the given API
+     *
+     * @param docId   DocumentID
+     * @return Documentation
+     * @throws APIManagementException if failed to get Documentation
+     */
+    public Documentation getDocumentation(String docId) throws APIManagementException;
+
+    /**
      * This method used to get the content of a documentation
      *
      * @param identifier,        API identifier
