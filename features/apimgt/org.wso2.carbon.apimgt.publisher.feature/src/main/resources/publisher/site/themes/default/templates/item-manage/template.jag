@@ -703,7 +703,6 @@
             $("body").on("api_saved", publish_api);
             thisID = $(this).attr('id');
                 if(!$("#toggleThrottle").attr('checked')) {
-                alert("Checked")
                 // Setting text field values to null if check box is not selected.
                     $('#productionTps').val(null);
                     $('#sandboxTps').val(null);

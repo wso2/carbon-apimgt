@@ -223,7 +223,7 @@ public class APIThrottleHandler extends AbstractHandler {
             // It it's a hard limit exceeding, we tell it as service not being available.
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
         } else {
-            errorCode = 900800;
+            errorCode = APIThrottleConstants.THROTTLE_OUT_ERROR_CODE;
             errorMessage = "Message throttled out";
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
@@ -311,7 +311,7 @@ public class APIThrottleHandler extends AbstractHandler {
         boolean canAccess = true;
         //remote ip of the caller
         String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+                                                                         .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP != null) {
             if (remoteIP.indexOf(",") > 0) {
                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
@@ -562,7 +562,6 @@ public class APIThrottleHandler extends AbstractHandler {
                 //==============================Start of Resource level throttling=========================================
 
                 //get throttling information for given request with resource path and http verb
-                APIKeyValidator validator = new APIKeyValidator(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
                 VerbInfoDTO verbInfoDTO = null;
 
                 //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
@@ -720,6 +719,11 @@ public class APIThrottleHandler extends AbstractHandler {
             }
         }
 
+        //---------------End of API level throttling------------------
+
+
+        //---------------Start of Hard throttling------------------
+
         ThrottleContext hardThrottleContext = throttle.getThrottleContext(
                 APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
 
@@ -750,7 +754,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 }
 
                 if (info != null && !info.isAccessAllowed()) {
-                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
                     return false;
                 }
             }
@@ -759,7 +763,7 @@ public class APIThrottleHandler extends AbstractHandler {
             log.warn("Exception occurred while performing role " +
                      "based throttling", e);
             canAccess = false;
-            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON,APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
             return canAccess;
         }
         return canAccess;
@@ -913,11 +917,11 @@ public class APIThrottleHandler extends AbstractHandler {
                                                  "    <throttle:MediatorThrottleAssertion>\n");
 
         if (productionMaxCount != null && productionUnitTime != null) {
-            policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT,productionUnitTime,productionMaxCount));
+            policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT, productionUnitTime, productionMaxCount));
         }
 
         if (sandboxMaxCount != null && sandboxUnitTime != null) {
-            policy.append(createPolicyForRole(APIThrottleConstants.SANDBOX_HARD_LIMIT,sandboxUnitTime,sandboxMaxCount));
+            policy.append(createPolicyForRole(APIThrottleConstants.SANDBOX_HARD_LIMIT, sandboxUnitTime, sandboxMaxCount));
         }
 
         policy.append("    </throttle:MediatorThrottleAssertion>\n" +
@@ -931,7 +935,7 @@ public class APIThrottleHandler extends AbstractHandler {
         }
     }
 
-    private String createPolicyForRole(String roleId, String unitTime, String maxCount){
+    private String createPolicyForRole(String roleId, String unitTime, String maxCount) {
         return "<wsp:Policy>\n" +
                "     <throttle:ID throttle:type=\"ROLE\">" + roleId + "</throttle:ID>\n" +
                "            <wsp:Policy>\n" +
@@ -965,7 +969,7 @@ public class APIThrottleHandler extends AbstractHandler {
         }
         try {
             String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                    .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
+                                                                              .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
             if (userAgent != null) {
                 logMessage = logMessage + " with userAgent=" + userAgent;
             }
@@ -981,7 +985,7 @@ public class APIThrottleHandler extends AbstractHandler {
         }
         //If gateway is fronted by hardware load balancer client ip should retrieve from x forward for header
         String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+                                                                         .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP == null) {
             remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
