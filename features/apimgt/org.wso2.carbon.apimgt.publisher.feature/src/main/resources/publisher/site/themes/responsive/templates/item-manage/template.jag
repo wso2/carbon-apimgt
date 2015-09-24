@@ -1,5 +1,4 @@
-<% jagg.template("item-manage", function(inputs, outputs, jagg) { 
-    var isSynapseGateway = outputs.isSynapseGateway;
+<% jagg.template("item-manage", function(inputs, outputs, jagg) {
 
     var api = outputs.api;
     var createPermitted = outputs.isCreatePermitted;
@@ -22,7 +21,7 @@
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
-    %> 
+%>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
     var AUTH_TYPES = [
@@ -41,12 +40,6 @@
     var DEFAULT_AUTH = "Application & Application User";
     var OPTION_DEFAULT_AUTH = "None";
 
-    var insequence = "<%=api.inSequence%>";
-    var outsequence = "<%=api.outSequence%>";
-    var faultsequence = "<%=api.faultSequence%>";
-    var inSequencesLoaded = false;
-    var outSequencesLoaded = false;
-    var faultSequencesLoaded = false;
 </script>
 <div id="item-add">
 <%
@@ -185,53 +178,6 @@
                 <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
                 </div>
              </div>
-
-            <% if (isSynapseGateway) { %>
-            <div class="form-group">
-                <label class="control-label col-sm-3" for="sequence"><%=i18n.localize("sequence")%>:</label>
-
-
-                <div class="controls col-sm-8">
-                <div class="checkbox">
-                <label>
-                    <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
-                <%
-                if((api.inSequence && (!"none".equals(api.inSequence)))|| (api.outSequence && (!"none".equals(api.outSequence)))
-                    || ( api.faultSequence && (!"none".equals(api.faultSequence)))){ %>
-                checked="checked"<%}%>><%=i18n.localize("sequenceMsg")%>
-                </label>
-                </div>
-                <table class="table table-bordered table-striped" id="seqTable"
-                <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-                    <thead>
-                        <tr>
-                            <th><%=i18n.localize("inFlow")%></th>
-                            <th><%=i18n.localize("outFlow")%></th>
-                            <th><%=i18n.localize("faultFlow")%></th>
-                        </tr>
-                    </thead>
-                        <tr>
-                            <td>
-                                <select id="inSequence"  class="form-control" name="inSequence" >
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="outSequence"  class="form-control" name="outSequence">
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="faultSequence" class="form-control" name="faultSequence">
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                </select>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-            <%}%>
-
 
             <!--Response Caching -->
                 <div class="form-group form-inline">

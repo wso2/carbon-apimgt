@@ -386,6 +386,36 @@ $(document).ready(function () {
         ]
     };
 
+    APP.form.default_endpoint = {
+        "schema": {
+            synapseCombo: {
+                type: 'string',
+                title: i18n.t("endpointUi.To Header Synapse"),
+                'enum': ['org.apache.synapse.endpoints.algorithms.RoundRobin', 'other'],
+                'default': 'org.apache.synapse.endpoints.algorithms.RoundRobin'
+            }
+        },
+        form: [
+            {
+                key:'synapseCombo',
+                titleMap:{
+                    'org.apache.synapse.endpoints.algorithms.RoundRobin' : i18n.t("endpointUi.Round-robin"),
+                    "other":"Other"
+                },
+                "onChange": function (evt) {
+                    if($(evt.target).val() == 'other'){
+                        $('.algo_class_field').val('');
+                        $('.algo_class_name').show('fast');
+                    }
+                    else{
+                        $('.algo_class_name').hide('fast');
+                        $('.algo_class_field').val($(evt.target).val());
+                    }
+                }
+            }
+        ]
+    };
+
 // this will convert the config in to json form value
     APP.endpointConfig2JsonForm = function(config){
 
