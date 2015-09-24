@@ -4625,14 +4625,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-	public static boolean jsFunction_isSynapseGateway(Context cx, Scriptable thisObj,
-            Object[] args,
-            Function funObj) throws APIManagementException {
+	public static boolean jsFunction_isSynapseGateway(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
 		APIProvider provider = getAPIProvider(thisObj);
-		if (!provider.isSynapseGateway()) {
-			return false;
-		}
-		return true;
+		return provider.isSynapseGateway();
 	}
 
     public static boolean jsFunction_updateExternalAPIStores(Context cx,Scriptable thisObj, Object[] args,
