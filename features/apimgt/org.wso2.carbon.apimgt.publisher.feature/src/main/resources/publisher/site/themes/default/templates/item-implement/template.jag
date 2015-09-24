@@ -4,6 +4,7 @@
     var permitted=outputs.isPermitted;
     var isCreatePermitted=outputs.isCreatePermitted;
     var mod = jagg.module("api");
+    var isSynapseGateway = mod.isSynapseGateway().isSynapseGateway;
     var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
@@ -16,7 +17,13 @@
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
       { "value": "<%=i18n.localize("applicationUser")%>", "text":"<%=i18n.localize("applicationUser")%>"},
       { "value": "<%=i18n.localize("application&applicationUser")%>", "text":"<%=i18n.localize("application&applicationUser")%>"}
-    ];    
+    ];
+    var insequence = "<%=api.inSequence%>";
+    var outsequence = "<%=api.outSequence%>";
+    var faultsequence = "<%=api.faultSequence%>";
+    var inSequencesLoaded = false;
+    var outSequencesLoaded = false;
+    var faultSequencesLoaded = false;
 </script>   
 <div id="item-add">
 <%
@@ -27,7 +34,7 @@
     var manage_wlabel = "";
     if( api.availableTiers !=""){
         manage_wlabel = "wizard-done";      
-    }else{
+    } else {
         var manage_w_link = '#';        
     } 
 %>
