@@ -2919,7 +2919,7 @@ public class ApiMgtDAO {
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
                         " IAT.TOKEN_ID = ISAT.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'PRODUCTION' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
@@ -2928,30 +2928,6 @@ public class ApiMgtDAO {
                         " ORDER BY IAT.TIME_CREATED DESC";
 
         String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null, db2SQL = null;
-
-        //Construct database specific sql statements.
-//        oracleSQL = "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-//                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
-//                        " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-//                        " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-//                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
-//                        " AKM.KEY_TYPE AS TOKEN_TYPE, " +
-//                        " AKM.STATE AS STATE "+
-//                        " FROM" +
-//                        " AM_APPLICATION_KEY_MAPPING AKM, " +
-//                        accessTokenStoreTable + " IAT," +
-//                        " IDN_OAUTH_CONSUMER_APPS ICA " +
-//                        " WHERE" +
-//                        " AKM.APPLICATION_ID = ? AND" +
-//                        " IAT.USER_TYPE = ? AND" +
-//                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-//                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-//                        " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-//                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
-//                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
-//                        " IAT.TOKEN_STATE = 'REVOKED')" +
-//                        " AND ROWNUM < 2 " +
-//                        " ORDER BY IAT.TIME_CREATED DESC";
 
         oracleSQL = "SELECT CONSUMER_KEY, " +
                 "CONSUMER_SECRET, " +
@@ -2977,7 +2953,7 @@ public class ApiMgtDAO {
                         "AKM.APPLICATION_ID = ? AND " +
                         "IAT.USER_TYPE = ? AND " +
                         "ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND " +
-                        "IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND " +
+                        "IAT.CONSUMER_KEY_ID = ICA.ID AND " +
                         "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         "AKM.KEY_TYPE = 'PRODUCTION' AND " +
                         "(IAT.TOKEN_STATE = 'ACTIVE' OR " +
@@ -3077,7 +3053,7 @@ public class ApiMgtDAO {
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
                         " IAT.TOKEN_ID = ISAT.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
@@ -3102,7 +3078,7 @@ public class ApiMgtDAO {
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
                         "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
@@ -7617,11 +7593,13 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
         }
         String authorizedDomains = "";
-        String accessAllowDomainsSql = "SELECT a.AUTHZ_DOMAIN " +
-                                       " FROM AM_APP_KEY_DOMAIN_MAPPING  a " +
-                                       " INNER JOIN " + accessTokenStoreTable + " b " +
-                                       " ON a.CONSUMER_KEY = b.CONSUMER_KEY " +
-                                       " WHERE b.ACCESS_TOKEN = ? ";
+        String accessAllowDomainsSql = "SELECT AKDM.AUTHZ_DOMAIN " +
+                                       "FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, " +
+                                             accessTokenStoreTable + " IOAT, " +
+                                             "IDN_OAUTH_CONSUMER_APPS IOCA " +
+                                       "WHERE IOAT.ACCESS_TOKEN  = ? " +
+                                              "AND IOAT.CONSUMER_KEY_ID = IOCA.ID " +
+                                              "AND IOCA.CONSUMER_KEY = AKDM.CONSUMER_KEY";
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
