@@ -86,13 +86,13 @@ var jagg = jagg || (function () {
 var getThemeFile = function (path) {
         var p, index, theme = getUserTheme();
         if(theme.subtheme) {
-        p = getThemePath() + "subthemes/" + theme.subtheme + "/" + path;
-        index = p.indexOf("?");
-        if(new File(p.substring(0, index == -1 ? p.length : index)).isExists()) {
-        return p;
+            p = getThemePath() + "subthemes/" + theme.subtheme + "/" + path;
+            index = p.indexOf("?");
+            if(new File(p.substring(0, index == -1 ? p.length : index)).isExists()) {
+                return p;
+            }
         }
-}
-return getThemePath() + path;
+        return getThemePath() + path;
 };
 
     var getThemesPath = function () {
