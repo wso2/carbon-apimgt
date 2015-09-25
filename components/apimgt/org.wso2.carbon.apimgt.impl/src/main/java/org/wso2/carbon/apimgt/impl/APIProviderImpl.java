@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -2622,6 +2623,56 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    public GenericArtifact getAPIArtifact(String apiPath) throws APIManagementException{
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                APIConstants.API_KEY);
+       // Gson gson = new Gson();
+        try{
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            return artifactManager.getGenericArtifact(artifactId);
+        }
+        catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return null;
+        }
+    }
+
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
+                                         boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
+            throws APIManagementException {
+        String provider = APIUtil.replaceEmailDomain(apiIdentifier.getProviderName());
+        APIIdentifier identifier = new APIIdentifier(provider, apiIdentifier.getApiName(), apiIdentifier.getVersion());
+        String apiPath = APIUtil.getAPIPath(identifier);
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+            String currentStatus = apiArtifact.getLifecycleState();
+            if (!currentStatus.equalsIgnoreCase(targetStatus)) {
+                String action = APIUtil.getLifeCycleTransitionAction(currentStatus, targetStatus);
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+            } else {
+                updateAPIStatus(identifier, targetStatus, publishToGateway, deprecateOldVersions, makeKeysForwardCompatible);
+            }
+            return true;
+        } catch (GovernanceException e) {
+            handleException("Failed to change the life cycle status : ", e);
+            return false;
+        } catch (FaultGatewaysException e) {
+            handleException("Error while publishing to API gateways" + e);
+            return false;
+        } catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return false;
         }
     }
 

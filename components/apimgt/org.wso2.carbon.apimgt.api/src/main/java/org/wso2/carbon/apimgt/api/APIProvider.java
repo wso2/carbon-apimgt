@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 
 import java.util.List;
 import java.util.Map;
@@ -446,4 +447,10 @@ public interface APIProvider extends APIManager {
      * @param updatedStatus status of the stat publishing state
      */
     public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus);
+
+    public GenericArtifact getAPIArtifact(String apiPath) throws APIManagementException;
+
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
+                                         boolean deprecateOldVersions ,boolean makeKeysForwardCompatible)
+            throws	APIManagementException;
 }

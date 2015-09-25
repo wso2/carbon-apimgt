@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.registry.extensions.interfaces.Execution;
@@ -79,7 +80,7 @@ public class APIExecutor implements Execution {
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
-        String user = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String user = "admin"; //need to pass the logged in user here
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String userWithDomain = APIUtil.appendDomainWithUser(user, domain);
         userWithDomain = APIUtil.replaceEmailDomainBack(userWithDomain);

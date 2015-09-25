@@ -25,6 +25,14 @@ include("/jagg/jagg.jag");
         var keyForward=request.getParameter("requireResubscription");
         if(keyForward!=null && keyForward){apiData.makeKeysForwardCompatible='false';}else{apiData.makeKeysForwardCompatible='true';}
         result = mod.updateAPIStatus(apiData);
+
+        var ApiProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProviderImplObj = new ApiProviderImpl("admin"); //TODO need to pass the logged in user here
+        var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+        var apiIdentifierObj = apiIdentifier(apiData.provider, apiData.apiName, apiData.version);
+
+        apiProviderImplObj.changeLifeCycleStatus(apiIdentifierObj, apiData.status,  true, true, true); //need to pass proper parameters instead of hardcoded parameters
+
         var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),version:request.getParameter("version")}).lcs;
 
         if (result.error==true) {
