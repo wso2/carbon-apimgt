@@ -42,7 +42,7 @@ include("/jagg/jagg.jag");
         mod = jagg.module("search");
         resultSearch = mod.searchPaginatedAPIs(query,tenantDomain,start,end);
 
-        if (result.error) {
+        if (resultSearch.error) {
             obj = {
                 error:true,
                 message:resultSearch.result.message
