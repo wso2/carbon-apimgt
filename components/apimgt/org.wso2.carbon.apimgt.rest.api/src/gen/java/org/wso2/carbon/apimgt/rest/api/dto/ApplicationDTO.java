@@ -10,6 +10,7 @@ public class ApplicationDTO  {
   
   private Integer applicationId = null;
   private String name = null;
+  private String subscriber = null;
   private String throttlingTier = null;
   private String callbackUrl = null;
   private String description = null;
@@ -37,6 +38,18 @@ public class ApplicationDTO  {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscriber")
+  public String getSubscriber() {
+    return subscriber;
+  }
+  public void setSubscriber(String subscriber) {
+    this.subscriber = subscriber;
   }
 
   
@@ -96,6 +109,7 @@ public class ApplicationDTO  {
     
     sb.append("  applicationId: ").append(applicationId).append("\n");
     sb.append("  name: ").append(name).append("\n");
+    sb.append("  subscriber: ").append(subscriber).append("\n");
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  description: ").append(description).append("\n");
