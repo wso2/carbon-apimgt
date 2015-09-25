@@ -1,5 +1,5 @@
 <%
-
+ var site = require("/site/conf/site.json");
 //TODO : remove this when log configs are implemented
 //Log.prototype.isDebugEnabled = function () {
 //    return false;
@@ -86,13 +86,13 @@ var jagg = jagg || (function () {
 var getThemeFile = function (path) {
         var p, index, theme = getUserTheme();
         if(theme.subtheme) {
-        p = getThemePath() + "subthemes/" + theme.subtheme + "/" + path;
-        index = p.indexOf("?");
-        if(new File(p.substring(0, index == -1 ? p.length : index)).isExists()) {
-        return p;
+            p = getThemePath() + "subthemes/" + theme.subtheme + "/" + path;
+            index = p.indexOf("?");
+            if(new File(p.substring(0, index == -1 ? p.length : index)).isExists()) {
+                return p;
+            }
         }
-}
-return getThemePath() + path;
+        return getThemePath() + path;
 };
 
     var getThemesPath = function () {
@@ -693,6 +693,16 @@ return getThemePath() + path;
         return true;
     };
 
+    var getTenantDomain = function(){
+        var user = jagg.getUser(),username;
+        if(user!=null){
+            username=user.username;
+        	var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+           	var domainName =MultitenantUtils.getTenantDomain(username);
+           	return domainName;
+        }
+    };
+
     return {
         setUser:setUser,
         getUser:getUser,
@@ -734,6 +744,7 @@ return getThemePath() + path;
         url:url,
         getRegistryPath:getRegistryPath,
         getHttpsUrl:getHttpsUrl,
+        getTenantDomain:getTenantDomain,
 	getSiteContext:getSiteContext
     };
 

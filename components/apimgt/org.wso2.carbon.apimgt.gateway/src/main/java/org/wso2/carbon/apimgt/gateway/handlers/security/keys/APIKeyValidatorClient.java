@@ -92,7 +92,7 @@ public class APIKeyValidatorClient {
             Map headers = (Map) MessageContext.getCurrentMessageContext().getProperty(
                     org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (headers != null) {
-                headerList.add(new Header("activityID", (String)headers.get("activityID")));
+                headerList.add(new Header(APIConstants.ACTIVITY_ID, (String)headers.get(APIConstants.ACTIVITY_ID)));
             }
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(org.apache.axis2.transport.http.HTTPConstants.HTTP_HEADERS, headerList);
             /**/

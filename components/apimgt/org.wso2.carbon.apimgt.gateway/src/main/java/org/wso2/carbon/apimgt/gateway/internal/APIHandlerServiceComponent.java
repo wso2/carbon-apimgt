@@ -16,12 +16,20 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import java.io.File;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidatorClientPool;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 /**
@@ -39,13 +47,34 @@ public class APIHandlerServiceComponent {
 
     private APIKeyValidatorClientPool clientPool;
     private ThriftKeyValidatorClientPool thriftClientPool;
+    private APIManagerConfiguration configuration = new APIManagerConfiguration();
 
     protected void activate(ComponentContext context) {
+    	BundleContext bundleContext = context.getBundleContext();
         if (log.isDebugEnabled()) {
             log.debug("API handlers component activated");
         }
         clientPool = APIKeyValidatorClientPool.getInstance();
         thriftClientPool = ThriftKeyValidatorClientPool.getInstance();
+
+        String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+                File.separator + "conf" + File.separator + "api-manager.xml";
+		try {
+			configuration.load(filePath);
+
+			String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+			if ("Synapse".equalsIgnoreCase(gatewayType)) {
+			  //Register Tenant service creator to deploy tenant specific common synapse configurations
+			  TenantServiceCreator listener = new TenantServiceCreator();
+			  bundleContext.registerService(
+			          Axis2ConfigurationContextObserver.class.getName(), listener, null);
+			}
+		} catch (APIManagementException e) {
+			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
+		}
+
+
+
     }
 
     protected void deactivate(ComponentContext context) {

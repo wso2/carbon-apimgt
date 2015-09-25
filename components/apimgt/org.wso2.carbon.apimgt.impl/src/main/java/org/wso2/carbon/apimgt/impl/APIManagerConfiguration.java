@@ -26,18 +26,12 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -209,6 +203,9 @@ public class APIManagerConfiguration {
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {
+                        /*
+                          This will be happen only on server startup therefore we log and continue the startup
+                         */
                         log.error("Duplicate environment name found in api-manager.xml " +
                                   environment.getName());
                     }
@@ -223,11 +220,7 @@ public class APIManagerConfiguration {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        try {
-                            throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
-                        }
+                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
                     }
                     store.setName(name); //Set store name
                     OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
@@ -255,11 +248,7 @@ public class APIManagerConfiguration {
                                     storeElem.getFirstChildWithName(new QName(
                                             APIConstants.EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
                         } else {
-                            try {
-                                throw new APIManagementException("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
-                            } catch (APIManagementException e) {
-                                //ignore
-                            }
+                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
                         }
                     }
                     externalAPIStores.add(store);

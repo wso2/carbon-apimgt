@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.token;
 import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.codehaus.jettison.json.JSONException;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -168,7 +169,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             StringBuilder jwtHeaderBuilder = new StringBuilder();
             jwtHeaderBuilder.append("{\"typ\":\"JWT\",");
             jwtHeaderBuilder.append("\"alg\":\"");
-            jwtHeaderBuilder.append(JWTSignatureAlg.NONE.getJwsCompliantCode());
+            jwtHeaderBuilder.append(getJWSCompliantAlgorithmCode(NONE));
             jwtHeaderBuilder.append("\"");
             jwtHeaderBuilder.append("}");
 
@@ -222,9 +223,11 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     private byte[] signJWT(String assertion, String endUserName)
             throws APIManagementException {
 
+        String tenantDomain = null;
+
         try {
             //get tenant domain
-            String tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
+            tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
             //get tenantId
             int tenantId = APIUtil.getTenantId(endUserName);
 
@@ -280,8 +283,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             String error = "Error in signature";
             //do not log
             throw new APIManagementException(error);
-        } catch (RegistryException e1) {
-            String error = "Error in load tenant from registry";
+        } catch (RegistryException e) {
+            String error = "Error in loading tenant registry for " + tenantDomain;
             //do not log
             throw new APIManagementException(error);
         }
@@ -365,8 +368,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             //{"typ":"JWT", "alg":"[2]", "x5t":"[1]"}
             jwtHeader.append("{\"typ\":\"JWT\",");
             jwtHeader.append("\"alg\":\"");
-            jwtHeader.append(SHA256_WITH_RSA.equals(signatureAlgorithm) ?
-                    JWTSignatureAlg.SHA256_WITH_RSA.getJwsCompliantCode() : signatureAlgorithm);
+            jwtHeader.append(getJWSCompliantAlgorithmCode(signatureAlgorithm));
             jwtHeader.append("\",");
 
             jwtHeader.append("\"x5t\":\"");
@@ -411,5 +413,23 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         }
 
         return buf.toString();
+    }
+
+    /**
+     * Get the JWS compliant signature algorithm code of the algorithm used to sign the JWT.
+     * @param signatureAlgorithm - The algorithm used to sign the JWT. If signing is disabled, the value will be NONE.
+     * @return - The JWS Compliant algorithm code of the signature algorithm.
+     */
+    public String getJWSCompliantAlgorithmCode(String signatureAlgorithm){
+
+        if (signatureAlgorithm == null || NONE.equals(signatureAlgorithm)){
+            return JWTSignatureAlg.NONE.getJwsCompliantCode();
+        }
+        else if(SHA256_WITH_RSA.equals(signatureAlgorithm)){
+            return JWTSignatureAlg.SHA256_WITH_RSA.getJwsCompliantCode();
+        }
+        else{
+            return signatureAlgorithm;
+        }
     }
 }

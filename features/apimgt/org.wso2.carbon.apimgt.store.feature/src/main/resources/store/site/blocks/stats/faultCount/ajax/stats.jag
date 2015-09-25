@@ -34,7 +34,8 @@ log = new Log();
         var subscriber = jagg.getUser().username;
         from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
-        result = mod.getPerAppAPIFaultCount(subscriber,from,to);
+        var groupId = session.get("groupId");
+        result = mod.getPerAppAPIFaultCount(subscriber,from,to,groupId);
 
         if (result.error == "true") {
             obj = {

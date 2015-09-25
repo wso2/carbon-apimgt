@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
 
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONObject;
@@ -214,6 +215,7 @@ public final class APIUtil {
             api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+            api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {		
@@ -394,6 +396,9 @@ public final class APIUtil {
             api.setFaultSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE));
             api.setResponseCache(artifact.getAttribute(APIConstants.API_OVERVIEW_RESPONSE_CACHING));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
+
+            api.setProductionMaxTps(artifact.getAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS));
+            api.setSandboxMaxTps(artifact.getAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS));
 
             int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
             try {
@@ -715,6 +720,9 @@ public final class APIUtil {
 
 			artifact.setAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION, api.getImplementation());
 
+            artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
+            artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
+
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context"); // TODO: check whether this is
@@ -1023,8 +1031,7 @@ public final class APIUtil {
      * @return Doc content path
      */
     public static String getAPIDocContentPath(APIIdentifier apiId, String documentationName) {
-        return getAPIDocPath(apiId) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
-        		RegistryConstants.PATH_SEPARATOR + documentationName;
+        return getAPIDocPath(apiId) + RegistryConstants.PATH_SEPARATOR + documentationName;
     }
 
     /**
@@ -1180,7 +1187,7 @@ public final class APIUtil {
     		String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
                     "--" + api.getId().getApiName() + api.getId().getVersion()+".wsdl";
 			String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
-                    RegistryContext.getBaseInstance(), APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)) +
+                    RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
                     wsdlResourcePath;
 
 			APIMWSDLReader wsdlreader = new APIMWSDLReader(api.getWsdlUrl());
@@ -1498,39 +1505,34 @@ public final class APIUtil {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        try {
-                            throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
-                        }
+                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
                     }
                     store.setName(name); //Set store name
-                    OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
+                    OMElement configDisplayName = storeElem.getFirstChildWithName
+                            (new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
                     String displayName = (configDisplayName != null) ? replaceSystemProperty(
                             configDisplayName.getText()) : name;
                     store.setDisplayName(displayName);//Set store display name
-                    store.setEndpoint(replaceSystemProperty(
-                            storeElem.getFirstChildWithName(new QName(
-                                    APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText())); //Set store endpoint,which is used to publish APIs
+                    store.setEndpoint(replaceSystemProperty(storeElem.getFirstChildWithName(
+                            new QName(APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText()));
+                    //Set store endpoint, which is used to publish APIs
                     store.setPublished(false);
                     if (APIConstants.WSO2_API_STORE_TYPE.equals(type)) {
                         OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
                         if (password != null) {
-                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "." + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name;//Set store login password [optional]
+                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "."
+                                    + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name; //Set store login password
                             String value = password.getText();
 
-                    store.setPassword(replaceSystemProperty(value));
-                    store.setUsername(replaceSystemProperty(
-                            storeElem.getFirstChildWithName(new QName(
-                                    APIConstants.EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
-                    }else{
-                        try {
-                            throw new APIManagementException("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
+                            store.setPassword(replaceSystemProperty(value));
+                            store.setUsername(replaceSystemProperty(storeElem.getFirstChildWithName(
+                                    new QName(APIConstants.EXTERNAL_API_STORE_USERNAME)).getText()));
+                                    //Set store login username
+                        } else {
+                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> " +
+                                    "config of api-manager.xml.");
                         }
-                    }
                     }
                     externalAPIStores.add(store);
                 }
@@ -1545,11 +1547,17 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (ClassNotFoundException e) {
-            log.error("Requested APIPublisher Class couldn't found", e);
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be found";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (InstantiationException e) {
-            log.error("Requested APIPublisher Class couldn't load", e);
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be load";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            String msg = "One or more classes defined in APIConstants.EXTERNAL_API_STORE_CLASS_NAME cannot be access";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return externalAPIStores;
     }
@@ -2070,7 +2078,10 @@ public final class APIUtil {
         long currentTime = System.currentTimeMillis();
 
         //If the validity period is not an never expiring value
-        if (validityPeriod != Long.MAX_VALUE) {
+        if (validityPeriod != Long.MAX_VALUE &&
+            // For cases where validityPeriod is closer to Long.MAX_VALUE (then issuedTime + validityPeriod would spill
+            // over and would produce a negative value)
+            (currentTime - timestampSkew) > validityPeriod) {
             //check the validity of cached OAuth2AccessToken Response
 
             if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
@@ -2564,6 +2575,44 @@ public final class APIUtil {
             return serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable();
         }
         return false;
+    }
+
+
+    /**
+     * If Analytics is enabled through api-manager.xml this method will write the details to registry.
+     *
+     * @param configuration api-manager.xml
+     */
+    public static void writeAnalyticsConfigurationToRegistry(APIManagerConfiguration configuration) {
+        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
+        String usageEnabled = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+        if (usageEnabled != null && serviceDataPublisherAdmin != null) {
+            log.debug("APIUsageTracking set to : " + usageEnabled);
+            boolean usageEnabledState = JavaUtils.isTrueExplicitly(usageEnabled);
+            EventingConfigData eventingConfigData = serviceDataPublisherAdmin.getEventingConfigData();
+            eventingConfigData.setServiceStatsEnable(usageEnabledState);
+            try {
+                if (usageEnabledState) {
+                    String bamServerURL = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+                    String bamServerUser = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+                    String bamServerPassword = configuration.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+                    eventingConfigData.setUrl(bamServerURL);
+                    eventingConfigData.setUserName(bamServerUser);
+                    eventingConfigData.setPassword(bamServerPassword);
+                    if (log.isDebugEnabled()) {
+                        log.debug("BAMServerURL : " + bamServerURL + " , BAMServerUserName : " + bamServerUser + " , " +
+                                  "BAMServerPassword : " + bamServerPassword);
+                    }
+                    APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, MultitenantConstants.SUPER_TENANT_ID);
+                }
+
+                serviceDataPublisherAdmin.configureEventing(eventingConfigData);
+            } catch (APIManagementException e) {
+                log.error("Error occurred while adding BAMServerProfile");
+            } catch (Exception e) {
+                log.error("Error occurred while updating EventingConfiguration");
+            }
+        }
     }
 
     public static Map<String, String> getAnalyticsConfigFromRegistry() {
@@ -3326,7 +3375,7 @@ public final class APIUtil {
         return token;
     }
 
-    public static void loadTenantRegistry(int tenantId) throws RegistryException{
+    public static void loadTenantRegistry(int tenantId) throws RegistryException {
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
         ServiceReferenceHolder.getInstance().getIndexLoaderService().loadTenantIndex(tenantId);
         tenantRegistryLoader.loadTenantRegistry(tenantId);
@@ -3954,12 +4003,12 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of gateway domains for the tenant
+     * Returns a map of gateway / store domains for the tenant
      *
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMappings(String tenantDomain) throws APIManagementException {
+    public static Map<String, String> getDomainMappings(String tenantDomain, String appType) throws APIManagementException {
         Map<String, String> domains = new HashMap<String, String>();
         String resourcePath;
         try {
@@ -3971,8 +4020,8 @@ public final class APIUtil {
                 String content = new String((byte[]) resource.getContent());
                 JSONParser parser = new JSONParser();
                 JSONObject mappings = (JSONObject) parser.parse(content);
-                if(mappings.get("gateway") != null) {
-                    mappings = (JSONObject) mappings.get("gateway");
+                if(mappings.get(appType) != null) {
+                    mappings = (JSONObject) mappings.get(appType);
                     Iterator entries = mappings.entrySet().iterator();
                     while (entries.hasNext()) {
                         Entry thisEntry = (Entry) entries.next();
@@ -4009,7 +4058,7 @@ public final class APIUtil {
      */
 
     public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain)
+                                                  String tenantDomain, int tenantId)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4023,13 +4072,7 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
-        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
         try {
-            if (tenantDomain != null && !"null".equals(tenantDomain)) {
-                tenantId = ServiceReferenceHolder
-                        .getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-            }
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4042,20 +4085,13 @@ public final class APIUtil {
                 String[] content = apiDocResource.getPath().split("/");
                 documentMap.put("name", content[content.length - 1]);
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            log.error("Couldn't retrieve Tenant Domain for User " + userName, e);
-            handleException("Couldn't retrieve Tenant Domain for User " + userName, e);
-
         } catch (RegistryException e) {
-            log.error("Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
-                      e);
-            handleException(
-                    "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
-                    e);
+            String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
+            log.error(msg, e);
+            handleException(msg, e);
         }
         return documentMap;
     }
-
     /**
      * this method used to set environments values to api object.
      *
@@ -4215,5 +4251,29 @@ public final class APIUtil {
         return null;
     }
 
+	 public static boolean isStringArray(Object[] args) {
+        int argsCount = args.length;
+        for (int i = 0; i < argsCount; i++) {
+            if (!(args[i] instanceof String)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static String appendDomainWithUser(String username, String domain){
+        if(username.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR) || username.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT) || MultitenantConstants.SUPER_TENANT_NAME.equalsIgnoreCase(username)){
+            return username;
+        }
+        return username + APIConstants.EMAIL_DOMAIN_SEPARATOR+domain;
+    }
+
+    /*
+    Attach the lifecycle to a registry resource
+    */
+    public void associateLifeCycle(String resourcePath, Registry registry) throws RegistryException {
+
+        GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
+    }
 
 }

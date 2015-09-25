@@ -22,18 +22,45 @@ import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
     private static final Log log = LogFactory.getLog(ExtendedClientCredentialsGrantHandler.class);
+    private static final String VALIDITY_PERIOD = "validity_period";
+
+    @Override
+    public boolean authorizeAccessDelegation(OAuthTokenReqMessageContext tokReqMsgCtx) {
+
+        RequestParameter[] parameters = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getRequestParameters();
+
+        long validityPeriod = 0;
+
+        if (parameters == null) {
+            return true;
+        }
+
+        // find out validity period
+        for (RequestParameter parameter : parameters) {
+            if (VALIDITY_PERIOD.equals(parameter.getKey())) {
+                if (parameter.getValue() != null && parameter.getValue().length > 0) {
+                    validityPeriod = Long.valueOf(parameter.getValue()[0]);
+                    //set validity time
+                    tokReqMsgCtx.setValidityPeriod(validityPeriod);
+
+                }
+            }
+        }
+
+        return true;
+    }
+
 
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
@@ -51,9 +78,11 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
                 throw new IdentityOAuth2Exception(e.getMessage());
             }
         }
-        String username = tokReqMsgCtx.getAuthorizedUser();
-        username = username + "@" + tenantDomain;
-        tokReqMsgCtx.setAuthorizedUser(username);
+        //String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
+        //username = username + "@" + tenantDomain;
+        User user = tokReqMsgCtx.getAuthorizedUser();
+        user.setUserName(user.getUserName() + "@" + tenantDomain);
+        tokReqMsgCtx.setAuthorizedUser(user);
 
         return validateResult;
     }

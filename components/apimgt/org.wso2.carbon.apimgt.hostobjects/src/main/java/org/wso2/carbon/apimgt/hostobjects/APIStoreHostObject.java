@@ -25,6 +25,7 @@ import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
@@ -60,7 +61,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
-import org.wso2.carbon.identity.oauth.internal.OAuthComponentServiceHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
@@ -127,7 +127,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
             } catch (RegistryException e) {
-                log.error("Could not load tenant registry. Error while loading tenant registry " + tenantDomain);
+                log.error("Could not load tenant registry for tenant " + tenantDomain);
             }
         }
 
@@ -260,9 +260,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getAppApiCallType(subscriberName, fromDate, toDate, 10);
+            list = client.getAppApiCallType(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -340,9 +341,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getPerAppFaultCount(subscriberName, fromDate, toDate, 10);
+            list = client.getPerAppFaultCount(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for faultCount", e);
         }
@@ -409,9 +411,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.perAppPerAPIUsage(subscriberName, fromDate, toDate, 10);
+            list = client.perAppPerAPIUsage(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -478,9 +481,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getTopAppUsers(subscriberName, fromDate, toDate, 10);
+            list = client.getTopAppUsers(subscriberName, groupId, fromDate, toDate, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -554,9 +558,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String subscriberName = (String) args[0];
         String fromDate = (String) args[1];
         String toDate = (String) args[2];
+        String groupId = (String) args[3];
         try {
             APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getAppRegisteredUsers(subscriberName);
+            list = client.getAppRegisteredUsers(subscriberName, groupId);
         } catch (APIMgtUsageQueryServiceClientException e) {
             handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
         }
@@ -791,7 +796,6 @@ public class APIStoreHostObject extends ScriptableObject {
             return null;
         }
     }
-
 
     /**
      * This method is responsible for update given oAuthApplication.
@@ -1177,7 +1181,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
         try {
 
-            RealmService realmService = OAuthComponentServiceHolder.getRealmService();
+            //RealmService realmService = OAuthComponentServiceHolder.getRealmService();
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
 
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(MultitenantUtils.getTenantDomain(username));
 
@@ -1340,6 +1345,12 @@ public class APIStoreHostObject extends ScriptableObject {
             String tenantDomain = (String) args[1];
             int start = Integer.parseInt((String) args[2]);
             int end = Integer.parseInt((String) args[3]);
+            boolean limitAttributes = false;
+
+            if (args.length == 5) {
+                limitAttributes = Boolean.parseBoolean((String) args[4]);
+            }
+
             String searchTerm;
             String searchType = null;
             Set<API> apiSet = null;
@@ -1369,7 +1380,7 @@ public class APIStoreHostObject extends ScriptableObject {
                             searchTerm = "*"+searchTerm ;
                         }
                         }
-                        result = apiConsumer.searchPaginatedAPIs(searchTerm, searchType, tenantDomain, start, end);
+                        result = apiConsumer.searchPaginatedAPIs(searchTerm, searchType, tenantDomain, start, end, limitAttributes);
                     } else {
                         noSearchTerm = true;
                     }
@@ -1380,7 +1391,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }if (!searchValue.startsWith("*")) {
                         searchValue = "*"+searchValue ;
                     }
-                    result = apiConsumer.searchPaginatedAPIs(searchValue, "Name", tenantDomain, start, end);
+                    result = apiConsumer.searchPaginatedAPIs(searchValue, "Name", tenantDomain, start, end, limitAttributes);
                 }
 
             } catch (APIManagementException e) {
@@ -1476,6 +1487,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                    }
 	                    resultObj.put("apis", resultObj, apiArray);
 	                    resultObj.put("totalLength", resultObj, result.get("length"));
+                        resultObj.put("isMore", resultObj, result.get("isMore"));
 	                }
             }
             }
@@ -1984,7 +1996,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
             Map<String, String> domains = new HashMap<String, String>();
 
-            domains = apiConsumer.getTenantDomainMappings(MultitenantUtils.getTenantDomain(userName));
+            domains = apiConsumer.getTenantDomainMappings(MultitenantUtils.getTenantDomain(userName), APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
             if (domains != null && domains.size() > 0) {
                 int index = 0;
                 Iterator it = domains.entrySet().iterator();
@@ -2057,7 +2069,6 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 api = apiConsumer.getAPI(apiIdentifier);
                 if (username != null) {
-                    //TODO @sumedha : remove hardcoded tenant Id
                     isSubscribed = apiConsumer.isSubscribed(apiIdentifier, username);
                 }
 
@@ -2296,6 +2307,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Documentation documentation = (Documentation) docObject;
                     Object objectSourceType = documentation.getSourceType();
                     String strSourceType = objectSourceType.toString();
+
                     row.put("name", row, documentation.getName());
                     row.put("sourceType", row, strSourceType);
                     row.put("summary", row, documentation.getSummary());
@@ -2480,7 +2492,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String subsStatus = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
             return subsStatus;
         } catch (APIManagementException e) {
-            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage(), e);
+            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());
             return null;
         } finally {
             if (isTenantFlowStarted) {
@@ -3210,6 +3222,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("hasMultipleEndpoints", apiObj, String.valueOf(api.getSandboxUrl() != null));
             apisArray.put(apisArray.getIds().length, apisArray, apiObj);
         } catch (APIManagementException e) {
+            // we didn't throw this exception if registry corruption occured as mentioned in https://wso2.org/jira/browse/APIMANAGER-2046
             log.error("Error while obtaining application metadata", e);
         }
     }
@@ -3350,8 +3363,16 @@ public class APIStoreHostObject extends ScriptableObject {
         String status = null;
         if (args != null && args.length >= 4 && isStringArray(args)) {
             String name = (String) args[0];
+
+            if(StringUtils.isEmpty(name.trim())){
+                handleException("Application Name is empty.");
+            }
             String username = (String) args[1];
             String tier = (String) args[2];
+
+            if(StringUtils.isEmpty(tier.trim())){
+                handleException("No tier is defined for the Application.");
+            }
             String callbackUrl = (String) args[3];
             String description = (String) args[4];
             String groupId = null;
@@ -3372,6 +3393,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
             status = apiConsumer.addApplication(application, username);
             return status;
+        } else{
+            handleException("Missing parameters.");
         }
 
         return status;
@@ -3474,7 +3497,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
 
         if (args != null && args.length > 5 && isStringArray(args)) {
-            String name = (String) args[0];
+            String newName = (String) args[0];
             String oldName = (String) args[1];
             String username = (String) args[2];
             String tier = (String) args[3];
@@ -3499,13 +3522,13 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             
             // check whether there is an app with same name
-            if (!name.equals(oldName) && appsMap.containsKey(name)) {
-                handleException("An application already exist by the name " + name);
+            if (!newName.equals(oldName) && appsMap.containsKey(newName)) {
+                handleException("An application already exist by the name " + newName);
             }
 
             for (Application app : apps) {
                 if (app.getName().equals(oldName)) {
-                    Application application = new Application(name, subscriber);
+                    Application application = new Application(newName, subscriber);
                     application.setId(app.getId());
                     application.setTier(tier);
                     application.setCallbackUrl(callbackUrl);
@@ -4703,7 +4726,7 @@ public class APIStoreHostObject extends ScriptableObject {
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         Map<String, String> domains = new HashMap<String, String>();
         if (args.length > 0 && args[0] != null) {
-            domains = apiConsumer.getTenantDomainMappings((String) args[0]);
+            domains = apiConsumer.getTenantDomainMappings((String) args[0], APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         }
         if(domains == null || domains.size() == 0 ){
             return null;
@@ -4744,14 +4767,26 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        boolean isTenantFlowStarted = false;
+        try {
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
             data.put("contentType", data, docResourceMap.get("contentType"));
             data.put("name", data, docResourceMap.get("name"));
         }
-
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
         return data;
     }
 
