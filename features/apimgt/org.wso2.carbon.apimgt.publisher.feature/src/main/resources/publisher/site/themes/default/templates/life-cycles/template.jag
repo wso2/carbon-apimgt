@@ -48,14 +48,28 @@ if(api.apiStores!=null && api.apiStores != undefined){
 var publishedInExternalStores=<%=publishedInExternalStores%>;
 </script>
 
-<% var i,resCount,rowNums = [];
-   var mod = jagg.module("api");
-   var apiData={};
-   apiData.provider= api.provider;
-   apiData.name= api.name;
-   apiData.version= api.version;
-   var result = mod.getLifeCyclesEvents(apiData);
-   var lcs=result.lcs;
+<%  var i,resCount,rowNums = [];
+    var mod = jagg.module("api");
+    var apiData={};
+    apiData.provider= api.provider;
+    apiData.name= api.name;
+    apiData.version= api.version;
+
+    var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+    var apiIdentifierObj = apiIdentifier(api.provider, api.name, api.version);
+    var apiUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+    var apiPath = apiUtil.getAPIPath(apiIdentifierObj);
+    var ApiProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+    var apiProviderImplObj = new ApiProviderImpl("admin"); //TODO need to pass logged in user here
+
+    var GovernanceArtifactImplObj = apiProviderImplObj.getAPIArtifact(apiPath);
+    GovernanceArtifactImplObj.attachLifecycle("APILifeCycle");
+
+
+    var result = mod.getLifeCyclesEvents(apiData);
+    var lcs=result.lcs;
+
+
 %>
 
 <div class="alert alert-error" id="statusAPIError" style="display:none">
@@ -74,18 +88,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <div class="control-group">
                 <label class="control-label" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
                 <div class="controls">
-                    <select id="editStatus" name="status" onChange="getSelectedValue('<%=api.status%>')">
-                        <option value="CREATED"<%=(api.status == "CREATED" ? ' selected="selected"' : '')%>><%=i18n.localize("created")%></option>
-                        <%if(api.implementation == "INLINE" || api.endpointConfig != ""){%>
-                            <option value="PROTOTYPED"<%=(api.status == "PROTOTYPED" ? ' selected="selected"' : '')%>><%= "PROTOTYPED" %></option>
-                        <%}%>
-                        <%if(api.availableTiers != null && api.availableTiers != ""){%>
-                            <option value="PUBLISHED"<%=(api.status == "PUBLISHED" ? ' selected="selected"' : '')%>><%=i18n.localize("published")%></option>
-                        <%}%>
-                        <option value="DEPRECATED"<%=(api.status == "DEPRECATED" ? ' selected="selected"' : '')%>><%=i18n.localize("deprecated")%></option>
-                        <option value="RETIRED"<%=(api.status == "RETIRED" ? ' selected="selected"' : '')%>><%=i18n.localize("retired")%></option>
-                        <option value="BLOCKED"<%=(api.status == "BLOCKED" ? ' selected="selected"' : '')%>><%=i18n.localize("blocked")%></option>
-                    </select>
+                    <% print(GovernanceArtifactImplObj.getLifecycleState("APILifeCycle")); %>
                     <a class="icon-question-sign help_popup" help_data="lifecycle_help"></a>
            			 <p id="lifecycle_help" class="hide"><%=i18n.localize("lifecycleHelpMsg")%></p>
                  </div> <br/>

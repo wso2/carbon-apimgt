@@ -109,6 +109,15 @@ function loadSwaggerObj(path)
             result = mod.checkIfResourceExists(apiData);
             if(!result){
                 result = mod.createAPI(apiData);
+                var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+                var apiIdentifierObj = apiIdentifier(apiData.provider, apiData.name, apiData.version);
+                var apiUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                var apiPath = apiUtil.getAPIPath(apiIdentifierObj);
+                var ApiProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+                var apiProviderImplObj = new ApiProviderImpl("admin"); // TODO need to pass logged in user here
+
+                var GovernanceArtifactImplObj = apiProviderImplObj.getAPIArtifact(apiPath);
+                GovernanceArtifactImplObj.attachLifecycle("APILifeCycle");
                 if (result.error==true) {
                     obj = {
                         error:true,
@@ -228,6 +237,14 @@ function loadSwaggerObj(path)
 		    apiData.environments = request.getParameter("environments");
 
             result = mod.manageAPI(apiData);
+            var ApiProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+            var apiProviderImplObj = new ApiProviderImpl("admin");
+            var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+            var apiIdentifierObj = apiIdentifier(apiData.provider, apiData.apiName, apiData.version);
+
+            apiProviderImplObj.changeLifeCycleStatus(apiIdentifierObj, "PUBLISHED",  true, true, true);
+
+
             if (result.error==true) {
                 obj = {
                     error:true,
@@ -290,6 +307,14 @@ function loadSwaggerObj(path)
             result = mod.checkIfResourceExists(apiData);
             if(!result){
                 result = mod.createAPI(apiData);
+                var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+                var apiIdentifierObj = apiIdentifier(apiData.provider, apiData.name, apiData.version);
+                var apiUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                var apiPath = apiUtil.getAPIPath(apiIdentifierObj);
+                var ApiProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+                var apiProviderImplObj = new ApiProviderImpl("admin"); // TODO need to pass logged in user here
+                var GovernanceArtifactImplObj = apiProviderImplObj.getAPIArtifact(apiPath);
+                GovernanceArtifactImplObj.attachLifecycle("APILifeCycle");
                 if (result.error==true) {
                     obj = {
                         error:true,
