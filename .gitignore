@@ -5,3 +5,4 @@ target
 .project
 *.i??
 .idea
+features/apimgt/org.wso2.carbon.apimgt.core.feature/src/main/resources/repository/database/WSO2AM_DB.h2.db
