@@ -90,6 +90,13 @@ $(document).ready(function(){
     else {
 	$('#toggleSequence').parent().next().hide();
     }
+
+    if( $("#toggleThrottle").attr('checked') ) {
+    $('#toggleThrottle').parent().next().show();
+    } 
+    else {
+    $('#toggleThrottle').parent().next().hide();
+    }
     
 });
 
@@ -256,6 +263,15 @@ $("#toggleSequence").change(function(e){
         $('#outSequence').val('');
     }
 });
+
+$("#toggleThrottle").change(function(e){
+    if($(this).is(":checked")){
+        $(this).parent().next().show();
+    }else{
+        $(this).parent().next().hide();
+    }
+});
+
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
     var checkedHttpsTransport=$('#transport_https').is(":checked");
