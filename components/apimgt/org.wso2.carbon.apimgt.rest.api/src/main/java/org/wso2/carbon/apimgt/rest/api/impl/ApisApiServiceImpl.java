@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -28,22 +29,23 @@ import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.exception.NotFoundException;
+
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class ApisApiServiceImpl extends ApisApiService {
-
-    APIProvider provider ;
 
     @Override
     public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch){
@@ -78,6 +80,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisPost(APIDTO body,String contentType){
 
         boolean isTenantFlowStarted = false;
+        URI createdApiUri = null;
         try {
             org.wso2.carbon.apimgt.api.model.API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
             String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -89,10 +92,16 @@ public class ApisApiServiceImpl extends ApisApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             apiProvider.addAPI(apiToAdd);
-
+            apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
+            //This was added in order to provide location header for HTTP response
+            APIIdentifier createdApiId = apiToAdd.getId();
+            createdApiUri = new URI("http://10.100.7.39:9763/api/am/v1/apis/"
+                + createdApiId.getApiName() + "-" + createdApiId.getVersion() + "-" + createdApiId.getProviderName());
             //how to add thumbnail
             //publish to external stores
         } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        } catch (URISyntaxException e) {
             throw new InternalServerErrorException(e);
         } finally {
             if (isTenantFlowStarted) {
@@ -100,7 +109,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         }
 
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.created(createdApiUri).entity(body).build();
     }
     @Override
     public Response apisChangeLifecyclePost(String newState,String publishToGateway,String resubscription,String apiId,String ifMatch,String ifUnmodifiedSince){
@@ -109,22 +118,56 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
     @Override
     public Response apisCopyApiPost(String newVersion,String apiId){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        boolean isTenantFlowStarted = false;
+        URI newVersionedApiUri = null;
+        APIDTO newVersionedApi = null;
+
+        try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPI(apiIdentifier);
+            if (api != null) {
+                apiProvider.createNewAPIVersion(api, newVersion);
+                //get newly created API to return as response
+                APIIdentifier apiNewVersionedIdentifier =
+                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
+                newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
+                //This was added in order to provide location header for HTTP response
+                newVersionedApiUri =
+                    new URI("http://10.100.7.39:9763/api/am/v1/apis/" +
+                        apiIdentifier.getApiName() + "-" + newVersion + "-" + apiIdentifier.getProviderName());
+            } else {
+                throw new NotFoundException();
+            }
+
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        } catch (DuplicateAPIException e) {
+            throw new InternalServerErrorException(e);
+        } catch (URISyntaxException e) {
+            throw new InternalServerErrorException(e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
     }
     @Override
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
-        //validate API id (provider's tenant = carbon context.tenant domain)
-        String[] apiIdDetails = apiId.split("-");
-        String apiName = apiIdDetails[0];
-        String version = apiIdDetails[1];
-        String providerName = apiIdDetails[2];
-        String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
         boolean isTenantFlowStarted = false;
         APIDTO apiToReturn = new APIDTO();
         try {
-
-            APIIdentifier apiIdentifier = new APIIdentifier(providerNameEmailReplaced, apiName, version);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
             String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
             APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -136,13 +179,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
             org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPI(apiIdentifier);
             if (api != null) {
-
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-
             } else {
-                //log the error
-                return Response.status(Response.Status.NOT_FOUND).entity("Cannot find the requested API- " + apiName +
-                        "-" + version).type(MediaType.APPLICATION_JSON).build();
+                throw new NotFoundException();
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -157,7 +196,12 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         boolean isTenantFlowStarted = false;
+        //validate ID of api dto with the provided id
         try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+            body.setName(apiIdentifier.getApiName());
+            body.setVersion(apiIdentifier.getVersion());
+            body.setProvider(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
             org.wso2.carbon.apimgt.api.model.API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
 
             String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -178,16 +222,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         }
 
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity(body).build();
     }
     @Override
     public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince){
-        String[] apiIdDetails = apiId.split("-");
-        String apiName = apiIdDetails[0];
-        String version = apiIdDetails[1];
-        String providerName = apiIdDetails[2];
-        String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
-        APIIdentifier apiIdentifier = new APIIdentifier(providerNameEmailReplaced, apiName, version);
+        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
         boolean isTenantFlowStarted = false;
         try{
             String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -211,7 +250,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().build();
     }
     @Override
     public Response apisApiIdDocumentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){

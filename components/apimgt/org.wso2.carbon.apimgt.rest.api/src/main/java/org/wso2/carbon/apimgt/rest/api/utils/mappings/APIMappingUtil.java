@@ -19,13 +19,11 @@
 package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -35,15 +33,16 @@ import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.HashSet;
 
 public class APIMappingUtil {
 
     public static APIIdentifier getAPIIdentifier(String apiId){
+        //validation required
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
         String apiName = apiIdDetails[0];
         String version = apiIdDetails[1];
@@ -108,7 +107,7 @@ public class APIMappingUtil {
 
         apiSwaggerDefinition = apiProvider.getSwagger20Definition(model.getId());
 
-        dto.setSwagger(apiSwaggerDefinition);
+        dto.setApiDefinition(apiSwaggerDefinition);
 
         Set<String> apiTags = model.getTags();
         List<String> tagsToReturn = new ArrayList();
@@ -181,9 +180,9 @@ public class APIMappingUtil {
             model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
         }
 
-        //this should be done after api was added once
-        /*if (dto.getSwagger() != null) {
-            String apiSwaggerDefinition = dto.getSwagger();
+        if (dto.getApiDefinition() != null) {
+            String apiSwaggerDefinition = dto.getApiDefinition();
+            //URI Templates
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(model, apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
@@ -191,14 +190,7 @@ public class APIMappingUtil {
             Set<Scope> scopes = definitionFromSwagger20.getScopes(apiSwaggerDefinition);
             model.setScopes(scopes);
 
-            //scope validation should be done inside validatingUtil
-
-            apiProvider.saveSwagger20Definition(model.getId(), apiSwaggerDefinition);
-        } else {
-            // this needs to be checked since uri templates are not yet set
-            String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(model);
-            apiProvider.saveSwagger20Definition(model.getId(), apiDefinitionJSON);
-        }*/
+        }
 
         if (dto.getTags() != null) {
             Set<String> apiTags = new HashSet<String>(dto.getTags());

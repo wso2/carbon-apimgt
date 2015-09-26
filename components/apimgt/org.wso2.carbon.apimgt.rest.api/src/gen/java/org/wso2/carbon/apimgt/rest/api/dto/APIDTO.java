@@ -19,7 +19,7 @@ public class APIDTO  {
   private String context = null;
   private String version = null;
   private String provider = null;
-  private String swagger = null;
+  private String apiDefinition = null;
   private String status = null;
   private String responseCaching = null;
   private Integer cacheTimeout = null;
@@ -115,14 +115,15 @@ public class APIDTO  {
 
   
   /**
+   * Swagger definition of the API which contains details about URI templates and scopes
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("swagger")
-  public String getSwagger() {
-    return swagger;
+  @ApiModelProperty(value = "Swagger definition of the API which contains details about URI templates and scopes")
+  @JsonProperty("apiDefinition")
+  public String getApiDefinition() {
+    return apiDefinition;
   }
-  public void setSwagger(String swagger) {
-    this.swagger = swagger;
+  public void setApiDefinition(String apiDefinition) {
+    this.apiDefinition = apiDefinition;
   }
 
   
@@ -306,7 +307,7 @@ public class APIDTO  {
     sb.append("  context: ").append(context).append("\n");
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
-    sb.append("  swagger: ").append(swagger).append("\n");
+    sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
     sb.append("  status: ").append(status).append("\n");
     sb.append("  responseCaching: ").append(responseCaching).append("\n");
     sb.append("  cacheTimeout: ").append(cacheTimeout).append("\n");
