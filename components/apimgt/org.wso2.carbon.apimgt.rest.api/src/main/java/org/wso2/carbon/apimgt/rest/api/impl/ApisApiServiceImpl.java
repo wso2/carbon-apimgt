@@ -267,10 +267,19 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
         return Response.ok().entity(list).build();
     }
+
     @Override
     public Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        List<DocumentDTO> list = new ArrayList<DocumentDTO>();
+        try {
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
+            apiProvider.addDocumentation(APIMappingUtil.getAPIIdentifier(apiId),doc);
+            return Response.status(Response.Status.CREATED).build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
@@ -284,7 +293,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.ok().entity(doc).build();
             }
             else{
-                throw new org.wso2.carbon.apimgt.rest.api.exception.NotFoundException();
+                throw new NotFoundException();
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -293,14 +302,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
-        // do some magic!
+
+
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
-        // do some magic!
         return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
+
+
     @Override
     public Response apisApiIdEnvironmentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){
         // do some magic!
