@@ -61,10 +61,9 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format.") })
 
     public Response applicationsPost(@ApiParam(value = "Application object that is to be created" ,required=true ) ApplicationDTO body,
-    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
     throws NotFoundException {
-    return delegate.applicationsPost(body,subscriber,contentType);
+    return delegate.applicationsPost(body,contentType);
     }
     @GET
     @Path("/{applicationId}")
@@ -104,12 +103,11 @@ public class ApplicationsApi  {
 
     public Response applicationsApplicationIdPut(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
     @ApiParam(value = "Application object that needs to be updated" ,required=true ) ApplicationDTO body,
-    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
-    return delegate.applicationsApplicationIdPut(applicationId,body,subscriber,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.applicationsApplicationIdPut(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
     @Path("/{applicationId}")
