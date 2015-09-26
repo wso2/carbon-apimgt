@@ -1406,7 +1406,8 @@ definitions:
         type: string
       provider:
         type: string
-      swagger:
+      apiDefinition:
+        description: Swagger definition of the API which contains details about URI templates and scopes
         type: string
       status:
         type: string
