@@ -78,6 +78,8 @@ var addAnalyticsConfig = function (configData) {
         eventingConfigData.setUserName(configData.eventReceiverUsername);
         eventingConfigData.setPassword(configData.eventReceiverPassword);
         eventingConfigData.setServiceStatsEnable(true);
+
+        //Commented due to Current component not support this
         //var analyzingConfigData = stub.getAnalyzingConfigData();
         //analyzingConfigData.setUrl(configData.eventAnalyserURL);
         //analyzingConfigData.setUserName(configData.eventAnalyserUsername);
@@ -85,7 +87,7 @@ var addAnalyticsConfig = function (configData) {
 
         log.info("Saving Analytics config in registry...");
         stub.configureEventing(eventingConfigData);
-        //stub.configureAnalyzing(analyzingConfigData);
+        //stub.configureAnalyzing(analyzingConfigData);         //Commented due to Current component not support this
         var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
         log.info(configReaderService.getRequestStreamName());
         log.info(configReaderService.getResponseStreamName());
