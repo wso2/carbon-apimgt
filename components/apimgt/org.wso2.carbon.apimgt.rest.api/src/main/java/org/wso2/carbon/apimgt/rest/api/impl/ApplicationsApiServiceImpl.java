@@ -49,7 +49,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsPost(ApplicationDTO body, String subscriber, String contentType) {
+    public Response applicationsPost(ApplicationDTO body, String contentType) {
         //todo: validation, need to be moved
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         if (StringUtils.isEmpty(body.getName())) {
@@ -60,7 +60,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Tier is empty"))
                     .build();
         }
-        if (subscriber == null) { //todo: implement permission
+        String subscriber = body.getSubscriber(); //todo: implement permission
+        if (subscriber == null) { 
             subscriber = username;
         }
 
@@ -104,10 +105,11 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String subscriber,
-            String contentType, String ifMatch, String ifUnmodifiedSince) {
+    public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String contentType, 
+            String ifMatch, String ifUnmodifiedSince) {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        if (subscriber == null) { //todo: implement permission
+        String subscriber = body.getSubscriber(); //todo: implement permission
+        if (subscriber == null) {
             subscriber = username;
         }
         body.setApplicationId(Integer.parseInt(applicationId));
