@@ -21,10 +21,30 @@ package org.wso2.carbon.apimgt.rest.api.utils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorListItemDTO;
+import javax.validation.ConstraintViolation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class RestApiUtil {
 
     public static APIProvider getProvider (String providerName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIProvider(providerName);
+    }
+    
+    public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setMessage("Constraint Violation");
+        List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
+        for (ConstraintViolation violation : violations) {
+            ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
+            errorListItemDTO.setMessage(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath()
+                    + ": " + violation.getMessage());
+            errorListItemDTOs.add(errorListItemDTO);
+        }
+        errorDTO.setError(errorListItemDTOs);
+        return errorDTO;
     }
 }

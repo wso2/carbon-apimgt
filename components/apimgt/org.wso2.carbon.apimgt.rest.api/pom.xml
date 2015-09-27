@@ -46,7 +46,7 @@
 				<checksumPolicy>ignore</checksumPolicy>
 			</releases>
 		</repository>
-	</repositories>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -101,6 +101,12 @@
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>5.0.2.Final</version>
+        </dependency>
+
     </dependencies>
     <build>
         <pluginManagement>
