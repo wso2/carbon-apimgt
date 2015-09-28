@@ -40,8 +40,7 @@ public class RestApiUtil {
         List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
         for (ConstraintViolation violation : violations) {
             ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
-            errorListItemDTO.setMessage(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath()
-                    + ": " + violation.getMessage());
+            errorListItemDTO.setMessage(violation.getPropertyPath() + ": " + violation.getMessage());
             errorListItemDTOs.add(errorListItemDTO);
         }
         errorDTO.setError(errorListItemDTOs);

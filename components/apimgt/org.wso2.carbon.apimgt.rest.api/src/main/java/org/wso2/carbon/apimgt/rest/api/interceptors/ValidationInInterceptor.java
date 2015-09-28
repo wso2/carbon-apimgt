@@ -39,11 +39,18 @@ import javax.validation.ValidatorFactory;
 import javax.validation.executable.ExecutableValidator;
 
 public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
-    protected Log log = LogFactory.getLog(getClass());
+    private Log log = LogFactory.getLog(getClass());
+    private Validator validator = null; //validator interface is thread-safe
     
     public ValidationInInterceptor() {
         super(Phase.PRE_INVOKE);
-        log.info("Validation Interceptor initialized");
+        ValidatorFactory defaultFactory = Validation.buildDefaultValidatorFactory();
+        validator = defaultFactory.getValidator();
+        if (validator == null){
+            log.warn("Bean Validation provider could not be found, no validation will be performed");
+        } else {
+            log.info("Validation In-Interceptor initialized successfully");
+        }
     }
 
     public void handleMessage(Message message) {
@@ -68,8 +75,12 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
 
         final List<Object> arguments = MessageContentsList.getContentsList(message);
         final Method method = operationResource.getAnnotatedMethod();
+        final Object instance = resourceProvider.getInstance(message);
         if (method != null && arguments != null) {
-            validate(method, arguments.toArray(), resourceProvider.getInstance(message));
+            //validate the parameters(arguments) over the invoked method
+            validate(method, arguments.toArray(), instance);
+
+            //validate the fields of each argument
             for (Object arg : arguments) {
                 if (arg != null)
                     validate(arg);
@@ -78,38 +89,28 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
     }
 
     public <T> void validate(final Method method, final Object[] arguments, final T instance) {
-
-        ValidatorFactory defaultFactory = null;
-
         try {
-            defaultFactory = Validation.buildDefaultValidatorFactory();
-            Validator validator = defaultFactory.getValidator();
-
-            if (defaultFactory == null) {
-                log.warn("Bean Validation provider could be found, no validation will be performed");
+            if (validator == null) {
+                log.warn("Bean Validation provider could not be found, no validation will be performed");
                 return;
             }
 
-            final ExecutableValidator methodValidator = validator.forExecutables();
-            final Set<ConstraintViolation<T>> violations = methodValidator.validateParameters(instance,
+            ExecutableValidator methodValidator = validator.forExecutables();
+            Set<ConstraintViolation<T>> violations = methodValidator.validateParameters(instance,
                     method, arguments);
-            
+
             if (!violations.isEmpty()) {
                 throw new ConstraintViolationException(violations);
             }
 
-        } catch (final ValidationException ex) {
+        } catch (ValidationException ex) {
             throw new InternalServerErrorException(ex);
         }
     }
 
     public <T> void validate(final T object) {
-        ValidatorFactory defaultFactory = null;
         try {
-            defaultFactory = Validation.buildDefaultValidatorFactory();
-            Validator validator = defaultFactory.getValidator();
-
-            if (defaultFactory == null) {
+            if (validator == null) {
                 log.warn("Bean Validation provider could be found, no validation will be performed");
                 return;
             }
@@ -120,7 +121,7 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
                 throw new ConstraintViolationException(violations);
             }
 
-        } catch (final ValidationException ex) {
+        } catch (ValidationException ex) {
             throw new InternalServerErrorException(ex);
         }
     }

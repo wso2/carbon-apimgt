@@ -33,7 +33,7 @@ public class ConstraintViolationException extends WebApplicationException {
         super(Response.status(Response.Status.BAD_REQUEST).entity(
                 RestApiUtil.getConstraintViolationErrorDTO(violations)).build());
         for (ConstraintViolation violation : violations) {
-            log.error(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath()
+            log.info(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath()
                     + ": " + violation.getMessage());
         }
     }
