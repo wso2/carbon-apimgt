@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
@@ -77,9 +78,11 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
                 throw new IdentityOAuth2Exception(e.getMessage());
             }
         }
-        String username = tokReqMsgCtx.getAuthorizedUser();
-        username = username + "@" + tenantDomain;
-        tokReqMsgCtx.setAuthorizedUser(username);
+        //String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
+        //username = username + "@" + tenantDomain;
+        User user = tokReqMsgCtx.getAuthorizedUser();
+        user.setUserName(user.getUserName() + "@" + tenantDomain);
+        tokReqMsgCtx.setAuthorizedUser(user);
 
         return validateResult;
     }
