@@ -24,18 +24,16 @@ include("/jagg/jagg.jag");
         apiData.deprecateOldVersions = request.getParameter("deprecateOldVersions");
         var keyForward=request.getParameter("requireResubscription");
         if(keyForward!=null && keyForward){apiData.makeKeysForwardCompatible='false';}else{apiData.makeKeysForwardCompatible='true';}
-        result = mod.updateAPIStatus(apiData);
-
-        var ApiProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-        var apiProviderImplObj = new ApiProviderImpl("admin"); //TODO need to pass the logged in user here
+        var userName = jagg.getUser().username;
+        var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
         var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
         var apiIdentifierObj = apiIdentifier(apiData.provider, apiData.apiName, apiData.version);
+        result=APIManagerFactory.getInstance().getAPIProvider(userName).changeLifeCycleStatus(apiIdentifierObj, apiData.status,
+                          Boolean(apiData.publishToGateway), Boolean(apiData.deprecateOldVersions), Boolean(apiData.makeKeysForwardCompatible));
 
-        apiProviderImplObj.changeLifeCycleStatus(apiIdentifierObj, apiData.status,  true, true, true); //need to pass proper parameters instead of hardcoded parameters
+        //var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),version:request.getParameter("version")}).lcs;
 
-        var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),version:request.getParameter("version")}).lcs;
-
-        if (result.error==true) {
+        if (!result) {
             obj = {
                 error:true,
                 message:result.message
@@ -43,7 +41,7 @@ include("/jagg/jagg.jag");
         } else {
             obj = {
                 error:false,
-                lcs:lcs
+                lcs:"tt"
             }
         }
         print(obj);

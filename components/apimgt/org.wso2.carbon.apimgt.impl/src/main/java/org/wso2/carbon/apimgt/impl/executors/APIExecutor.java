@@ -80,7 +80,7 @@ public class APIExecutor implements Execution {
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
-        String user = "admin"; //need to pass the logged in user here
+        String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
         String userWithDomain = APIUtil.appendDomainWithUser(user, domain);
         userWithDomain = APIUtil.replaceEmailDomainBack(userWithDomain);

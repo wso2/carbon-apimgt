@@ -856,7 +856,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIStatus oldStatus = api.getStatus();
                 APIStatus newStatus = APIUtil.getApiStatus(status);
                 String currentUser = this.username;
-                changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+                changeAPIStatus(api, newStatus, APIUtil.appendDomainWithUser(currentUser,tenantDomain), publishToGateway);
 
                 if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
                         && newStatus.equals(APIStatus.PUBLISHED)) {
@@ -899,9 +899,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIStatus currentStatus = api.getStatus();
         if (!currentStatus.equals(status)) {
             api.setStatus(status);
-            MultitenantUtils.getTenantDomain(username);
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             try {
                 //If API status changed to publish we should add it to recently added APIs list
                 //this should happen in store-publisher cluster domain if deployment is distributed
@@ -954,9 +951,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (APIManagementException e) {
             	handleException("Error occured in the status change : " + api.getId().getApiName() + ". " 
             	                                                                                + e.getMessage(), e);
-            }
-            finally {
-                PrivilegedCarbonContext.endTenantFlow();
             }
         }
         if (!failedGateways.isEmpty() &&
@@ -1634,6 +1628,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
             GenericArtifact artifact = APIUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
+            //Attach the API lifecycle
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIUtil.getAPIProviderPath(api.getId());
             //provider ------provides----> API
@@ -2651,6 +2647,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIIdentifier identifier = new APIIdentifier(provider, apiIdentifier.getApiName(), apiIdentifier.getVersion());
         String apiPath = APIUtil.getAPIPath(identifier);
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain,true);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             Resource apiResource = registry.get(apiPath);
@@ -2673,8 +2672,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
             return false;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
         }
     }
+
+
 
 }
 

@@ -54,18 +54,6 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
     apiData.provider= api.provider;
     apiData.name= api.name;
     apiData.version= api.version;
-
-    var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
-    var apiIdentifierObj = apiIdentifier(api.provider, api.name, api.version);
-    var apiUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-    var apiPath = apiUtil.getAPIPath(apiIdentifierObj);
-    var ApiProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-    var apiProviderImplObj = new ApiProviderImpl("admin"); //TODO need to pass logged in user here
-
-    var GovernanceArtifactImplObj = apiProviderImplObj.getAPIArtifact(apiPath);
-    GovernanceArtifactImplObj.attachLifecycle("APILifeCycle");
-
-
     var result = mod.getLifeCyclesEvents(apiData);
     var lcs=result.lcs;
 
@@ -88,14 +76,10 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <div class="control-group">
                 <label class="control-label" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
                 <div class="controls">
-                    <% print(GovernanceArtifactImplObj.getLifecycleState("APILifeCycle")); %>
-                    <a class="icon-question-sign help_popup" help_data="lifecycle_help"></a>
-           			 <p id="lifecycle_help" class="hide"><%=i18n.localize("lifecycleHelpMsg")%></p>
+                    <% print(api.status); %>
+
                  </div> <br/>
                  <div class="controls publishCheckBoxes">
-                    <label class="checkbox" id="publishToGatewayDiv"  style="display:none;">
-                        <input type="checkbox" id="publishToGateway" name="publishToGateway" onChange="checkValue('#publishToGateway')" checked="true" value="true"><%=i18n.localize("propagateChangesToGateway")%>
-                    </label>
                      <label class="checkbox" id="deprecateOldVersionsDiv" style="display:none;">
                         <input type="checkbox" id="deprecateOldVersions" name="deprecateOldVersions" onChange="checkValue('#deprecateOldVersions')" value="false"><%=i18n.localize("deprecateOldVersions")%>
                      </label>

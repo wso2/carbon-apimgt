@@ -134,4 +134,11 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void checkPublishPermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
     }
+
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
+                                         boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
+            throws APIManagementException {
+        checkPublishPermission();
+        return super.changeLifeCycleStatus(apiIdentifier, targetStatus, publishToGateway, deprecateOldVersions, makeKeysForwardCompatible);
+    }
 }
