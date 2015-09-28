@@ -9257,7 +9257,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             String sqlQuery = "SELECT ACCESS_TOKEN" +
                               " FROM IDN_OAUTH2_ACCESS_TOKEN" +
                               " WHERE " +
-                              " CONSUMER_KEY = ?" +
+                              " CONSUMER_KEY_ID = ?" +
                               " AND TOKEN_STATE = 'ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);
