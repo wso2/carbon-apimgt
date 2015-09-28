@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
+import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.AccessTokenDO;
@@ -128,23 +129,24 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             }
         }
 
-        AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(),
-                apiKeyValidationInfoDTO.getEndUserName(), scopes,
-                null, null,apiKeyValidationInfoDTO.getValidityPeriod(),apiKeyValidationInfoDTO.getValidityPeriod(),
+        User user = new User();
+        user.setUserName(apiKeyValidationInfoDTO.getEndUserName());
+        AccessTokenDO accessTokenDO = new AccessTokenDO(apiKeyValidationInfoDTO.getConsumerKey(), user, scopes, null,
+                null, apiKeyValidationInfoDTO.getValidityPeriod(), apiKeyValidationInfoDTO.getValidityPeriod(),
                 apiKeyValidationInfoDTO.getType());
 
         accessTokenDO.setAccessToken(validationContext.getAccessToken());
 
         String actualVersion = validationContext.getVersion();
-                //Check if the api version has been prefixed with _default_
-                        if (actualVersion != null && actualVersion.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
-                        //Remove the prefix from the version.
-                                actualVersion = actualVersion.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
-                    }
-                String resource = validationContext.getContext() + "/" + actualVersion + validationContext
-                        .getMatchingResource()
-                                  + ":" +
-                                  validationContext.getHttpVerb();
+        //Check if the api version has been prefixed with _default_
+        if (actualVersion != null && actualVersion.startsWith(APIConstants.DEFAULT_VERSION_PREFIX)) {
+            //Remove the prefix from the version.
+            actualVersion = actualVersion.split(APIConstants.DEFAULT_VERSION_PREFIX)[1];
+        }
+        String resource = validationContext.getContext() + "/" + actualVersion + validationContext
+                .getMatchingResource()
+                + ":" +
+                validationContext.getHttpVerb();
 
         try {
             if(scopeValidator != null){

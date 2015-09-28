@@ -5,10 +5,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.application.common.cache.BaseCache;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
+import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
@@ -100,7 +102,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
                 throw new IdentityOAuth2Exception(e.getMessage(), e);
             }
 
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
             UserStoreManager userStoreManager = null;
             try {
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
@@ -117,8 +119,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
                     if (requiredHeaderClaimUris != null && requiredHeaderClaimUris.size() > 0) {
                         // Get user's claim values from the default profile.
-                        String userStoreDomain = UserCoreUtil.extractDomainFromName(tokReqMsgCtx
-                                .getAuthorizedUser());
+                        String userStoreDomain = tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain();
 
                         String endUsernameWithDomain = UserCoreUtil.addDomainToName
                                 (oAuth2AccessTokenReqDTO.getResourceOwnerUsername(),
@@ -358,6 +359,6 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
     }
 
     private QName getQNameWithIdentityNS(String localPart) {
-        return new QName(IdentityConfigParser.IDENTITY_DEFAULT_NAMESPACE, localPart);
+        return new QName(IdentityCoreConstants.IDENTITY_DEFAULT_NAMESPACE, localPart);
     }
 }
