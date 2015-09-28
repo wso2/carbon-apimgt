@@ -9,6 +9,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.neethi.PolicyEngine;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
+import org.apache.synapse.commons.throttle.core.Throttle;
+import org.apache.synapse.commons.throttle.core.ThrottleConstants;
+import org.apache.synapse.commons.throttle.core.ThrottleContext;
+import org.apache.synapse.commons.throttle.core.ThrottleDataHolder;
+import org.apache.synapse.commons.throttle.core.ThrottleException;
+import org.apache.synapse.commons.throttle.core.ThrottleFactory;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.util.SynapseBinaryDataSource;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -21,7 +27,7 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.throttle.core.*;
+
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;

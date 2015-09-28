@@ -45,10 +45,6 @@
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.throttle.core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
             <exclusions>

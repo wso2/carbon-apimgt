@@ -12,6 +12,12 @@ $(document).ready(function(){
         $(".implementation_method_"+$(this).val()).show();
     });
 
+    if($('#toggleThrottle').attr('checked')){
+        $('#toggleThrottle').parent().next().show();
+    } else {
+        $('#toggleThrottle').parent().next().hide();
+    }
+
 
     $('#endpointType').on('change',function(){
         var endpointType = $('#endpointType').find(":selected").val();
