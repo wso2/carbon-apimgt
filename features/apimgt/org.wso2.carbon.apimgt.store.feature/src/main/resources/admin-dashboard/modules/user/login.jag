@@ -148,7 +148,7 @@ if( bpsRuning ){
 var isUserAllowed=function(username,password){
 var log=new Log();
 try{
-
+var ws = require("ws");
 var version = new ws.WSRequest();
 var options = new Array();
 options.useSOAP = 1.2;

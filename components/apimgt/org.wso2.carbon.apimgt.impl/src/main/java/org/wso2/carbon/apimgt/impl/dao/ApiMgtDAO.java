@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1096,7 +1095,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            handleException("Error occurred while reading subscription details from the database.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps,conn,rs);
         }
@@ -2919,7 +2918,7 @@ public class ApiMgtDAO {
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
                         " IAT.TOKEN_ID = ISAT.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'PRODUCTION' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
@@ -2928,30 +2927,6 @@ public class ApiMgtDAO {
                         " ORDER BY IAT.TIME_CREATED DESC";
 
         String sql = null, oracleSQL = null, mySQLSQL = null, msSQL = null,postgreSQL = null, db2SQL = null;
-
-        //Construct database specific sql statements.
-//        oracleSQL = "SELECT ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-//                        " ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
-//                        " IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
-//                        " IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
-//                        " IAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
-//                        " AKM.KEY_TYPE AS TOKEN_TYPE, " +
-//                        " AKM.STATE AS STATE "+
-//                        " FROM" +
-//                        " AM_APPLICATION_KEY_MAPPING AKM, " +
-//                        accessTokenStoreTable + " IAT," +
-//                        " IDN_OAUTH_CONSUMER_APPS ICA " +
-//                        " WHERE" +
-//                        " AKM.APPLICATION_ID = ? AND" +
-//                        " IAT.USER_TYPE = ? AND" +
-//                        " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-//                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
-//                        " AKM.KEY_TYPE = 'PRODUCTION' AND" +
-//                        " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
-//                        " IAT.TOKEN_STATE = 'EXPIRED' OR" +
-//                        " IAT.TOKEN_STATE = 'REVOKED')" +
-//                        " AND ROWNUM < 2 " +
-//                        " ORDER BY IAT.TIME_CREATED DESC";
 
         oracleSQL = "SELECT CONSUMER_KEY, " +
                 "CONSUMER_SECRET, " +
@@ -2977,7 +2952,7 @@ public class ApiMgtDAO {
                         "AKM.APPLICATION_ID = ? AND " +
                         "IAT.USER_TYPE = ? AND " +
                         "ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND " +
-                        "IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND " +
+                        "IAT.CONSUMER_KEY_ID = ICA.ID AND " +
                         "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         "AKM.KEY_TYPE = 'PRODUCTION' AND " +
                         "(IAT.TOKEN_STATE = 'ACTIVE' OR " +
@@ -3077,7 +3052,7 @@ public class ApiMgtDAO {
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
                         " IAT.TOKEN_ID = ISAT.TOKEN_ID AND" +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
@@ -3102,7 +3077,7 @@ public class ApiMgtDAO {
                         " AKM.APPLICATION_ID = ? AND" +
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-                        " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY AND" +
+                        " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
                         "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
@@ -4219,24 +4194,26 @@ public class ApiMgtDAO {
                 "CONSUMER_KEY = ? " +
                 "WHERE APPLICATION_ID = ? AND KEY_TYPE = ?";
 
+            Connection connection = null;
+            PreparedStatement ps = null;
+
             try {
-                Connection connection = APIMgtDBUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement(addApplicationKeyMapping);
+                connection = APIMgtDBUtil.getConnection();
+                ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, APIUtil.encryptToken(consumerKey));
 //                ps.setString(2,APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
-                ps.setInt(2,application.getId());
-                ps.setString(3,keyType);
-
+                ps.setInt(2, application.getId());
+                ps.setString(3, keyType);
                 ps.executeUpdate();
-                ps.close();
                 connection.commit();
-                APIMgtDBUtil.closeAllConnections(ps,connection,null);
             } catch (SQLException e) {
                 handleException("Error updating the CONSUMER KEY of the AM_APPLICATION_KEY_MAPPING table where " +
                         "APPLICATION_ID = " + application.getId() + " and KEY_TYPE = " + keyType, e);
             } catch (CryptoException e) {
                 handleException("Error while encrypting the consumer key " + consumerKey + " before updating the " +
                         "AM_APPLICATION_KEY_MAPPING table", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(ps,connection,null);
             }
 
         }
@@ -4283,7 +4260,6 @@ public class ApiMgtDAO {
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
                 ps.setString(5,"MAPPED");
                 ps.execute();
-                ps.close();
                 connection.commit();
 
             } catch (SQLException e) {
@@ -7616,11 +7592,13 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
         }
         String authorizedDomains = "";
-        String accessAllowDomainsSql = "SELECT a.AUTHZ_DOMAIN " +
-                                       " FROM AM_APP_KEY_DOMAIN_MAPPING  a " +
-                                       " INNER JOIN " + accessTokenStoreTable + " b " +
-                                       " ON a.CONSUMER_KEY = b.CONSUMER_KEY " +
-                                       " WHERE b.ACCESS_TOKEN = ? ";
+        String accessAllowDomainsSql = "SELECT AKDM.AUTHZ_DOMAIN " +
+                                       "FROM AM_APP_KEY_DOMAIN_MAPPING AKDM, " +
+                                             accessTokenStoreTable + " IOAT, " +
+                                             "IDN_OAUTH_CONSUMER_APPS IOCA " +
+                                       "WHERE IOAT.ACCESS_TOKEN  = ? " +
+                                              "AND IOAT.CONSUMER_KEY_ID = IOCA.ID " +
+                                              "AND IOCA.CONSUMER_KEY = AKDM.CONSUMER_KEY";
 
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -7927,6 +7905,40 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
         return false;
+    }
+
+    public static String getAPIContext(APIIdentifier identifier) throws APIManagementException {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        PreparedStatement prepStmt = null;
+
+        String  context = null;
+
+        String sql = "SELECT CONTEXT FROM AM_API WHERE " +
+                        "API_PROVIDER = ? " +
+                        "  AND API_NAME = ? " +
+                        "  AND API_VERSION  = ?";
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sql);
+            prepStmt.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            prepStmt.setString(2, identifier.getApiName());
+            prepStmt.setString(3, identifier.getVersion());
+            resultSet = prepStmt.executeQuery();
+
+            while (resultSet.next()) {
+                context = resultSet.getString(1);
+            }
+        } catch (SQLException e) {
+            log.error("Failed to retrieve the API Context", e);
+
+            handleException("Failed to retrieve the API Context for " +
+                    identifier.getProviderName() + "-" + identifier.getApiName() + "-"
+                                                    + identifier.getVersion(), e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+        }
+        return context;
     }
 
     public static List<String> getAllAvailableContexts () {
@@ -9244,7 +9256,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             String sqlQuery = "SELECT ACCESS_TOKEN" +
                               " FROM IDN_OAUTH2_ACCESS_TOKEN" +
                               " WHERE " +
-                              " CONSUMER_KEY = ?" +
+                              " CONSUMER_KEY_ID = ?" +
                               " AND TOKEN_STATE = 'ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);

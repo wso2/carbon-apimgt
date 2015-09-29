@@ -232,13 +232,13 @@ public final class APIMgtDBUtil {
                 sb.append(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error occurred while reading from buffered reader.", e);
         } finally {
             if (br != null) {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Error occurred while closing the buffered reader.", e);
                 }
             }
         }
