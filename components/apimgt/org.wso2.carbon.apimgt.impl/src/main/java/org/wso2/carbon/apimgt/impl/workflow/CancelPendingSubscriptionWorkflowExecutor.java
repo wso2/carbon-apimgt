@@ -27,9 +27,8 @@ import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
@@ -38,9 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Workflow executor for subscription delete action
+ * WS workflow executor for subscription delete action
+ * cancelPendingSubscriptionWorkflows
  */
-public class SubscriptionDeletionWSWorkflowExecutor extends SubscriptionCreationSimpleWorkflowExecutor {
+public class CancelPendingSubscriptionWorkflowExecutor extends SubscriptionDeletionSimpleWorkflowExecutor {
 
     private String serviceEndpoint;
 
@@ -59,7 +59,7 @@ public class SubscriptionDeletionWSWorkflowExecutor extends SubscriptionCreation
                     .getClientConfigContext(),
                     null);
             Options options = new Options();
-            options.setAction("http://workflow.application.apimgt.carbon.wso2.org/cancel");
+            options.setAction("http://workflow.subscription.apimgt.carbon.wso2.org/cancel");
             options.setTo(new EndpointReference(serviceEndpoint));
 
             if (contentType != null) {
@@ -71,6 +71,7 @@ public class SubscriptionDeletionWSWorkflowExecutor extends SubscriptionCreation
 
             HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
+            // Assumes authentication is required if username and password is given
             if (username != null && password != null) {
                 auth.setUsername(username);
                 auth.setPassword(password);
@@ -85,7 +86,7 @@ public class SubscriptionDeletionWSWorkflowExecutor extends SubscriptionCreation
 
             client.setOptions(options);
 
-            ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
+            SubscriptionWorkflowDTO appWorkFlowDTO = (SubscriptionWorkflowDTO) workflowDTO;
             String payload =
                     "<wor:CancelSubscriptionApprovalWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt.carbon.wso2.org\">\n"
                             + "<wor:workflowExtRef>" + appWorkFlowDTO.getExternalWorkflowReference()
@@ -96,9 +97,11 @@ public class SubscriptionDeletionWSWorkflowExecutor extends SubscriptionCreation
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
             complete(workflowDTO);
         } catch (AxisFault axisFault) {
-            throw new WorkflowException("Error while updating workflow", axisFault);
+            log.error("Error sending out message", axisFault);
+            throw new WorkflowException("Error sending out message", axisFault);
         } catch (XMLStreamException e) {
-            throw new WorkflowException("Error while updating workflow", e);
+            log.error("Error converting String to OMElement", e);
+            throw new WorkflowException("Error converting String to OMElement", e);
         }
     }
 
