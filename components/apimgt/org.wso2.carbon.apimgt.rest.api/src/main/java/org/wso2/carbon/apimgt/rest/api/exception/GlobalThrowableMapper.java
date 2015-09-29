@@ -61,6 +61,10 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable>{
             return ((BadRequestException) e).getResponse();
         }
 
+        if(e instanceof ConstraintViolationException){
+            return ((ConstraintViolationException) e).getResponse();
+        }
+
         //unknown exception log and return
         log.error("An Unknown exception has been captured by global exception mapper.", e);
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Content-Type", "application/json").entity(e500).build();
