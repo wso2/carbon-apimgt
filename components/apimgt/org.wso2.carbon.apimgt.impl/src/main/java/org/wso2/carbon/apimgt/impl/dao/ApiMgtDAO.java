@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1096,7 +1095,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            handleException("Error occurred while reading subscription details from the database.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps,conn,rs);
         }
