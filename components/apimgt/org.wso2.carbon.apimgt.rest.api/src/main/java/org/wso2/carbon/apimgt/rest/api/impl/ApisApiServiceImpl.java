@@ -276,7 +276,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
             Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
             apiProvider.addDocumentation(APIMappingUtil.getAPIIdentifier(apiId),doc);
-            return Response.status(Response.Status.CREATED).build();
+            return Response.status(Response.Status.CREATED).header("Location", "/apis/" + apiId + "/documents/" + doc.getId()).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
@@ -302,13 +302,35 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
-
-
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        List<DocumentDTO> list = new ArrayList<DocumentDTO>();
+        try {
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
+            apiProvider.updateDocumentation(APIMappingUtil.getAPIIdentifier(apiId), doc);
+            return Response.ok().entity(APIMappingUtil.fromDocumentationtoDTO(doc)).build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
+
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        Documentation doc;
+        try {
+            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+
+            doc = apiProvider.getDocumentation(documentId);
+            if(null == doc){
+                throw new NotFoundException();
+            }
+            apiProvider.removeDocumentation(APIMappingUtil.getAPIIdentifier(apiId), documentId);
+            return Response.ok().build();
+
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
 

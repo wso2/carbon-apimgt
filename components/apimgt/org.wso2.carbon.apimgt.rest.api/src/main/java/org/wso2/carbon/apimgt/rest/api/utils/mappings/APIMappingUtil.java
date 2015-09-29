@@ -232,27 +232,23 @@ public class APIMappingUtil {
         DocumentDTO d = new DocumentDTO();
         d.setDocumentId(doc.getId());
         d.setName(doc.getName());
-        d.setUrl(doc.getFilePath());
+        //d.setUrl(doc.getFilePath());
         d.setSummary(doc.getSummary());
-        d.setType(doc.getType().getType());
-        d.setUrl(doc.getFilePath());
+        d.setType(DocumentDTO.TypeEnum.valueOf(doc.getType().toString()));
+        //d.setUrl(doc.getFilePath());
+        d.setVisibility(DocumentDTO.VisibilityEnum.valueOf(doc.getVisibility().toString()));
         return d;
     }
 
     public static Documentation fromDTOtoDocumentation(DocumentDTO dto){
-        Documentation doc = new Documentation(getDocType(dto.getType()) ,dto.getName());
+        Documentation doc = new Documentation(DocumentationType.valueOf(dto.getType().toString()) ,dto.getName());
         doc.setSummary(dto.getSummary());
-        doc.set
-        return doc;
-    }
-
-    private static DocumentationType getDocType(String docType) {
-        DocumentationType docsType = null;
-        for (DocumentationType type : DocumentationType.values()) {
-            if (type.getType().equalsIgnoreCase(docType)) {
-                docsType = type;
-            }
+        String visibility = dto.getVisibility().toString();
+        if (visibility == null){
+            visibility = APIConstants.DOC_API_BASED_VISIBILITY;
         }
-        return docsType;
+        doc.setVisibility(Documentation.DocumentVisibility.valueOf(visibility));
+        doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+        return doc;
     }
 }

@@ -40,7 +40,7 @@ public class ApisApi  {
 
     public Response apisGet(@ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
     @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
-    @ApiParam(value = "** Search condition **.\n\n\nIf no advanced attribute modifier is found search will match the given query string against API Name.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nEg. \"provider:wso2\" will match if the API provider is wso2.\n\n\nSupported attribute modifiers are [ **version, context, status, description, subcontext, doc, provider, tag **  ]\n") @QueryParam("query") String query,
+    @ApiParam(value = "** Search condition **.\n\nIf no advanced attribute modifier is found search will match the given query string against API Name.\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match if the API provider is wso2.\n\nSupported attribute modifiers are [ **version, context, status, description, subcontext, doc, provider, tag **  ]\n") @QueryParam("query") String query,
     @ApiParam(value = " prototype / production ") @QueryParam("type") String type,
     @ApiParam(value = " List supported sorting attributes ") @QueryParam("sort") String sort,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
