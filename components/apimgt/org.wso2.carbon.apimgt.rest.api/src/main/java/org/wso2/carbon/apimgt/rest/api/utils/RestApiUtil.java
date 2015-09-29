@@ -46,4 +46,10 @@ public class RestApiUtil {
         errorDTO.setError(errorListItemDTOs);
         return errorDTO;
     }
+
+    public static ErrorDTO getAuthenticationErrorDTO(String message) {
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setMessage(message);
+        return errorDTO;
+    }
 }
