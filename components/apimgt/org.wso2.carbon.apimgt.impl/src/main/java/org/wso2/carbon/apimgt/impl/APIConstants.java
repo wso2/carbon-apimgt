@@ -286,7 +286,6 @@ public final class APIConstants {
         public static final String PROD_ONLY_BLOCKED = "PROD_ONLY_BLOCKED";
         public static final String UNBLOCKED = "UNBLOCKED";
         public static final String ON_HOLD = "ON_HOLD";
-        public static final String PENDING_REMOVAL = "PENDING_REMOVAL";
         public static final String REJECTED = "REJECTED";
     }
 

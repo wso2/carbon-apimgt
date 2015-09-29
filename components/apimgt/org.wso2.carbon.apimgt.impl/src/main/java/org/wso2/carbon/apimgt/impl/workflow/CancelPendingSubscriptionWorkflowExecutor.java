@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -55,9 +56,8 @@ public class CancelPendingSubscriptionWorkflowExecutor extends SubscriptionDelet
     @Override
     public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
         try {
-            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getContextService()
-                    .getClientConfigContext(),
-                    null);
+            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
+                    .getContextService().getClientConfigContext(), null);
             Options options = new Options();
             options.setAction("http://workflow.subscription.apimgt.carbon.wso2.org/cancel");
             options.setTo(new EndpointReference(serviceEndpoint));
@@ -79,6 +79,10 @@ public class CancelPendingSubscriptionWorkflowExecutor extends SubscriptionDelet
                 List<String> authSchemes = new ArrayList<String>();
                 authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
                 auth.setAuthSchemes(authSchemes);
+
+                if(contentType == null){
+                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+                }
                 options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
                         auth);
                 options.setManageSession(true);
@@ -87,14 +91,14 @@ public class CancelPendingSubscriptionWorkflowExecutor extends SubscriptionDelet
             client.setOptions(options);
 
             SubscriptionWorkflowDTO appWorkFlowDTO = (SubscriptionWorkflowDTO) workflowDTO;
-            String payload =
-                    "<wor:CancelSubscriptionApprovalWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt.carbon.wso2.org\">\n"
-                            + "<wor:workflowExtRef>" + appWorkFlowDTO.getExternalWorkflowReference()
-                            + "</wor:workflowExtRef>\n"
-                            + "</wor:CancelSubscriptionApprovalWorkFlowProcessRequest>";
+            String payload = "<wor:CancelSubscriptionApprovalWorkflowProcessRequest " +
+                    "           xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
+                    "           <wor:workflowExtRef>$1</wor:workflowExtRef>\n" +
+                    "        </wor:CancelSubscriptionApprovalWorkflowProcessRequest>";
 
-
+            payload = payload.replace("$1", appWorkFlowDTO.getExternalWorkflowReference());
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
+            // call complete method here since there are no callbacks to fire complete method
             complete(workflowDTO);
         } catch (AxisFault axisFault) {
             log.error("Error sending out message", axisFault);
@@ -109,8 +113,10 @@ public class CancelPendingSubscriptionWorkflowExecutor extends SubscriptionDelet
     public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
 
+        workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
         try {
+            workflowDTO.setStatus(WorkflowStatus.APPROVED);
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
             publishEvents(workflowDTO);
         } catch (APIManagementException e) {

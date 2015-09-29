@@ -1966,10 +1966,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         API api = getAPI(identifier);
         boolean isTenantFlowStarted = false;
-        /**
-         * TODO:  find if there are set of disallowed api status which can't be unsubscribed
-         */
-        apiMgtDAO.updateSubscription(identifier, APIConstants.SubscriptionStatus.PENDING_REMOVAL, applicationId);
+
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             isTenantFlowStarted = true;
             PrivilegedCarbonContext.startTenantFlow();
@@ -1979,25 +1976,25 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(identifier, applicationId);
 
-            /**
-             * TODO: Check below items to match the required parameters of deletion workflow
-             */
             SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
-            workflowDTO.setWorkflowReference(String.valueOf(applicationId));
-            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            workflowDTO.setStatus(WorkflowStatus.CREATED);
-            workflowDTO.setCreatedTime(System.currentTimeMillis());
+            workflowDTO.setApiProvider(identifier.getProviderName());
+            workflowDTO.setApiContext(api.getContext());
+            workflowDTO.setApiName(identifier.getApiName());
+            workflowDTO.setApiVersion(identifier.getVersion());
+            workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
-            workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
+            workflowDTO.setExternalWorkflowReference(workflowExtRef);
             workflowDTO.setSubscriber(userId);
 
             removeSubscriptionWFExecutor.execute(workflowDTO);
+            if(log.isDebugEnabled()) {
+                log.debug("Workflow successfully executed for identifier: " + identifier );
+            }
         } catch (WorkflowException e) {
-            // If the workflow execution fails, roll back transaction by adding the subscription entry.
-            apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
-                    APIConstants.SubscriptionStatus.UNBLOCKED);
             log.error("Could not execute Workflow", e);
             throw new APIManagementException("Could not execute Workflow", e);
         } finally {
@@ -2011,7 +2008,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         if(log.isDebugEnabled()){
             String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
-            String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscription removed by " + userId +" from app "+ appName;
+            String logMessage = "API Name: " + identifier.getApiName() + ", API Version " +
+                    identifier.getVersion()+" subscription removed from app " + appName + " by " + userId;
             log.debug(logMessage);
         }
     }

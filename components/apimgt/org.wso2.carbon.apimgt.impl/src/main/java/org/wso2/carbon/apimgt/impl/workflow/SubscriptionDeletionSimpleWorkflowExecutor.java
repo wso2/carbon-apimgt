@@ -25,9 +25,15 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
+/**
+ * Simple workflow executor for subscription delete action
+ */
 public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(SubscriptionCreationSimpleWorkflowExecutor.class);
@@ -50,17 +56,39 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
     }
 
     @Override
-    public void complete(WorkflowDTO workflowDTO) throws WorkflowException{
+    public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         SubscriptionWorkflowDTO subWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
+        Connection conn = null;
+
         try {
             APIIdentifier identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
                     subWorkflowDTO.getApiName(), subWorkflowDTO.getApiVersion());
             int applicationIdID = apiMgtDAO.getApplicationId(subWorkflowDTO.getApplicationName(), subWorkflowDTO.getSubscriber());
-            apiMgtDAO.removeSubscription(identifier, applicationIdID);
+
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            apiMgtDAO.removeSubscription(identifier, applicationIdID, conn);
+            conn.commit();
         } catch (APIManagementException e) {
             log.error("Could not complete subscription deletion workflow", e);
             throw new WorkflowException("Could not complete subscription deletion workflow", e);
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback remove subscription ", ex);
+                }
+            }
+            log.error("Could not remove subscription entry ", e);
+            throw new WorkflowException("Couldn't remove subscription entry ", e);
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                log.error("Couldn't close database connection", e);
+            }
         }
     }
 }

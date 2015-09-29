@@ -1485,8 +1485,17 @@ public class ApiMgtDAO {
         return subscriptionId;
     }
 
-    public void removeSubscription(APIIdentifier identifier, int applicationId) throws APIManagementException {
-        Connection conn = null;
+    /**
+     * Removes the subscription entry from AM_SUBSCRIPTIONS for identifier. Providing and managing
+     * the conn object is a responsibility of the third party that uses this method.
+     *
+     * @param identifier APIIdentifier
+     * @param applicationId ID of the application which has the subscription
+     * @param conn Connection object to use for database operations.
+     * @throws APIManagementException
+     */
+    public void removeSubscription(APIIdentifier identifier, int applicationId, Connection conn)
+            throws APIManagementException {
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         PreparedStatement preparedStForUpdateOrDelete = null;
@@ -1494,7 +1503,6 @@ public class ApiMgtDAO {
         String subStatus = null;
 
         try {
-            conn = APIMgtDBUtil.getConnection();
             apiId = getAPIID(identifier, conn);
             String subscriptionStatusQuery = "SELECT " +
                                              "SUB_STATUS FROM AM_SUBSCRIPTION" +
@@ -1510,8 +1518,6 @@ public class ApiMgtDAO {
             if (resultSet.next())   {
                 subStatus = resultSet.getString("SUB_STATUS");
             }
-            
-            conn.setAutoCommit(false);
 
             // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
 
@@ -1536,21 +1542,12 @@ public class ApiMgtDAO {
             }
 
             preparedStForUpdateOrDelete.executeUpdate();
-            
-            // finally commit transaction
-            conn.commit();
 
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException e1) {
-                    log.error("Failed to rollback the add subscription ", e);
-                }
-            }
+            log.error("Failed to add subscriber data ", e);
             handleException("Failed to add subscriber data ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
             APIMgtDBUtil.closeAllConnections(preparedStForUpdateOrDelete, null, null);
         }
     }
@@ -4224,13 +4221,13 @@ public class ApiMgtDAO {
                 PreparedStatement ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, APIUtil.encryptToken(consumerKey));
 //                ps.setString(2,APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
-                ps.setInt(2,application.getId());
+                ps.setInt(2, application.getId());
                 ps.setString(3,keyType);
 
                 ps.executeUpdate();
                 ps.close();
                 connection.commit();
-                APIMgtDBUtil.closeAllConnections(ps,connection,null);
+                APIMgtDBUtil.closeAllConnections(ps, connection, null);
             } catch (SQLException e) {
                 handleException("Error updating the CONSUMER KEY of the AM_APPLICATION_KEY_MAPPING table where " +
                         "APPLICATION_ID = " + application.getId() + " and KEY_TYPE = " + keyType, e);
@@ -4281,7 +4278,7 @@ public class ApiMgtDAO {
                 ps.setString(3, keyType);
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
-                ps.setString(5,"MAPPED");
+                ps.setString(5, "MAPPED");
                 ps.execute();
                 ps.close();
                 connection.commit();
@@ -5992,7 +5989,7 @@ public class ApiMgtDAO {
 
         } catch (SQLException e) {
             handleException("Error when reading the application information from" +
-                            " the persistence store.", e);
+                    " the persistence store.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -6921,7 +6918,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         }
         finally {
             APIMgtDBUtil.closeAllConnections(prepStmt,null,null);
-            APIMgtDBUtil.closeAllConnections(scopePrepStmt,null,null);
+            APIMgtDBUtil.closeAllConnections(scopePrepStmt, null, null);
         }
     }
 
@@ -7098,7 +7095,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt.execute();
             prepStmt.close();
 
-            addURLTemplates(apiId,api, connection);
+            addURLTemplates(apiId, api, connection);
             
             connection.commit();
         } catch (SQLException e) {
@@ -7896,7 +7893,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 log.error("Failed to retrieve comments ", e);
             }
             handleException("Failed to retrieve comments for  " + identifier.getApiName() + "-"
-                            + identifier.getVersion(), e);
+                    + identifier.getVersion(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
@@ -8203,6 +8200,72 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         }
         return workflowReference;
 
+    }
+
+    /**
+     * Retries the WorkflowExternalReference for a subscription.
+     *
+     * @param identifier APIIdentifier to find the subscribed api
+     * @param appID ID of the application which has the subscription
+     * @return External workflow reference for the subscription identified
+     * @throws APIManagementException
+     */
+    public String getExternalWorkflowReferenceForSubscription(APIIdentifier identifier, int appID)
+            throws APIManagementException {
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int apiID = -1;
+        int subscriptionID = -1;
+
+        String sqlQuery = "SELECT SUBSCRIPTION_ID FROM " +
+                "AM_SUBSCRIPTION WHERE " +
+                "API_ID=? AND " +
+                "APPLICATION_ID=?";
+
+        try {
+            apiID = getAPIID(identifier, conn);
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiID);
+            ps.setInt(2, appID);
+            rs = ps.executeQuery();
+
+            while(rs.next()) {
+                subscriptionID = rs.getInt("SUBSCRIPTION_ID");
+            }
+            rs.close();
+            ps.close();
+
+            if (subscriptionID == -1) {
+                String msg = "Unable to get the Subscription ID for: " + identifier;
+                log.error(msg);
+                throw new APIManagementException(msg);
+            }
+
+            sqlQuery = "SELECT WF_EXTERNAL_REFERENCE FROM " +
+                    "AM_WORKFLOWS WHERE " +
+                    "WF_REFERENCE=?";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, subscriptionID);
+            rs = ps.executeQuery();
+
+            while(rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+
+            ps.close();
+            rs.close();
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Subscription : " + subscriptionID, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return workflowExtRef;
     }
 
 
