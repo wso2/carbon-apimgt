@@ -128,7 +128,6 @@ public class APIManagerComponent {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
             addTierPolicies();
-            addDefinedSequencesToRegistry();
             addApplicationsPermissionsToRegistry();
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
@@ -151,6 +150,9 @@ public class APIManagerComponent {
                 bundleContext.registerService(
                         Axis2ConfigurationContextObserver.class.getName(), listener, null);
             }*/
+            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                addDefinedSequencesToRegistry();
+            }
 
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
