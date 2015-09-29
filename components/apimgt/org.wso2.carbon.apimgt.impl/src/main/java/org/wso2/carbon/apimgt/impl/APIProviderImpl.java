@@ -904,8 +904,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 //this should happen in store-publisher cluster domain if deployment is distributed
                 //IF new API published we will add it to recently added APIs
                 Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
-                APIStatusObserverList observerList = APIStatusObserverList.getInstance();
-                observerList.notifyObservers(currentStatus, status, api);
+                //Commented out picking the below APIStatusObserver as this can be done via registry lc executor
+                //APIStatusObserverList observerList = APIStatusObserverList.getInstance();
+                //observerList.notifyObservers(currentStatus, status, api);
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
                 String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
