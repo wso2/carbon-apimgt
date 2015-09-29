@@ -28,6 +28,10 @@ public class API implements Serializable{
 
     private APIIdentifier id;
 
+    // registry artifact id
+    // this id is provider's username independent
+    private String artifactId;
+
     private String description;
     private String url;
     private String sandboxUrl;
@@ -134,6 +138,13 @@ public class API implements Serializable{
 
     //TODO: missing - total user count, up time statistics,tier
 
+    public String getArtifactId() {
+        return artifactId;
+    }
+
+    public void setArtifactId(String artifactId) {
+        this.artifactId = artifactId;
+    }
 
     public String getProductionMaxTps() {
         return productionMaxTps;

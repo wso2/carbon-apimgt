@@ -1393,8 +1393,12 @@ definitions:
       - name
       - context
       - version
+      - apiDefinition
     properties:
       name:
+        type: string
+      artifactId:
+        description: UUID of the api registry artifact
         type: string
       description:
         type: string

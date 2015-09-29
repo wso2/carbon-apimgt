@@ -331,6 +331,27 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    /**
+     * Get API by registry artifact id
+     *
+     * @param artifactId  Registry artifact id
+     * @return API of the provided artifact id
+     * @throws APIManagementException
+     */
+    public API getAPIbyUUID(String artifactId) throws APIManagementException {
+        try {
+            //registry of the current logged in user has been directly used
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+            return APIUtil.getAPIForPublishing(apiArtifact, registry);
+
+        } catch (RegistryException e) {
+            handleException("Failed to get API", e);
+            return null;
+        }
+    }
+
     public API getAPI(String apiPath) throws APIManagementException {
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,

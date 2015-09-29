@@ -364,6 +364,8 @@ public final class APIUtil {
             }
 
             api = new API(apiIdentifier);
+            //set uuid
+            api.setArtifactId(artifact.getId());
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));

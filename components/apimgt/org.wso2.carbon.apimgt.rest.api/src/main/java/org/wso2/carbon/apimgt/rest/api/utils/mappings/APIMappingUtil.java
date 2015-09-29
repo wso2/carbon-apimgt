@@ -58,12 +58,13 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(org.wso2.carbon.apimgt.api.model.API model) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getProvider(model.getId().getProviderName());
+        APIProvider apiProvider = RestApiUtil.getProvider();
 
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         dto.setProvider(model.getId().getProviderName());
+        dto.setArtifactId(model.getArtifactId());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
 
@@ -144,7 +145,7 @@ public class APIMappingUtil {
 
     public static org.wso2.carbon.apimgt.api.model.API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getProvider(dto.getProvider());
+        APIProvider apiProvider = RestApiUtil.getProvider();
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
         APIIdentifier apiId = new APIIdentifier(dto.getProvider(), dto.getName(), dto.getVersion());

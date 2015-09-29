@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class APIDTO  {
   
   private String name = null;
+  private String artifactId = null;
   private String description = null;
   public enum TypeEnum {
      REST,  SOAP, 
@@ -51,6 +52,19 @@ public class APIDTO  {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  
+  /**
+   * UUID of the api registry artifact
+   **/
+  @ApiModelProperty(value = "UUID of the api registry artifact")
+  @JsonProperty("artifactId")
+  public String getArtifactId() {
+    return artifactId;
+  }
+  public void setArtifactId(String artifactId) {
+    this.artifactId = artifactId;
   }
 
   
@@ -117,7 +131,7 @@ public class APIDTO  {
   /**
    * Swagger definition of the API which contains details about URI templates and scopes
    **/
-  @ApiModelProperty(value = "Swagger definition of the API which contains details about URI templates and scopes")
+  @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes")
   @JsonProperty("apiDefinition")
   public String getApiDefinition() {
     return apiDefinition;
@@ -302,6 +316,7 @@ public class APIDTO  {
     sb.append("class APIDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
+    sb.append("  artifactId: ").append(artifactId).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  context: ").append(context).append("\n");
