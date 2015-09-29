@@ -9250,36 +9250,23 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        PreparedStatement ps2 = null;
+
         Set<String> tokens = null;
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String consumerKeySQL = "SELECT ID FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?";
+            String sqlQuery = "SELECT ACCESS_TOKEN" +
+                    " FROM IDN_OAUTH2_ACCESS_TOKEN" +
+                    " WHERE " +
+                    " CONSUMER_KEY_ID = (SELECT ID FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?)" +
+                    " AND TOKEN_STATE = 'ACTIVE'";
 
-            ps = conn.prepareStatement(consumerKeySQL);
+            ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, consumerKey);
             resultSet = ps.executeQuery();
-
-            Integer consumerKeyID = null;
+            tokens = new HashSet<String>();
             while (resultSet.next()) {
-                consumerKeyID = resultSet.getInt("ID");
-            }
-
-            if (consumerKeyID != null) {
-                String sqlQuery = "SELECT ACCESS_TOKEN" +
-                        " FROM IDN_OAUTH2_ACCESS_TOKEN" +
-                        " WHERE " +
-                        " CONSUMER_KEY_ID = ?" +
-                        " AND TOKEN_STATE = 'ACTIVE'";
-
-                ps2 = conn.prepareStatement(sqlQuery);
-                ps2.setInt(1, consumerKeyID);
-                resultSet = ps2.executeQuery();
-                tokens = new HashSet<String>();
-                while (resultSet.next()) {
-                    tokens.add(APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN")));
-                }
+                tokens.add(APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN")));
             }
 
         } catch (SQLException e) {
@@ -9288,7 +9275,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             handleException("Token decryption failed of an active access token of consumerKey " + consumerKey, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-            APIMgtDBUtil.closeAllConnections(ps2, null, null);
         }
         return tokens;
     }
