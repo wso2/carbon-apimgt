@@ -4,8 +4,7 @@ info:
   title: WSO2 API Manager
   description: >
     This document describe a ** RESTFul API ** for wso2 **API Manager**.
-
-
+ 
 
     You can find the source of this API definition at
     [here](https://github.com/hevayo/restful-apim). It was written with [swagger
@@ -36,18 +35,14 @@ paths:
             ** Search condition **.
 
 
-
             If no advanced attribute modifier is found search will match the
             given query string against API Name.
-
 
 
             You can search in attributes by using **"attribute:"** modifier.
 
 
-
             Eg. "provider:wso2" will match if the API provider is wso2.
-
 
 
             Supported attribute modifiers are [ **version, context, status,
@@ -1211,8 +1206,12 @@ paths:
 
 
 
+
+
             If no advanced attribute modifier is found search will match the
             given query string against Tag Name.
+
+
 
 
 
@@ -1220,8 +1219,12 @@ paths:
 
 
 
+
+
             Eg. "apiName:phoneVerification" will match if the API Name is
             phoneVerification.
+
+
 
 
 
@@ -1569,12 +1572,28 @@ definitions:
         type: string
       type:
         type: string
+        enum: 
+          - HOWTO
+          - SAMPLES
+          - PUBLIC_FORUM
+          - SUPPORT_FORUM
+          - API_MESSAGE_FORMAT
+          - SWAGGER_DOC
+          - OTHER
       summary:
         type: string
-      content:
+      source:
         type: string
-      url:
+        enum:
+          - INLINE
+          - URL
+          - FILE
+      visibility:
         type: string
+        enum:
+          - OWNER_ONLY
+          - PRIVATE
+          - API_LEVEL
   Tier:
     title: Tier
     required:

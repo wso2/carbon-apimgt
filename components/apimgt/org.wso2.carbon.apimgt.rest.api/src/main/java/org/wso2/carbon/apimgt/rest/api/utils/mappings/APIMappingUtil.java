@@ -19,11 +19,16 @@
 package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -33,11 +38,11 @@ import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 
-import java.util.List;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class APIMappingUtil {
 
@@ -227,10 +232,23 @@ public class APIMappingUtil {
         DocumentDTO d = new DocumentDTO();
         d.setDocumentId(doc.getId());
         d.setName(doc.getName());
-        d.setUrl(doc.getFilePath());
+        //d.setUrl(doc.getFilePath());
         d.setSummary(doc.getSummary());
-        d.setType(doc.getType().getType());
-        d.setUrl(doc.getFilePath());
+        d.setType(DocumentDTO.TypeEnum.valueOf(doc.getType().toString()));
+        //d.setUrl(doc.getFilePath());
+        d.setVisibility(DocumentDTO.VisibilityEnum.valueOf(doc.getVisibility().toString()));
         return d;
+    }
+
+    public static Documentation fromDTOtoDocumentation(DocumentDTO dto){
+        Documentation doc = new Documentation(DocumentationType.valueOf(dto.getType().toString()) ,dto.getName());
+        doc.setSummary(dto.getSummary());
+        String visibility = dto.getVisibility().toString();
+        if (visibility == null){
+            visibility = APIConstants.DOC_API_BASED_VISIBILITY;
+        }
+        doc.setVisibility(Documentation.DocumentVisibility.valueOf(visibility));
+        doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+        return doc;
     }
 }

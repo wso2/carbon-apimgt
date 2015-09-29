@@ -194,6 +194,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
 
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
+    public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
+    public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
@@ -273,6 +275,7 @@ public final class APIConstants {
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
     public static final String API_LIFE_CYCLE="APILifeCycle";
+
 
 
     public static class TokenStatus {

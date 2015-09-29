@@ -10,10 +10,19 @@ public class DocumentDTO  {
   
   private String documentId = null;
   private String name = null;
-  private String type = null;
+  public enum TypeEnum {
+     HOWTO,  SAMPLES,  PUBLIC_FORUM,  SUPPORT_FORUM,  API_MESSAGE_FORMAT,  SWAGGER_DOC,  OTHER, 
+  };
+  private TypeEnum type = null;
   private String summary = null;
-  private String content = null;
-  private String url = null;
+  public enum SourceEnum {
+     INLINE,  URL,  FILE, 
+  };
+  private SourceEnum source = null;
+  public enum VisibilityEnum {
+     OWNER_ONLY,  PRIVATE,  API_LEVEL, 
+  };
+  private VisibilityEnum visibility = null;
 
   
   /**
@@ -44,10 +53,10 @@ public class DocumentDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("type")
-  public String getType() {
+  public TypeEnum getType() {
     return type;
   }
-  public void setType(String type) {
+  public void setType(TypeEnum type) {
     this.type = type;
   }
 
@@ -67,24 +76,24 @@ public class DocumentDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("content")
-  public String getContent() {
-    return content;
+  @JsonProperty("source")
+  public SourceEnum getSource() {
+    return source;
   }
-  public void setContent(String content) {
-    this.content = content;
+  public void setSource(SourceEnum source) {
+    this.source = source;
   }
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("url")
-  public String getUrl() {
-    return url;
+  @JsonProperty("visibility")
+  public VisibilityEnum getVisibility() {
+    return visibility;
   }
-  public void setUrl(String url) {
-    this.url = url;
+  public void setVisibility(VisibilityEnum visibility) {
+    this.visibility = visibility;
   }
 
   
@@ -98,8 +107,8 @@ public class DocumentDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  summary: ").append(summary).append("\n");
-    sb.append("  content: ").append(content).append("\n");
-    sb.append("  url: ").append(url).append("\n");
+    sb.append("  source: ").append(source).append("\n");
+    sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

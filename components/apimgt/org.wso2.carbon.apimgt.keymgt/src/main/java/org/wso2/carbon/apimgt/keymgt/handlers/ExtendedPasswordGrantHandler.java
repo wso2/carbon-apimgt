@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.ServerConfigurationException;
 import org.wso2.carbon.identity.application.common.cache.BaseCache;
 import org.wso2.carbon.identity.base.IdentityException;
@@ -101,7 +102,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
                 throw new IdentityOAuth2Exception(e.getMessage(), e);
             }
 
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
             UserStoreManager userStoreManager = null;
             try {
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
