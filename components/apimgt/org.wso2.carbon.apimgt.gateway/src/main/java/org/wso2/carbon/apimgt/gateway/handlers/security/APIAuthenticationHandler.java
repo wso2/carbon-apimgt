@@ -112,14 +112,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         long endTime;
         long difference;
 
-        //TODO: check the validity of this code. Getting the start time and end time at the same moment seems like a
-        // logical error
-        endTime = System.nanoTime();
-        // Moving the following code segment inside to each of the debug statements. Otherwise there would be
-        // additional overhead to each of the API calls.
-
-        // difference = (endTime - startTime) / 1000000;
-        // String messageDetails = logMessageDetails(messageContext, difference);
         try {
             if (Utils.isStatsEnabled()) {
                 long currentTime = System.currentTimeMillis();
@@ -132,8 +124,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 if (log.isDebugEnabled()) {
                     // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
                     // to all the gateway calls that is happening.
+                    endTime = System.nanoTime();
                     difference = (endTime - startTime) / 1000000;
-                    String messageDetails = logMessageDetails(messageContext, difference);
+                    String messageDetails = logMessageDetails(messageContext);
 
                     log.debug("Authenticated API, authentication response relieved: " + messageDetails +
                             ", elapsedTimeInMilliseconds=" + difference / 1000000);
@@ -146,9 +139,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             if (log.isDebugEnabled()) {
                 // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
                 // to all the gateway calls that is happening.
+                endTime = System.nanoTime();
                 difference = (endTime - startTime) / 1000000;
-                String messageDetails = logMessageDetails(messageContext, difference);
-                log.debug("Call to API gateway : " + messageDetails);
+                String messageDetails = logMessageDetails(messageContext);
+                log.debug("Call to API gateway : " + messageDetails + ", elapsedTimeInMilliseconds=" +
+                        difference / 1000000 );
             }
             // We do not need to log authentication failures as errors since these are not product errors.
             log.warn("API authentication failure due to " +
@@ -231,7 +226,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return payload;
     }
 
-    private String logMessageDetails(MessageContext messageContext, long elapsedTime) {
+    private String logMessageDetails(MessageContext messageContext) {
         //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
         String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
         String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
@@ -271,9 +266,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         if (remoteIP != null) {
             logMessage = logMessage + " from clientIP=" + remoteIP;
-        }
-        if(elapsedTime > 0){
-            logMessage = logMessage + " elapsedTimeInMilliseconds=" + elapsedTime;
         }
         return logMessage;
     }
