@@ -63,6 +63,8 @@ include("/jagg/jagg.jag");
             apiData.faultSequence = request.getParameter("faultSequence");
             apiData.destinationStats= request.getParameter("destinationStats","UTF-8");
             apiData.environments=request.getParameter("environments","UTF-8");
+            apiData.productionTps = request.getParameter("productionTps");
+            apiData.sandboxTps = request.getParameter("sandboxTps");
             var externalAPIStoresArray = new Array();
             var externalAPIStores = request.getParameter("externalAPIStores");
             var provider = request.getParameter("provider","UTF-8");
