@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.Replicator;
@@ -32,25 +33,35 @@ import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
+import org.apache.synapse.commons.throttle.core.AccessInformation;
+import org.apache.synapse.commons.throttle.core.AccessRateController;
+import org.apache.synapse.commons.throttle.core.ConcurrentAccessController;
+import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
+import org.apache.synapse.commons.throttle.core.Throttle;
+import org.apache.synapse.commons.throttle.core.ThrottleConfiguration;
+import org.apache.synapse.commons.throttle.core.ThrottleConstants;
+import org.apache.synapse.commons.throttle.core.ThrottleContext;
+import org.apache.synapse.commons.throttle.core.ThrottleDataHolder;
+import org.apache.synapse.commons.throttle.core.ThrottleException;
+import org.apache.synapse.commons.throttle.core.ThrottleFactory;
+import org.apache.synapse.commons.throttle.core.factory.ThrottleContextFactory;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.util.AXIOMUtils;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.throttle.core.*;
-import org.wso2.carbon.throttle.core.factory.ThrottleContextFactory;
-
+import javax.xml.stream.XMLStreamException;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -86,6 +97,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
     public static final String RESOURCE_THROTTLE_KEY = "resource_throttle_context";
 
+
     /**
      * The property key that used when the ConcurrentAccessController
      * look up from ConfigurationContext
@@ -103,6 +115,15 @@ public class APIThrottleHandler extends AbstractHandler {
      * Version number of the throttle policy
      */
     private long version;
+
+    private String sandboxUnitTime = "1000";
+
+    private String productionUnitTime = "1000";
+
+    private String sandboxMaxCount;
+
+    private String productionMaxCount;
+
 
     /**
      * Does this env. support clustering
@@ -196,10 +217,31 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
     private void handleThrottleOut(MessageContext messageContext) {
-        messageContext.setProperty(SynapseConstants.ERROR_CODE, 900800);
-        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, "Message throttled out");
 
+        String errorMessage = null;
+        String errorDescription = null;
+        int errorCode = -1;
+        int httpErrorCode = -1;
+
+        if (APIThrottleConstants
+                .HARD_LIMIT_EXCEEDED.equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.HARD_LIMIT_EXCEEDED_ERROR_CODE;
+            errorMessage = "API Limit Reached";
+            errorDescription = "API not accepting requests";
+            // It it's a hard limit exceeding, we tell it as service not being available.
+            httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
+        } else {
+            errorCode = APIThrottleConstants.THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        }
+
+        messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
+        messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
         Mediator sequence = messageContext.getSequence(APIThrottleConstants.API_THROTTLE_OUT_HANDLER);
+
         // Invoke the custom error handler specified by the user
         if (sequence != null && !sequence.mediate(messageContext)) {
             // If needed user should be able to prevent the rest of the fault handling
@@ -212,28 +254,28 @@ public class APIThrottleHandler extends AbstractHandler {
         // as the response.
         axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
 
-        // By default we send a 503 response back
+
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
-            Utils.setFaultPayload(messageContext, getFaultPayload());
+            Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));
         } else {
-            Utils.setSOAPFault(messageContext, "Server", "Message Throttled Out",
-                               "You have exceeded your quota");
+            Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
         }
-           Utils.sendFault(messageContext, HttpStatus.SC_SERVICE_UNAVAILABLE);
+
+        Utils.sendFault(messageContext, httpErrorCode);
     }
 
-    private OMElement getFaultPayload() {
+    private OMElement getFaultPayload(int throttleErrorCode, String message, String description) {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMNamespace ns = fac.createOMNamespace(APIThrottleConstants.API_THROTTLE_NS,
                                                APIThrottleConstants.API_THROTTLE_NS_PREFIX);
         OMElement payload = fac.createOMElement("fault", ns);
 
         OMElement errorCode = fac.createOMElement("code", ns);
-        errorCode.setText(String.valueOf(APIThrottleConstants.THROTTLE_OUT_ERROR_CODE));
+        errorCode.setText(String.valueOf(throttleErrorCode));
         OMElement errorMessage = fac.createOMElement("message", ns);
-        errorMessage.setText("Message Throttled Out");
+        errorMessage.setText(message);
         OMElement errorDetail = fac.createOMElement("description", ns);
-        errorDetail.setText("You have exceeded your quota");
+        errorDetail.setText(description);
 
         payload.addChild(errorCode);
         payload.addChild(errorMessage);
@@ -276,13 +318,14 @@ public class APIThrottleHandler extends AbstractHandler {
         String callerId = null;
         boolean canAccess = true;
         //remote ip of the caller
-        String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
+        String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                                                                         .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP != null) {
             if (remoteIP.indexOf(",") > 0) {
                 remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
             }
         } else {
-            remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+            remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         } //domain name of the caller
         String domainName = (String) axisMC.getPropertyNonReplicable(NhttpConstants.REMOTE_HOST);
 
@@ -527,10 +570,9 @@ public class APIThrottleHandler extends AbstractHandler {
                 //==============================Start of Resource level throttling=========================================
 
                 //get throttling information for given request with resource path and http verb
-                APIKeyValidator validator = new APIKeyValidator(ServiceReferenceHolder.getInstance().getConfigurationContextService().getServerConfigContext().getAxisConfiguration());
                 VerbInfoDTO verbInfoDTO = null;
 
-                    //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
+                //verbInfoDTO = validator.getVerbInfoDTOFromAPIData(apiContext, apiVersion, requestPath, httpMethod);
                 verbInfoDTO = (VerbInfoDTO) synCtx.getProperty(APIConstants.VERB_INFO_DTO);
 
                 String resourceLevelRoleId = null;
@@ -684,6 +726,54 @@ public class APIThrottleHandler extends AbstractHandler {
                 }
             }
         }
+
+        //---------------End of API level throttling------------------
+
+
+        //---------------Start of Hard throttling------------------
+
+        ThrottleContext hardThrottleContext = throttle.getThrottleContext(
+                APIThrottleConstants.HARD_THROTTLING_CONFIGURATION);
+
+        try {
+
+            String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
+            String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+            apiContext = apiContext != null ? apiContext : "";
+            apiVersion = apiVersion != null ? apiVersion : "";
+            AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
+
+
+            if (hardThrottleContext != null && authContext.getKeyType() != null) {
+                String throttleKey = apiContext + ":" + apiVersion + ":" + authContext.getKeyType();
+                AccessInformation info = null;
+                if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
+                    info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
+                                                               APIThrottleConstants.PRODUCTION_HARD_LIMIT);
+                } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
+                    info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
+                                                               APIThrottleConstants.SANDBOX_HARD_LIMIT);
+                }
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Throttle by hard limit " + throttleKey);
+                    log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
+                }
+
+                if (info != null && !info.isAccessAllowed()) {
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+                    return false;
+                }
+            }
+
+        } catch (ThrottleException e) {
+            log.warn("Exception occurred while performing role " +
+                     "based throttling", e);
+            canAccess = false;
+            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+            return canAccess;
+        }
         return canAccess;
     }
 
@@ -742,6 +832,20 @@ public class APIThrottleHandler extends AbstractHandler {
                                     ThrottleContextFactory.createThrottleContext(ThrottleConstants.ROLE_BASE, throttleConfiguration);
                             throttle.addThrottleContext(RESOURCE_THROTTLE_KEY, resourceContext);
                         }
+
+
+                        OMElement hardThrottlingPolicy = createHardThrottlingPolicy();
+                        if (hardThrottlingPolicy != null) {
+                            Throttle tempThrottle = ThrottleFactory.createMediatorThrottle(
+                                    PolicyEngine.getPolicy(hardThrottlingPolicy));
+                            ThrottleConfiguration newThrottleConfig = tempThrottle.getThrottleConfiguration(ThrottleConstants
+                                                                                                                    .ROLE_BASED_THROTTLE_KEY);
+                            ThrottleContext hardThrottling = ThrottleContextFactory.createThrottleContext(ThrottleConstants
+                                                                                                                  .ROLE_BASE,
+                                                                                                          newThrottleConfig);
+                            throttle.addThrottleContext(APIThrottleConstants.HARD_THROTTLING_CONFIGURATION, hardThrottling);
+                        }
+
                     }
                 }
                 //For non-clustered  environment , must re-initiates
@@ -790,10 +894,73 @@ public class APIThrottleHandler extends AbstractHandler {
         throw new SynapseException(msg);
     }
 
+
+    public String getSandboxUnitTime() {
+        return sandboxUnitTime;
+    }
+
+    public void setSandboxUnitTime(String sandboxUnitTime) {
+        this.sandboxUnitTime = sandboxUnitTime;
+    }
+
+    public String getSandboxMaxCount() {
+        return sandboxMaxCount;
+    }
+
+    public void setSandboxMaxCount(String sandboxMaxCount) {
+        this.sandboxMaxCount = sandboxMaxCount;
+    }
+
+    private OMElement createHardThrottlingPolicy() {
+
+        if (productionMaxCount == null &&
+            sandboxMaxCount == null) {
+            return null;
+        }
+
+        OMElement parsedPolicy = null;
+
+        StringBuilder policy = new StringBuilder("<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\" " +
+                                                 "xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">\n" +
+                                                 "    <throttle:MediatorThrottleAssertion>\n");
+
+        if (productionMaxCount != null && productionUnitTime != null) {
+            policy.append(createPolicyForRole(APIThrottleConstants.PRODUCTION_HARD_LIMIT, productionUnitTime, productionMaxCount));
+        }
+
+        if (sandboxMaxCount != null && sandboxUnitTime != null) {
+            policy.append(createPolicyForRole(APIThrottleConstants.SANDBOX_HARD_LIMIT, sandboxUnitTime, sandboxMaxCount));
+        }
+
+        policy.append("    </throttle:MediatorThrottleAssertion>\n" +
+                      "</wsp:Policy>");
+        try {
+            parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
+        } catch (XMLStreamException e) {
+            log.error("Error occurred while creating policy file for Hard Throttling.");
+        } finally {
+            return parsedPolicy;
+        }
+    }
+
+    private String createPolicyForRole(String roleId, String unitTime, String maxCount) {
+        return "<wsp:Policy>\n" +
+               "     <throttle:ID throttle:type=\"ROLE\">" + roleId + "</throttle:ID>\n" +
+               "            <wsp:Policy>\n" +
+               "                <throttle:Control>\n" +
+               "                    <wsp:Policy>\n" +
+               "                        <throttle:MaximumCount>" + maxCount + "</throttle:MaximumCount>\n" +
+               "                        <throttle:UnitTime>" + unitTime + "</throttle:UnitTime>\n" +
+               "                    </wsp:Policy>\n" +
+               "                </throttle:Control>\n" +
+               "            </wsp:Policy>\n" +
+               " </wsp:Policy>\n";
+    }
+
     private void logMessageDetails(MessageContext messageContext) {
         //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
-        String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
-        String endUserName = (String) messageContext.getProperty("END_USER_NAME");
+        String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+        String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
 
         //Do not change this log format since its using by some external apps
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -809,7 +976,8 @@ public class APIThrottleHandler extends AbstractHandler {
             logMessage = logMessage + " transactionId=" + logID;
         }
         try {
-            String userAgent = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("User-Agent");
+            String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                                                                              .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
             if (userAgent != null) {
                 logMessage = logMessage + " with userAgent=" + userAgent;
             }
@@ -818,15 +986,16 @@ public class APIThrottleHandler extends AbstractHandler {
         }
 
         long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext().getProperty("wso2statistics.request.received.time"));
+                getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
         Date incomingReqTime = new Date(reqIncomingTimestamp);
         if (incomingReqTime != null) {
             logMessage = logMessage + " at requestTime=" + incomingReqTime;
         }
         //If gateway is fronted by hardware load balancer client ip should retrieve from x forward for header
-        String remoteIP = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("X-Forwarded-For");
+        String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                                                                         .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP == null) {
-            remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+            remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         }
         //null check before add it to log message
         if (remoteIP != null) {
@@ -835,4 +1004,19 @@ public class APIThrottleHandler extends AbstractHandler {
         log.debug("Message throttled out Details:" + logMessage);
     }
 
+    public String getProductionUnitTime() {
+        return productionUnitTime;
+    }
+
+    public void setProductionUnitTime(String productionUnitTime) {
+        this.productionUnitTime = productionUnitTime;
+    }
+
+    public String getProductionMaxCount() {
+        return productionMaxCount;
+    }
+
+    public void setProductionMaxCount(String productionMaxCount) {
+        this.productionMaxCount = productionMaxCount;
+    }
 }

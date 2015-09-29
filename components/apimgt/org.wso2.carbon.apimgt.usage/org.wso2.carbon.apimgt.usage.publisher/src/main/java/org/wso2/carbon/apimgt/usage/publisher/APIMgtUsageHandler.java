@@ -99,7 +99,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) mc).getAxis2MessageContext();
             Map headers = (Map) (axis2MsgContext).
                     getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            String userAgent = (String) headers.get("User-Agent");
+            String userAgent = (String) headers.get(APIConstants.USER_AGENT);
             String context = (String) mc.getProperty(RESTConstants.REST_API_CONTEXT);
             String api_version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);

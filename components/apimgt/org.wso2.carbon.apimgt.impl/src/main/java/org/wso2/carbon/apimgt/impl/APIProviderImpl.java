@@ -1138,6 +1138,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Map<String, String> properties = new HashMap<String, String>();
             properties.put("id", "A");
             properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+            if(api.getProductionMaxTps() != null){
+                properties.put("productionMaxCount",api.getProductionMaxTps());
+            }
+
+            if(api.getSandboxMaxTps() != null){
+                properties.put("sandboxMaxCount",api.getSandboxMaxTps());
+            }
+
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
 
             vtb.addHandler("org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageHandler", Collections.EMPTY_MAP);
@@ -1890,13 +1898,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 	new WSO2APIPublisher().deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
                 }
             }
-            apiMgtDAO.deleteAPI(identifier);
+
             //if manageAPIs == true
             if (APIUtil.isAPIManagementEnabled()) {
-            	 Cache contextCache = APIUtil.getAPIContextCache();
-                contextCache.remove(api.getContext());
-                contextCache.put(api.getContext(), false);
+                Cache contextCache = APIUtil.getAPIContextCache();
+                String context = apiMgtDAO.getAPIContext(identifier);
+                contextCache.remove(context);
+                contextCache.put(context, false);
             }
+
+            apiMgtDAO.deleteAPI(identifier);
+
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR + identifier.getApiName();

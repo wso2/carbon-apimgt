@@ -401,7 +401,19 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setCacheTimeout(cacheTimeOut);
         api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
 
-		api.removeCustomSequences();
+        String productionTps = (String) apiData.get("productionTps", apiData);
+        String sandboxTps = (String) apiData.get("sandboxTps", apiData);
+
+        api.removeCustomSequences();
+
+        if (!"none".equals(productionTps)) {
+            api.setProductionMaxTps(productionTps);
+        }
+
+        if (!"none".equals(sandboxTps)) {
+            api.setSandboxMaxTps(sandboxTps);
+        }
+
 		if (!"none".equals(inSequence)) {
 			api.setInSequence(inSequence);
 		}
@@ -1379,11 +1391,14 @@ public class APIProviderHostObject extends ScriptableObject {
 
             }catch (IOException e){
                 handleException("[Error] Cannot read data from the URL", e);
-                return false;
             }
             apiProvider.updateAPI(api);
 
         }
+
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
@@ -1776,6 +1791,9 @@ public class APIProviderHostObject extends ScriptableObject {
         //Validate endpoint URI format
         validateEndpointURI(api.getEndpointConfig());
 
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+
         api.setSubscriptionAvailability(subscriptionAvailability);
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
         api.setResponseCache(responseCache);
@@ -1834,7 +1852,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 } catch (IOException e) {
                     handleException("[Error] Cannot read data from the URL", e);
-                    return false;
                 }
             }
 
@@ -2014,7 +2031,7 @@ public class APIProviderHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
         if (fileHostObject != null) {
             long length = fileHostObject.getJavaScriptFile().getLength();
-            if (length / 1024.0 > 1024) {
+            if (length / 1024.0 > APIConstants.MAX_FILE_SIZE) {
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
@@ -2025,7 +2042,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if(file.exists()){
             long length = file.length();
-            if(length/ 1024.0 > 1024){
+            if(length/ 1024 > APIConstants.MAX_FILE_SIZE){
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
@@ -2405,7 +2422,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                 Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
                 myn.put(45, myn, JSONObject.toJSONString(registeredResource));
-
+                myn.put(46, myn, checkValue(api.getProductionMaxTps()));
+                myn.put(47, myn, checkValue(api.getSandboxMaxTps()));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
@@ -4627,14 +4645,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-	public static boolean jsFunction_isSynapseGateway(Context cx, Scriptable thisObj,
-            Object[] args,
-            Function funObj) throws APIManagementException {
+	public static boolean jsFunction_isSynapseGateway(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
 		APIProvider provider = getAPIProvider(thisObj);
-		if (!provider.isSynapseGateway()) {
-			return false;
-		}
-		return true;
+		return provider.isSynapseGateway();
 	}
 
     public static boolean jsFunction_updateExternalAPIStores(Context cx,Scriptable thisObj, Object[] args,
