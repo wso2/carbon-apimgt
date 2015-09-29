@@ -6,14 +6,27 @@ import java.util.*;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class ErrorDTO  {
   
+  
+  @NotNull
   private Long code = null;
+  
+  @NotNull
   private String message = null;
+  
+  
   private String description = null;
+  
+  
   private String moreInfo = null;
+  
+  
   private List<ErrorListItemDTO> error = new ArrayList<ErrorListItemDTO>() ;
 
   

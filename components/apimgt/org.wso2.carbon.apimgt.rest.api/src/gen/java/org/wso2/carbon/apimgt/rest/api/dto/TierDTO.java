@@ -4,12 +4,21 @@ package org.wso2.carbon.apimgt.rest.api.dto;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class TierDTO  {
   
+  
+  @NotNull
   private String name = null;
+  
+  
   private String rate = null;
+  
+  
   private String roles = null;
 
   

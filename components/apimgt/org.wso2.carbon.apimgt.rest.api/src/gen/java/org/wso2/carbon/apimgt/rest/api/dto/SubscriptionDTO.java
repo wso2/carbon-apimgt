@@ -5,14 +5,27 @@ import java.math.BigDecimal;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class SubscriptionDTO  {
   
+  
+  @NotNull
   private BigDecimal subscriptionId = null;
+  
+  
   private Integer applicationId = null;
+  
+  
   private String apiId = null;
+  
+  
   private String tier = null;
+  
+  
   private String status = null;
 
   

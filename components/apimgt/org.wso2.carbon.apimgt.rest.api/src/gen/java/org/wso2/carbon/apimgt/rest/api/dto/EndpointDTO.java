@@ -4,14 +4,21 @@ package org.wso2.carbon.apimgt.rest.api.dto;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class EndpointDTO  {
   
+  
   public enum TypeEnum {
      Production,  Sandbox,  ProductionFailOver,  SandboxFailOver, 
   };
+  @NotNull
   private TypeEnum type = null;
+  
+  @NotNull
   private String url = null;
 
   
