@@ -9255,11 +9255,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT ACCESS_TOKEN" +
-                    " FROM IDN_OAUTH2_ACCESS_TOKEN" +
-                    " WHERE " +
-                    " CONSUMER_KEY_ID = (SELECT ID FROM IDN_OAUTH_CONSUMER_APPS WHERE CONSUMER_KEY = ?)" +
-                    " AND TOKEN_STATE = 'ACTIVE'";
+            String sqlQuery = "SELECT IOAT.ACCESS_TOKEN" +
+                    " FROM IDN_OAUTH2_ACCESS_TOKEN IOAT" +
+                    " INNER JOIN IDN_OAUTH_CONSUMER_APPS IOCA ON IOCA.ID = IOAT.CONSUMER_KEY_ID" +
+                    " WHERE IOCA.CONSUMER_KEY = ?" +
+                    " AND IOAT.TOKEN_STATE = 'ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, consumerKey);
