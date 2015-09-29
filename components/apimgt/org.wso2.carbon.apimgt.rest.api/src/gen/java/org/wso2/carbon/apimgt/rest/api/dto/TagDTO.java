@@ -5,11 +5,18 @@ import java.math.BigDecimal;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class TagDTO  {
   
+  
+  @NotNull
   private String name = null;
+  
+  
   private BigDecimal weight = null;
 
   

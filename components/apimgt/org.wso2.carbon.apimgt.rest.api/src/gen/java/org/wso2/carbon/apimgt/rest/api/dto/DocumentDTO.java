@@ -4,24 +4,39 @@ package org.wso2.carbon.apimgt.rest.api.dto;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class DocumentDTO  {
   
+  
+  @NotNull
   private String documentId = null;
+  
+  
   private String name = null;
+  
   public enum TypeEnum {
      HOWTO,  SAMPLES,  PUBLIC_FORUM,  SUPPORT_FORUM,  API_MESSAGE_FORMAT,  SWAGGER_DOC,  OTHER, 
   };
+  
   private TypeEnum type = null;
+  
+  
   private String summary = null;
+  
   public enum SourceEnum {
      INLINE,  URL,  FILE, 
   };
+  
   private SourceEnum source = null;
+  
   public enum VisibilityEnum {
      OWNER_ONLY,  PRIVATE,  API_LEVEL, 
   };
+  
   private VisibilityEnum visibility = null;
 
   

@@ -6,39 +6,84 @@ import java.util.*;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class APIDTO  {
   
+  
+  @NotNull
   private String name = null;
+  
+  
   private String description = null;
+  
   public enum TypeEnum {
      REST,  SOAP, 
   };
+  
   private TypeEnum type = null;
+  
+  @NotNull
   private String context = null;
+  
+  @NotNull
   private String version = null;
+  
+  
   private String provider = null;
+  
+  
   private String apiDefinition = null;
+  
+  
   private String status = null;
+  
+  
   private String responseCaching = null;
+  
+  
   private Integer cacheTimeout = null;
+  
+  
   private String destinationStatsEnabled = null;
+  
+  
   private Boolean isDefaultVersion = null;
+  
+  
   private List<String> transport = new ArrayList<String>() ;
+  
+  
   private List<String> tags = new ArrayList<String>() ;
+  
+  
   private List<String> tiers = new ArrayList<String>() ;
+  
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED, 
   };
+  
   private VisibilityEnum visibility = null;
+  
+  
   private List<String> visibleRoles = new ArrayList<String>() ;
+  
+  
   private List<String> visibleTenants = new ArrayList<String>() ;
+  
+  
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>() ;
+  
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
   };
+  
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+  
+  
   private List<String> subscriptionAvailableTenants = new ArrayList<String>() ;
 
   
