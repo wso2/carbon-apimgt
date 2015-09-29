@@ -25,6 +25,8 @@ import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.jaxrs.ext.RequestHandler;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
+import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -50,7 +52,7 @@ public class BasicAuthenticationHandler implements RequestHandler {
         // Extract auth header from the message.
         AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
         if (policy == null) {
-            // if auth header is missing, proceed to next auth handler.
+            // if auth header is missing, terminates with 401 Unauthorized response
             return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
                     "Authentication failed: Basic authentication header is missing").build();
         }
@@ -63,17 +65,17 @@ public class BasicAuthenticationHandler implements RequestHandler {
         Object certObject = null;
 
         // Extract user credentials from the auth header.
-        String username = policy.getUserName().trim();
-        String password = policy.getPassword().trim();
+        String username = StringUtils.trim(policy.getUserName());
+        String password = StringUtils.trim(policy.getPassword());
 
         if (StringUtils.isEmpty(username)) {
-            logger.error("username is null/empty.");
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity("Username " +
-                    "cannot be null").build();
-        } else if (StringUtils.isEmpty(password)  && certObject == null ) {
-            logger.error("password is null/empty.");
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity("password " +
-                    "cannot be null").build();
+            ErrorDTO errorDTO = RestApiUtil.getAuthenticationErrorDTO("Username cannot be null/empty.");
+            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(errorDTO)
+                    .build();
+        } else if (StringUtils.isEmpty(password) && certObject == null) {
+            ErrorDTO errorDTO = RestApiUtil.getAuthenticationErrorDTO("Password cannot be null/empty.");
+            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(errorDTO)
+                    .build();
         }
 
         return Authenticate(certObject, username, password);
@@ -104,9 +106,9 @@ public class BasicAuthenticationHandler implements RequestHandler {
                             "Tenant not found").build();
                 }
             }
-            username = MultitenantUtils.getTenantAwareUsername(username);
+            String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
             // if authenticated
-            if (certObject != null || userRealm.getUserStoreManager().authenticate(username, password)) {
+            if (certObject != null || userRealm.getUserStoreManager().authenticate(tenantAwareUsername, password)) {
                 // set the correct tenant info for downstream code.
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
