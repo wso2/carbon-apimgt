@@ -72,6 +72,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         //remove front and end double quotes.
         serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
         realm = realm.substring(1, realm.length() - 1);
+        qop = qop.substring(1, qop.length() - 1);
 
         String[] headerAttributes = { realm, serverNonce, qop, opaque, algorithm };
         return headerAttributes;
@@ -255,22 +256,15 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
 
         try {
 
-            System.out.println("beginning");
-
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
 
             String postFix = (String) messageContext.getProperty("POSTFIX");
-            //messageContext.setProperty(NhttpConstants.POST_TO_URI, "true");
-
-            System.out.println("after uri :" + postFix);
 
             //appending forward slash.
             StringBuilder postFixStringBuilder = new StringBuilder(postFix);
             postFixStringBuilder.append("/");
             postFix = postFixStringBuilder.toString();
-
-            System.out.println("After Postfix :" + postFix);
 
             if (log.isDebugEnabled()) {
                 log.debug("Post Fix value is : " + postFix);
@@ -279,8 +273,6 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             //Take the WWW-Authenticate header from the message context
             Map transportHeaders = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             String wwwHeader = (String) transportHeaders.get(HttpHeaders.WWW_AUTHENTICATE);
-
-            System.out.println("After taking headers" + wwwHeader);
 
             if (log.isDebugEnabled()) {
                 log.debug("WWW-Auth header response ..." + wwwHeader);
@@ -298,8 +290,6 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 qop = headerAttributes[2];
                 opaque = headerAttributes[3];
                 algorithm = headerAttributes[4];
-
-                System.out.println("split parts from the header : " + realm + " " + serverNonce + " " + qop);
 
                 if (log.isDebugEnabled()) {
                     log.debug("Server nonce value : " + serverNonce);
@@ -321,17 +311,12 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                     log.debug("Password : " + passWord);
                 }
 
-                System.out.println("User name  : " + userName);
-                System.out.println("Password : " + passWord);
-
                 //get the Http method (GET, POST, PUT or DELETE)
                 String httpMethod = (String) messageContext.getProperty("HTTP_METHOD");
 
                 if (log.isDebugEnabled()) {
                     log.debug("HTTP method of request is : " + httpMethod);
                 }
-
-                System.out.println("HTTP method of request is : " + httpMethod);
 
                 //generate clientNonce
                 String clientNonce = generateClientNonce();
@@ -343,8 +328,6 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                     log.debug("MD5 value of ha1 is : " + ha1);
                 }
 
-                System.out.println("MD5 value of ha1 is : " + ha1);
-
                 //calculate ha2
                 String ha2 = calculateHA2(qop, httpMethod, postFix, axis2MC);
 
@@ -352,12 +335,8 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                     log.debug("MD5 value of ha2 is : " + ha2);
                 }
 
-                System.out.println("MD5 value of ha2 is : " + ha2);
-
                 //getting the previous NonceCount
                 String prevNonceCount = (String) messageContext.getProperty("NonceCount");
-
-                System.out.println("prevNonceCount : " + prevNonceCount);
 
                 if (prevNonceCount == null) {
                     messageContext.setProperty("NonceCount", "00000000");
@@ -371,11 +350,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 //setting the NonceCount after incrementing
                 messageContext.setProperty("NonceCount", serverResponseArray[1]);
 
-                System.out.println("NonceCount : " + serverResponseArray[1]);
-
                 String serverResponse = serverResponseArray[0];
-
-                System.out.println("serverResponse : " + serverResponseArray[0]);
 
                 if (log.isDebugEnabled()) {
                     log.debug("MD5 value of server response  is : " + serverResponse);
@@ -389,13 +364,8 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                     log.debug("Processed www-header to be sent is : " + header);
                 }
 
-                System.out.println("header : " + header);
-
                 //set the wwwHeader field
                 messageContext.setProperty("wwwHeader", header.toString());
-                String wwwHeader1 = (String) messageContext.getProperty("wwwHeader");
-
-                System.out.println("wwwHeader : " + wwwHeader1);
 
                 return true;
             } else {
