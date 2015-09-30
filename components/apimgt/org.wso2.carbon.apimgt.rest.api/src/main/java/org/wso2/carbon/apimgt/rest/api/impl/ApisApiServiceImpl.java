@@ -214,7 +214,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
-            body.setProvider(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+            body.setProvider(apiIdentifier.getProviderName());
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
 
             APIProvider apiProvider = RestApiUtil.getProvider();

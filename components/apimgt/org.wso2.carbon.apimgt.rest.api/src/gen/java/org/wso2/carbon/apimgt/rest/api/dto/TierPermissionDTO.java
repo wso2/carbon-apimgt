@@ -5,11 +5,18 @@ import java.util.*;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class TierPermissionDTO  {
   
+  
+  
   private String enableAccess = null;
+  
+  
   private List<String> roles = new ArrayList<String>() ;
 
   

@@ -1447,6 +1447,7 @@ definitions:
           - PUBLIC
           - PRIVATE
           - RESTRICTED
+          - CONTROLLED
       visibleRoles:
         type: array
         items:
