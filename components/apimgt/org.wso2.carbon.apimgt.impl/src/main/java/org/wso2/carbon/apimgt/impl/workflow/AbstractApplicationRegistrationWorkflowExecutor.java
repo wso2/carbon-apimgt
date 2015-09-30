@@ -77,9 +77,9 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             Application application = ApplicationUtils.populateApplication(workFlowDTO.getWorkflowReference());
             dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
 
-            dao.updateApplicationRegistration(status,
-                    ((ApplicationRegistrationWorkflowDTO) workFlowDTO).getKeyType(),
-                    ((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication().getId());
+            dao.updateApplicationRegistration(status, regWorkFlowDTO.getKeyType(),
+                    regWorkFlowDTO.getApplication().getId());
+
 //            OauthAppRequest appInfoDTO = ApplicationCreator.createAppInfoDTO(null);
 //            appInfoDTO.setMappingId(regWorkFlowDTO.getWorkflowReference());
 //           // appInfoDTO.retrieveDTO();
