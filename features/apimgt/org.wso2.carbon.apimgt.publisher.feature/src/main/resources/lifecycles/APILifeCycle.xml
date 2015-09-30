@@ -24,6 +24,14 @@
 
                 <state id="Created">
                     <datamodel>
+
+                        <data name="checkItems">
+                            <item name="Deprecate Old Versions" forEvent="">
+                            </item>
+                            <item name="Require Re-Subscription" forEvent="">
+                            </item>
+                        </data>
+
                         <data name="transitionExecution">
                             <execution forEvent="Deploy as a Prototype"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
@@ -58,12 +66,6 @@
 
                     <datamodel>
 
-                        <data name="checkItems">
-                            <item name="Deprecate Old Versions (If API is having multiple versions )" forEvent="">
-                            </item>
-                            <item name="Require Re-Subscription for latest API version" forEvent="">
-                            </item>
-                        </data>
                         <data name="transitionExecution">
                             <execution forEvent="Block"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">

@@ -80,22 +80,27 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                     <b><% print(api.status); %></b>                    
                     
                  </div> <br/>
-                 <div class="controls publishCheckBoxes">                  
-                     <label class="checkbox" id="deprecateOldVersionsDiv" style="display:none;">
-                        <input type="checkbox" id="deprecateOldVersions" name="deprecateOldVersions" onChange="checkValue('#deprecateOldVersions')" value="false"><%=i18n.localize("deprecateOldVersions")%>
+                 <div class="controls publishCheckBoxes"> 
+                 <%for (var j=0;j<resultData.items.length;j++){
+                 var itemName=resultData.items[j].name;
+                 var isVisible=resultData.items[j].isVisible;
+                 var itemValue=resultData.items[j].value;
+                 var state=resultData.items[j].lifeCycleStatus;
+                 %>
+                 <% if(isVisible){%> 
+                     <%if((state!="Created")||(state=="Created" && oldExist)){%>                
+                     <label class="checkbox" id="itemsDiv<%=String(j)%>">
+                        <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv<%=String(j)%>" value="<%=itemValue%>"><%=itemName%>
                      </label>
-
-                     <label class="checkbox" id="requireResubscriptionDiv" style="display:none;">
-                        <input type="checkbox" id="requireResubscription" name="requireResubscription" onChange="checkValue('#requireResubscription')"  checked="true" value="true"><%=i18n.localize("requireReSubscription")%>
-                     </label>
+                 
+                 <%}}}%>
                  </div>
-
 
 
       </div>
        <div class="form-actions">
        <% for (var i=0;i<resultData.nextStates.length;i++) {%>
-                <input type="button" id="actionButton" disabled="disabled" class="btn btn-primary has-spinner" value="<%=resultData.nextStates[i]%>"/>
+                <input type="button" id="actionButton" <%if((api.status=="CREATED")&& !oldExist){%>disabled<%}%> class="btn btn-primary" value="<%=resultData.nextStates[i]%>"/>
         <%}%>    
                 
        </div>

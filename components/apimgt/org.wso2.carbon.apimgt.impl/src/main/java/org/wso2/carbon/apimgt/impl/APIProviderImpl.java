@@ -1274,6 +1274,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            //Attach the API lifecycle
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             registry.addAssociation(APIUtil.getAPIProviderPath(api.getId()), targetPath,
                                     APIConstants.PROVIDER_ASSOCIATION);
             String roles=artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
@@ -2714,51 +2716,70 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String lifeCycleState = "";
 
             for (Property property : lifecycleProps) {
+            String propName = property.getKey();
+            String[] propValues = property.getValues();
+
+            if (propValues != null && propValues.length != 0) {
+            String value = propValues[0];
+
+            if (propName.startsWith(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX) &&
+                propName.endsWith(APIConstants.LC_PROPERTY_STATE_SUFFIX) &&
+                propName.contains(APIConstants.API_LIFE_CYCLE)) {
+
+                lifeCycleState = value;
+            }
+            }
+            }
+
+            for (Property property : lifecycleProps) {
+            String propName = property.getKey();
+            String[] propValues = property.getValues();
+
+            if (propValues != null && propValues.length != 0) {
+            if (propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                propName.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX) && propName.contains(APIConstants.API_LIFE_CYCLE)) {
+                for (String role : roleNames) {
+                     for (String propValue : propValues) {
+                          String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").replace(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX, "");
+                          if (propValue.equals(role)) {
+                          permissionList.add(key);
+                          } else if (propValue.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) && propValue.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX)) {
+                          permissionList.add(key);
+                          }
+                          }
+                }
+            }
+            }
+            }
+
+                for (Property property : lifecycleProps) {
                 String propName = property.getKey();
                 String[] propValues = property.getValues();
 
                 if (propValues != null && propValues.length != 0) {
-                    String value = propValues[0];
 
                     CheckListItem checkListItem = new CheckListItem();
                     checkListItem.setVisible("false");
-
-                    if (propName.startsWith(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX) &&
-                            propName.endsWith(APIConstants.LC_PROPERTY_STATE_SUFFIX) &&
-                            APIConstants.API_LIFE_CYCLE.contains(propName)) {
-                        lifeCycleState = value;
-                    } else if (propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
-                            propName.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX) && APIConstants.API_LIFE_CYCLE.contains(propName)) {
-                        for (String role : roleNames) {
-                            for (String propValue : propValues) {
-                                String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").replace(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX, "");
-                                if (propValue.equals(role)) {
-                                    permissionList.add(key);
-                                } else if (propValue.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) && propValue.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX)) {
-                                    permissionList.add(key);
-                                }
-                            }
-                        }
-                    } else if ((propName.startsWith(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX) &&
-                            propName.endsWith(APIConstants.LC_PROPERTY_ITEM_SUFFIX) && APIConstants.API_LIFE_CYCLE.contains(propName))) {
+                    if ((propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                            propName.endsWith(APIConstants.LC_PROPERTY_ITEM_SUFFIX) && propName.contains(APIConstants.API_LIFE_CYCLE))) {
                         if (propValues.length > 2) {
                             for (String param : propValues) {
                                 if ((param.startsWith(APIConstants.LC_STATUS))) {
                                     checkListItem.setLifeCycleStatus(param.substring(7));
                                 }
-                                if ((param.startsWith(APIConstants.LC_CHECK_ITEM_NAME))) {
+                                else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_NAME))) {
                                     checkListItem.setName(param.substring(5));
                                 }
-                                if ((param.startsWith(APIConstants.LC_CHECK_ITEM_VALUE))) {
+                                else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_VALUE))) {
                                     checkListItem.setValue(param.substring(6));
                                 }
-                                if ((param.startsWith(APIConstants.LC_CHECK_ITEM_ORDER))) {
+                                else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_ORDER))) {
                                     checkListItem.setOrder(param.substring(6));
                                 }
                             }
                         }
 
-                        String key = propName.replace(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX, "").
+                        String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").
                                 replace(APIConstants.LC_PROPERTY_ITEM_SUFFIX, "");
                         if (permissionList.contains(key)) {
                             checkListItem.setVisible("true");
