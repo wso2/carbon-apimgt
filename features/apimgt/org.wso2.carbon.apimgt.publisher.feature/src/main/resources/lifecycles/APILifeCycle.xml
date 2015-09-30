@@ -25,7 +25,7 @@
                 <state id="Created">
                     <datamodel>
                         <data name="transitionExecution">
-                            <execution forEvent="Promote"
+                            <execution forEvent="Deploy as a Prototype"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
                             <execution forEvent="Publish"
@@ -33,8 +33,9 @@
                             </execution>
                         </data>
                     </datamodel>
-                    <transition event="Promote" target="Prototyped"/>
                     <transition event="Publish" target="Published"/>
+                    <transition event="Deploy as a Prototype" target="Prototyped"/>
+
                 </state>
 
                 <state id="Prototyped">
@@ -43,32 +44,45 @@
                             <execution forEvent="Publish"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Demote"
+                            <execution forEvent="Demote to Created"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
                         </data>
                     </datamodel>
                     <transition event="Publish" target="Published"/>
-                    <transition event="Demote" target="Created"/>
+                    <transition event="Demote to Created" target="Created"/>
                 </state>
 
 
                 <state id="Published">
+
                     <datamodel>
+
+                        <data name="checkItems">
+                            <item name="Deprecate Old Versions (If API is having multiple versions )" forEvent="">
+                            </item>
+                            <item name="Require Re-Subscription for latest API version" forEvent="">
+                            </item>
+                        </data>
                         <data name="transitionExecution">
                             <execution forEvent="Block"
-                                       class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
-                            </execution>
-                            <execution forEvent="Demote"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
                             <execution forEvent="Deprecate"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
+                            <execution forEvent="Demote to Created"
+                                       class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
+                            </execution>
+                            <execution forEvent="Demote to Prototyped"
+                                       class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
+                            </execution>
+
                         </data>
                     </datamodel>
                     <transition event="Block" target="Blocked"/>
-                    <transition event="Demote" target="Prototyped"/>
+                    <transition event="Demote to Prototyped" target="Prototyped"/>
+                    <transition event="Demote to Created" target="Created"/>
                     <transition event="Deprecate" target="Deprecated"/>
                 </state>
 

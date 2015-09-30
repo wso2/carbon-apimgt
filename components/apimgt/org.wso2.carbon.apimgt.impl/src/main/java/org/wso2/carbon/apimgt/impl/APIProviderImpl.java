@@ -2696,6 +2696,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         LifecycleBean bean;
         try {
             bean = LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) registry, configRegistry);
+            if(bean!=null){
             LifecycleActions[] actions = bean.getAvailableActions();
             for (LifecycleActions lcAction : actions) {
                 if (APIConstants.API_LIFE_CYCLE.equals(lcAction.getLifecycle())) {
@@ -2770,6 +2771,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             lcData.put("items", checkListItems);
+            }
         } catch (Exception e) {
             handleException(e.getMessage(), e);
         }
