@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.usage.client;
 
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -25,19 +27,30 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.usage.client.bean.*;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
+import org.wso2.carbon.apimgt.usage.client.util.DASRestClient;
+import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -51,16 +64,15 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.json.simple.JSONArray;
-
+import java.util.Date;
 
 public class APIUsageStatisticsClient {
 
@@ -72,6 +84,7 @@ public class APIUsageStatisticsClient {
     private APIProvider apiProviderImpl;
     private APIConsumer apiConsumerImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsClient.class);
+
 
     /* private static String text = "    <PaymentPlan name=\"platinam\">    <parameter name=\"call\">  " +
              "      <range0><start>0</start><end>5</end><value>0.0</value></range0>      " +
@@ -157,16 +170,16 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString = "";
+        String concatenatedKeySetString;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString += "'" + subscriberApps.get(0) + "'";
+            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(0);
         } else {
             return new ArrayList<APIResponseFaultCountDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
+            concatenatedKeySetString += " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(i);
         }
 
         return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeySetString,
@@ -178,16 +191,16 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString = "";
+        String concatenatedKeySetString;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString += "'" + subscriberApps.get(0) + "'";
+            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(0);
         } else {
             return new ArrayList<AppUsageDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
+            concatenatedKeySetString += " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(i);
         }
 
         return getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString,
@@ -207,7 +220,49 @@ public class APIUsageStatisticsClient {
             int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "] AND ( "+keyString+" )";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+        RequestSearchBean request = new RequestSearchBean(query, 1, "key_userId_facet", tableName);
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField("total_request_count", "SUM", "count");
+        fields.add(f);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<TopAppUsersValues>>>() {
+        }.getType();
+
+        DASRestClient c=new DASRestClient();
+
+        List<Result<TopAppUsersValues>> obj=c.sendAndGetPost(request,ty);
+
+
+        List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
+
+        AppUsageDTO appUsageDTO;
+        for (Result<TopAppUsersValues> result : obj) {
+            TopAppUsersValues v = result.getValues();
+
+            appUsageDTO = new AppUsageDTO();
+            appUsageDTO.setCount(v.getCount());
+
+            appUsageDTO.setUserid(v.getColumnNames().get(1));
+            appUsageDTO.setappName(subscriberAppsMap.get(v.getColumnNames().get(0)));
+            appUsageDTO.setconsumerKey(v.getColumnNames().get(0));
+
+            topAppUsageDataList.add(appUsageDTO);
+        }
+
+        return topAppUsageDataList;
+        /*Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
@@ -275,7 +330,7 @@ public class APIUsageStatisticsClient {
                 }
             }
         }
-        return topAppUsageDataList;
+        return topAppUsageDataList;*/
     }
 
     /**
@@ -286,11 +341,54 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<APIResponseFaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate,
+        private List<APIResponseFaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate,
             String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
+            String query;
+
+            try {
+                query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                        toDate) + "] AND ( "+keyString+" )";
+            }catch(ParseException e){
+                throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            }
+
+            log.info(query);
+            RequestSearchBean request = new RequestSearchBean(query, 1, "consumerKey_api_facet",
+                    "API_FAULT_SUMMARY");
+            ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+            AggregateField f = new AggregateField("total_fault_count", "SUM", "count");
+            fields.add(f);
+            request.setAggregateFields(fields);
+
+            Type ty = new TypeToken<List<Result<FaultAppUsageDataValue>>>() {
+            }.getType();
+
+            DASRestClient c=new DASRestClient();
+
+            List<Result<FaultAppUsageDataValue>> obj=c.sendAndGetPost(request,ty);
+
+
+            List<APIResponseFaultCountDTO> falseAppUsageDataList = new ArrayList<APIResponseFaultCountDTO>();
+
+            APIResponseFaultCountDTO faultCountDTO;
+            for (Result<FaultAppUsageDataValue> result : obj) {
+                FaultAppUsageDataValue v = result.getValues();
+
+                faultCountDTO = new APIResponseFaultCountDTO();
+                faultCountDTO.setCount(v.getCount());
+
+                faultCountDTO.setApiName(v.getColumnNames().get(1));
+                faultCountDTO.setappName(subscriberAppsMap.get(v.getColumnNames().get(0)));
+                faultCountDTO.setconsumerKey(v.getColumnNames().get(0));
+
+                falseAppUsageDataList.add(faultCountDTO);
+            }
+
+            return falseAppUsageDataList;
+
+        /*Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         List<APIResponseFaultCountDTO> falseAppUsageDataList = new ArrayList<APIResponseFaultCountDTO>();
@@ -358,7 +456,7 @@ public class APIUsageStatisticsClient {
                 }
             }
         }
-        return falseAppUsageDataList;
+        return falseAppUsageDataList;*/
     }
 
     @Deprecated
@@ -383,16 +481,16 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString = "";
+        String concatenatedKeySetString;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString += "'" + subscriberApps.get(0) + "'";
+            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(0);
         } else {
             return new ArrayList<AppCallTypeDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
+            concatenatedKeySetString += " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(i);
         }
 
         return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
@@ -412,7 +510,51 @@ public class APIUsageStatisticsClient {
             String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "] AND ( "+keyString+" )";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+        log.info(query);
+
+        RequestSearchBean request = new RequestSearchBean(query, 3,
+                "key_api_method_path_facet", tableName);
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField("total_request_count", "SUM", "count");
+        fields.add(f);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<AppApiCallTypeValues>>>() {
+        }.getType();
+
+        DASRestClient c=new DASRestClient();
+
+        List<Result<AppApiCallTypeValues>> obj=c.sendAndGetPost(request,ty);
+
+        List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
+
+        AppCallTypeDTO appCallTypeDTO;
+        for (Result<AppApiCallTypeValues> result : obj) {
+            AppApiCallTypeValues v = result.getValues();
+
+            appCallTypeDTO = new AppCallTypeDTO();
+
+            List<String> callTypeList = new ArrayList<String>();
+            callTypeList.add(v.getColumnNames().get(3) + " (" + v.getColumnNames().get(2) + ")");
+
+            appCallTypeDTO.setApiName(v.getColumnNames().get(1));
+            appCallTypeDTO.setCallType(callTypeList);
+            appCallTypeDTO.setappName(subscriberAppsMap.get(v.getColumnNames().get(0)));
+            appCallTypeDTO.setconsumerKey(v.getColumnNames().get(0));
+
+            appApiCallTypeList.add(appCallTypeDTO);
+        }
+
+        return appApiCallTypeList;
+        /*Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
@@ -505,7 +647,7 @@ public class APIUsageStatisticsClient {
             }
         }
         return usageData;
-
+*/
 
     }
 
@@ -545,7 +687,7 @@ public class APIUsageStatisticsClient {
             String query;
 
 
-            query = "SELECT CONSUMER_KEY , AUTHZ_USER FROM IDN_OAUTH2_ACCESS_TOKEN GROUP BY CONSUMER_KEY,AUTHZ_USER   ";
+            query = "SELECT CONSUMER_KEY,AUTHZ_USER FROM IDN_OAUTH2_ACCESS_TOKEN AS A INNER JOIN IDN_OAUTH_CONSUMER_APPS AS B ON B.ID=A.CONSUMER_KEY_ID";
 
 
             rs = statement.executeQuery(query);
@@ -601,44 +743,22 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString = "";
+        String concatenatedKeySetString;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString += "'" + subscriberApps.get(0) + "'";
+            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(0);
         } else {
             return new ArrayList<APIUsageDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
+            concatenatedKeySetString += " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY+":" + subscriberApps.get(i);
         }
 
         return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString,
                 fromDate, toDate, limit);
     }
 
-    /**
-     * This method builds a single string from a set of strings in a string array, to be used in database query
-     *
-     * @param keyArray string array containing the keys
-     * @return set of keys as a comma separated single string
-     */
-    private String buildKeySetString(String[] keyArray){
-
-        String keySetString = "";
-
-        for (int i = 0; i < keyArray.length; i++) {
-            keySetString = keySetString + "'" + keyArray[i] + "'";
-            if (i != keyArray.length - 1) {
-                //adds a comma to the end of the string if the current key is not the last in the array
-                keySetString = keySetString + ",";
-            }
-        }
-        if (keySetString.isEmpty()) {
-            keySetString = "''";
-        }
-        return keySetString;
-    }
 
     /**
      * This method gets the API usage data per application
@@ -649,10 +769,52 @@ public class APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<APIUsageDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate, String toDate,
-            int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "] AND ( "+keyString+" )";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+        RequestSearchBean request = new RequestSearchBean(query, 1, "key_api_facet", tableName);
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField("total_request_count", "SUM", "count");
+        fields.add(f);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<PerAppPerAPIUsageValues>>>() {
+        }.getType();
+        DASRestClient c=new DASRestClient();
+        List<Result<PerAppPerAPIUsageValues>> obj=c.sendAndGetPost(request,ty);
+
+        List<APIUsageDTO> perAppUsageDataList = new ArrayList<APIUsageDTO>();
+        APIUsageDTO apiUsageDTO;
+        for (Result<PerAppPerAPIUsageValues> result : obj) {
+            PerAppPerAPIUsageValues v = result.getValues();
+
+            apiUsageDTO = new APIUsageDTO();
+            apiUsageDTO.setCount(v.getCount_sum());
+
+            apiUsageDTO.setApiName(v.getColumnNames().get(1));
+            apiUsageDTO.setappName(subscriberAppsMap.get(v.getColumnNames().get(0)));
+            apiUsageDTO.setconsumerKey(v.getColumnNames().get(0));
+
+            perAppUsageDataList.add(apiUsageDTO);
+        }
+
+        return perAppUsageDataList;
+
+
+
+
+        //----------------------------------------------------
+        /*Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         List<APIUsageDTO> perAppUsageDataList = new ArrayList<APIUsageDTO>();
@@ -723,7 +885,7 @@ public class APIUsageStatisticsClient {
                 }
             }
         }
-        return perAppUsageDataList;
+        return perAppUsageDataList;*/
     }
 
     private List<String> getAppsbySubscriber(String subscriberName, String groupId) throws APIMgtUsageQueryServiceClientException {
@@ -2703,8 +2865,7 @@ public class APIUsageStatisticsClient {
     public List<String> getFirstAccessTime(String providerName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        APIFirstAccess firstAccess = this.queryFirstAccess(
-                APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
+        APIFirstAccess firstAccess = this.queryFirstAccess( "API_UTIL");
         List<String> APIFirstAccessList = new ArrayList<String>();
 
         if (firstAccess != null) {
@@ -2718,7 +2879,25 @@ public class APIUsageStatisticsClient {
     private APIFirstAccess queryFirstAccess(String columnFamily)
             throws APIMgtUsageQueryServiceClientException {
 
-        if (dataSource == null) {
+        FirstAccessRequestSearchBean request = new FirstAccessRequestSearchBean("", 0, 1, columnFamily);
+
+        Type ty = new TypeToken<List<Result<FirstAccessValue>>>() {
+        }.getType();
+        DASRestClient c=new DASRestClient();
+        List<Result<FirstAccessValue>> obj=c.sendAndGetPost(request,ty);
+
+        long l=obj.get(0).getValues().getFirst_access_time();
+        Calendar cc = Calendar.getInstance();
+        cc.setTimeInMillis(l);
+
+        String year=cc.get(Calendar.YEAR)+"";
+        String month=cc.get(Calendar.MONTH)+1+"";
+        String day=cc.get(Calendar.DATE)+"";
+
+        APIFirstAccess firstAccess = new APIFirstAccess(year,month,day);
+
+        return firstAccess;
+        /*if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
                     "that the data source is properly configured in the APIUsageTracker configuration.");
         }
@@ -2783,7 +2962,7 @@ public class APIUsageStatisticsClient {
 
                 }
             }
-        }
+        }*/
     }
 
     private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)

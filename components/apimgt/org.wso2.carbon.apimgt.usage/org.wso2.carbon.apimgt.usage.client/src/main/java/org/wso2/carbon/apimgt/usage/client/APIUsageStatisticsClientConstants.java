@@ -24,7 +24,7 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API_THROTTLED_OUT_SUMMARY = "API_THROTTLED_OUT_SUMMARY";
 
-    public static final String CONSUMERKEY = "consumerkey";
+    public static final String CONSUMERKEY = "consumerKey";
 
     public static final String RESOURCE = "resourcepath";
 
