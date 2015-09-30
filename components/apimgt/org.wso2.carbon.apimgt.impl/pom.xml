@@ -47,10 +47,6 @@
           <groupId>org.wso2.carbon.governance</groupId>
           <artifactId>org.wso2.carbon.governance.api</artifactId>
       </dependency>
-      <dependency>
-          <groupId>org.wso2.carbon.governance</groupId>
-          <artifactId>org.wso2.carbon.governance.lcm</artifactId>
-      </dependency>
         <dependency>
             <groupId>org.wso2.carbon.registry</groupId>
             <artifactId>org.wso2.carbon.registry.ws.client</artifactId>
@@ -189,6 +185,10 @@
           <groupId>org.wso2.carbon.apimgt</groupId>
           <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
         </dependency>
+      <dependency>
+          <groupId>org.wso2.carbon.governance</groupId>
+          <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
+      </dependency>
   </dependencies>
     <build>
         <plugins>

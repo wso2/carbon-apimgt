@@ -54,6 +54,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
     apiData.provider= api.provider;
     apiData.name= api.name;
     apiData.version= api.version;
+    var resultData=mod.getAPILCData(apiData);
     var result = mod.getLifeCyclesEvents(apiData);
     var lcs=result.lcs;
 
@@ -76,10 +77,10 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <div class="control-group">
                 <label class="control-label" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
                 <div class="controls">
-                    <% print(api.status); %>
-
+                    <b><% print(api.status); %></b>                    
+                    
                  </div> <br/>
-                 <div class="controls publishCheckBoxes">
+                 <div class="controls publishCheckBoxes">                  
                      <label class="checkbox" id="deprecateOldVersionsDiv" style="display:none;">
                         <input type="checkbox" id="deprecateOldVersions" name="deprecateOldVersions" onChange="checkValue('#deprecateOldVersions')" value="false"><%=i18n.localize("deprecateOldVersions")%>
                      </label>
@@ -93,8 +94,10 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 
       </div>
        <div class="form-actions">
-                <input type="submit" id="updateStateButton" disabled="disabled" class="btn btn-primary has-spinner" value="<%=i18n.localize("update")%>"/>
-                <input type="button" id="resetState" disabled="disabled" class="btn" value="<%=i18n.localize("reset")%>" />
+       <% for (var i=0;i<resultData.nextStates.length;i++) {%>
+                <input type="button" id="actionButton" disabled="disabled" class="btn btn-primary has-spinner" value="<%=resultData.nextStates[i]%>"/>
+        <%}%>    
+                
        </div>
        <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
         <%=i18n.localize("lifecycleSuccessMsg")%>

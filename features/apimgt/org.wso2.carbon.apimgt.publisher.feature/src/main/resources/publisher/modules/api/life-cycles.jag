@@ -88,5 +88,19 @@ var getLifeCyclesEvents = function(api) {
     }
 }
 
+var getAPILCData = function(api) {
+var identifier = new Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier(api.provider, api.name, api.version);
+var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+var user=jagg.getUser().username;
+var result=APIManagerFactory.getInstance().getAPIProvider(user).getAPILifeCycleData(identifier);
+var json = APIUtil.convertToString(result);
+var lcJSON = {};
+if ( json != null ) {
+    lcJSON = JSON.parse(json);
+    }
+return lcJSON;
+}
+
 
 %>

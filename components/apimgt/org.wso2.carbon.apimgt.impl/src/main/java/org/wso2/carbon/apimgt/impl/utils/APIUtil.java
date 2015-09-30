@@ -4312,4 +4312,14 @@ public final class APIUtil {
         return action;
     }
 
+    /*
+    *  Util method to convert a java object to a json object
+    *
+    */
+    public static String convertToString(Object obj) {
+        Gson gson = new Gson();
+        String json = gson.toJson(obj);
+        return json;
+    }
+
 }

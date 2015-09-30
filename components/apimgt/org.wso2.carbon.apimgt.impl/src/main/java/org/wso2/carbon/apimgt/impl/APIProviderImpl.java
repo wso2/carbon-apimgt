@@ -59,6 +59,11 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBean;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleActions;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
@@ -2678,6 +2683,98 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    /*
+    * This method returns the lifecycle data for an API including current state,next states.
+    *
+    * @param apiId APIIdentifier
+    * @return Map<String,Object> a map with lifecycle data
+    */
+    public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
+        String path = APIUtil.getAPIPath(apiId);
+        Map<String, Object> lcData = new HashMap<String, Object>();
+        LifecycleBean bean;
+        try {
+            bean = LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) registry, configRegistry);
+            LifecycleActions[] actions = bean.getAvailableActions();
+            for (LifecycleActions lcAction : actions) {
+                if (APIConstants.API_LIFE_CYCLE.equals(lcAction.getLifecycle())) {
+                    //Put next states
+                    lcData.put(APIConstants.LC_NEXT_STATES, lcAction.getActions());
+                }
+            }
+            ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
+            List<String> permissionList = new ArrayList();
+
+            Property[] lifecycleProps = bean.getLifecycleProperties();
+            String[] roleNames = bean.getRolesOfUser();
+
+
+            String lifeCycleState = "";
+
+            for (Property property : lifecycleProps) {
+                String propName = property.getKey();
+                String[] propValues = property.getValues();
+
+                if (propValues != null && propValues.length != 0) {
+                    String value = propValues[0];
+
+                    CheckListItem checkListItem = new CheckListItem();
+                    checkListItem.setVisible("false");
+
+                    if (propName.startsWith(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX) &&
+                            propName.endsWith(APIConstants.LC_PROPERTY_STATE_SUFFIX) &&
+                            APIConstants.API_LIFE_CYCLE.contains(propName)) {
+                        lifeCycleState = value;
+                    } else if (propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                            propName.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX) && APIConstants.API_LIFE_CYCLE.contains(propName)) {
+                        for (String role : roleNames) {
+                            for (String propValue : propValues) {
+                                String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").replace(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX, "");
+                                if (propValue.equals(role)) {
+                                    permissionList.add(key);
+                                } else if (propValue.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) && propValue.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX)) {
+                                    permissionList.add(key);
+                                }
+                            }
+                        }
+                    } else if ((propName.startsWith(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX) &&
+                            propName.endsWith(APIConstants.LC_PROPERTY_ITEM_SUFFIX) && APIConstants.API_LIFE_CYCLE.contains(propName))) {
+                        if (propValues.length > 2) {
+                            for (String param : propValues) {
+                                if ((param.startsWith(APIConstants.LC_STATUS))) {
+                                    checkListItem.setLifeCycleStatus(param.substring(7));
+                                }
+                                if ((param.startsWith(APIConstants.LC_CHECK_ITEM_NAME))) {
+                                    checkListItem.setName(param.substring(5));
+                                }
+                                if ((param.startsWith(APIConstants.LC_CHECK_ITEM_VALUE))) {
+                                    checkListItem.setValue(param.substring(6));
+                                }
+                                if ((param.startsWith(APIConstants.LC_CHECK_ITEM_ORDER))) {
+                                    checkListItem.setOrder(param.substring(6));
+                                }
+                            }
+                        }
+
+                        String key = propName.replace(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX, "").
+                                replace(APIConstants.LC_PROPERTY_ITEM_SUFFIX, "");
+                        if (permissionList.contains(key)) {
+                            checkListItem.setVisible("true");
+                        }
+                    }
+
+                    if (checkListItem.matchLifeCycleStatus(lifeCycleState)) {
+                        checkListItems.add(checkListItem);
+                    }
+                }
+            }
+            lcData.put("items", checkListItems);
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
+        }
+        return lcData;
+    }
 
 
 }

@@ -450,4 +450,12 @@ public interface APIProvider extends APIManager {
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
                                          boolean deprecateOldVersions ,boolean makeKeysForwardCompatible)
             throws	APIManagementException;
+
+    /*
+    * This method returns the lifecycle data for an API including current state,next states.
+    *
+    * @param apiId APIIdentifier
+    * @return Map<String,Object> a map with lifecycle data
+    */
+    public Map<String,Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException;
 }
