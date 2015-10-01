@@ -59,8 +59,9 @@ public class ApplicationDTO  {
 
   
   /**
+   * If subscriber is not given user invoking the API will be taken as the subscriber.
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber.")
   @JsonProperty("subscriber")
   public String getSubscriber() {
     return subscriber;

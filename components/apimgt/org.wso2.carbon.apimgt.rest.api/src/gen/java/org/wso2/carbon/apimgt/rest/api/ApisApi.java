@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.factories.ApisApiServiceFactory;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 
@@ -30,7 +31,7 @@ public class ApisApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of available APIs qualifying under a given search condition.", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of available APIs qualifying under a given search condition.", response = APIListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of APIs is returned."),
         

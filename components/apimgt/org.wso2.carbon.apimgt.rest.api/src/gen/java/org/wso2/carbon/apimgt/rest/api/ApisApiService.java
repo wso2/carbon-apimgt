@@ -4,6 +4,7 @@ import org.wso2.carbon.apimgt.rest.api.*;
 import org.wso2.carbon.apimgt.rest.api.dto.*;
 
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 

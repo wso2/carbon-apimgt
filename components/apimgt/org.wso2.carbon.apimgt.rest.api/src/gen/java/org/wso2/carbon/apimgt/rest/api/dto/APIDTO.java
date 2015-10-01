@@ -14,11 +14,11 @@ import javax.validation.constraints.NotNull;
 public class APIDTO  {
   
   
-  @NotNull
-  private String name = null;
-  
   
   private String id = null;
+  
+  @NotNull
+  private String name = null;
   
   
   private String description = null;
@@ -91,18 +91,6 @@ public class APIDTO  {
 
   
   /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  
-  /**
    * UUID of the api registry artifact
    **/
   @ApiModelProperty(value = "UUID of the api registry artifact")
@@ -112,6 +100,18 @@ public class APIDTO  {
   }
   public void setId(String id) {
     this.id = id;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("name")
+  public String getName() {
+    return name;
+  }
+  public void setName(String name) {
+    this.name = name;
   }
 
   
@@ -164,8 +164,9 @@ public class APIDTO  {
 
   
   /**
+   * If the provider value is not given user invoking the api will be used as the provider.
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "If the provider value is not given user invoking the api will be used as the provider.")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;
@@ -362,8 +363,8 @@ public class APIDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
     
-    sb.append("  name: ").append(name).append("\n");
     sb.append("  id: ").append(id).append("\n");
+    sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  context: ").append(context).append("\n");
