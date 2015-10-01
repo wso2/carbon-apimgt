@@ -277,10 +277,10 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             if (log.isDebugEnabled()) {
                 log.debug("WWW-Auth header response ..." + wwwHeader);
             }
-
+            //This step can throw a NullPointerException if a WWW-Authenticate header is not received
             String wwwHeaderSplits[] = wwwHeader.split("Digest");
 
-            //Happens if the header supports digest authentication
+            //Happens only if the WWW-Authenticate header supports digest authentication.
             if (wwwHeaderSplits.length > 1 && wwwHeaderSplits[1] != null) {
 
                 //extracting required header information
@@ -369,11 +369,15 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
 
                 return true;
             } else {
-                //this is not digest auth protected api. let it go.
+                //This is not digest auth protected api. let it go. Might be basic auth or NTLM protected.
+                //We receive a www-authenticate header but it is not for Digest auth.
                 return true;
             }
-        } catch (Exception e) {
-            log.error("Exception has occurred while performing class mediation. : " + e.getMessage());
+        }catch(NullPointerException ex){
+            log.error("The endpoint does not support digest authentication : " + ex.getMessage());
+            return false;
+        }catch (Exception e) {
+            log.error("Exception has occurred while performing class mediation : " + e.getMessage());
             return false;
         }
 
