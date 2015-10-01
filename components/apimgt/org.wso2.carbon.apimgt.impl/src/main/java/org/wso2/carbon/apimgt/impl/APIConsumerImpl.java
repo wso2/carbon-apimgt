@@ -1813,6 +1813,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
+    /** returns the SubscribedAPI object which is related to the subscriptionId
+     *
+     * @param subscriptionId subscription id
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionById(String subscriptionId) throws APIManagementException {
+        SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionById(subscriptionId);
+        return subscribedAPI;
+    }
+
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, null);
         return subscribedAPIs;
@@ -1954,12 +1965,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscribe by " + userId + " for app "+ apiMgtDAO.getApplicationNameFromId(applicationId);
                 log.debug(logMessage);
             }
-
-            return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
+            return String.valueOf(subscriptionId);
         } else {
             throw new APIManagementException("Subscriptions not allowed on APIs in the state: " +
                     api.getStatus().getStatus());
         }
+    }
+    
+    public String getSubscriptionStatusById(String subscriptionId) throws APIManagementException {
+        return apiMgtDAO.getSubscriptionStatusById(Integer.parseInt(subscriptionId));
     }
 
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
@@ -2360,6 +2374,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     }
 
+    /**
+     * Returns the corresponding application given the Id
+     * @param id Id of the Application
+     * @return it will return Application corresponds to the id.
+     * @throws APIManagementException
+     */
+    public Application getApplicationById(String id) throws APIManagementException {
+        
+        return apiMgtDAO.getApplicationById(Integer.parseInt(id));
+    }
+    
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
         return apiMgtDAO.isAccessTokenExists(accessToken);
     }

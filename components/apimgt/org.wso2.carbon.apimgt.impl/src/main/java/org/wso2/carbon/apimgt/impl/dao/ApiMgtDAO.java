@@ -1645,6 +1645,64 @@ public class ApiMgtDAO {
         return null;
     }
 
+    /** returns the SubscribedAPI object which is related to the subscriptionId
+     * 
+     * @param subscriptionId subscription id
+     * @return
+     * @throws APIManagementException 
+     */
+    public SubscribedAPI getSubscriptionById(String subscriptionId) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getSubscriptionQuery = 
+                    "SELECT " +
+                    "SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+                    "API.API_PROVIDER AS API_PROVIDER, " +
+                    "API.API_NAME AS API_NAME, " +
+                    "API.API_VERSION AS API_VERSION, " +
+                    "SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+                    "SUBS.TIER_ID AS TIER_ID, " +
+                    "SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "SUBS.LAST_ACCESSED AS LAST_ACCESSED " +
+                    "FROM " +
+                    "AM_SUBSCRIPTION SUBS," +
+                    "AM_API API " +
+                    "WHERE " +
+                    "API.API_ID = SUBS.API_ID AND " +
+                    "SUBSCRIPTION_ID = ?";
+            ps = conn.prepareStatement(getSubscriptionQuery);
+            ps.setInt(1, Integer.parseInt(subscriptionId));
+            resultSet = ps.executeQuery();
+            SubscribedAPI subscribedAPI = null;
+            if (resultSet.next()) {
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
+                        resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+                
+                int applicationId = resultSet.getInt("APPLICATION_ID");
+                Application application = getApplicationById(applicationId);               
+                subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
+                subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
+                subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
+                subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
+                subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
+                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
+                subscribedAPI.setApplication(application);
+            }
+            return subscribedAPI;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve subscription from subscription id", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
     /**
      * This method used tot get Subscriber from subscriberId.
      *
@@ -1779,7 +1837,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet result = null;
         String sqlQuery = "SELECT " + 
-                "   SUBS.SUBSCRIPTION_ID" + 
+                "   SUBS.SUBSCRIPTION_ID AS SUBS_ID" + 
                 "   ,API.API_PROVIDER AS API_PROVIDER"+ 
                 "   ,API.API_NAME AS API_NAME" + 
                 "   ,API.API_VERSION AS API_VERSION" + 
@@ -1847,6 +1905,7 @@ public class ApiMgtDAO {
                                                                 result.getString("API_NAME"), result.getString("API_VERSION"));
 
                 SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
                 subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                 subscribedAPI.setTier(new Tier(
@@ -1946,7 +2005,7 @@ public class ApiMgtDAO {
      * @param applicationName the application to which the api's are subscribed
      * @param startSubIndex the start index for pagination
      * @param endSubIndex end index for pagination
-     * @param groupId the group id of the application
+     * @param groupingId the group id of the application
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */
@@ -2079,7 +2138,7 @@ public class ApiMgtDAO {
         subscriber.setName(subscribedUserName);
 
         String sqlQuery = "SELECT " +
-                "   SUBS.SUBSCRIPTION_ID" +
+                "   SUBS.SUBSCRIPTION_ID AS SUBS_ID" +
                 "   ,API.API_PROVIDER AS API_PROVIDER" +
                 "   ,API.API_NAME AS API_NAME" +
                 "   ,API.API_VERSION AS API_VERSION" +
@@ -2147,6 +2206,7 @@ public class ApiMgtDAO {
                                                                 result.getString("API_NAME"), result.getString("API_VERSION"));
 
                 SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
                 subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                 String tierName=result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID);

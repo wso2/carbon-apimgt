@@ -39,10 +39,11 @@ public class SubscriptionsApi  {
 
     public Response subscriptionsGet(@ApiParam(value = "Will return sunscriptions for the provided API") @QueryParam("apiId") String apiId,
     @ApiParam(value = "Will return subscriptions for the provided Application") @QueryParam("applicationId") String applicationId,
+    @ApiParam(value = "Application Group Id") @QueryParam("groupId") String groupId,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     throws NotFoundException {
-    return delegate.subscriptionsGet(apiId,applicationId,accept,ifNoneMatch);
+    return delegate.subscriptionsGet(apiId,applicationId,groupId,accept,ifNoneMatch);
     }
     @POST
     
@@ -75,11 +76,12 @@ public class SubscriptionsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
-    public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
+    public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id",required=true ) @PathParam("subscriptionId") String subscriptionId,
+    @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     throws NotFoundException {
-    return delegate.subscriptionsSubscriptionIdGet(accept,ifNoneMatch,ifModifiedSince);
+    return delegate.subscriptionsSubscriptionIdGet(subscriptionId,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/{subscriptionId}")
@@ -96,11 +98,12 @@ public class SubscriptionsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response subscriptionsSubscriptionIdPut(@ApiParam(value = "Subscription object that needs to be modified" ,required=true ) SubscriptionDTO body,
+    @ApiParam(value = "Subscription Id",required=true ) @PathParam("subscriptionId") String subscriptionId,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
-    return delegate.subscriptionsSubscriptionIdPut(body,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.subscriptionsSubscriptionIdPut(body,subscriptionId,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
     @Path("/{subscriptionId}")
@@ -114,10 +117,11 @@ public class SubscriptionsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
-    public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
+    public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Subscription Id",required=true ) @PathParam("subscriptionId") String subscriptionId,
+    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     throws NotFoundException {
-    return delegate.subscriptionsSubscriptionIdDelete(ifMatch,ifUnmodifiedSince);
+    return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince);
     }
 }
 

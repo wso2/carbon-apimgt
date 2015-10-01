@@ -2489,7 +2489,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 throw new APIManagementException("Subscription is not allowed for " + userDomain);
             }
             apiIdentifier.setTier(tier);
-            String subsStatus = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
+            String subscriptionId = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
+            String subsStatus = apiConsumer.getSubscriptionStatusById(subscriptionId);
             return subsStatus;
         } catch (APIManagementException e) {
             handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());

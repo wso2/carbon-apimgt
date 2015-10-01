@@ -807,6 +807,7 @@ paths:
           name: applicationId
           type: string
           description: Will return subscriptions for the provided Application
+        - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       responses:
@@ -872,11 +873,10 @@ paths:
         '415':
           description: Unsupported media type. The entity of the request was in a not supported format.
   '/subscriptions/{subscriptionId}':
-    parameters:
-      - $ref: '#/parameters/subscriptionId'
     get:
       description: Get subscription details
       parameters:
+        - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -914,6 +914,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -950,6 +951,7 @@ paths:
     delete:
       description: Remove subscription
       parameters:
+        - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       responses:
@@ -1333,15 +1335,13 @@ parameters:
     in: path
     description: Subscription Id
     required: true
-    type: number
-    format: integer
+    type: string
   subscriptionId-Q:
     name: subscriptionId
     in: query
     description: Subscription Id
     required: true
-    type: number
-    format: integer
+    type: string
   limit:
     name: limit
     in: query
@@ -1620,9 +1620,9 @@ definitions:
       - subscriptionId
     properties:
       subscriptionId:
-        type: number
+        type: string
       applicationId:
-        type: integer
+        type: string
       apiId:
         type: string
       tier:

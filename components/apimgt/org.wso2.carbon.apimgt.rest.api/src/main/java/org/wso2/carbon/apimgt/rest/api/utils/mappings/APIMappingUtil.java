@@ -49,9 +49,9 @@ public class APIMappingUtil {
     public static APIIdentifier getAPIIdentifier(String apiId){
         //validation required
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
-        String apiName = apiIdDetails[0];
-        String version = apiIdDetails[1];
-        String providerName = apiIdDetails[2];
+        String providerName = apiIdDetails[0];
+        String apiName = apiIdDetails[1];
+        String version = apiIdDetails[2];
         String providerNameEmailReplaced = APIUtil.replaceEmailDomain(providerName);
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }

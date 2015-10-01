@@ -139,6 +139,14 @@ public interface APIConsumer extends APIManager {
      */
     public void removeAPIRating(APIIdentifier apiId, String user) throws APIManagementException;
 
+    /** returns the SubscribedAPI object which is related to the subscriptionId
+     *
+     * @param subscriptionId subscription id
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionById(String subscriptionId) throws APIManagementException;
+    
     /**
      * Returns a set of SubscribedAPI purchased by the given Subscriber
      *
@@ -241,6 +249,14 @@ public interface APIConsumer extends APIManager {
     public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
 
+    /**
+     * 
+     * @param subscriptionId id of the subscription
+     * @return
+     * @throws APIManagementException if failed to get subscription detail from database
+     */
+    public String getSubscriptionStatusById(String subscriptionId) throws APIManagementException;
+ 
     /**
      * Unsubscribe the specified user from the specified API in the given application
      *
@@ -387,6 +403,13 @@ public interface APIConsumer extends APIManager {
     public Application getApplicationsByName(String userId , String ApplicationName , String groupId) throws
             APIManagementException;
 
+    /**
+     * Returns the corresponding application given the Id
+     * @param id Id of the Application
+     * @return it will return Application corresponds to the id.
+     * @throws APIManagementException
+     */
+    public Application getApplicationById(String id) throws APIManagementException;
 
     /**
      * @param subscriber the subscriber in relation to the identifiers
