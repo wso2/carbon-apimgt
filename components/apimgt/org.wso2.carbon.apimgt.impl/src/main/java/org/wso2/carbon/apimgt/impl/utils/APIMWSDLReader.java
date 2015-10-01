@@ -166,7 +166,7 @@ public class APIMWSDLReader {
                         break;
                     } else {
                         String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(), api.getTransports());
-                        setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) + "/" + api.getId().getVersion()));
+                        setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) + api.getContext() + "/" + api.getId().getVersion()));
                     }
                 }
             }
