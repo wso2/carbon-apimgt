@@ -166,7 +166,7 @@ public class APIMWSDLReader {
                         break;
                     } else {
                         String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(), api.getTransports());
-                        setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) + api.getContext()));
+                        setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) + "/" + api.getId().getVersion()));
                     }
                 }
             }
@@ -309,11 +309,11 @@ public class APIMWSDLReader {
 	private void setAddressUrl(ExtensibilityElement exElement, String transports, API api) throws APIManagementException {
 
         if (exElement instanceof SOAP12AddressImpl) {
-        	((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else if (exElement instanceof SOAPAddressImpl) {
-        	((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else if (exElement instanceof HTTPAddressImpl) {
-        	 ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
+            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else {
 			String msg = "Unsupported WSDL errors!";
 			log.error(msg);
