@@ -1,9 +1,11 @@
 <% jagg.template("life-cycles", function(inputs, outputs, jagg) {
 if(outputs.isPublishPermitted){
         var api = outputs.api;
-        var modApi = jagg.module("api");
-        var result = modApi.isAPIOlderVersionExist(api);
-        var oldExist=result.exist;
+        var oldExist=outputs.oldExist;
+        var lcs=outputs.lcs;
+        var lcData=outputs.lcData;
+        var publishedInExternalStores=outputs.publishedInExternalStores;
+        var i,resCount,rowNums = [];
  %>
 
 <script type="text/javascript">
@@ -32,34 +34,9 @@ var initOf_publishToGateway = 'true';
 var initOf_deprecateOldVersions = 'false';
 var initOf_requireResubscription = 'true';
 
-<%
-// jaggary code which check for published in external stores
-var publishedInExternalStores=false;
-if(api.apiStores!=null && api.apiStores != undefined){
-    for(var i=0;i<api.apiStores.length;i++){
-         if(api.apiStores[i].published){
-              publishedInExternalStores = true;
-              break;
-         }
-    }
-}
-%>
 // java script variable to store the status
 var publishedInExternalStores=<%=publishedInExternalStores%>;
 </script>
-
-<%  var i,resCount,rowNums = [];
-    var mod = jagg.module("api");
-    var apiData={};
-    apiData.provider= api.provider;
-    apiData.name= api.name;
-    apiData.version= api.version;
-    var resultData=mod.getAPILCData(apiData);
-    var result = mod.getLifeCyclesEvents(apiData);
-    var lcs=result.lcs;
-
-
-%>
 
 <div class="alert alert-error" id="statusAPIError" style="display:none">
 <span id="statusErrorSpan"></span>
@@ -77,32 +54,33 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <div class="control-group">
                 <label class="control-label" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
                 <div class="controls">
-                    <b><% print(api.status); %></b>                    
-                    
+                    <b><% print(api.status); %></b>
+
                  </div> <br/>
-                 <div class="controls publishCheckBoxes"> 
-                 <%for (var j=0;j<resultData.items.length;j++){
-                 var itemName=resultData.items[j].name;
-                 var isVisible=resultData.items[j].isVisible;
-                 var itemValue=resultData.items[j].value;
-                 var state=resultData.items[j].lifeCycleStatus;
+                 <div class="controls publishCheckBoxes">
+                 <%for (var j=0;j<lcData.items.length;j++){
+                 var item=lcData.items[j];
+                 var itemName=item.name;
+                 var isVisible=item.isVisible;
+                 var itemValue=item.value;
+                 var state=item.lifeCycleStatus;
                  %>
-                 <% if(isVisible){%> 
-                     <%if((state!="Created")||(state=="Created" && oldExist)){%>                
+                 <% if(isVisible){%>
+                     <%if((state!="Created")||(state=="Created" && oldExist)){%>
                      <label class="checkbox" id="itemsDiv<%=String(j)%>">
                         <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv<%=String(j)%>" value="<%=itemValue%>"><%=itemName%>
                      </label>
-                 
+
                  <%}}}%>
                  </div>
 
 
       </div>
        <div class="form-actions">
-       <% for (var i=0;i<resultData.nextStates.length;i++) {%>
-                <input type="button" id="actionButton" <%if((api.status=="CREATED")&& !oldExist){%>disabled<%}%> class="btn btn-primary" value="<%=resultData.nextStates[i]%>"/>
-        <%}%>    
-                
+       <% for (var i=0;i<lcData.nextStates.length;i++) {%>
+                <input type="button" id="actionButton" <%if((api.status=="CREATED")&& !oldExist){%>disabled<%}%> class="btn btn-primary" value="<%=lcData.nextStates[i]%>"/>
+        <%}%>
+
        </div>
        <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
         <%=i18n.localize("lifecycleSuccessMsg")%>
