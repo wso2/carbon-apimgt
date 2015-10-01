@@ -1016,8 +1016,8 @@ public class APIUsageStatisticsClient {
         String query;
 
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
-                    toDate) + "]";
+            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(
+                    fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         }catch(ParseException e){
             throw new APIMgtUsageQueryServiceClientException("Error parsing date");
         }
@@ -1356,8 +1356,8 @@ public class APIUsageStatisticsClient {
         String query;
 
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
-                    toDate) + "]";
+            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(
+                    fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         }catch(ParseException e){
             throw new APIMgtUsageQueryServiceClientException("Error parsing date");
         }
@@ -1526,8 +1526,8 @@ public class APIUsageStatisticsClient {
         String query;
 
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
-                    toDate) + "]";
+            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(
+                    fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         }catch(ParseException e){
             throw new APIMgtUsageQueryServiceClientException("Error parsing date");
         }
@@ -2221,8 +2221,8 @@ public class APIUsageStatisticsClient {
         String query;
 
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
-                    toDate) + "]";
+            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(
+                    fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         }catch(ParseException e){
             throw new APIMgtUsageQueryServiceClientException("Error parsing date");
         }
@@ -2324,8 +2324,8 @@ public class APIUsageStatisticsClient {
         String query;
 
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
-                    toDate) + "]";
+            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(
+                    fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         }catch(ParseException e){
             throw new APIMgtUsageQueryServiceClientException("Error parsing date");
         }
@@ -2428,8 +2428,8 @@ public class APIUsageStatisticsClient {
         String query;
 
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
-                    toDate) + "]";
+            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(
+                    fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         }catch(ParseException e){
             throw new APIMgtUsageQueryServiceClientException("Error parsing date");
         }
@@ -2441,7 +2441,7 @@ public class APIUsageStatisticsClient {
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField f0 = new AggregateField("total_request_count", "SUM",
-                "totalRequesCount");
+                "totalRequestCount");
         fields.add(f0);
         request.setAggregateFields(fields);
 
@@ -2532,6 +2532,46 @@ public class APIUsageStatisticsClient {
             String apiName)
             throws APIMgtUsageQueryServiceClientException {
 
+        String query;
+
+        try {
+            query = "api:"+apiName +" AND max_request_time: [" + RestClientUtil.getFloorDateAsLong(
+                    fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        RequestSearchBean request = new RequestSearchBean(query, 2,
+                "api_version_context_facet", "API_VERSION_USAGE_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f0 = new AggregateField("total_request_count", "SUM",
+                "totalRequestCount");
+        fields.add(f0);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<UsageByAPIVersionsValue>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<UsageByAPIVersionsValue>> obj = c.sendAndGetPost(
+                request, ty);
+
+        List<APIUsage> usageDataList = new ArrayList<APIUsage>();
+        APIUsage usage;
+        for (Result<UsageByAPIVersionsValue> result : obj) {
+            UsageByAPIVersionsValue v = result.getValues();
+
+            usage = new APIUsage();
+            usage.requestCount = v.getTotalRequestCount();
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.context = v.getColumnNames().get(2);
+
+            usageDataList.add(usage);
+        }
+
+        return usageDataList;
+        /*
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
                     "that the data source is properly configured in the APIUsageTracker configuration.");
@@ -2595,17 +2635,18 @@ public class APIUsageStatisticsClient {
 
                 }
             }
-        }
+        }*/
     }
 
     private List<APIUsageByUserName> getAPIUsageByUserData(String providerName, String fromDate, String toDate,
             Integer limit)
             throws APIMgtUsageQueryServiceClientException {
 
+        System.out.println(fromDate+" "+toDate);
         String query;
 
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(
                     toDate) + "]";
         }catch(ParseException e){
             throw new APIMgtUsageQueryServiceClientException("Error parsing date");
@@ -3174,7 +3215,7 @@ public class APIUsageStatisticsClient {
         cc.setTimeInMillis(l);
 
         String year=cc.get(Calendar.YEAR)+"";
-        String month=cc.get(Calendar.MONTH)+1+"";
+        String month=cc.get(Calendar.MONTH)+"";
         String day=cc.get(Calendar.DATE)+"";
 
         APIFirstAccess firstAccess = new APIFirstAccess(year,month,day);

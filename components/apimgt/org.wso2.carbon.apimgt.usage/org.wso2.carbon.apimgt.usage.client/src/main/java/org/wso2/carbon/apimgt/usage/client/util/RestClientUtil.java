@@ -14,4 +14,24 @@ public class RestClientUtil {
         Long l = dt.getTime();
         return l;
     }
+
+    public static long getCeilingDateAsLong(String date) throws ParseException {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date d =df.parse(date);
+        d.setHours(0);
+        d.setMinutes(0);
+        d.setSeconds(0);
+        d.setDate(d.getDate()+1);
+        return d.getTime();
+    }
+
+    public static long getFloorDateAsLong(String date) throws ParseException {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date d =df.parse(date);
+        d.setHours(0);
+        d.setMinutes(0);
+        d.setSeconds(0);
+        d.setDate(d.getDate());
+        return d.getTime();
+    }
 }
