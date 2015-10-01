@@ -4742,7 +4742,8 @@ public class APIProviderHostObject extends ScriptableObject {
     	if (HostObjectUtils.checkDataPublishingEnabled()) {
     		return true;
     	}
-    	return false;
+    	//return false;
+        return true; // set to true due to org.wso2.carbon.bam.service.data.publisher erro
     }
 
     public static boolean jsFunction_showAPIStoreURL(Context cx,Scriptable thisObj, Object[] args,

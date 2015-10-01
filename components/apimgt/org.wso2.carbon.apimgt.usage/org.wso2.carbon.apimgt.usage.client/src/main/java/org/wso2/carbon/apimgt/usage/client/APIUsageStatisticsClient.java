@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.usage.client;
 
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -27,10 +26,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -56,9 +51,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -72,12 +64,11 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 
 public class APIUsageStatisticsClient {
 
     private static final String API_USAGE_TRACKING = "APIUsageTracking.";
-    private static final String DATA_SOURCE_NAME = "jdbc/WSO2AM_STATS_DB";
+//    private static final String DATA_SOURCE_NAME = "jdbc/WSO2AM_STATS_DB";
     private static volatile DataSource dataSource = null;
     private static PaymentPlan paymentPlan;
     private static Map<String, String> subscriberAppsMap = new HashMap<String, String>();
@@ -144,13 +135,13 @@ public class APIUsageStatisticsClient {
     }
 
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-        try {
-            Context ctx = new InitialContext();
-            dataSource = (DataSource) ctx.lookup(DATA_SOURCE_NAME);
-        } catch (NamingException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error while looking up the data " +
-                    "source: " + DATA_SOURCE_NAME);
-        }
+//        try {
+//            Context ctx = new InitialContext();
+//            dataSource = (DataSource) ctx.lookup(DATA_SOURCE_NAME);
+//        } catch (NamingException e) {
+//            throw new APIMgtUsageQueryServiceClientException("Error while looking up the data " +
+//                    "source: " + DATA_SOURCE_NAME);
+//        }
     }
 
     public static OMElement buildOMElement(InputStream inputStream) throws Exception {
@@ -982,7 +973,7 @@ public class APIUsageStatisticsClient {
     public List<APIUsageDTO> getUsageByAPIs(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
+        Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,fromDate,toDate,limit);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
@@ -1020,9 +1011,49 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the API usage data
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<APIUsage> getAPIUsageData(String tableName) throws APIMgtUsageQueryServiceClientException {
+    private Collection<APIUsage> getAPIUsageData(String tableName,String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+
+        RequestSearchBean request = new RequestSearchBean(query, 2, "api_version_context_facet",
+                "API_VERSION_USAGE_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f0 = new AggregateField("total_request_count", "SUM",
+                "totalRequestCount");
+        fields.add(f0);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<UsageByAPIsValue>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<UsageByAPIsValue>> obj = c.sendAndGetPost(request, ty);
+
+        List<APIUsage> usageDataList = new ArrayList<APIUsage>();
+        APIUsage usage;
+        for (Result<UsageByAPIsValue> result : obj) {
+            UsageByAPIsValue v = result.getValues();
+
+            usage = new APIUsage();
+            usage.requestCount = v.getTotalRequestCount();
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.context = v.getColumnNames().get(2);
+
+            usageDataList.add(usage);
+        }
+
+        return usageDataList;
+        /*Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         Collection<APIUsage> usageDataList = new ArrayList<APIUsage>();
@@ -1087,7 +1118,7 @@ public class APIUsageStatisticsClient {
                 }
             }
         }
-        return usageDataList;
+        return usageDataList;*/
     }
 
     /**
@@ -1177,7 +1208,7 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsageByResourcePath> usageData = this
-                .queryToGetAPIUsageByResourcePath(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
+                .getAPIUsageByResourcePathData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
                         fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResourcePathUsageDTO> usageByResourcePath = new ArrayList<APIResourcePathUsageDTO>();
@@ -1205,7 +1236,7 @@ public class APIUsageStatisticsClient {
     public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        List<APIUsageByDestination> usageData= this.queryToGetAPIUsageByDestination(
+        List<APIUsageByDestination> usageData= this.getAPIUsageByDestinationData(
                 APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY, fromDate, toDate);
 
         List<API> providerAPIs = getAPIsByProvider(providerName);
@@ -1241,7 +1272,7 @@ public class APIUsageStatisticsClient {
     public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        List<APIUsageByUserName> usageData = this.queryBetweenTwoDaysForAPIUsageByUser(providerName, fromDate, toDate, null);
+        List<APIUsageByUserName> usageData = this.getAPIUsageByUserData(providerName, fromDate, toDate, null);
         
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         
@@ -1273,7 +1304,7 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIResponseTime> responseTimes =
-                getAPIResponseTimeData(APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
+                getAPIResponseTimeData(APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY,fromDate,toDate,limit);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, Double> apiCumulativeServiceTimeMap = new HashMap<String, Double>();
         Map<String, Long> apiUsageMap = new TreeMap<String, Long>();
@@ -1319,10 +1350,55 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to API response times
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<APIResponseTime> getAPIResponseTimeData(String tableName)
+    private Collection<APIResponseTime> getAPIResponseTimeData(String tableName,String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+
+        RequestSearchBean request = new RequestSearchBean(query, 2,
+                "api_version_context_facet", "API_RESPONSE_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f0 = new AggregateField("serviceTime", "SUM",
+                "totalServiceTime");
+        AggregateField f1 = new AggregateField("total_response_count", "SUM",
+                "totalResponseCount");
+        fields.add(f0);
+        fields.add(f1);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<ResponseTimesByAPIsValue>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<ResponseTimesByAPIsValue>> obj = c.sendAndGetPost(request,
+                ty);
+
+        List<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
+        APIResponseTime usage;
+        for (Result<ResponseTimesByAPIsValue> result : obj) {
+            ResponseTimesByAPIsValue v = result.getValues();
+
+            usage = new APIResponseTime();
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.context = v.getColumnNames().get(2);
+            usage.responseTime = v.getTotalServiceTime();
+            usage.responseCount = v.getTotalResponseCount();
+
+            responseTimeData.add(usage);
+        }
+
+        return responseTimeData;
+        /*Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         Collection<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
@@ -1387,7 +1463,7 @@ public class APIUsageStatisticsClient {
                 }
             }
         }
-        return responseTimeData;
+        return responseTimeData;*/
     }
 
     /**
@@ -1403,7 +1479,7 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIAccessTime> accessTimes =
-                getLastAccessData(APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY);
+                getLastAccessTimesByAPIData(APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY,fromDate,toDate,limit);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIAccessTime> lastAccessTimes = new TreeMap<String, APIAccessTime>();
         for (APIAccessTime accessTime : accessTimes) {
@@ -1444,10 +1520,50 @@ public class APIUsageStatisticsClient {
      * @return a collection containing the data related to API last access times
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<APIAccessTime> getLastAccessData(String tableName)
+    private Collection<APIAccessTime> getLastAccessTimesByAPIData(String tableName,String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Connection connection = null;
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+        RequestSearchBean request = new RequestSearchBean(query, 3,
+                "api_version_userId_context_facet", "API_REQUEST_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f0 = new AggregateField("max_request_time", "MAX",
+                "lastAccessTime");
+        fields.add(f0);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<LastAccessTimesByAPIValue>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<LastAccessTimesByAPIValue>> obj = c.sendAndGetPost(request,
+                ty);
+
+        List<APIAccessTime> lastAccessTimeData = new ArrayList<APIAccessTime>();
+        APIAccessTime usage;
+        for (Result<LastAccessTimesByAPIValue> result : obj) {
+            LastAccessTimesByAPIValue v = result.getValues();
+
+            usage = new APIAccessTime();
+            usage.accessTime = v.getLastAccessTime();
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.username = v.getColumnNames().get(2);
+            usage.context = v.getColumnNames().get(3);
+            lastAccessTimeData.add(usage);
+        }
+
+        return lastAccessTimeData;
+        /*Connection connection = null;
         Statement statement = null;
         ResultSet resultSet = null;
         Collection<APIAccessTime> lastAccessTimeData = new ArrayList<APIAccessTime>();
@@ -1519,7 +1635,7 @@ public class APIUsageStatisticsClient {
                 }
             }
         }
-        return lastAccessTimeData;
+        return lastAccessTimeData;*/
     }
 
     /**
@@ -1613,7 +1729,7 @@ public class APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIResponseFaultCount> faultyData = this
-                .queryBetweenTwoDaysForFaulty(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, fromDate, toDate);
+                .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResponseFaultCountDTO> faultyCount = new ArrayList<APIResponseFaultCountDTO>();
         List<APIVersionUsageDTO> apiVersionUsageList;
@@ -2099,11 +2215,51 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private List<APIResponseFaultCount> queryBetweenTwoDaysForFaulty(String tableName, String fromDate,
-            String toDate)
+    private List<APIResponseFaultCount> getAPIResponseFaultCountData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        if (dataSource == null) {
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+
+        RequestSearchBean request = new RequestSearchBean(query, 3,
+                "api_version_apiPublisher_context_facet", "API_FAULT_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f0 = new AggregateField("total_fault_count", "SUM",
+                "totalFaultCount");
+        fields.add(f0);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APIResponseFaultCountValue>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<APIResponseFaultCountValue>> obj = c.sendAndGetPost(
+                request, ty);
+
+        List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
+        APIResponseFaultCount usage;
+        for (Result<APIResponseFaultCountValue> result : obj) {
+            APIResponseFaultCountValue v = result.getValues();
+
+            usage = new APIResponseFaultCount();
+            usage.faultCount = v.getTotalFaultCount();
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.context = v.getColumnNames().get(3);
+
+            faultUsage.add(usage);
+        }
+
+        return faultUsage;
+        /*if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
                     "that the data source is properly configured in the APIUsageTracker configuration.");
         }
@@ -2159,14 +2315,55 @@ public class APIUsageStatisticsClient {
 
                 }
             }
-        }
+        }*/
     }
 
-    private List<APIUsageByResourcePath> queryToGetAPIUsageByResourcePath(String tableName, String fromDate,
-            String toDate)
+    private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        if (dataSource == null) {
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+        RequestSearchBean request = new RequestSearchBean(query, 3,
+                "api_version_context_method_facet",
+                "API_RESOURCE_USAGE_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f0 = new AggregateField("total_request_count", "SUM",
+                "totalRequesCount");
+        fields.add(f0);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APIUsageByResourcePathValue>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<APIUsageByResourcePathValue>> obj = c.sendAndGetPost(
+                request, ty);
+
+        List<APIUsageByResourcePath> usageByResourcePath = new ArrayList<APIUsageByResourcePath>();
+        APIUsageByResourcePath usage;
+        for (Result<APIUsageByResourcePathValue> result : obj) {
+            APIUsageByResourcePathValue v = result.getValues();
+
+            usage = new APIUsageByResourcePath();
+            usage.requestCount = v.getTotalRequesCount();
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.context = v.getColumnNames().get(2);
+            usage.method = v.getColumnNames().get(3);
+
+            usageByResourcePath.add(usage);
+        }
+
+        return usageByResourcePath;
+        /*if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
                     "that the data source is properly configured in the APIUsageTracker configuration.");
         }
@@ -2222,13 +2419,55 @@ public class APIUsageStatisticsClient {
 
                 }
             }
-        }
+        }*/
     }
 
-    private List<APIUsageByDestination> queryToGetAPIUsageByDestination(String tableName, String fromDate,
-            String toDate)
+    private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
-        if (dataSource == null) {
+
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+
+        RequestSearchBean request = new RequestSearchBean(query, 3,
+                "api_version_context_dest_facet", "API_DESTINATION_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f0 = new AggregateField("total_request_count", "SUM",
+                "totalRequesCount");
+        fields.add(f0);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APIUsageByDestinationValue>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<APIUsageByDestinationValue>> obj = c.sendAndGetPost(
+                request, ty);
+
+        List<APIUsageByDestination> usageByResourcePath = new ArrayList<APIUsageByDestination>();
+        APIUsageByDestination usage;
+        for (Result<APIUsageByDestinationValue> result : obj) {
+            APIUsageByDestinationValue v = result.getValues();
+
+            usage = new APIUsageByDestination();
+            usage.requestCount = v.getTotalRequesCount();
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.context = v.getColumnNames().get(2);
+            usage.destination = v.getColumnNames().get(3);
+
+            usageByResourcePath.add(usage);
+        }
+
+        return usageByResourcePath;
+        /*if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
                     "that the data source is properly configured in the APIUsageTracker configuration.");
         }
@@ -2286,7 +2525,7 @@ public class APIUsageStatisticsClient {
 
                 }
             }
-        }
+        }*/
     }
 
     private List<APIUsage> queryBetweenTwoDaysForAPIUsageByVersion(String tableName, String fromDate, String toDate,
@@ -2359,9 +2598,53 @@ public class APIUsageStatisticsClient {
         }
     }
 
-    private List<APIUsageByUserName> queryBetweenTwoDaysForAPIUsageByUser(String providerName, String fromDate, String toDate, Integer limit)
+    private List<APIUsageByUserName> getAPIUsageByUserData(String providerName, String fromDate, String toDate,
+            Integer limit)
             throws APIMgtUsageQueryServiceClientException {
-        if (dataSource == null) {
+
+        String query;
+
+        try {
+            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil.dateToLong(
+                    toDate) + "]";
+        }catch(ParseException e){
+            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+        }
+
+        log.info(query);
+
+        RequestSearchBean request = new RequestSearchBean(query, 3,
+                "api_version_userId_apiPublisher_facet", "API_REQUEST_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField f = new AggregateField("total_request_count", "SUM",
+                "count");
+        fields.add(f);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APIUsageByUserValues>>>() {
+        }.getType();
+        DASRestClient c = new DASRestClient();
+        List<Result<APIUsageByUserValues>> obj = c.sendAndGetPost(request, ty);
+
+        List<APIUsageByUserName> usageByName = new ArrayList<APIUsageByUserName>();
+        APIUsageByUserName usage;
+        for (Result<APIUsageByUserValues> result : obj) {
+            APIUsageByUserValues v = result.getValues();
+
+            usage = new APIUsageByUserName();
+            usage.requestCount = v.getCount_sum();
+
+            usage.apiName = v.getColumnNames().get(0);
+            usage.apiVersion = v.getColumnNames().get(1);
+            usage.userID = v.getColumnNames().get(2);
+            usage.apipublisher = v.getColumnNames().get(3);
+
+            usageByName.add(usage);
+        }
+
+        return usageByName;
+        /*if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
                     "that the data source is properly configured in the APIUsageTracker configuration.");
         }
@@ -2465,7 +2748,7 @@ public class APIUsageStatisticsClient {
 
                 }
             }
-        }
+        }*/
     }
 
     public boolean isTableExist(String tableName, Connection connection) throws SQLException {
@@ -3484,6 +3767,9 @@ public class APIUsageStatisticsClient {
         private String context;
         private long requestCount;
 
+        public APIUsage(){
+
+        }
         @Deprecated
         public APIUsage(OMElement row) {
             apiName = row.getFirstChildWithName(new QName(
@@ -3573,6 +3859,9 @@ public class APIUsageStatisticsClient {
         private long requestCount;
         private String time;
 
+        public APIUsageByResourcePath(){
+
+        }
         public APIUsageByResourcePath(String apiName, String apiVersion, String method, String context,
                 long requestCount, String time) {
             this.apiName = apiName;
@@ -3608,6 +3897,9 @@ public class APIUsageStatisticsClient {
         private String destination;
         private long requestCount;
 
+        public APIUsageByDestination(){
+
+        }
         public APIUsageByDestination(String apiName, String apiVersion, String context, String destination,
                 long requestCount) {
             this.apiName = apiName;
@@ -3641,6 +3933,9 @@ public class APIUsageStatisticsClient {
         private String apipublisher;
         private long requestCount;
 
+        public APIUsageByUserName(){
+
+        }
         public APIUsageByUserName(String apiName, String apiVersion, String context, String userID, long requestCount,
                 String apipublisher) {
             this.apiName = apiName;
@@ -3674,6 +3969,9 @@ public class APIUsageStatisticsClient {
 //        private String requestTime;
         private long faultCount;
 
+        public APIResponseFaultCount(){
+
+        }
         public APIResponseFaultCount(String apiName, String apiVersion, String context, long faultCount) {
             this.apiName = apiName;
             this.apiVersion = apiVersion;
@@ -3814,6 +4112,10 @@ public class APIUsageStatisticsClient {
         private double responseTime;
         private long responseCount;
 
+        public APIResponseTime(){
+
+        }
+
         @Deprecated
         public APIResponseTime(OMElement row) {
             String nameVersion = row.getFirstChildWithName(new QName(
@@ -3848,6 +4150,9 @@ public class APIUsageStatisticsClient {
         private double accessTime;
         private String username;
 
+        public APIAccessTime(){
+
+        }
         @Deprecated
         public APIAccessTime(OMElement row) {
             String nameVersion = row.getFirstChildWithName(new QName(

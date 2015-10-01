@@ -4693,7 +4693,8 @@ public class APIStoreHostObject extends ScriptableObject {
         if (HostObjectUtils.checkDataPublishingEnabled()) {
             return true;
         }
-        return false;
+        return true; // set to true due to org.wso2.carbon.bam.service.data.publisher erro
+//        return false;
     }
 
     public String getUsername() {
