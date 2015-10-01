@@ -18,7 +18,7 @@ public class APIDTO  {
   private String name = null;
   
   
-  private String artifactId = null;
+  private String id = null;
   
   
   private String description = null;
@@ -106,12 +106,12 @@ public class APIDTO  {
    * UUID of the api registry artifact
    **/
   @ApiModelProperty(value = "UUID of the api registry artifact")
-  @JsonProperty("artifactId")
-  public String getArtifactId() {
-    return artifactId;
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setArtifactId(String artifactId) {
-    this.artifactId = artifactId;
+  public void setId(String id) {
+    this.id = id;
   }
 
   
@@ -363,7 +363,7 @@ public class APIDTO  {
     sb.append("class APIDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  artifactId: ").append(artifactId).append("\n");
+    sb.append("  id: ").append(id).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  context: ").append(context).append("\n");

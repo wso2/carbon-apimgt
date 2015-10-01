@@ -1397,7 +1397,7 @@ definitions:
     properties:
       name:
         type: string
-      artifactId:
+      id:
         description: UUID of the api registry artifact
         type: string
       description:

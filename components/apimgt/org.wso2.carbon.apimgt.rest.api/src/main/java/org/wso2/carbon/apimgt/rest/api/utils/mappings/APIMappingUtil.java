@@ -57,7 +57,7 @@ public class APIMappingUtil {
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         dto.setProvider(model.getId().getProviderName());
-        dto.setArtifactId(model.getArtifactId());
+        dto.setId(model.getUUID());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
 
@@ -95,7 +95,12 @@ public class APIMappingUtil {
         dto.setSequences(sequences);
 
         dto.setStatus(model.getStatus().getStatus());
-        dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(model.getSubscriptionAvailability()));
+
+        String subscriptionAvailability = model.getSubscriptionAvailability();
+        if (subscriptionAvailability != null) {
+            dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
+        }
+
         //do we need to put validity checks? - specific_tenants
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
