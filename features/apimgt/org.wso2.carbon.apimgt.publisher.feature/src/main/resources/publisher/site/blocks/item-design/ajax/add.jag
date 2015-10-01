@@ -230,12 +230,6 @@ function loadSwaggerObj(path)
             apiData.sandboxTps = request.getParameter("sandboxTps");
 
             result = mod.manageAPI(apiData);
-            var userName = jagg.getUser().username;
-            var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
-            var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
-            var apiIdentifierObj = apiIdentifier(apiData.provider, apiData.apiName, apiData.version);
-            APIManagerFactory.getInstance().getAPIProvider(userName).changeLifeCycleStatus(apiIdentifierObj, "PUBLISHED");
-
             if (result.error==true) {
                 obj = {
                     error:true,
