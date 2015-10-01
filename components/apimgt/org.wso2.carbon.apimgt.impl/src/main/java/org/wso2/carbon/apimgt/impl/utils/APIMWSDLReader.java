@@ -21,7 +21,6 @@ import com.ibm.wsdl.extensions.http.HTTPAddressImpl;
 import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
 import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.woden.wsdl20.Endpoint;
@@ -143,7 +142,8 @@ public class APIMWSDLReader {
             org.apache.woden.wsdl20.Description wsdlDefinition1 = wReader.readWSDL(baseURI);
             return wsdlDefinition1;
         } catch (org.apache.woden.WSDLException e) {
-            e.printStackTrace();
+            String error = "Error occurred reading wsdl document.";
+            log.error(error);
         }
         if (log.isDebugEnabled()) {
             log.debug("Reading  the WSDL. Base uri is " + baseURI);

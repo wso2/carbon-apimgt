@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1096,7 +1095,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            handleException("Error occurred while reading subscription details from the database.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps,conn,rs);
         }
@@ -9251,23 +9250,25 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
+
+        Set<String> tokens = null;
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT ACCESS_TOKEN" +
-                              " FROM IDN_OAUTH2_ACCESS_TOKEN" +
-                              " WHERE " +
-                              " CONSUMER_KEY = ?" +
-                              " AND TOKEN_STATE = 'ACTIVE'";
+            String sqlQuery = "SELECT IOAT.ACCESS_TOKEN" +
+                    " FROM IDN_OAUTH2_ACCESS_TOKEN IOAT" +
+                    " INNER JOIN IDN_OAUTH_CONSUMER_APPS IOCA ON IOCA.ID = IOAT.CONSUMER_KEY_ID" +
+                    " WHERE IOCA.CONSUMER_KEY = ?" +
+                    " AND IOAT.TOKEN_STATE = 'ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, consumerKey);
             resultSet = ps.executeQuery();
-            Set<String> tokens = new HashSet<String>();
+            tokens = new HashSet<String>();
             while (resultSet.next()) {
                 tokens.add(APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN")));
             }
-            return tokens;
+
         } catch (SQLException e) {
             handleException("Failed to get active access tokens for consumerKey " + consumerKey, e);
         } catch (CryptoException e) {
@@ -9275,7 +9276,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return null;
+        return tokens;
     }
 
     /**
