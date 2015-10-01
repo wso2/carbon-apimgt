@@ -4,7 +4,7 @@ info:
   title: WSO2 API Manager
   description: >
     This document describe a ** RESTFul API ** for wso2 **API Manager**.
- 
+
 
     You can find the source of this API definition at
     [here](https://github.com/hevayo/restful-apim). It was written with [swagger
@@ -65,20 +65,7 @@ paths:
         '200':
           description: OK. List of APIs is returned.
           schema:
-            title: APIList
-            properties:
-              count:
-                type: string
-              next:
-                type: string
-                description: Link for next page. Empty if no more APIs to be returned.
-              previous:
-                type: string
-                description: Link for previous page. Empty if current page is first page.
-              list:
-                type: array
-                items:
-                  $ref: '#/definitions/API'
+            $ref: '#/definitions/APIList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -1205,27 +1192,15 @@ paths:
             ** Search condition **.
 
 
-
-
-
             If no advanced attribute modifier is found search will match the
             given query string against Tag Name.
-
-
-
 
 
             You can search in attributes by using **"attribute:"** modifier.
 
 
-
-
-
             Eg. "apiName:phoneVerification" will match if the API Name is
             phoneVerification.
-
-
-
 
 
             Supported attribute modifiers are [ **apiName,version**  ]
@@ -1387,18 +1362,27 @@ parameters:
     description: Validator for conditional requests; based on Last Modified header.
     type: string
 definitions:
-  API:
-    title: API object
-    required:
-      - name
-      - context
-      - version
-      - apiDefinition
+  APIList:
+    title: APIList
     properties:
-      name:
+      count:
         type: string
+      next:
+        type: string
+        description: Link for next page. Empty if no more APIs to be returned.
+      previous:
+        type: string
+        description: Link for previous page. Empty if current page is first page.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/APIInfo'
+  APIInfo:
+    title: API info object with basic api details.
+    properties:
       id:
-        description: UUID of the api registry artifact
+        type: string
+      name:
         type: string
       description:
         type: string
@@ -1412,6 +1396,36 @@ definitions:
       version:
         type: string
       provider:
+        description: If the provider value is not given user invoking the api will be used as the provider.
+        type: string
+      status:
+        type: string      
+  API:
+    title: API object
+    required:
+      - name
+      - context
+      - version
+      - apiDefinition
+    properties:
+      id:
+        type: string
+        description: UUID of the api registry artifact
+      name:
+        type: string
+      description:
+        type: string
+      type:
+        type: string
+        enum:
+          - REST
+          - SOAP
+      context:
+        type: string
+      version:
+        type: string
+      provider:
+        description: If the provider value is not given user invoking the api will be used as the provider.
         type: string
       apiDefinition:
         description: Swagger definition of the API which contains details about URI templates and scopes
@@ -1527,6 +1541,7 @@ definitions:
       name:
         type: string
       subscriber:
+        description: If subscriber is not given user invoking the API will be taken as the subscriber.
         type: string
       throttlingTier:
         type: string
@@ -1569,7 +1584,8 @@ definitions:
   Document:
     title: Document
     required:
-      - documentId
+      - name
+      - type
     properties:
       documentId:
         type: string
@@ -1577,7 +1593,7 @@ definitions:
         type: string
       type:
         type: string
-        enum: 
+        enum:
           - HOWTO
           - SAMPLES
           - PUBLIC_FORUM
