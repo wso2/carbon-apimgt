@@ -12,7 +12,7 @@ jagg.block("life-cycles", {
 
     getOutputs:function (inputs) {
     var api;
-
+    
     api=inputs.api;
     var permitted=inputs.isPublishPermitted;
     var modApi = jagg.module("api");
@@ -37,7 +37,7 @@ jagg.block("life-cycles", {
          }
     }
     }
-
+   
         return {
             "api":api,
             "lcs":lcs,
@@ -45,7 +45,7 @@ jagg.block("life-cycles", {
             "oldExist":oldExist,
             "isPublishPermitted":permitted,
             "publishedInExternalStores":publishedInExternalStores
-
+           
         }
     },
 

@@ -447,8 +447,14 @@ public interface APIProvider extends APIManager {
      */
     public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus);
 
-    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
-                                         boolean deprecateOldVersions ,boolean makeKeysForwardCompatible)
+    /*
+    * This method is to change registry lifecycle states for an API artifact
+    *
+    * @param  APIIdentifier apiIdentifier
+    * @param  action  Action which need to execute from registry lifecycle
+    *
+    * */
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws	APIManagementException;
 
     /*

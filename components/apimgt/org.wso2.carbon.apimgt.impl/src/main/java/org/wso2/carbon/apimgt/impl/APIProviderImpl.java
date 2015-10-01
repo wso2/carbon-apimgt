@@ -2648,8 +2648,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus, boolean publishToGateway,
-                                         boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
             throws APIManagementException {
         String provider = APIUtil.replaceEmailDomain(apiIdentifier.getProviderName());
         APIIdentifier identifier = new APIIdentifier(provider, apiIdentifier.getApiName(), apiIdentifier.getVersion());
@@ -2665,17 +2664,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
             String currentStatus = apiArtifact.getLifecycleState();
             if (!currentStatus.equalsIgnoreCase(targetStatus)) {
-                String action = APIUtil.getLifeCycleTransitionAction(currentStatus, targetStatus);
-                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
-            } else {
-                updateAPIStatus(identifier, targetStatus, publishToGateway, deprecateOldVersions, makeKeysForwardCompatible);
+                apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
             }
             return true;
         } catch (GovernanceException e) {
             handleException("Failed to change the life cycle status : ", e);
-            return false;
-        } catch (FaultGatewaysException e) {
-            handleException("Error while publishing to API gateways" + e);
             return false;
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
@@ -2695,41 +2688,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
         String path = APIUtil.getAPIPath(apiId);
         Map<String, Object> lcData = new HashMap<String, Object>();
-        LifecycleBean bean;
+
         try {
+        Resource apiSourceArtifact = registry.get(path);
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                APIConstants.API_KEY);
+        GenericArtifact artifact = artifactManager.getGenericArtifact(
+                apiSourceArtifact.getUUID());
+        //Get all the actions corresponding to current state of the api artifact
+        String[] actions=artifact.getAllLifecycleActions(APIConstants.API_LIFE_CYCLE);
+        //Put next states into map
+        lcData.put(APIConstants.LC_NEXT_STATES, actions);
+        String lifeCycleState=artifact.getLifecycleState();
+        LifecycleBean bean;
+
             bean = LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) registry, configRegistry);
             if(bean!=null){
-            LifecycleActions[] actions = bean.getAvailableActions();
-            for (LifecycleActions lcAction : actions) {
-                if (APIConstants.API_LIFE_CYCLE.equals(lcAction.getLifecycle())) {
-                    //Put next states
-                    lcData.put(APIConstants.LC_NEXT_STATES, lcAction.getActions());
-                }
-            }
+
             ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
-            List<String> permissionList = new ArrayList();
+            ArrayList permissionList = new ArrayList();
 
+            //Get lc properties
             Property[] lifecycleProps = bean.getLifecycleProperties();
+            //Get roles of the current session holder
             String[] roleNames = bean.getRolesOfUser();
-
-
-            String lifeCycleState = "";
-
-            for (Property property : lifecycleProps) {
-            String propName = property.getKey();
-            String[] propValues = property.getValues();
-
-            if (propValues != null && propValues.length != 0) {
-            String value = propValues[0];
-
-            if (propName.startsWith(APIConstants.LC_PROPERTY_LIFECYCLE_NAME_PREFIX) &&
-                propName.endsWith(APIConstants.LC_PROPERTY_STATE_SUFFIX) &&
-                propName.contains(APIConstants.API_LIFE_CYCLE)) {
-
-                lifeCycleState = value;
-            }
-            }
-            }
 
             for (Property property : lifecycleProps) {
             String propName = property.getKey();
