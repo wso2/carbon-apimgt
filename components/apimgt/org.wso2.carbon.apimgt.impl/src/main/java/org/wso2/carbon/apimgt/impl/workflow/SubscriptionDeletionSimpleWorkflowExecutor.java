@@ -85,7 +85,9 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
             throw new WorkflowException("Couldn't remove subscription entry ", e);
         } finally {
             try {
-                conn.close();
+                if (conn != null) {
+                    conn.close();
+                }
             } catch (SQLException e) {
                 log.error("Couldn't close database connection", e);
             }
