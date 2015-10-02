@@ -2632,18 +2632,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
             throws APIManagementException {
-        String provider = APIUtil.replaceEmailDomain(apiIdentifier.getProviderName());
-        APIIdentifier identifier = new APIIdentifier(provider, apiIdentifier.getApiName(), apiIdentifier.getVersion());
-        String apiPath = APIUtil.getAPIPath(identifier);
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
             String currentStatus = apiArtifact.getLifecycleState();
             if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                 apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
@@ -2652,12 +2646,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (GovernanceException e) {
             handleException("Failed to change the life cycle status : ", e);
             return false;
-        } catch (RegistryException e) {
-            handleException("Failed to get API from : " + apiPath, e);
-            return false;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    @Override
+    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
+            throws APIManagementException {
+        GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+        Boolean success = false;
+        try {
+            if (checkItemValue) {
+                apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+            } else {
+                apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+            }
+            success = true;
+        } catch (GovernanceException e) {
+            handleException("Error while setting registry lifecycle checklist items for the API: " +
+                    apiIdentifier.getApiName(), e);
+        }
+        return success;
     }
 
     @Override

@@ -143,7 +143,13 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
     }
 
-    public Map<String,Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException{
+    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
+            throws APIManagementException {
+        checkPublishPermission();
+        return super.changeAPILCCheckListItems(apiIdentifier, checkItem, checkItemValue);
+    }
+
+    public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
         checkPublishPermission();
         return super.getAPILifeCycleData(apiId);
     }

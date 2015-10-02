@@ -50,7 +50,7 @@ import java.util.Set;
  * interface {@link org.wso2.carbon.governance.registry.extensions.interfaces.Execution}
  * This class consists methods that will create, prototype, publish, block, deprecate and
  * retire  an API to API Manager.
- *
+ * <p/>
  * This executor used to publish a service to API store as a API.
  *
  * @see org.wso2.carbon.governance.registry.extensions.interfaces.Execution
@@ -108,15 +108,24 @@ public class APIExecutor implements Execution {
                     && newStatus.equals(APIStatus.PUBLISHED)) {
                 Set<Tier> tiers = api.getAvailableTiers();
                 String endPoint = api.getEndpointConfig();
-                if(endPoint != null && endPoint.trim().length() > 0){
-                    if(tiers == null || tiers.size()<= 0 ){
-                       throw new APIManagementException("Failed to publish service to API store while executing APIExecutor. No Tiers selected");
+                if (endPoint != null && endPoint.trim().length() > 0) {
+                    if (tiers == null || tiers.size() <= 0) {
+                        throw new APIManagementException("Failed to publish service to API store while executing " +
+                                                         "APIExecutor. No Tiers selected");
                     }
-                }else{
-                    throw new APIManagementException("Failed to publish service to API store while executing APIExecutor. No endpoint selected");
+                } else {
+                    throw new APIManagementException("Failed to publish service to API store while executing APIExecutor." +
+                                                     " No endpoint selected");
                 }
             }
-            executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
+            Boolean deprecateOldVersions = false;
+            Boolean makeKeysForwardCompatible = false;
+            //If the API status is CREATED ,check for check list items of lifecycle
+            if (oldStatus.equals(APIStatus.CREATED)) {
+                deprecateOldVersions = apiArtifact.isLCItemChecked(0, APIConstants.API_LIFE_CYCLE);
+                makeKeysForwardCompatible = !(apiArtifact.isLCItemChecked(1, APIConstants.API_LIFE_CYCLE));
+            }
+            executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, deprecateOldVersions, makeKeysForwardCompatible);
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
 

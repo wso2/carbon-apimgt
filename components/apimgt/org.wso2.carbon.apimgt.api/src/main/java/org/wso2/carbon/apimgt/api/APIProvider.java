@@ -455,7 +455,18 @@ public interface APIProvider extends APIManager {
     *
     * */
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
-                   throws APIManagementException;
+            throws APIManagementException;
+
+   /*
+   * This method is to set checklist item values for a particular life-cycle state of an API
+   *
+   * @param  APIIdentifier apiIdentifier
+   * @param  checkItem  Order of the checklist item
+   * @param  checkItemValue Value of the checklist item
+   *
+   * */
+    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem,boolean checkItemValue)
+            throws APIManagementException;
 
     /*
     * This method returns the lifecycle data for an API including current state,next states.
