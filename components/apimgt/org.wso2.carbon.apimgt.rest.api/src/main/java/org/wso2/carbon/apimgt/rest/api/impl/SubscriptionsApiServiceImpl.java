@@ -61,7 +61,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body,String contentType){
+    public Response subscriptionsPost(SubscriptionDTO body, String contentType) {
         String username = RestApiUtil.getLoggedInUsername();
         APIConsumer apiConsumer = null;
         try {
@@ -71,8 +71,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String applicationId = body.getApplicationId();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
             apiIdentifier.setTier(body.getTier());
-            String subscriptionId = apiConsumer.addSubscription(apiIdentifier, username, Integer.parseInt(applicationId));
-            return Response.created(new URI("subscriptions/" + subscriptionId)).entity("").build();
+            String subscriptionId =
+                    apiConsumer.addSubscription(apiIdentifier, username, Integer.parseInt(applicationId));
+            SubscribedAPI addedSubscribedAPI = apiConsumer.getSubscriptionById(Integer.parseInt(subscriptionId));
+            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptiontoDTO(addedSubscribedAPI);
+            //todo: use a proper way other than using "subscriptions/"
+            return Response.created(new URI("subscriptions/" + subscriptionId)).entity(addedSubscriptionDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
             throw new InternalServerErrorException(e);
         }
@@ -84,7 +88,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         APIConsumer apiConsumer = null;
         try {
             apiConsumer = RestApiUtil.getConsumer(username);
-            SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionById(subscriptionId);
+            SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionById(Integer.parseInt(subscriptionId));
             if (subscribedAPI != null) {
                 SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptiontoDTO(subscribedAPI);
                 return Response.ok().entity(subscriptionDTO).build();
@@ -97,15 +101,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsSubscriptionIdPut(SubscriptionDTO body, String subscriptionId, String contentType,
-            String ifMatch, String ifUnmodifiedSince) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
-    }
-
-    @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch, String ifUnmodifiedSince) {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        String username = RestApiUtil.getLoggedInUsername();
+        APIConsumer apiConsumer = null;
+        try {
+            apiConsumer = RestApiUtil.getConsumer(username);
+            apiConsumer.removeSubscriptionById(Integer.parseInt(subscriptionId));
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 }

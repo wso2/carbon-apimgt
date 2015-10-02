@@ -83,28 +83,6 @@ public class SubscriptionsApi  {
     throws NotFoundException {
     return delegate.subscriptionsSubscriptionIdGet(subscriptionId,accept,ifNoneMatch,ifModifiedSince);
     }
-    @PUT
-    @Path("/{subscriptionId}")
-    
-    
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update subscription details", response = SubscriptionDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription updated."),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
-
-    public Response subscriptionsSubscriptionIdPut(@ApiParam(value = "Subscription object that needs to be modified" ,required=true ) SubscriptionDTO body,
-    @ApiParam(value = "Subscription Id",required=true ) @PathParam("subscriptionId") String subscriptionId,
-    @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
-    return delegate.subscriptionsSubscriptionIdPut(body,subscriptionId,contentType,ifMatch,ifUnmodifiedSince);
-    }
     @DELETE
     @Path("/{subscriptionId}")
     

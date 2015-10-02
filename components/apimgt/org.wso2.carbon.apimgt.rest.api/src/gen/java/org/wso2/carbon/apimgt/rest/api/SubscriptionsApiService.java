@@ -21,8 +21,6 @@ public abstract class SubscriptionsApiService {
     throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdGet(String subscriptionId,String accept,String ifNoneMatch,String ifModifiedSince)
     throws NotFoundException;
-    public abstract Response subscriptionsSubscriptionIdPut(SubscriptionDTO body,String subscriptionId,String contentType,String ifMatch,String ifUnmodifiedSince)
-    throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdDelete(String subscriptionId,String ifMatch,String ifUnmodifiedSince)
     throws NotFoundException;
 }
