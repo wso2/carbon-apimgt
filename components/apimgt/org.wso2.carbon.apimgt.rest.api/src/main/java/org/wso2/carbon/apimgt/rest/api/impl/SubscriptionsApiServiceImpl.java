@@ -71,9 +71,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String applicationId = body.getApplicationId();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
             apiIdentifier.setTier(body.getTier());
-            String subscriptionId =
+            int subscriptionId =
                     apiConsumer.addSubscription(apiIdentifier, username, Integer.parseInt(applicationId));
-            SubscribedAPI addedSubscribedAPI = apiConsumer.getSubscriptionById(Integer.parseInt(subscriptionId));
+            SubscribedAPI addedSubscribedAPI = apiConsumer.getSubscriptionById(subscriptionId);
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptiontoDTO(addedSubscribedAPI);
             //todo: use a proper way other than using "subscriptions/"
             return Response.created(new URI("subscriptions/" + subscriptionId)).entity(addedSubscriptionDTO).build();

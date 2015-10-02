@@ -1911,7 +1911,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribed;
     }
 
-    public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public int addSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
@@ -1965,15 +1965,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscribe by " + userId + " for app "+ apiMgtDAO.getApplicationNameFromId(applicationId);
                 log.debug(logMessage);
             }
-            return String.valueOf(subscriptionId);
+            return subscriptionId;
         } else {
             throw new APIManagementException("Subscriptions not allowed on APIs in the state: " +
                     api.getStatus().getStatus());
         }
     }
     
-    public String getSubscriptionStatusById(String subscriptionId) throws APIManagementException {
-        return apiMgtDAO.getSubscriptionStatusById(Integer.parseInt(subscriptionId));
+    public String getSubscriptionStatusById(int subscriptionId) throws APIManagementException {
+        return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
     }
 
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
