@@ -4,14 +4,27 @@ package org.wso2.carbon.apimgt.rest.api.dto;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class SubscriptionDTO  {
   
+  
+  @NotNull
   private String subscriptionId = null;
+  
+  
   private String applicationId = null;
+  
+  
   private String apiId = null;
+  
+  
   private String tier = null;
+  
+  
   private String status = null;
 
   

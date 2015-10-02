@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.rest.api.utils;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -31,10 +33,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import java.util.UUID;
+
 public class RestApiUtil {
 
-    public static APIProvider getProvider (String providerName) throws APIManagementException {
-        return APIManagerFactory.getInstance().getAPIProvider(providerName);
+    private static final Log log = LogFactory.getLog(RestApiUtil.class);
+
+    public static APIProvider getProvider () throws APIManagementException {
+        String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return APIManagerFactory.getInstance().getAPIProvider(loggedInUser);
     }
     
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations){
@@ -48,6 +55,19 @@ public class RestApiUtil {
         }
         errorDTO.setError(errorListItemDTOs);
         return errorDTO;
+    }
+
+    public static boolean isUUID (String apiId) {
+        try {
+            UUID.fromString(apiId);
+            return true;
+        } catch (IllegalArgumentException e) {
+            if (log.isDebugEnabled()) {
+                log.debug(apiId + " is not a valid UUID");
+            }
+            return false;
+        }
+
     }
 
     public static ErrorDTO getAuthenticationErrorDTO(String message) {

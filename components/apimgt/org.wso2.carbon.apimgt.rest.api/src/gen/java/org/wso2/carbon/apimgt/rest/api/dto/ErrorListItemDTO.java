@@ -4,11 +4,18 @@ package org.wso2.carbon.apimgt.rest.api.dto;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotNull;
+
+
 
 @ApiModel(description = "")
 public class ErrorListItemDTO  {
   
+  
+  @NotNull
   private Long code = null;
+  
+  @NotNull
   private String message = null;
 
   

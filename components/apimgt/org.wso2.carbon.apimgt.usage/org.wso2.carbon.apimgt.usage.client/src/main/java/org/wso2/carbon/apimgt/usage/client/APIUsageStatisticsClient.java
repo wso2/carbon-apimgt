@@ -221,11 +221,14 @@ public class APIUsageStatisticsClient {
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS net_total_requests" +
+                        APIUsageStatisticsClientConstants.USER_ID + "," +
+                        APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                        "SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS net_total_requests" +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
                         " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
-                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
+                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                        APIUsageStatisticsClientConstants.USER_ID
                         + " ORDER BY net_total_requests DESC";
 
                 resultSet = statement.executeQuery(query);
@@ -426,14 +429,17 @@ public class APIUsageStatisticsClient {
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "*" +
+                        APIUsageStatisticsClientConstants.API + "," +
+                        APIUsageStatisticsClientConstants.METHOD + "," +
+                        APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                        APIUsageStatisticsClientConstants.RESOURCE +
                         " FROM " + tableName +
                         " WHERE " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                         " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
                         " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
-                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
-                        + "resourcePath";
+                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + "," +
+                        APIUsageStatisticsClientConstants.RESOURCE;
 
 
                 resultSet = statement.executeQuery(query);
@@ -666,7 +672,9 @@ public class APIUsageStatisticsClient {
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS total_calls " +
+                        APIUsageStatisticsClientConstants.API + "," +
+                        APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                        " SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS total_calls " +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
                         " WHERE " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
@@ -877,11 +885,13 @@ public class APIUsageStatisticsClient {
                         APIUsageStatisticsClientConstants.API + "," +
                         APIUsageStatisticsClientConstants.CONTEXT + "," +
                         APIUsageStatisticsClientConstants.VERSION + "," +
-                        "SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS aggregateSum " +
+                        " SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS aggregateSum " +
                         " FROM " +
                         tableName +
                         " GROUP BY " +
-                        APIUsageStatisticsClientConstants.API;
+                        APIUsageStatisticsClientConstants.API +","+
+                        APIUsageStatisticsClientConstants.CONTEXT+","+
+                        APIUsageStatisticsClientConstants.VERSION;
 
                 resultSet = statement.executeQuery(query);
 
@@ -1168,19 +1178,26 @@ public class APIUsageStatisticsClient {
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
+            String tempTableName = "TempTable";
             String query;
 
             query = "SELECT " +
-                    "TempTable.*, " +
+                    tempTableName + "." + APIUsageStatisticsClientConstants.API_VERSION + ", " +
+                    tempTableName + "." + APIUsageStatisticsClientConstants.CONTEXT + ", " +
                     "SUM(" + APIUsageStatisticsClientConstants.RESPONSE + ") AS totalTime ," +
                     "SUM(weighted_service_time) AS totalWeightTime " +
                     " FROM " +
                     "(SELECT " +
-                    "*, (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
+                    APIUsageStatisticsClientConstants.RESPONSE + "," +
+                    APIUsageStatisticsClientConstants.API_VERSION + "," +
+                    APIUsageStatisticsClientConstants.CONTEXT + "," + "(" +
+                    APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
                     APIUsageStatisticsClientConstants.RESPONSE + ") AS weighted_service_time " +
                     " FROM " +
                     APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
-                    " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION;
+                    " GROUP BY " +
+                    tempTableName + "." + APIUsageStatisticsClientConstants.API_VERSION + ", " +
+                    tempTableName + "." + APIUsageStatisticsClientConstants.CONTEXT;
 
             resultSet = statement.executeQuery(query);
 
@@ -1293,26 +1310,35 @@ public class APIUsageStatisticsClient {
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
+            String dataTableName = "dataTable";
+            String maxTimesTable = "maxTimesTable";
             String query;
 
             query = "SELECT " +
-                    "dataTable.* " +
+                    dataTableName + "." + APIUsageStatisticsClientConstants.API + "," +
+                    dataTableName + "." + APIUsageStatisticsClientConstants.VERSION + "," +
+                    dataTableName + "." + APIUsageStatisticsClientConstants.CONTEXT + "," +
+                    dataTableName + "." + APIUsageStatisticsClientConstants.REQUEST_TIME + "," +
+                    dataTableName + "." + APIUsageStatisticsClientConstants.USER_ID +
                     " FROM (" +
-                    " SELECT " +
-                    APIUsageStatisticsClientConstants.API + ",apiPublisher," +
-                    "MAX(" + APIUsageStatisticsClientConstants.TIME + ") " + "AS maxTime " +
-                    " FROM " + tableName +
-                    " GROUP BY " + APIUsageStatisticsClientConstants.API + ",apiPublisher) maxTimesTable " +
-                    " INNER JOIN " +
-                    "(SELECT * " +
-                    " FROM " +
-                    tableName + ") dataTable " +
-                    " ON maxTimesTable." +
-                    APIUsageStatisticsClientConstants.API + "=dataTable." + APIUsageStatisticsClientConstants.API +
-                    " AND " +
-                    "maxTimesTable.apiPublisher=dataTable.apiPublisher" +
-                    " AND " +
-                    "maxTimesTable.maxTime=dataTable." + APIUsageStatisticsClientConstants.TIME;
+                    " SELECT " + APIUsageStatisticsClientConstants.API + "," +
+                    "apiPublisher" + "," + "MAX(" + APIUsageStatisticsClientConstants.TIME + ")" +
+                    "AS maxTime FROM " + tableName + " GROUP BY " +
+                    APIUsageStatisticsClientConstants.API + ",apiPublisher) maxTimesTable INNER JOIN " +
+                    " (SELECT " +
+                    APIUsageStatisticsClientConstants.API + "," +
+                    APIUsageStatisticsClientConstants.VERSION + "," +
+                    APIUsageStatisticsClientConstants.CONTEXT + "," +
+                    "apiPublisher" + "," +
+                    APIUsageStatisticsClientConstants.REQUEST_TIME + "," +
+                    APIUsageStatisticsClientConstants.TIME + "," +
+                    APIUsageStatisticsClientConstants.USER_ID +
+                    " FROM " + tableName + ")"+
+                    dataTableName + " ON " +
+                    maxTimesTable+"." + APIUsageStatisticsClientConstants.API + "=" +
+                    dataTableName + "." + APIUsageStatisticsClientConstants.API + " AND " +
+                    maxTimesTable+"."+"apiPublisher" + "=" + dataTableName+"."+"apiPublisher" + " AND " +
+                    maxTimesTable+"."+"maxTime="+dataTableName+"." + APIUsageStatisticsClientConstants.TIME;
 
             resultSet = statement.executeQuery(query);
 

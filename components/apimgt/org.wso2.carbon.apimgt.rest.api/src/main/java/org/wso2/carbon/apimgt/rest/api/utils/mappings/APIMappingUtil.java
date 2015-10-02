@@ -22,13 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -47,7 +41,6 @@ import java.util.Set;
 public class APIMappingUtil {
 
     public static APIIdentifier getAPIIdentifier(String apiId){
-        //validation required
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
         String providerName = apiIdDetails[0];
         String apiName = apiIdDetails[1];
@@ -56,14 +49,15 @@ public class APIMappingUtil {
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }
 
-    public static APIDTO fromAPItoDTO(org.wso2.carbon.apimgt.api.model.API model) throws APIManagementException {
+    public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getProvider(model.getId().getProviderName());
+        APIProvider apiProvider = RestApiUtil.getProvider();
 
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         dto.setProvider(model.getId().getProviderName());
+        dto.setId(model.getUUID());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
 
@@ -101,7 +95,12 @@ public class APIMappingUtil {
         dto.setSequences(sequences);
 
         dto.setStatus(model.getStatus().getStatus());
-        //dto.setSubscriptionAvailability(API.SubscriptionAvailabilityEnum.valueOf(model.getSubscriptionAvailability()));
+
+        String subscriptionAvailability = model.getSubscriptionAvailability();
+        if (subscriptionAvailability != null) {
+            dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
+        }
+
         //do we need to put validity checks? - specific_tenants
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
@@ -128,7 +127,7 @@ public class APIMappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         //dto.setType("");   //how to get type?
-        //dto.setVisibility(API.VisibilityEnum.valueOf(model.getVisibility()));
+        dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
         //do we need to put validity checks? - restricted
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
@@ -142,14 +141,14 @@ public class APIMappingUtil {
         return dto;
     }
 
-    public static org.wso2.carbon.apimgt.api.model.API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
+    public static API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getProvider(dto.getProvider());
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
         APIIdentifier apiId = new APIIdentifier(dto.getProvider(), dto.getName(), dto.getVersion());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
 
+        //if not supertenant append /t/wso2.com/ to context
         model.setContext(dto.getContext());  //context should change if tenant
         model.setContextTemplate(dto.getContext());
         model.setDescription(dto.getDescription());
@@ -177,7 +176,7 @@ public class APIMappingUtil {
         }
 
         if (dto.getSubscriptionAvailability() != null) {
-            model.setSubscriptionAvailability(dto.getSubscriptionAvailability().name());
+            model.setSubscriptionAvailability(mapSubscriptionAvailabilityFromDTOtoAPI(dto.getSubscriptionAvailability()));
         }
 
         //do we need to put validity checks? - specific_tenants
@@ -212,7 +211,7 @@ public class APIMappingUtil {
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
         //dto.setType("");   //how to get type?
-        model.setVisibility("Public");
+        model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
             model.setVisibleRoles(visibleRoles);
@@ -227,6 +226,67 @@ public class APIMappingUtil {
         return model;
 
     }
+
+    private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) {
+        switch (visibility) {
+            case PUBLIC:
+                return APIConstants.API_GLOBAL_VISIBILITY;
+            case PRIVATE:
+                return APIConstants.API_PRIVATE_VISIBILITY;
+            case RESTRICTED:
+                return APIConstants.API_RESTRICTED_VISIBILITY;
+            case CONTROLLED:
+                return APIConstants.API_CONTROLLED_VISIBILITY;
+            default:
+                return null; // how to handle this?
+        }
+    }
+    private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
+        switch (visibility) { //public, private,controlled, restricted
+            case APIConstants.API_GLOBAL_VISIBILITY :
+                return APIDTO.VisibilityEnum.PUBLIC;
+            case APIConstants.API_PRIVATE_VISIBILITY :
+                return APIDTO.VisibilityEnum.PRIVATE;
+            case APIConstants.API_RESTRICTED_VISIBILITY :
+                return APIDTO.VisibilityEnum.RESTRICTED;
+            case APIConstants.API_CONTROLLED_VISIBILITY :
+                return APIDTO.VisibilityEnum.CONTROLLED;
+            default:
+                return null; // how to handle this?
+        }
+    }
+
+    private static APIDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPItoDTO(
+            String subscriptionAvailability) {
+
+        switch (subscriptionAvailability) {
+            case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT :
+                return APIDTO.SubscriptionAvailabilityEnum.current_tenant;
+            case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS :
+                return APIDTO.SubscriptionAvailabilityEnum.all_tenants;
+            case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS :
+                return APIDTO.SubscriptionAvailabilityEnum.specific_tenants;
+            default:
+                return null; // how to handle this?
+        }
+
+    }
+
+    private static String mapSubscriptionAvailabilityFromDTOtoAPI(
+            APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
+        switch (subscriptionAvailability) {
+            case current_tenant:
+                return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
+            case all_tenants:
+                return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
+            case specific_tenants:
+                return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
+            default:
+                return null; // how to handle this? 500 or 400
+        }
+
+    }
+
 
     public static DocumentDTO fromDocumentationtoDTO(Documentation doc){
         DocumentDTO d = new DocumentDTO();

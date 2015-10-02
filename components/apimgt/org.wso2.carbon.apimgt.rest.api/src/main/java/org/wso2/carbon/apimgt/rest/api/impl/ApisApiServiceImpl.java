@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
@@ -49,22 +50,24 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch){
-        List<org.wso2.carbon.apimgt.api.model.API> apis;
+        List<API> apis;
         List<APIDTO> list = new ArrayList<APIDTO>();
-
         boolean isTenantFlowStarted = false;
 
         try {
             String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
+
             apis = apiProvider.searchAPIs(query,type, loggedInUser);
-            for (org.wso2.carbon.apimgt.api.model.API temp : apis) {
+            for (API temp : apis) {
                 list.add(APIMappingUtil.fromAPItoDTO(temp));
             }
         } catch (APIManagementException e) {
@@ -81,22 +84,27 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         boolean isTenantFlowStarted = false;
         URI createdApiUri = null;
+        APIDTO  createdApiDTO = null;
         try {
-            org.wso2.carbon.apimgt.api.model.API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
-            //This was added in order to provide location header for HTTP response
             APIIdentifier createdApiId = apiToAdd.getId();
-            createdApiUri = new URI("http://10.100.7.39:9763/api/am/v1/apis/"
-                + createdApiId.getApiName() + "-" + createdApiId.getVersion() + "-" + createdApiId.getProviderName());
+            //Retrieve the newly added API to send in the response payload
+            API createdApi = apiProvider.getAPI(createdApiId);
+            createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
+            //This URI used to set the location header of the POST response
+            createdApiUri = new URI(
+                createdApiId.getApiName() + "-" + createdApiId.getVersion() + "-" + createdApiId.getProviderName());
             //how to add thumbnail
             //publish to external stores
         } catch (APIManagementException e) {
@@ -108,8 +116,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-
-        return Response.created(createdApiUri).entity(body).build();
+        return Response.created(createdApiUri).entity(createdApiDTO).build();
     }
     @Override
     public Response apisChangeLifecyclePost(String newState,String publishToGateway,String resubscription,String apiId,String ifMatch,String ifUnmodifiedSince){
@@ -124,26 +131,26 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
 
-            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPI(apiIdentifier);
+            API api = apiProvider.getAPI(apiIdentifier);
             if (api != null) {
                 apiProvider.createNewAPIVersion(api, newVersion);
                 //get newly created API to return as response
                 APIIdentifier apiNewVersionedIdentifier =
                     new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
-                //This was added in order to provide location header for HTTP response
+                //This URI used to set the location header of the POST response
                 newVersionedApiUri =
-                    new URI("http://10.100.7.39:9763/api/am/v1/apis/" +
-                        apiIdentifier.getApiName() + "-" + newVersion + "-" + apiIdentifier.getProviderName());
+                    new URI(apiIdentifier.getApiName() + "-" + newVersion + "-" + apiIdentifier.getProviderName());
             } else {
                 throw new NotFoundException();
             }
@@ -167,17 +174,23 @@ public class ApisApiServiceImpl extends ApisApiService {
         boolean isTenantFlowStarted = false;
         APIDTO apiToReturn = new APIDTO();
         try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-
+            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-            org.wso2.carbon.apimgt.api.model.API api = apiProvider.getAPI(apiIdentifier);
+            API api;
+            if (RestApiUtil.isUUID(apiId)) {
+                api = apiProvider.getAPIbyUUID(apiId);
+            } else {
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+                api = apiProvider.getAPI(apiIdentifier);
+            }
+
             if (api != null) {
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             } else {
@@ -190,28 +203,31 @@ public class ApisApiServiceImpl extends ApisApiService {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-
         return Response.ok().entity(apiToReturn).build();
     }
     @Override
     public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
+
         boolean isTenantFlowStarted = false;
-        //validate ID of api dto with the provided id
+        APIDTO updatedApiDTO = null;
         try {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
-            body.setProvider(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
-            org.wso2.carbon.apimgt.api.model.API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
+            body.setProvider(apiIdentifier.getProviderName());
+            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
 
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
             apiProvider.updateAPI(apiToAdd);
+            updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         } catch (FaultGatewaysException e) {
@@ -221,20 +237,21 @@ public class ApisApiServiceImpl extends ApisApiService {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-
-        return Response.ok().entity(body).build();
+        return Response.ok().entity(updatedApiDTO).build();
     }
     @Override
     public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince){
         APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
         boolean isTenantFlowStarted = false;
         try{
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
             apiProvider.deleteAPI(apiIdentifier);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
@@ -256,8 +273,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){
         List<DocumentDTO> list = new ArrayList<DocumentDTO>();
         try {
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             List<Documentation> docs = apiProvider.getAllDocumentation(APIMappingUtil.getAPIIdentifier(apiId));
             for (org.wso2.carbon.apimgt.api.model.Documentation temp : docs) {
                 list.add(APIMappingUtil.fromDocumentationtoDTO(temp));
@@ -272,8 +288,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType){
         List<DocumentDTO> list = new ArrayList<DocumentDTO>();
         try {
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
             apiProvider.addDocumentation(APIMappingUtil.getAPIIdentifier(apiId),doc);
             return Response.status(Response.Status.CREATED).header("Location", "/apis/" + apiId + "/documents/" + doc.getId()).build();
@@ -286,8 +301,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
         Documentation doc;
         try {
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             doc = apiProvider.getDocumentation(documentId);
             if(null != doc){
                 return Response.ok().entity(doc).build();
@@ -304,8 +318,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         List<DocumentDTO> list = new ArrayList<DocumentDTO>();
         try {
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
             Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
             apiProvider.updateDocumentation(APIMappingUtil.getAPIIdentifier(apiId), doc);
             return Response.ok().entity(APIMappingUtil.fromDocumentationtoDTO(doc)).build();
@@ -318,8 +331,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
         Documentation doc;
         try {
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            APIProvider apiProvider = RestApiUtil.getProvider(loggedInUser);
+            APIProvider apiProvider = RestApiUtil.getProvider();
 
             doc = apiProvider.getDocumentation(documentId);
             if(null == doc){
