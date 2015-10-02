@@ -2,12 +2,12 @@
 var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
 var user=jagg.getUser().username;
 var log = new Log();
-var apiIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
+var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 var updateAPIStatus = function (apiData) {
     var provider=APIUtil.replaceEmailDomain(apiData.provider);
-    var apiIdentifierObj = apiIdentifier(provider, apiData.apiName, apiData.version);
+    var apiIdentifierObj = APIIdentifier(provider, apiData.apiName, apiData.version);
     var result=APIManagerFactory.getInstance().getAPIProvider(user).changeLifeCycleStatus(apiIdentifierObj, apiData.status);
 
     if (log.isDebugEnabled()) {
@@ -76,7 +76,7 @@ var getLifeCyclesEvents = function(api) {
 
 var getAPILCData = function(api) {
     var provider=APIUtil.replaceEmailDomain(api.provider);
-    var identifier = apiIdentifier(provider, api.name, api.version);
+    var identifier = APIIdentifier(provider, api.name, api.version);
     var result=APIManagerFactory.getInstance().getAPIProvider(user).getAPILifeCycleData(identifier);
     var json = APIUtil.convertToString(result);
     var lcJSON = {};
@@ -86,11 +86,11 @@ var getAPILCData = function(api) {
     return lcJSON;
 }
 
-var setCheckListItemVal=function(apiData,checkListItemOrder,checkListItemVal){
+var setCheckListItemVal=function(apiData,checkListItemOrder,checkListItemVal){ 
     var provider=APIUtil.replaceEmailDomain(apiData.provider);
-    var apiIdentifier = apiIdentifier(provider, apiData.apiName, apiData.version);
+    var apiIdentifier = APIIdentifier(provider, apiData.name, apiData.version);
     return APIManagerFactory.getInstance().getAPIProvider(user).changeAPILCCheckListItems(apiIdentifier,
-                                 checkListItemOrder,checkListItemVal);
+                                 parseInt(checkListItemOrder),checkListItemVal);
 
 }
 

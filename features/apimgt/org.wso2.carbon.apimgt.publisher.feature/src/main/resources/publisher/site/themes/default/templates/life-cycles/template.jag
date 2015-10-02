@@ -16,15 +16,16 @@ checkExternalStores('<%=api.status%>');
 
 function setChecklistItemVal(element,order) {
     if ($(element).is(":checked") == false) {
-        $(element).attr('value', 'false');
+        $(element).attr('value', false);
     }
     else {
-        $(element).attr('value', 'true');
+        $(element).attr('value', true);
     }
     var apiName=$("#name").val();
     var version=$("#apiVersion").val();
     var provider=$("#provider").val();
-    jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"setCheckListItemVal",provider:provider,name:apiName,version:version,status:status },
+    var value= $(element).val();
+    jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"setCheckListItemVal",provider:provider,name:apiName,version:version,order:order,value:value },
               "json");
     
 };
@@ -39,7 +40,7 @@ var provider=$("#provider").val();
                      $('#statusUpdateMsg').show();
                      setTimeout(function(){
     location = ''
-  },3000)
+  },1000)
 
                   }
               }, "json");
@@ -83,7 +84,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                  <% if(isVisible=="true"){%> 
                      <%if((state!="Created")||(state=="Created" && oldExist)){%>                
                      <label class="checkbox" id="itemsDiv<%=String(j)%>">
-                        <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>"><%=itemName%>
+                        <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
                      </label>
                  
                  <%}}}%>

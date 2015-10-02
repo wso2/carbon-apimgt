@@ -59,7 +59,12 @@ include("/jagg/jagg.jag");
              apiData.name = request.getParameter("name");
              apiData.version = request.getParameter("version");
              var checkListItemOrder=request.getParameter("order");
-             var checkListItemVal=request.getParameter("value");
+             var checkListItemVal=request.getParameter("value");  
+             if(checkListItemVal=='true'){
+             checkListItemVal=true;
+             } else{
+             checkListItemVal=false;
+             }        
              result = mod.setCheckListItemVal(apiData,checkListItemOrder,checkListItemVal);
              if (!result) {
                  obj = {
