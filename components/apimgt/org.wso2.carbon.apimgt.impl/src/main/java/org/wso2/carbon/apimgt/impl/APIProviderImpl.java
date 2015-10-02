@@ -2630,24 +2630,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public GenericArtifact getAPIArtifact(String apiPath) throws APIManagementException{
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
-       // Gson gson = new Gson();
-        try{
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            return artifactManager.getGenericArtifact(artifactId);
-        }
-        catch (RegistryException e) {
-            handleException("Failed to get API from : " + apiPath, e);
-            return null;
-        }
-    }
-
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
             throws APIManagementException {
         String provider = APIUtil.replaceEmailDomain(apiIdentifier.getProviderName());
@@ -2656,7 +2638,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain,true);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
             Resource apiResource = registry.get(apiPath);
@@ -2690,90 +2672,91 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, Object> lcData = new HashMap<String, Object>();
 
         try {
-        Resource apiSourceArtifact = registry.get(path);
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
-        GenericArtifact artifact = artifactManager.getGenericArtifact(
-                apiSourceArtifact.getUUID());
-        //Get all the actions corresponding to current state of the api artifact
-        String[] actions=artifact.getAllLifecycleActions(APIConstants.API_LIFE_CYCLE);
-        //Put next states into map
-        lcData.put(APIConstants.LC_NEXT_STATES, actions);
-        String lifeCycleState=artifact.getLifecycleState();
-        LifecycleBean bean;
+            Resource apiSourceArtifact = registry.get(path);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(
+                    apiSourceArtifact.getUUID());
+            //Get all the actions corresponding to current state of the api artifact
+            String[] actions = artifact.getAllLifecycleActions(APIConstants.API_LIFE_CYCLE);
+            //Put next states into map
+            lcData.put(APIConstants.LC_NEXT_STATES, actions);
+            String lifeCycleState = artifact.getLifecycleState();
+            LifecycleBean bean;
 
             bean = LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) registry, configRegistry);
-            if(bean!=null){
+            if (bean != null) {
 
-            ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
-            ArrayList permissionList = new ArrayList();
+                ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
+                ArrayList permissionList = new ArrayList();
 
-            //Get lc properties
-            Property[] lifecycleProps = bean.getLifecycleProperties();
-            //Get roles of the current session holder
-            String[] roleNames = bean.getRolesOfUser();
-
-            for (Property property : lifecycleProps) {
-            String propName = property.getKey();
-            String[] propValues = property.getValues();
-
-            if (propValues != null && propValues.length != 0) {
-            if (propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
-                propName.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX) && propName.contains(APIConstants.API_LIFE_CYCLE)) {
-                for (String role : roleNames) {
-                     for (String propValue : propValues) {
-                          String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").replace(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX, "");
-                          if (propValue.equals(role)) {
-                          permissionList.add(key);
-                          } else if (propValue.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) && propValue.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX)) {
-                          permissionList.add(key);
-                          }
-                          }
-                }
-            }
-            }
-            }
+                //Get lc properties
+                Property[] lifecycleProps = bean.getLifecycleProperties();
+                //Get roles of the current session holder
+                String[] roleNames = bean.getRolesOfUser();
 
                 for (Property property : lifecycleProps) {
-                String propName = property.getKey();
-                String[] propValues = property.getValues();
-
-                if (propValues != null && propValues.length != 0) {
-
-                    CheckListItem checkListItem = new CheckListItem();
-                    checkListItem.setVisible("false");
-                    if ((propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
-                            propName.endsWith(APIConstants.LC_PROPERTY_ITEM_SUFFIX) && propName.contains(APIConstants.API_LIFE_CYCLE))) {
-                        if (propValues.length > 2) {
-                            for (String param : propValues) {
-                                if ((param.startsWith(APIConstants.LC_STATUS))) {
-                                    checkListItem.setLifeCycleStatus(param.substring(7));
-                                }
-                                else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_NAME))) {
-                                    checkListItem.setName(param.substring(5));
-                                }
-                                else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_VALUE))) {
-                                    checkListItem.setValue(param.substring(6));
-                                }
-                                else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_ORDER))) {
-                                    checkListItem.setOrder(param.substring(6));
+                    String propName = property.getKey();
+                    String[] propValues = property.getValues();
+                    //Check for permission properties if any exists
+                    if (propValues != null && propValues.length != 0) {
+                        if (propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                                propName.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX) &&
+                                propName.contains(APIConstants.API_LIFE_CYCLE)) {
+                            for (String role : roleNames) {
+                                for (String propValue : propValues) {
+                                    String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "")
+                                                 .replace(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX, "");
+                                    if (propValue.equals(role)) {
+                                        permissionList.add(key);
+                                    } else if (propValue.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                                               propValue.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX)) {
+                                        permissionList.add(key);
+                                    }
                                 }
                             }
                         }
-
-                        String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").
-                                replace(APIConstants.LC_PROPERTY_ITEM_SUFFIX, "");
-                        if (permissionList.contains(key)) {
-                            checkListItem.setVisible("true");
-                        }
-                    }
-
-                    if (checkListItem.matchLifeCycleStatus(lifeCycleState)) {
-                        checkListItems.add(checkListItem);
                     }
                 }
-            }
-            lcData.put("items", checkListItems);
+                //Check for lifecycle checklist item properties defined
+                for (Property property : lifecycleProps) {
+                    String propName = property.getKey();
+                    String[] propValues = property.getValues();
+
+                    if (propValues != null && propValues.length != 0) {
+
+                        CheckListItem checkListItem = new CheckListItem();
+                        checkListItem.setVisible("false");
+                        if ((propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                                propName.endsWith(APIConstants.LC_PROPERTY_ITEM_SUFFIX) &&
+                                propName.contains(APIConstants.API_LIFE_CYCLE))) {
+                            if (propValues.length > 2) {
+                                for (String param : propValues) {
+                                    if ((param.startsWith(APIConstants.LC_STATUS))) {
+                                        checkListItem.setLifeCycleStatus(param.substring(7));
+                                    } else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_NAME))) {
+                                        checkListItem.setName(param.substring(5));
+                                    } else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_VALUE))) {
+                                        checkListItem.setValue(param.substring(6));
+                                    } else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_ORDER))) {
+                                        checkListItem.setOrder(param.substring(6));
+                                    }
+                                }
+                            }
+
+                            String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").
+                                    replace(APIConstants.LC_PROPERTY_ITEM_SUFFIX, "");
+                            if (permissionList.contains(key)) { //Set visible to true if the checklist item permits
+                                checkListItem.setVisible("true");
+                            }
+                        }
+
+                        if (checkListItem.matchLifeCycleStatus(lifeCycleState)) {
+                            checkListItems.add(checkListItem);
+                        }
+                    }
+                }
+                lcData.put("items", checkListItems);
             }
         } catch (Exception e) {
             handleException(e.getMessage(), e);
