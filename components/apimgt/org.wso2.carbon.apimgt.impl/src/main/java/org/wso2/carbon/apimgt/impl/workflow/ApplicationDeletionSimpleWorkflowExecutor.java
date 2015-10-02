@@ -18,8 +18,15 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -27,6 +34,7 @@ import java.util.List;
  */
 public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor {
 
+    private static final Log log = LogFactory.getLog(SubscriptionCreationSimpleWorkflowExecutor.class);
 
     @Override
     public String getWorkflowType() {
@@ -40,12 +48,44 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
 
     @Override
     public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
-        super.execute(workflowDTO);
+        workflowDTO.setStatus(WorkflowStatus.APPROVED);
+        complete(workflowDTO);
+        super.publishEvents(workflowDTO);
     }
 
     @Override
     public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
-        super.complete(workflowDTO);
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
+        Application application = applicationWorkflowDTO.getApplication();
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            apiMgtDAO.deleteApplication(application, conn);
+            conn.commit();
+        } catch (APIManagementException e) {
+            log.error("Couldn't complete application deletion workflow", e);
+            throw new WorkflowException("Couldn't complete application deletion workflow", e);
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    log.error("Failed to rollback remove application ", ex);
+                }
+            }
+            log.error("Couldn't remove application entry ", e);
+            throw new WorkflowException("Couldn't remove application entry ", e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error("Couldn't close database connection", e);
+            }
+        }
     }
 
 }

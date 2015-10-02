@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -301,7 +300,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             if (!onlyKeyMappingEntry) {
                 ps = conn.prepareStatement(registrationEntry);
                 ps.setInt(1, subscriber.getId());
@@ -322,7 +321,7 @@ public class ApiMgtDAO {
             ps.setString(3, dto.getStatus().toString());
             ps.execute();
             ps.close();
-            
+
             conn.commit();
         } catch (SQLException e) {
             try {
@@ -726,7 +725,7 @@ public class ApiMgtDAO {
 
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-                        
+
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, statusEnum);
             ps.setString(2, tenantAwareUsername);
@@ -739,7 +738,7 @@ public class ApiMgtDAO {
             if (log.isDebugEnabled()) {
                 log.debug("Number of rows being updated : " + count);
             }
-            
+
             conn.commit();
         } catch (SQLException e) {
             try {
@@ -863,9 +862,9 @@ public class ApiMgtDAO {
                                     "   AND AKM.APPLICATION_ID=APP.APPLICATION_ID";
 
         try {
-            conn = APIMgtDBUtil.getConnection();            
+            conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             ps = conn.prepareStatement(applicationSqlQuery);
             String encryptedAccessToken = APIUtil.encryptToken(accessToken);
             ps.setString(1, encryptedAccessToken);
@@ -896,7 +895,7 @@ public class ApiMgtDAO {
                 apiName = rs.getString(APIConstants.FIELD_API_NAME);
                 consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
                 apiPublisher = rs.getString(APIConstants.FIELD_API_PUBLISHER);
-                
+
                 keyValidationInfoDTO.setApiName(apiName);
                 keyValidationInfoDTO.setApiPublisher(apiPublisher);
                 keyValidationInfoDTO.setApplicationId(applicationId);
@@ -910,7 +909,7 @@ public class ApiMgtDAO {
                 keyValidationInfoDTO.setUserType(userType);
                 keyValidationInfoDTO.setValidityPeriod(validityPeriod);
                 keyValidationInfoDTO.setSubscriber(subscriberName);
-               
+
                 keyValidationInfoDTO.setAuthorizedDomains(ApiMgtDAO.getAuthorizedDomainList(accessToken));
                 keyValidationInfoDTO.setConsumerKey(APIUtil.decryptToken(consumerKey));
                 Set<String> scopes = new HashSet<String>();
@@ -978,11 +977,11 @@ public class ApiMgtDAO {
                         }
                         //update token status as expired
                         updateTokenState(accessToken, conn, ps);
-                        
+
                         conn.commit();
                     } else {
                         keyValidationInfoDTO.setAuthorized(true);
-                      
+
                         if (tokenGenerator != null) {
                             String calleeToken = null;
 
@@ -1259,9 +1258,9 @@ public class ApiMgtDAO {
         ResultSet rs = null;
         PreparedStatement ps = null;
         try {
-            conn = APIMgtDBUtil.getConnection();            
+            conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             String query = "INSERT" +
                            " INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED, " +
                            "CREATED_BY, CREATED_TIME)" +
@@ -1277,7 +1276,7 @@ public class ApiMgtDAO {
             ps.setString(5, subscriber.getName());
             ps.setTimestamp(6, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.executeUpdate();
-                       
+
 
             int subscriberId = 0;
             rs = ps.getGeneratedKeys();
@@ -1286,17 +1285,17 @@ public class ApiMgtDAO {
                 subscriberId = Integer.valueOf(rs.getString(1)).intValue();
             }
             subscriber.setId(subscriberId);
-       
-            
+
+
             conn.commit();
-            
+
             //Add default application.
             //It will not be shared within in the group 
             Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
             defaultApp.setTier(APIConstants.UNLIMITED_TIER);
             defaultApp.setGroupId("");
             addApplication(defaultApp, subscriber.getName(), conn);
-                                                               
+
         } catch (SQLException e) {
             if (conn != null) {
                 try {
@@ -1318,7 +1317,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             String query = "UPDATE" +
                            " AM_SUBSCRIBER SET USER_ID=?, TENANT_ID=?, EMAIL_ADDRESS=?, DATE_SUBSCRIBED=?, " +
                            "UPDATED_BY=?, UPDATED_TIME=? WHERE SUBSCRIBER_ID=?";
@@ -1331,7 +1330,7 @@ public class ApiMgtDAO {
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setInt(7, subscriber.getId());
             ps.executeUpdate();
-                        
+
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -1465,7 +1464,7 @@ public class ApiMgtDAO {
                 //subscriptionId = rs.getInt(1);
                 subscriptionId = Integer.valueOf(rs.getString(1)).intValue();
             }
-            
+
             // finally commit transaction
             conn.commit();
 
@@ -5756,11 +5755,12 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
-    public void deleteApplication(Application application) throws APIManagementException {
-        Connection connection = null;
+    public void deleteApplication(Application application, Connection connection)
+            throws APIManagementException {
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetConsumerKey = null;
         ResultSet rs = null;
+        boolean isConnectionProvided = (connection != null);
 
         String getSubscriptionsQuery = "SELECT" +
                                        " SUBSCRIPTION_ID " +
@@ -5783,12 +5783,11 @@ public class ApiMgtDAO {
         String deleteApplicationQuery = "DELETE FROM AM_APPLICATION WHERE APPLICATION_ID = ?";
         String deleteRegistrationEntry = "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ?";
 
-
-
         try {
-            connection = APIMgtDBUtil.getConnection();
-            connection.setAutoCommit(false);
-
+            if(!isConnectionProvided) {
+                connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
+            }
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
             prepStmt.setInt(1, application.getId());
             rs = prepStmt.executeQuery();
@@ -5854,8 +5853,10 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, application.getId());
             prepStmt.execute();
 
-            connection.commit();
-
+            if (!isConnectionProvided) {
+                connection.commit();
+                connection.close();
+            }
             for (String consumerKey : consumerKeys){
                 //delete on oAuthorization server.
                 KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
@@ -5863,7 +5864,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while removing application details from the database", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+            APIMgtDBUtil.closeAllConnections(prepStmt, null, rs);
         }
     }
 
@@ -7932,7 +7933,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             handleException("Failed to retrieve the API Context for " +
                     identifier.getProviderName() + "-" + identifier.getApiName() + "-"
-                                                    + identifier.getVersion(), e);
+                    + identifier.getVersion(), e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
         }
@@ -8155,7 +8156,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             rs = ps.executeQuery();
 
             while (rs.next()) {
-
                 appId = rs.getInt("APP_ID");
             }
 
@@ -8200,11 +8200,9 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             rs = ps.executeQuery();
 
             while (rs.next()) {
-
                 workflowReference = rs.getString("WF_REF");
             }
 
-            ps.close();
         } catch (SQLException e) {
             handleException("Error occurred while getting workflow entry for " +
                             "Application : " + applicationName + " created by " + userId, e);
@@ -8213,6 +8211,44 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         }
         return workflowReference;
 
+    }
+
+    /**
+     * Retries the WorkflowExternalReference for a application.
+     *
+     * @param appID ID of the application
+     * @return External workflow reference for the application identified
+     * @throws APIManagementException
+     */
+    public String getExternalWorkflowReferenceByApplicationID(int appID) throws APIManagementException {
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT WF_EXTERNAL_REFERENCE FROM " +
+                "AM_WORKFLOWS WHERE " +
+                "WF_TYPE=? AND " +
+                "WF_REFERENCE=?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            ps.setInt(2, appID);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Application ID : " + appID, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return workflowExtRef;
     }
 
     /**
@@ -8259,18 +8295,18 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             sqlQuery = "SELECT WF_EXTERNAL_REFERENCE FROM " +
                     "AM_WORKFLOWS WHERE " +
-                    "WF_REFERENCE=?";
+                    "WF_REFERENCE=? AND " +
+                    "WF_TYPE=?";
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, subscriptionID);
+            ps.setString(2, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             rs = ps.executeQuery();
 
             while(rs.next()) {
                 workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
             }
 
-            ps.close();
-            rs.close();
         } catch (SQLException e) {
             handleException("Error occurred while getting workflow entry for " +
                     "Subscription : " + subscriptionID, e);
@@ -8279,6 +8315,87 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         }
 
         return workflowExtRef;
+    }
+
+    /**
+     * Retries the WorkflowExternalReference for a subscription.
+     *
+     * @param subscriptionId ID of the subscription
+     * @return External workflow reference for the subscription with subscriptionId
+     * @throws APIManagementException
+     */
+    public String getExternalWorkflowReferenceForSubscription(int subscriptionId)
+            throws APIManagementException {
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT WF_EXTERNAL_REFERENCE FROM " +
+                "AM_WORKFLOWS WHERE " +
+                "WF_REFERENCE=? AND " +
+                "WF_TYPE=?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            // setting subscriptionId as string to prevent error when db finds string type IDs for
+            // ApplicationRegistration workflows
+            ps.setString(1, String.valueOf(subscriptionId));
+            ps.setString(2, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            rs = ps.executeQuery();
+
+            while(rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "Subscription : " + subscriptionId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return workflowExtRef;
+    }
+
+    /**
+     * Retrieves IDs of pending subscriptions for a given application
+     *
+     * @param applicationId application id of the application
+     * @return Set containing subscription id list
+     * @throws APIManagementException
+     */
+    public Set<Integer> getPendingSubscriptionsByApplicationId(int applicationId) throws APIManagementException {
+        Set<Integer> pendingSubscriptions = new HashSet<Integer>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT SUBSCRIPTION_ID FROM " +
+                "AM_SUBSCRIPTION WHERE " +
+                "APPLICATION_ID=? AND " +
+                "SUB_STATUS=?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, applicationId);
+            ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
+            rs = ps.executeQuery();
+
+            while(rs.next()) {
+                pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription entries for " +
+                    "Application : " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return pendingSubscriptions;
     }
 
 
@@ -8365,7 +8482,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param login
      * @return
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
     private String getPrimaryloginFromSecondary(String login) throws APIManagementException {
         Map<String, Map<String, String>> loginConfiguration = ServiceReferenceHolder.getInstance()
@@ -8387,7 +8504,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 username = user[0].toString();
             }
         } catch (Exception e) {
-        
+
             handleException("Error while retriivng the primaryLogin name using seconadry loginanme : "
                       +login, e);
         }
@@ -8399,7 +8516,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      *
      * @param userID
      * @return
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
     private String getLoginUserName(String userID) throws APIManagementException {
         String primaryLogin = userID;
@@ -8429,7 +8546,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             //This query to add external APIStores to database table
             String sqlQuery = "INSERT" +
                     " INTO AM_EXTERNAL_STORES (API_ID, STORE_ID,STORE_DISPLAY_NAME, STORE_ENDPOINT,STORE_TYPE)" +
@@ -8495,7 +8612,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-                        
+
             String sqlQuery = "DELETE" +
                     " FROM AM_EXTERNAL_STORES WHERE API_ID=? AND STORE_ID=? AND STORE_TYPE=?";
 
@@ -8519,7 +8636,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             ps.executeBatch();
             //           ps.clearBatch();           
-            
+
             conn.commit();
             state = true;
         } catch (SQLException e) {
@@ -8548,9 +8665,9 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
-            updateExternalAPIStoresDetails(apiId,apiStoreSet, conn);           
-            
+
+            updateExternalAPIStoresDetails(apiId,apiStoreSet, conn);
+
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -8584,7 +8701,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
-            
+
             //This query to add external APIStores to database table
             String sqlQuery = "UPDATE " +
                               "AM_EXTERNAL_STORES"  +
@@ -8618,7 +8735,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             ps.executeBatch();
             ps.clearBatch();
-            
+
             conn.commit();
 
         } catch (SQLException e) {
@@ -8642,8 +8759,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            storesSet = getExternalAPIStoresDetails(apiId, conn);         
-            
+            storesSet = getExternalAPIStoresDetails(apiId, conn);
+
             conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
@@ -8744,7 +8861,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
             	scopeId = scopeId.toLowerCase();
             }
-            
+
             if(objects != null){
                 for(Object object : objects){
                     ps = conn.prepareStatement(scopeEntry, new String[]{scopeId});
@@ -9053,7 +9170,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
-                            
+
             apiId = getAPIID(api.getId(),connection);
             if (apiId == -1) {
                 //application addition has failed
@@ -9187,7 +9304,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
     /**
 	 * Remove scope entries from DB, when delete APIs
-	 * 
+	 *
 	 * @param apiIdentifier
 	 */
 	private void removeAPIScope(APIIdentifier apiIdentifier) throws APIManagementException {
@@ -9207,7 +9324,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 		try {
 			connection = APIMgtDBUtil.getConnection();
 			connection.setAutoCommit(false);
-			
+
 			prepStmt = connection.prepareStatement(deleteAPIScopeQuery);
 			prepStmt.setInt(1, apiId);
 			prepStmt.execute();
@@ -9215,18 +9332,18 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 			if (!scopes.isEmpty()) {
 				Iterator<Scope> scopeItr = scopes.iterator();
 				while (scopeItr.hasNext()) {
-					scopeId = scopeItr.next().getId();				
+					scopeId = scopeItr.next().getId();
 
 					prepStmt = connection.prepareStatement(deleteOauth2ResourceScopeQuery);
 					prepStmt.setInt(1, scopeId);
 					prepStmt.execute();
-					
+
 					prepStmt = connection.prepareStatement(deleteOauth2ScopeQuery);
 					prepStmt.setInt(1, scopeId);
 					prepStmt.execute();
 				}
 			}
-            
+
             connection.commit();
 
 		} catch (SQLException e) {
@@ -9355,7 +9472,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         ResultSet resultSet = null;
 
         String query = "SELECT COUNT(SCOPE_ID) AS SCOPE_COUNT FROM IDN_OAUTH2_SCOPE WHERE SCOPE_KEY = ? AND TENANT_ID = ?";
-        
+
         try {
             connection = APIMgtDBUtil.getConnection();
 
@@ -9380,11 +9497,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         }
         return false;
     }
-    
+
     /**
      * Check whether the given scope key is already assigned to another API than given under given tenant
      *
-     * @param identifier API Identifier 
+     * @param identifier API Identifier
      * @param scopeKey candidate scope key
      * @param tenantId tenant id
      * @return true if the scope key is already available
@@ -9397,9 +9514,9 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         PreparedStatement prepStmt2 = null;
         ResultSet resultSet = null;
         String apiScopeQuery = "SELECT API.API_ID from AM_API API, IDN_OAUTH2_SCOPE IDN, AM_API_SCOPES AMS "
-                                       + "WHERE IDN.SCOPE_ID=AMS.SCOPE_ID AND " 
+                                       + "WHERE IDN.SCOPE_ID=AMS.SCOPE_ID AND "
                                        + "AMS.API_ID=API.API_ID AND "
-                                       + "IDN.SCOPE_KEY = ? AND " 
+                                       + "IDN.SCOPE_KEY = ? AND "
                                        + "IDN.tenant_id = ?";
         String getApiQuery =
                              "SELECT API_ID FROM AM_API API WHERE API_PROVIDER = ? AND "
