@@ -22,9 +22,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-/**
- * Created by jo on 9/21/15.
- */
 public class BadRequestException extends WebApplicationException {
 
     List<ErrorListItemDTO> list;

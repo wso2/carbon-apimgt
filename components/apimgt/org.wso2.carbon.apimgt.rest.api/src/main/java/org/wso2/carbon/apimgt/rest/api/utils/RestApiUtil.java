@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -74,4 +75,17 @@ public class RestApiUtil {
         errorDTO.setMessage(message);
         return errorDTO;
     }
+
+    public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
+    }
+
+    public static String getLoggedInUsername() {
+        return CarbonContext.getThreadLocalCarbonContext().getUsername();
+    }
+
+    public static String getLoggedInUserTenantDomain() {
+        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
 }

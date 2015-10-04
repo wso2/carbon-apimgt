@@ -27,6 +27,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class SubscribedAPI {
 
+    private int subscriptionId;
     private Tier tier;
     private Subscriber subscriber;
     private APIIdentifier apiId;
@@ -107,6 +108,14 @@ public class SubscribedAPI {
 
     public void setSubCreatedStatus(String subCreatedStatus) {
         this.subCreatedStatus = subCreatedStatus;
+    }
+
+    public int getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(int subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 
     @Override
