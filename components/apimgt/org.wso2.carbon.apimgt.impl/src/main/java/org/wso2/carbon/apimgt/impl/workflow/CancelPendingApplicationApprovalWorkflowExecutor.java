@@ -57,6 +57,7 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
     public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         removeSubscriptionProcessesByApplication(applicationWorkflowDTO.getApplication());
+        removeRegistrationProcessByApplicationId(applicationWorkflowDTO.getApplication().getId());
         try {
             ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
                     .getContextService().getClientConfigContext(), null);
@@ -127,6 +128,83 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
     }
 
     /**
+     * Removes and application's registration processes created at the BPS
+     *
+     * @param applicationId of the application
+     */
+    private void removeRegistrationProcessByApplicationId(int applicationId) throws WorkflowException {
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApplicationRegistrationWSWorkflowExecutor applicationRegistrationWFExecutor =
+                (ApplicationRegistrationWSWorkflowExecutor) WorkflowExecutorFactory.getInstance().
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+        String subContentType = applicationRegistrationWFExecutor.getContentType();
+        String subUsername = applicationRegistrationWFExecutor.getUsername();
+        String subPassword = applicationRegistrationWFExecutor.getPassword();
+        String subServiceEndPoint = applicationRegistrationWFExecutor.getServiceEndpoint();
+
+        try {
+            Set<String> registrationIDs = apiMgtDAO.getRegistrationWFReferencesByApplicationId(applicationId);
+
+            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
+                    .getContextService().getClientConfigContext(), null);
+            Options options = new Options();
+            options.setAction("http://workflow.application.apimgt.carbon.wso2.org/cancel");
+            options.setTo(new EndpointReference(subServiceEndPoint));
+
+            if (subContentType != null) {
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
+            } else {
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                        HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+            }
+
+            HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
+
+            // Assumes authentication is required if username and password is given
+            if (subUsername != null && subPassword != null) {
+                auth.setUsername(subUsername);
+                auth.setPassword(subPassword);
+                auth.setPreemptiveAuthentication(true);
+                List<String> authSchemes = new ArrayList<String>();
+                authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
+                auth.setAuthSchemes(authSchemes);
+
+                if (subContentType == null) {
+                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+                }
+                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
+                        auth);
+                options.setManageSession(true);
+            }
+
+            client.setOptions(options);
+
+            for (String registration: registrationIDs) {
+                try {
+                    String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
+                            "           xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
+                            "               <p:workflowRef>$1</p:workflowRef>\n" +
+                            "           </p:CancelApplicationRegistrationWorkflowProcessRequest>";
+                    payload = payload.replace("$1", registration);
+                    client.fireAndForget(AXIOMUtil.stringToOM(payload));
+                }  catch (AxisFault axisFault) {
+                    log.error("Error sending out message", axisFault);
+                    throw new WorkflowException("Error sending out message", axisFault);
+                } catch (XMLStreamException e) {
+                    log.error("Error converting String to OMElement", e);
+                    throw new WorkflowException("Error converting String to OMElement", e);
+                }
+            }
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
+            throw new WorkflowException(e.getMessage(), e);
+        }  catch (AxisFault axisFault) {
+            log.error("Error sending out message", axisFault);
+            throw new WorkflowException("Error sending out message", axisFault);
+        }
+    }
+
+    /**
      * Removes an application's pending subscription processes from BPS
      *
      * @param application Application which has the subscriptions to be removed
@@ -134,21 +212,15 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
      */
     private void removeSubscriptionProcessesByApplication(Application application) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        Set<Integer> pendingSubscriptions = null;
-        String subUsername = null;
-        String subPassword = null;
-        String subContentType = null;
-        String subServiceEndPoint = null;
         CancelPendingSubscriptionWorkflowExecutor cancelPendingSubscriptionExecutor =
                 (CancelPendingSubscriptionWorkflowExecutor) WorkflowExecutorFactory.getInstance().
                         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
-
-        subContentType = cancelPendingSubscriptionExecutor.getContentType();
-        subUsername = cancelPendingSubscriptionExecutor.getUsername();
-        subPassword = cancelPendingSubscriptionExecutor.getPassword();
-        subServiceEndPoint = cancelPendingSubscriptionExecutor.getServiceEndpoint();
+        String subContentType = cancelPendingSubscriptionExecutor.getContentType();
+        String subUsername = cancelPendingSubscriptionExecutor.getUsername();
+        String subPassword = cancelPendingSubscriptionExecutor.getPassword();
+        String subServiceEndPoint = cancelPendingSubscriptionExecutor.getServiceEndpoint();
         try {
-            pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(application.getId());
+            Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(application.getId());
 
             ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
                     .getContextService().getClientConfigContext(), null);

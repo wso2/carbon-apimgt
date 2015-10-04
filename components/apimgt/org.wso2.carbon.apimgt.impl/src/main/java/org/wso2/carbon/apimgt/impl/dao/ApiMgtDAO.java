@@ -8398,6 +8398,44 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return pendingSubscriptions;
     }
 
+    /**
+     * Retrieves all workflow references of registrations for a given application
+     *
+     * @param applicationId application id of the application
+     * @return Set containing registration id list
+     * @throws APIManagementException
+     */
+    public Set<String> getRegistrationWFReferencesByApplicationId(int applicationId)
+            throws APIManagementException {
+        Set<String> registrations = new HashSet<String>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT WF_REF FROM " +
+                "AM_APPLICATION_REGISTRATION WHERE " +
+                "APP_ID=?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, applicationId);
+            rs = ps.executeQuery();
+
+            while(rs.next()) {
+                registrations.add(rs.getString("WF_REF"));
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting registration entries for " +
+                    "Application : " + applicationId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return registrations;
+    }
+
 
     private static class SubscriptionInfo {
         private int subscriptionId;
@@ -9434,11 +9472,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT ACCESS_TOKEN" +
-                              " FROM IDN_OAUTH2_ACCESS_TOKEN" +
-                              " WHERE " +
-                              " CONSUMER_KEY_ID = ?" +
-                              " AND TOKEN_STATE = 'ACTIVE'";
+            String sqlQuery = "SELECT IAT.ACCESS_TOKEN" +
+                    " FROM IDN_OAUTH2_ACCESS_TOKEN IAT, IDN_OAUTH_CONSUMER_APPS ICA" +
+                    " WHERE ICA.CONSUMER_KEY=?" +
+                    " AND IAT.CONSUMER_KEY_ID = ICA.ID" +
+                    " AND IAT.TOKEN_STATE ='ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, consumerKey);
