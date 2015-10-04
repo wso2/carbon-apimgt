@@ -1264,6 +1264,9 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setDestinationStatsEnabled(destinationStats);
         api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
 
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+
         if(!"none".equals(inSequence)){
             api.setInSequence(inSequence);
         }
@@ -1395,9 +1398,6 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.updateAPI(api);
 
         }
-
-        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
-        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
