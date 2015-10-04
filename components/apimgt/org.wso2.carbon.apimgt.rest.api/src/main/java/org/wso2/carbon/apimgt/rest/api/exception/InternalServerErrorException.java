@@ -19,9 +19,6 @@ package org.wso2.carbon.apimgt.rest.api.exception;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-/**
- * Created by jo on 9/21/15.
- */
 public class InternalServerErrorException extends WebApplicationException {
 
     public InternalServerErrorException(Throwable e){

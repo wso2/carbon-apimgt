@@ -24,9 +24,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
-/**
- * Created by jo on 9/16/15.
- */
+
 public class GlobalThrowableMapper implements ExceptionMapper<Throwable>{
 
     private static final Log log = LogFactory.getLog(GlobalThrowableMapper.class);

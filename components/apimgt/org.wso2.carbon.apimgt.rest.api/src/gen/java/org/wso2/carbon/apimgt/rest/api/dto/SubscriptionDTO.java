@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.dto;
 
-import java.math.BigDecimal;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,10 +13,10 @@ public class SubscriptionDTO  {
   
   
   @NotNull
-  private BigDecimal subscriptionId = null;
+  private String subscriptionId = null;
   
   
-  private Integer applicationId = null;
+  private String applicationId = null;
   
   
   private String apiId = null;
@@ -33,10 +32,10 @@ public class SubscriptionDTO  {
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("subscriptionId")
-  public BigDecimal getSubscriptionId() {
+  public String getSubscriptionId() {
     return subscriptionId;
   }
-  public void setSubscriptionId(BigDecimal subscriptionId) {
+  public void setSubscriptionId(String subscriptionId) {
     this.subscriptionId = subscriptionId;
   }
 
@@ -45,10 +44,10 @@ public class SubscriptionDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("applicationId")
-  public Integer getApplicationId() {
+  public String getApplicationId() {
     return applicationId;
   }
-  public void setApplicationId(Integer applicationId) {
+  public void setApplicationId(String applicationId) {
     this.applicationId = applicationId;
   }
 
