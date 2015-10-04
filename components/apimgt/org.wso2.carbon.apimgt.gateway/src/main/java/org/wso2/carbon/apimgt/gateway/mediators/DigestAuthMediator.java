@@ -70,9 +70,12 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         }
 
         //remove front and end double quotes.
-        serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
+        serverNonce = serverNonce.substring(1, serverNonce.length() - 1); //serverNonce and realm will not be null
         realm = realm.substring(1, realm.length() - 1);
-        qop = qop.substring(1, qop.length() - 1);
+
+        if (qop != null) {
+            qop = qop.substring(1, qop.length() - 1); //qop can be null
+        }
 
         String[] headerAttributes = { realm, serverNonce, qop, opaque, algorithm };
         return headerAttributes;
@@ -113,13 +116,17 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
     //hashing the entityBody for qop = auth-int (for calculating ha2)
     public String findEntityBodyHash(
             org.apache.axis2.context.MessageContext axis2MC) { //Take MessageContext messageContext //an auth-int is normally returned from a POST request
-
+        //get the previous message context here
         //Get the hash of the entity-body
-        String entityBody = axis2MC.getEnvelope().getText(); //Any transfer encoding applied might have to be reversed
+        String entityBody = axis2MC.getEnvelope().getText();
+        if (entityBody == null) {
+            entityBody = ""; //if the entity-body is null for GET requests in particular take it a null string
+        }
+
+        String hash = DigestUtils.md5Hex(entityBody);//Any transfer encoding applied might have to be reversed
         // - deferred, will need to check the Transfer-encoding header from the message context. This header value can be taken from
         //passing the transportHeaders map and extract transportHeaders.get("Transfer-encoding"); If null, transfer encoding is not applied.
         //Therefore no need to reverse. Enrich might handle this so I don't need to see it here. Check it.
-        String hash = DigestUtils.md5Hex(entityBody);
         return hash;
     }
 
@@ -267,7 +274,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             postFix = postFixStringBuilder.toString();
 
             if (log.isDebugEnabled()) {
-                log.debug("Post Fix value is : " + postFix);
+                log.debug("Post Fix value is : " + postFix); //The uri should be uniquely identifiable. PLease check it.
             }
 
             //Take the WWW-Authenticate header from the message context
@@ -373,10 +380,10 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 //We receive a www-authenticate header but it is not for Digest auth.
                 return true;
             }
-        }catch(NullPointerException ex){
+        } catch (NullPointerException ex) {
             log.error("The endpoint does not support digest authentication : " + ex.getMessage());
             return false;
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Exception has occurred while performing class mediation : " + e.getMessage());
             return false;
         }
