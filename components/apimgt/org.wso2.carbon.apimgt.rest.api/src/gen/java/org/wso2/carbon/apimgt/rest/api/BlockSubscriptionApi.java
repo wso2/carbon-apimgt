@@ -9,7 +9,6 @@ import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.NotFoundException;
 
 import java.io.InputStream;
 
@@ -41,7 +40,7 @@ public class BlockSubscriptionApi  {
     public Response blockSubscriptionPost(@ApiParam(value = "Subscription Id",required=true) @QueryParam("subscriptionId") String subscriptionId,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.blockSubscriptionPost(subscriptionId,ifMatch,ifUnmodifiedSince);
     }
 }
