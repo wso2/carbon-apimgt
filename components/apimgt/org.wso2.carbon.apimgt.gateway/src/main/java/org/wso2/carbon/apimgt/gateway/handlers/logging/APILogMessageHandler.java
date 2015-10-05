@@ -99,7 +99,7 @@ public class APILogMessageHandler extends AbstractHandler {
         String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         if (requestURI != null) {
             logMessage = logMessage + " , requestURI=" + requestURI;
-            if (requestURI.equalsIgnoreCase("/login/")) {
+            if (requestURI.equalsIgnoreCase("/token/")) {
                 isLoginRequest = true;
             }
         }
