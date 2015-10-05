@@ -10,7 +10,6 @@ import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.SubscriptionDTO;
 
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.NotFoundException;
 
 import java.io.InputStream;
 
@@ -42,7 +41,7 @@ public class SubscriptionsApi  {
     @ApiParam(value = "Application Group Id") @QueryParam("groupId") String groupId,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    throws NotFoundException {
+    {
     return delegate.subscriptionsGet(apiId,applicationId,groupId,accept,ifNoneMatch);
     }
     @POST
@@ -59,7 +58,7 @@ public class SubscriptionsApi  {
 
     public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added" ,required=true ) SubscriptionDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
-    throws NotFoundException {
+    {
     return delegate.subscriptionsPost(body,contentType);
     }
     @GET
@@ -80,7 +79,7 @@ public class SubscriptionsApi  {
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
-    throws NotFoundException {
+    {
     return delegate.subscriptionsSubscriptionIdGet(subscriptionId,accept,ifNoneMatch,ifModifiedSince);
     }
     @DELETE
@@ -98,7 +97,7 @@ public class SubscriptionsApi  {
     public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Subscription Id",required=true ) @PathParam("subscriptionId") String subscriptionId,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince);
     }
 }

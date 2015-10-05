@@ -2,34 +2,23 @@ package org.wso2.carbon.apimgt.rest.api.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.*;
-import org.wso2.carbon.apimgt.rest.api.dto.*;
-
-
+import org.wso2.carbon.apimgt.rest.api.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.dto.TierDTO;
-import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.utils.mappings.TierMappingUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.io.InputStream;
-import java.util.Map;
 import java.util.Set;
-
-import javax.ws.rs.core.Response;
 
 public class TiersApiServiceImpl extends TiersApiService {
     @Override
@@ -62,7 +51,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(tierDTOs).build();
     }
 
-    @Override public Response tiersPost(TierDTO body, String contentType) throws NotFoundException {
+    @Override public Response tiersPost(TierDTO body, String contentType) {
         boolean isTenantFlowStarted = false;
         URI createdApiUri = null;
         TierDTO  createdTierDTO = null;
@@ -97,13 +86,13 @@ public class TiersApiServiceImpl extends TiersApiService {
     }
 
     @Override public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
-            String ifModifiedSince) throws NotFoundException {
+            String ifModifiedSince){
         //backend method requires
         return Response.ok().entity(null).build();
     }
 
     @Override public Response tiersTierNamePut(String tierName, TierDTO body, String contentType, String ifMatch,
-            String ifUnmodifiedSince) throws NotFoundException {
+            String ifUnmodifiedSince) {
         boolean isTenantFlowStarted = false;
         TierDTO  updatedTierDTO = null;
         try {
@@ -132,8 +121,7 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(updatedTierDTO).build();
     }
 
-    @Override public Response tiersTierNameDelete(String tierName, String ifMatch, String ifUnmodifiedSince)
-            throws NotFoundException {
+    @Override public Response tiersTierNameDelete(String tierName, String ifMatch, String ifUnmodifiedSince){
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -155,6 +143,14 @@ public class TiersApiServiceImpl extends TiersApiService {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+        return Response.ok().build();
+    }
+
+    @Override
+    public Response tiersTierNameUpdatePermissionPost(String tierName,
+                                                      TierPermissionDTO permissions,
+                                                      String contentType, String ifMatch,
+                                                      String ifUnmodifiedSince) {
         return Response.ok().build();
     }
 }
