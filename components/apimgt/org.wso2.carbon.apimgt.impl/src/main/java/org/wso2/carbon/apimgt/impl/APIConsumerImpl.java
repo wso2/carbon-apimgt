@@ -22,6 +22,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -84,15 +86,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Object tagCacheMutex = new Object();
     private LRUCache<String,GenericArtifactManager> genericArtifactCache = new LRUCache<String,GenericArtifactManager>(5);
     private Set<API> recentlyAddedAPI;
+    private APIMRegistryService apimRegistryService;
 
     public APIConsumerImpl() throws APIManagementException {
         super();
         readTagCacheConfigs();
     }
 
-    public APIConsumerImpl(String username) throws APIManagementException {
+    public APIConsumerImpl(String username, APIMRegistryService apimRegistryService) throws APIManagementException {
         super(username);
         readTagCacheConfigs();
+        this.apimRegistryService = apimRegistryService;
     }
 
     private void readTagCacheConfigs() {
@@ -2818,5 +2822,38 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return row;
+    }
+
+    private JSONObject getAPITenantConfig(String tenantDomain) throws APIManagementException {
+        JSONObject jsonObject = null;
+        try {
+            Object content = apimRegistryService.getResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                jsonObject = (JSONObject) parser.parse((String) content);
+            }
+
+        } catch (UserStoreException e) {
+            handleException("UserStoreException thrown when getting API tenant config from registry", e);
+        } catch (RegistryException e) {
+            handleException("RegistryException thrown when getting API tenant config from registry", e);
+        } catch (ParseException e) {
+            handleException("ParseException thrown when passing API tenant config from registry", e);
+        }
+
+        return jsonObject;
+    }
+
+    @Override
+    public boolean isMonitizationEnabled(String tenantDomain) throws APIManagementException {
+        JSONObject jsonObject = getAPITenantConfig(tenantDomain);
+
+        if (jsonObject != null) {
+            Object value = jsonObject.get(APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
+            return Boolean.valueOf(value.toString());
+        }
+
+        return false;
     }
 }

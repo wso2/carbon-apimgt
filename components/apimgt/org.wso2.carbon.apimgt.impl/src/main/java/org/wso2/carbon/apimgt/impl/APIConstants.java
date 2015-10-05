@@ -68,6 +68,10 @@ public final class APIConstants {
     
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 
+    public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/tenant-conf.json";
+
+    public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonitization";
+
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
     //domain mapping app keys

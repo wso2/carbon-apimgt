@@ -560,4 +560,6 @@ public interface APIConsumer extends APIManager {
     public String getGroupIds(String response) throws APIManagementException;
 
 	public JSONObject resumeWorkflow(Object[] args);
+
+    public boolean isMonitizationEnabled(String tenantDomain) throws APIManagementException;
 }
