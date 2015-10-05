@@ -13,6 +13,10 @@ function loadSwaggerObj(path)
     return obj;
 }
 
+function isPositiveInteger(s) {
+    return !!s.match(/^[0-9]+$/);
+}
+
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
     response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.
@@ -218,9 +222,9 @@ function loadSwaggerObj(path)
             apiData.subscriptionAvailability = request.getParameter("subscriptions");
             apiData.subscriptionTenants = request.getParameter("tenants","UTF-8");
             apiData.bizOwner = request.getParameter("bizOwner");
-		apiData.bizOwnerMail = request.getParameter("bizOwnerMail");
-		apiData.techOwner = request.getParameter("techOwner");
-		apiData.techOwnerMail = request.getParameter("techOwnerMail");
+    		apiData.bizOwnerMail = request.getParameter("bizOwnerMail");
+    		apiData.techOwner = request.getParameter("techOwner");
+    		apiData.techOwnerMail = request.getParameter("techOwnerMail");
             apiData.faultSequence = request.getParameter("faultSequence");
             apiData.responseCache = request.getParameter("responseCache","UTF-8");
             apiData.cacheTimeout= request.getParameter("cacheTimeout","UTF-8");
@@ -228,6 +232,25 @@ function loadSwaggerObj(path)
 		    apiData.environments = request.getParameter("environments");
             apiData.productionTps = request.getParameter("productionTps");
             apiData.sandboxTps = request.getParameter("sandboxTps");
+
+            var errorMsg = null;
+            if(apiData.productionTps != null && apiData.productionTps != ""  && !isPositiveInteger(apiData.productionTps)){
+                errorMsg = "Invalid input for Production TPS";
+            }
+
+            if(apiData.sandboxTps != null && apiData.sandboxTps != "" && !isPositiveInteger(apiData.sandboxTps)){
+                errorMsg = "Invalid input for Sandbox TPS";
+            }
+
+            if(errorMsg != null){
+             obj = {
+                    error:true,
+                    message:errorMsg,
+                    data :apiId,
+                };
+            print(obj);
+            return;    
+            }
 
             result = mod.manageAPI(apiData);
             if (result.error==true) {
