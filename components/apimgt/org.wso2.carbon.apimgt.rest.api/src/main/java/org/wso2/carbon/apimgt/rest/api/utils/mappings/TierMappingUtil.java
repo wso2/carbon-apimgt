@@ -21,7 +21,16 @@ package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.dto.TierDTO;
 
+/**
+ * This class is used as a util class to map attributes of backend Tier model with Tier DTO in REST API
+ */
 public class TierMappingUtil {
+    /**
+     * Map backend tier model to DTO
+     *
+     * @param tier Backend tier model
+     * @return TierDTO Corresponding DTO which maps with the input backend attributes
+     */
     public static TierDTO fromTiertoDTO(Tier tier){
         TierDTO dto = new TierDTO();
         dto.setName(tier.getName());
@@ -31,6 +40,12 @@ public class TierMappingUtil {
         return dto;
     }
 
+    /**
+     * Map DTO to backend tier model
+     *
+     * @param dto Tier DTO
+     * @return Tier Corresponding backend model which maps with DTO attributes
+     */
     public static Tier fromDTOtoTier(TierDTO dto){
         Tier tier = new Tier(dto.getName());
         tier.setDescription(dto.getDescription());
