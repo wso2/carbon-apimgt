@@ -215,10 +215,7 @@ if(tenant!=null) {
                             var firstTierDesc = '';
                             if(existingFirstTierDesc.length ==0){
                                 firstTierDesc = '';
-                            }
-                            else{
-                               firstTierDesc = existingFirstTierDesc[0];
-                            }
+                            } else{ firstTierDesc = existingFirstTierDesc[0]; }
                         %>
                         <span class="help-block" id="tierDesc"><%=firstTierDesc%>
                         <%if(api.tiers[0].tierAttributes!=null){
