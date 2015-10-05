@@ -12,16 +12,16 @@ import javax.validation.constraints.NotNull;
 public class DocumentDTO  {
   
   
-  @NotNull
+  
   private String documentId = null;
   
-  
+  @NotNull
   private String name = null;
   
   public enum TypeEnum {
      HOWTO,  SAMPLES,  PUBLIC_FORUM,  SUPPORT_FORUM,  API_MESSAGE_FORMAT,  SWAGGER_DOC,  OTHER, 
   };
-  
+  @NotNull
   private TypeEnum type = null;
   
   
@@ -42,7 +42,7 @@ public class DocumentDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("documentId")
   public String getDocumentId() {
     return documentId;
@@ -54,7 +54,7 @@ public class DocumentDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -66,7 +66,7 @@ public class DocumentDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.utils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;

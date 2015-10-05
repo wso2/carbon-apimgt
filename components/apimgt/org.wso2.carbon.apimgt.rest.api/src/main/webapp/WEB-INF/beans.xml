@@ -13,11 +13,8 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.TagsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.ApisApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.SequencesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.EnvironmentsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.UpdateTierPermissionApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.TiersApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.ExternalStoresApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.ApplicationsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.BlockSubscriptionApi"/>
             

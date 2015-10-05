@@ -1,10 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.dto;
 
-
-import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 
 
@@ -16,10 +19,22 @@ public class TierDTO  {
   private String name = null;
   
   
-  private String rate = null;
+  private String description = null;
   
   
-  private String roles = null;
+  private Map attributes = new HashMap<String, String>() ;
+  
+  
+  private BigDecimal requestCount = null;
+  
+  
+  private BigDecimal unitTime = null;
+  
+  
+  private String billingPlan = null;
+  
+  
+  private Boolean continueOnQuotaReach = null;
 
   
   /**
@@ -37,24 +52,76 @@ public class TierDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("rate")
-  public String getRate() {
-    return rate;
+  @JsonProperty("description")
+  public String getDescription() {
+    return description;
   }
-  public void setRate(String rate) {
-    this.rate = rate;
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  
+  /**
+   * custom attributes added to the tier policy
+   **/
+  @ApiModelProperty(value = "custom attributes added to the tier policy")
+  @JsonProperty("attributes")
+  public Map getAttributes() {
+    return attributes;
+  }
+  public void setAttributes(Map attributes) {
+    this.attributes = attributes;
+  }
+
+  
+  /**
+   * Maximum number of requests which can be sent within a provided unit time
+   **/
+  @ApiModelProperty(value = "Maximum number of requests which can be sent within a provided unit time")
+  @JsonProperty("requestCount")
+  public BigDecimal getRequestCount() {
+    return requestCount;
+  }
+  public void setRequestCount(BigDecimal requestCount) {
+    this.requestCount = requestCount;
   }
 
   
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("roles")
-  public String getRoles() {
-    return roles;
+  @JsonProperty("unitTime")
+  public BigDecimal getUnitTime() {
+    return unitTime;
   }
-  public void setRoles(String roles) {
-    this.roles = roles;
+  public void setUnitTime(BigDecimal unitTime) {
+    this.unitTime = unitTime;
+  }
+
+  
+  /**
+   * This attribute declares whether this tier is available under commercial or free
+   **/
+  @ApiModelProperty(value = "This attribute declares whether this tier is available under commercial or free")
+  @JsonProperty("billingPlan")
+  public String getBillingPlan() {
+    return billingPlan;
+  }
+  public void setBillingPlan(String billingPlan) {
+    this.billingPlan = billingPlan;
+  }
+
+  
+  /**
+   * By making this attribute to true, you are capabale of sending requests even request count exceeded within a unit time
+   **/
+  @ApiModelProperty(value = "By making this attribute to true, you are capabale of sending requests even request count exceeded within a unit time")
+  @JsonProperty("continueOnQuotaReach")
+  public Boolean getContinueOnQuotaReach() {
+    return continueOnQuotaReach;
+  }
+  public void setContinueOnQuotaReach(Boolean continueOnQuotaReach) {
+    this.continueOnQuotaReach = continueOnQuotaReach;
   }
 
   
@@ -65,8 +132,12 @@ public class TierDTO  {
     sb.append("class TierDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  rate: ").append(rate).append("\n");
-    sb.append("  roles: ").append(roles).append("\n");
+    sb.append("  description: ").append(description).append("\n");
+    sb.append("  attributes: ").append(attributes).append("\n");
+    sb.append("  requestCount: ").append(requestCount).append("\n");
+    sb.append("  unitTime: ").append(unitTime).append("\n");
+    sb.append("  billingPlan: ").append(billingPlan).append("\n");
+    sb.append("  continueOnQuotaReach: ").append(continueOnQuotaReach).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

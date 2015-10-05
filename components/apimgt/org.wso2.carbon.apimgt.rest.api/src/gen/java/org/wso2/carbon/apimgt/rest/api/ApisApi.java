@@ -7,11 +7,11 @@ import org.wso2.carbon.apimgt.rest.api.factories.ApisApiServiceFactory;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.NotFoundException;
 
 import java.io.InputStream;
 
@@ -30,7 +30,7 @@ public class ApisApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of available APIs qualifying under a given search condition.", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of available APIs qualifying under a given search condition.", response = APIListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of APIs is returned."),
         
@@ -45,7 +45,7 @@ public class ApisApi  {
     @ApiParam(value = " List supported sorting attributes ") @QueryParam("sort") String sort,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    throws NotFoundException {
+    {
     return delegate.apisGet(limit,offset,query,type,sort,accept,ifNoneMatch);
     }
     @POST
@@ -62,7 +62,7 @@ public class ApisApi  {
 
     public Response apisPost(@ApiParam(value = "API object that needs to be added" ,required=true ) APIDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
-    throws NotFoundException {
+    {
     return delegate.apisPost(body,contentType);
     }
     @POST
@@ -85,7 +85,7 @@ public class ApisApi  {
     @ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true) @QueryParam("apiId") String apiId,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.apisChangeLifecyclePost(newState,publishToGateway,resubscription,apiId,ifMatch,ifUnmodifiedSince);
     }
     @POST
@@ -102,7 +102,7 @@ public class ApisApi  {
 
     public Response apisCopyApiPost(@ApiParam(value = "Version of the new API.") @QueryParam("newVersion") String newVersion,
     @ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true) @QueryParam("apiId") String apiId)
-    throws NotFoundException {
+    {
     return delegate.apisCopyApiPost(newVersion,apiId);
     }
     @GET
@@ -123,7 +123,7 @@ public class ApisApi  {
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdGet(apiId,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
@@ -147,7 +147,7 @@ public class ApisApi  {
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdPut(apiId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
@@ -167,7 +167,7 @@ public class ApisApi  {
     public Response apisApiIdDelete(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince);
     }
     @GET
@@ -190,7 +190,7 @@ public class ApisApi  {
     @ApiParam(value = "Search condition.") @QueryParam("query") String query,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdDocumentsGet(apiId,limit,offset,query,accept,ifNoneMatch);
     }
     @POST
@@ -208,7 +208,7 @@ public class ApisApi  {
     public Response apisApiIdDocumentsPost(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
     @ApiParam(value = "Document object that needs to be added" ,required=true ) DocumentDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdDocumentsPost(apiId,body,contentType);
     }
     @GET
@@ -230,7 +230,7 @@ public class ApisApi  {
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
@@ -253,7 +253,7 @@ public class ApisApi  {
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdDocumentsDocumentIdPut(apiId,documentId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
@@ -272,54 +272,8 @@ public class ApisApi  {
     @ApiParam(value = "Document Id",required=true ) @PathParam("documentId") String documentId,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.apisApiIdDocumentsDocumentIdDelete(apiId,documentId,ifMatch,ifUnmodifiedSince);
-    }
-    @GET
-    @Path("/{apiId}/environments")
-    
-    
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of documents belonging to an API.", response = Void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Gateway environment list where this API is published returned."),
-        
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
-
-    public Response apisApiIdEnvironmentsGet(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
-    @ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
-    @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
-    @ApiParam(value = "Search condition.") @QueryParam("query") String query,
-    @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    throws NotFoundException {
-    return delegate.apisApiIdEnvironmentsGet(apiId,limit,offset,query,accept,ifNoneMatch);
-    }
-    @GET
-    @Path("/{apiId}/externalStores")
-    
-    
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of external stores where is this API is published.", response = Void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. external store list is returned."),
-        
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
-
-    public Response apisApiIdExternalStoresGet(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
-    @ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
-    @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
-    @ApiParam(value = "Search condition.") @QueryParam("query") String query,
-    @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    throws NotFoundException {
-    return delegate.apisApiIdExternalStoresGet(apiId,limit,offset,query,accept,ifNoneMatch);
     }
 }
 

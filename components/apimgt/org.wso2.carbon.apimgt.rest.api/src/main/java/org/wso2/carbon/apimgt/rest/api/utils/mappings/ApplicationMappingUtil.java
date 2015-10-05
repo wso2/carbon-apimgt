@@ -30,6 +30,7 @@ public class ApplicationMappingUtil {
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
         applicationDTO.setName(application.getName());
         applicationDTO.setGroupId(application.getGroupId());
+        applicationDTO.setSubscriber(application.getSubscriber().getName());
         return applicationDTO;
     }
 

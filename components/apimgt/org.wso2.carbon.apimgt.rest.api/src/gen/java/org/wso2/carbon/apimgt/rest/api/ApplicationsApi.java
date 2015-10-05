@@ -10,7 +10,6 @@ import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.NotFoundException;
 
 import java.io.InputStream;
 
@@ -45,7 +44,7 @@ public class ApplicationsApi  {
     @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
-    throws NotFoundException {
+    {
     return delegate.applicationsGet(subscriber,groupId,limit,offset,accept,ifNoneMatch);
     }
     @POST
@@ -62,7 +61,7 @@ public class ApplicationsApi  {
 
     public Response applicationsPost(@ApiParam(value = "Application object that is to be created" ,required=true ) ApplicationDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType)
-    throws NotFoundException {
+    {
     return delegate.applicationsPost(body,contentType);
     }
     @GET
@@ -84,7 +83,7 @@ public class ApplicationsApi  {
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
-    throws NotFoundException {
+    {
     return delegate.applicationsApplicationIdGet(applicationId,subscriber,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
@@ -106,7 +105,7 @@ public class ApplicationsApi  {
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.applicationsApplicationIdPut(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @DELETE
@@ -125,7 +124,7 @@ public class ApplicationsApi  {
     @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.applicationsApplicationIdDelete(applicationId,subscriber,ifMatch,ifUnmodifiedSince);
     }
     @POST
@@ -147,7 +146,7 @@ public class ApplicationsApi  {
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    throws NotFoundException {
+    {
     return delegate.applicationsApplicationIdGenerateKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
 }
