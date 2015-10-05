@@ -163,7 +163,7 @@ include("/jagg/jagg.jag");
         apiVersion = request.getParameter('apiVersion');
         provider = request.getParameter('provider');
 
-         if((apiName != null) && apiVersion != null) && (provider != null) ){
+         if((apiName != null) && (apiVersion != null) && (provider != null) ){
 
         	var api = {};
         	api.name = apiName;
