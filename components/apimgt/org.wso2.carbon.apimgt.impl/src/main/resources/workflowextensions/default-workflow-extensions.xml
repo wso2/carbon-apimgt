@@ -34,4 +34,18 @@
          <Property name="password">admin</Property>
          <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
     </UserSignUp-->
+    <SubscriptionDeletion executor="org.wso2.carbon.apimgt.impl.workflow.SubscriptionDeletionSimpleWorkflowExecutor"/>
+    <!--SubscriptionDeletion executor="org.wso2.carbon.apimgt.impl.workflow.CancelPendingSubscriptionWorkflowExecutor">
+         <Property name="serviceEndpoint">http://localhost:9765/services/SubscriptionApprovalWorkFlowProcess/</Property>
+         <Property name="username">admin</Property>
+         <Property name="password">admin</Property>
+         <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
+    </SubscriptionDeletion -->
+    <ApplicationDeletion executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionSimpleWorkflowExecutor"/>
+    <!--ApplicationDeletion executor="org.wso2.carbon.apimgt.impl.workflow.CancelPendingApplicationApprovalWorkflowExecutor">
+         <Property name="serviceEndpoint">http://localhost:9765/services/ApplicationApprovalWorkFlowProcess/</Property>
+         <Property name="username">admin</Property>
+         <Property name="password">admin</Property>
+         <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
+    </ApplicationDeletion-->
 </WorkFlowExtensions>
