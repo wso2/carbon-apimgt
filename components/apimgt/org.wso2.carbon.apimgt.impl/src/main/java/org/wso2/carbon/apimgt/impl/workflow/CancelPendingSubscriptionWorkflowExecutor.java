@@ -79,7 +79,7 @@ public class CancelPendingSubscriptionWorkflowExecutor extends SubscriptionDelet
                 authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
                 auth.setAuthSchemes(authSchemes);
 
-                if(contentType == null){
+                if (contentType == null) {
                     options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
                 }
                 options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
@@ -92,10 +92,10 @@ public class CancelPendingSubscriptionWorkflowExecutor extends SubscriptionDelet
             SubscriptionWorkflowDTO appWorkFlowDTO = (SubscriptionWorkflowDTO) workflowDTO;
             String payload = "<wor:CancelSubscriptionApprovalWorkflowProcessRequest " +
                     "           xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
-                    "           <wor:workflowExtRef>$1</wor:workflowExtRef>\n" +
+                    "           <wor:workflowExtRef>" + appWorkFlowDTO.getExternalWorkflowReference() +
+                    "</wor:workflowExtRef>\n" +
                     "        </wor:CancelSubscriptionApprovalWorkflowProcessRequest>";
 
-            payload = payload.replace("$1", appWorkFlowDTO.getExternalWorkflowReference());
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
             // call complete method here since there are no callbacks to fire complete method
             complete(workflowDTO);

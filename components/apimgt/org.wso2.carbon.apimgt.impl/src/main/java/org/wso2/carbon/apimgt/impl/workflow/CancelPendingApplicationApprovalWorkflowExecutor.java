@@ -35,7 +35,9 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -59,47 +61,20 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
         removeSubscriptionProcessesByApplication(applicationWorkflowDTO.getApplication());
         removeRegistrationProcessByApplicationId(applicationWorkflowDTO.getApplication().getId());
         try {
-            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-                    .getContextService().getClientConfigContext(), null);
-            Options options = new Options();
-            options.setAction("http://workflow.application.apimgt.carbon.wso2.org/cancel");
-            options.setTo(new EndpointReference(serviceEndpoint));
+            Map<String, String> args = new HashMap<String, String>();
+            args.put("action", "http://workflow.application.apimgt.carbon.wso2.org/cancel");
+            args.put("username", username);
+            args.put("password", password);
+            args.put("serviceEndpoint", serviceEndpoint);
+            args.put("contentType", contentType);
+            ServiceClient client = getClient(args);
 
-            if (contentType != null) {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
-            } else {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                        HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-            }
-
-            HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
-
-            // Assumes authentication is required if username and password is given
-            if (username != null && password != null) {
-                auth.setUsername(username);
-                auth.setPassword(password);
-                auth.setPreemptiveAuthentication(true);
-                List<String> authSchemes = new ArrayList<String>();
-                authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
-                auth.setAuthSchemes(authSchemes);
-
-                if(contentType == null){
-                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-                }
-                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
-                        auth);
-                options.setManageSession(true);
-            }
-
-            client.setOptions(options);
-
-            ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
             String payload = "<p:CancelApplicationApprovalWorkflowProcessRequest " +
                     "        xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
-                    "           <p:workflowRef>$1</p:workflowRef>\n" +
+                    "           <p:workflowRef>" + applicationWorkflowDTO.getExternalWorkflowReference() +
+                    "</p:workflowRef>\n" +
                     "        </p:CancelApplicationApprovalWorkflowProcessRequest>";
 
-            payload = payload.replace("$1", appWorkFlowDTO.getExternalWorkflowReference());
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
             // call complete method here since there are no callbacks to fire complete method
             complete(workflowDTO);
@@ -145,49 +120,22 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
         try {
             Set<String> registrationIDs = apiMgtDAO.getRegistrationWFReferencesByApplicationId(applicationId);
 
-            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-                    .getContextService().getClientConfigContext(), null);
-            Options options = new Options();
-            options.setAction("http://workflow.application.apimgt.carbon.wso2.org/cancel");
-            options.setTo(new EndpointReference(subServiceEndPoint));
+            Map<String, String> args = new HashMap<String, String>();
+            args.put("action", "http://workflow.application.apimgt.carbon.wso2.org/cancel");
+            args.put("username", subUsername);
+            args.put("password", subPassword);
+            args.put("serviceEndpoint", subServiceEndPoint);
+            args.put("contentType", subContentType);
+            ServiceClient client = getClient(args);
 
-            if (subContentType != null) {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
-            } else {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                        HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-            }
-
-            HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
-
-            // Assumes authentication is required if username and password is given
-            if (subUsername != null && subPassword != null) {
-                auth.setUsername(subUsername);
-                auth.setPassword(subPassword);
-                auth.setPreemptiveAuthentication(true);
-                List<String> authSchemes = new ArrayList<String>();
-                authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
-                auth.setAuthSchemes(authSchemes);
-
-                if (subContentType == null) {
-                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-                }
-                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
-                        auth);
-                options.setManageSession(true);
-            }
-
-            client.setOptions(options);
-
-            for (String registration: registrationIDs) {
+            for (String registration : registrationIDs) {
                 try {
                     String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
                             "           xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
-                            "               <p:workflowRef>$1</p:workflowRef>\n" +
+                            "               <p:workflowRef>" + registration + "</p:workflowRef>\n" +
                             "           </p:CancelApplicationRegistrationWorkflowProcessRequest>";
-                    payload = payload.replace("$1", registration);
                     client.fireAndForget(AXIOMUtil.stringToOM(payload));
-                }  catch (AxisFault axisFault) {
+                } catch (AxisFault axisFault) {
                     log.error("Error sending out message", axisFault);
                     throw new WorkflowException("Error sending out message", axisFault);
                 } catch (XMLStreamException e) {
@@ -198,7 +146,7 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
         } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
             throw new WorkflowException(e.getMessage(), e);
-        }  catch (AxisFault axisFault) {
+        } catch (AxisFault axisFault) {
             log.error("Error sending out message", axisFault);
             throw new WorkflowException("Error sending out message", axisFault);
         }
@@ -221,52 +169,24 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
         String subServiceEndPoint = cancelPendingSubscriptionExecutor.getServiceEndpoint();
         try {
             Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(application.getId());
+            Map<String, String> args = new HashMap<String, String>();
+            args.put("action", "http://workflow.subscription.apimgt.carbon.wso2.org/cancel");
+            args.put("username", subUsername);
+            args.put("password", subPassword);
+            args.put("serviceEndpoint", subServiceEndPoint);
+            args.put("contentType", subContentType);
+            ServiceClient client = getClient(args);
 
-            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-                    .getContextService().getClientConfigContext(), null);
-            Options options = new Options();
-            options.setAction("http://workflow.subscription.apimgt.carbon.wso2.org/cancel");
-            options.setTo(new EndpointReference(subServiceEndPoint));
-
-            if (subContentType != null) {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
-            } else {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                        HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-            }
-
-            HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
-
-            // Assumes authentication is required if username and password is given
-            if (subUsername != null && subPassword != null) {
-                auth.setUsername(subUsername);
-                auth.setPassword(subPassword);
-                auth.setPreemptiveAuthentication(true);
-                List<String> authSchemes = new ArrayList<String>();
-                authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
-                auth.setAuthSchemes(authSchemes);
-
-                if (subContentType == null) {
-                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-                }
-                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
-                        auth);
-                options.setManageSession(true);
-            }
-
-            client.setOptions(options);
-
-            for (int subscription: pendingSubscriptions) {
+            for (int subscription : pendingSubscriptions) {
                 String workflowExtRef = null;
                 try {
+                    workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
                     String payload = "  <wor:CancelSubscriptionApprovalWorkflowProcessRequest " +
                             "           xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
-                            "               <wor:workflowExtRef>$1</wor:workflowExtRef>\n" +
+                            "               <wor:workflowExtRef>" + workflowExtRef + "</wor:workflowExtRef>\n" +
                             "           </wor:CancelSubscriptionApprovalWorkflowProcessRequest>";
-                    workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
-                    payload = payload.replace("$1", workflowExtRef);
                     client.fireAndForget(AXIOMUtil.stringToOM(payload));
-                }  catch (AxisFault axisFault) {
+                } catch (AxisFault axisFault) {
                     log.error("Error sending out message", axisFault);
                     throw new WorkflowException("Error sending out message", axisFault);
                 } catch (XMLStreamException e) {
@@ -277,10 +197,48 @@ public class CancelPendingApplicationApprovalWorkflowExecutor extends Applicatio
         } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
             throw new WorkflowException(e.getMessage(), e);
-        }  catch (AxisFault axisFault) {
+        } catch (AxisFault axisFault) {
             log.error("Error sending out message", axisFault);
             throw new WorkflowException("Error sending out message", axisFault);
         }
+    }
+
+    public ServiceClient getClient(Map<String, String> args) throws AxisFault {
+        ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
+                .getContextService().getClientConfigContext(), null);
+        Options options = new Options();
+        options.setAction(args.get("action"));
+        options.setTo(new EndpointReference(args.get("serviceEndpoint")));
+
+        if (args.get("contentType") != null) {
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE, args.get("contentType"));
+        } else {
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                    HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+        }
+
+        HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
+
+        // Assumes authentication is required if username and password is given
+        if (args.get("username") != null && args.get("password") != null) {
+            auth.setUsername(args.get("username"));
+            auth.setPassword(args.get("password"));
+            auth.setPreemptiveAuthentication(true);
+            List<String> authSchemes = new ArrayList<String>();
+            authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
+            auth.setAuthSchemes(authSchemes);
+
+            if (args.get("contentType") == null) {
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+            }
+            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
+                    auth);
+            options.setManageSession(true);
+        }
+
+        client.setOptions(options);
+
+        return client;
     }
 
     public String getServiceEndpoint() {
