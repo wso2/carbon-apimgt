@@ -66,7 +66,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class APIUsageStatisticsClient {
+public class APIUsageStatisticsClient implements APIUsageStatisticsClientI {
 
     private static final String API_USAGE_TRACKING = "APIUsageTracking.";
     private static final String DATA_SOURCE_NAME = "jdbc/WSO2AM_STATS_DB";
@@ -138,7 +138,8 @@ public class APIUsageStatisticsClient {
 // store start
 //-------------------------------------
 
-    public List<APIUsageDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate, String toDate, int limit)
+    @Override public List<APIUsageDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
@@ -301,7 +302,8 @@ public class APIUsageStatisticsClient {
         return perAppUsageDataList;*/
     }
 
-    public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate, int limit)
+    @Override public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
@@ -463,7 +465,8 @@ public class APIUsageStatisticsClient {
         return topAppUsageDataList;*/
     }
 
-    public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate, int limit)
+    @Override public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
@@ -652,7 +655,8 @@ public class APIUsageStatisticsClient {
 
     }
 
-    public List<APIResponseFaultCountDTO> getPerAppFaultCount(String subscriberName, String groupId, String fromDate, String toDate, int limit)
+    @Override public List<APIResponseFaultCountDTO> getPerAppFaultCount(String subscriberName, String groupId,
+            String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsbySubscriber(subscriberName, groupId);
@@ -832,7 +836,7 @@ public class APIUsageStatisticsClient {
      * @return a List of APIUsageByUserDTO objects, possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
-    public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
+    @Override public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByUserName> usageData = this.getAPIUsageByUserData(providerName, fromDate, toDate, null);
@@ -1034,7 +1038,8 @@ public class APIUsageStatisticsClient {
      * @return a List of APIResponseTimeDTO objects, possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
-    public List<APIResponseTimeDTO> getResponseTimesByAPIs(String providerName, String fromDate, String toDate, int limit)
+    @Override public List<APIResponseTimeDTO> getResponseTimesByAPIs(String providerName, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIResponseTime> responseTimes =
@@ -1235,7 +1240,8 @@ public class APIUsageStatisticsClient {
      * @return a list of APIVersionLastAccessTimeDTO objects, possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
-    public List<APIVersionLastAccessTimeDTO> getLastAccessTimesByAPI(String providerName, String fromDate, String toDate, int limit)
+    @Override public List<APIVersionLastAccessTimeDTO> getLastAccessTimesByAPI(String providerName, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIAccessTime> accessTimes =
@@ -1435,7 +1441,8 @@ public class APIUsageStatisticsClient {
      * @return a List of APIResourcePathUsageDTO objects, possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
-    public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
+    @Override public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate,
+            String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsageByResourcePath> usageData = this
@@ -1585,7 +1592,8 @@ public class APIUsageStatisticsClient {
         }*/
     }
 
-    public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate, String toDate)
+    @Override public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate,
+            String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByDestination> usageData= this.getAPIUsageByDestinationData(
@@ -1747,7 +1755,7 @@ public class APIUsageStatisticsClient {
      * @return a List of APIUsageDTO objects - possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException if an error occurs while contacting backend services
      */
-    public List<APIUsageDTO> getUsageByAPIs(String providerName, String fromDate, String toDate, int limit)
+    @Override public List<APIUsageDTO> getUsageByAPIs(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsage> usageData = getUsageByAPIsData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
@@ -1917,7 +1925,8 @@ public class APIUsageStatisticsClient {
         return usageDataList;*/
     }
 
-    public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
+    @Override public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate,
+            String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIResponseFaultCount> faultyData = this

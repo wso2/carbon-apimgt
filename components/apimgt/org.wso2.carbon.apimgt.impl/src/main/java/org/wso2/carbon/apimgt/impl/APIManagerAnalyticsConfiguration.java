@@ -30,7 +30,7 @@ public class APIManagerAnalyticsConfiguration {
     private String bamServerUrlGroups;
     private String bamServerUser;
     private String bamServerPassword;
-    private boolean analyticsEnabled=true;
+    private boolean analyticsEnabled;
     private boolean skipEventReceiverConnection;
     private boolean buildMsg;
     private String publisherClass;
