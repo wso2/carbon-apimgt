@@ -24,7 +24,7 @@ public class ApplicationMappingUtil {
 
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
         ApplicationDTO applicationDTO = new ApplicationDTO();
-        applicationDTO.setApplicationId(application.getId());
+        applicationDTO.setApplicationId(application.getUUID());
         applicationDTO.setThrottlingTier(application.getTier());
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
@@ -34,12 +34,13 @@ public class ApplicationMappingUtil {
         return applicationDTO;
     }
 
-    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, Subscriber subscriber) {
+    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO) {
+        Subscriber subscriber = new Subscriber(applicationDTO.getSubscriber());
         Application application = new Application(applicationDTO.getName(), subscriber);
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
-        application.setId(applicationDTO.getApplicationId());
+        application.setUUID(applicationDTO.getApplicationId());
         application.setGroupId(applicationDTO.getGroupId());
         return application;
     }

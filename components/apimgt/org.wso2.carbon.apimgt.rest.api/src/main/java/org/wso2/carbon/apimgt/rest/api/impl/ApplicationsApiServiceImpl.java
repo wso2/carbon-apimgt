@@ -1,25 +1,21 @@
 package org.wso2.carbon.apimgt.rest.api.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-
 import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.utils.mappings.ApplicationMappingUtil;
-import org.wso2.carbon.context.CarbonContext;
-
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-
-import java.io.InputStream;
 
 import javax.ws.rs.core.Response;
 
@@ -27,11 +23,11 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsGet(String subscriber, String groupId, String limit, String offset, String accept,
             String ifNoneMatch) {
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String username = RestApiUtil.getLoggedInUsername();
         if (groupId == null) {
             groupId = "";
         }
-        if (subscriber == null) { //todo: implement permission
+        if (subscriber == null) {
             subscriber = username;
         }
 
@@ -50,55 +46,35 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     @Override
     public Response applicationsPost(ApplicationDTO body, String contentType) {
-        //todo: validation, need to be moved
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        if (StringUtils.isEmpty(body.getName())) {
-            return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Name is empty"))
-                    .build();
-        }
-        if (StringUtils.isEmpty(body.getThrottlingTier())) {
-            return Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Tier is empty"))
-                    .build();
-        }
-        String subscriber = body.getSubscriber(); //todo: implement permission
-        if (subscriber == null) { 
-            subscriber = username;
-        }
-
+        String username = RestApiUtil.getLoggedInUsername();
+        String subscriber = body.getSubscriber();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = ApplicationMappingUtil.fromDTOtoApplication(body, new Subscriber(subscriber));
-            String status = apiConsumer.addApplication(application, subscriber);  //todo: use "status" properly
-            return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, status)).build();
-        } catch (APIManagementException e) {
+            Application application = ApplicationMappingUtil.fromDTOtoApplication(body);
+            int applicationId = apiConsumer.addApplication(application, subscriber);
+
+            //retrieves the created application and send as the response
+            Application createdApplication = apiConsumer.getApplicationById(applicationId);
+            ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
+
+            //to be set as the Location header
+            URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
+                    createdApplicationDTO.getApplicationId());
+            return Response.created(location).entity(createdApplicationDTO).build();
+        } catch (APIManagementException | URISyntaxException e) {
             throw new InternalServerErrorException(e);
         }
     }
 
     @Override
-    public Response applicationsApplicationIdGet(String applicationId, String subscriber, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
-        //todo: need to be improved. Should avoid iteration through all applications.       
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        if (subscriber == null) { //todo: implement permission
-            subscriber = username;
-        }
-        String groupId = "";  //todo: add to model
-        int applicationID = Integer.parseInt(applicationId);
-        ApplicationDTO applicationDTO = null;
+    public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] applications = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
-            for (Application application : applications) {
-                if (application.getId() == applicationID) {
-                    applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-                }
-            }
-            if (applicationDTO != null) {
-                return Response.ok().entity(applicationDTO).build();
-            } else {
-                throw new NotFoundException();
-            }
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+            return Response.ok().entity(applicationDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
@@ -107,49 +83,29 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String contentType, 
             String ifMatch, String ifUnmodifiedSince) {
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        String subscriber = body.getSubscriber(); //todo: implement permission
-        if (subscriber == null) {
-            subscriber = username;
-        }
-        body.setApplicationId(Integer.parseInt(applicationId));
-        Application application = ApplicationMappingUtil.fromDTOtoApplication(body, new Subscriber(subscriber));
+        String username = RestApiUtil.getLoggedInUsername();
+        Application application = ApplicationMappingUtil.fromDTOtoApplication(body);
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            apiConsumer.updateApplication(application);
-            return Response.ok().build();
+            apiConsumer.updateApplicationByUUID(application);
+
+            //retrieves the updated application and send as the response
+            Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
+            ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
+            return Response.ok().entity(updatedApplicationDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
     }
 
     @Override
-    public Response applicationsApplicationIdDelete(String applicationId, String subscriber, String ifMatch,
+    public Response applicationsApplicationIdDelete(String applicationId, String ifMatch,
             String ifUnmodifiedSince) {
-        //todo: need to be improved. Should avoid iteration through all applications.
-
-        String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        if (subscriber == null) { //todo: implement permission
-            subscriber = username;
-        }
-        String groupId = "";
-        int applicationID = Integer.parseInt(applicationId);
-        boolean removed = false;
+        String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] applications = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
-            for (Application application : applications) {
-                if (application.getId() == applicationID) {
-                    apiConsumer.removeApplication(application);
-                    removed = true;
-                    break;
-                }
-            }
-            if (removed) {
-                return Response.ok().build();
-            } else {
-                throw new NotFoundException();
-            }
+            apiConsumer.removeApplicationByUUID(applicationId);
+            return Response.ok().build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }

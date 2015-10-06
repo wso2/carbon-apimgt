@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
@@ -101,8 +102,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             API createdApi = apiProvider.getAPI(createdApiId);
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
-            createdApiUri = new URI(
-                createdApiId.getApiName() + "-" + createdApiId.getVersion() + "-" + createdApiId.getProviderName());
+            createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" +
+                   createdApiId.getProviderName() + "-" + createdApiId.getApiName() + "-" + createdApiId.getVersion());
             //how to add thumbnail
             //publish to external stores
         } catch (APIManagementException e) {
@@ -148,7 +149,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
                 //This URI used to set the location header of the POST response
                 newVersionedApiUri =
-                    new URI(apiIdentifier.getApiName() + "-" + newVersion + "-" + apiIdentifier.getProviderName());
+                        new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiIdentifier.getProviderName() + "-" +
+                                apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
             } else {
                 throw new NotFoundException();
             }
