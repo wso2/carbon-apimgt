@@ -723,7 +723,7 @@ public final class APIConstants {
         private ConfigParameters() {
             throw new AssertionError();
         }
-        public static final String IS_EXTERNAL = "IsExternal";
+        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
     }
 
     public static String CORS_SEQUENCE_NAME = "_cors_request_handler_";

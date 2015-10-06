@@ -51,28 +51,31 @@ public class AuthorizationManager {
         if (instance == null) {
             synchronized (AuthorizationManager.class) {
                 if (instance == null) {
-                    String strIsExternal = ServiceReferenceHolder.getInstance()
+                    String strChekPermRemotely = ServiceReferenceHolder.getInstance()
                             .getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                    getFirstProperty(APIConstants.ConfigParameters.IS_EXTERNAL);
-                    if (strIsExternal == null || "".equals(strIsExternal)) {
+                                    getFirstProperty(APIConstants.ConfigParameters.CHECK_PERMISSIONS_REMOTELY);
+
+                    if (strChekPermRemotely == null || "".equals(strChekPermRemotely)) {
+                        strChekPermRemotely = "false";
+
                         if (log.isDebugEnabled()) {
-                            log.debug("IsExternal attribute is not configured in Authorization Manager " +
+                            log.debug("CheckPermissionsRemotely attribute is not configured in Authorization Manager " +
                                     "configuration, Therefore assuming that the internal Authorization Manager " +
                                     "Client implementation is being used");
                         }
                     }
-                    boolean isExternal = Boolean.parseBoolean(ServiceReferenceHolder.getInstance()
-                            .getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                    getFirstProperty(APIConstants.ConfigParameters.IS_EXTERNAL));
+
+                    boolean checkPermRemotely = Boolean.parseBoolean(strChekPermRemotely);
+
                     if (log.isDebugEnabled()) {
-                        log.debug("IsExternal attribute is set to '" + isExternal + "'");
-                        if (isExternal) {
+                        log.debug("IsExternal attribute is set to '" + checkPermRemotely + "'");
+                        if (checkPermRemotely) {
                             log.debug("Remote Authorization Manager Client implementation will be used");
                         } else {
                             log.debug("Standalone Authorization Manager Client implementation will be used");
                         }
                     }
-                    ClientType authClientType = (!isExternal) ? ClientType.STANDALONE : ClientType.REMOTE;
+                    ClientType authClientType = (!checkPermRemotely) ? ClientType.STANDALONE : ClientType.REMOTE;
                     instance = new AuthorizationManager(authClientType);
                 }
             }
