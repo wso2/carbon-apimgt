@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.usage.client.bean.FirstAccessRequestSearchBean;
 import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchBean;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
@@ -33,6 +34,7 @@ public class DASRestClient {
     }
 
     HttpResponse post(String js,String url) throws IOException {
+        httpClient = new DefaultHttpClient();
         HttpPost postRequest = new HttpPost(url);
         postRequest.addHeader("Authorization", "Basic YWRtaW46YWRtaW4=");
         StringEntity input = new StringEntity(js);
@@ -46,6 +48,7 @@ public class DASRestClient {
         BufferedReader re = new BufferedReader(new InputStreamReader(response
                 .getEntity().getContent()));
         List<Result<T>> obj = gson.fromJson(re, ty);
+        EntityUtils.consume(response.getEntity());
         return obj;
     }
 
@@ -66,6 +69,7 @@ public class DASRestClient {
 
         List<Result<T>> result = parse(response, ty);
 
+
         return result;
     }
 
@@ -81,6 +85,7 @@ public class DASRestClient {
         }.getType();
 
         TableExistResponseBean obj = gson.fromJson(re,ty);
+        EntityUtils.consume(response.getEntity());
 
         return obj;
 

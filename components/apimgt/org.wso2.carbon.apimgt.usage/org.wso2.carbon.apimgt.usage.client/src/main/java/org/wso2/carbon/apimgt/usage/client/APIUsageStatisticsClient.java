@@ -1939,7 +1939,18 @@ public class APIUsageStatisticsClient {
                     faultyDTO.setCount(fault.faultCount);
 
                     apiVersionUsageList = getUsageByAPIVersions(providerName, fault.apiName, fromDate, toDate);
-                    for (int i = 0; i < apiVersionUsageList.size(); i++) {
+                    if(apiVersionUsageList.size() > 0){
+                        apiVersionUsageDTO = apiVersionUsageList.get(0);
+                        if (apiVersionUsageDTO.getVersion().equals(fault.apiVersion)) {
+                            long requestCount = apiVersionUsageDTO.getCount();
+                            double faultPercentage = ((double)requestCount - fault.faultCount) / requestCount * 100;
+                            DecimalFormat twoDForm = new DecimalFormat("#.##");
+                            faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
+                            faultyDTO.setFaultPercentage(faultPercentage);
+                            faultyDTO.setRequestCount(requestCount);
+                        }
+                    }
+                    /*for (int i = 0; i < apiVersionUsageList.size(); i++) {
                         apiVersionUsageDTO = apiVersionUsageList.get(i);
                         if (apiVersionUsageDTO.getVersion().equals(fault.apiVersion)) {
                             long requestCount = apiVersionUsageDTO.getCount();
@@ -1950,7 +1961,7 @@ public class APIUsageStatisticsClient {
                             faultyDTO.setRequestCount(requestCount);
                             break;
                         }
-                    }
+                    }*/
 
                     faultyCount.add(faultyDTO);
 
