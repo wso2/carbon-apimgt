@@ -89,7 +89,7 @@ public class Util {
                 bootStrapped = true;
             } catch (ConfigurationException e) {
                 System.err.println("Error in bootstrapping the OpenSAML2 library");
-                e.printStackTrace();
+                log.error("Error in bootstrapping the OpenSAML2 library", e);
             }
         }
     }

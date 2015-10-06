@@ -1542,7 +1542,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return false;
     }
 
-    private void getAPIsByBusinessOwner(Registry registry, final String businessOwner){
+    private void getAPIsByBusinessOwner(Registry registry, final String businessOwner) throws APIManagementException {
 
         Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         listMap.put(APIConstants.API_OVERVIEW_BUSS_OWNER, new ArrayList<String>() {{
@@ -1561,9 +1561,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            handleException("Failed to read artifact manager for the key : " + APIConstants.API_KEY, e);
         } catch (GovernanceException e) {
-            e.printStackTrace();
+            handleException("Failed to read APIs from the registry", e);
         }
     }
 
