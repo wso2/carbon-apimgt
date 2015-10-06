@@ -1724,16 +1724,23 @@ public final class APIUtil {
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
         boolean authorized;
         try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+
             if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
                         getRealmService().getTenantUserRealm(tenantId).
                         getAuthorizationManager();
                 authorized = manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
                                                       CarbonConstants.UI_PERMISSION_ACTION);
             } else {
+                //On the first login attempt to publisher (without browsing the store), the user realm will be null.
+                if(ServiceReferenceHolder.getUserRealm() == null){
+                    ServiceReferenceHolder.setUserRealm((UserRealm)ServiceReferenceHolder.getInstance().
+                                            getRealmService().getTenantUserRealm(tenantId));
+                }
                 authorized = AuthorizationManager.getInstance().isUserAuthorized(username, permission);
             }
             if (!authorized) {
@@ -3678,7 +3685,7 @@ public final class APIUtil {
 
 			SolrDocumentList documentList = client.query(searchTerm, tenantID, fields);
 
-			AuthorizationManager manager = ServiceReferenceHolder.getInstance().
+            org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
                     getRealmService().getTenantUserRealm(tenantID).
                     getAuthorizationManager();
 
