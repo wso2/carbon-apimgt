@@ -426,7 +426,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                     var attr = $(scopeId).attr('name');
                     // For some browsers, `attr` is undefined; for others,
                     // `attr` is false.  Check for both.
-                    if (typeof attr !== typeof undefined && attr !== false) {
+                    if (attr) {
                         generatedScopesNames+=$(scopeId).attr('name');
                         if(i<generatedScopesArr.length - 1){
                             generatedScopesNames+=", ";

@@ -2145,11 +2145,11 @@ public class APIStoreHostObject extends ScriptableObject {
                         List<NativeArray> uriTemplatesArr = new ArrayList<NativeArray>();
                         if (uriTemplates.size() != 0) {
                             NativeArray uriTempArr = new NativeArray(uriTemplates.size());
-                            Iterator i = uriTemplates.iterator();
+                            Iterator uriTemplateIterator = uriTemplates.iterator();
 
-                            while (i.hasNext()) {
+                            while (uriTemplateIterator.hasNext()) {
                                 List<String> utArr = new ArrayList<String>();
-                                URITemplate ut = (URITemplate) i.next();
+                                URITemplate ut = (URITemplate) uriTemplateIterator.next();
                                 utArr.add(ut.getUriTemplate());
                                 utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
                                 utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
@@ -2178,8 +2178,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
                         row.put("subscriptionAvailability", row, api.getSubscriptionAvailability());
                         row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
-                        row.put("isDefaultVersion",row,api.isDefaultVersion());
-                        row.put("transports",row,api.getTransports());
+                        row.put("isDefaultVersion", row,api.isDefaultVersion());
+                        row.put("transports", row,api.getTransports());
 
                         myn.put(0, myn, row);
 

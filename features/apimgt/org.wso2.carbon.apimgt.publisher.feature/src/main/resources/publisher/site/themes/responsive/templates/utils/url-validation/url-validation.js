@@ -5,7 +5,7 @@ $(document).ready(function(){
         var type = '';
         var attr = $(this).attr('url-type');
         var thisID = $(this).attr('id');
-        if (typeof attr !== typeof undefined && attr !== false) {
+        if (attr) {
             type = $(btn).attr('url-type');
         } else {
             if (thisID == "prototype_test") {
