@@ -2037,8 +2037,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             removeSubscriptionWFExecutor.execute(workflowDTO);
         } catch (WorkflowException e) {
-            log.error("Could not execute Workflow", e);
-            throw new APIManagementException("Could not execute Workflow", e);
+            String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION + "" +
+                    " for apiID " + identifier.getApiName();
+            handleException(errorMsg, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -2048,10 +2049,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
             invalidateCachedKeys(applicationId);
         }
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
             String logMessage = "API Name: " + identifier.getApiName() + ", API Version " +
-                    identifier.getVersion()+" subscription removed from app " + appName + " by " + userId;
+                    identifier.getVersion() + " subscription removed from app " + appName + " by " + userId;
             log.debug(logMessage);
         }
     }
@@ -2158,7 +2159,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (WorkflowException e) {
             //If the workflow execution fails, roll back transaction by removing the application entry.
             application.setId(applicationId);
-            apiMgtDAO.deleteApplication(application, null);
+            apiMgtDAO.deleteApplication(application);
             log.error("Unable to execute Application Creation Workflow", e);
             handleException("Unable to execute Application Creation Workflow", e);
         } finally {
@@ -2233,7 +2234,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public void removeApplication(Application application) throws APIManagementException {
         boolean isTenantFlowStarted = false;
 
-        log.debug("remove started");
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             isTenantFlowStarted = true;
             PrivilegedCarbonContext.startTenantFlow();
@@ -2252,21 +2252,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setTenantId(tenantId);
             workflowDTO.setExternalWorkflowReference(workflowExtRef);
 
-            //Remove from cache first since we won't be able to find active access tokens
+            // Remove from cache first since we won't be able to find active access tokens
             // once the application is removed.
             invalidateCachedKeys(application.getId());
 
             removeApplicationWFExecutor.execute(workflowDTO);
         } catch (WorkflowException e) {
-            log.error("Could not execute Workflow", e);
-            throw new APIManagementException("Could not execute Workflow", e);
+            String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION + " " +
+                    "for applicationID " + application.getId();
+            handleException(errorMsg, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
 
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             String logMessage = "Application Name: " + application.getName() + " successfully removed";
             log.debug(logMessage);
         }

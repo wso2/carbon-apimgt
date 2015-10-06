@@ -5755,12 +5755,23 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
-    public void deleteApplication(Application application, Connection connection)
-            throws APIManagementException {
+    public void deleteApplication(Application application) throws APIManagementException {
+        Connection con = null;
+        try {
+            con = APIMgtDBUtil.getConnection();
+            con.setAutoCommit(false);
+            deleteApplication(application, con);
+            con.commit();
+        } catch (SQLException e) {
+            handleException("Error while removing application details from the database", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, con, null);
+        }
+    }
+    public void deleteApplication(Application application, Connection connection) throws APIManagementException {
         PreparedStatement prepStmt = null;
         PreparedStatement prepStmtGetConsumerKey = null;
         ResultSet rs = null;
-        boolean isConnectionProvided = (connection != null);
 
         String getSubscriptionsQuery = "SELECT" +
                                        " SUBSCRIPTION_ID " +
@@ -5784,10 +5795,6 @@ public class ApiMgtDAO {
         String deleteRegistrationEntry = "DELETE FROM AM_APPLICATION_REGISTRATION WHERE APP_ID = ?";
 
         try {
-            if(!isConnectionProvided) {
-                connection = APIMgtDBUtil.getConnection();
-                connection.setAutoCommit(false);
-            }
             prepStmt = connection.prepareStatement(getSubscriptionsQuery);
             prepStmt.setInt(1, application.getId());
             rs = prepStmt.executeQuery();
@@ -5853,10 +5860,6 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, application.getId());
             prepStmt.execute();
 
-            if (!isConnectionProvided) {
-                connection.commit();
-                connection.close();
-            }
             for (String consumerKey : consumerKeys){
                 //delete on oAuthorization server.
                 KeyManagerHolder.getKeyManagerInstance().deleteApplication(consumerKey);
@@ -8238,6 +8241,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             ps.setInt(2, appID);
             rs = ps.executeQuery();
 
+            // returns only one row
             while (rs.next()) {
                 workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
             }
@@ -8255,12 +8259,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Retries the WorkflowExternalReference for a subscription.
      *
      * @param identifier APIIdentifier to find the subscribed api
-     * @param appID ID of the application which has the subscription
+     * @param appID      ID of the application which has the subscription
      * @return External workflow reference for the subscription identified
      * @throws APIManagementException
      */
-    public String getExternalWorkflowReferenceForSubscription(APIIdentifier identifier, int appID)
-            throws APIManagementException {
+    public String getExternalWorkflowReferenceForSubscription(APIIdentifier identifier, int appID) throws
+            APIManagementException {
         String workflowExtRef = null;
         Connection conn = null;
         PreparedStatement ps = null;
@@ -8268,10 +8272,12 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         int apiID = -1;
         int subscriptionID = -1;
 
-        String sqlQuery = "SELECT SUBSCRIPTION_ID FROM " +
-                "AM_SUBSCRIPTION WHERE " +
-                "API_ID=? AND " +
-                "APPLICATION_ID=?";
+        String sqlQuery = "SELECT AW.WF_EXTERNAL_REFERENCE FROM" +
+                " AM_WORKFLOWS AW, AM_SUBSCRIPTION ASUB  WHERE" +
+                " ASUB.API_ID=? AND" +
+                " ASUB.APPLICATION_ID=? AND" +
+                " AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID AND" +
+                " AW.WF_TYPE=?";
 
         try {
             apiID = getAPIID(identifier, conn);
@@ -8279,31 +8285,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, apiID);
             ps.setInt(2, appID);
+            ps.setString(3, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             rs = ps.executeQuery();
 
-            while(rs.next()) {
-                subscriptionID = rs.getInt("SUBSCRIPTION_ID");
-            }
-            rs.close();
-            ps.close();
-
-            if (subscriptionID == -1) {
-                String msg = "Unable to get the Subscription ID for: " + identifier;
-                log.error(msg);
-                throw new APIManagementException(msg);
-            }
-
-            sqlQuery = "SELECT WF_EXTERNAL_REFERENCE FROM " +
-                    "AM_WORKFLOWS WHERE " +
-                    "WF_REFERENCE=? AND " +
-                    "WF_TYPE=?";
-
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setInt(1, subscriptionID);
-            ps.setString(2, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            rs = ps.executeQuery();
-
-            while(rs.next()) {
+            // returns only one row
+            while (rs.next()) {
                 workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
             }
 
@@ -8345,6 +8331,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             ps.setString(2, WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             rs = ps.executeQuery();
 
+            // returns only one row
             while(rs.next()) {
                 workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
             }
@@ -8384,6 +8371,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
             rs = ps.executeQuery();
 
+            // returns only one row
             while(rs.next()) {
                 pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
             }
@@ -8422,6 +8410,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             ps.setInt(1, applicationId);
             rs = ps.executeQuery();
 
+            // returns only one row
             while(rs.next()) {
                 registrations.add(rs.getString("WF_REF"));
             }
@@ -9204,7 +9193,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         PreparedStatement prepStmt = null;
         int apiId = -1;
 
-        String deleteScopes = "DELETE FROM IDN_OAUTH2_SCOPE WHERE SCOPE_ID IN ( SELECT SCOPE_ID FROM AM_API_SCOPES WHERE API_ID = ? )";
+        String deleteScopes = "DELETE FROM IDN_OAUTH2_SCOPE WHERE SCOPE_ID IN ( SELECT SCOPE_ID FROM AM_API_SCOPES " +
+                "WHERE API_ID = ? )";
         try {
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
