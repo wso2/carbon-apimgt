@@ -32,8 +32,8 @@ import org.apache.synapse.mediators.AbstractMediator;
 import java.util.*;
 
 /**
- * This mediator would set username and password in to http client request.
- * Then we will send the http request and get the json payload, then we pass it to the api manager for mediation.
+ * This mediator would set the authorization header of the request that is to be sent to the endpoint,
+ * making use of the 401 Unauthorized response received from the first request.
  */
 public class DigestAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
@@ -69,12 +69,13 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             }
         }
 
-        //remove front and end double quotes.
-        serverNonce = serverNonce.substring(1, serverNonce.length() - 1); //serverNonce and realm will not be null
+        //remove front and end double quotes.serverNonce and realm will not be null.
+        serverNonce = serverNonce.substring(1, serverNonce.length() - 1);
         realm = realm.substring(1, realm.length() - 1);
 
+        //qop can be null
         if (qop != null) {
-            qop = qop.substring(1, qop.length() - 1); //qop can be null
+            qop = qop.substring(1, qop.length() - 1);
         }
 
         String[] headerAttributes = { realm, serverNonce, qop, opaque, algorithm };
@@ -114,16 +115,17 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
     }
 
     //hashing the entityBody for qop = auth-int (for calculating ha2)
-    public String findEntityBodyHash(
-            org.apache.axis2.context.MessageContext axis2MC) { //Take MessageContext messageContext //an auth-int is normally returned from a POST request
-        //get the previous message context here
-        //Get the hash of the entity-body
-        String entityBody = axis2MC.getEnvelope().getText();
+    public String findEntityBodyHash(MessageContext messageContext) {
+        //String entityBody = axis2MC.getEnvelope().getText();
+        String entityBody = (String) messageContext.getProperty("MessageBody");
+
+        //if the entity-body is null for GET requests in particular take it as an empty string
         if (entityBody == null) {
-            entityBody = ""; //if the entity-body is null for GET requests in particular take it a null string
+            entityBody = "";
         }
 
-        String hash = DigestUtils.md5Hex(entityBody);//Any transfer encoding applied might have to be reversed
+        String hash = DigestUtils.md5Hex(entityBody);
+        //Any transfer encoding applied might have to be reversed
         // - deferred, will need to check the Transfer-encoding header from the message context. This header value can be taken from
         //passing the transportHeaders map and extract transportHeaders.get("Transfer-encoding"); If null, transfer encoding is not applied.
         //Therefore no need to reverse. Enrich might handle this so I don't need to see it here. Check it.
@@ -131,8 +133,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
     }
 
     //method to calculate hash 2 for digest authentication
-    public String calculateHA2(String qop, String httpMethod, String postFix,
-            org.apache.axis2.context.MessageContext axis2MC) {
+    public String calculateHA2(String qop, String httpMethod, String postFix, MessageContext messageContext) {
 
         String ha2;
 
@@ -140,7 +141,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         if ("auth-int".equals(qop)) {
 
             //Extracting the entity body for calculating ha2 for qop="auth-int"
-            String entityBodyHash = findEntityBodyHash(axis2MC);
+            String entityBodyHash = findEntityBodyHash(messageContext);
 
             StringBuilder ha2StringBuilder = new StringBuilder(httpMethod);
             ha2StringBuilder.append(":");
@@ -177,7 +178,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         return nonceCount;
     }
 
-    //generate response hash
+    //method to generate the response hash
     public String[] generateResponseHash(String ha1, String ha2, String serverNonce, String qop, String prevNonceCount,
             String clientNonce) {
 
@@ -196,6 +197,11 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             serverResponseStringBuilder.append(":");
             serverResponseStringBuilder.append(clientNonce);
             serverResponseStringBuilder.append(":");
+            if("auth".equals(qop) || "auth-int".equals(qop)){
+                //do nothing
+            }else{ //this is if qop = "auth,aut-int" or something other than "auth" or "auth-int", assume qop="auth"
+                qop = "auth";
+            }
             serverResponseStringBuilder.append(qop);
             serverResponseStringBuilder.append(":");
             serverResponseStringBuilder.append(ha2);
@@ -231,6 +237,11 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         if (qop != null) {
 
             String nonceCount = serverResponseArray[1];
+            if("auth".equals(qop) || "auth-int".equals(qop)){
+                //do nothing
+            }else{ //this is if qop = "auth,aut-int" or something other than "auth" or "auth-int"
+                qop = "auth";
+            }
             header.append("qop=" + qop + ", ");
             header.append("nc=" + nonceCount + ", ");
             header.append("cnonce=\"" + clientNonce + "\"" + ", ");
@@ -332,14 +343,14 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 String ha1 = calculateHA1(userName, realm, passWord, algorithm, serverNonce, clientNonce);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("MD5 value of ha1 is : " + ha1);
+                    log.debug("Value of ha1 is : " + ha1);
                 }
 
                 //calculate ha2
-                String ha2 = calculateHA2(qop, httpMethod, postFix, axis2MC);
+                String ha2 = calculateHA2(qop, httpMethod, postFix, messageContext);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("MD5 value of ha2 is : " + ha2);
+                    log.debug("Value of ha2 is : " + ha2);
                 }
 
                 //getting the previous NonceCount
@@ -399,5 +410,4 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
     }
 
 }
-
 

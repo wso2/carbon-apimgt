@@ -72,16 +72,17 @@ public class DigestAuthMediatorTest {
         assertEquals(expectedHa1, ha1);
     }
 
-    @Test public void testFindEntityBodyHash() throws Exception {
-        //org.apache.axis2.context.MessageContext axis2MC =
-    }
 
-    @Test public void testCalculateHA2WhenQopIsAuthInt() throws Exception {
+    /*@Test public void testFindEntityBodyHash() throws Exception {
+        //org.apache.axis2.context.MessageContext axis2MC =
+    }*/
+
+    /*@Test public void testCalculateHA2WhenQopIsAuthInt() throws Exception {
         String qop = "auth-int";
         String httpMethod = "GET";
         String postFix = "/S374453680109605K/";
         org.apache.axis2.context.MessageContext axis2MC = new MessageContext();
-    }
+    }*/
 
     @Test public void testCalculateHA2WhenQopIsNotAuthInt() throws Exception {
         String qop = "auth"; //qop is not required for the calculation
@@ -165,8 +166,8 @@ public class DigestAuthMediatorTest {
         assertEquals(expectedHeader, AuthHeader);
     }
 
-    @Test public void testMediate() throws Exception {
+    /*@Test public void testMediate() throws Exception {
 
-    }
+    }*/
 
 }
