@@ -86,7 +86,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             qop = qop.substring(1, qop.length() - 1);
         }
         //algorithm can be null
-        if (algorithm != null){
+        if (algorithm != null) {
             algorithm = algorithm.substring(1, algorithm.length() - 1);
         }
         //No need to trim the opaque if present because it is not used in calculations
@@ -410,7 +410,8 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             log.error("The endpoint does not support digest authentication : " + ex.getMessage());
             return false;
         } catch (Exception e) {
-            log.error("Exception has occurred while performing class mediation for Digest Authentication: " + e.getMessage());
+            log.error("Exception has occurred while performing class mediation for Digest Authentication: " + e
+                    .getMessage());
             return false;
         }
 
