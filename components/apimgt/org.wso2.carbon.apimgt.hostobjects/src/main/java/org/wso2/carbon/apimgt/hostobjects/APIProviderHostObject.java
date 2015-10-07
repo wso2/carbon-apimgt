@@ -109,6 +109,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     private String username;
     private static String VERSION_PARAM="{version}";
+    private static String ICON_PATH = "tmp/icon";
 
     private APIProvider apiProvider;
 
@@ -1363,8 +1364,7 @@ public class APIProviderHostObject extends ScriptableObject {
             try {
                 URL url = new URL(thumbUrl);
                 String imageType = url.openConnection().getContentType();
-
-                File fileToUploadFromUrl = new File("tmp/icon");
+                File fileToUploadFromUrl = new File(ICON_PATH);
                 if (!fileToUploadFromUrl.exists()) {
                     fileToUploadFromUrl.createNewFile();
                 }
