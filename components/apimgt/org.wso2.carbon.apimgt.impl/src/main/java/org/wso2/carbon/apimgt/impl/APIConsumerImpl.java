@@ -2082,7 +2082,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return {@link String}
      */
 
-    public String addApplication(Application application, String userId)
+    public int addApplication(Application application, String userId)
             throws APIManagementException {
         
         if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
@@ -2127,10 +2127,25 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        String status = apiMgtDAO.getApplicationStatus(application.getName(), userId);
-        return status;
+        return applicationId;
     }
 
+    /** Updates an Application identified by its UUID
+     * 
+     * @param application Application object to be updated
+     * @throws APIManagementException
+     */
+    public void updateApplicationByUUID(Application application) throws APIManagementException {
+        Application applicationWithId = apiMgtDAO.getApplicationByUUID(application.getUUID());
+        application.setId(applicationWithId.getId());
+        updateApplication(application);
+    }
+
+    /** Updates an Application identified by its id
+     *
+     * @param application Application object to be updated
+     * @throws APIManagementException
+     */
     public void updateApplication(Application application) throws APIManagementException {
         Application app = apiMgtDAO.getApplicationById(application.getId());
         if (app != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(app.getStatus())) {
@@ -2203,6 +2218,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         apiMgtDAO.deleteApplication(application);
+    }
+
+    /**
+     * Function to remove an Application from the API Store identified by UUID
+     * @param uuid - UUID string of the Application
+     * @throws APIManagementException
+     */
+    public void removeApplicationByUUID(String uuid) throws APIManagementException {
+        Application applicationWithId = apiMgtDAO.getApplicationByUUID(uuid);
+        removeApplication(applicationWithId);
     }
 
     /**
@@ -2408,9 +2433,28 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @return it will return Application corresponds to the id.
      * @throws APIManagementException
      */
-    public Application getApplicationById(String id) throws APIManagementException {
-        
-        return apiMgtDAO.getApplicationById(Integer.parseInt(id));
+    public Application getApplicationById(int id) throws APIManagementException {
+        return apiMgtDAO.getApplicationById(id);
+    }
+
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    public Application getApplicationByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getApplicationByUUID(uuid);
+    }
+
+    /** get the status of the Application creation process given the application Id
+     *
+     * @param applicationId Id of the Application
+     * @return
+     * @throws APIManagementException
+     */
+    public String getApplicationStatusById(int applicationId) throws APIManagementException {
+        return apiMgtDAO.getApplicationStatusById(applicationId);
     }
     
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {

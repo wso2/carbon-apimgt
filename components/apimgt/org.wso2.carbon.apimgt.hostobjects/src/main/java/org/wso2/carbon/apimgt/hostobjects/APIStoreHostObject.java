@@ -3392,7 +3392,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 application.setGroupId(groupId);
             }
 
-            status = apiConsumer.addApplication(application, username);
+            int applicationId = apiConsumer.addApplication(application, username);
+            status = apiConsumer.getApplicationStatusById(applicationId);
             return status;
         } else{
             handleException("Missing parameters.");
