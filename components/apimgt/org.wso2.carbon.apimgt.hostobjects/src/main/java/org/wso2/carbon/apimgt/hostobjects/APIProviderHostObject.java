@@ -3014,7 +3014,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String sourceURL = null;
 
         boolean isTenantFlowStarted = false;
-
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
