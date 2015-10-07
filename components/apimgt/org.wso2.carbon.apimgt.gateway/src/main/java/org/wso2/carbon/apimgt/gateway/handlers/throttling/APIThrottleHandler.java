@@ -60,6 +60,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+
 import javax.xml.stream.XMLStreamException;
 import java.util.Date;
 import java.util.TreeMap;
@@ -662,14 +663,11 @@ public class APIThrottleHandler extends AbstractHandler {
                     return true;
                 }
 
-                if (APIConstants.UNLIMITED_TIER.equals(roleID)) {
-                    return canAccess;
-                }
 
-                //check for configuration role of the caller
-                String consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
-                if (consumerRoleID != null) {
+                if (roleID != null) {
                     // If this is a clustered env.
+                    //check for configuration role of the caller
+                    String consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
                     if (isClusteringEnable) {
                         context.setConfigurationContext(cc);
                         context.setThrottleId(id);

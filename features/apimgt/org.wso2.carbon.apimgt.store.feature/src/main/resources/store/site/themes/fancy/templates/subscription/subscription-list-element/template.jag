@@ -793,7 +793,7 @@
 				}
 
 				$('#'+id).attr('data-granttype', granttype);
-        		$('#'+id).html('curl -k -d "grant_type='+grantTypeVal+'" -H "Authorization: Basic '+encodedString+', Content-Type: application/x-www-form-urlencoded" '+gatewayurlendpoint+'/token');
+        		$('#'+id).html('curl -k -d "grant_type='+grantTypeVal+'" -H "Authorization: Basic '+encodedString+'" '+gatewayurlendpoint+'/token');
         		$('#'+id).closest('.row-fluid').show();
         		$('#'+id+ 'Copy').show();
             }

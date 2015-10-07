@@ -35,7 +35,8 @@
                 if(samlLogoutRequest==null){
                         //logout request failed because there is no session details in anymore. Here trying to do a login request.
                         if (log.isDebugEnabled()) {
-                            log.debug("logout request failed because there is no session details in SAMLSSORelyingPartyObject. Here it is trying to do a login request");
+                            log.debug("logout request failed because there is no session details in "
+                            + "SAMLSSORelyingPartyObject. Here it is trying to do a login request");
                         }
                         samlLogoutRequest = ssoRelyingParty.getSAMLAuthRequest();
                         idpURL = site.ssoConfiguration.identityProviderURL ;
