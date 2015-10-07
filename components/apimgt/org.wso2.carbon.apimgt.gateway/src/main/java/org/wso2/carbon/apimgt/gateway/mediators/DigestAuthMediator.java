@@ -35,9 +35,17 @@ import java.util.*;
  * This mediator would set the authorization header of the request that is to be sent to the endpoint,
  * making use of the 401 Unauthorized response received from the first request.
  */
+
 public class DigestAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(DigestAuthMediator.class);
+
+    private static final String POSTFIX = "POSTFIX";
+    private static final String HTTP_METHOD = "HTTP_METHOD";
+    private static final String MESSAGE_BODY = "MessageBody";
+    private static final String UNAMEPASSWORD = "UNAMEPASSWORD";
+    private static final String NONCE_COUNT = "NonceCount";
+    private static final String INIT_NONCE_COUNT = "00000000";
 
     //method to split digest auth header sent from the backend
     public String[] splitDigestHeader(String[] wwwHeaderSplits) {
@@ -77,6 +85,24 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         if (qop != null) {
             qop = qop.substring(1, qop.length() - 1);
         }
+        //algorithm can be null
+        if (algorithm != null){
+            algorithm = algorithm.substring(1, algorithm.length() - 1);
+        }
+        //No need to trim the opaque if present because it is not used in calculations
+
+        //Selecting an option if multiple options are provided for qop and algorithm
+        if ("auth".equals(qop) || "auth-int".equals(qop) || qop == null) {
+            //do nothing
+        } else { //this is if qop = "auth,aut-int" or something other than "auth" or "auth-int", assume qop="auth"
+            qop = "auth";
+        }
+
+        if ("MD5".equals(algorithm) || "MD5-sess".equals(algorithm) || algorithm == null) {
+            //do nothing
+        } else { //this is if algorithm = "MD5,MD5-sess", assume algorithm = "MD5"
+            algorithm = "MD5";
+        }
 
         String[] headerAttributes = { realm, serverNonce, qop, opaque, algorithm };
         return headerAttributes;
@@ -104,6 +130,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             ha1 = DigestUtils.md5Hex(ha1StringBuilder.toString());
 
         } else {
+
             StringBuilder ha1StringBuilder = new StringBuilder(username);
             ha1StringBuilder.append(":");
             ha1StringBuilder.append(realm);
@@ -114,33 +141,29 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         return ha1;
     }
 
-    //hashing the entityBody for qop = auth-int (for calculating ha2)
+    //hashing the entityBody for qop = auth-int (for calculating hash2)
     public String findEntityBodyHash(MessageContext messageContext) {
-        //String entityBody = axis2MC.getEnvelope().getText();
-        String entityBody = (String) messageContext.getProperty("MessageBody");
 
-        //if the entity-body is null for GET requests in particular take it as an empty string
+        String entityBody = (String) messageContext.getProperty(MESSAGE_BODY);
+
+        //if the entity-body is null,take it as an empty string
         if (entityBody == null) {
             entityBody = "";
         }
 
         String hash = DigestUtils.md5Hex(entityBody);
-        //Any transfer encoding applied might have to be reversed
-        // - deferred, will need to check the Transfer-encoding header from the message context. This header value can be taken from
-        //passing the transportHeaders map and extract transportHeaders.get("Transfer-encoding"); If null, transfer encoding is not applied.
-        //Therefore no need to reverse. Enrich might handle this so I don't need to see it here. Check it.
+
         return hash;
     }
 
-    //method to calculate hash 2 for digest authentication
+    //method to calculate hash2 for digest authentication
     public String calculateHA2(String qop, String httpMethod, String postFix, MessageContext messageContext) {
 
         String ha2;
 
-        //Consider all qop types other than "auth-int" as auth and compute ha2 here
         if ("auth-int".equals(qop)) {
 
-            //Extracting the entity body for calculating ha2 for qop="auth-int"
+            //Extracting the entity body for calculating hash2 for qop="auth-int"
             String entityBodyHash = findEntityBodyHash(messageContext);
 
             StringBuilder ha2StringBuilder = new StringBuilder(httpMethod);
@@ -197,11 +220,6 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             serverResponseStringBuilder.append(":");
             serverResponseStringBuilder.append(clientNonce);
             serverResponseStringBuilder.append(":");
-            if("auth".equals(qop) || "auth-int".equals(qop)){
-                //do nothing
-            }else{ //this is if qop = "auth,aut-int" or something other than "auth" or "auth-int", assume qop="auth"
-                qop = "auth";
-            }
             serverResponseStringBuilder.append(qop);
             serverResponseStringBuilder.append(":");
             serverResponseStringBuilder.append(ha2);
@@ -209,6 +227,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             serverResponse = DigestUtils.md5Hex(serverResponseStringBuilder.toString());
             String[] responseParams = { serverResponse, nonceCount };
             return responseParams;
+
         } else {
 
             StringBuilder serverResponseStringBuilder = new StringBuilder(ha1);
@@ -237,11 +256,6 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         if (qop != null) {
 
             String nonceCount = serverResponseArray[1];
-            if("auth".equals(qop) || "auth-int".equals(qop)){
-                //do nothing
-            }else{ //this is if qop = "auth,aut-int" or something other than "auth" or "auth-int"
-                qop = "auth";
-            }
             header.append("qop=" + qop + ", ");
             header.append("nc=" + nonceCount + ", ");
             header.append("cnonce=\"" + clientNonce + "\"" + ", ");
@@ -269,7 +283,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         String algorithm;
 
         if (log.isDebugEnabled()) {
-            log.debug("Digest auth header creation mediator is activated..");
+            log.debug("Digest authorization header creation mediator is activated...");
         }
 
         try {
@@ -277,15 +291,15 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
 
-            String postFix = (String) messageContext.getProperty("POSTFIX");
+            String postFix = (String) messageContext.getProperty(POSTFIX);
 
-            //appending forward slash.
+            //appending forward slash to the postfix uri.
             StringBuilder postFixStringBuilder = new StringBuilder(postFix);
             postFixStringBuilder.append("/");
             postFix = postFixStringBuilder.toString();
 
             if (log.isDebugEnabled()) {
-                log.debug("Post Fix value is : " + postFix); //The uri should be uniquely identifiable. PLease check it.
+                log.debug("Post Fix value is : " + postFix);
             }
 
             //Take the WWW-Authenticate header from the message context
@@ -293,15 +307,15 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             String wwwHeader = (String) transportHeaders.get(HttpHeaders.WWW_AUTHENTICATE);
 
             if (log.isDebugEnabled()) {
-                log.debug("WWW-Auth header response ..." + wwwHeader);
+                log.debug("WWW-Authentication header is :" + wwwHeader);
             }
-            //This step can throw a NullPointerException if a WWW-Authenticate header is not received
+            //This step can throw a NullPointerException if a WWW-Authenticate header is not received.
             String wwwHeaderSplits[] = wwwHeader.split("Digest");
 
             //Happens only if the WWW-Authenticate header supports digest authentication.
             if (wwwHeaderSplits.length > 1 && wwwHeaderSplits[1] != null) {
 
-                //extracting required header information
+                //extracting required header information from the WWW-Authenticate header
                 String[] headerAttributes = splitDigestHeader(wwwHeaderSplits);
                 realm = headerAttributes[0];
                 serverNonce = headerAttributes[1];
@@ -315,7 +329,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 }
 
                 //get username password given by the client
-                String userNamePassword = (String) messageContext.getProperty("UNAMEPASSWORD");
+                String userNamePassword = (String) messageContext.getProperty(UNAMEPASSWORD);
 
                 byte[] valueDecoded = Base64.decodeBase64(userNamePassword.getBytes());
                 String decodedString = new String(valueDecoded);
@@ -325,12 +339,12 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 String passWord = splittedArrayOfUserNamePassword[1];
 
                 if (log.isDebugEnabled()) {
-                    log.debug("User name  : " + userName);
+                    log.debug("Username : " + userName);
                     log.debug("Password : " + passWord);
                 }
 
-                //get the Http method (GET, POST, PUT or DELETE)
-                String httpMethod = (String) messageContext.getProperty("HTTP_METHOD");
+                //get the Http method (GET, POST, PUT or DELETE etc.)
+                String httpMethod = (String) messageContext.getProperty(HTTP_METHOD);
 
                 if (log.isDebugEnabled()) {
                     log.debug("HTTP method of request is : " + httpMethod);
@@ -339,26 +353,26 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 //generate clientNonce
                 String clientNonce = generateClientNonce();
 
-                //calculate ha1
+                //calculate hash1
                 String ha1 = calculateHA1(userName, realm, passWord, algorithm, serverNonce, clientNonce);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Value of ha1 is : " + ha1);
+                    log.debug("Value of hash 1 is : " + ha1);
                 }
 
-                //calculate ha2
+                //calculate hash2
                 String ha2 = calculateHA2(qop, httpMethod, postFix, messageContext);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Value of ha2 is : " + ha2);
+                    log.debug("Value of hash 2 is : " + ha2);
                 }
 
                 //getting the previous NonceCount
-                String prevNonceCount = (String) messageContext.getProperty("NonceCount");
+                String prevNonceCount = (String) messageContext.getProperty(NONCE_COUNT);
 
                 if (prevNonceCount == null) {
-                    messageContext.setProperty("NonceCount", "00000000");
-                    prevNonceCount = (String) messageContext.getProperty("NonceCount");
+                    messageContext.setProperty(NONCE_COUNT, INIT_NONCE_COUNT);
+                    prevNonceCount = (String) messageContext.getProperty(NONCE_COUNT);
                 }
 
                 //generate the final hash (serverResponse)
@@ -366,12 +380,12 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                         clientNonce);
 
                 //setting the NonceCount after incrementing
-                messageContext.setProperty("NonceCount", serverResponseArray[1]);
+                messageContext.setProperty(NONCE_COUNT, serverResponseArray[1]);
 
                 String serverResponse = serverResponseArray[0];
 
                 if (log.isDebugEnabled()) {
-                    log.debug("MD5 value of server response  is : " + serverResponse);
+                    log.debug("Value of server response  is : " + serverResponse);
                 }
 
                 //Construct the authorization header
@@ -379,23 +393,24 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                         qop, opaque, clientNonce);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Processed www-header to be sent is : " + header);
+                    log.debug("Processed Authorization header to be sent in the request is : " + header);
                 }
 
-                //set the wwwHeader field
+                //set the wwwHeader field in the message context
                 messageContext.setProperty("wwwHeader", header.toString());
 
                 return true;
+
             } else {
                 //This is not digest auth protected api. let it go. Might be basic auth or NTLM protected.
-                //We receive a www-authenticate header but it is not for Digest auth.
+                //Here we receive a www-authenticate header but it is not for Digest authentication.
                 return true;
             }
         } catch (NullPointerException ex) {
             log.error("The endpoint does not support digest authentication : " + ex.getMessage());
             return false;
         } catch (Exception e) {
-            log.error("Exception has occurred while performing class mediation : " + e.getMessage());
+            log.error("Exception has occurred while performing class mediation for Digest Authentication: " + e.getMessage());
             return false;
         }
 
