@@ -330,7 +330,6 @@
                             org.wso2.carbon.sequences.stub.*;version="${carbon.mediation.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>org.wso2.carbon.apimgt.keymgt</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
