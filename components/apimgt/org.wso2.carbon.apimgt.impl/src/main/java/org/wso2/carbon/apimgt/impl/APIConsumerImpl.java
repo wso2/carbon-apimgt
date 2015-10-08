@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -2130,25 +2131,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return applicationId;
     }
 
-    /** Updates an Application identified by its UUID
-     * 
-     * @param application Application object to be updated
-     * @throws APIManagementException
-     */
-    public void updateApplicationByUUID(Application application) throws APIManagementException {
-        Application applicationWithId = apiMgtDAO.getApplicationByUUID(application.getUUID());
-        application.setId(applicationWithId.getId());
-        updateApplication(application);
-    }
-
     /** Updates an Application identified by its id
      *
      * @param application Application object to be updated
      * @throws APIManagementException
      */
     public void updateApplication(Application application) throws APIManagementException {
-        Application app = apiMgtDAO.getApplicationById(application.getId());
-        if (app != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(app.getStatus())) {
+
+        Application existingApp;
+        String uuid = application.getUUID();
+        if (!StringUtils.isEmpty(uuid)) {
+            existingApp = apiMgtDAO.getApplicationByUUID(uuid);
+            application.setId(existingApp.getId());
+        } else {
+            existingApp = apiMgtDAO.getApplicationById(application.getId());
+        }
+
+        if (existingApp != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())) {
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
 
@@ -2157,8 +2156,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         APIKey[] apiKeys = null;
 
         // Update on OAuthApps are performed by
-        if ((application.getCallbackUrl() != null && application.getCallbackUrl() != app.getCallbackUrl()) ||
-            !application.getName().equals(app.getName())) {
+        if ((application.getCallbackUrl() != null && application.getCallbackUrl() != existingApp.getCallbackUrl()) ||
+            !application.getName().equals(existingApp.getName())) {
 
             // Only the OauthApps created from UI will be changed. Mapped Clients won't be touched.
             apiKeys = apiMgtDAO.getConsumerKeysWithMode(application.getId(),
@@ -2169,11 +2168,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 OAuthApplicationInfo applicationInfo = new OAuthApplicationInfo();
                 applicationInfo.setClientId(apiKey.getConsumerKey());
 
-                if (application.getCallbackUrl() != null && application.getCallbackUrl() != app.getCallbackUrl()) {
+                if (application.getCallbackUrl() != null && application.getCallbackUrl() != existingApp.getCallbackUrl()) {
                     applicationInfo.setCallBackURL(application.getCallbackUrl());
                 }
 
-                if (application.getName() != null && !application.getName().equals(app.getName())) {
+                if (application.getName() != null && !application.getName().equals(existingApp.getName())) {
                     applicationInfo.setClientName(application.getName() + "_" + apiKey.getType());
                 }
                 applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, application.getSubscriber().getName());
@@ -2206,6 +2205,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @throws APIManagementException
      */
     public void removeApplication(Application application) throws APIManagementException {
+        String uuid = application.getUUID();
+        if (application.getId() == 0 && !StringUtils.isEmpty(uuid)) {
+            application = apiMgtDAO.getApplicationByUUID(uuid);
+        }
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
@@ -2218,16 +2221,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         apiMgtDAO.deleteApplication(application);
-    }
-
-    /**
-     * Function to remove an Application from the API Store identified by UUID
-     * @param uuid - UUID string of the Application
-     * @throws APIManagementException
-     */
-    public void removeApplicationByUUID(String uuid) throws APIManagementException {
-        Application applicationWithId = apiMgtDAO.getApplicationByUUID(uuid);
-        removeApplication(applicationWithId);
     }
 
     /**

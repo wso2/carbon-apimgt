@@ -87,7 +87,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         Application application = ApplicationMappingUtil.fromDTOtoApplication(body);
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            apiConsumer.updateApplicationByUUID(application);
+            apiConsumer.updateApplication(application);
 
             //retrieves the updated application and send as the response
             Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
@@ -104,7 +104,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            apiConsumer.removeApplicationByUUID(applicationId);
+            Application application = new Application(applicationId);
+            apiConsumer.removeApplication(application);
             return Response.ok().build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
