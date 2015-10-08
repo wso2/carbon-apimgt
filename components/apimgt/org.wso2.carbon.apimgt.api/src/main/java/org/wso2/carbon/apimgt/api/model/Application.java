@@ -52,6 +52,11 @@ public class Application {
         this.subscriber = new Subscriber(null);
     }
 
+    public Application(String uuid) {
+        this.uuid = uuid;
+        this.subscriber = new Subscriber(null);
+    }
+
     public String getDescription() {
         return description;
     }

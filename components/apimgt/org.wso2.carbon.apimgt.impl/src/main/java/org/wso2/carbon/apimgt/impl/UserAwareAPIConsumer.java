@@ -77,21 +77,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void updateApplicationByUUID(Application application) throws APIManagementException {
-        checkSubscribePermission();
-        super.updateApplicationByUUID(application);
-    }
-
-    @Override
     public void removeApplication(Application application) throws APIManagementException {
         checkSubscribePermission();
         super.removeApplication(application);
-    }
-
-    @Override
-    public void removeApplicationByUUID(String uuid) throws APIManagementException {
-        checkSubscribePermission();
-        super.removeApplicationByUUID(uuid);
     }
 
     @Override

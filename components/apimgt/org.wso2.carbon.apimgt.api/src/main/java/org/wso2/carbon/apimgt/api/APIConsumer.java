@@ -329,26 +329,12 @@ public interface APIConsumer extends APIManager {
      */
     public void updateApplication(Application application) throws APIManagementException;
 
-    /** Updates an Application identified by its UUID
-     *
-     * @param application Application object to be updated
-     * @throws APIManagementException
-     */
-    public void updateApplicationByUUID(Application application) throws APIManagementException;
-
     /**
      * Function to remove an Application from the API Store
      * @param application - The Application Object that represents the Application
      * @throws APIManagementException
      */
     public void removeApplication(Application application) throws APIManagementException;
-
-    /**
-     * Function to remove an Application from the API Store identified by UUID
-     * @param uuid - UUID string of the Application
-     * @throws APIManagementException
-     */
-    public void removeApplicationByUUID(String uuid) throws APIManagementException;
 
     /** get the status of the Application creation process given the application Id
      *
