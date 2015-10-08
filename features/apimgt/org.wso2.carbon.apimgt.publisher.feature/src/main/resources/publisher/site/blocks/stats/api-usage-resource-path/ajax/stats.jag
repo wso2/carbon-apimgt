@@ -15,8 +15,10 @@ include("/jagg/jagg.jag");
         });
     } else {
         if (action === "getAPIUsageByResourcePath") {
-            mod = jagg.module("statistics");
+
             var provider = jagg.getUser().username;
+            mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
+
             var currentLocation = request.getParameter("currentLocation");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
@@ -34,13 +36,13 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    usage: result.usage
+                    usage: result
                 }
             }
             print(obj);
         } else if (action === "getFirstAccessTime") {
-            mod = jagg.module("statistics");
             var provider = jagg.getUser().username;
+            mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
             var currentLocation = request.getParameter("currentLocation");
             if (currentLocation.indexOf("all-statistics") >= 0) {
                 result = mod.getFirstAccessTime(allProviders);
@@ -55,14 +57,13 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    usage: result.usage
+                    usage: result.toArray()
                 }
             }
             print(obj);
 
         } else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
+            result = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
             
             if (result.error == "true") {
                 obj = {
@@ -72,7 +73,7 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    usage: result.usage
+                    usage: result
                 }
             }
             print(obj);

@@ -28,12 +28,14 @@ log = new Log();
             });        
         }
         else if (action === "getAppApiCallType") {
-        mod = jagg.module("statistics");
+
         var subscriber = jagg.getUser().username;
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
+
         from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
         var groupId = session.get("groupId");
-        result = mod.getAppApiCallType(subscriber,from,to,groupId);
+        result = mod.getAppApiCallType(subscriber,groupId,from,to,10);
 
         if (result.error == "true") {
             obj = {
@@ -43,7 +45,7 @@ log = new Log();
         } else {
             obj = {
                 error:false,
-                usage:result.usage
+                usage:result
             }
         }
         print(obj);
@@ -51,8 +53,8 @@ log = new Log();
   
 
     }else if (action === "getFirstAccessTime") {
-        mod = jagg.module("statistics");
-        var subscriber = jagg.getUser().username;
+        var provider = jagg.getUser().username;
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
         result = mod.getFirstAccessTime(subscriber);
         if (result.error == "true") {
             obj = {
@@ -62,15 +64,14 @@ log = new Log();
         } else {
             obj = {
                 error:false,
-                usage:result.usage
+                usage:result.toArray()
             }
         }
         print(obj);
 
     } else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
-            
+            result = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
+
             if (result.error == "true") {
                 obj = {
                     error: result.error,
@@ -79,7 +80,7 @@ log = new Log();
             } else {
                 obj = {
                     error: false,
-                    usage: result.usage
+                    usage: result
                 }
             }
             print(obj);

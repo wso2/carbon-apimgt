@@ -1,5 +1,13 @@
 package org.wso2.carbon.apimgt.usage.client.util;
 
+import org.apache.commons.codec.binary.Base64;
+import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
+import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
+import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl;
+import org.wso2.carbon.bam.service.data.publisher.conf.AnalyzingConfigData;
+import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,5 +41,22 @@ public class RestClientUtil {
         d.setSeconds(0);
         d.setDate(d.getDate());
         return d.getTime();
+    }
+
+    public static String encodeCredintials(String user,String pass){
+        String cred=user+":"+pass;
+        byte[] encodedBytes = Base64.encodeBase64(cred.getBytes());
+        return new String(encodedBytes);
+    }
+
+    public static APIUsageStatisticsClient getStatisticClient(String name){
+
+        APIUsageStatisticsClient client= null;
+        try {
+            client = new APIUsageStatisticsRestClientImpl(name);
+        } catch (APIMgtUsageQueryServiceClientException e) {
+            e.printStackTrace();
+        }
+        return client;
     }
 }

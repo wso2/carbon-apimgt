@@ -16,7 +16,8 @@ include("/jagg/jagg.jag");
     } else {
     if (action === "getProviderAPIServiceTime") {
         mod = jagg.module("statistics");
-        var provider;
+        var provider = jagg.getUser().username;
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
         var currentLocation = request.getParameter("currentLocation");
         var from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
@@ -25,10 +26,10 @@ include("/jagg/jagg.jag");
             result = mod.getProviderAPIServiceTime(allProviders,from,to);
         } else if (mode != null && mode == "browse") {
             provider = request.getParameter("provider");
-            result = mod.getProviderAPIServiceTime(provider,from,to);
+            result = mod.getResponseTimesByAPIs(provider,from,to,10);
         } else {
             provider = jagg.getUser().username;
-            result = mod.getProviderAPIServiceTime(provider,from,to);
+            result = mod.getResponseTimesByAPIs(provider,from,to,10);
         }
         if (result.error == "true") {
             obj = {
@@ -38,13 +39,15 @@ include("/jagg/jagg.jag");
         } else {
             obj = {
                 error:false,
-                usage:result.usage
+                usage:result
             }
         }
         print(obj);
     }else if (action === "getFirstAccessTime") {
-        mod = jagg.module("statistics");
+
         var provider = jagg.getUser().username;
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
+
         var currentLocation = request.getParameter("currentLocation");
         if (currentLocation.indexOf("all-statistics") >= 0) {
             result = mod.getFirstAccessTime(allProviders);
@@ -59,14 +62,13 @@ include("/jagg/jagg.jag");
         } else {
             obj = {
                 error:false,
-                usage:result.usage
+                usage:result.toArray()
             }
         }
         print(obj);
 
     } else if (action === "isDataPublishingEnabled") {
-            mod = jagg.module("statistics");
-            result = mod.isDataPublishingEnabled();
+            result = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
             
             if (result.error == "true") {
                 obj = {
@@ -76,7 +78,7 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    usage: result.usage
+                    usage: result
                 }
             }
             print(obj);

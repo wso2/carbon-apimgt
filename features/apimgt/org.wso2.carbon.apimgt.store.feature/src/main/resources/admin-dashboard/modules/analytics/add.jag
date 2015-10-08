@@ -151,7 +151,8 @@ var addDatasourceConfig = function (configData) {
         log.info("Saving datasource '" + dsName + "'...");
         stub.addDataSource(dataSourceMetaInfo);
         log.info("Datasource '" + dsName + "' saved");
-        org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient.initializeDataSource();
+        //org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient.initializeDataSource();
+        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.initializeDataSource();
         log.info("Initialized datasource '" + dsName);
         return {
             error: false

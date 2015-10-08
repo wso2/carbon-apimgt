@@ -29,7 +29,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                 if( json.usage && json.usage.length > 0){
                     
                     var d = new Date();
-                    var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
+                    var firstAccessDay = new Date(json.usage[0], json.usage[1], json.usage[2]);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
                     if(firstAccessDay.valueOf() == currentDay.valueOf()){
                         currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
@@ -108,6 +108,8 @@ var drawAPIResponseFaultCountTable = function(from,to){
     jagg.post("/site/blocks/stats/faultCount/ajax/stats.jag", { action:"getPerAppAPIFaultCount",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
+                json.usage=JSON.parse(json.usage);
+
                 $('#PerAppAPIFaultCountTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
                 $('#PerAppAPIFaultCountTable').show();

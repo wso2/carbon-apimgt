@@ -37,7 +37,7 @@ var log = new Log();
         var provider = jagg.getUser().username;
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var tenantDomain = MultitenantUtils.getTenantDomain(provider);
-        var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
+        var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl;
         var usageStatClient;
 
         var currentLocation = request.getParameter("currentLocation");

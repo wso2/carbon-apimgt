@@ -153,6 +153,8 @@ var drawAPIUsageByResourcePath = function (from, to) {
     jagg.post("/site/blocks/stats/api-usage-resource-path/ajax/stats.jag", { action: "getAPIUsageByResourcePath", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate},
         function (json) {
             if (!json.error) {
+
+                json.usage=JSON.parse(json.usage);
                 $('#resourcePathUsageTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
 

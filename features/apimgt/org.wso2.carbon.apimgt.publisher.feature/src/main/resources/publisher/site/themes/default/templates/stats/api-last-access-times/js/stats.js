@@ -130,6 +130,7 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
         function (json) {
             if (!json.error) {
 
+		        json.usage=JSON.parse(json.usage);
                 var length = json.usage.length;
                 $('#tempLoadingSpace').empty();
                 $('div#lastAccessTable_wrapper.dataTables_wrapper.no-footer').remove();
@@ -166,7 +167,7 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
                                     '</tr></thead>'));
 
                 for (var i = 0; i < json.usage.length; i++) {
-                    $dataTable.append($('<tr><td>' + json.usage[i].api_name + '</td><td>' + json.usage[i].api_version + '</td><td>' + json.usage[i].user + '</td><td style="text-align:right" >' + jagg.getDate(json.usage[i].lastAccess)+ '</td></tr>'));
+                    $dataTable.append($('<tr><td>' + json.usage[i].apiName + '</td><td>' + json.usage[i].apiVersion + '</td><td>' + json.usage[i].user + '</td><td style="text-align:right" >' + jagg.getDate(json.usage[i].lastAccessTime)+ '</td></tr>'));
                 }
                 if (length == 0) {
                     $('#lastAccessTable').hide();

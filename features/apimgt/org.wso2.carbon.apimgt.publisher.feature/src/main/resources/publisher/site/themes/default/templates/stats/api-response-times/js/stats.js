@@ -27,6 +27,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
             if (!json.error) {
 
+
                 if (json.usage && json.usage.length > 0) {
                     var d = new Date();
                     var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month - 1, json.usage[0].day);
@@ -98,7 +99,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                 }
 
-                else if (json.usage && json.usage.length == 0 && statsEnabled) {
+                else if (usage && usage.length == 0 && statsEnabled) {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
@@ -130,6 +131,7 @@ var drawProviderAPIServiceTime = function (from, to) {
         function (json) {
             if (!json.error) {
 
+                    json.usage=JSON.parse(json.usage);
                     var length = json.usage.length, s1 = [];
                     var data = [];
 

@@ -22,7 +22,7 @@ var datasourceData = outputs.datasourceData;
                 </div>
             </div>
         </div>
-        <form action="<%= jagg.uri("/site/blocks/analytics-task/ajax/add.jag") %>" id="configuration_form"
+        <form action="<%= jagg.url("/site/blocks/analytics-task/ajax/add.jag") %>" id="configuration_form"
                             enctype="multipart/form-data" method="post" style="display:none">
             <fieldset>
             <table class="analytics_table" width="100%">
