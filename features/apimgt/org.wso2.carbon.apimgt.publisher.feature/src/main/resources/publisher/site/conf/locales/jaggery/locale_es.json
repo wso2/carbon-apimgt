@@ -185,7 +185,7 @@
     "wsdlHelpMsg":"Ex:http://appserver/services/echo?wsdl",
     "sandboxHelpMsg":"Ex:http://test-appserver/services/echo",
     "endpointHelpMsg":"Ex:http://appserver/services/echo",
-    "endpointAuthHelpMsg" : "Select whether you need digest authentication with an extra level of security or else basic authentication",
+    "endpointAuthHelpMsg" :"Select the authentication scheme you require.",
     "imgHelpMsg":"Tamaño máximo 1 MB.",
     "imgHelpMsg2":"Tamaño de imagen recomendada: 100 x 100 pixels.",
     "noLifecycleMsg":"No existen datos sobre el ciclo de vida de esta API.",
