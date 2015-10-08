@@ -6562,7 +6562,8 @@ public class ApiMgtDAO {
                 addScopes(api.getScopes(),applicationId, tenantId);
             }
             addURLTemplates(applicationId, api, connection);
-            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED, APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), connection);
+            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED, APIUtil.replaceEmailDomainBack(api.getId()
+                    .getProviderName()), connection);
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if(api.isDefaultVersion()){
                 addUpdateAPIAsDefaultVersion(api, connection);
@@ -8377,7 +8378,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             ps.setString(2, APIConstants.SubscriptionStatus.ON_HOLD);
             rs = ps.executeQuery();
 
-            // returns only one row
             while(rs.next()) {
                 pendingSubscriptions.add(rs.getInt("SUBSCRIPTION_ID"));
             }
@@ -8393,42 +8393,85 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     }
 
     /**
-     * Retrieves all workflow references of registrations for a given application
+     * Retrieves registration workflow reference for applicationId and key type
      *
-     * @param applicationId application id of the application
-     * @return Set containing registration id list
+     * @param applicationId id of the application with registration
+     * @param keyType key type of the registration
+     * @return workflow reference of the registration
      * @throws APIManagementException
      */
-    public Set<String> getRegistrationWFReferencesByApplicationId(int applicationId)
+    public String getRegistrationWFReference(int applicationId, String keyType)
             throws APIManagementException {
-        Set<String> registrations = new HashSet<String>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        String reference = null;
 
-        String sqlQuery = "SELECT WF_REF FROM " +
-                "AM_APPLICATION_REGISTRATION WHERE " +
-                "APP_ID=?";
+        String sqlQuery = "SELECT WF_REF FROM" +
+                " AM_APPLICATION_REGISTRATION WHERE" +
+                " APP_ID = ? AND TOKEN_TYPE = ?";
 
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, applicationId);
+            ps.setString(2, keyType);
             rs = ps.executeQuery();
 
             // returns only one row
-            while(rs.next()) {
-                registrations.add(rs.getString("WF_REF"));
+            while (rs.next()) {
+                reference = rs.getString("WF_REF");
             }
 
         } catch (SQLException e) {
-            handleException("Error occurred while getting registration entries for " +
+            handleException("Error occurred while getting registration entry for " +
                     "Application : " + applicationId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
 
-        return registrations;
+        return reference;
+    }
+
+    /**
+     * Retrives subscription status for APIIdentifier and applicationId
+     *
+     * @param identifier    api identifier subscribed
+     * @param applicationId application with subscription
+     * @return subscription status
+     * @throws APIManagementException
+     */
+    public String getSubscriptionStatus(APIIdentifier identifier, int applicationId) throws APIManagementException {
+        String status = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT SUB_STATUS FROM" +
+                " AM_SUBSCRIPTION WHERE" +
+                " API_ID = ? AND" +
+                " APPLICATION_ID = ?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            int apiId = getAPIID(identifier, conn);
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.setInt(2, applicationId);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                status = rs.getString("SUB_STATUS");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription entry for " +
+                    "Application : " + applicationId + ", API: " + identifier, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return status;
     }
 
 

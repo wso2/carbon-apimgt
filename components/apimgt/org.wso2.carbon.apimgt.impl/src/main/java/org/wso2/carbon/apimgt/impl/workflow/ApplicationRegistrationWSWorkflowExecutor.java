@@ -30,13 +30,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is the class to call external workflow to have human interaction on
@@ -64,36 +67,8 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 			log.info("Executing Application registration Workflow..");
 		}
 		try {
-			ServiceClient client = new ServiceClient(ServiceReferenceHolder.getContextService()
-			                                                               .getClientConfigContext(),
-			                                         null);
-
-			Options options = new Options();
-            options.setAction("http://workflow.application.apimgt.carbon.wso2.org/initiate");
-			options.setTo(new EndpointReference(serviceEndpoint));
-
-			if (contentType != null) {
-				options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
-			} else {
-				options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-				                    HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-			}
-
-			HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
-
-			if (username != null && password != null) {
-				auth.setUsername(username);
-				auth.setPassword(password);
-				auth.setPreemptiveAuthentication(true);
-				List<String> authSchemes = new ArrayList<String>();
-				authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
-				auth.setAuthSchemes(authSchemes);
-				options.setProperty(HTTPConstants.AUTHENTICATE,
-				                    auth);
-				options.setManageSession(true);
-			}
-
-			client.setOptions(options);
+			String action = "http://workflow.application.apimgt.carbon.wso2.org/initiate";
+			ServiceClient client = getClient(action);
 
 			String payload =
 			                 "<wor:ApplicationRegistrationWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt.carbon.wso2.org\">\n"
@@ -170,7 +145,76 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 		return null;
 	}
 
-    public String getServiceEndpoint() {
+	@Override
+	public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
+		super.cleanUpPendingTask(workflowExtRef);
+		String errorMsg = null;
+
+		try {
+			String action = "http://workflow.application.apimgt.carbon.wso2.org/cancel";
+			ServiceClient client = getClient(action);
+
+			String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
+							"   xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
+							"   	<p:workflowRef>" + workflowExtRef + "</p:workflowRef>\n" +
+							"   </p:CancelApplicationRegistrationWorkflowProcessRequest>";
+					client.fireAndForget(AXIOMUtil.stringToOM(payload));
+
+		} catch (AxisFault axisFault) {
+			errorMsg = "Error sending out cancel pending registration approval process message. cause: " +
+					axisFault.getMessage();
+			throw new WorkflowException(errorMsg, axisFault);
+		} catch (XMLStreamException e) {
+			errorMsg = "Error converting registration cleanup String to OMElement. cause: " + e.getMessage();
+			throw new WorkflowException(errorMsg, e);
+		}
+	}
+
+	/**
+	 * Retrieves configured ServiceClient for communication with external services
+	 *
+	 * @param action web service action to use
+	 * @return configured service client
+	 * @throws AxisFault
+	 */
+	public ServiceClient getClient(String action) throws AxisFault {
+		ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
+				.getContextService().getClientConfigContext(), null);
+		Options options = new Options();
+		options.setAction(action);
+		options.setTo(new EndpointReference(serviceEndpoint));
+
+		if (contentType != null) {
+			options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
+		} else {
+			options.setProperty(Constants.Configuration.MESSAGE_TYPE,
+					HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+		}
+
+		HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
+
+		// Assumes authentication is required if username and password is given
+		if (username != null && password != null) {
+			auth.setUsername(username);
+			auth.setPassword(password);
+			auth.setPreemptiveAuthentication(true);
+			List<String> authSchemes = new ArrayList<String>();
+			authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
+			auth.setAuthSchemes(authSchemes);
+
+			if (contentType == null) {
+				options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+			}
+			options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
+					auth);
+			options.setManageSession(true);
+		}
+		client.setOptions(options);
+
+		return client;
+	}
+
+	public String getServiceEndpoint() {
         return serviceEndpoint;
     }
 
