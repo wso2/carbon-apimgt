@@ -827,7 +827,7 @@
         <!-- Carbon kernel version -->
         <wso2carbon.version>4.4.0</wso2carbon.version>
         <carbon.kernel.version>4.4.1</carbon.kernel.version>
-	   <carbon.commons.version>4.4.6</carbon.commons.version>
+	   <carbon.commons.version>4.4.7</carbon.commons.version>
 
          
         <commons.logging.imp.pkg.version>[1.2.0, 1.3.0)</commons.logging.imp.pkg.version>
@@ -840,13 +840,13 @@
         <carbon.apimgt.handlers.stub.package.import.version.range>[2.0.0, 3.0.0)</carbon.apimgt.handlers.stub.package.import.version.range>
 
 	<!-- Carbon Governance -->
-        <carbon.governance.version>4.5.8</carbon.governance.version>
+        <carbon.governance.version>4.5.9</carbon.governance.version>
 
         <!-- Carbon Registry -->
-        <carbon.registry.version>4.4.8</carbon.registry.version>
+        <carbon.registry.version>4.4.9</carbon.registry.version>
         <carbon.registry.imp.pkg.version>[1.0.1, 2.0.0)</carbon.registry.imp.pkg.version>
 
-	
+
 
         <!-- Axis2 Version -->
         <axis2.wso2.version>1.6.1-wso2v11</axis2.wso2.version>
