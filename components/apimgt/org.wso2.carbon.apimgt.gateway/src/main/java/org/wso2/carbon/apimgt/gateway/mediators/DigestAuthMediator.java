@@ -46,6 +46,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
     private static final String UNAMEPASSWORD = "UNAMEPASSWORD";
     private static final String NONCE_COUNT = "NonceCount";
     private static final String INIT_NONCE_COUNT = "00000000";
+    private static final String AUTH_HEADER = "AuthHeader";
 
     //method to split digest auth header sent from the backend
     public String[] splitDigestHeader(String[] wwwHeaderSplits) {
@@ -396,8 +397,8 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                     log.debug("Processed Authorization header to be sent in the request is : " + header);
                 }
 
-                //set the wwwHeader field in the message context
-                messageContext.setProperty("wwwHeader", header.toString());
+                //set the AuthHeader field in the message context
+                messageContext.setProperty(AUTH_HEADER, header.toString());
 
                 return true;
 
