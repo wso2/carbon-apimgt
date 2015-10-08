@@ -265,8 +265,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return true if update successful, false otherwise
      * @throws APIManagementException
      */
-    public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
+    public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || args.length == 0) {
             handleException("Invalid input parameters to the login method");
@@ -288,8 +287,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return updated;
     }
 
-    public static String jsFunction_getAuthServerURL(Context cx, Scriptable thisObj,
-                                                     Object[] args, Function funObj)
+    public static String jsFunction_getAuthServerURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
@@ -300,8 +298,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return url;
     }
 
-    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj,
-                                                Object[] args, Function funObj)
+    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         String hostName = CarbonUtils.getServerConfiguration().getFirstProperty("HostName");
         String backendHttpsPort = HostObjectUtils.getBackendPort("https");
@@ -321,8 +318,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj,
-                                               Object[] args, Function funObj)
+    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
     	boolean success = false;
     	
@@ -399,7 +395,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
@@ -455,7 +451,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("swagger", apiData) != null) {
 
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+            Set<URITemplate> uriTemplates =
+                    definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
@@ -502,9 +499,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (registeredResource == null) {
             boolean isNewResourceRegistered = keyManager.registerNewResource(api , null);
             if (!isNewResourceRegistered) {
-                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName
-                        () + "-" + api
-                        .getId().getVersion());
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName()
+                                + "-" + api.getId().getVersion());
             }
         } else {
             //update APIResource.
@@ -530,6 +526,8 @@ public class APIProviderHostObject extends ScriptableObject {
     public static boolean jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
+
+        // Get the InSeq or outSeq here and put into registry
     	
     	if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -540,7 +538,9 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String implementationType = (String) apiData.get("implementation_type", apiData);
-        
+        FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
+        FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
+
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }        
@@ -623,6 +623,18 @@ public class APIProviderHostObject extends ScriptableObject {
 
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
+
+
+
+        Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+        String inSeqPath = APIUtil.getSequencePath(api.getId(), "in");
+        String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
+
+        Icon outSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+        String outSeqPath = APIUtil.getSequencePath(api.getId(), "out");
+        String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
+
+        //api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
                 
         return saveAPI(apiProvider, api, null, false);
     	
@@ -663,8 +675,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain))
-        {
+        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
             //Create tenant aware context for API
             context= "/t/"+ providerDomain+context;
         }
@@ -882,12 +893,11 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param apiProvider
      * @param api
      * @param fileHostObject
-     * @param create
+     * @param isNewApi
      * @return true if the API was added successfully
      * @throws APIManagementException
      */
-    private static boolean saveAPI(APIProvider apiProvider,API api,
-                                  FileHostObject fileHostObject, boolean create)
+    private static boolean saveAPI(APIProvider apiProvider, API api, FileHostObject fileHostObject, boolean isNewApi)
             throws APIManagementException, FaultGatewaysException {
     	boolean success = false;
     	boolean isTenantFlowStarted = false;
@@ -910,7 +920,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 /*Set permissions to anonymous role for thumbPath*/
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
             }
-            if (create) {
+            if (isNewApi) {
             	apiProvider.addAPI(api);
             } else {
                 apiProvider.manageAPI(api);
@@ -4147,7 +4157,7 @@ public class APIProviderHostObject extends ScriptableObject {
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
                 Icon icon = new Icon(fileHostObject.getInputStream(),
                                      fileHostObject.getJavaScriptFile().getContentType());
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName()); // Look here sample
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
             } else if (oldDoc.getFilePath() != null) {
                 doc.setFilePath(oldDoc.getFilePath());

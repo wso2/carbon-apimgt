@@ -2163,8 +2163,8 @@ public final class APIUtil {
             throws APIManagementException {
         try {
         	String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-        	        APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + artifactPath);
+                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                + artifactPath);
 
         	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
         	if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
@@ -2340,8 +2340,8 @@ public final class APIUtil {
             AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
                     getTenantUserRealm(tenantID).getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + APIConstants.EXTERNAL_API_STORES_LOCATION);
+                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                                                                + APIConstants.EXTERNAL_API_STORES_LOCATION);
             authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
 
 		} catch (RegistryException e) {
@@ -4274,6 +4274,13 @@ public final class APIUtil {
     public void associateLifeCycle(String resourcePath, Registry registry) throws RegistryException {
 
         GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
+    }
+
+    public static String getSequencePath(APIIdentifier identifier, String pathFlow) {
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                              identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                              identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
+        return artifactPath + RegistryConstants.PATH_SEPARATOR + pathFlow;
     }
 
 }

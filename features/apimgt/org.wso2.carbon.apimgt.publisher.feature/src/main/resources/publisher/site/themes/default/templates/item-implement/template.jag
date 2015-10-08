@@ -213,7 +213,7 @@
                                                 <td>
                                                     <div id="inpFile" class="pull-left">
                                                         <div id="apiThumb-container"  style="display: inline;">
-                                                            <input type="file" class="input-xlarge validateImageFile" id="apiThumb"  name="apiThumb" />
+                                                            <input type="file" class="input-xlarge " id="inSeqFile"  name="inSeqFile" />
                                                         </div>
                                                     </div>
                                                     <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
@@ -221,7 +221,7 @@
                                                 <td>
                                                     <div id="inpFile" class="pull-left">
                                                         <div id="apiThumb-container"  style="display: inline;">
-                                                            <input type="file" class="input-xlarge validateImageFile" id="apiThumb"  name="apiThumb" />
+                                                            <input type="file" class="input-xlarge " id="outSeqFile"  name="outSeqFile" />
                                                         </div>
                                                     </div>
                                                     <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
