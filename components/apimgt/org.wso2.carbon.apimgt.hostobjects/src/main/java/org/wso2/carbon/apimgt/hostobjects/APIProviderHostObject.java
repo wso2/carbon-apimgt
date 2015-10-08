@@ -628,11 +628,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
 
         Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
-        String inSeqPath = APIUtil.getSequencePath(api.getId(), "in");
+        String inSeqPath = APIUtil.getSequencePath(api.getId(), "in", inSeqFile.getName());
         String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
 
-        Icon outSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
-        String outSeqPath = APIUtil.getSequencePath(api.getId(), "out");
+        Icon outSeq = new Icon(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
+        String outSeqPath = APIUtil.getSequencePath(api.getId(), "out", outSeqFile.getName());
         String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
 
         //api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
@@ -4141,7 +4141,7 @@ public class APIProviderHostObject extends ScriptableObject {
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
                 Icon icon = new Icon(fileHostObject.getInputStream(),
                                      fileHostObject.getJavaScriptFile().getContentType());
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName()); // Look here sample
+                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
             } else if (oldDoc.getFilePath() != null) {
                 doc.setFilePath(oldDoc.getFilePath());
