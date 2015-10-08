@@ -309,11 +309,11 @@ public class APIMWSDLReader {
 	private void setAddressUrl(ExtensibilityElement exElement, String transports, API api) throws APIManagementException {
 
         if (exElement instanceof SOAP12AddressImpl) {
-        	((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext() + "/" + api.getId().getVersion());
+            ((SOAP12AddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else if (exElement instanceof SOAPAddressImpl) {
-        	((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext() + "/" + api.getId().getVersion());
+            ((SOAPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else if (exElement instanceof HTTPAddressImpl) {
-        	 ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext() + "/" + api.getId().getVersion());
+            ((HTTPAddressImpl) exElement).setLocationURI(APIUtil.getGatewayendpoint(transports) + api.getContext());
         } else {
 			String msg = "Unsupported WSDL errors!";
 			log.error(msg);

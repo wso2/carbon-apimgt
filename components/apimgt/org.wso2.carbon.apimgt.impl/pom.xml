@@ -330,14 +330,12 @@
                             org.wso2.carbon.sequences.stub.*;version="${carbon.mediation.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>org.wso2.carbon.apimgt.keymgt</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.0.10</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>

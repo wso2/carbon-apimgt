@@ -91,6 +91,7 @@ import javax.net.ssl.SSLSession;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -908,15 +909,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String thumbPath = APIUtil.getIconPath(api.getId());
 
-                String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
-
-                /*Set permissions to anonymous role for thumbPath*/
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+                String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
+                        fileHostObject.getJavaScriptFile().getContentType(), apiProvider, api);
             }
             if (create) {
             	apiProvider.addAPI(api);
@@ -1273,6 +1268,9 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setDestinationStatsEnabled(destinationStats);
         api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
 
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+
         if(!"none".equals(inSequence)){
             api.setInSequence(inSequence);
         }
@@ -1350,15 +1348,9 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.addAPI(api);
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String thumbPath = APIUtil.getIconPath(apiId);
 
-                String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, provider));
-
-                /*Set permissions to anonymous role for thumbPath*/
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+                String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
+                        fileHostObject.getJavaScriptFile().getContentType(), apiProvider, api);
                 apiProvider.updateAPI(api);
             }
             NativeArray externalAPIStores = (NativeArray) apiData.get("externalAPIStores", apiData);
@@ -1396,23 +1388,15 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 checkImageSize(fileToUploadFromUrl);
 
-                Icon thumbIcon = new Icon(fileBody.getInputStream(), url.openConnection().getContentType());
-                String thumbPath = APIUtil.getIconPath(api.getId());
-                String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
-                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+                String thumbPath = addThumbIcon(fileBody.getInputStream(),
+                        url.openConnection().getContentType(), apiProvider, api);
 
-                    /*Set permissions to anonymous role for thumbPath*/
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
-
-            }catch (IOException e){
+            } catch (IOException e) {
                 handleException("[Error] Cannot read data from the URL", e);
             }
             apiProvider.updateAPI(api);
 
         }
-
-        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
-        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
@@ -1449,6 +1433,19 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return success;
 
+    }
+
+    private static String addThumbIcon(InputStream inputStream, String contentType, APIProvider apiProvider, API api)
+            throws APIManagementException {
+
+        Icon thumbIcon = new Icon(inputStream, contentType);
+        String thumbPath = APIUtil.getIconPath(api.getId());
+        String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
+        api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+
+        /*Set permissions to anonymous role for thumbPath*/
+        APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+        return thumbPath;
     }
 
     private static boolean isHTTPMethodValid(String httpMethod) {
@@ -1513,7 +1510,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
-        String thumbUrl = (String) apiData.get("thumbUrl",apiData);
+        String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String environments = (String) apiData.get("environments", apiData);
         String visibleRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
@@ -1830,18 +1827,10 @@ public class APIProviderHostObject extends ScriptableObject {
             checkFileSize(fileHostObject);
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String thumbPath = APIUtil.getIconPath(apiId);
 
+                String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
+                        fileHostObject.getJavaScriptFile().getContentType(),apiProvider, api);
 
-
-                    String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                    api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, provider));
-
-
-                /*Set permissions to anonymous role for thumbPath*/
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
             } else if (oldApi.getThumbnailUrl() != null) {
                 // retain the previously uploaded image
                 api.setThumbnailUrl(oldApi.getThumbnailUrl());
@@ -1861,13 +1850,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
                     checkImageSize(fileToUploadFromUrl);
 
-                    Icon thumbIcon = new Icon(fileBody.getInputStream(), url.openConnection().getContentType());
-                    String thumbPath = APIUtil.getIconPath(api.getId());
-                    String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
-                    api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
-
-                    /*Set permissions to anonymous role for thumbPath*/
-                    APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+                    String thumbPath = addThumbIcon(fileBody.getInputStream(), url.openConnection().getContentType(),
+                            apiProvider, api);
 
                 } catch (IOException e) {
                     handleException("[Error] Cannot read data from the URL", e);

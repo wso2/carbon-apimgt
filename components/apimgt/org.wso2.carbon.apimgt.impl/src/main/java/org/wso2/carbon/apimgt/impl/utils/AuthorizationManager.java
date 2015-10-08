@@ -16,36 +16,78 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.impl.StackObjectPool;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
-public class RemoteAuthorizationManager {
+public class AuthorizationManager {
 
-    private static final RemoteAuthorizationManager instance = new RemoteAuthorizationManager();
+    private static AuthorizationManager instance;
 
     private ObjectPool clientPool;
 
     private ScheduledExecutorService exec;
     private ScheduledFuture future;
 
-    private RemoteAuthorizationManager() {
+    private static final Log log = LogFactory.getLog(AuthorizationManager.class);
 
+    public enum ClientType {
+        REMOTE, STANDALONE
     }
 
-    public static RemoteAuthorizationManager getInstance() {
+    private AuthorizationManager(ClientType authClientType) {
+        init(authClientType);
+    }
+
+    public static AuthorizationManager getInstance() {
+        if (instance == null) {
+            synchronized (AuthorizationManager.class) {
+                if (instance == null) {
+                    String strChekPermRemotely = ServiceReferenceHolder.getInstance()
+                            .getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                                    getFirstProperty(APIConstants.ConfigParameters.CHECK_PERMISSIONS_REMOTELY);
+
+                    if (strChekPermRemotely == null || "".equals(strChekPermRemotely)) {
+                        strChekPermRemotely = "false";
+
+                        if (log.isDebugEnabled()) {
+                            log.debug("CheckPermissionsRemotely attribute is not configured in Authorization Manager " +
+                                    "configuration, Therefore assuming that the internal Authorization Manager " +
+                                    "Client implementation is being used");
+                        }
+                    }
+
+                    boolean checkPermRemotely = Boolean.parseBoolean(strChekPermRemotely);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("IsExternal attribute is set to '" + checkPermRemotely + "'");
+                        if (checkPermRemotely) {
+                            log.debug("Remote Authorization Manager Client implementation will be used");
+                        } else {
+                            log.debug("Standalone Authorization Manager Client implementation will be used");
+                        }
+                    }
+                    ClientType authClientType = (!checkPermRemotely) ? ClientType.STANDALONE : ClientType.REMOTE;
+                    instance = new AuthorizationManager(authClientType);
+                }
+            }
+        }
         return instance;
     }
 
-    public void init() {
+    private void init(final ClientType type) {
         clientPool = new StackObjectPool(new BasePoolableObjectFactory() {
             @Override
             public Object makeObject() throws Exception {
-                return new RemoteAuthorizationManagerClient();
+                return AuthorizationManagerClientFactory.getAuthorizationManagerClient(type);
             }
         });
     }
@@ -59,9 +101,9 @@ public class RemoteAuthorizationManager {
     }
 
     public boolean isUserAuthorized(String user, String permission) throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = (AuthorizationManagerClient) clientPool.borrowObject();
             return client.isUserAuthorized(user, permission);
 
         } catch (Exception e) {
@@ -77,9 +119,9 @@ public class RemoteAuthorizationManager {
     }
 
     public String[] getRolesOfUser(String user) throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = (AuthorizationManagerClient) clientPool.borrowObject();
             return client.getRolesOfUser(user);
 
         } catch (Exception e) {
@@ -95,9 +137,9 @@ public class RemoteAuthorizationManager {
     }
 
     public String[] getRoleNames() throws APIManagementException {
-        RemoteAuthorizationManagerClient client = null;
+        AuthorizationManagerClient client = null;
         try {
-            client = (RemoteAuthorizationManagerClient) clientPool.borrowObject();
+            client = (AuthorizationManagerClient) clientPool.borrowObject();
             return client.getRoleNames();
 
         } catch (Exception e) {
