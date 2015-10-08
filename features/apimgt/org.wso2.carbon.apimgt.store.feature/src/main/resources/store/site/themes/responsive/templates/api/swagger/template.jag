@@ -202,11 +202,13 @@ function checkOnKeyPress(e) {
 -->
 <% }else if(jagg.getUser() != null){ %>
     <div class="alert alert-info" style="margin-bottom:10px">
-    <i class="fa fa-info"></i> &nbsp;&nbsp; Please subscribe to the API to generate an access token. If you already have an access token please provide it below.
+        <i class="fa fa-info"></i> &nbsp;&nbsp; <%=i18n.localize("subscribeToGetAccessToken")%> &nbsp;
+        <%=i18n.localize("provideAccessToken")%>
     </div>
 <% }else{ %>
     <div class="alert alert-info" style="margin-bottom:10px">
-    <i class="fa fa-info"></i> &nbsp;&nbsp;You require an access token to try the API. Please login and subscribe to API to generate an access token. If you already have an access token please provide it below.
+        <i class="fa fa-info"></i> &nbsp;&nbsp; <%=i18n.localize("requireAccessToken")%> &nbsp;
+        <%=i18n.localize("provideAccessToken")%>
     </div>     
 <% } %>
     <div class="alert hide notoken">

@@ -264,7 +264,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         }
 
         try {
-            RealmService realmSvc = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmSvc = APIKeyMgtDataHolder.getRealmService();
             RealmConfiguration config = new RealmConfiguration();
             UserRealm realm = realmSvc.getUserRealm(config);
             org.wso2.carbon.user.core.UserStoreManager storeManager = realm.getUserStoreManager();
