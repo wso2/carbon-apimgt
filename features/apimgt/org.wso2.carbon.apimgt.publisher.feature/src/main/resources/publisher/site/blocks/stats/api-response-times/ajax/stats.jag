@@ -23,7 +23,7 @@ include("/jagg/jagg.jag");
         var to = request.getParameter("toDate");
         var mode = request.getParameter("mode");
         if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
-            result = mod.getProviderAPIServiceTime(allProviders,from,to);
+            result = mod.getResponseTimesByAPIs(allProviders,from,to,10);
         } else if (mode != null && mode == "browse") {
             provider = request.getParameter("provider");
             result = mod.getResponseTimesByAPIs(provider,from,to,10);

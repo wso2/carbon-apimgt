@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.usage.client.impl;
 
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 
@@ -11,7 +12,7 @@ public class UsageClient {
 
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
         APIUsageStatisticsRestClientImpl.initializeDataSource();
-        //                APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
+        //APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
 
     }
 
@@ -32,7 +33,9 @@ public class UsageClient {
     }
 
     public static boolean isDataPublishingEnabled(){
-        return true;
+        APIManagerAnalyticsConfiguration con=APIManagerAnalyticsConfiguration.getInstance();
+        return con.isAnalyticsEnabled();
+//        return true;
     }
 
 

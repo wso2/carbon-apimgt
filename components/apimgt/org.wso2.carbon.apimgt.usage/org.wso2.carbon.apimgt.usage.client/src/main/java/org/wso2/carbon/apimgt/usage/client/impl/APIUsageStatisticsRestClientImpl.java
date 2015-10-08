@@ -141,8 +141,7 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
 
 
-// store start
-//-------------------------------------
+// Store Statistic Methods
 
 //    @Override
     public String perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
@@ -878,15 +877,9 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
     }
 
 
-    // Store end
-    //--------------------------------------------------------------
 
 
-
-
-
-
-    //start publisher
+    // Publisher Statistic Methods
 
     /**
      * Returns a list of APIUsageByUserDTO objects that contain information related to
@@ -900,6 +893,9 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
     public String getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
+//        if(!UsageClient.isDataPublishingEnabled()){
+//            return null;
+//        }
         List<APIUsageByUserName> usageData = this.getAPIUsageByUserData(providerName, fromDate, toDate, null);
 
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
@@ -2168,11 +2164,9 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
     }
 
 
-    //stop publisher
 
 
-//throttle
-
+    //Throttling related Methods
 
     /** Given API name and Application, returns throttling request counts over time for a given time span
      *
@@ -2568,7 +2562,6 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
         }
     }
 
-    //throttle end
 
 
     /**
@@ -2868,7 +2861,8 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
     }
 
-//end of rest
+
+
 
 
 

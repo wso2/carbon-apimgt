@@ -12,7 +12,7 @@ var statsEnabled = isDataPublishingEnabled();
                 if( json.usage && json.usage.length > 0){
                     
                     var d = new Date();
-                    var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month-1, json.usage[0].day);
+                    var firstAccessDay = new Date(json.usage[0], json.usage[1], json.usage[2]);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
 
                     //day picker
@@ -108,6 +108,7 @@ var drawAPIResponseFaultCountTable = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/faultCount/ajax/stats.jag", { action:"getPerAppAPIFaultCount",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
+            json.usage=JSON.parse(json.usage);
             $('#spinner').hide();
             if (!json.error) {
 
