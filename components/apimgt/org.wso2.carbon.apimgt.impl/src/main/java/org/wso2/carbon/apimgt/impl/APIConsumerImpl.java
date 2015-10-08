@@ -1903,7 +1903,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupingId) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
-            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex, endSubIndex, groupingId);
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,
+                    endSubIndex, groupingId);
             if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
                 Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
                 for(SubscribedAPI subscribedApi:subscribedAPIs) {
@@ -2019,6 +2020,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         try {
+            WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(identifier, applicationId);
@@ -2035,6 +2038,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             workflowDTO.setExternalWorkflowReference(workflowExtRef);
             workflowDTO.setSubscriber(userId);
 
+            String status = apiMgtDAO.getSubscriptionStatus(identifier, applicationId);
+            if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
+                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
             removeSubscriptionWFExecutor.execute(workflowDTO);
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION + "" +
@@ -2224,7 +2231,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-
     /**
      * Function to remove an Application from the API Store
      *
@@ -2233,6 +2239,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     public void removeApplication(Application application) throws APIManagementException {
         boolean isTenantFlowStarted = false;
+        int applicationId = application.getId();
 
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             isTenantFlowStarted = true;
@@ -2241,9 +2248,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         try {
+            String workflowExtRef = null;
+            WorkflowExecutor createApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor createProductionRegistrationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            WorkflowExecutor createSandboxRegistrationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
             WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
-            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceByApplicationID(application.getId());
+
+            workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceByApplicationID(application.getId());
 
             ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
             workflowDTO.setApplication(application);
@@ -2256,6 +2273,28 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // once the application is removed.
             invalidateCachedKeys(application.getId());
 
+            // clean up pending subscription tasks
+            Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(applicationId);
+            for (int subscription : pendingSubscriptions) {
+                workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
+                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+
+            // cleanup pending application registration tasks
+            String productionKeyStatus = apiMgtDAO.getRegistrationApprovalState(applicationId, APIConstants
+                    .API_KEY_TYPE_PRODUCTION);
+            String sandboxKeyStatus = apiMgtDAO.getRegistrationApprovalState(applicationId, APIConstants
+                    .API_KEY_TYPE_SANDBOX);
+            if (WorkflowStatus.CREATED.toString().equals(productionKeyStatus)) {
+                workflowExtRef = apiMgtDAO.getRegistrationWFReference(applicationId, APIConstants
+                        .API_KEY_TYPE_PRODUCTION);
+                createProductionRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+            if (WorkflowStatus.CREATED.toString().equals(sandboxKeyStatus)) {
+                workflowExtRef = apiMgtDAO.getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+                createSandboxRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+            createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
             removeApplicationWFExecutor.execute(workflowDTO);
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION + " " +
