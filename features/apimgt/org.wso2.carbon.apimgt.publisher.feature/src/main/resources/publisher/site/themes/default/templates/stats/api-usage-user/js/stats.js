@@ -131,6 +131,7 @@ var drawAPIUsage = function (from,to) {
     jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
                 function (json) {
                     if (!json.error) {
+                        json.usage=JSON.parse(json.usage);
                         var length = json.usage.length, data = [];
                         var newLength=0;
                         subscriberDetails=[];
@@ -147,7 +148,7 @@ var drawAPIUsage = function (from,to) {
 
                              for (var i = 0; i < length; i++) {
 
-                                 var apiData= JSON.parse(json.usage[i].apiName);
+                                 var apiData= json.usage[i].apiName;
 
                                  apiName_Provider=""+apiData[0]+" ("+apiData[2]+")";
                                  inputData.push({

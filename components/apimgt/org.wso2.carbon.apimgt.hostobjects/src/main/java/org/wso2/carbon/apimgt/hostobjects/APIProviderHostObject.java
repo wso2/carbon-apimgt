@@ -69,7 +69,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl;
+import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
@@ -3338,10 +3338,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String providerName = (String) args[0];
         String apiName = (String) args[1];
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUsageByAPIVersions(providerName, apiName);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIVersionUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionUsage", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3379,10 +3379,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String providerName = (String) args[0];
         String apiName = (String) args[1];
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUsageBySubscribers(providerName, apiName, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIUserUsage", e);
+            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUserUsage", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3424,11 +3424,11 @@ public class APIProviderHostObject extends ScriptableObject {
         String toDate = (String) args[2];
 
         try {
-            APIUsageStatisticsRestClientImpl client =
-                    new APIUsageStatisticsRestClientImpl(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client =
+                    new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getAPIUsageByUser(providerName,fromDate,toDate);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
 
         Iterator it = null;
@@ -3473,10 +3473,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String apiName = (String) args[1];
         String version = (String) args[2];
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUsageBySubscribers(providerName, apiName, version, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIUserUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUserUsage", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3504,10 +3504,10 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIRequestsByUserAgentsDTO> list = null;
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUserAgentSummaryForALLAPIs();
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIVersionLastAccess", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
         }
         NativeArray myn = new NativeArray(0);
         Iterator it = null;
@@ -3547,10 +3547,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String toDate = (String) args[1];
         String apiName = (String)args[2];
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getAPIRequestsByHour(fromDate, toDate,apiName);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIVersionLastAccess", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -4198,10 +4198,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String providerName = (String) args[0];
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getFirstAccessTime(providerName);
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
+            list = client.getFirstAccessTime(providerName,1);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
         NativeObject row = new NativeObject();
 

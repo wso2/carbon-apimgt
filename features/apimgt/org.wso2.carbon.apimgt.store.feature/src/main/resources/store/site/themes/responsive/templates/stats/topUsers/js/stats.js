@@ -193,6 +193,8 @@ var drawTopAppUsers = function(from,to){
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getTopAppUsers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
+                json.usage=JSON.parse(json.usage);
+
                 $('#topAppUsersTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
                 $('#topAppUsersTable').show();
@@ -226,6 +228,8 @@ var drawRegisteredUserCountByApplications = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getPerAppSubscribers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
+            json.usage=JSON.parse(json.usage);
+
             $('#registeredUseresSpinner').hide();
             if (!json.error) {
                 var length = json.usage.length,data = [];
@@ -523,6 +527,8 @@ var drawAppUsers = function(from,to){
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getPerAppSubscribers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
+                json.usage=JSON.parse(json.usage);
+
                 $('#appUsersTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
                 $('#appUsersTable').show();

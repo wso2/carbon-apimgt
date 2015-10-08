@@ -9,6 +9,7 @@ var statsEnabled = isDataPublishingEnabled();
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
+                json.usage=JSON.parse(json.usage);
                 var length = json.usage.length, data = [];
                 var newLength=0;
                 var inputData=[];
@@ -23,7 +24,7 @@ var statsEnabled = isDataPublishingEnabled();
 
                      for (var i = 0; i < length; i++) {
 
-                         var apiData= JSON.parse(json.usage[i].apiName);
+                         var apiData= json.usage[i].apiName;
 
                          apiName_Provider=""+apiData[0]+" ("+apiData[2]+")";
                          inputData.push({

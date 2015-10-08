@@ -51,7 +51,7 @@ import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.keymgt.client.APIAuthenticationServiceClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl;
+import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
@@ -225,10 +225,10 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         String subscriberName = (String) args[0];
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getFirstAccessTime(subscriberName);
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
+            list = client.getFirstAccessTime(subscriberName,1);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRestClientImpl for StoreAPIUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for StoreAPIUsage", e);
         }
         NativeObject row = new NativeObject();
 
@@ -289,10 +289,10 @@ public class APIStoreHostObject extends ScriptableObject {
         String toDate = (String) args[2];
         String groupId = (String) args[3];
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIStoreHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
             list = client.getAppRegisteredUsers(subscriberName, groupId);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIUsage", e);
+            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
 
         Iterator it = null;
@@ -4120,12 +4120,12 @@ public class APIStoreHostObject extends ScriptableObject {
         String period = (String) args[1];
 
         try {
-            APIUsageStatisticsRestClientImpl client = new APIUsageStatisticsRestClientImpl(((APIStoreHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
             list = client.getUsageBySubscriber(subscriberName, period);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIUsage", e);
+            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         } catch (Exception e) {
-            handleException("Error while invoking APIUsageStatisticsRestClientImpl for ProviderAPIUsage", e);
+            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
 
         Iterator it = null;
@@ -4457,7 +4457,7 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args.length > 0 && args[0] != null) {
             domains = apiConsumer.getTenantDomainMappings((String) args[0], APIConstants.API_DOMAIN_MAPPINGS_GATEWAY);
         }
-        if(domains == null || domains.size() == 0 ){
+        if (domains == null || domains.size() == 0) {
             return null;
         }
         Iterator entries = domains.entrySet().iterator();
@@ -4465,7 +4465,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Map.Entry thisEntry = (Map.Entry) entries.next();
             String key = (String) thisEntry.getKey();
             String value = (String) thisEntry.getValue();
-            myn.put(key,myn,value);
+            myn.put(key, myn, value);
         }
         return myn;
     }
