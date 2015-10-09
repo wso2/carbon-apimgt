@@ -37,9 +37,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
 

@@ -38,10 +38,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This is the class to call external workflow to have human interaction on
