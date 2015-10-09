@@ -92,7 +92,12 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
         try {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
             apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            if (apiManagerAnalyticsConfiguration.isAnalyticsEnabled() && restClient == null) {
+
+            if(!apiManagerAnalyticsConfiguration.isAnalyticsEnabled()){
+                throw new APIMgtUsageQueryServiceClientException("Analytics not enabled");
+            }
+
+            if (restClient == null) {
                 initializeDataSource();
             }
             // text = config.getFirstProperty("BillingConfig");
@@ -118,13 +123,13 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
         ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
         if (serviceDataPublisherAdmin != null){
-            AnalyzingConfigData data=serviceDataPublisherAdmin.getAnalyzingConfigData();
-
-            String url=data.getUrl();
-            String user=data.getUserName();
-            String pass=data.getPassword();
-            restClient=new DASRestClient(url,user,pass);
-
+            if(serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable()) {
+                AnalyzingConfigData data = serviceDataPublisherAdmin.getAnalyzingConfigData();
+                String url = data.getUrl();
+                String user = data.getUserName();
+                String pass = data.getPassword();
+                restClient = new DASRestClient(url, user, pass);
+            }
         }
     }
 
@@ -587,9 +592,11 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
     public String getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-//        if(!UsageClient.isDataPublishingEnabled()){
-//            return null;
-//        }
+        if(!UsageClient.isDataPublishingEnabled()){
+            return null;
+//            throw new APIMgtUsageQueryServiceClientException("isDataPublishingEnabled");
+        }
+
         List<APIUsageByUserName> usageData = this.getAPIUsageByUserData(providerName, fromDate, toDate, null);
 
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);

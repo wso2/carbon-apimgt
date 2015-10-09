@@ -30,7 +30,7 @@ log = new Log();
         else if (action === "getAppApiCallType") {
 
         var subscriber = jagg.getUser().username;
-        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
 
         from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
@@ -54,20 +54,28 @@ log = new Log();
 
     }else if (action === "getFirstAccessTime") {
         var provider = jagg.getUser().username;
-        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
-        result = mod.getFirstAccessTime(subscriber);
-        if (result.error == "true") {
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
+        if (mod==null){
             obj = {
-                error:result.error,
-                message:msg.error.backendError(action)
+                error: false,
+                message: ""
             };
+            print(obj);
         } else {
-            obj = {
-                error:false,
-                usage:result.toArray()
+            result = mod.getFirstAccessTime(subscriber);
+            if (result.error == "true") {
+                obj = {
+                    error:result.error,
+                    message:msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error:false,
+                    usage:result.toArray()
+                }
             }
+            print(obj);
         }
-        print(obj);
 
     } else if (action === "isDataPublishingEnabled") {
             result = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();

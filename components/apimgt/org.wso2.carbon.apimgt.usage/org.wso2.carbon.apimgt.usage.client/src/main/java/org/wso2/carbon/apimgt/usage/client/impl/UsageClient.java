@@ -32,29 +32,32 @@ public class UsageClient {
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
         APIUsageStatisticsRestClientImpl.initializeDataSource();
         //APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
-
-    }
-
-    public UsageClient(String name) {
         try {
-            apiUsageStatisticsClient = new APIUsageStatisticsRestClientImpl(name);
+            apiUsageStatisticsClient = new APIUsageStatisticsRestClientImpl("");
         } catch (APIMgtUsageQueryServiceClientException e) {
             e.printStackTrace();
         }
+    }
+
+    public UsageClient(String name) {
+        System.out.println("init usageClient");
     }
 
     public UsageClient() {
         System.out.println("init");
     }
 
-    public APIUsageStatisticsClient getClient() {
-        return apiUsageStatisticsClient;
+    public static APIUsageStatisticsClient getClient() {
+        if (isDataPublishingEnabled()) {
+            return apiUsageStatisticsClient;
+        } else {
+            return null;
+        }
     }
 
     public static boolean isDataPublishingEnabled(){
         APIManagerAnalyticsConfiguration con=APIManagerAnalyticsConfiguration.getInstance();
         return con.isAnalyticsEnabled();
-//        return true;
     }
 
     public static String getSubscriberCountByAPIs(String loggedUser)

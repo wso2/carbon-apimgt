@@ -99,7 +99,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                 }
 
-                else if (usage && usage.length == 0 && statsEnabled) {
+                else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
