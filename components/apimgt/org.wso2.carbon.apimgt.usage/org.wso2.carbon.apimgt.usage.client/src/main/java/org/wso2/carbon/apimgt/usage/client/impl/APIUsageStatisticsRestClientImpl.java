@@ -860,7 +860,7 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
                     accessTimeDTO.setApiName(apiName);
                     accessTimeDTO.setApiVersion(accessTime.apiVersion);
                     accessTimeDTO.setUser(accessTime.username);
-                    accessTimeDTO.setLastAccessTime(dateFormat.format(accessTime.accessTime));
+                    accessTimeDTO.setLastAccessTime(accessTime.accessTime+"");
                     apiVersionLastAccessTimeUsage.add(accessTimeDTO);
                 }
             }
@@ -1990,16 +1990,18 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
                     ("Error occurred while connecting to DAS REST API", e);
         }
 
+        APIFirstAccess firstAccess=null;
         long l=obj.get(0).getValues().getFirst_access_time();
-        Calendar cc = Calendar.getInstance();
-        cc.setTimeInMillis(l);
+        if(l>0) {
+            Calendar cc = Calendar.getInstance();
+            cc.setTimeInMillis(l);
 
-        String year=cc.get(Calendar.YEAR)+"";
-        String month=cc.get(Calendar.MONTH)+"";
-        String day=cc.get(Calendar.DATE)+"";
+            String year = cc.get(Calendar.YEAR) + "";
+            String month = cc.get(Calendar.MONTH) + "";
+            String day = cc.get(Calendar.DATE) + "";
 
-        APIFirstAccess firstAccess = new APIFirstAccess(year,month,day);
-
+            firstAccess = new APIFirstAccess(year, month, day);
+        }
         return firstAccess;
         /*if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
@@ -2577,28 +2579,14 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
         private String apiName;
         private String apiVersion;
         private String context;
-        private double accessTime;
+        private long accessTime;
         private String username;
 
         public APIAccessTime(){
 
         }
-        @Deprecated
-        public APIAccessTime(OMElement row) {
-            String nameVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API_VERSION)).getText();
-            int index = nameVersion.lastIndexOf(":v");
-            apiName = nameVersion.substring(0, index);
-            apiVersion = nameVersion.substring(index + 2);
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            accessTime = Double.parseDouble(
-                    row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.REQUEST_TIME)).getText());
-            username = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-        }
 
-        public APIAccessTime(String apiName, String apiVersion, String context, double accessTime, String username) {
+        public APIAccessTime(String apiName, String apiVersion, String context, long accessTime, String username) {
 
             this.apiName = apiName;
             this.apiVersion = apiVersion;
