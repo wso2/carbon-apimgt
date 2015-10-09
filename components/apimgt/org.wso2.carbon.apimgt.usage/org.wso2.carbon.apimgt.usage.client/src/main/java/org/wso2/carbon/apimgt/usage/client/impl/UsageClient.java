@@ -1,9 +1,8 @@
 package org.wso2.carbon.apimgt.usage.client.impl;
 
 import com.google.gson.Gson;
-import org.json.simple.JSONArray;
-import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -19,37 +18,25 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by rukshan on 10/6/15.
  */
 public class UsageClient {
-    private static String user;
-    public static APIUsageStatisticsClient apiUsageStatisticsClient;
+    private static final Log log = LogFactory.getLog(UsageClient.class);
 
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
         APIUsageStatisticsRestClientImpl.initializeDataSource();
-        //APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
-        try {
-            apiUsageStatisticsClient = new APIUsageStatisticsRestClientImpl("");
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public UsageClient(String name) {
-        System.out.println("init usageClient");
-    }
-
-    public UsageClient() {
-        System.out.println("init");
     }
 
     public static APIUsageStatisticsClient getClient() {
         if (isDataPublishingEnabled()) {
-            return apiUsageStatisticsClient;
+            try {
+                return new APIUsageStatisticsRestClientImpl("");
+            } catch (APIMgtUsageQueryServiceClientException e) {
+               log.error("Error instantiating Statistic Client",e);
+                return null;
+            }
         } else {
             return null;
         }

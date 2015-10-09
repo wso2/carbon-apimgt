@@ -592,11 +592,6 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
     public String getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        if(!UsageClient.isDataPublishingEnabled()){
-            return null;
-//            throw new APIMgtUsageQueryServiceClientException("isDataPublishingEnabled");
-        }
-
         List<APIUsageByUserName> usageData = this.getAPIUsageByUserData(providerName, fromDate, toDate, null);
 
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
@@ -1955,6 +1950,10 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
     public List<String> getFirstAccessTime(String providerName)
             throws APIMgtUsageQueryServiceClientException {
+
+        if(!isTableExist("API_UTIL")){
+            return new ArrayList<String>();
+        }
 
         APIFirstAccess firstAccess = this.queryFirstAccess( "API_UTIL");
         List<String> APIFirstAccessList = new ArrayList<String>();
