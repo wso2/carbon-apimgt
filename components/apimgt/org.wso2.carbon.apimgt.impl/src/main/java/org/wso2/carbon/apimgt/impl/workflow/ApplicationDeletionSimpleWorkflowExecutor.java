@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor {
 
-    private static final Log log = LogFactory.getLog(SubscriptionCreationSimpleWorkflowExecutor.class);
+    private static final Log log = LogFactory.getLog(ApplicationDeletionSimpleWorkflowExecutor.class);
 
     @Override
     public String getWorkflowType() {

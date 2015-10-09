@@ -65,10 +65,11 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
     public void execute(WorkflowDTO workflowDTO) throws WorkflowException{
 
         try {
-            String action = "http://workflow.subscription.apimgt.carbon.wso2.org/initiate";
+            String action = WorkflowConstants.CREATE_SUBSCRIPTION_WS_ACTION;
             ServiceClient client = getClient(action);
 
-            String payload = "<wor:SubscriptionApprovalWorkFlowProcessRequest xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
+            String payload = "<wor:SubscriptionApprovalWorkFlowProcessRequest " +
+                    "         xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
                     "         <wor:apiName>$1</wor:apiName>\n" +
                     "         <wor:apiVersion>$2</wor:apiVersion>\n" +
                     "         <wor:apiContext>$3</wor:apiContext>\n" +
@@ -138,7 +139,7 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
         String errorMsg = null;
         super.cleanUpPendingTask(workflowExtRef);
         try {
-            String action = "http://workflow.subscription.apimgt.carbon.wso2.org/cancel";
+            String action = WorkflowConstants.DELETE_SUBSCRIPTION_WS_ACTION;
             ServiceClient client = getClient(action);
 
             String payload = "<wor:CancelSubscriptionApprovalWorkflowProcessRequest " +

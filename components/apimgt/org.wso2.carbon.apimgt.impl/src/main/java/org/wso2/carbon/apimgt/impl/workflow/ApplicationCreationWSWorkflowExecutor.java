@@ -70,7 +70,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
         }
         super.execute(workflowDTO);
         try {
-            String action = "http://workflow.application.apimgt.carbon.wso2.org/initiate";
+            String action = WorkflowConstants.CREATE_APPLICATION_WS_ACTION;
             ServiceClient client = getClient(action);
 
             String payload =
@@ -172,7 +172,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
 
         super.cleanUpPendingTask(workflowExtRef);
         try {
-            String action = "http://workflow.application.apimgt.carbon.wso2.org/cancel";
+            String action = WorkflowConstants.DELETE_APPLICATION_WS_ACTION;
             ServiceClient client = getClient(action);
 
             String payload = "<p:CancelApplicationApprovalWorkflowProcessRequest " +

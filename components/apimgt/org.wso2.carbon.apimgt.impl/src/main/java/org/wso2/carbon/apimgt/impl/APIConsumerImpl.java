@@ -2014,8 +2014,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isTenantFlowStarted = false;
 
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            isTenantFlowStarted = true;
             PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
 
@@ -2242,8 +2242,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         int applicationId = application.getId();
 
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            isTenantFlowStarted = true;
             PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
 

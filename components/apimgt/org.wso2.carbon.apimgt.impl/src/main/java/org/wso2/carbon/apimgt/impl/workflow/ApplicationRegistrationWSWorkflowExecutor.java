@@ -64,7 +64,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 			log.info("Executing Application registration Workflow..");
 		}
 		try {
-			String action = "http://workflow.application.apimgt.carbon.wso2.org/initiate";
+			String action = WorkflowConstants.CREATE_REGISTRATION_WS_ACTION;
 			ServiceClient client = getClient(action);
 
 			String payload =
@@ -148,7 +148,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 		String errorMsg = null;
 
 		try {
-			String action = "http://workflow.application.apimgt.carbon.wso2.org/cancel";
+			String action = WorkflowConstants.DELETE_REGISTRATION_WS_ACTION;
 			ServiceClient client = getClient(action);
 
 			String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
