@@ -47,7 +47,7 @@ import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
-import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
+import org.wso2.carbon.apimgt.usage.client.pojo.*;
 import org.wso2.carbon.apimgt.usage.client.util.DASRestClient;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.bam.service.data.publisher.conf.AnalyzingConfigData;
@@ -599,12 +599,12 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
         List<APIUsageByUserDTO> usageByName = new ArrayList<APIUsageByUserDTO>();
 
         for (APIUsageByUserName usage : usageData) {
-            if (tenantDomain.equals(MultitenantUtils.getTenantDomain(usage.apipublisher))) {
+            if (tenantDomain.equals(MultitenantUtils.getTenantDomain(usage.getApipublisher()))) {
                 APIUsageByUserDTO usageDTO = new APIUsageByUserDTO();
-                usageDTO.setApiName(usage.apiName);
-                usageDTO.setVersion(usage.apiVersion);
-                usageDTO.setUserID(usage.userID);
-                usageDTO.setCount(usage.requestCount);
+                usageDTO.setApiName(usage.getApiName());
+                usageDTO.setVersion(usage.getApiVersion());
+                usageDTO.setUserID(usage.getUserID());
+                usageDTO.setCount(usage.getRequestCount());
                 usageByName.add(usageDTO);
             }
         }
@@ -664,12 +664,12 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             APIUsageByUserValues v = result.getValues();
 
             usage = new APIUsageByUserName();
-            usage.requestCount = v.getCount_sum();
+            usage.setRequestCount(v.getCount_sum());
 
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.userID = v.getColumnNames().get(2);
-            usage.apipublisher = v.getColumnNames().get(3);
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setUserID(v.getColumnNames().get(2));
+            usage.setApipublisher(v.getColumnNames().get(3));
 
             usageByName.add(usage);
         }
@@ -704,9 +704,9 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
         for (APIResponseTime responseTime : responseTimes) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(responseTime.apiName) &&
-                        providerAPI.getId().getVersion().equals(responseTime.apiVersion) &&
-                        providerAPI.getContext().equals(responseTime.context)) {
+                if (providerAPI.getId().getApiName().equals(responseTime.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(responseTime.getApiVersion()) &&
+                        providerAPI.getContext().equals(responseTime.getContext())) {
 
                     /*String apiName = responseTime.apiName + " (" + providerAPI.getId().getProviderName() + ")";
                     Double cumulativeResponseTime = apiCumulativeServiceTimeMap.get(apiName);
@@ -722,8 +722,8 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
                         apiUsageMap.put(apiName, responseTime.responseCount);
                     }*/
                     APIResponseTimeDTO responseTimeDTO = new APIResponseTimeDTO();
-                    responseTimeDTO.setApiName(responseTime.apiName);
-                    double avgTime = responseTime.responseTime / responseTime.responseCount;
+                    responseTimeDTO.setApiName(responseTime.getApiName());
+                    double avgTime = responseTime.getResponseTime() / responseTime.getResponseCount();
                     responseTimeDTO.setServiceTime(Double.parseDouble(format.format(avgTime)));
                     apiResponseTimeUsage.add(responseTimeDTO);
                 }
@@ -805,11 +805,11 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             ResponseTimesByAPIsValue v = result.getValues();
 
             usage = new APIResponseTime();
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.context = v.getColumnNames().get(2);
-            usage.responseTime = v.getTotalServiceTime();
-            usage.responseCount = v.getTotalResponseCount();
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setContext(v.getColumnNames().get(2));
+            usage.setResponseTime(v.getTotalServiceTime());
+            usage.setResponseCount(v.getTotalResponseCount());
 
             responseTimeData.add(usage);
         }
@@ -840,9 +840,9 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
         for (APIAccessTime accessTime : accessTimes) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(accessTime.apiName) &&
-                        providerAPI.getId().getVersion().equals(accessTime.apiVersion) &&
-                        providerAPI.getContext().equals(accessTime.context)) {
+                if (providerAPI.getId().getApiName().equals(accessTime.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(accessTime.getApiVersion()) &&
+                        providerAPI.getContext().equals(accessTime.getContext())) {
 
                     /*String apiName = accessTime.apiName + " (" + providerAPI.getId().getProviderName() + ")";
                     APIAccessTime lastAccessTime = lastAccessTimes.get(apiName);
@@ -850,12 +850,12 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
                         lastAccessTimes.put(apiName, accessTime);
                         break;
                     }*/
-                    String apiName = accessTime.apiName + " (" + providerAPI.getId().getProviderName() + ")";
+                    String apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
                     APIVersionLastAccessTimeDTO accessTimeDTO = new APIVersionLastAccessTimeDTO();
                     accessTimeDTO.setApiName(apiName);
-                    accessTimeDTO.setApiVersion(accessTime.apiVersion);
-                    accessTimeDTO.setUser(accessTime.username);
-                    accessTimeDTO.setLastAccessTime(accessTime.accessTime+"");
+                    accessTimeDTO.setApiVersion(accessTime.getApiVersion());
+                    accessTimeDTO.setUser(accessTime.getUsername());
+                    accessTimeDTO.setLastAccessTime(accessTime.getAccessTime()+"");
                     apiVersionLastAccessTimeUsage.add(accessTimeDTO);
                 }
             }
@@ -935,11 +935,11 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             LastAccessTimesByAPIValue v = result.getValues();
 
             usage = new APIAccessTime();
-            usage.accessTime = v.getLastAccessTime();
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.username = v.getColumnNames().get(2);
-            usage.context = v.getColumnNames().get(3);
+            usage.setAccessTime(v.getLastAccessTime());
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setUsername(v.getColumnNames().get(2));
+            usage.setContext(v.getColumnNames().get(3));
             lastAccessTimeData.add(usage);
         }
 
@@ -969,17 +969,17 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
         for (APIUsageByResourcePath usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
 
                     APIResourcePathUsageDTO usageDTO = new APIResourcePathUsageDTO();
-                    usageDTO.setApiName(usage.apiName);
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setMethod(usage.method);
-                    usageDTO.setContext(usage.context);
-                    usageDTO.setCount(usage.requestCount);
-                    usageDTO.setTime(usage.time);
+                    usageDTO.setApiName(usage.getApiName());
+                    usageDTO.setVersion(usage.getApiVersion());
+                    usageDTO.setMethod(usage.getMethod());
+                    usageDTO.setContext(usage.getContext());
+                    usageDTO.setCount(usage.getRequestCount());
+                    usageDTO.setTime(usage.getTime());
                     usageByResourcePath.add(usageDTO);
                 }
             }
@@ -1039,11 +1039,11 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             APIUsageByResourcePathValue v = result.getValues();
 
             usage = new APIUsageByResourcePath();
-            usage.requestCount = v.getTotalRequesCount();
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.context = v.getColumnNames().get(2);
-            usage.method = v.getColumnNames().get(3);
+            usage.setRequestCount(v.getTotalRequesCount());
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setContext(v.getColumnNames().get(2));
+            usage.setMethod(v.getColumnNames().get(3));
 
             usageByResourcePath.add(usage);
         }
@@ -1065,16 +1065,16 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
         for (APIUsageByDestination usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
 
                     APIDestinationUsageDTO usageDTO = new APIDestinationUsageDTO();
-                    usageDTO.setApiName(usage.apiName);
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setDestination(usage.destination);
-                    usageDTO.setContext(usage.context);
-                    usageDTO.setCount(usage.requestCount);
+                    usageDTO.setApiName(usage.getApiName());
+                    usageDTO.setVersion(usage.getApiVersion());
+                    usageDTO.setDestination(usage.getDestination());
+                    usageDTO.setContext(usage.getContext());
+                    usageDTO.setCount(usage.getRequestCount());
                     usageByResourcePath.add(usageDTO);
                 }
             }
@@ -1134,11 +1134,11 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             APIUsageByDestinationValue v = result.getValues();
 
             usage = new APIUsageByDestination();
-            usage.requestCount = v.getTotalRequesCount();
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.context = v.getColumnNames().get(2);
-            usage.destination = v.getColumnNames().get(3);
+            usage.setRequestCount(v.getTotalRequesCount());
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setContext(v.getColumnNames().get(2));
+            usage.setDestination(v.getColumnNames().get(3));
 
             usageByResourcePath.add(usage);
         }
@@ -1168,10 +1168,10 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
-                    String[] apiData = {usage.apiName, usage.apiVersion,  providerAPI.getId().getProviderName()};
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
+                    String[] apiData = {usage.getApiName(), usage.getApiVersion(),  providerAPI.getId().getProviderName()};
 
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add(0,apiData[0]);
@@ -1181,11 +1181,11 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
                     APIUsageDTO usageDTO = usageByAPIs.get(apiName);
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usage.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usage.getRequestCount());
                     } else {
                         usageDTO = new APIUsageDTO();
                         usageDTO.setApiName(apiName);
-                        usageDTO.setCount(usage.requestCount);
+                        usageDTO.setCount(usage.getRequestCount());
                         usageByAPIs.put(apiName, usageDTO);
                     }
                 }
@@ -1253,10 +1253,10 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             UsageByAPIsValue v = result.getValues();
 
             usage = new APIUsage();
-            usage.requestCount = v.getTotalRequestCount();
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.context = v.getColumnNames().get(2);
+            usage.setRequestCount(v.getTotalRequestCount());
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setContext(v.getColumnNames().get(2));
 
             usageDataList.add(usage);
         }
@@ -1277,22 +1277,22 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
         APIVersionUsageDTO apiVersionUsageDTO;
         for (APIResponseFaultCount fault : faultyData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(fault.apiName) &&
-                        providerAPI.getId().getVersion().equals(fault.apiVersion) &&
-                        providerAPI.getContext().equals(fault.context)) {
+                if (providerAPI.getId().getApiName().equals(fault.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(fault.getApiVersion()) &&
+                        providerAPI.getContext().equals(fault.getContext())) {
 
                     APIResponseFaultCountDTO faultyDTO = new APIResponseFaultCountDTO();
-                    faultyDTO.setApiName(fault.apiName);
-                    faultyDTO.setVersion(fault.apiVersion);
-                    faultyDTO.setContext(fault.context);
-                    faultyDTO.setCount(fault.faultCount);
+                    faultyDTO.setApiName(fault.getApiName());
+                    faultyDTO.setVersion(fault.getApiVersion());
+                    faultyDTO.setContext(fault.getContext());
+                    faultyDTO.setCount(fault.getFaultCount());
 
-                    apiVersionUsageList = getUsageByAPIVersions(providerName, fault.apiName, fromDate, toDate);
+                    apiVersionUsageList = getUsageByAPIVersions(providerName, fault.getApiName(), fromDate, toDate);
                     if(apiVersionUsageList.size() > 0){
                         apiVersionUsageDTO = apiVersionUsageList.get(0);
-                        if (apiVersionUsageDTO.getVersion().equals(fault.apiVersion)) {
+                        if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             long requestCount = apiVersionUsageDTO.getCount();
-                            double faultPercentage = ((double)requestCount - fault.faultCount) / requestCount * 100;
+                            double faultPercentage = ((double)requestCount - fault.getFaultCount()) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
                             faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
@@ -1372,10 +1372,10 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             APIResponseFaultCountValue v = result.getValues();
 
             usage = new APIResponseFaultCount();
-            usage.faultCount = v.getTotalFaultCount();
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.context = v.getColumnNames().get(3);
+            usage.setFaultCount(v.getTotalFaultCount());
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setContext(v.getColumnNames().get(3));
 
             faultUsage.add(usage);
         }
@@ -1808,14 +1808,14 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
         for (APIUsage usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
 
                     APIVersionUsageDTO usageDTO = new APIVersionUsageDTO();
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setCount(usage.requestCount);
-                    usageByVersions.put(usage.apiVersion, usageDTO);
+                    usageDTO.setVersion(usage.getApiVersion());
+                    usageDTO.setCount(usage.getRequestCount());
+                    usageByVersions.put(usage.getApiVersion(), usageDTO);
                 }
             }
         }
@@ -1872,80 +1872,16 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             UsageByAPIVersionsValue v = result.getValues();
 
             usage = new APIUsage();
-            usage.requestCount = v.getTotalRequestCount();
-            usage.apiName = v.getColumnNames().get(0);
-            usage.apiVersion = v.getColumnNames().get(1);
-            usage.context = v.getColumnNames().get(2);
+            usage.setRequestCount(v.getTotalRequestCount());
+            usage.setApiName(v.getColumnNames().get(0));
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setContext(v.getColumnNames().get(2));
 
             usageDataList.add(usage);
         }
 
         return usageDataList;
-        /*
-        if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
-        }
 
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
-        List<APIUsage> usageDataList = new ArrayList<APIUsage>();
-
-        try {
-            connection = dataSource.getConnection();
-            statement = connection.createStatement();
-            String query;
-            if (fromDate != null && toDate != null) {
-                query = "SELECT api,version,apiPublisher,context,SUM(total_request_count) as total_request_count" +
-                        " FROM  " + tableName +
-                        " WHERE api =\'" + apiName + "\' " +
-                        " AND " + APIUsageStatisticsClientConstants.TIME +
-                        " BETWEEN " + "\'" + fromDate + "\' " +
-                        " AND \'" + toDate + "\'" +
-                        " GROUP BY api,version,apiPublisher,context";
-            } else {
-                query = "SELECT api,version,apiPublisher,context,SUM(total_request_count) as total_request_count" +
-                        " FROM  " + tableName +
-                        " WHERE api =\'" + apiName + "\' " +
-                        " GROUP BY api,version,apiPublisher,context";
-            }
-            rs = statement.executeQuery(query);
-
-            while (rs.next()) {
-                String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
-                String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
-                long requestCount = rs.getLong("total_request_count");
-                usageDataList.add(new APIUsage(apiName, context, version, requestCount));
-            }
-
-            return usageDataList;
-
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
-        }*/
     }
 
     public List<String> getFirstAccessTime(String providerName)
@@ -2002,72 +1938,7 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
             firstAccess = new APIFirstAccess(year, month, day);
         }
         return firstAccess;
-        /*if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
-        }
 
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet rs = null;
-        try {
-            connection = dataSource.getConnection();
-            statement = connection.createStatement();
-            String query;
-            if (connection != null && connection.getMetaData().getDatabaseProductName().equalsIgnoreCase("oracle")) {
-
-                query = "SELECT time,year,month,day FROM  " + columnFamily + " WHERE ROWNUM <= 1 order by time ASC";
-
-            } else if (connection != null && connection.getMetaData().getDatabaseProductName().contains("Microsoft")) {
-
-                query = "SELECT TOP 1 time,year,month,day FROM  " + columnFamily + " order by time ASC";
-
-            } else {
-
-                query = "SELECT time,year,month,day FROM  " + columnFamily + " order by time ASC limit 1";
-
-            }
-            rs = statement.executeQuery(query);
-            String year;
-            String month;
-            String day;
-            APIFirstAccess firstAccess = null;
-
-            while (rs.next()) {
-                year = rs.getString("year");
-                month = rs.getString("month");
-                day = rs.getString("day");
-                firstAccess = new APIFirstAccess(year, month, day);
-            }
-
-            return firstAccess;
-
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database" +
-                                                             e.getMessage(), e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
-        }*/
     }
 
     private static boolean isTableExist(String tableName) throws APIMgtUsageQueryServiceClientException {
@@ -2354,246 +2225,14 @@ public class APIUsageStatisticsRestClientImpl implements APIUsageStatisticsClien
 
 
 
-    private static class APIUsage {
 
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private long requestCount;
 
-        public APIUsage(){
 
-        }
-        @Deprecated
-        public APIUsage(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-        }
 
-        public APIUsage(String apiName, String context, String apiVersion, long requestCount) {
 
-            this.apiName = apiName;
-            this.context = context;
-            this.apiVersion = apiVersion;
-            this.requestCount = requestCount;
-        }
-    }
 
-    private static class APIUsageByResourcePath {
 
-        private String apiName;
-        private String apiVersion;
-        private String method;
-        private String context;
-        private long requestCount;
-        private String time;
 
-        public APIUsageByResourcePath(){
-
-        }
-        public APIUsageByResourcePath(String apiName, String apiVersion, String method, String context,
-                long requestCount, String time) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.method = method;
-            this.context = context;
-            this.requestCount = requestCount;
-            this.time = time;
-        }
-
-        @Deprecated
-        public APIUsageByResourcePath(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            method = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.METHOD)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            time = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.TIME)).getText();
-        }
-    }
-
-    private static class APIUsageByDestination {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private String destination;
-        private long requestCount;
-
-        public APIUsageByDestination(){
-
-        }
-        public APIUsageByDestination(String apiName, String apiVersion, String context, String destination,
-                long requestCount) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.destination = destination;
-            this.requestCount = requestCount;
-        }
-
-        @Deprecated
-        public APIUsageByDestination(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            destination = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.DESTINATION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-        }
-    }
-
-    private static class APIUsageByUserName {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private String userID;
-        private String apipublisher;
-        private long requestCount;
-
-        public APIUsageByUserName(){
-
-        }
-        public APIUsageByUserName(String apiName, String apiVersion, String context, String userID, long requestCount,
-                String apipublisher) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.userID = userID;
-            this.requestCount = requestCount;
-            this.apipublisher = apipublisher;
-        }
-
-        @Deprecated
-        public APIUsageByUserName(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            userID = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-        }
-    }
-
-    private static class APIResponseFaultCount {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-//        private String requestTime;
-        private long faultCount;
-
-        public APIResponseFaultCount(){
-
-        }
-        public APIResponseFaultCount(String apiName, String apiVersion, String context, long faultCount) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.faultCount = faultCount;
-        }
-
-        @Deprecated
-        public APIResponseFaultCount(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            OMElement invocationTimeEle = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.INVOCATION_TIME));
-            OMElement faultCountEle = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.FAULT));
-//            if (invocationTimeEle != null) {
-//                requestTime = invocationTimeEle.getText();
-//            }
-            if (faultCountEle != null) {
-                faultCount = (long) Double.parseDouble(faultCountEle.getText());
-            }
-        }
-    }
-
-    private static class APIResponseTime {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private double responseTime;
-        private long responseCount;
-
-        public APIResponseTime(){
-
-        }
-
-        @Deprecated
-        public APIResponseTime(OMElement row) {
-            String nameVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API_VERSION)).getText();
-            int index = nameVersion.lastIndexOf(":v");
-            apiName = nameVersion.substring(0, index);
-            apiVersion = nameVersion.substring(index + 2);
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            responseTime = Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.SERVICE_TIME)).getText());
-            responseCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.RESPONSE)).getText());
-        }
-
-        public APIResponseTime
-                (String apiName, String apiVersion, String context, double responseTime, long responseCount) {
-
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.responseTime = responseTime;
-            this.responseCount = responseCount;
-        }
-    }
-
-    private static class APIAccessTime {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private long accessTime;
-        private String username;
-
-        public APIAccessTime(){
-
-        }
-
-        public APIAccessTime(String apiName, String apiVersion, String context, long accessTime, String username) {
-
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.accessTime = accessTime;
-            this.username = username;
-        }
-    }
 
 
 }

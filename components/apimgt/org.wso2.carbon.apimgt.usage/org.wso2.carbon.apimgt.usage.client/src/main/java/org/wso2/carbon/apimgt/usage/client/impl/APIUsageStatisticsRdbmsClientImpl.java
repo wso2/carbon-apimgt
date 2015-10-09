@@ -64,7 +64,7 @@ import java.util.*;
 import org.json.simple.JSONArray;
 
 
-public class APIUsageStatisticsRdbmsClientImpl implements APIUsageStatisticsClient {
+public class APIUsageStatisticsRdbmsClientImpl /*implements APIUsageStatisticsClient*/ {
 
     private static final String API_USAGE_TRACKING = "APIUsageTracking.";
     private static final String DATA_SOURCE_NAME = "jdbc/WSO2AM_STATS_DB";

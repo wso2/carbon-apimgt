@@ -34,7 +34,7 @@ public class UsageClient {
             try {
                 return new APIUsageStatisticsRestClientImpl("");
             } catch (APIMgtUsageQueryServiceClientException e) {
-               log.error("Error instantiating Statistic Client",e);
+                log.error("Error instantiating Statistic Client", e);
                 return null;
             }
         } else {
@@ -42,24 +42,23 @@ public class UsageClient {
         }
     }
 
-    public static boolean isDataPublishingEnabled(){
-        APIManagerAnalyticsConfiguration con=APIManagerAnalyticsConfiguration.getInstance();
+    public static boolean isDataPublishingEnabled() {
+        APIManagerAnalyticsConfiguration con = APIManagerAnalyticsConfiguration.getInstance();
         return con.isAnalyticsEnabled();
     }
 
-    public static String getSubscriberCountByAPIs(String loggedUser)
-            throws APIManagementException {
+    public static String getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
         String providerName = null;
 
         APIProvider apiProvider; //= getAPIProvider(thisObj);
         apiProvider = APIManagerFactory.getInstance().getAPIProvider(loggedUser);
 
-        List<SubscriberCountByAPIs> list=new ArrayList<SubscriberCountByAPIs>();
+        List<SubscriberCountByAPIs> list = new ArrayList<SubscriberCountByAPIs>();
         boolean isTenantFlowStarted = false;
         try {
             providerName = APIUtil.replaceEmailDomain(loggedUser);
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -73,9 +72,8 @@ public class UsageClient {
                     apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(providerName));
                 }
 
-//                List<SubscriberCountByAPIs> subscriptionData = new ArrayList<SubscriberCountByAPIs>();
-//                Map<String, Long> subscriptions = new TreeMap<String, Long>();
-
+                //                List<SubscriberCountByAPIs> subscriptionData = new ArrayList<SubscriberCountByAPIs>();
+                //                Map<String, Long> subscriptions = new TreeMap<String, Long>();
 
                 for (API api : apiSet) {
                     if (api.getStatus() == APIStatus.CREATED) {
@@ -86,12 +84,12 @@ public class UsageClient {
                         continue;
                     }
 
-                    SubscriberCountByAPIs apiSub=new SubscriberCountByAPIs();
+                    SubscriberCountByAPIs apiSub = new SubscriberCountByAPIs();
                     apiSub.apiName.add(api.getId().getApiName());
                     apiSub.apiName.add(api.getId().getVersion());
                     apiSub.apiName.add(api.getId().getProviderName());
 
-                    apiSub.count=count;
+                    apiSub.count = count;
                     list.add(apiSub);
                 }
 
@@ -106,12 +104,9 @@ public class UsageClient {
         return new Gson().toJson(list);
     }
 
-
-
-
 }
 
-class SubscriberCountByAPIs{
-    List<String> apiName=new ArrayList<String>();
+class SubscriberCountByAPIs {
+    List<String> apiName = new ArrayList<String>();
     long count;
 }

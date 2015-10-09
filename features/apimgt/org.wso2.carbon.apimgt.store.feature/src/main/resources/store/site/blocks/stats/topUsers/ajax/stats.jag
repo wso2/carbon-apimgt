@@ -31,7 +31,7 @@ log = new Log();
     else if (action === "getTopAppUsers") {
 
         var subscriber = jagg.getUser().username;
-        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(provider).getClient();
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
 
         var from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
@@ -54,7 +54,7 @@ log = new Log();
 
     } else if (action === "getPerAppSubscribers") {
         var subscriber = jagg.getUser().username;
-        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient(subscriber).getClient();
+        mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
 
         var from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
