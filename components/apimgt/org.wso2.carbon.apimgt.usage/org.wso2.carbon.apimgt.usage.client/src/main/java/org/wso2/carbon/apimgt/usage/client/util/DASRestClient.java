@@ -32,7 +32,7 @@ public class DASRestClient {
     Gson gson;
 
     public DASRestClient(String url, String user, String pass) {
-        httpClient = new DefaultHttpClient();
+//        httpClient = new DefaultHttpClient();
         gson = new Gson();
         this.dasUrl = url;
         this.user = user;
@@ -48,6 +48,7 @@ public class DASRestClient {
         StringEntity input = new StringEntity(js);
         input.setContentType("application/json");
         postRequest.setEntity(input);
+        httpClient = new DefaultHttpClient();
         return httpClient.execute(postRequest);
     }
 
@@ -85,6 +86,7 @@ public class DASRestClient {
         String cred = RestClientUtil.encodeCredintials(this.user, this.pass);
         getRequest.addHeader("Authorization", "Basic " + cred);
 
+        httpClient = new DefaultHttpClient();
         HttpResponse response = httpClient.execute(getRequest);
 
         BufferedReader re = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));

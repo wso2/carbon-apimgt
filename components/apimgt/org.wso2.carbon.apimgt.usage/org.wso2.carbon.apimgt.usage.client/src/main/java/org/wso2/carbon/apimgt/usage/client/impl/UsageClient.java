@@ -26,13 +26,15 @@ public class UsageClient {
     private static final Log log = LogFactory.getLog(UsageClient.class);
 
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-        APIUsageStatisticsRestClientImpl.initializeDataSource();
+//        APIUsageStatisticsRestClientImpl.initializeDataSource();
+        APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
     }
 
     public static APIUsageStatisticsClient getClient() {
         if (isDataPublishingEnabled()) {
             try {
-                return new APIUsageStatisticsRestClientImpl("");
+//                return new APIUsageStatisticsRestClientImpl("");
+                return new APIUsageStatisticsRdbmsClientImpl("");
             } catch (APIMgtUsageQueryServiceClientException e) {
                 log.error("Error instantiating Statistic Client", e);
                 return null;
