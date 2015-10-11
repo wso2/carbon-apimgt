@@ -348,8 +348,8 @@ public abstract class AbstractAPIManager implements APIManager {
 
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
-            return null;
         }
+        return null;
     }
 
     public API getAPI(String apiPath) throws APIManagementException {

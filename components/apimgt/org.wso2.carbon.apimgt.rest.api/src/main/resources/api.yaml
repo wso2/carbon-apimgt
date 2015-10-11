@@ -1379,9 +1379,9 @@ definitions:
       subscriptionAvailability:
         type: string
         enum:
-          - current_tenant
-          - all_tenants
-          - specific_tenants
+          - CURRENT_TENANT
+          - ALL_TENANTS
+          - SPECIFIC_TENANTS
       subscriptionAvailableTenants:
         type: array
         items:

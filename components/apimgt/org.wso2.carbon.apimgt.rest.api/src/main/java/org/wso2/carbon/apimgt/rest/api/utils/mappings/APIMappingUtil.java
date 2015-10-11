@@ -79,7 +79,6 @@ public class APIMappingUtil {
         dto.setId(model.getUUID());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
-
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
@@ -88,7 +87,7 @@ public class APIMappingUtil {
         List<SequenceDTO> sequences = null;
 
         String inSequenceName = model.getInSequence();
-        if (inSequenceName != null && !inSequenceName.isEmpty()) {
+        if (!StringUtils.isEmpty(inSequenceName)) {
             SequenceDTO inSequence = new SequenceDTO();
             inSequence.setName(inSequenceName);
             inSequence.setType("IN");
@@ -96,7 +95,7 @@ public class APIMappingUtil {
         }
 
         String outSequenceName = model.getOutSequence();
-        if (outSequenceName != null && !outSequenceName.isEmpty()) {
+        if (!StringUtils.isEmpty(outSequenceName)) {
             SequenceDTO outSequence = new SequenceDTO();
             outSequence.setName(outSequenceName);
             outSequence.setType("OUT");
@@ -104,7 +103,7 @@ public class APIMappingUtil {
         }
 
         String faultSequenceName = model.getFaultSequence();
-        if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
+        if (!StringUtils.isEmpty(faultSequenceName)) {
             SequenceDTO faultSequence = new SequenceDTO();
             faultSequence.setName(faultSequenceName);
             faultSequence.setType("FAULT");
@@ -151,7 +150,6 @@ public class APIMappingUtil {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
-        //endpoint configs, business info and thumbnail remains to be mapped
         return dto;
     }
 
@@ -169,13 +167,10 @@ public class APIMappingUtil {
         APIIdentifier apiId = new APIIdentifier(dto.getProvider(), dto.getName(), dto.getVersion());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
 
-        //todo:if not SUPER_TENANT append /t/<tenant_name>/ to the context
         model.setContext(dto.getContext());
         model.setContextTemplate(dto.getContext());
         model.setDescription(dto.getDescription());
-
         model.setStatus(APIStatus.CREATED);
-
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
         model.setCacheTimeout(dto.getCacheTimeout());
@@ -240,7 +235,6 @@ public class APIMappingUtil {
             model.setVisibleRoles(visibleTenants);
         }
 
-        //endpoint configs, business info and thumbnail requires mapping
         return model;
 
     }
@@ -250,8 +244,9 @@ public class APIMappingUtil {
      *
      * @param visibility Enum containing the visibility value
      * @return String Corresponding APIConstant which maps with DTO visibility enum
+     * APIManagementException If mapping between backend and DTO level visibility values does not exist
      */
-    private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) {
+    private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) throws APIManagementException {
         switch (visibility) {
             case PUBLIC:
                 return APIConstants.API_GLOBAL_VISIBILITY;
@@ -262,8 +257,7 @@ public class APIMappingUtil {
             case CONTROLLED:
                 return APIConstants.API_CONTROLLED_VISIBILITY;
             default:
-                return null;
-                //todo: how to handle if there is no mapping backend value for an enum
+                throw new APIManagementException("No mapping backend value for " + visibility.name());
         }
     }
 
@@ -272,8 +266,9 @@ public class APIMappingUtil {
      *
      * @param visibility API Constant containing visibility value
      * @return VisibilityEnum Corresponding enum which maps with backend visibility value
+     * APIManagementException If mapping between backend and DTO level visibility values does not exist
      */
-    private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
+    private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) throws APIManagementException {
         switch (visibility) {
             case APIConstants.API_GLOBAL_VISIBILITY :
                 return APIDTO.VisibilityEnum.PUBLIC;
@@ -284,8 +279,7 @@ public class APIMappingUtil {
             case APIConstants.API_CONTROLLED_VISIBILITY :
                 return APIDTO.VisibilityEnum.CONTROLLED;
             default:
-                return null;
-                //todo: how to handle if there is no mapping enum for a backend visibility value
+                throw new APIManagementException("No DTO level mapping exist for " + visibility);
         }
     }
 
@@ -294,20 +288,20 @@ public class APIMappingUtil {
      *
      * @param subscriptionAvailability Backend constant value
      * @return SubscriptionAvailabilityEnum Corresponding enum which maps with backend value
+     * APIManagementException If mapping between backend and DTO level subscription values does not exist
      */
     private static APIDTO.SubscriptionAvailabilityEnum mapSubscriptionAvailabilityFromAPItoDTO(
-        String subscriptionAvailability) {
+        String subscriptionAvailability) throws APIManagementException {
 
         switch (subscriptionAvailability) {
             case APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT :
-                return APIDTO.SubscriptionAvailabilityEnum.current_tenant;
+                return APIDTO.SubscriptionAvailabilityEnum.CURRENT_TENANT;
             case APIConstants.SUBSCRIPTION_TO_ALL_TENANTS :
-                return APIDTO.SubscriptionAvailabilityEnum.all_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.ALL_TENANTS;
             case APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS :
-                return APIDTO.SubscriptionAvailabilityEnum.specific_tenants;
+                return APIDTO.SubscriptionAvailabilityEnum.SPECIFIC_TENANTS;
             default:
-                return null;
-                //todo: how to handle if there is no mapping enum for a backend subscription value
+                throw new APIManagementException("No mapping DTO level value exist for " + subscriptionAvailability);
         }
 
     }
@@ -317,19 +311,19 @@ public class APIMappingUtil {
      *
      * @param subscriptionAvailability Enum containing the subscription availability value
      * @return String Corresponding mapping value for enum in the DTO
+     * APIManagementException If mapping between backend and DTO level subscription values does not exist
      */
     private static String mapSubscriptionAvailabilityFromDTOtoAPI(
-        APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
+        APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) throws APIManagementException {
         switch (subscriptionAvailability) {
-            case current_tenant:
+            case CURRENT_TENANT:
                 return APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT;
-            case all_tenants:
+            case ALL_TENANTS:
                 return APIConstants.SUBSCRIPTION_TO_ALL_TENANTS;
-            case specific_tenants:
+            case SPECIFIC_TENANTS:
                 return APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS;
             default:
-                return null;
-                //todo: how to handle if there is no mapping backend value for an enum
+                throw new APIManagementException("No mapping backend value for " + subscriptionAvailability.name());
         }
 
     }

@@ -36,10 +36,20 @@ import java.util.Set;
 
 import java.util.UUID;
 
+/**
+ * This class is used for maintaining
+ * common util functionalities which can be reused across REST API implementation
+ */
 public class RestApiUtil {
 
     private static final Log log = LogFactory.getLog(RestApiUtil.class);
 
+    /**
+     * Get API provider instance of the logged-in user
+     *
+     * @return  API Provider instance of logged-in user
+     * @throws APIManagementException  If an error occurs while retrieving provider
+     */
     public static APIProvider getProvider () throws APIManagementException {
         String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         return APIManagerFactory.getInstance().getAPIProvider(loggedInUser);
@@ -58,11 +68,19 @@ public class RestApiUtil {
         return errorDTO;
     }
 
+    /**
+     * Checks whether a provided string is a UUID
+     *
+     * @param apiId String to be checked for the validity as the UUID
+     * @return True id provided string matches the format of UUID
+     */
     public static boolean isUUID (String apiId) {
         try {
             UUID.fromString(apiId);
             return true;
         } catch (IllegalArgumentException e) {
+            // Error is logged and ignored
+            // because this exception is thrown just to indicate that the provided String is not a UUID
             if (log.isDebugEnabled()) {
                 log.debug(apiId + " is not a valid UUID");
             }

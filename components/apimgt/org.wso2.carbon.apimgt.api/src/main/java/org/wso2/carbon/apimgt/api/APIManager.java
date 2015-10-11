@@ -51,6 +51,7 @@ public interface APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     public API getAPI(String apiPath) throws APIManagementException;
+
     /**
      * Returns details of an API
      *
@@ -59,6 +60,7 @@ public interface APIManager {
      * @throws APIManagementException if failed get API from APIIdentifier
      */
     public API getAPIbyUUID(String uuid) throws APIManagementException;
+
     /**
      * Returns details of an API
      *

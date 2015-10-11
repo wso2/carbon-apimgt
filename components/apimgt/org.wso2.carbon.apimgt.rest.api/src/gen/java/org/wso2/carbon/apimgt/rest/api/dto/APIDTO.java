@@ -81,7 +81,7 @@ public class APIDTO  {
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>() ;
   
   public enum SubscriptionAvailabilityEnum {
-     current_tenant,  all_tenants,  specific_tenants, 
+     CURRENT_TENANT,  ALL_TENANTS,  SPECIFIC_TENANTS, 
   };
   
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
