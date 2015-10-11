@@ -203,7 +203,7 @@ public class ApplicationManagementServiceClient {
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             idps = identityApplicationManagementServiceStub.getAllIdentityProviders();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
         return idps;
     }

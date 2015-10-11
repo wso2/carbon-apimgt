@@ -94,7 +94,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getConfigSystemRegistry();
                 this.username= CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
-                ServiceReferenceHolder.setUserRealm((UserRealm)(ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
+                ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
                 String tenantDomainName = MultitenantUtils.getTenantDomain(username);
                 String tenantUserName = MultitenantUtils.getTenantAwareUsername(username);
@@ -497,7 +497,9 @@ public abstract class AbstractAPIManager implements APIManager {
                     docResource = registryType.get(docPath);
                 } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
                     //do nothing. Permission not allowed to access the doc.
-                }catch (RegistryException e){e.printStackTrace();}
+                }catch (RegistryException e){
+                    handleException("Failed to get documentations for api " + apiId.getApiName(), e);
+                }
                 if (docResource != null) {
                     GenericArtifactManager artifactManager = new GenericArtifactManager(registryType,
                             APIConstants.DOCUMENTATION_KEY);

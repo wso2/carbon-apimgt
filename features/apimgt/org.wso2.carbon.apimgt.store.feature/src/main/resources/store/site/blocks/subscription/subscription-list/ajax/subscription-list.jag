@@ -4,7 +4,7 @@ include("/jagg/jagg.jag");
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
     response.contentType = "application/json; charset=UTF-8";
-    var mod, obj, result, username, selectedApp , page,
+    var mod, obj, result, username, selectedApp , page, apiName, apiVersion, provider,
             msg = require("/site/conf/ui-messages.jag"),
             action = request.getParameter("action"),
             user = jagg.getUser();
@@ -159,12 +159,11 @@ include("/jagg/jagg.jag");
         }
         username = user.username;
 
-        if((request.getParameter('apiName')!=null) && (request.getParameter('apiVersion')!=null) &&
-                (request.getParameter('provider')!=null) ){
+        apiName = request.getParameter('apiName');
+        apiVersion = request.getParameter('apiVersion');
+        provider = request.getParameter('provider');
 
-            apiName = request.getParameter('apiName');
-            apiVersion = request.getParameter('apiVersion');
-            provider = request.getParameter('provider');
+         if((apiName != null) && (apiVersion != null) && (provider != null) ){
 
         	var api = {};
         	api.name = apiName;

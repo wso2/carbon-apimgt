@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 
-import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1096,7 +1095,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            handleException("Error occurred while reading subscription details from the database.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps,conn,rs);
         }
@@ -2430,16 +2429,18 @@ public class ApiMgtDAO {
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         String tokenScopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
+        String consumerKeyTable = APIConstants.CONSUMER_KEY_SECRET_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
         }
 
-        String getTokenSql = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+        String getTokenSql = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,ICA.CONSUMER_KEY," +
                             "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
-                            "FROM " + accessTokenStoreTable  + " IAT,"+
-                            tokenScopeAssociationTable + " ISAT " +
-                            " WHERE IAT.TOKEN_ID = ISAT.TOKEN_ID " +
+                            "FROM " + accessTokenStoreTable  + " IAT, "+
+                            tokenScopeAssociationTable + " ISAT, " +
+                            consumerKeyTable + " ICA" +
+                            " WHERE IAT.TOKEN_ID = ISAT.TOKEN_ID AND IAT.CONSUMER_KEY_ID = ICA.ID AND" +
                             " IAT.ACCESS_TOKEN= ? AND IAT.TOKEN_STATE='ACTIVE' ";
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -2553,14 +2554,16 @@ public class ApiMgtDAO {
     private String getTokenSql (String accessTokenStoreTable) {
         String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
+        String consumerKeyTable = APIConstants.CONSUMER_KEY_SECRET_TABLE;
         if (accessTokenStoreTable != null) {
             tokenStoreTable = accessTokenStoreTable;
         }
 
-        return "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+        return "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,ICA.CONSUMER_KEY," +
                 "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
-                "FROM " + tokenStoreTable + " IAT," + scopeAssociationTable +
-                " ISAT WHERE IAT.TOKEN_STATE='ACTIVE' AND IAT.TOKEN_ID = ISAT.TOKEN_ID ORDER BY IAT.TOKEN_ID";
+                "FROM " + tokenStoreTable + " IAT, " + scopeAssociationTable + " ISAT, " + consumerKeyTable + " ICA" +
+                " WHERE IAT.TOKEN_STATE='ACTIVE' AND IAT.TOKEN_ID = ISAT.TOKEN_ID AND IAT.CONSUMER_KEY_ID = ICA.ID" +
+                " ORDER BY IAT.TOKEN_ID";
 
     }
 
@@ -2573,16 +2576,17 @@ public class ApiMgtDAO {
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
+        String consumerKeyTable = APIConstants.CONSUMER_KEY_SECRET_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
             APIUtil.checkUserNameAssertionEnabled()) {
             accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(user);
         }
 
-        String getTokenSql = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+        String getTokenSql = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,ICA.CONSUMER_KEY," +
                              "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
-                             "FROM " + accessTokenStoreTable + " IAT, " + scopeAssociationTable +" ISAT"+
+                             "FROM " + accessTokenStoreTable + " IAT, " + scopeAssociationTable +" ISAT, " + consumerKeyTable + " ICA" +
                              " WHERE IAT.AUTHZ_USER= ? AND IAT.TOKEN_STATE='ACTIVE' AND IAT.TOKEN_ID = ISAT" +
-                             ".TOKEN_ID ORDER BY IAT.TOKEN_ID";
+                             ".TOKEN_ID AND IAT.CONSUMER_KEY_ID = ICA.ID ORDER BY IAT.TOKEN_ID";
         try {
             connection = APIMgtDBUtil.getConnection();
             PreparedStatement getToken = connection.prepareStatement(getTokenSql);
@@ -2718,21 +2722,22 @@ public class ApiMgtDAO {
         String[] querySqlArr = new String[2];
         String tokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         String scopeAssociationTable = APIConstants.TOKEN_SCOPE_ASSOCIATION_TABLE;
+        String consumerKeyTable = APIConstants.CONSUMER_KEY_SECRET_TABLE;
         if (accessTokenStoreTable != null) {
             tokenStoreTable = accessTokenStoreTable;
         }
 
-        querySqlArr[0] = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+        querySqlArr[0] = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,ICA.CONSUMER_KEY," +
                          "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
-                         "FROM " + tokenStoreTable  + " IAT, "+ scopeAssociationTable + " ISAT"+
+                         "FROM " + tokenStoreTable  + " IAT, "+ scopeAssociationTable + " ISAT, "+ consumerKeyTable + " ICA" +
                          " WHERE IAT.TOKEN_STATE='ACTIVE' AND IAT.TIME_CREATED >= ? AND IAT.TOKEN_ID" +
-                         " = ISAT.TOKEN_ID ORDER BY IAT.TOKEN_ID";
+                         " = ISAT.TOKEN_ID AND IAT.CONSUMER_KEY_ID = ICA.ID ORDER BY IAT.TOKEN_ID";
 
-        querySqlArr[1] = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,IAT.CONSUMER_KEY," +
+        querySqlArr[1] = "SELECT IAT.ACCESS_TOKEN,IAT.AUTHZ_USER,ISAT.TOKEN_SCOPE,ICA.CONSUMER_KEY," +
                         "IAT.TIME_CREATED,IAT.VALIDITY_PERIOD " +
-                        "FROM " + tokenStoreTable  + " IAT, "+ scopeAssociationTable + " ISAT"+
+                        "FROM " + tokenStoreTable  + " IAT, "+ scopeAssociationTable + " ISAT, "+ consumerKeyTable + " ICA" +
                         " WHERE IAT.TOKEN_STATE='ACTIVE' AND IAT.TIME_CREATED <= ? AND IAT.TOKEN_ID" +
-                        " = ISAT.TOKEN_ID ORDER BY IAT.TOKEN_ID";
+                        " = ISAT.TOKEN_ID AND IAT.CONSUMER_KEY_ID = ICA.ID ORDER BY IAT.TOKEN_ID";
 
         return querySqlArr;
     }
@@ -9251,23 +9256,25 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
+
+        Set<String> tokens = null;
         try {
             conn = APIMgtDBUtil.getConnection();
 
-            String sqlQuery = "SELECT ACCESS_TOKEN" +
-                              " FROM IDN_OAUTH2_ACCESS_TOKEN" +
-                              " WHERE " +
-                              " CONSUMER_KEY = ?" +
-                              " AND TOKEN_STATE = 'ACTIVE'";
+            String sqlQuery = "SELECT IOAT.ACCESS_TOKEN" +
+                    " FROM IDN_OAUTH2_ACCESS_TOKEN IOAT" +
+                    " INNER JOIN IDN_OAUTH_CONSUMER_APPS IOCA ON IOCA.ID = IOAT.CONSUMER_KEY_ID" +
+                    " WHERE IOCA.CONSUMER_KEY = ?" +
+                    " AND IOAT.TOKEN_STATE = 'ACTIVE'";
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, consumerKey);
             resultSet = ps.executeQuery();
-            Set<String> tokens = new HashSet<String>();
+            tokens = new HashSet<String>();
             while (resultSet.next()) {
                 tokens.add(APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN")));
             }
-            return tokens;
+
         } catch (SQLException e) {
             handleException("Failed to get active access tokens for consumerKey " + consumerKey, e);
         } catch (CryptoException e) {
@@ -9275,7 +9282,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return null;
+        return tokens;
     }
 
     /**
