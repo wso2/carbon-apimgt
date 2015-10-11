@@ -107,6 +107,10 @@
     "next" : "Next",
 
     "apiName": "API Name",
+    "api" : "API",
+    "apiOwner" : "Owner",
+    "subscriptionStatus" : "Subscription Status",
+    "subscription" : "Subscription",
     "appName" : "Application Name",
     "noOfAPICalls": "Number of API Calls",
     "faultCount" : "Faulty API Invocation Count",
