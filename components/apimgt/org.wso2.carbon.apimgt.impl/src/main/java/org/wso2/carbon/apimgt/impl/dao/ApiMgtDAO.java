@@ -5448,7 +5448,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error when getting the application id from the persistence store.", e);
+            handleException("Error while getting the id  of " + appName + " from the persistence store.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }
