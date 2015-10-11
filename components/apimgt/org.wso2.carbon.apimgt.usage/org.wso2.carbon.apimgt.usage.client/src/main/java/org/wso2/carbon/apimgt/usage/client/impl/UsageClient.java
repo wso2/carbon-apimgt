@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.util.RESTClientConstant;
+import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
@@ -22,7 +23,7 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,13 +33,15 @@ import java.util.List;
 public class UsageClient {
     private static final Log log = LogFactory.getLog(UsageClient.class);
 
-    public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-        if(getClientType()==RESTClientConstant.DATASOURCE_REST_TYPE) {
-                    APIUsageStatisticsRestClientImpl.initializeDataSource();
-        }else if(getClientType()==RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
+    public static void initializeDataSource(int dataSourceType) throws APIMgtUsageQueryServiceClientException {
+        if (dataSourceType == RESTClientConstant.DATASOURCE_REST_TYPE) {
+            APIUsageStatisticsRestClientImpl.initializeDataSource();
+            log.info("Initializing REST Usage Statistics Client");
+        } else if (dataSourceType == RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
             APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
-        }else{
-            //handle
+            log.info("Initializing RDBMS Usage Statistics Client");
+        } else {
+            log.error("Unknown Statistic client information found");
         }
     }
 
@@ -46,12 +49,12 @@ public class UsageClient {
         if (isDataPublishingEnabled()) {
             try {
 
-                if(getClientType()==RESTClientConstant.DATASOURCE_REST_TYPE) {
+                if (getClientType() == RESTClientConstant.DATASOURCE_REST_TYPE) {
                     return new APIUsageStatisticsRestClientImpl("");
-                }else if(getClientType()==RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
+                } else if (getClientType() == RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
                     return new APIUsageStatisticsRdbmsClientImpl("");
-                }else{
-                    //handle
+                } else {
+                    log.error("Unknown Statistic client information found");
                     return null;
                 }
             } catch (APIMgtUsageQueryServiceClientException e) {
@@ -126,7 +129,33 @@ public class UsageClient {
     }
 
     public static int getClientType() {
-        return RESTClientConstant.DATASOURCE_REST_TYPE ;
+        Registry registry = CarbonContext.getThreadLocalCarbonContext()
+                .getRegistry(RegistryType.valueOf(RegistryType.LOCAL_REPOSITORY.toString()));
+
+        int val = 0;
+        try {
+            Resource orderRes = registry.get(RESTClientConstant.DATASOURCE_TYPE_REG_LOCATION);
+            byte[] st = (byte[]) orderRes.getContent();
+            val = (Integer) RestClientUtil.deserialize(st);
+        } catch (RegistryException e) {
+            log.error("DataSource type is not set", e);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+        }
+
+        return val;
+    }
+
+    public static void setClientType(String sourceType) throws RegistryException, IOException {
+        Integer type = Integer.parseInt(sourceType);
+        Registry registry = CarbonContext.getThreadLocalCarbonContext()
+                .getRegistry(RegistryType.valueOf(RegistryType.LOCAL_REPOSITORY.toString()));
+
+        Resource orderRes = registry.newResource();
+        orderRes.setContent(RestClientUtil.serialize(type));
+        registry.put(RESTClientConstant.DATASOURCE_TYPE_REG_LOCATION, orderRes);
+
     }
 
 }

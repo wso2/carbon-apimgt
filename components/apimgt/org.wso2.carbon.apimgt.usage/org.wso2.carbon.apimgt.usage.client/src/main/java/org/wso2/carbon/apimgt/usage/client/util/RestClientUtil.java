@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.usage.client.util;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -43,14 +44,17 @@ public class RestClientUtil {
         return new String(encodedBytes);
     }
 
-//    public static APIUsageStatisticsClient getStatisticClient(String name){
-//
-//        APIUsageStatisticsClient client= null;
-//        try {
-//            client = new APIUsageStatisticsRestClientImpl(name);
-//        } catch (APIMgtUsageQueryServiceClientException e) {
-//            e.printStackTrace();
-//        }
-//        return client;
-//    }
+    public static Object deserialize(byte[] bytes) throws IOException,
+            ClassNotFoundException {
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        ObjectInputStream o = new ObjectInputStream(b);
+        return o.readObject();
+    }
+
+    public static byte[] serialize(Object obj) throws IOException {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        ObjectOutputStream o = new ObjectOutputStream(b);
+        o.writeObject(obj);
+        return b.toByteArray();
+    }
 }

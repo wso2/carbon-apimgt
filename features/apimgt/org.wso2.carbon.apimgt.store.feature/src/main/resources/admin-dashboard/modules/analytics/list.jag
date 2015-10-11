@@ -150,18 +150,12 @@ var getDatasourceConfig = function () {
 
 var getDataSourceType = function () {
 
-    var registry=org.wso2.carbon.context.CarbonContext.getThreadLocalCarbonContext().getRegistry(
-            org.wso2.carbon.context.RegistryType.valueOf(org.wso2.carbon.context.RegistryType.LOCAL_REPOSITORY.toString()));
-    var ORDER_PATH = "order_location";
     var val=null;
 
     try {
-        var orderRes = registry.get(ORDER_PATH);
-        var st=(java.lang.String)(orderRes.getContent());
-        val=java.lang.Integer.parseInt(st);
-        log.info(val);
-    } catch (e) {
-        log.info(e);
+        val=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClientType();
+    }catch (e) {
+        log.info(e.getMessage());
     }
 
     if(val==null){

@@ -151,8 +151,7 @@ var addDatasourceConfig = function (configData) {
         log.info("Saving datasource '" + dsName + "'...");
         stub.addDataSource(dataSourceMetaInfo);
         log.info("Datasource '" + dsName + "' saved");
-        //org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient.initializeDataSource();
-        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.initializeDataSource();
+        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.initializeDataSource(configData.dataSourceType);
         log.info("Initialized datasource '" + dsName);
         return {
             error: false
@@ -385,26 +384,10 @@ var getDataSourceConfigString = function (configData) {
 
 var setDataSourceType = function (configData) {
 	var type=configData.dataSourceType;
-	var registry;
-
-    registry = org.wso2.carbon.context.CarbonContext.getThreadLocalCarbonContext().getRegistry(
-            org.wso2.carbon.context.RegistryType.valueOf(org.wso2.carbon.context.RegistryType.LOCAL_REPOSITORY.toString()));
-    var ORDER_PATH = "order_location";
-
     try {
-        var orderRes = registry.newResource();
-        orderRes.setContent(type);
-        registry.put(ORDER_PATH, orderRes);
+        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.setClientType(type);
     }catch (e) {
-        log.info(e.getMessage());
-    }
-
-    try {
-        var orderRes = registry.get(ORDER_PATH);
-        var st=(java.lang.String)(orderRes.getContent());
-        var val=java.lang.Integer.parseInt(st);
-    } catch (e) {
-        log.info(e);
+        log.error(e.message);
     }
 
     return {

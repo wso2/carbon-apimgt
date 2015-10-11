@@ -12,5 +12,5 @@ public class RESTClientConstant {
 
     public static final int DATASOURCE_REST_TYPE = 0;
     public static final int DATASOURCE_RDBMS_TYPE = 1;
-
+    public static final String DATASOURCE_TYPE_REG_LOCATION = "apim.datasource.type.location";
 }
