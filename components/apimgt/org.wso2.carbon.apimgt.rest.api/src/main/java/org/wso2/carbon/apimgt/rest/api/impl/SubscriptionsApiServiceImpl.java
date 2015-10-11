@@ -39,7 +39,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupId);
 
             } else if (!StringUtils.isEmpty(applicationId)) {
-                Application application = apiConsumer.getApplicationById(applicationId);
+                Application application = apiConsumer.getApplicationById(Integer.parseInt(applicationId));
                 subscriptions =
                         apiConsumer.getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
             }

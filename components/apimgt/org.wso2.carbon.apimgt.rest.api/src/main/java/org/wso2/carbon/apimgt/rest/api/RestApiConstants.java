@@ -24,4 +24,7 @@ public final class RestApiConstants {
     public static final String APPLICATION_JSON = "application/json";
 
     public static final String API_ID_DELIMITER = "-";
+
+    public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
 }

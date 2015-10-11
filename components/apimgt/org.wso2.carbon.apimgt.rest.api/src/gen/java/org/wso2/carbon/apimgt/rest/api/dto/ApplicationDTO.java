@@ -13,15 +13,15 @@ public class ApplicationDTO  {
   
   
   @NotNull
-  private Integer applicationId = null;
+  private String applicationId = null;
   
-  
+  @NotNull
   private String name = null;
   
-  
+  @NotNull
   private String subscriber = null;
   
-  
+  @NotNull
   private String throttlingTier = null;
   
   
@@ -38,17 +38,17 @@ public class ApplicationDTO  {
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("applicationId")
-  public Integer getApplicationId() {
+  public String getApplicationId() {
     return applicationId;
   }
-  public void setApplicationId(Integer applicationId) {
+  public void setApplicationId(String applicationId) {
     this.applicationId = applicationId;
   }
 
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -61,7 +61,7 @@ public class ApplicationDTO  {
   /**
    * If subscriber is not given user invoking the API will be taken as the subscriber.
    **/
-  @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber.")
+  @ApiModelProperty(required = true, value = "If subscriber is not given user invoking the API will be taken as the subscriber.")
   @JsonProperty("subscriber")
   public String getSubscriber() {
     return subscriber;
@@ -73,7 +73,7 @@ public class ApplicationDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("throttlingTier")
   public String getThrottlingTier() {
     return throttlingTier;

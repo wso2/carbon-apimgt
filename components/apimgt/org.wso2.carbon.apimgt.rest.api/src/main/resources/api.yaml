@@ -550,7 +550,6 @@ paths:
       description: Get application details
       parameters:
         - $ref: '#/parameters/applicationId'
-        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -626,7 +625,6 @@ paths:
       description: Remove an application
       parameters:
         - $ref: '#/parameters/applicationId'
-        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       responses:
@@ -1153,8 +1151,7 @@ parameters:
     in: path
     description: Application Id
     required: true
-    type: number
-    format: integer
+    type: string
   groupId:
     name: groupId
     in: query
@@ -1403,9 +1400,12 @@ definitions:
     title: Application
     required:
       - applicationId
+      - name
+      - subscriber
+      - throttlingTier
     properties:
       applicationId:
-        type: integer
+        type: string
       name:
         type: string
       subscriber:

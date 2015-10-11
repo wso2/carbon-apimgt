@@ -319,7 +319,7 @@ public interface APIConsumer extends APIManager {
      * @param userId      User Id
      * @throws APIManagementException if failed to add Application
      */
-    public String addApplication(Application application, String userId) throws APIManagementException;
+    public int addApplication(Application application, String userId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -329,7 +329,20 @@ public interface APIConsumer extends APIManager {
      */
     public void updateApplication(Application application) throws APIManagementException;
 
+    /**
+     * Function to remove an Application from the API Store
+     * @param application - The Application Object that represents the Application
+     * @throws APIManagementException
+     */
     public void removeApplication(Application application) throws APIManagementException;
+
+    /** get the status of the Application creation process given the application Id
+     *
+     * @param applicationId Id of the Application
+     * @return
+     * @throws APIManagementException
+     */
+    public String getApplicationStatusById(int applicationId) throws APIManagementException;
 
     /**
      * Creates a request for getting Approval for Application Registration.
@@ -416,8 +429,16 @@ public interface APIConsumer extends APIManager {
      * @return it will return Application corresponds to the id.
      * @throws APIManagementException
      */
-    public Application getApplicationById(String id) throws APIManagementException;
+    public Application getApplicationById(int id) throws APIManagementException;
 
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    public Application getApplicationByUUID(String uuid) throws APIManagementException;
+ 
     /**
      * @param subscriber the subscriber in relation to the identifiers
      * @param identifier the identifiers of the API's the subscriber is subscribed to

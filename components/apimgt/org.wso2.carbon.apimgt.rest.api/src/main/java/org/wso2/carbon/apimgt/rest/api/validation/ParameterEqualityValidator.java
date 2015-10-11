@@ -53,12 +53,12 @@ public class ParameterEqualityValidator implements ConstraintValidator<ValidateP
             Object firstObj = object[firstParamIndex];
             Object secondObj = object[secondParamIndex];
 
-            if (firstField != null && !StringUtils.isEmpty(firstField)) {
+            if (!StringUtils.isEmpty(firstField)) {
                 firstObj = BeanUtils.getProperty(firstObj,
                         firstField); //if first field is present, take first object as the field value of the firstObj
             }
 
-            if (secondField != null && !StringUtils.isEmpty(secondField)) {
+            if (!StringUtils.isEmpty(secondField)) {
                 secondObj = BeanUtils.getProperty(secondObj,
                         secondField); //if second field is present, take second object as the field value of the secondObj
             }

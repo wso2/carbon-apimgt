@@ -79,12 +79,11 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
     public Response applicationsApplicationIdGet(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
-    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
-    return delegate.applicationsApplicationIdGet(applicationId,subscriber,accept,ifNoneMatch,ifModifiedSince);
+    return delegate.applicationsApplicationIdGet(applicationId,accept,ifNoneMatch,ifModifiedSince);
     }
     @PUT
     @Path("/{applicationId}")
@@ -121,11 +120,10 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response applicationsApplicationIdDelete(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
-    @ApiParam(value = "Subscriber username") @QueryParam("subscriber") String subscriber,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.applicationsApplicationIdDelete(applicationId,subscriber,ifMatch,ifUnmodifiedSince);
+    return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince);
     }
     @POST
     @Path("/{applicationId}/generate-keys")
