@@ -443,8 +443,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 		int revokeEndpointPort = revokeEndpointURL.getPort();
 	
 
-        HttpClient tokenEPClient =  APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-        HttpClient revokeEPClient = APIKeyMgtUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
+        HttpClient tokenEPClient =  APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+        HttpClient revokeEPClient = APIUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
         HttpPost httpTokpost = new HttpPost(tokenEndpoint);
         HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
 

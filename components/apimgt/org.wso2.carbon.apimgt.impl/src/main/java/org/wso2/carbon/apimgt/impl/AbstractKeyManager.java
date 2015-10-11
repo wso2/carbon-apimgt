@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,7 @@
  * /
  */
 
-package org.wso2.carbon.apimgt.keymgt;
+package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,7 +96,7 @@ public abstract class AbstractKeyManager implements KeyManager {
      * @throws APIManagementException
      */
     public OAuthApplicationInfo buildFromJSON(OAuthApplicationInfo oAuthApplicationInfo, String jsonInput) throws
-                                                                                                           APIManagementException {
+            APIManagementException {
         //initiate json parser.
         JSONParser parser = new JSONParser();
         JSONObject jsonObject;
@@ -124,7 +124,7 @@ public abstract class AbstractKeyManager implements KeyManager {
 
     public AccessTokenRequest buildAccessTokenRequestFromOAuthApp(OAuthApplicationInfo oAuthApplication,
                                                                   AccessTokenRequest tokenRequest) throws
-                                                                                                   APIManagementException {
+            APIManagementException {
         if (oAuthApplication == null) {
             return tokenRequest;
         }
@@ -147,7 +147,7 @@ public abstract class AbstractKeyManager implements KeyManager {
 
         if (oAuthApplication.getParameter(ApplicationConstants.VALIDITY_PERIOD) != null) {
             tokenRequest.setValidityPeriod(Long.parseLong((String) oAuthApplication.getParameter(ApplicationConstants
-                                                                                                         .VALIDITY_PERIOD)));
+                    .VALIDITY_PERIOD)));
         }
 
         return tokenRequest;

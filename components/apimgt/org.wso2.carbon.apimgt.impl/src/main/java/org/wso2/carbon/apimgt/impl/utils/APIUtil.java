@@ -23,6 +23,16 @@ import com.google.gson.Gson;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -2168,8 +2178,8 @@ public final class APIUtil {
             throws APIManagementException {
         try {
         	String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-        	        APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + artifactPath);
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                            + artifactPath);
 
         	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
         	if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.
@@ -2349,7 +2359,7 @@ public final class APIUtil {
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                    + APIConstants.EXTERNAL_API_STORES_LOCATION);
+                            + APIConstants.EXTERNAL_API_STORES_LOCATION);
             authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
 
 		} catch (RegistryException e) {
@@ -4288,6 +4298,36 @@ public final class APIUtil {
     public void associateLifeCycle(String resourcePath, Registry registry) throws RegistryException {
 
         GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
+    }
+
+    /**
+     * Return a http client instance
+     * @param port - server port
+     * @param protocol- service endpoint protocol http/https
+     * @return
+     */
+    public static HttpClient getHttpClient(int port, String protocol) {
+        SchemeRegistry registry = new SchemeRegistry();
+        X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+        socketFactory.setHostnameVerifier(hostnameVerifier);
+        if ("https".equals(protocol)) {
+            if (port >= 0) {
+                registry.register(new Scheme("https", port, socketFactory));
+            } else {
+                registry.register(new Scheme("https", 443, socketFactory));
+            }
+        } else if ("http".equals(protocol)) {
+            if (port >= 0) {
+                registry.register(new Scheme("http", port, PlainSocketFactory.getSocketFactory()));
+            } else {
+                registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+            }
+        }
+        HttpParams params = new BasicHttpParams();
+        ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
+        HttpClient client = new DefaultHttpClient(tcm, params);
+        return client;
     }
 
 }
