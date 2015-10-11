@@ -10,4 +10,7 @@ public class RESTClientConstant {
     public static final String DAS_AGGREGATES_SEARCH_REST_API_URL = "/analytics/aggregates";
     public static final String DAS_Table_EXIST_REST_API_URL = "/analytics/table_exists";
 
+    public static final int DATASOURCE_REST_TYPE = 0;
+    public static final int DATASOURCE_RDBMS_TYPE = 1;
+
 }

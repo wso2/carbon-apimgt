@@ -273,66 +273,6 @@ public class APIStoreHostObject extends ScriptableObject {
                                                               Object[] args, Function funObj)
             throws APIManagementException {
         NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        List<AppRegisteredUsersDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String subscriberName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        String groupId = (String) args[3];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getAppRegisteredUsers(subscriberName, groupId);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-
-        int i = 0;
-        if (it != null) {
-            // Sort API Usage by Application Name
-
-
-            Map<String, NativeArray> appUsersMap = new HashMap<String, NativeArray>();
-
-            while (it.hasNext()) {
-                AppRegisteredUsersDTO appUser = (AppRegisteredUsersDTO) it.next();
-
-
-                if (appUsersMap.containsKey(appUser.getappName()) && appUsersMap != null) {
-                    NativeArray userList = appUsersMap.get(appUser.getappName());
-
-                    userList.put(userList.size(), userList, appUser.getUser());
-                } else {
-
-                    NativeArray userList = new NativeArray(0);
-                    userList.put(0, userList, appUser.getUser());
-                    appUsersMap.put(appUser.getappName(), userList);
-                }
-            }
-
-            for (Map.Entry entry : appUsersMap.entrySet()) {
-                NativeObject row = new NativeObject();
-                row.put("appName", row, entry.getKey());
-                row.put("userArray", row, entry.getValue());
-
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        }
         return myn;
     }
 

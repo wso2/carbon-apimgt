@@ -12,10 +12,17 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.util.RESTClientConstant;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.registry.api.Registry;
+import org.wso2.carbon.registry.api.RegistryException;
+import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,15 +33,27 @@ public class UsageClient {
     private static final Log log = LogFactory.getLog(UsageClient.class);
 
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-//        APIUsageStatisticsRestClientImpl.initializeDataSource();
-        APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
+        if(getClientType()==RESTClientConstant.DATASOURCE_REST_TYPE) {
+                    APIUsageStatisticsRestClientImpl.initializeDataSource();
+        }else if(getClientType()==RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
+            APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
+        }else{
+            //handle
+        }
     }
 
     public static APIUsageStatisticsClient getClient() {
         if (isDataPublishingEnabled()) {
             try {
-//                return new APIUsageStatisticsRestClientImpl("");
-                return new APIUsageStatisticsRdbmsClientImpl("");
+
+                if(getClientType()==RESTClientConstant.DATASOURCE_REST_TYPE) {
+                    return new APIUsageStatisticsRestClientImpl("");
+                }else if(getClientType()==RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
+                    return new APIUsageStatisticsRdbmsClientImpl("");
+                }else{
+                    //handle
+                    return null;
+                }
             } catch (APIMgtUsageQueryServiceClientException e) {
                 log.error("Error instantiating Statistic Client", e);
                 return null;
@@ -104,6 +123,10 @@ public class UsageClient {
             }
         }
         return new Gson().toJson(list);
+    }
+
+    public static int getClientType() {
+        return RESTClientConstant.DATASOURCE_REST_TYPE ;
     }
 
 }

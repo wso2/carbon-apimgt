@@ -2,6 +2,7 @@
 var mod = jagg.module("analytics");
 var analyticsData = outputs.analyticsData;
 var datasourceData = outputs.datasourceData;
+var dataSourceType = outputs.dataSourceType;
 %>
 <div id="listing">
     <div class="title-section">
@@ -138,6 +139,14 @@ var datasourceData = outputs.datasourceData;
                     <legend>Statistics Summary Datasource</legend>
                 </td>
             </tr>
+	   <tr>
+                <td colspan="4">
+			<div class="control-group">
+                    	<input type="radio" name="dataSourceType" value="<%= org.wso2.carbon.apimgt.usage.client.util.RESTClientConstant.DATASOURCE_REST_TYPE %>" checked>Configure REST Client<br>
+			<input type="radio" name="dataSourceType" value="<%= org.wso2.carbon.apimgt.usage.client.util.RESTClientConstant.DATASOURCE_RDBMS_TYPE %>">Configure RDBMS Client
+			</div>
+                </td>
+            </tr>	
             <tr>
                 <td>
                     <div class="control-group">
@@ -548,6 +557,9 @@ var datasourceData = outputs.datasourceData;
 
 <script>
 $(document).ready(function() {
+
+	$("input[name=dataSourceType]").val([<%= dataSourceType.type %>]);
+
         var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics%>";
 if(enableAnalytics){
     <% if(analyticsData.analytics.eventReceiverURL != '') { %>
