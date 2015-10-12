@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import junit.framework.TestCase;
-import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.gateway.TestUtils;
 
 import static org.junit.Assert.*;
 
@@ -33,8 +31,18 @@ public class DigestAuthMediatorTest extends TestCase {
                 "realm=\"Vcreate\", qop=\"auth\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\"" };
         mediator = new DigestAuthMediator();
         String[] afterSplit = mediator.splitDigestHeader(wwwHeaderSplits);
-        String[] expectedArray = { "VTWRealm", "MTQ0MzY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==",
+        String[] expectedArray = { "Vcreate", "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==",
                 "auth", null, null };
+        assertArrayEquals(expectedArray, afterSplit);
+    }
+
+    public void testSplitDigestHeaderQopNull() throws Exception {
+        String[] wwwHeaderSplits = { "",
+                "realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\"" };
+        mediator = new DigestAuthMediator();
+        String[] afterSplit = mediator.splitDigestHeader(wwwHeaderSplits);
+        String[] expectedArray = { "Vcreate", "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==", null,
+                null, null };
         assertArrayEquals(expectedArray, afterSplit);
     }
 
@@ -43,18 +51,18 @@ public class DigestAuthMediatorTest extends TestCase {
                 "realm=\"Vcreate\", qop=\"auth,auth-int\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\"" };
         mediator = new DigestAuthMediator();
         String[] afterSplit = mediator.splitDigestHeader(wwwHeaderSplits);
-        String[] expectedArray = { "VTWRealm", "MTQ0MzY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==",
+        String[] expectedArray = { "Vcreate", "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==",
                 "auth", null, null };
         assertArrayEquals(expectedArray, afterSplit);
     }
 
     public void testSplitDigestHeaderWithAlgorithmMultiple() throws Exception {
         String[] wwwHeaderSplits = { "",
-                "realm=\"Vcreate\", qop=\"auth\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\" algorithm=\"MD5,MD5-sess\"" };
+                "realm=\"Vcreate\", qop=\"auth-int\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", algorithm=\"MD5,MD5-sess\"" };
         mediator = new DigestAuthMediator();
         String[] afterSplit = mediator.splitDigestHeader(wwwHeaderSplits);
-        String[] expectedArray = { "VTWRealm", "MTQ0MzY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==",
-                "auth", null, "MD5" };
+        String[] expectedArray = { "Vcreate", "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==",
+                "auth-int", null, "MD5" };
         assertArrayEquals(expectedArray, afterSplit);
     }
 
@@ -88,52 +96,13 @@ public class DigestAuthMediatorTest extends TestCase {
         String username = "GarryL";
         String realm = "Vcreate";
         String password = "garry@123";
-        String algorithm = null;
+        String algorithm = null; //algorithm is taken as not specified here
         String serverNonce = "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==";
         String clientNonce = "19b428e5";
         mediator = new DigestAuthMediator();
         String ha1 = mediator.calculateHA1(username, realm, password, algorithm, serverNonce, clientNonce);
         String expectedHa1 = "7eb542ec2f370e063dceca936023bb88";
         assertEquals(expectedHa1, ha1);
-    }
-
-    public void testFindEntityBodyHash() throws Exception {
-
-        //Setting the MessageBody property in the current message context
-        MessageContext messageContext = TestUtils.getMessageContext("/digestAuth", "1.0.0");
-        messageContext.setProperty("MessageBody", null);
-        mediator = new DigestAuthMediator();
-        String actulaHash = mediator.findEntityBodyHash(messageContext);
-        String expectedEntityBodyHash = "d41d8cd98f00b204e9800998ecf8427e";
-        assertEquals(expectedEntityBodyHash, actulaHash);
-    }
-
-    public void testCalculateHA2WhenQopIsAuthInt() throws Exception {
-
-        MessageContext messageContext = TestUtils.getMessageContext("/digestAuth", "1.0.0");
-        messageContext.setProperty("MessageBody", null);
-        String qop = "auth-int";
-        String httpMethod = "GET";
-        String postFix = "/S374453680109605K/";
-        mediator = new DigestAuthMediator();
-        String actulaHash2 = mediator.calculateHA2(qop, httpMethod, postFix, messageContext);
-        String expectedHash2 = "d41d8cd98f00b204e9800998ecf8427e";
-        assertEquals(expectedHash2, actulaHash2);
-
-    }
-
-    public void testCalculateHA2WhenQopIsNotAuthInt() throws Exception {
-
-        MessageContext messageContext = TestUtils.getMessageContext("/digestAuth", "1.0.0");
-        messageContext.setProperty("MessageBody", null);
-        String qop = "auth";
-        String httpMethod = "GET";
-        String postFix = "/S374453680109605K/";
-        mediator = new DigestAuthMediator();
-        String actulaHash2 = mediator.calculateHA2(qop, httpMethod, postFix, messageContext);
-        String expectedHash2 = "d41d8cd98f00b204e9800998ecf8427e";
-        assertEquals(expectedHash2, actulaHash2);
-
     }
 
     public void testIncrementNonceCount() throws Exception {
@@ -162,7 +131,7 @@ public class DigestAuthMediatorTest extends TestCase {
         String ha1 = "7eb542ec2f370e063dceca936023bb88";
         String ha2 = "23b5493f4f370e063dc34r936023wb65";
         String serverNonce = "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==";
-        String qop = null;
+        String qop = null; //qop is taken to be null here
         String prevNonceCount = "00000001"; //The prevNonceCount and clientNonce will be passed no matter whether qop is null
         String clientNonce = "19b428e5";
         mediator = new DigestAuthMediator();
@@ -175,17 +144,18 @@ public class DigestAuthMediatorTest extends TestCase {
         String[] serverResponseArray = { "c42047191b9d53a208cd615b23797b15" };
         String username = "GarryL";
         String realm = "Vcreate";
-        String qop = null;
-        String opaque = "5ccc069c403ebaf9f0171e9517f40e41"; //Assume opaque is not null here
+        String qop = null; //qop is taken to be null here
+        String opaque = "\"5ccc069c403ebaf9f0171e9517f40e41\""; //Opaque is not null here
         String serverNonce = "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==";
         String clientNonce = "19b428e5";
-        String postFix = "/S374453680109605K/";
+        String digestUri = "/service/path/S374453680109605K";
+        String algorithm = "MD5";
         mediator = new DigestAuthMediator();
         StringBuilder header = mediator
-                .constructAuthHeader(username, realm, serverNonce, postFix, serverResponseArray, qop, opaque,
-                        clientNonce);
+                .constructAuthHeader(username, realm, serverNonce, digestUri, serverResponseArray, qop, opaque,
+                        clientNonce, algorithm);
         String AuthHeader = header.toString();
-        String expectedHeader = "Digest username=\"GarryL\", realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", uri=\"/S374453680109605K/\", response=\"c42047191b9d53a208cd615b23797b15\", opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
+        String expectedHeader = "Digest username=\"GarryL\", realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", uri=\"/service/path/S374453680109605K\", algorithm=MD5, response=\"c42047191b9d53a208cd615b23797b15\", opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
         assertEquals(expectedHeader, AuthHeader);
     }
 
@@ -194,21 +164,37 @@ public class DigestAuthMediatorTest extends TestCase {
         String username = "GarryL";
         String realm = "Vcreate";
         String qop = "auth";
-        String opaque = null; //Assume opaque is null here
+        String opaque = null; //Opaque is taken to be null here
         String serverNonce = "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==";
         String clientNonce = "19b428e5";
-        String postFix = "/S374453680109605K/";
+        String digestUri = "/service/path/S374453680109605K";
+        String algorithm = "MD5"; //Algorithm is not null here
         mediator = new DigestAuthMediator();
         StringBuilder header = mediator
-                .constructAuthHeader(username, realm, serverNonce, postFix, serverResponseArray, qop, opaque,
-                        clientNonce);
+                .constructAuthHeader(username, realm, serverNonce, digestUri, serverResponseArray, qop, opaque,
+                        clientNonce, algorithm);
         String AuthHeader = header.toString();
-        String expectedHeader = "Digest username=\"GarryL\", realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", uri=\"/S374453680109605K/\", qop=auth, nc=00000001, cnonce=\"19b428e5\", response=\"c42047191b9d53a208cd615b23797b15\", opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
+        String expectedHeader = "Digest username=\"GarryL\", realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", uri=\"/service/path/S374453680109605K\", qop=auth, nc=00000001, cnonce=\"19b428e5\", algorithm=MD5, response=\"c42047191b9d53a208cd615b23797b15\"";
         assertEquals(expectedHeader, AuthHeader);
     }
 
-    /*public void testMediate() throws Exception {
-
-    }*/
+    public void testConstructAuthHeaderWhenAlgoNull() throws Exception {
+        String[] serverResponseArray = { "c42047191b9d53a208cd615b23797b15", "00000001" };
+        String username = "GarryL";
+        String realm = "Vcreate";
+        String qop = "auth";
+        String opaque = "\"5ccc069c403ebaf9f0171e9517f40e41\"";
+        String serverNonce = "PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==";
+        String clientNonce = "19b428e5";
+        String digestUri = "/service/path/S374453680109605K";
+        String algorithm = null; //Algorithm is null
+        mediator = new DigestAuthMediator();
+        StringBuilder header = mediator
+                .constructAuthHeader(username, realm, serverNonce, digestUri, serverResponseArray, qop, opaque,
+                        clientNonce, algorithm);
+        String AuthHeader = header.toString();
+        String expectedHeader = "Digest username=\"GarryL\", realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", uri=\"/service/path/S374453680109605K\", qop=auth, nc=00000001, cnonce=\"19b428e5\", response=\"c42047191b9d53a208cd615b23797b15\", opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
+        assertEquals(expectedHeader, AuthHeader);
+    }
 
 }
