@@ -24,6 +24,9 @@
     var inSequencesLoaded = false;
     var outSequencesLoaded = false;
     var faultSequencesLoaded = false;
+    var apiProvider = "<%=api.provider%>"
+    var apiVersion = "<%=api.version%>"
+    var apiName = "<%=api.name%>"
 </script>   
 <div id="item-add">
 <%

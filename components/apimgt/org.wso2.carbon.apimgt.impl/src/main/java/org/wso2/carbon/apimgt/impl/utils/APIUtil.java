@@ -4297,7 +4297,7 @@ public final class APIUtil {
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                               identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                               identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-        return artifactPath + RegistryConstants.PATH_SEPARATOR + pathFlow;
+        return artifactPath + RegistryConstants.PATH_SEPARATOR + pathFlow + RegistryConstants.PATH_SEPARATOR;
     }
 
     /**

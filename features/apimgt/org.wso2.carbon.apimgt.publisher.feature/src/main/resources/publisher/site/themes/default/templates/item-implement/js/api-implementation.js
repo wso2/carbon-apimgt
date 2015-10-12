@@ -267,8 +267,8 @@ function loadInSequences() {
         return;
     }
 
-    jagg.post("/site/blocks/item-add/ajax/add.jag", {
-                action : "getCustomInSequences"
+        jagg.post("/site/blocks/item-add/ajax/add.jag", {
+                action : "getCustomInSequences", provider:apiProvider, apiName:apiName, apiVersion:apiVersion
             },
               function(result) {
                   if (!result.error) {

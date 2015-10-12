@@ -279,11 +279,11 @@ var validateRoles = function(roles,username) {
     }
 };
 
-var getCustomInSequences = function () {
-    var sequence,sequences,list=[],log = new Log(),
-            provider = jagg.module("manager").getAPIProviderObj();
+var getCustomInSequences = function (apiName, apiVersion, apiProvider) {
+        var sequence,sequences,list=[],log = new Log(),
+        provider = jagg.module("manager").getAPIProviderObj();
     try {
-    	sequences = provider.getCustomInSequences();
+    	sequences = provider.getCustomInSequences(apiName, apiVersion, apiProvider);
         if (log.isDebugEnabled()) {
             log.debug("getCustomInSequences " +  " : " + sequences);
         }
@@ -301,11 +301,11 @@ var getCustomInSequences = function () {
     }
 };
 
-var getCustomOutSequences = function () {
+var getCustomOutSequences = function (apiName, apiVersion, apiProvider) {
     var sequence,sequences,list=[],log = new Log(),
-            provider = jagg.module("manager").getAPIProviderObj();
+    provider = jagg.module("manager").getAPIProviderObj();
     try {
-    	sequences = provider.getCustomOutSequences();
+    	sequences = provider.getCustomOutSequences(apiName, apiVersion, apiProvider);
         if (log.isDebugEnabled()) {
             log.debug("getCustomOutSequences " +  " : " + sequences);
         }

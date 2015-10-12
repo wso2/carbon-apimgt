@@ -76,6 +76,7 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -628,11 +629,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
 
         Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
-        String inSeqPath = APIUtil.getSequencePath(api.getId(), "in", inSeqFile.getName());
+        String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR + inSeqFile.getName();
         String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
 
         Icon outSeq = new Icon(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
-        String outSeqPath = APIUtil.getSequencePath(api.getId(), "out", outSeqFile.getName());
+        String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR + outSeqFile.getName();
         String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
 
         //api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
@@ -948,9 +949,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      * @throws FaultGatewaysException 
      */
-    public static boolean jsFunction_addAPI(Context cx, Scriptable thisObj,
-                                            Object[] args,
-                                            Function funObj)
+    public static boolean jsFunction_addAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
         if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -4570,9 +4569,18 @@ public class APIProviderHostObject extends ScriptableObject {
      */
 	public static NativeArray jsFunction_getCustomOutSequences(Context cx, Scriptable thisObj,
 	                                                        Object[] args, Function funObj)
-	                                                                                       throws APIManagementException {
+            throws APIManagementException {
 		APIProvider apiProvider = getAPIProvider(thisObj);
-		List<String> sequenceList = apiProvider.getCustomOutSequences();
+        String apiName = (String) args[0];
+        String apiVersion = (String) args[1];
+        String provider = (String) args[2];
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+
+		List<String> sequenceList = apiProvider.getCustomOutSequences(apiIdentifier);
 
 		NativeArray myn = new NativeArray(0);
 		if (sequenceList == null) {
@@ -4595,23 +4603,33 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return
      * @throws APIManagementException
      */
-	public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
-	                                                        Object[] args, Function funObj)
-	                                                                                       throws APIManagementException {
-		APIProvider apiProvider = getAPIProvider(thisObj);
-		List<String> sequenceList = apiProvider.getCustomInSequences();
+    public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
+                                                              Object[] args, Function funObj)
+            throws APIManagementException {
+        APIProvider apiProvider = getAPIProvider(thisObj);
 
-		NativeArray myn = new NativeArray(0);
-		if (sequenceList == null) {
-			return null;
-		} else {
-			for (int i = 0; i < sequenceList.size(); i++) {
-				myn.put(i, myn, sequenceList.get(i));
-			}
-			return myn;
-		}
+        String apiName = (String) args[0];
+        String apiVersion = (String) args[1];
+        String provider = (String) args[2];
 
-	}
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+
+        List<String> sequenceList = apiProvider.getCustomInSequences(apiIdentifier);
+
+        NativeArray myn = new NativeArray(0);
+        if (sequenceList == null) {
+            return null;
+        } else {
+            for (int i = 0; i < sequenceList.size(); i++) {
+                myn.put(i, myn, sequenceList.get(i));
+            }
+            return myn;
+        }
+
+    }
 
     /**
      * Retrieves custom fault sequences from registry
