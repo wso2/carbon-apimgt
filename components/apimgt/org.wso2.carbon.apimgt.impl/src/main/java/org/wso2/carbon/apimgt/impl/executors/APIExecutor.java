@@ -118,8 +118,8 @@ public class APIExecutor implements Execution {
                                                      " No endpoint selected");
                 }
             }
-            Boolean deprecateOldVersions = false;
-            Boolean makeKeysForwardCompatible = false;
+            boolean deprecateOldVersions = false;
+            boolean makeKeysForwardCompatible = false;
             //If the API status is CREATED ,check for check list items of lifecycle
             if (oldStatus.equals(APIStatus.CREATED)) {
                 deprecateOldVersions = apiArtifact.isLCItemChecked(0, APIConstants.API_LIFE_CYCLE);
