@@ -1024,7 +1024,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
-        if(StringUtils.isEmpty(tier.trim())){
+        if(StringUtils.isEmpty(tier.trim())) {
             handleException("No tier defined for the API");
         }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
@@ -1307,9 +1307,9 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
 
         String endpointConfig = (String) apiData.get("endpoint_config", apiData);
-        if(StringUtils.isEmpty(endpointConfig)){
+        if(StringUtils.isEmpty(endpointConfig)) {
             handleException("Endpoint Configuration is missing");
-        } else{
+        } else {
             api.setEndpointConfig(endpointConfig);
             //Validate endpoint URI format
             validateEndpointURI(api.getEndpointConfig());
@@ -1360,7 +1360,7 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        if(thumbUrl != null && !thumbUrl.isEmpty()){
+        if(thumbUrl != null && !thumbUrl.isEmpty()) {
             try {
                 URL url = new URL(thumbUrl);
                 String imageType = url.openConnection().getContentType();
@@ -2024,9 +2024,9 @@ public class APIProviderHostObject extends ScriptableObject {
     private static void checkImageSize(File file)
             throws ScriptException, APIManagementException, IOException {
 
-        if(file.exists()){
+        if(file.exists()) {
             long length = file.length();
-            if(length/ 1024 > APIConstants.MAX_FILE_SIZE){
+            if(length/ 1024 > APIConstants.MAX_FILE_SIZE) {
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
@@ -4768,7 +4768,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
                 Object epType = jsonObject.get("endpoint_type");
 
-                if(StringUtils.isEmpty(ObjectUtils.toString(epType))){
+                if(StringUtils.isEmpty(ObjectUtils.toString(epType))) {
                     handleException("No endpoint type defined.");
 
                 } else if (epType instanceof String && "http".equals(epType)) {
@@ -4776,13 +4776,13 @@ public class APIProviderHostObject extends ScriptableObject {
                     Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
                     Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
 
-                    if(prodEPs == null && sandEPs == null){
+                    if(prodEPs == null && sandEPs == null) {
                         handleException("No Endpoint is defined");
                     }
                     if (prodEPs instanceof JSONObject) {
                         Object url = ((JSONObject) prodEPs).get("url");//check whether the URL is null or not
 
-                        if(StringUtils.isEmpty(url.toString().trim())){
+                        if(StringUtils.isEmpty(url.toString().trim())) {
                             handleException("URL of production Endpoint is not defined.");
                         }
                         if (url instanceof String && !isValidURI(url.toString())) {
@@ -4794,7 +4794,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     if (sandEPs instanceof JSONObject) {
                         Object url = ((JSONObject) sandEPs).get("url");
 
-                        if(StringUtils.isEmpty(url.toString().trim())){
+                        if(StringUtils.isEmpty(url.toString().trim())) {
                             handleException("URL of sandbox Endpoint is not defined.");
                         }
                         if (url instanceof String && !isValidURI(url.toString())) {

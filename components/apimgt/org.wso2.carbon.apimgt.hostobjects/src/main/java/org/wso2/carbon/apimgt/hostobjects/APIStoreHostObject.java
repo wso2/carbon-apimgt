@@ -3364,13 +3364,13 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && args.length >= 4 && isStringArray(args)) {
             String name = (String) args[0];
 
-            if(StringUtils.isEmpty(name.trim())){
+            if(StringUtils.isEmpty(name.trim())) {
                 handleException("Application Name is empty.");
             }
             String username = (String) args[1];
             String tier = (String) args[2];
 
-            if(StringUtils.isEmpty(tier.trim())){
+            if(StringUtils.isEmpty(tier.trim())) {
                 handleException("No tier is defined for the Application.");
             }
             String callbackUrl = (String) args[3];
@@ -3393,7 +3393,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
             status = apiConsumer.addApplication(application, username);
             return status;
-        } else{
+        } else {
             handleException("Missing parameters.");
         }
 
