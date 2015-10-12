@@ -1024,7 +1024,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
-        if(StringUtils.isEmpty(tier.trim())) {
+        if(StringUtils.isBlank(tier)) {
             handleException("No tier defined for the API");
         }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
@@ -4782,7 +4782,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     if (prodEPs instanceof JSONObject) {
                         Object url = ((JSONObject) prodEPs).get("url");//check whether the URL is null or not
 
-                        if(StringUtils.isEmpty(url.toString().trim())) {
+                        if(StringUtils.isBlank(ObjectUtils.toString(url))) {
                             handleException("URL of production Endpoint is not defined.");
                         }
                         if (url instanceof String && !isValidURI(url.toString())) {
@@ -4794,7 +4794,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     if (sandEPs instanceof JSONObject) {
                         Object url = ((JSONObject) sandEPs).get("url");
 
-                        if(StringUtils.isEmpty(url.toString().trim())) {
+                        if(StringUtils.isBlank(ObjectUtils.toString(url))) {
                             handleException("URL of sandbox Endpoint is not defined.");
                         }
                         if (url instanceof String && !isValidURI(url.toString())) {
