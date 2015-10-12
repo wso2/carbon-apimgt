@@ -196,34 +196,5 @@ public class APIKeyMgtUtil {
             return null;
         }
     }
-    
-    /**
-     * Return a http client instance
-     * @param port - server port
-     * @param protocol- service endpoint protocol http/https 
-     * @return
-     */
-	public static HttpClient getHttpClient(int port, String protocol) {
-		SchemeRegistry registry = new SchemeRegistry();
-		X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-		SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-		socketFactory.setHostnameVerifier(hostnameVerifier);
-		if ("https".equals(protocol)) {
-			if (port >= 0) {
-				registry.register(new Scheme("https", port, socketFactory));
-			} else {
-				registry.register(new Scheme("https", 443, socketFactory));
-			}
-		} else if ("http".equals(protocol)) {
-			if (port >= 0) {
-				registry.register(new Scheme("http", port, PlainSocketFactory.getSocketFactory()));
-			} else {
-				registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-			}
-		}
-		HttpParams params = new BasicHttpParams();
-		ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
-		HttpClient client = new DefaultHttpClient(tcm, params);
-		return client;
-	}
+
 }
