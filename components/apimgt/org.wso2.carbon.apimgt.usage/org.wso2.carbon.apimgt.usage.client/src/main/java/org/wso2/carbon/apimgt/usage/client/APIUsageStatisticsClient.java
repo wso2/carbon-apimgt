@@ -23,17 +23,17 @@ public abstract class APIUsageStatisticsClient {
 
     public abstract void initializeDataSource() throws APIMgtUsageQueryServiceClientException;
 
-    public abstract String perAppPerAPIUsage(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException;
+    public abstract List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
-    public abstract String getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException;
+    public abstract List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
-    public abstract String getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException;
+    public abstract List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
-    public abstract String getPerAppFaultCount(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException;
+    public abstract List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException;
 
     public abstract List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException;
@@ -79,7 +79,7 @@ public abstract class APIUsageStatisticsClient {
 
     public abstract List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException;
 
-    public String getAppRegisteredUsers(String subscriberName, String groupId)
+    public List<RegisteredAppUsersDTO> getPerAppSubscribers(String subscriberName, String groupId)
             throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
@@ -114,9 +114,7 @@ public abstract class APIUsageStatisticsClient {
                 }
             }
         }
-
-        Gson gson = new Gson();
-        return gson.toJson(appUserList);
+        return appUserList;
     }
 
     protected List<String> getAppsBySubscriber(String subscriberName, String groupId)

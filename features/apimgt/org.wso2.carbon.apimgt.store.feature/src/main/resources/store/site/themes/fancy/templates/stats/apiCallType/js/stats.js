@@ -29,7 +29,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                 if( json.usage && json.usage.length > 0){
                     
                     var d = new Date();
-                    var firstAccessDay = new Date(json.usage[0], json.usage[1], json.usage[2]);
+                    var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
                     if(firstAccessDay.valueOf() == currentDay.valueOf()){
                         currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()+1);
@@ -113,7 +113,6 @@ var drawAppAPICallType = function(from,to){
     jagg.post("/site/blocks/stats/apiCallType/ajax/stats.jag", { action:"getAppApiCallType",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
-                json.usage=JSON.parse(json.usage);
 
                 $('#AppApiCallTypeTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;

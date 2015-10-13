@@ -151,8 +151,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     // Store Statistic Methods
 
-    @Override public String perAppPerAPIUsage(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override public List<PerAppApiCountDTO> perAppPerAPIUsage
+            (String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString;
@@ -161,7 +162,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
-            return gson.toJson(new ArrayList<APIUsageDTO>());
+            return new ArrayList<PerAppApiCountDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeySetString +=
@@ -170,7 +171,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         List<PerAppApiCountDTO> usage = getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
                 concatenatedKeySetString, fromDate, toDate, limit);
-        return gson.toJson(usage);
+        return usage;
 
     }
 
@@ -251,8 +252,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return perAppUsageDataList;
     }
 
-    @Override public String getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString;
@@ -261,7 +262,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
-            return gson.toJson(new ArrayList<AppUsageDTO>());
+            return new ArrayList<AppUsageDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeySetString +=
@@ -270,7 +271,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         List<AppUsageDTO> usage = getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
                 concatenatedKeySetString, fromDate, toDate, limit);
-        return gson.toJson(usage);
+        return usage;
 
     }
 
@@ -350,8 +351,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return topAppUsageDataList;
     }
 
-    @Override public String getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString;
@@ -360,7 +361,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
-            return gson.toJson(new ArrayList<AppCallTypeDTO>());
+            return new ArrayList<AppCallTypeDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeySetString +=
@@ -371,7 +372,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, concatenatedKeySetString, fromDate,
                 toDate, limit);
 
-        return gson.toJson(usage);
+        return usage;
     }
 
     /**
@@ -452,8 +453,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return appApiCallTypeList;
     }
 
-    @Override public String getPerAppFaultCount(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString;
@@ -462,7 +463,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
-            return gson.toJson(new ArrayList<FaultCountDTO>());
+            return new ArrayList<FaultCountDTO>();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeySetString +=
@@ -471,7 +472,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         List<FaultCountDTO> usage = getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY,
                 concatenatedKeySetString, fromDate, toDate, limit);
-        return gson.toJson(usage);
+        return usage;
     }
 
     /**

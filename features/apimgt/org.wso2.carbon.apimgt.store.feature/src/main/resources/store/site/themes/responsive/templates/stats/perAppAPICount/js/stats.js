@@ -109,7 +109,6 @@ var drawGraphAPIUsage = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/perAppAPICount/ajax/stats.jag", { action:"getProviderAPIUsage",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
-            json.usage=JSON.parse(json.usage);
             $('#spinner').hide();
             if (!json.error) {
                 var dataLength = json.usage.length;

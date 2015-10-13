@@ -152,5 +152,8 @@ var getActiveTenantDomains=function(){
 
 };
 
+var getUsageClient = function(){
+	return org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
+}
 
 %>

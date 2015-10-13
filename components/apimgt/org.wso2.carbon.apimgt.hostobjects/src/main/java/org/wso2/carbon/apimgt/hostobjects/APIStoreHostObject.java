@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -219,7 +220,7 @@ public class APIStoreHostObject extends ScriptableObject {
             return myn;
         }
 
-        List<String> list = null;
+        List<APIFirstAccess> list = null;
         if (args.length == 0) {
             handleException("Invalid number of parameters.");
         }

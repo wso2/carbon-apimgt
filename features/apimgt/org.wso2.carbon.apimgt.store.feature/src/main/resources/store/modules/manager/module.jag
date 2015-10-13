@@ -38,7 +38,9 @@ jagg.module("manager", {
      },
      getActiveTenantDomains:function () {
        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getActiveTenantDomains.apply(this, arguments);
-     }
-
+     },
+    getUsageClient:function () {
+        return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getUsageClient.apply(this, arguments);
+    }
  });
  %>

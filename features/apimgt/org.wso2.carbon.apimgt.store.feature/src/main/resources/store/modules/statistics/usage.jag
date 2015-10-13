@@ -1,14 +1,15 @@
 <%
 log = new Log(),
 apiStore = jagg.module("manager").getAPIStoreObj(),
+usageClient = jagg.module("manager").getUsageClient(),
 user = jagg.getUser();
-
+var gson=com.google.gson.Gson();
 
 function getFirstAccessTime(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiStore.getFirstAccessTime(providerName, server);
+        usage = usageClient.getFirstAccessTime(providerName);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIFirstAccessTime for : " + server);
         }
@@ -18,7 +19,7 @@ function getFirstAccessTime(providerName, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -39,7 +40,7 @@ function getAppApiCallType(subscriberName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiStore.getAppApiCallType(subscriberName,from,to, server);
+        usage = usageClient.getAppApiCallType(subscriberName,server,from,to,10 );
         if (log.isDebugEnabled()) {
             log.debug("getAppApiCallType for : " + server);
         }
@@ -49,7 +50,7 @@ function getAppApiCallType(subscriberName,from,to, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -73,7 +74,7 @@ function getPerAppAPIFaultCount(subscriberName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiStore.getPerAppAPIFaultCount(subscriberName,from,to, server);
+        usage = usageClient.getPerAppAPIFaultCount(subscriberName,server,from,to,10 );
         if (log.isDebugEnabled()) {
             log.debug("getPerAppAPIFaultCount for : " + server);
         }
@@ -83,7 +84,7 @@ function getPerAppAPIFaultCount(subscriberName,from,to, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -105,7 +106,7 @@ function getProviderAPIUsage(subscriberName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiStore.getProviderAPIUsage(subscriberName,from,to, server);
+        usage = usageClient.perAppPerAPIUsage(subscriberName,server,from,to,10 );
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIUsage for : " + server);
         }
@@ -115,7 +116,7 @@ function getProviderAPIUsage(subscriberName,from,to, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -135,7 +136,7 @@ function getTopAppUsers(subscriberName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiStore.getTopAppUsers(subscriberName,from,to, server);
+        usage = usageClient.getTopAppUsers(subscriberName,server,from,to,10 );
         if (log.isDebugEnabled()) {
             log.debug("getTopAppUsers for : " + server);
         }
@@ -145,7 +146,7 @@ function getTopAppUsers(subscriberName,from,to, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -165,7 +166,7 @@ function getPerAppSubscribers(subscriberName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiStore.getPerAppSubscribers(subscriberName,from,to, server);
+        usage = usageClient.getPerAppSubscribers(subscriberName, server);
         if (log.isDebugEnabled()) {
             log.debug("getPerAppSubscribers for : " + server);
         }
@@ -175,7 +176,7 @@ function getPerAppSubscribers(subscriberName,from,to, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -192,11 +193,11 @@ function getPerAppSubscribers(subscriberName,from,to, server) {
 }
 
 function isDataPublishingEnabled(providerName, server) {
-    
+
     var usage = [];
     var usageout = [];
     try {
-        usage = apiStore.isDataPublishingEnabled();
+        usage = usage = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
         if (log.isDebugEnabled()) {
             log.debug("isDataPublishingEnabled check");
         }
