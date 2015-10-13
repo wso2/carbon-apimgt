@@ -97,7 +97,7 @@
                             <importBundles>
                                 <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.throttle.core:4.2.1</importBundleDef>
+                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.throttle.core:${carbon.throttle.module.version}</importBundleDef>
                             </importBundles>
                         </configuration>
                     </execution>
