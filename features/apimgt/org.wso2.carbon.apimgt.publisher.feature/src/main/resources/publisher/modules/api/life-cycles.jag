@@ -1,22 +1,36 @@
 <%
-var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
-var user=jagg.getUser().username;
-var log = new Log();
-var APIIdentifier = Packages.org.wso2.carbon.apimgt.api.model.APIIdentifier;
-var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+var updateAPIStatus = function (api) {
+    var log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        var success = provider.updateAPIStatus(api);
+        if (log.isDebugEnabled()) {
+            log.debug("updateAPIStatus : " + api.name + "-" + api.version);
+        }
 
-var updateAPIStatus = function (apiData) {
-    var provider=APIUtil.replaceEmailDomain(apiData.provider);
-    var apiIdentifierObj = APIIdentifier(provider, apiData.apiName, apiData.version);
-    var result=APIManagerFactory.getInstance().getAPIProvider(user).changeLifeCycleStatus(apiIdentifierObj, apiData.status);
+        if (!success) {
+            return {
+                error:true
+            };
+        } else {
+               return {
+                           error:false
+                     };
+        }
+    } catch (e) {
+     if (e.javaException instanceof org.wso2.carbon.apimgt.api.FaultGatewaysException){
+     	return {
+        	error:true,
+        	message:e.javaException.getFaultGateWayString() + '||warning'
+        };
+     } else {
+        return {
+        	error:true,
+        	message:e.message.replace(e.message.split(":")[0] + ":", "")
+        };
+     }
 
-    if (log.isDebugEnabled()) {
-        log.debug("updateAPIStatus : " + api.name + "-" + api.version);
     }
-
-    return result;
-
-
 };
 var isAPIOlderVersionExist = function (api) {
     var log = new Log(),
@@ -72,26 +86,6 @@ var getLifeCyclesEvents = function(api) {
             lcs:null
         };
     }
-}
-
-var getAPILCData = function(api) {
-    var provider=APIUtil.replaceEmailDomain(api.provider);
-    var identifier = APIIdentifier(provider, api.name, api.version);
-    var result=APIManagerFactory.getInstance().getAPIProvider(user).getAPILifeCycleData(identifier);
-    var json = APIUtil.convertToString(result);
-    var lcJSON = {};
-    if ( json != null ) {
-    lcJSON = JSON.parse(json);
-    }
-    return lcJSON;
-}
-
-var setCheckListItemVal=function(apiData,checkListItemOrder,checkListItemVal){ 
-    var provider=APIUtil.replaceEmailDomain(apiData.provider);
-    var apiIdentifier = APIIdentifier(provider, apiData.name, apiData.version);
-    return APIManagerFactory.getInstance().getAPIProvider(user).changeAPILCCheckListItems(apiIdentifier,
-                                 parseInt(checkListItemOrder),checkListItemVal);
-
 }
 
 

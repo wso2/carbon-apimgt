@@ -76,7 +76,6 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Log log = LogFactory.getLog(getClass());
 
     protected Registry registry;
-    protected UserRegistry configRegistry;
     protected ApiMgtDAO apiMgtDAO;
     protected int tenantId;
     protected String tenantDomain;
@@ -87,12 +86,12 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public AbstractAPIManager(String username) throws APIManagementException {
         apiMgtDAO = new ApiMgtDAO();
-
+        UserRegistry configRegistry;
         try {
             if (username == null) {
                 this.registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceUserRegistry();
-                this.configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getConfigSystemRegistry();
                 this.username= CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
@@ -108,7 +107,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 this.registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
-                this.configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
                         getConfigSystemRegistry(tenantId);
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT( tenantUserName, tenantId);

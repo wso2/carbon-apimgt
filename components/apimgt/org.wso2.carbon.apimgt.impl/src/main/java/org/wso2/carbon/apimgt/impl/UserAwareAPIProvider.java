@@ -21,8 +21,6 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import java.util.Map;
-
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
  * necessary privileges to execute the operations. Users can use this class as an
@@ -135,22 +133,5 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     public void checkPublishPermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
-    }
-
-    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
-            throws APIManagementException {
-        checkPublishPermission();
-        return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
-    }
-
-    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
-            throws APIManagementException {
-        checkPublishPermission();
-        return super.changeAPILCCheckListItems(apiIdentifier, checkItem, checkItemValue);
-    }
-
-    public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
-        checkPublishPermission();
-        return super.getAPILifeCycleData(apiId);
     }
 }

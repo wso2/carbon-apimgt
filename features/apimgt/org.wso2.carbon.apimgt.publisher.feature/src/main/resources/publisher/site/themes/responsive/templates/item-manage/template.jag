@@ -566,7 +566,7 @@
                     name:"<%=api.name%>",
                     version:"<%=api.version%>",
                     provider: "<%=api.provider%>",
-                    status: "Publish",
+                    status: "PUBLISHED",
                     publishToGateway:true,
                     requireResubscription:true
                 },
