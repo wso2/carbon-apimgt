@@ -1489,56 +1489,31 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        PreparedStatement preparedStForUpdateOrDelete = null;
         int apiId = -1;
-        String subStatus = null;
-
+        String uuid;
         try {
             conn = APIMgtDBUtil.getConnection();
             apiId = getAPIID(identifier, conn);
-            String subscriptionStatusQuery = "SELECT " +
-                                             "SUB_STATUS FROM AM_SUBSCRIPTION" +
-                                             " WHERE " +
-                                             "API_ID = ? " +
-                                             "AND APPLICATION_ID = ?";
 
-            ps = conn.prepareStatement(subscriptionStatusQuery);
+            String subscriptionUUIDQuery = "SELECT " +
+                    " UUID FROM AM_SUBSCRIPTION" +
+                    " WHERE " +
+                    "API_ID = ? " +
+                    "AND APPLICATION_ID = ?";
+
+            ps = conn.prepareStatement(subscriptionUUIDQuery);
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
             resultSet = ps.executeQuery();
 
             if (resultSet.next())   {
-                subStatus = resultSet.getString("SUB_STATUS");
-            }
-            
-            conn.setAutoCommit(false);
-
-            // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
-
-            String updateQuery = "UPDATE AM_SUBSCRIPTION " +
-                                 " SET " +
-                                 "SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE +
-                                 "' WHERE " +
-                                 "API_ID = ? " +
-                                 "AND APPLICATION_ID = ?";
-
-            String deleteQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
-
-            if(APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
-               || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                preparedStForUpdateOrDelete = conn.prepareStatement(updateQuery);
-                preparedStForUpdateOrDelete.setInt(1, apiId);
-                preparedStForUpdateOrDelete.setInt(2, applicationId);
+                uuid = resultSet.getString("UUID");
+                SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
+                removeSubscription(subscribedAPI);
             } else {
-                preparedStForUpdateOrDelete = conn.prepareStatement(deleteQuery);
-                preparedStForUpdateOrDelete.setInt(1, apiId);
-                preparedStForUpdateOrDelete.setInt(2, applicationId);
+                throw new APIManagementException(
+                        "UUID does not exist for the given apiId:" + apiId + " and application id:" + applicationId);
             }
-
-            preparedStForUpdateOrDelete.executeUpdate();
-            
-            // finally commit transaction
-            conn.commit();
 
         } catch (SQLException e) {
             if (conn != null) {
@@ -1551,7 +1526,6 @@ public class ApiMgtDAO {
             handleException("Failed to add subscriber data ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-            APIMgtDBUtil.closeAllConnections(preparedStForUpdateOrDelete, null, null);
         }
     }
 
