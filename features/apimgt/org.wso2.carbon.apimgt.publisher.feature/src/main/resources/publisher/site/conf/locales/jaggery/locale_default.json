@@ -106,7 +106,7 @@
     "lifeCycle":"Lifecycle",
     "docs":"Docs",
     "users":"Users",
-    "state":"State",
+    "state":"Current State",
 
     "propagateChangesToGateway":"Propagate Changes to API Gateway",
     "requireReSubscription":"Require Re-Subscription",

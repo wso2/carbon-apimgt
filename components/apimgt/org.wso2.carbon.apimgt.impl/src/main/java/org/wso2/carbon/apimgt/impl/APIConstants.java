@@ -275,7 +275,19 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
+    public static final String LC_NEXT_STATES="nextStates";
+    public static final String LC_PROPERTY_LIFECYCLE_NAME_PREFIX="registry.lifecycle.";
+    public static final String LC_PROPERTY_CHECKLIST_PREFIX="registry.custom_lifecycle.checklist.";
+    public static final String LC_PROPERTY_STATE_SUFFIX=".state";
+    public static final String LC_PROPERTY_PERMISSION_SUFFIX=".item.permission";
+    public static final String LC_PROPERTY_ITEM_SUFFIX=".item";
+    public static final String LC_STATUS="status:";
+    public static final String LC_CHECK_ITEM_NAME="name:";
+    public static final String LC_CHECK_ITEM_VALUE="value:";
+    public static final String LC_CHECK_ITEM_ORDER="order:";
+
 
 
 

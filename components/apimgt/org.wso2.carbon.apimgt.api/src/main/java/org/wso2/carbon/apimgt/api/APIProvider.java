@@ -446,4 +446,33 @@ public interface APIProvider extends APIManager {
      * @param updatedStatus status of the stat publishing state
      */
     public void callStatUpdateService(String receiverUrl, String user, String password, boolean updatedStatus);
+
+    /*
+    * This method is to change registry lifecycle states for an API artifact
+    *
+    * @param  APIIdentifier apiIdentifier
+    * @param  action  Action which need to execute from registry lifecycle
+    *
+    * */
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+            throws APIManagementException;
+
+   /*
+   * This method is to set checklist item values for a particular life-cycle state of an API
+   *
+   * @param  APIIdentifier apiIdentifier
+   * @param  checkItem  Order of the checklist item
+   * @param  checkItemValue Value of the checklist item
+   *
+   * */
+    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem,boolean checkItemValue)
+            throws APIManagementException;
+
+    /*
+    * This method returns the lifecycle data for an API including current state,next states.
+    *
+    * @param apiId APIIdentifier
+    * @return Map<String,Object> a map with lifecycle data
+    */
+    public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException;
 }

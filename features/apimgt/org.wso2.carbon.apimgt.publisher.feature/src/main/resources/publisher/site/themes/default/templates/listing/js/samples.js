@@ -50,7 +50,7 @@ APISamples.prototype.deploySample1 = function(){
 				if (isPublishPermitted) {
 					var urlPublished="/site/blocks/life-cycles/ajax/life-cycles.jag";
 
-					var result2 = jagg.post(urlPublished,{action:"updateStatus",name:"WeatherAPI",version:"1.0.0",provider:username,status:"PUBLISHED",publishToGateway:true,requireResubscription:true},
+					var result2 = jagg.post(urlPublished,{action:"updateStatus",name:"WeatherAPI",version:"1.0.0",provider:username,status:"Publish",publishToGateway:true,requireResubscription:true},
 					function(result){
 						if(!result.error){
 							window.location.assign(siteContext + "/site/pages/index.jag");

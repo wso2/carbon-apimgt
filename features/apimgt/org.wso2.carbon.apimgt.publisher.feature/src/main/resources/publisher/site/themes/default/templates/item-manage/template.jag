@@ -552,7 +552,7 @@
                     name:"<%=api.name%>",
                     version:"<%=api.version%>",
                     provider: "<%=api.provider%>",
-                    status: "PUBLISHED",
+                    status: "Publish",
                     publishToGateway:true,
                     requireResubscription:true
                 },
