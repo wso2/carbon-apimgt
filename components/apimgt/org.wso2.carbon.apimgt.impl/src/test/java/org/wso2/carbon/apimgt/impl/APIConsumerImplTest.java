@@ -23,21 +23,23 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import java.io.UnsupportedEncodingException;
+
 import static org.mockito.Mockito.when;
 
 public class APIConsumerImplTest extends TestCase {
 
-    public void testReadMonitizationConfigAnnonymously() {
+    public void testReadMonetizationConfigAnnonymously() {
         APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryService.class);
 
-        String json = "{\n  EnableMonitization : true\n }";
+        String json = "{\n  EnableMonetization : true\n }";
 
         try {
             when(apimRegistryService.getResourceContent("", "")).thenReturn(json);
             /* TODO: Need to mock out ApimgtDAO and usage of registry else where in order to test this
             APIConsumer apiConsumer = new UserAwareAPIConsumer("__wso2.am.anon__", apimRegistryService);
 
-            boolean isEnabled = apiConsumer.isMonitizationEnabled("carbon.super");
+            boolean isEnabled = apiConsumer.isMonetizationEnabled("carbon.super");
 
             assertTrue("Expected true but returned " + isEnabled, isEnabled);
 
@@ -46,6 +48,8 @@ public class APIConsumerImplTest extends TestCase {
         */} catch (UserStoreException e) {
             e.printStackTrace();
         } catch (RegistryException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
     }

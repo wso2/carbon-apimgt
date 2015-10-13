@@ -58,6 +58,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -2824,14 +2825,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return row;
     }
 
-    private JSONObject getAPITenantConfig(String tenantDomain) throws APIManagementException {
-        JSONObject jsonObject = null;
+
+    @Override
+    public boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException {
+        JSONObject apiTenantConfig = null;
         try {
-            Object content = apimRegistryService.getResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content = apimRegistryService.getResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
 
             if (content != null) {
                 JSONParser parser = new JSONParser();
-                jsonObject = (JSONObject) parser.parse((String) content);
+                apiTenantConfig = (JSONObject) parser.parse(content);
             }
 
         } catch (UserStoreException e) {
@@ -2840,18 +2843,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("RegistryException thrown when getting API tenant config from registry", e);
         } catch (ParseException e) {
             handleException("ParseException thrown when passing API tenant config from registry", e);
+        } catch (UnsupportedEncodingException e) {
+            handleException("UnsupportedEncodingException thrown when reading content of tenant config from registry", e);
         }
 
-        return jsonObject;
+        return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
     }
 
-    @Override
-    public boolean isMonitizationEnabled(String tenantDomain) throws APIManagementException {
-        JSONObject jsonObject = getAPITenantConfig(tenantDomain);
+    private boolean getTenantConfigValue(String tenantDomain, JSONObject apiTenantConfig, String configKey) throws APIManagementException {
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(configKey);
 
-        if (jsonObject != null) {
-            Object value = jsonObject.get(APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
-            return Boolean.valueOf(value.toString());
+            if (value != null) {
+                return Boolean.valueOf(value.toString());
+            }
+            else {
+                throw new APIManagementException(configKey + " config does not exist for tenant " + tenantDomain);
+            }
         }
 
         return false;

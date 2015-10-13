@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * Service interface for accessing the governance registry
  */
@@ -26,6 +28,6 @@ public interface APIMRegistryService {
     /**
     * Get resource belonging to a given user from the provided registry path
     */
-    Object getResourceContent(final String tenantDomain, final String registryLocation) throws UserStoreException, RegistryException;
+    String getResourceContent(String tenantDomain, final String registryLocation) throws UserStoreException, RegistryException, UnsupportedEncodingException;
 
 }

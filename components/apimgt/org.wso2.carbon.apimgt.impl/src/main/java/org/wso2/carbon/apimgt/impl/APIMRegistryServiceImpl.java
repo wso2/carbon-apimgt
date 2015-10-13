@@ -22,11 +22,19 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+
+import java.io.UnsupportedEncodingException;
 
 public class APIMRegistryServiceImpl implements APIMRegistryService {
     @Override
-    public Object getResourceContent(final String tenantDomain, final String registryLocation) throws UserStoreException, RegistryException {
-        Object content = null;
+    public String getResourceContent(String tenantDomain, final String registryLocation) throws UserStoreException,
+                                                RegistryException, UnsupportedEncodingException {
+        String content = null;
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -36,7 +44,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
 
             if (registry.resourceExists(registryLocation)) {
                 Resource resource = registry.get(registryLocation);
-                content = resource.getContent();
+                content = new String((byte[]) resource.getContent(), "UTF-8");
             }
         }
         finally {

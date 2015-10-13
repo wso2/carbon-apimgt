@@ -561,5 +561,5 @@ public interface APIConsumer extends APIManager {
 
 	public JSONObject resumeWorkflow(Object[] args);
 
-    public boolean isMonitizationEnabled(String tenantDomain) throws APIManagementException;
+    boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 }

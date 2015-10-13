@@ -68,9 +68,23 @@ public final class APIConstants {
     
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
 
-    public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/tenant-conf.json";
+    public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
-    public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonitization";
+    public static final String API_TENANT_CONF = "tenant-conf.json";
+
+    public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
+
+    public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
+
+    public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
+
+    public static final String API_TIER_IS_PAID_ATTRIBUTE = "IsPaid";
+
+    public static final String API_CATEGORY_FREE = "Free";
+
+    public static final String API_CATEGORY_FREEMIUM = "Freemium";
+
+    public static final String API_CATEGORY_PAID = "Paid";
 
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
