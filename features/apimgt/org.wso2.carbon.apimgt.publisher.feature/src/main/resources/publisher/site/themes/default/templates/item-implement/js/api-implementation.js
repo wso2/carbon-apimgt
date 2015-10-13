@@ -148,7 +148,7 @@ $(document).ready(function(){
                         name:designer.saved_api.name,
                         version:designer.saved_api.version,
                         provider: designer.saved_api.provider,
-                        status: "Deploy as a Prototype",
+                        status: "PROTOTYPED",
                         publishToGateway:true,
                         requireResubscription:true
                     },

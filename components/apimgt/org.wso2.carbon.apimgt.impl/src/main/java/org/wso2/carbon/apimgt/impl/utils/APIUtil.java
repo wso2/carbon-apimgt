@@ -916,7 +916,7 @@ public final class APIUtil {
     public static APIStatus getApiStatus(String status) throws APIManagementException {
         APIStatus apiStatus = null;
         for (APIStatus aStatus : APIStatus.values()) {
-            if (aStatus.getStatus().equalsIgnoreCase(status)) {
+            if (aStatus.getStatus().equals(status)) {
                 apiStatus = aStatus;
             }
         }
@@ -4287,34 +4287,11 @@ public final class APIUtil {
     }
 
     /*
-    *  Util method to convert a java object to a json object
-    *
+    Attach the lifecycle to a registry resource
     */
-    public static String convertToString(Object obj) {
-        Gson gson = new Gson();
-        String json = gson.toJson(obj);
-        return json;
-    }
+    public void associateLifeCycle(String resourcePath, Registry registry) throws RegistryException {
 
-    /*
-    * Util method to return the artifact from a registry resource path
-    *
-    * */
-    public static GenericArtifact getAPIArtifact(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
-        String apiPath = APIUtil.getAPIPath(apiIdentifier);
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
-        try {
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
-            }
-            return artifactManager.getGenericArtifact(artifactId);
-        } catch (RegistryException e) {
-            handleException("Failed to get API artifact from : " + apiPath, e);
-            return null;
-        }
+        GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
     }
 
     /**
