@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.usage.client.dto;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class AppUsageDTO {

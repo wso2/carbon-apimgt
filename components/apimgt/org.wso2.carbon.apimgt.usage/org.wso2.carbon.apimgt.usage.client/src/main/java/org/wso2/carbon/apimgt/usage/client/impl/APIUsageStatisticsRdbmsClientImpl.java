@@ -22,18 +22,24 @@ import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.client.Options;
+import org.apache.axis2.client.ServiceClient;
+import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.*;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
@@ -41,11 +47,14 @@ import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
-import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
+import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
+import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.activation.DataHandler;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -62,7 +71,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.json.simple.JSONArray;
 
 
 public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient {
@@ -107,7 +115,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     }
 
-    public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
+    public void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
         try {
             Context ctx = new InitialContext();
             dataSource = (DataSource) ctx.lookup(DATA_SOURCE_NAME);
@@ -683,7 +691,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException if an error occurs while contacting backend services
      */
     @Override
-    public String getUsageByAPIs(String providerName, String fromDate, String toDate, int limit)
+    public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
@@ -716,7 +724,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         List<APIUsageDTO> usage= getAPIUsageTopEntries(new ArrayList<APIUsageDTO>(usageByAPIs.values()), limit);
-        return gson.toJson(usage);
+        return usage;
     }
 
     /**
@@ -880,7 +888,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     @Override
-    public String getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
+    public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsageByResourcePath> usageData = this
@@ -907,11 +915,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
         }
         List<APIResourcePathUsageDTO> usage= usageByResourcePath;
-        return gson.toJson(usage);
+        return usage;
     }
 
     @Override
-    public String getAPIUsageByDestination(String providerName, String fromDate, String toDate)
+    public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByDestination> usageData= this.queryToGetAPIUsageByDestination(
@@ -937,7 +945,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
         }
         List<APIDestinationUsageDTO> usage= usageByResourcePath;
-        return gson.toJson(usage);
+        return usage;
     }
 
     /**
@@ -949,7 +957,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     @Override
-    public String getAPIUsageByUser(String providerName, String fromDate, String toDate)
+    public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByUserName> usageData = this.queryBetweenTwoDaysForAPIUsageByUser(providerName, fromDate, toDate, null);
@@ -970,7 +978,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         List<APIUsageByUserDTO> usage= usageByName;
-        return gson.toJson(usage);
+//        return gson.toJson(usage);
+        return usage;
     }
 
     /**
@@ -982,7 +991,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     @Override
-    public String getResponseTimesByAPIs(String providerName, String fromDate, String toDate, int limit)
+    public List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate, String toDate,
+            int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIResponseTime> responseTimes =
@@ -1023,7 +1033,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             responseTimeByAPI.put(key, responseTimeDTO);
         }
         List<APIResponseTimeDTO> usage= getResponseTimeTopEntries(new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);
-        return gson.toJson(usage);
+        return usage;
     }
 
     /**
@@ -1114,7 +1124,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     @Override
-    public String getLastAccessTimesByAPI(String providerName, String fromDate, String toDate, int limit)
+    public List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIAccessTime> accessTimes =
@@ -1149,7 +1160,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             accessTimeByAPI.put(entry.getKey(), accessTimeDTO);
         }
         List<APIVersionLastAccessTimeDTO> usage= getLastAccessTimeTopEntries(new ArrayList<APIVersionLastAccessTimeDTO>(accessTimeByAPI.values()), limit);
-        return gson.toJson(usage);
+        return usage;
     }
 
     /**
@@ -1324,7 +1335,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return new ArrayList<String>(apisList);
     }
 
-    public String getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
+    public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         List<APIResponseFaultCount> faultyData = this
@@ -1364,7 +1375,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         }
-        return gson.toJson(faultyCount);
+        return faultyCount;
     }
 
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName,
@@ -2563,7 +2574,34 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return paymentPlan.evaluate(param, calls);
     }
 
-//    @Deprecated
+    @Override public void deployArtifacts(String url,String user,String pass) throws Exception {
+        String cAppName= "API_Manager_Analytics_RDBMS.car";
+        String cAppPath = System.getProperty("carbon.home") + "/statistics";
+        cAppPath = cAppPath + '/' + cAppName;
+        File file = new File(cAppPath);
+
+        byte[] byteArray = FileUtils.readFileToByteArray(file);
+        DataHandler dataHandler = new DataHandler(byteArray, "application/octet-stream");
+
+        CarbonAppUploaderStub stub = new CarbonAppUploaderStub(url + "/services/CarbonAppUploader");
+        ServiceClient client = stub._getServiceClient();
+        Options options = client.getOptions();
+        HttpTransportProperties.Authenticator authenticator = new HttpTransportProperties.Authenticator();
+        authenticator.setUsername(user);
+        authenticator.setPassword(pass);
+        authenticator.setPreemptiveAuthentication(true);
+        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
+        client.setOptions(options);
+        log.info("Deploying DAS cApp '" + cAppName + "'...");
+        UploadedFileItem[] fileItem = new UploadedFileItem[1];
+        fileItem[0]=new UploadedFileItem();
+        fileItem[0].setDataHandler(dataHandler);
+        fileItem[0].setFileName(cAppName);
+        fileItem[0].setFileType("jar");
+        stub.uploadApp(fileItem);
+    }
+
+    //    @Deprecated
 //    private Collection<APIFirstAccess> getFirstAccessTime(OMElement data) {
 //        List<APIFirstAccess> usageData = new ArrayList<APIFirstAccess>();
 //        OMElement rowsElement = data.getFirstChildWithName(new QName(
@@ -2578,21 +2616,21 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 //    }
 
     @Override
-    public List<String> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
+    public List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
         return getFirstAccessTime(providerName,1);
     }
 
-    public List<String> getFirstAccessTime(String providerName, int limit)
+    public List<APIFirstAccess> getFirstAccessTime(String providerName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        APIFirstAccess firstAccess = this.queryFirstAccess(
-                APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
-        List<String> APIFirstAccessList = new ArrayList<String>();
+        APIFirstAccess firstAccess = this.queryFirstAccess(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY);
+        List<APIFirstAccess> APIFirstAccessList = new ArrayList<APIFirstAccess>();
+
+        APIFirstAccess fTime;
 
         if (firstAccess != null) {
-            APIFirstAccessList.add(firstAccess.getYear());
-            APIFirstAccessList.add(firstAccess.getMonth());
-            APIFirstAccessList.add(firstAccess.getDay());
+            fTime = new APIFirstAccess(firstAccess.getYear(), firstAccess.getMonth(), firstAccess.getDay());
+            APIFirstAccessList.add(fTime);
         }
         return APIFirstAccessList;
     }
@@ -3573,44 +3611,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             this.context = context;
             this.accessTime = accessTime;
             this.username = username;
-        }
-    }
-
-    private static class APIFirstAccess {
-
-        private String year;
-        private String month;
-        private String day;
-        //private long requestCount;
-
-        public APIFirstAccess(String year, String month, String day) {
-            this.year = year;
-            this.month = month;
-            this.day = day;
-        }
-
-        public String getYear() {
-            return year;
-        }
-
-        public String getMonth() {
-            return month;
-        }
-
-        public String getDay() {
-            return day;
-        }
-
-        @Deprecated
-        public APIFirstAccess(OMElement row) {
-            year = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.YEAR)).getText();
-            month = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.MONTH)).getText();
-            day = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.DAY)).getText();
-            /*requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());*/
         }
     }
 

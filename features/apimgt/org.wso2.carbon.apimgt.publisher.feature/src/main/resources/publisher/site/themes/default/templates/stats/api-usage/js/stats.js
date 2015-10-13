@@ -126,7 +126,6 @@ var drawProviderAPIUsage = function(from,to){
         function (json) {
             if (!json.error) {
 
-                json.usage=JSON.parse(json.usage);
                 var length = json.usage.length,data = [];
                 var inputData=[];
                 $('#apiChart').empty();

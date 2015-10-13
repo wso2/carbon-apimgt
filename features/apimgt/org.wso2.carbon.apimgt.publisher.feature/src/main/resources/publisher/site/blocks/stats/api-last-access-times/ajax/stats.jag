@@ -16,7 +16,7 @@ include("/jagg/jagg.jag");
     } else {
         if (action === "getProviderAPIVersionUserLastAccess") {
             var provider = jagg.getUser().username;
-            mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
+            mod = jagg.module("statistics");
 
             var currentLocation = request.getParameter("currentLocation");
             var mode = request.getParameter("mode");
@@ -27,10 +27,10 @@ include("/jagg/jagg.jag");
                 result = mod.getLastAccessTimesByAPI(allProviders, from, to,10);
             } else if (mode != null && mode == "browse") {
                 provider = request.getParameter("provider");
-                result = mod.getLastAccessTimesByAPI(provider, from, to,10);
+                result = mod.getProviderAPIVersionUserLastAccess(provider, from, to);
             } else {
                 provider = jagg.getUser().username;
-                result = mod.getLastAccessTimesByAPI(provider, from, to,10);
+                result = mod.getProviderAPIVersionUserLastAccess(provider, from, to);
             }
             if (result.error == "true") {
                 obj = {
@@ -40,42 +40,37 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    usage: result
+                    usage: result.usage
                 }
             }
             print(obj);
 
         } else if (action === "getFirstAccessTime") {
             var provider = jagg.getUser().username;
-            mod=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
-            if (mod==null){
+            mod = jagg.module("statistics");
+
+            var currentLocation = request.getParameter("currentLocation");
+            if (currentLocation.indexOf("all-statistics") >= 0) {
+                result = mod.getFirstAccessTime(allProviders);
+            } else {
+                result = mod.getFirstAccessTime(provider);
+            }
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
                 obj = {
                     error: false,
-                    message: ""
-                };
-                print(obj);
-            } else {
-                var currentLocation = request.getParameter("currentLocation");
-                if (currentLocation.indexOf("all-statistics") >= 0) {
-                    result = mod.getFirstAccessTime(allProviders);
-                } else {
-                    result = mod.getFirstAccessTime(provider);
+                    usage: result.usage
                 }
-                if (result.error == "true") {
-                    obj = {
-                        error: result.error,
-                        message: msg.error.backendError(action)
-                    };
-                } else {
-                    obj = {
-                        error: false,
-                        usage: result.toArray()
-                    }
-                }
-                print(obj);
             }
+            print(obj);
+
         } else if (action === "isDataPublishingEnabled") {
-            result = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
+            mod = jagg.module("statistics");
+            result = mod.isDataPublishingEnabled();
             
             if (result.error == "true") {
                 obj = {

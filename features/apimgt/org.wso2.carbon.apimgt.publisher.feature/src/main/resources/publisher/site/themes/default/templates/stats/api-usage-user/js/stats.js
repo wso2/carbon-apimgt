@@ -131,7 +131,6 @@ var drawAPIUsage = function (from,to) {
     jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
                 function (json) {
                     if (!json.error) {
-                        json.usage=JSON.parse(json.usage);
                         var length = json.usage.length, data = [];
                         var newLength=0;
                         subscriberDetails=[];
@@ -251,8 +250,6 @@ var drawChart = function (from, to) {
     jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "getAPIUsageByUser", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate},
         function (json) {
             if (!json.error) {
-
-                json.usage=JSON.parse(json.usage);
 
                 $('#tooltipTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;

@@ -1,7 +1,9 @@
 <%
 log = new Log(),
 apiProvider = jagg.module("manager").getAPIProviderObj(),
+usageClient = jagg.module("manager").getUsageClient(),
 user = jagg.getUser();
+var gson=com.google.gson.Gson();
 
 //methods for usage monitoring
 function getProviderAPIVersionUsage(providerName, apiName, server) {
@@ -55,7 +57,7 @@ function getProviderAPIUsage(providerName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getProviderAPIUsage(providerName,from,to, server);
+        usage = usageClient.getProviderAPIUsage(providerName,from,to, 10);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIUsage for : " + server);
         }
@@ -65,7 +67,7 @@ function getProviderAPIUsage(providerName,from,to, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -115,7 +117,7 @@ function getAPIUsageByResourcePath(providerName,from,to) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getAPIUsageByResourcePath(providerName,from,to);
+        usage = usageClient.getAPIUsageByResourcePath(providerName,from,to);
         if (log.isDebugEnabled()) {
             log.debug("getAPIUsageByResourcePath for : " + providerName);
         }
@@ -125,7 +127,7 @@ function getAPIUsageByResourcePath(providerName,from,to) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -145,7 +147,7 @@ function getAPIUsageByDestination(providerName,from,to) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getAPIUsageByDestination(providerName,from,to);
+        usage = usageClient.getAPIUsageByDestination(providerName,from,to);
         if (log.isDebugEnabled()) {
             log.debug("getAPIUsageByDestination for : " + providerName);
         }
@@ -155,7 +157,7 @@ function getAPIUsageByDestination(providerName,from,to) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -175,7 +177,7 @@ function getAPIUsageByUser(providerName,from,to) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getAPIUsageByUser(providerName,from,to);
+        usage = usageClient.getAPIUsageByUser(providerName,from,to);
         if (log.isDebugEnabled()) {
             log.debug("getAPIUsageByUser for : " + providerName);
         }
@@ -185,7 +187,7 @@ function getAPIUsageByUser(providerName,from,to) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -204,7 +206,7 @@ function getAPIUsageByUser(providerName,from,to) {
 function getProviderAPIVersionUserLastAccess(providerName,from,to, server) {
     var usage = [];
     try {
-        usage = apiProvider.getProviderAPIVersionUserLastAccess(providerName,from,to, server);
+        usage = usageClient.getProviderAPIVersionUserLastAccess(providerName,from,to, 10);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIVersionUserLastAccess for : " + server);
         }
@@ -214,6 +216,7 @@ function getProviderAPIVersionUserLastAccess(providerName,from,to, server) {
             };
 
         } else {
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -233,7 +236,7 @@ function getProviderAPIServiceTime(providerName,from,to, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getProviderAPIServiceTime(providerName,from,to, server);
+        usage = usageClient.getProviderAPIServiceTime(providerName,from,to, 10);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIServiceTime for : " + server);
         }
@@ -243,7 +246,7 @@ function getProviderAPIServiceTime(providerName,from,to, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -263,7 +266,7 @@ function getSubscriberCountByAPIs(providerName) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getSubscriberCountByAPIs(providerName);
+        usage = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getSubscriberCountByAPIs(providerName);
         if (log.isDebugEnabled()) {
             log.debug("getSubscriberCountByAPIs for : " + providerName);
         }
@@ -273,6 +276,7 @@ function getSubscriberCountByAPIs(providerName) {
             };
 
         } else {
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -321,7 +325,7 @@ function getAPIResponseFaultCount(providerName,from,to) {
      var usage = [];
      var usageout = [];
      try {
-         usage = apiProvider.getAPIResponseFaultCount(providerName,from,to);
+         usage = usageClient.getAPIResponseFaultCount(providerName,from,to);
          if (log.isDebugEnabled()) {
              log.debug("getAPIResponseFaultCount for : " + providerName);
          }
@@ -331,6 +335,7 @@ function getAPIResponseFaultCount(providerName,from,to) {
              };
 
          } else {
+             usage=JSON.parse(gson.toJson(usage));
              return {
                  error:false,
                  usage:usage
@@ -375,13 +380,13 @@ function getAPIFaultyAnalyzeByTime(providerName) {
      }
  }
 
-function getFirstAccessTime(providerName, server) {
+function getFirstAccessTime(providerName) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getFirstAccessTime(providerName, server);
+        usage = usageClient.getFirstAccessTime(providerName);
         if (log.isDebugEnabled()) {
-            log.debug("getProviderAPIFirstAccessTime for : " + server);
+            log.debug("getProviderAPIFirstAccessTime for : ");
         }
         if (usage == null) {
             return {
@@ -389,7 +394,7 @@ function getFirstAccessTime(providerName, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -409,7 +414,7 @@ function isDataPublishingEnabled(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.isDataPublishingEnabled();
+        usage = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
         if (log.isDebugEnabled()) {
             log.debug("isDataPublishingEnabled check");
         }

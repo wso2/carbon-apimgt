@@ -128,7 +128,6 @@ var drawAPIUsageByDestination = function(from,to){
         function (json) {
             if (!json.error) {
 
-                json.usage=JSON.parse(json.usage);
                 var length = json.usage.length;
                 $('#tempLoadingSpaceDestination').empty();
                 $('div#destinationBasedUsageTable_wrapper.dataTables_wrapper.no-footer').remove();

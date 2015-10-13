@@ -45,7 +45,7 @@ public class APIUsageClientServiceComponent {
             log.debug("API usage client component activated");
         }
         if (analyticsConfiguration.isAnalyticsEnabled()){
-            UsageClient.initializeDataSource(UsageClient.getClientType());
+            UsageClient.initializeDataSource();
         }
     }
 

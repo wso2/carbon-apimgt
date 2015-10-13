@@ -154,7 +154,6 @@ var drawAPIUsageByResourcePath = function (from, to) {
         function (json) {
             if (!json.error) {
 
-                json.usage=JSON.parse(json.usage);
                 $('#resourcePathUsageTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
 

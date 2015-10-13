@@ -93,4 +93,9 @@ var getAPIStoreObj = function() {
     var store = require('apistore');
     return new store.APIStore();
 };
+
+var getUsageClient = function(){
+	return org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
+}
+
 %>

@@ -139,14 +139,6 @@ var dataSourceType = outputs.dataSourceType;
                     <legend>Statistics Summary Datasource</legend>
                 </td>
             </tr>
-	   <tr>
-                <td colspan="4">
-			<div class="control-group">
-                    	<input type="radio" name="dataSourceType" value="<%= org.wso2.carbon.apimgt.usage.client.util.RESTClientConstant.DATASOURCE_REST_TYPE %>" checked>Configure REST Client<br>
-			<input type="radio" name="dataSourceType" value="<%= org.wso2.carbon.apimgt.usage.client.util.RESTClientConstant.DATASOURCE_RDBMS_TYPE %>">Configure RDBMS Client
-			</div>
-                </td>
-            </tr>	
             <tr>
                 <td>
                     <div class="control-group">
@@ -558,7 +550,6 @@ var dataSourceType = outputs.dataSourceType;
 <script>
 $(document).ready(function() {
 
-	$("input[name=dataSourceType]").val([<%= dataSourceType.type %>]);
 
         var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics%>";
 if(enableAnalytics){

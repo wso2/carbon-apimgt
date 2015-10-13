@@ -16,8 +16,7 @@ jagg.block("analytics-task", {
         mod = jagg.module("analytics");
         return {
             "analyticsData" : mod.getAnalyticsConfig(),
-            "datasourceData" : mod.getDatasourceConfig(),
-            "dataSourceType" : mod.getDataSourceType()
+            "datasourceData" : mod.getDatasourceConfig()
         }
 
     }

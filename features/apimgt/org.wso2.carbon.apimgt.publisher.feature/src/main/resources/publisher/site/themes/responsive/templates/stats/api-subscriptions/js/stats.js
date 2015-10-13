@@ -9,7 +9,6 @@ var statsEnabled = isDataPublishingEnabled();
         function (json) {
             $('#spinner').hide();
             if (!json.error) {
-                json.usage=JSON.parse(json.usage);
                 var length = json.usage.length, data = [];
                 var newLength=0;
                 var inputData=[];

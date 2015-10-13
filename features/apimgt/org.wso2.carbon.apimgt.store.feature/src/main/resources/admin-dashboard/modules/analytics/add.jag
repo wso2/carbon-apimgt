@@ -79,15 +79,20 @@ var addAnalyticsConfig = function (configData) {
         eventingConfigData.setPassword(configData.eventReceiverPassword);
         eventingConfigData.setServiceStatsEnable(true);
 
-        //Commented due to Current component not support this
         var analyzingConfigData = stub.getAnalyzingConfigData();
         analyzingConfigData.setUrl(configData.eventAnalyserURL);
         analyzingConfigData.setUserName(configData.eventAnalyserUsername);
         analyzingConfigData.setPassword(configData.eventAnalyserPassword);
 
+        var restAPIConfigData = stub.getRestAPIConfigData();
+        restAPIConfigData.setUrl(configData.eventAnalyserURL);
+        restAPIConfigData.setUserName(configData.eventAnalyserUsername);
+        restAPIConfigData.setPassword(configData.eventAnalyserPassword);
+
         log.info("Saving Analytics config in registry...");
         stub.configureEventing(eventingConfigData);
-        stub.configureAnalyzing(analyzingConfigData);         //Commented due to Current component not support this
+        stub.configureAnalyzing(analyzingConfigData);
+        stub.configureRestAPI(restAPIConfigData);
         var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
         log.info(configReaderService.getRequestStreamName());
         log.info(configReaderService.getResponseStreamName());
@@ -151,7 +156,7 @@ var addDatasourceConfig = function (configData) {
         log.info("Saving datasource '" + dsName + "'...");
         stub.addDataSource(dataSourceMetaInfo);
         log.info("Datasource '" + dsName + "' saved");
-        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.initializeDataSource(configData.dataSourceType);
+        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.initializeDataSource();
         log.info("Initialized datasource '" + dsName);
         return {
             error: false
@@ -168,7 +173,23 @@ var addDatasourceConfig = function (configData) {
 
 
 var addToolbox = function (configData) {
-    if(configData.eventAnalyserURL.trim() == ""){
+
+    try {
+        var client=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
+        client.deployArtifacts(configData.eventAnalyserURL,configData.eventAnalyserUsername,configData.eventAnalyserPassword);
+        return {
+            error: false
+        };
+    }catch(ex){
+        var message = "Error occurred while deploying artifacts (Cause:" + ex.message + ")";
+        log.error(message);
+        return {
+            error: true,
+            message: message
+        };
+    }
+
+    /*if(configData.eventAnalyserURL.trim() == ""){
         var message = "Data Analyzer URL is empty. Toolbox will not be deployed.";
         log.warn(message);
         return {
@@ -247,7 +268,7 @@ var addToolbox = function (configData) {
             error: true,
             message: message
         };
-    }
+    }*/
 };
 
 var addBamServerProfile = function (configData) {
@@ -381,20 +402,6 @@ var getDataSourceConfigString = function (configData) {
         result:configString
     };
 };
-
-var setDataSourceType = function (configData) {
-	var type=configData.dataSourceType;
-    try {
-        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.setClientType(type);
-    }catch (e) {
-        log.error(e.message);
-    }
-
-    return {
-        error: false
-    };
-}
-
 
 
 %>

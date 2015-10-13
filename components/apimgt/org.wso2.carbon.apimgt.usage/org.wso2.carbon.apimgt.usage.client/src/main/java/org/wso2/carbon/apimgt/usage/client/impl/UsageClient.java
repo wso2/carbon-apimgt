@@ -8,7 +8,9 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -23,7 +25,8 @@ import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,34 +35,51 @@ import java.util.List;
  */
 public class UsageClient {
     private static final Log log = LogFactory.getLog(UsageClient.class);
+    private static APIUsageStatisticsClient usageStatisticsClient;
 
-    public static void initializeDataSource(int dataSourceType) throws APIMgtUsageQueryServiceClientException {
-        if (dataSourceType == RESTClientConstant.DATASOURCE_REST_TYPE) {
-            APIUsageStatisticsRestClientImpl.initializeDataSource();
-            log.info("Initializing REST Usage Statistics Client");
-        } else if (dataSourceType == RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
-            APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
-            log.info("Initializing RDBMS Usage Statistics Client");
-        } else {
-            log.error("Unknown Statistic client information found");
+    public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
+
+        try {
+            APIUsageStatisticsClient client=getStatisticClient();
+            client.initializeDataSource();
+        } catch (ClassNotFoundException e) {
+            throw new APIMgtUsageQueryServiceClientException("Class not found",e);
+        } catch (IllegalAccessException e) {
+            throw new APIMgtUsageQueryServiceClientException("error in class",e);
+        } catch (InstantiationException e) {
+            throw new APIMgtUsageQueryServiceClientException("error in class",e);
+        } catch (NoSuchMethodException e) {
+            throw new APIMgtUsageQueryServiceClientException("error in class",e);
+        } catch (InvocationTargetException e) {
+            throw new APIMgtUsageQueryServiceClientException("error in class",e);
         }
+
+        //        if (dataSourceType == RESTClientConstant.DATASOURCE_REST_TYPE) {
+//            APIUsageStatisticsRestClientImpl.initializeDataSource();
+//            log.info("Initializing REST Usage Statistics Client");
+//        } else if (dataSourceType == RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
+//            APIUsageStatisticsRdbmsClientImpl.initializeDataSource();
+//            log.info("Initializing RDBMS Usage Statistics Client");
+//        } else {
+//            log.error("Unknown Statistic client information found");
+//        }
     }
 
-    public static APIUsageStatisticsClient getClient() {
+    public static APIUsageStatisticsClient getClient() throws APIMgtUsageQueryServiceClientException {
         if (isDataPublishingEnabled()) {
             try {
-
-                if (getClientType() == RESTClientConstant.DATASOURCE_REST_TYPE) {
-                    return new APIUsageStatisticsRestClientImpl("");
-                } else if (getClientType() == RESTClientConstant.DATASOURCE_RDBMS_TYPE) {
-                    return new APIUsageStatisticsRdbmsClientImpl("");
-                } else {
-                    log.error("Unknown Statistic client information found");
-                    return null;
-                }
-            } catch (APIMgtUsageQueryServiceClientException e) {
-                log.error("Error instantiating Statistic Client", e);
-                return null;
+                APIUsageStatisticsClient client=getStatisticClient();
+                return client;
+            } catch (ClassNotFoundException e) {
+                throw new APIMgtUsageQueryServiceClientException("Class not found",e);
+            } catch (IllegalAccessException e) {
+                throw new APIMgtUsageQueryServiceClientException("error in class",e);
+            } catch (InstantiationException e) {
+                throw new APIMgtUsageQueryServiceClientException("error in class",e);
+            }catch (NoSuchMethodException e) {
+                throw new APIMgtUsageQueryServiceClientException("error in class",e);
+            } catch (InvocationTargetException e) {
+                throw new APIMgtUsageQueryServiceClientException("error in class",e);
             }
         } else {
             return null;
@@ -71,7 +91,7 @@ public class UsageClient {
         return con.isAnalyticsEnabled();
     }
 
-    public static String getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
+    public static List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
         String providerName = null;
 
         APIProvider apiProvider; //= getAPIProvider(thisObj);
@@ -125,38 +145,23 @@ public class UsageClient {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
-        return new Gson().toJson(list);
+        return list;
     }
 
-    public static int getClientType() {
-        Registry registry = CarbonContext.getThreadLocalCarbonContext()
-                .getRegistry(RegistryType.valueOf(RegistryType.LOCAL_REPOSITORY.toString()));
+    private static APIUsageStatisticsClient getStatisticClient()
+            throws ClassNotFoundException, IllegalAccessException, InstantiationException, NoSuchMethodException,
+            InvocationTargetException {
 
-        int val = 0;
-        try {
-            Resource orderRes = registry.get(RESTClientConstant.DATASOURCE_TYPE_REG_LOCATION);
-            byte[] st = (byte[]) orderRes.getContent();
-            val = (Integer) RestClientUtil.deserialize(st);
-        } catch (RegistryException e) {
-            log.error("DataSource type is not set", e);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
+        if(usageStatisticsClient==null) {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            String className = config.getFirstProperty("StatisticClientProvider");
+            usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor(String.class).newInstance("");
         }
 
-        return val;
+        return usageStatisticsClient;
     }
 
-    public static void setClientType(String sourceType) throws RegistryException, IOException {
-        Integer type = Integer.parseInt(sourceType);
-        Registry registry = CarbonContext.getThreadLocalCarbonContext()
-                .getRegistry(RegistryType.valueOf(RegistryType.LOCAL_REPOSITORY.toString()));
-
-        Resource orderRes = registry.newResource();
-        orderRes.setContent(RestClientUtil.serialize(type));
-        registry.put(RESTClientConstant.DATASOURCE_TYPE_REG_LOCATION, orderRes);
-
-    }
 
 }
 

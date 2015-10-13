@@ -65,7 +65,6 @@ var log = new Log();
         configData.statDsSuspectTimeout = request.getParameter('statDsSuspectTimeout');
         configData.statDsAlternateUsernameAllowed = request.getParameter('statDsAlternateUsernameAllowed');
         configData.statDsValidationQueryTimeout = request.getParameter('statDsValidationQueryTimeout');
-	    configData.dataSourceType = request.getParameter('dataSourceType');
 
         result = mod.addAnalyticsConfig(configData);
         if (result.error) {
@@ -86,12 +85,6 @@ var log = new Log();
         }
 
         result = mod.addBamServerProfile(configData);
-        if (result.error) {
-            print(result);
-            return false;
-        }
-	
-	    result = mod.setDataSourceType(configData);
         if (result.error) {
             print(result);
             return false;

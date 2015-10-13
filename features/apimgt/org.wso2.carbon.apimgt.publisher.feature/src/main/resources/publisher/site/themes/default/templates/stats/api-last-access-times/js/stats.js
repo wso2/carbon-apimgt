@@ -130,7 +130,6 @@ var drawProviderAPIVersionUserLastAccess = function(from,to){
         function (json) {
             if (!json.error) {
 
-		        json.usage=JSON.parse(json.usage);
                 var length = json.usage.length;
                 $('#tempLoadingSpace').empty();
                 $('div#lastAccessTable_wrapper.dataTables_wrapper.no-footer').remove();

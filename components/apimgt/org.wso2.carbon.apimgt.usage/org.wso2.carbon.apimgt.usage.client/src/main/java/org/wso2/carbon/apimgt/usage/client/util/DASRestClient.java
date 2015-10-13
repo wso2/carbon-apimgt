@@ -48,14 +48,14 @@ public class DASRestClient {
         StringEntity input = new StringEntity(js);
         input.setContentType("application/json");
         postRequest.setEntity(input);
-        httpClient = new DefaultHttpClient();
         return httpClient.execute(postRequest);
     }
 
     <T> List<Result<T>> parse(HttpResponse response, Type ty) throws IllegalStateException, IOException {
         BufferedReader re = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         List<Result<T>> obj = gson.fromJson(re, ty);
-        EntityUtils.consume(response.getEntity());
+//        EntityUtils.consume(response.getEntity());
+        httpClient.getConnectionManager().shutdown();
         return obj;
     }
 

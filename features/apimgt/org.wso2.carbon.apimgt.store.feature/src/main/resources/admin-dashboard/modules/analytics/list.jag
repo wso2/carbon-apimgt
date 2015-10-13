@@ -148,23 +148,4 @@ var getDatasourceConfig = function () {
     }
 };
 
-var getDataSourceType = function () {
-
-    var val=null;
-
-    try {
-        val=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClientType();
-    }catch (e) {
-        log.info(e.getMessage());
-    }
-
-    if(val==null){
-        val=org.wso2.carbon.apimgt.usage.client.util.RESTClientConstant.DATASOURCE_REST_TYPE;
-    }
-
-    return {
-        error: false,
-        type:val
-    };
-}
 %>

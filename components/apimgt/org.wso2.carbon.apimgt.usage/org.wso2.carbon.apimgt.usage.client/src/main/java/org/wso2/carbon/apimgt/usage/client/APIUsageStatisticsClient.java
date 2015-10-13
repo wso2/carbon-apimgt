@@ -5,12 +5,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
-import org.wso2.carbon.apimgt.usage.client.dto.APIThrottlingOverTimeDTO;
-import org.wso2.carbon.apimgt.usage.client.dto.APIVersionUsageDTO;
-import org.wso2.carbon.apimgt.usage.client.dto.AppRegisteredUsersDTO;
-import org.wso2.carbon.apimgt.usage.client.dto.RegisteredAppUsersDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.sql.*;
@@ -23,58 +21,63 @@ public abstract class APIUsageStatisticsClient {
 
     protected static Map<String, String> subscriberAppsMap = new HashMap<String, String>();
 
-    public abstract String perAppPerAPIUsage(String subscriberName, String groupId, String fromDate, String toDate, int limit)
+    public abstract void initializeDataSource() throws APIMgtUsageQueryServiceClientException;
+
+    public abstract String perAppPerAPIUsage(String subscriberName, String groupId, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException;
+
+    public abstract String getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException;
+
+    public abstract String getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException;
+
+    public abstract String getPerAppFaultCount(String subscriberName, String groupId, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException;
+
+    public abstract List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException;
 
-    public abstract String getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate, int limit)
+    public abstract List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate,
+            String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException;
 
-    public abstract String getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate, int limit)
+    public abstract List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName,
+            String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException;
 
-    public abstract String getPerAppFaultCount(String subscriberName, String groupId, String fromDate, String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract String getAPIUsageByUser(String providerName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract String getResponseTimesByAPIs(String providerName, String fromDate, String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract String getLastAccessTimesByAPI(String providerName, String fromDate, String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract String getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract String getAPIUsageByDestination(String providerName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract String getUsageByAPIs(String providerName, String fromDate, String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException;
-
-
-    public abstract String getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider, String appName,
-            String fromDate, String toDate, String groupBy)
-            throws APIMgtUsageQueryServiceClientException;
-
-    public abstract List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider, String fromDate,
+    public abstract List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate,
             String toDate)
             throws APIMgtUsageQueryServiceClientException;
 
-    public abstract List<String> getAPIsForThrottleStats(String provider)
+    public abstract List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate,
+            String toDate)
             throws APIMgtUsageQueryServiceClientException;
+
+    public abstract List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate,
+            int limit)
+            throws APIMgtUsageQueryServiceClientException;
+
+    public abstract List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate,
+            String toDate)
+            throws APIMgtUsageQueryServiceClientException;
+
+    public abstract List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
+            String appName, String fromDate, String toDate, String groupBy)
+            throws APIMgtUsageQueryServiceClientException;
+
+    public abstract List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
+            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException;
+
+    public abstract List<String> getAPIsForThrottleStats(String provider) throws APIMgtUsageQueryServiceClientException;
 
     public abstract List<String> getAppsForThrottleStats(String provider, String apiName)
             throws APIMgtUsageQueryServiceClientException;
 
-    public abstract List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException;
+    public abstract List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
+            String toDate) throws APIMgtUsageQueryServiceClientException;
 
-    public abstract List<String> getFirstAccessTime(String providerName)
-            throws APIMgtUsageQueryServiceClientException;
+    public abstract List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException;
 
     public String getAppRegisteredUsers(String subscriberName, String groupId)
             throws APIMgtUsageQueryServiceClientException {
@@ -112,7 +115,7 @@ public abstract class APIUsageStatisticsClient {
             }
         }
 
-        Gson gson=new Gson();
+        Gson gson = new Gson();
         return gson.toJson(appUserList);
     }
 
@@ -258,4 +261,6 @@ public abstract class APIUsageStatisticsClient {
     }
 
     public abstract List<APIUsageRangeCost> evaluate(String param, int calls) throws Exception;
+
+    public abstract void deployArtifacts(String url,String user,String pass) throws Exception;
 }

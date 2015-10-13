@@ -1,8 +1,7 @@
 package org.wso2.carbon.apimgt.usage.client.dto;
 
-
-        import java.util.ArrayList;
-        import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PerAppApiCountDTO {
 
