@@ -39,9 +39,6 @@ import java.util.*;
 
 public class DigestAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
-    public DigestAuthMediator() {
-    }
-
     private static final Log log = LogFactory.getLog(DigestAuthMediator.class);
 
     private static final String POSTFIX = "POSTFIX";
