@@ -95,6 +95,8 @@ public class API implements Serializable{
 
     private String implementation = "ENDPOINT";
 
+    private String monetizationCategory;
+
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
@@ -635,4 +637,8 @@ public class API implements Serializable{
     public void setAllowedHeaders(Set<String> allowedHeaders) {
         this.allowedHeaders = allowedHeaders;
     }
+
+    public String getMonetizationCategory() { return this.monetizationCategory; }
+
+    public void setMonetizationCategory(String monetizationCategory) { this.monetizationCategory = monetizationCategory; }
 }
