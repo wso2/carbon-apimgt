@@ -130,4 +130,12 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String GROUP_BY_WEEK = "week";
 
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String HTTP_AUTH_HEADER_NAME = "Authorization";
+    public static final String HTTP_AUTH_HEADER_TYPE = "Basic";
+
+    public static final String DAS_SEARCH_REST_API_URL = "/analytics/search";
+    public static final String DAS_AGGREGATES_SEARCH_REST_API_URL = "/analytics/aggregates";
+    public static final String DAS_Table_EXIST_REST_API_URL = "/analytics/table_exists";
+
 }

@@ -156,7 +156,7 @@ var addDatasourceConfig = function (configData) {
         log.info("Saving datasource '" + dsName + "'...");
         stub.addDataSource(dataSourceMetaInfo);
         log.info("Datasource '" + dsName + "' saved");
-        org.wso2.carbon.apimgt.usage.client.impl.UsageClient.initializeDataSource();
+        org.wso2.carbon.apimgt.usage.client.UsageClient.initializeDataSource();
         log.info("Initialized datasource '" + dsName);
         return {
             error: false
@@ -175,7 +175,7 @@ var addDatasourceConfig = function (configData) {
 var addToolbox = function (configData) {
 
     try {
-        var client=org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
+        var client=org.wso2.carbon.apimgt.usage.client.UsageClient.getClient();
         client.deployArtifacts(configData.eventAnalyserURL,configData.eventAnalyserUsername,configData.eventAnalyserPassword);
         return {
             error: false

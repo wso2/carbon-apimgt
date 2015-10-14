@@ -266,7 +266,7 @@ function getSubscriberCountByAPIs(providerName) {
     var usage = [];
     var usageout = [];
     try {
-        usage = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getSubscriberCountByAPIs(providerName);
+        usage = org.wso2.carbon.apimgt.usage.client.UsageClient.getSubscriberCountByAPIs(providerName);
         if (log.isDebugEnabled()) {
             log.debug("getSubscriberCountByAPIs for : " + providerName);
         }
@@ -414,7 +414,7 @@ function isDataPublishingEnabled(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
+        usage = org.wso2.carbon.apimgt.usage.client.UsageClient.isDataPublishingEnabled();
         if (log.isDebugEnabled()) {
             log.debug("isDataPublishingEnabled check");
         }

@@ -197,7 +197,7 @@ function isDataPublishingEnabled(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = usage = org.wso2.carbon.apimgt.usage.client.impl.UsageClient.isDataPublishingEnabled();
+        usage = usage = org.wso2.carbon.apimgt.usage.client.UsageClient.isDataPublishingEnabled();
         if (log.isDebugEnabled()) {
             log.debug("isDataPublishingEnabled check");
         }

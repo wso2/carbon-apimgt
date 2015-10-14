@@ -1,19 +1,20 @@
 /*
-*  Copyright (c) 2005-2010, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
+* WSO2 Inc. licenses this file to you under the Apache License,
+* Version 2.0 (the "License"); you may not use this file except
+* in compliance with the License.
+* You may obtain a copy of the License at
 *
-*    http://www.apache.org/licenses/LICENSE-2.0
+* http://www.apache.org/licenses/LICENSE-2.0
 *
 * Unless required by applicable law or agreed to in writing,
 * software distributed under the License is distributed on an
 * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
+* KIND, either express or implied. See the License for the
 * specific language governing permissions and limitations
 * under the License.
+*
 */
 
 package org.wso2.carbon.apimgt.usage.client.impl;
@@ -47,7 +48,7 @@ import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.*;
-import org.wso2.carbon.apimgt.usage.client.util.DASRestClient;
+import org.wso2.carbon.apimgt.usage.client.DASRestClient;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
@@ -82,8 +83,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private static PaymentPlan paymentPlan;
     private APIProvider apiProviderImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRestClientImpl.class);
-    private static DASRestClient restClient;
-    Gson gson = new Gson();
+    private DASRestClient restClient;
+    private final Gson gson = new Gson();
 
     public APIUsageStatisticsRestClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
@@ -151,26 +152,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     // Store Statistic Methods
 
-    @Override public List<PerAppApiCountDTO> perAppPerAPIUsage
-            (String subscriberName, String groupId, String fromDate,
+    @Override public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString;
+        String firstKey;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
+            firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
             return new ArrayList<PerAppApiCountDTO>();
         }
+        StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString +=
-                    " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(i);
+            concatenatedKeys
+                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
         }
 
         List<PerAppApiCountDTO> usage = getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
-                concatenatedKeySetString, fromDate, toDate, limit);
+                concatenatedKeys.toString(), fromDate, toDate, limit);
         return usage;
 
     }
@@ -186,16 +187,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
                     .dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
 
-        log.info(query);
         RequestSearchBean request = new RequestSearchBean(query, 1, "key_api_facet", tableName);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
@@ -206,18 +206,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<PerAppPerAPIUsageValues>>>() {
         }.getType();
 
-        List<Result<PerAppPerAPIUsageValues>> obj;
+        List<Result<PerAppPerAPIUsageValues>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
-//        catch (Exception e) {
-//            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
-//        }
 
         List<PerAppApiCountDTO> perAppUsageDataList = new ArrayList<PerAppApiCountDTO>();
 
@@ -256,21 +253,22 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString;
+        String firstKey;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
+            firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
             return new ArrayList<AppUsageDTO>();
         }
+        StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString +=
-                    " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(i);
+            concatenatedKeys
+                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
         }
 
         List<AppUsageDTO> usage = getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
-                concatenatedKeySetString, fromDate, toDate, limit);
+                concatenatedKeys.toString(), fromDate, toDate, limit);
         return usage;
 
     }
@@ -286,16 +284,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
                     .dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
 
-        log.info(query);
         RequestSearchBean request = new RequestSearchBean(query, 1, "key_userId_facet", tableName);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
@@ -306,16 +303,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<TopAppUsersValues>>>() {
         }.getType();
 
-        List<Result<TopAppUsersValues>> obj;
+        List<Result<TopAppUsersValues>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<AppUsageDTO> topAppUsageDataList = new ArrayList<AppUsageDTO>();
@@ -355,22 +350,23 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString;
+        String firstKey;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
+            firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
             return new ArrayList<AppCallTypeDTO>();
         }
+        StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString +=
-                    " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(i);
+            concatenatedKeys
+                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
         }
 
         List<AppCallTypeDTO> usage = getAPICallTypeUsageData(
-                APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, concatenatedKeySetString, fromDate,
-                toDate, limit);
+                APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, concatenatedKeys.toString(),
+                fromDate, toDate, limit);
 
         return usage;
     }
@@ -386,15 +382,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
                     .dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
-        log.info(query);
 
         RequestSearchBean request = new RequestSearchBean(query, 3, "key_api_method_path_facet", tableName);
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
@@ -405,16 +400,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<AppApiCallTypeValues>>>() {
         }.getType();
 
-        List<Result<AppApiCallTypeValues>> obj;
+        List<Result<AppApiCallTypeValues>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<AppCallTypeDTO> appApiCallTypeList = new ArrayList<AppCallTypeDTO>();
@@ -457,21 +450,22 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
-        String concatenatedKeySetString;
+        String firstKey;
 
         int size = subscriberApps.size();
         if (size > 0) {
-            concatenatedKeySetString = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
+            firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(0);
         } else {
             return new ArrayList<FaultCountDTO>();
         }
+        StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeySetString +=
-                    " OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ":" + subscriberApps.get(i);
+            concatenatedKeys
+                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
         }
 
         List<FaultCountDTO> usage = getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY,
-                concatenatedKeySetString, fromDate, toDate, limit);
+                concatenatedKeys.toString(), fromDate, toDate, limit);
         return usage;
     }
 
@@ -486,16 +480,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<FaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
                     .dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
 
-        log.info(query);
         RequestSearchBean request = new RequestSearchBean(query, 1, "consumerKey_api_facet", "API_FAULT_SUMMARY");
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField f = new AggregateField("total_fault_count", "SUM", "count");
@@ -505,16 +498,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<FaultAppUsageDataValue>>>() {
         }.getType();
 
-        List<Result<FaultAppUsageDataValue>> obj;
+        List<Result<FaultAppUsageDataValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<FaultCountDTO> falseAppUsageDataList = new ArrayList<FaultCountDTO>();
@@ -580,23 +571,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 usageByName.add(usageDTO);
             }
         }
-//        return gson.toJson(usageByName);
+        //        return gson.toJson(usageByName);
         return usageByName;
     }
 
     private List<APIUsageByUserName> getAPIUsageByUserData(String providerName, String fromDate, String toDate,
             Integer limit) throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
-
-        log.info(query);
 
         RequestSearchBean request = new RequestSearchBean(query, 3, "api_version_userId_apiPublisher_facet",
                 "API_REQUEST_SUMMARY");
@@ -609,16 +598,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<APIUsageByUserValues>>>() {
         }.getType();
 
-        List<Result<APIUsageByUserValues>> obj;
+        List<Result<APIUsageByUserValues>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIUsageByUserName> usageByName = new ArrayList<APIUsageByUserName>();
@@ -658,8 +645,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     @Override public List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate,
-            String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIResponseTime> responseTimes = getAPIResponseTimeData(
                 APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY, fromDate, toDate, limit);
@@ -720,16 +706,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private Collection<APIResponseTime> getAPIResponseTimeData(String tableName, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
-
-        log.info(query);
 
         RequestSearchBean request = new RequestSearchBean(query, 2, "api_version_context_facet",
                 "API_RESPONSE_SUMMARY");
@@ -744,16 +728,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<ResponseTimesByAPIsValue>>>() {
         }.getType();
 
-        List<Result<ResponseTimesByAPIsValue>> obj;
+        List<Result<ResponseTimesByAPIsValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
@@ -789,15 +771,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     @Override public List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName,
-            String fromDate, String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIAccessTime> accessTimes = getLastAccessTimesByAPIData(
                 APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY, fromDate, toDate, limit);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         //        Map<String, APIAccessTime> lastAccessTimes = new TreeMap<String, APIAccessTime>();
         List<APIVersionLastAccessTimeDTO> apiVersionLastAccessTimeUsage = new ArrayList<APIVersionLastAccessTimeDTO>();
-        DateFormat dateFormat = new SimpleDateFormat();
+
+        APIVersionLastAccessTimeDTO accessTimeDTO;
+        String apiName;
 
         for (APIAccessTime accessTime : accessTimes) {
             for (API providerAPI : providerAPIs) {
@@ -811,8 +794,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         lastAccessTimes.put(apiName, accessTime);
                         break;
                     }*/
-                    String apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
-                    APIVersionLastAccessTimeDTO accessTimeDTO = new APIVersionLastAccessTimeDTO();
+                    apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
+                    accessTimeDTO = new APIVersionLastAccessTimeDTO();
                     accessTimeDTO.setApiName(apiName);
                     accessTimeDTO.setApiVersion(accessTime.getApiVersion());
                     accessTimeDTO.setUser(accessTime.getUsername());
@@ -848,16 +831,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private Collection<APIAccessTime> getLastAccessTimesByAPIData(String tableName, String fromDate, String toDate,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
 
-        log.info(query);
         RequestSearchBean request = new RequestSearchBean(query, 3, "api_version_userId_context_facet",
                 "API_REQUEST_SUMMARY");
 
@@ -869,16 +851,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<LastAccessTimesByAPIValue>>>() {
         }.getType();
 
-        List<Result<LastAccessTimesByAPIValue>> obj;
+        List<Result<LastAccessTimesByAPIValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIAccessTime> lastAccessTimeData = new ArrayList<APIAccessTime>();
@@ -914,8 +894,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     @Override public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate,
-            String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsageByResourcePath> usageData = this
                 .getAPIUsageByResourcePathData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
@@ -946,16 +925,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIUsageByResourcePath> getAPIUsageByResourcePathData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
 
-        log.info(query);
         RequestSearchBean request = new RequestSearchBean(query, 3, "api_version_context_method_facet",
                 "API_RESOURCE_USAGE_SUMMARY");
 
@@ -967,16 +945,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<APIUsageByResourcePathValue>>>() {
         }.getType();
 
-        List<Result<APIUsageByResourcePathValue>> obj;
+        List<Result<APIUsageByResourcePathValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIUsageByResourcePath> usageByResourcePath = new ArrayList<APIUsageByResourcePath>();
@@ -1004,8 +980,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     @Override public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate,
-            String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         List<APIUsageByDestination> usageData = this
                 .getAPIUsageByDestinationData(APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY,
@@ -1036,16 +1011,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIUsageByDestination> getAPIUsageByDestinationData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
-
-        log.info(query);
 
         RequestSearchBean request = new RequestSearchBean(query, 3, "api_version_context_dest_facet",
                 "API_DESTINATION_SUMMARY");
@@ -1058,16 +1031,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<APIUsageByDestinationValue>>>() {
         }.getType();
 
-        List<Result<APIUsageByDestinationValue>> obj;
+        List<Result<APIUsageByDestinationValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIUsageByDestination> usageByResourcePath = new ArrayList<APIUsageByDestination>();
@@ -1106,8 +1077,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException if an error occurs while contacting backend services
      */
     @Override public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate,
-            int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsage> usageData = getUsageByAPIsData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
                 fromDate, toDate, limit);
@@ -1153,16 +1123,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private Collection<APIUsage> getUsageByAPIsData(String tableName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
-
-        log.info(query);
 
         RequestSearchBean request = new RequestSearchBean(query, 2, "api_version_context_facet",
                 "API_VERSION_USAGE_SUMMARY");
@@ -1175,16 +1143,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<UsageByAPIsValue>>>() {
         }.getType();
 
-        List<Result<UsageByAPIsValue>> obj;
+        List<Result<UsageByAPIsValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIUsage> usageDataList = new ArrayList<APIUsage>();
@@ -1210,8 +1176,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     @Override public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate,
-            String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         List<APIResponseFaultCount> faultyData = this
                 .getAPIResponseFaultCountData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, fromDate, toDate);
@@ -1268,16 +1233,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIResponseFaultCount> getAPIResponseFaultCountData(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
-
-        log.info(query);
 
         RequestSearchBean request = new RequestSearchBean(query, 3, "api_version_apiPublisher_context_facet",
                 "API_FAULT_SUMMARY");
@@ -1290,16 +1253,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<APIResponseFaultCountValue>>>() {
         }.getType();
 
-        List<Result<APIResponseFaultCountValue>> obj;
+        List<Result<APIResponseFaultCountValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
@@ -1411,7 +1372,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     }
                     throttlingData
                             .add(new APIThrottlingOverTimeDTO(apiName, provider, successRequestCount, throttledOutCount,
-                                            time));
+                                    time));
                 }
 
             } else {
@@ -1476,7 +1437,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            String query;
+            String query = null;
             List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -1573,7 +1534,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            String query;
+            String query = null;
             List<String> throttlingAPIData = new ArrayList<String>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -1658,7 +1619,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
-            String query;
+            String query = null;
             List<String> throttlingAppData = new ArrayList<String>();
             String tenantDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -1767,13 +1728,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIUsage> getUsageByAPIVersionsData(String tableName, String fromDate, String toDate, String apiName)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query;
+        String query = null;
 
         try {
             query = "api:" + apiName + " AND max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO "
                     + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error parsing date");
+            handleException("Error occurred while Error parsing date", e);
         }
 
         RequestSearchBean request = new RequestSearchBean(query, 2, "api_version_context_facet",
@@ -1787,16 +1748,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<UsageByAPIVersionsValue>>>() {
         }.getType();
 
-        List<Result<UsageByAPIVersionsValue>> obj;
+        List<Result<UsageByAPIVersionsValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         List<APIUsage> usageDataList = new ArrayList<APIUsage>();
@@ -1835,7 +1794,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIFirstAccess fTime;
 
         if (firstAccess != null) {
-            fTime=new APIFirstAccess(firstAccess.getYear(),firstAccess.getMonth(),firstAccess.getDay());
+            fTime = new APIFirstAccess(firstAccess.getYear(), firstAccess.getMonth(), firstAccess.getDay());
             APIFirstAccessList.add(fTime);
         }
         return APIFirstAccessList;
@@ -1848,16 +1807,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type ty = new TypeToken<List<Result<FirstAccessValue>>>() {
         }.getType();
 
-        List<Result<FirstAccessValue>> obj;
+        List<Result<FirstAccessValue>> obj = null;
 
         try {
             obj = restClient.sendAndGetPost(request, ty);
         } catch (JsonSyntaxException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
+            handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
         APIFirstAccess firstAccess = null;
@@ -1876,29 +1833,23 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     }
 
-    private static boolean isTableExist(String tableName) throws APIMgtUsageQueryServiceClientException {
+    private boolean isTableExist(String tableName) throws APIMgtUsageQueryServiceClientException {
 
         TableExistResponseBean status;
         try {
             status = restClient.isTableExist(tableName);
         } catch (JsonSyntaxException e) {
+            log.error("Error occurred while parsing response", e);
             throw new APIMgtUsageQueryServiceClientException("Error occurred while parsing response", e);
         } catch (IOException e) {
+            log.error("Error occurred while Connecting to DAS REST API");
             throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
-        } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while connecting to DAS REST API", e);
         }
 
         boolean isExist = status.getStatus().equalsIgnoreCase("success");
         return isExist;
 
     }
-
-
-
-
-
-
 
     private List<PerUserAPIUsageDTO> getTopEntries(List<PerUserAPIUsageDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
@@ -1962,9 +1913,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return paymentPlan.evaluate(param, calls);
     }
 
-    @Override public void deployArtifacts(String url,String user,String pass) throws Exception{
+    @Override public void deployArtifacts(String url, String user, String pass) throws Exception {
 
-        String cAppName= "API_Manager_Analytics.car";
+        String cAppName = "API_Manager_Analytics.car";
         String cAppPath = System.getProperty("carbon.home") + "/statistics";
         cAppPath = cAppPath + '/' + cAppName;
         File file = new File(cAppPath);
@@ -1983,11 +1934,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         client.setOptions(options);
         log.info("Deploying DAS cApp '" + cAppName + "'...");
         UploadedFileItem[] fileItem = new UploadedFileItem[1];
-        fileItem[0]=new UploadedFileItem();
+        fileItem[0] = new UploadedFileItem();
         fileItem[0].setDataHandler(dataHandler);
         fileItem[0].setFileName(cAppName);
         fileItem[0].setFileType("jar");
         stub.uploadApp(fileItem);
     }
 
+    private static void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
+        log.error(msg, e);
+        throw new APIMgtUsageQueryServiceClientException(msg, e);
+    }
 }

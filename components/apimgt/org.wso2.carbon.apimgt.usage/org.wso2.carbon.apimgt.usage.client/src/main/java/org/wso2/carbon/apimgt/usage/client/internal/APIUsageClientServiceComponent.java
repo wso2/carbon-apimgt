@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
-import org.wso2.carbon.apimgt.usage.client.impl.UsageClient;
+import org.wso2.carbon.apimgt.usage.client.UsageClient;
 
 /**
  * @scr.component name="org.wso2.apimgt.usage.client" immediate="true"

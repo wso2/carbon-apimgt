@@ -95,7 +95,7 @@ var getAPIStoreObj = function() {
 };
 
 var getUsageClient = function(){
-	return org.wso2.carbon.apimgt.usage.client.impl.UsageClient.getClient();
+	return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient();
 }
 
 %>
