@@ -18,14 +18,12 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-//import junit.framework.TestCase;
-//import static org.junit.Assert.*;
+import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-//Test commented due to SLF4J: Class path contains multiple slf4j bindings error
+public class DigestAuthMediatorTest extends TestCase{
 
-public class DigestAuthMediatorTest { //extends TestCase
-
-    /*DigestAuthMediator mediator;
+    DigestAuthMediator mediator;
 
     public void testSplitDigestHeader() throws Exception {
         String[] wwwHeaderSplits = { "",
@@ -196,6 +194,6 @@ public class DigestAuthMediatorTest { //extends TestCase
         String AuthHeader = header.toString();
         String expectedHeader = "Digest username=\"GarryL\", realm=\"Vcreate\", nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", uri=\"/service/path/S374453680109605K\", qop=auth, nc=00000001, cnonce=\"19b428e5\", response=\"c42047191b9d53a208cd615b23797b15\", opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
         assertEquals(expectedHeader, AuthHeader);
-    }*/
+    }
 
 }
