@@ -2830,7 +2830,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException {
         JSONObject apiTenantConfig = null;
         try {
-            String content = apimRegistryService.getResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
 
             if (content != null) {
                 JSONParser parser = new JSONParser();
