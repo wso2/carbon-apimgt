@@ -2508,7 +2508,7 @@ public final class APIUtil {
     public static void loadTenantConf(int tenantID) throws APIManagementException {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         try {
-            UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantID);
+            UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
             if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
                 log.debug("Tenant conf already uploaded to the registry");
                 return;
@@ -4405,7 +4405,7 @@ public final class APIUtil {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
 
             if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
                 Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);

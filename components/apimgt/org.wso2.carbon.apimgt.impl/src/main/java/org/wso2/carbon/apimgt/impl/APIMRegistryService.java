@@ -26,8 +26,15 @@ import java.io.UnsupportedEncodingException;
  */
 public interface APIMRegistryService {
     /**
-    * Get resource belonging to a given user from the provided registry path
+    * Get resource belonging to a given user from the provided path in config registry
     */
-    String getResourceContent(String tenantDomain, final String registryLocation) throws UserStoreException, RegistryException, UnsupportedEncodingException;
+    String getConfigRegistryResourceContent(String tenantDomain, final String registryLocation)
+            throws UserStoreException, RegistryException, UnsupportedEncodingException;
+
+    /**
+     * Get resource belonging to a given user from the provided path in governance registry
+     */
+    String getGovernanceRegistryResourceContent(String tenantDomain, final String registryLocation)
+            throws UserStoreException, RegistryException, UnsupportedEncodingException;
 
 }
