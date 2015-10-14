@@ -39,6 +39,9 @@ import java.util.*;
 
 public class DigestAuthMediator extends AbstractMediator implements ManagedLifecycle {
 
+    public DigestAuthMediator() {
+    }
+
     private static final Log log = LogFactory.getLog(DigestAuthMediator.class);
 
     private static final String POSTFIX = "POSTFIX";
@@ -49,6 +52,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
     private static final String INIT_NONCE_COUNT = "00000000";
     private static final String AUTH_HEADER = "AuthHeader";
     private static final String BACKEND_URL = "BACKEND_URL";
+    private static final String CHARSET = "UTF-8";
 
     /**
      * This method is used to split the WWW-Authenticate header sent from the backend
@@ -411,8 +415,8 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 //get username password given by the client
                 String userNamePassword = (String) messageContext.getProperty(UNAMEPASSWORD);
 
-                byte[] valueDecoded = Base64.decodeBase64(userNamePassword.getBytes());
-                String decodedString = new String(valueDecoded);
+                byte[] valueDecoded = Base64.decodeBase64(userNamePassword.getBytes(CHARSET));
+                String decodedString = new String(valueDecoded, CHARSET);
                 String[] splittedArrayOfUserNamePassword = decodedString.split(":");
 
                 String userName = splittedArrayOfUserNamePassword[0];

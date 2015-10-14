@@ -170,7 +170,7 @@
                             org.apache.axis2.engine; version="${axis2.osgi.version.range}",
                             org.apache.axis2.rpc.receivers; version="${axis2.osgi.version.range}",
                             org.apache.axis2.context; version="${axis2.osgi.version.range}",
-                            org.apache.commons.logging,
+                            org.apache.commons.logging; version="1.1.1",
                             org.apache.synapse,
                             org.apache.synapse.config,
                             org.apache.synapse.config.xml,
