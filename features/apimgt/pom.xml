@@ -40,6 +40,7 @@
         <module>org.wso2.carbon.apimgt.interceptor.feature</module>
         <module>org.wso2.carbon.apimgt.startup.publisher.feature</module>
         <module>org.wso2.carbon.apimgt.feature</module>
+        <module>org.wso2.carbon.apimgt.rest.api.store.feature</module>
     </modules>
     <build>
         <pluginManagement>
