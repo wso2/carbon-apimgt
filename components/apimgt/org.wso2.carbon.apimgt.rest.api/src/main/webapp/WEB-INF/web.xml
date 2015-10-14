@@ -41,6 +41,6 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>CXFServlet</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/store/*</url-pattern>
     </servlet-mapping>
 </web-app>
