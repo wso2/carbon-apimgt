@@ -89,7 +89,8 @@ public class XACMLAuthenticationHandler implements RequestHandler {
             return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(errorDTO)
                     .build();
         }
-        return isUserPermitted(username, (String) message.get(Message.REQUEST_URI), (String) message.get(Message.HTTP_REQUEST_METHOD), null);
+        return isUserPermitted(username, (String) message.get(Message.REQUEST_URI),
+                (String) message.get(Message.HTTP_REQUEST_METHOD), null);
     }
 
 
