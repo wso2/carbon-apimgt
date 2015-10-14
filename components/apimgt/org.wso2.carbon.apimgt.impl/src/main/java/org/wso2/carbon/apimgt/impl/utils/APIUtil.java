@@ -4352,7 +4352,7 @@ public final class APIUtil {
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
-        if (tierName.equalsIgnoreCase(APIConstants.UNLIMITED_TIER)) {
+        if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(tierName)) {
             return isUnlimitedTierPaid(tenantDomain);
         }
 
@@ -4432,7 +4432,7 @@ public final class APIUtil {
             Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID);
 
             if (value != null) {
-                return Boolean.valueOf(value.toString());
+                return Boolean.parseBoolean(value.toString());
             }
             else {
                 throw new APIManagementException(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant " + tenantDomain);
