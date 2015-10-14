@@ -1551,7 +1551,7 @@ definitions:
       name:
         type: string
       weight:
-        type: number
+        type: integer
   Error:
     title: Error object returned with 4XX HTTP status
     required:
