@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -59,9 +60,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void removeSubscriptionById(int subscription_id) throws APIManagementException {
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
         checkSubscribePermission();
-        super.removeSubscriptionById(subscription_id);
+        super.removeSubscription(subscription);
     }
 
     @Override

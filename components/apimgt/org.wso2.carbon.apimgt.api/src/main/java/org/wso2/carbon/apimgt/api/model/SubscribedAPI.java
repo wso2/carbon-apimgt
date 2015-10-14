@@ -36,12 +36,17 @@ public class SubscribedAPI {
     private String subStatus;
     private String subCreatedStatus;
     private List<APIKey> keys = new ArrayList<APIKey>();
+    private String uuid;
 
     private boolean isBlocked;   //TODO: what is the difference & usage of revoking & blocking users
 
     public SubscribedAPI(Subscriber subscriber, APIIdentifier apiId) {
         this.subscriber = subscriber;
         this.apiId = apiId;
+    }
+
+    public SubscribedAPI (String uuid) {
+        this.uuid = uuid;
     }
 
     public void setApplication(Application application) {
@@ -116,6 +121,14 @@ public class SubscribedAPI {
 
     public void setSubscriptionId(int subscriptionId) {
         this.subscriptionId = subscriptionId;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUUID() {
+        return uuid;
     }
 
     @Override

@@ -24,6 +24,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsGet(String subscriber, String groupId, String limit, String offset, String accept,
             String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
+
+        //pre-processing
         if (groupId == null) {
             groupId = "";
         }
