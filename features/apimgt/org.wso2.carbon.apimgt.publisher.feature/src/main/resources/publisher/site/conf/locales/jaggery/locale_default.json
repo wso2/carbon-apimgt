@@ -47,9 +47,9 @@
     "businessInformationTitle" : "Business Information",
     "apiResourcesTitle" : "API Resources",
     "invalidSwaggerUrlErrorMsg": "Invalid swagger url",
-    "createFromExistingAPI" : "Use an existing API endpoint to create a managed API. If you have API definition you can import it to speed up API creation.",
+    "createFromExistingAPI" : "Use an existing API's endpoint or the API definition to create an API.",
     "createFromExistingSOAPEndpoint" : "Use an existing SOAP endpoint to create a managed API. Import WSDL of the SOAP service.",
-    "designNewAPI" : "Design and prototype a new API with API Manager.",
+    "designNewAPI" : "Design and prototype a new API.",
 
 
     "private": "Visible to my domain",
@@ -108,9 +108,11 @@
     "users":"Users",
     "state":"State",
 
-    "propagateChangesToGateway":"Propagate Changes to API Gateway",
+    "propagateChangesToGateway":"Propagate Changes to the API Gateway",
     "requireReSubscription":"Require Re-Subscription",
     "deprecateOldVersions":"Deprecate Old Versions",
+    "retireApiTitle":"API Retired",
+    "retireApi":"API will loose all its subscription when its state changed to RETIRED",
 
     "created":"CREATED",
     "published":"PUBLISHED",
@@ -147,6 +149,8 @@
     "apiUsageFromDestination" : "API Usage by Destination",
     "apiUsageComparison" : "API Usage Comparison",
     "faultyInvocations" : "Faulty Invocations",
+    "apiThrottledCounts" : "API Throttled Out Requests",
+    "applicationThrottledCounts" : "App Throttled Out Requests",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
     "overallAPISubscriptionsTitle": "Overall API Subscriptions (Across All Versions)",
@@ -157,6 +161,8 @@
     "apiUsageComparisonTitle": "API Usage Comparison (Across All Versions)",
     "faultyInvocationsTitle": "Faulty Invocations",
     "faultyAnalyzeTitle": "Faulty Invocations",
+    "apiThrottledCountsTitle" : "API Throttled Out Requests",
+    "applicationThrottledCountsTitle" : "Application Throttled Out Requests",
     "apiUsageByVersionTitle": "API Usage by Versions",
     "apiSubscriptionsByVersionTitle": "API Subscriptions by Versions",
     "apiName": "API Name",
@@ -208,17 +214,17 @@
     "clear": "Clear",
 
     "nameHelpMsg" : "Display name to be shown in the API Store." ,
-    "contextHelpMsg" : "URI context path of the API.<br/> Supported formats are.. <br/> 1. /foo <br/> 2. /foo/bar <br/> 3. /foo/{version}/bar (case sensitive) - Allows the version to be within the context" ,
+    "contextHelpMsg" : "URI context path of the API (case sensitive).<br/> The supported formats are.. <br/> 1. /foo <br/> 2. /foo/bar <br/> 3. /foo/{version}/bar (case sensitive) - allows the version to be within the context" ,
     "tierHelpMsg" : "Tiers limit the number of requests a subscriber can make to an API. An API can be exposed over one or more tiers. The Gold, Silver and Bronze tiers allow 20, 5 and 1 request/s respectively per minute." ,
     "roleHelpMsg" : "<strong>Public :</strong> The API is accessible to everyone and can be advertised in multiple stores - a central store and/or non-WSO2 stores.<br/><strong> Visible to my domain :</strong>  The API is visible to all users who are registered in the API's tenant domain.<br/><strong>Restricted by roles :</strong> The API is visible only to specific user roles in the tenant store that you specify." ,
     "docRoleHelpMsg" : "<strong>Same as API visibility: </strong> Visible to the same user roles who can see the API.<br/><strong> Visible to my domain :</strong>  Visible to all registered users in the API's tenant domain.<br/><strong>Private:</strong> Visible only to the API creator's role." ,
     "tenantRoleHelpMsg" : "This option controls the API visibility based on the tenant. " ,
     "aboutAPIs" : "The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed through the API Store. ",
-    "versionsHelpMsg":"E.g.,: v1.0.0 ,v1.0 , 1.0.0, 1.0",
+    "versionsHelpMsg":"E.g.: v1.0.0, v1.0, 1.0.0, 1.0",
     "tagsHelpLabel":"Type a tag and Enter",
     "tagsHelpMsg":"Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs.",
     "optionsHelpMsg": "Select Options method to send OPTIONS calls to backed. If not selected API gateway will return OPTIONS call with the allowed methods in gateway.",
-    "rolesHelpMsg":"Comma separated list (e.g.,: role1,role2,role3)",
+    "rolesHelpMsg":"Comma-separated list (e.g.: role1,role2,role3)",
     "allowTenantsHelpMsg":"Comma separated list (e.g.,: tenant1.com,tenant2.com). Your API will be accessible to those defined Tenants as well.",
     "wadlHelpMsg":"E.g.,:http://example.com/service.wadl",
     "wsdlHelpMsg":"E.g.,:http://appserver/services/echo?wsdl",
@@ -231,12 +237,12 @@
     "lifecycleSuccessMsg":"Successfully updated the API status.",
     "searchMsg":"No matching APIs found.",
     "noAPIsMsg":"No APIs created yet.",
-    "noAPIsMsg1":"No APIs created yet. Click one of below buttons to get started.",
+    "noAPIsMsg1":"No APIs created yet. Click one of the buttons below to get started.",
     "versionHelpMsg": "E.g.,:v1.0.1",
     "noApisByProviderMsg": "No APIs provided by the user",
     "revokeHelpMsg": "Search Options - 1) By Access Token [Default]  2) By Authorized User ->user:xxxx  3) By Created Date -> after:yyyy-mm-dd  or before:yyyy-mm-dd",
     "createAPIMsg": "created the API.",
-    "changeAPIStatusMsg": "changed api status from",
+    "changeAPIStatusMsg": "changed the API status from",
     "noActiveSubscribersMsg": "No active subscribers",
     "noDocsMsg": "No documentation associated with the API",
     "noSubsMsg": "No subscriptions yet.",
@@ -298,7 +304,7 @@
     "availableToAllTenants" : "Available to all the tenants",
     "availableToSpecificTenants" : "Available to specific tenants",
     "tenantsHelpMsg":"Comma separated list (e.g.,: tenant1,tenant2,tenant3)",
-    "subscriptionHelpMsg" : "This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the AP",
+    "subscriptionHelpMsg" : "This option specifies the tenants who can subscribe to an API in a multi-tenanted setup. <strong> Available to current Tenant Only:</strong> only users in the current organization/tenant domain can subscribe to the API <strong>Available to All the Tenants:</strong> users of all organizations/tenant domains can subscribe to the API <strong> Available to Specific Tenants:</strong> users of the organizations/tenant domains you specify as well as the current tenant domain can subscribe to the API",
 
     "productionFailoverEp": "Production Fail-over Endpoint(s)",
     "sandboxFailoverEp"   : "Sandbox Fail-over Endpoint(s)",
@@ -333,5 +339,6 @@
 
     "apiUnavailable" : "API does not exist",
     "removeAPIFromExternalStoresWarning" : "This API is not PUBLISHED. Please remove from external stores.",
-    "SampleAPI" : "Deploy Sample API"
+    "SampleAPI" : "Deploy Sample API",
+    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint."
 }
