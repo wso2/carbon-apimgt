@@ -106,7 +106,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         APIConsumer apiConsumer = null;
         try {
             apiConsumer = RestApiUtil.getConsumer(username);
-            apiConsumer.removeSubscriptionById(Integer.parseInt(subscriptionId));
+           // apiConsumer.removeSubscriptionById(Integer.parseInt(subscriptionId));
             return Response.ok().build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
