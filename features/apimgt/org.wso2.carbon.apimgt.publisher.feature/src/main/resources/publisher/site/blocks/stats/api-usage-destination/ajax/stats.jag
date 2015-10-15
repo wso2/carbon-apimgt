@@ -64,7 +64,6 @@ include("/jagg/jagg.jag");
             }
             print(obj);
 
-
         } else if (action === "isDataPublishingEnabled") {
             mod = jagg.module("statistics");
             result = mod.isDataPublishingEnabled();

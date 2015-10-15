@@ -16,7 +16,6 @@ include("/jagg/jagg.jag");
     } else {
         if (action === "getProviderAPIVersionUserLastAccess") {
             mod = jagg.module("statistics");
-            var provider = jagg.getUser().username;
             var currentLocation = request.getParameter("currentLocation");
             var mode = request.getParameter("mode");
             var from = request.getParameter("fromDate");
