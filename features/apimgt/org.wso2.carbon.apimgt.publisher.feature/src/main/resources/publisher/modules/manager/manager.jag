@@ -17,7 +17,12 @@ var getAPIStoreURL = function() {
     var result,log=new Log();
     var provider = getAPIProviderObj();
     try {
-    result = provider.getAPIStoreURL();
+        var tenantDomain = String(jagg.getTenantDomain());
+        if(tenantDomain != null && tenantDomain != undefined){
+            result = provider.getAPIStoreURL(tenantDomain);
+        }else{
+            result = provider.getAPIStoreURL();
+        }
     if (log.isDebugEnabled()) {
     log.debug("getAPIStoreURL : ");
     }

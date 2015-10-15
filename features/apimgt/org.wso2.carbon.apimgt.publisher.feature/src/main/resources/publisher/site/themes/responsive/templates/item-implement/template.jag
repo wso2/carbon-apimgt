@@ -85,7 +85,7 @@
                  </div>
                  <div class="col-sm-11">
                      <h4>Managed API</h4>
-                     <p>Provide endpoints of the production API and sandbox API to be managed.</p>
+                     <p>Provide the production and sandbox endpoints of the API to be managed.</p>
                  </div>
               </div>
         </div>
@@ -204,8 +204,8 @@
                          <i class="icon-implement fa fa-cog fa-3x"></i>
                      </div>
                      <div class="col-sm-11">
-                         <h4>Prototype</h4>
-                         <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
+                         <h4>Prototyped API</h4>
+                         <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
                      </div>
                   </div>
               </div>
@@ -267,7 +267,7 @@
                             </div>
 
 
-                        <p class="help-block">E.g.,: http://appserver/resource</p>
+                        <p class="help-block">E.g.: http://appserver/resource</p>
                         </div>
                         <span style="display:none;" class="help-block jsonform-errortext"></span>
                     </div>

@@ -37,19 +37,19 @@
                                 return;
                             }
                         }
-
+                        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+                        var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+                        var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
+                        var domainName = null
+                        if (fullUserName != null){
+                            domainName = MultitenantUtils.getTenantDomain(fullUserName);
+                        }
 
                         // validating the signature
                         if(site.ssoConfiguration.responseSigningEnabled === 'true'){
-                            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
-                            var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-                            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-                            if(fullUserName != null){
-                                var domainName = MultitenantUtils.getTenantDomain(fullUserName);
                                 if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
                                     jagg.module("manager").loadTenantRegistry(String(domainName));
                                 }
-                            }
 
                             var isSignatureValid =ssoRelyingParty.validateSignature(samlResponse);
                             if(!Boolean(isSignatureValid)){
@@ -84,12 +84,12 @@
           		        var  store = manager.getAPIStoreObj();
                         var decodedSamlReponse = ssoRelyingParty.decode(samlResponse);
                         var groupId = store.getGroupIds(decodedSamlReponse);
-                       //Store and empty string instead of null if no group Id is found. This is done so that when checking for a string array 
+                       //Store and empty string instead of null if no group Id is found. This is done so that when checking for a string array
                        //the null value returned would not cause any issue.
                         if(groupId == null){
                           groupId = "";
                         }
-                      
+
 			            session.put("groupId", groupId)
 			            var subscriber = store.getSubscriber(username);
     			        if (!subscriber) {
@@ -103,7 +103,8 @@
                         }
                         response.sendRedirect(requestedURI);
                         return;
-                   } }else{
+                   }
+                }else{
                         // if the saml response is log out request from IDP, we log out from web app.
                         ssoRelyingParty.invalidateSessionBySessionId(sessionId);
                         response.sendRedirect("../");

@@ -37,16 +37,17 @@ public abstract class WorkflowExecutor implements Serializable {
     protected String callbackURL;
 
 
-
     /**
      * Returns the workflow executor type. It is better to follow a convention as PRODUCT_ARTIFACT_ACTION for the
      * workflow type. Ex: AM_SUBSCRIPTION_CREATION.
+     *
      * @return - The workflow type.
      */
     public abstract String getWorkflowType();
 
     /**
      * Implements the workflow execution logic.
+     *
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
      * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
@@ -62,10 +63,11 @@ public abstract class WorkflowExecutor implements Serializable {
 
     /**
      * Implements the workflow completion logic.
+     *
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
      * @throws WorkflowException - Thrown when the workflow completion was not fully performed.
      */
-    public void complete(WorkflowDTO workflowDTO) throws WorkflowException{
+    public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
@@ -77,6 +79,7 @@ public abstract class WorkflowExecutor implements Serializable {
 
     /**
      * Returns the information of the workflows whose status' match the workflowStatus
+     *
      * @param workflowStatus - The status of the workflows to match
      * @return - List of workflows whose status' matches the workflowStatus param. 'null' if no matches found.
      * @throws WorkflowException - Thrown when the workflow information could not be retrieved.
@@ -84,19 +87,19 @@ public abstract class WorkflowExecutor implements Serializable {
     public abstract List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException;
 
 
-
-
     /**
      * Method generates and returns UUID
+     *
      * @return UUID
      */
-    public String generateUUID(){
+    public String generateUUID() {
         String UUID = UUIDGenerator.generateUUID();
         return UUID;
     }
 
     /**
      * Method for persisting Workflow DTO
+     *
      * @param workflowDTO
      * @throws WorkflowException
      */
@@ -117,10 +120,11 @@ public abstract class WorkflowExecutor implements Serializable {
         this.callbackURL = callbackURL;
     }
 
-    /*
-    This method is to publish workflow events
-    * @param workflowDTO workflow DTO
-    */
+    /**
+     * This method is to publish workflow events
+     *
+     * @param workflowDTO workflow DTO
+     */
     public void publishEvents(WorkflowDTO workflowDTO) {
         APIManagerAnalyticsConfiguration analyticsConfiguration = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().
@@ -131,5 +135,13 @@ public abstract class WorkflowExecutor implements Serializable {
             publisher.publishEvent(workflowDTO);
         }
     }
+
+    /**
+     * Clean up pending task with workflowExtRef from workflow server
+     *
+     * @param workflowExtRef workflow external reference to match with workflow server process
+     * @throws WorkflowException
+     */
+    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {}
 
 }

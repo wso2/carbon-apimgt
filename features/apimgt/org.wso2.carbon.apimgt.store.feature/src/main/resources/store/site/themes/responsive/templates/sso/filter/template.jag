@@ -30,7 +30,7 @@
 		checkSSO = false;
     }else if (passiveAuthRequired != null && 'false' == passiveAuthRequired) {
         isPassiveAuthRequired = false;
-    } else if ((requestURI == site.context+'/') || requestURI.indexOf(site.context+'/?tenant=') != -1 || requestURI.indexOf("list-apis.jag") != -1 || requestURI.indexOf("apis/info") != -1) {
+    } else if ((requestURI == site.context+'/') || requestURI.indexOf(site.context+'/?tenant=') != -1 || requestURI.indexOf("list-apis.jag") != -1 || requestURI.indexOf("apis/info") != -1 || requestURI.indexOf("apis/list") != -1) {
         isPassiveAuthRequired = true;
     }
 
@@ -54,23 +54,28 @@
             if(site.ssoConfiguration.signRequests == null || site.ssoConfiguration.signRequests == ""){
                 site.ssoConfiguration.signRequests = "false";
             }
+            if(site.ssoConfiguration.nameIdPolicy == null){
+                site.ssoConfiguration.nameIdPolicy = "";
+            }
+
             ssoRelyingParty.setProperty("identityProviderURL", site.ssoConfiguration.identityProviderURL);
             ssoRelyingParty.setProperty("keyStorePassword", String(site.ssoConfiguration.keyStorePassword));
             ssoRelyingParty.setProperty("identityAlias", String(site.ssoConfiguration.identityAlias));
             ssoRelyingParty.setProperty("keyStoreName", String(site.ssoConfiguration.keyStoreName));
             ssoRelyingParty.setProperty("signRequests", String(site.ssoConfiguration.signRequests));
+            ssoRelyingParty.setProperty("nameIdPolicy", site.ssoConfiguration.nameIdPolicy);
 
         var consumerUrl = "";
         //if acsURL is provided in site.json, consumerUrl will be taken from that. Otherwise generated from the app.
         if (acsURL) {
             consumerUrl = acsURL;
         } else {
-            consumerUrl = jagg.getHttpsUrl("/jagg/jaggery_acs.jag");
+            consumerUrl = jagg.getAbsoluteUrl("/jagg/jaggery_acs.jag");
         }
         if(site.ssoConfiguration.passive == "true")    {
-            samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(isPassiveAuthRequired, consumerUrl);
+            samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(consumerUrl, isPassiveAuthRequired);
         } else {
-            if(site.ssoConfiguration.signRequests && (site.reverseProxy.enabled == "auto")){
+            if(site.ssoConfiguration.signRequests == "true" && (site.reverseProxy.enabled == "auto")){
                 samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest(consumerUrl);
             }else{
                 samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();

@@ -8,6 +8,9 @@
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
     var apiStatus = api.status;
+
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
@@ -82,7 +85,7 @@
                 </div>
                 <div class="span11">
                     <h4>Managed API</h4>
-                    <p>Provide endpoints of the production API and sandbox API to be managed.</p>
+                    <p>Provide the production and sandbox endpoints of the API to be managed.</p>
                 </div>
             </div>
 
@@ -157,7 +160,7 @@
                             </div>
                         </div>
 
-                        <% if(isDataPublishingEnabled) { %>
+                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
                         <!--Southboud statistics -->
                         <div class="control-group">
                             <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
@@ -196,8 +199,8 @@
                     <i class="fa fa-cog fa-3x" ></i>
                 </div>
                 <div class="span11">
-                    <h4 >Prototype</h4>
-                    <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
+                    <h4>Prototyped API</h4>
+                    <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
                 </div>
             </div>
 
@@ -239,11 +242,11 @@
 
                             <a style="margin-left:3px" class="icon-question-sign help_popup" help_data="endpoint_test_help"></a>
                             <div id="endpoint_test_help" class="hide">
-                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+                                <p><%=i18n.localize("validityCheckMessage")%></p>
                             </div>
 
                         </div>
-                        <p class="help-block">E.g.,: http://appserver/resource</p>
+                        <p class="help-block">E.g.: http://appserver/resource</p>
                         <span style="display:none;" class="help-block jsonform-errortext"></span>
                     </div>
                 </fieldset>
@@ -419,7 +422,7 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
         });
 
         $('#goToStore-btn').click(function(){
-            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>', '_blank');
+            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
             location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
         });
 
