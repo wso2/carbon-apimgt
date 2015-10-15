@@ -608,11 +608,8 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.setEndpointSecured(true);
         	api.setEndpointUTUsername(endpointUTUsername);
         	api.setEndpointUTPassword(endpointUTPassword);
-            if("digestAuth".equals(endpointAuthDigest)) {
+            if ("digestAuth".equals(endpointAuthDigest)) {
                 api.setEndpointAuthDigest(true);
-            }
-            else{
-                api.setEndpointAuthDigest(false);
             }
         } else {
             api.setEndpointSecured(false);
@@ -1327,11 +1324,8 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
-            if("digestAuth".equals(endpointAuthDigest)){
+            if ("digestAuth".equals(endpointAuthDigest)) {
                 api.setEndpointAuthDigest(true);
-            }
-            else{
-                api.setEndpointAuthDigest(false);
             }
         }
 
@@ -1522,7 +1516,7 @@ public class APIProviderHostObject extends ScriptableObject {
         	visibleTenants = (String) apiData.get("visibleTenants", apiData);
         }
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
-        String endpointAuthDigest = (String) apiData.get("endpointAuthType", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 

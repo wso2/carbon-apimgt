@@ -65,7 +65,7 @@ public class API implements Serializable{
 
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
-	private String endpointUTUsername;
+    private String endpointUTUsername;
     private String endpointUTPassword;
 
     private String transports;

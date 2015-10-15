@@ -426,15 +426,14 @@ function showHideTenants(){
 
 function showUTProductionURL(){
 	var endpointType = $('#endpointType').find(":selected").val();
-	if(endpointType == "secured"){
-	    var endpointAuthType = $('#endpointAuthType').find(":selected").val();
+    if (endpointType == "secured") {
+        var endpointAuthType = $('#endpointAuthType').find(":selected").val();
         $('#endpointAuthType').show();
-		$('#credentials').show();
-	}
-	else{
-	    $('#endpointAuthType').hide();
-		$('#credentials').hide();
-	}
+        $('#credentials').show();
+    } else {
+        $('#endpointAuthType').hide();
+        $('#credentials').hide();
+    }
 
 }
 
