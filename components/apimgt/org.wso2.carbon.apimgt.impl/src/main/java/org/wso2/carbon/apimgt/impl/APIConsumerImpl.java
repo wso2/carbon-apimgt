@@ -22,18 +22,51 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.*;
-import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.apimgt.impl.utils.LRUCache;
+import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -42,8 +75,12 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
@@ -56,7 +93,18 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
-import java.util.*;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -84,15 +132,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Object tagCacheMutex = new Object();
     private LRUCache<String,GenericArtifactManager> genericArtifactCache = new LRUCache<String,GenericArtifactManager>(5);
     private Set<API> recentlyAddedAPI;
+    private APIMRegistryService apimRegistryService;
 
     public APIConsumerImpl() throws APIManagementException {
         super();
         readTagCacheConfigs();
     }
 
-    public APIConsumerImpl(String username) throws APIManagementException {
+    public APIConsumerImpl(String username, APIMRegistryService apimRegistryService) throws APIManagementException {
         super(username);
         readTagCacheConfigs();
+        this.apimRegistryService = apimRegistryService;
     }
 
     private void readTagCacheConfigs() {
@@ -1747,7 +1797,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Application application = apiMgtDAO.getApplicationByName(applicationName, userName, groupId);
         String applicationId = String.valueOf(application.getId());
         apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
-        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId , tokenType);
+        apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId, tokenType);
         String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
         if(consumerKey != null){
             apiMgtDAO.deleteAccessAllowDomains(consumerKey);
@@ -1858,7 +1908,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Set<SubscribedAPI> getPaginatedSubscribedAPIs(Subscriber subscriber, String applicationName, int startSubIndex, int endSubIndex, String groupingId) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = null;
         try {
-            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,endSubIndex, groupingId);
+            subscribedAPIs = apiMgtDAO.getPaginatedSubscribedAPIs(subscriber, applicationName, startSubIndex,
+                    endSubIndex, groupingId);
             if(subscribedAPIs!=null && !subscribedAPIs.isEmpty()){
                 Map<String, Tier> tiers=APIUtil.getTiers(tenantId);
                 for(SubscribedAPI subscribedApi:subscribedAPIs) {
@@ -1964,13 +2015,56 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
-        apiMgtDAO.removeSubscription(identifier, applicationId);
+        API api = getAPI(identifier);
+        boolean isTenantFlowStarted = false;
+
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        }
+
+        try {
+            WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(identifier, applicationId);
+
+            SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+            workflowDTO.setApiProvider(identifier.getProviderName());
+            workflowDTO.setApiContext(api.getContext());
+            workflowDTO.setApiName(identifier.getApiName());
+            workflowDTO.setApiVersion(identifier.getVersion());
+            workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            workflowDTO.setTenantDomain(tenantDomain);
+            workflowDTO.setTenantId(tenantId);
+            workflowDTO.setExternalWorkflowReference(workflowExtRef);
+            workflowDTO.setSubscriber(userId);
+
+            String status = apiMgtDAO.getSubscriptionStatus(identifier, applicationId);
+            if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
+                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+            removeSubscriptionWFExecutor.execute(workflowDTO);
+        } catch (WorkflowException e) {
+            String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION + "" +
+                    " for apiID " + identifier.getApiName();
+            handleException(errorMsg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
         if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
             invalidateCachedKeys(applicationId);
         }
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             String appName = apiMgtDAO.getApplicationNameFromId(applicationId);
-            String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscription removed by " + userId +" from app "+ appName;
+            String logMessage = "API Name: " + identifier.getApiName() + ", API Version " +
+                    identifier.getVersion() + " subscription removed from app " + appName + " by " + userId;
             log.debug(logMessage);
         }
     }
@@ -2142,29 +2236,89 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-
     /**
      * Function to remove an Application from the API Store
+     *
      * @param application - The Application Object that represents the Application
      * @throws APIManagementException
      */
     public void removeApplication(Application application) throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        boolean isTenantFlowStarted = false;
+        int applicationId = application.getId();
 
-        try {
-            //Remove from cache first since we won't be able to find active access tokens once the application is removed.
-            invalidateCachedKeys(application.getId());
-        }catch(APIManagementException ignore){
-            //Log and proceed since we do not want to halt the application delete due to cache invalidation failures.
-            log.warn("Failed to invalidate Gateway Cache " + ignore.getMessage());
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         }
 
-        apiMgtDAO.deleteApplication(application);
+        try {
+            String workflowExtRef = null;
+            WorkflowExecutor createApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor createProductionRegistrationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            WorkflowExecutor createSandboxRegistrationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+
+            workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceByApplicationID(application.getId());
+
+            ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
+            workflowDTO.setApplication(application);
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            workflowDTO.setTenantDomain(tenantDomain);
+            workflowDTO.setTenantId(tenantId);
+            workflowDTO.setExternalWorkflowReference(workflowExtRef);
+
+            // Remove from cache first since we won't be able to find active access tokens
+            // once the application is removed.
+            invalidateCachedKeys(application.getId());
+
+            // clean up pending subscription tasks
+            Set<Integer> pendingSubscriptions = apiMgtDAO.getPendingSubscriptionsByApplicationId(applicationId);
+            for (int subscription : pendingSubscriptions) {
+                workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscription);
+                createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+
+            // cleanup pending application registration tasks
+            String productionKeyStatus = apiMgtDAO.getRegistrationApprovalState(applicationId, APIConstants
+                    .API_KEY_TYPE_PRODUCTION);
+            String sandboxKeyStatus = apiMgtDAO.getRegistrationApprovalState(applicationId, APIConstants
+                    .API_KEY_TYPE_SANDBOX);
+            if (WorkflowStatus.CREATED.toString().equals(productionKeyStatus)) {
+                workflowExtRef = apiMgtDAO.getRegistrationWFReference(applicationId, APIConstants
+                        .API_KEY_TYPE_PRODUCTION);
+                createProductionRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+            if (WorkflowStatus.CREATED.toString().equals(sandboxKeyStatus)) {
+                workflowExtRef = apiMgtDAO.getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
+                createSandboxRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+            createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
+            removeApplicationWFExecutor.execute(workflowDTO);
+        } catch (WorkflowException e) {
+            String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION + " " +
+                    "for applicationID " + application.getId();
+            handleException(errorMsg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            String logMessage = "Application Name: " + application.getName() + " successfully removed";
+            log.debug(logMessage);
+        }
     }
 
     /**
-     * @param userId Subsriber name.
+     * @param userId Subscriber name.
      * @param applicationName of the Application.
      * @param tokenType Token type (PRODUCTION | SANDBOX)
      * @param jsonString oAuthApplication parameters as a json string.
@@ -2818,5 +2972,45 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return row;
+    }
+
+
+    @Override
+    public boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException {
+        JSONObject apiTenantConfig = null;
+        try {
+            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (JSONObject) parser.parse(content);
+            }
+
+        } catch (UserStoreException e) {
+            handleException("UserStoreException thrown when getting API tenant config from registry", e);
+        } catch (RegistryException e) {
+            handleException("RegistryException thrown when getting API tenant config from registry", e);
+        } catch (ParseException e) {
+            handleException("ParseException thrown when passing API tenant config from registry", e);
+        } catch (UnsupportedEncodingException e) {
+            handleException("UnsupportedEncodingException thrown when reading content of tenant config from registry", e);
+        }
+
+        return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
+    }
+
+    private boolean getTenantConfigValue(String tenantDomain, JSONObject apiTenantConfig, String configKey) throws APIManagementException {
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(configKey);
+
+            if (value != null) {
+                return Boolean.valueOf(value.toString());
+            }
+            else {
+                throw new APIManagementException(configKey + " config does not exist for tenant " + tenantDomain);
+            }
+        }
+
+        return false;
     }
 }

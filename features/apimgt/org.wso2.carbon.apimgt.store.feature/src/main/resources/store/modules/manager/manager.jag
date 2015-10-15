@@ -87,6 +87,14 @@ var getAPIStoreObj = function() {
     }
 };
 
+var getAPIConsumerObj = function() {
+    var user = jagg.getUser();
+
+    var APIManagerFactory = Packages.org.wso2.carbon.apimgt.impl.APIManagerFactory;
+
+    return APIManagerFactory.getInstance().getAPIConsumer(user);
+};
+
 var loadTenantRegistry = function (tenantDomain) {
     try {
         if (tenantDomain != null && tenantDomain != "") {

@@ -149,7 +149,6 @@ function APIDesigner(){
             parameters.push({
                 name : m[0].replace("{","").replace("}",""),
                 "in": "path",
-                "allowMultiple": false,
                 "required": true,
 				"type":"string"
             })            
@@ -165,17 +164,18 @@ function APIDesigner(){
     		        var method = $(this).val();               
                     var tempPara = parameters.concat();                
                          
-                    if(method == "POST" || method == "PUT") {   
-                            tempPara.push({
-    		            name : "body",
-    		      	    "description": "Request Body",
-    		            "allowMultiple": false,
-    		            "required": false,
-    		            "in": "body",
-    		            "type":"string"
-                            });
-                    } 
-                    resource[method] = { 
+                    if(method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
+                        tempPara.push({
+                            "name" : "Payload",
+                            "description": "Request Body",
+                            "required": false,
+                            "in": "body",
+                            "schema": {
+                                "type" : "object"
+                            }
+                        });
+                    }
+                    resource[method] = {
                         responses : { '200':{}}
                     };
                     if(tempPara.length > 0){
@@ -277,6 +277,7 @@ APIDesigner.prototype.display_elements = function(value,source){
 };
 
 APIDesigner.prototype.update_elements = function(resource, newValue){
+    var swaggerSchema = JSON.parse('{"type":"object"}');
     var API_DESIGNER = APIDesigner();
     var obj = API_DESIGNER.query($(this).attr('data-path'));
     var obj = obj[0]
@@ -284,8 +285,22 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
         var obj = API_DESIGNER.query(obj["$ref"].replace("#","$").replace(/\//g,"."));  
         var obj = obj[0];      
     }
+    if ($(this).attr('data-attr-type') == "comma_seperated") {
+        newValue = $.map(newValue.split(","), $.trim);
+    }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
+    if (i == "in") {
+        //Add body parameter to the swagger
+        if (newValue == "body") {
+            delete obj.type;
+            obj['schema'] = swaggerSchema;
+        } else { //other parameters
+            delete obj.schema;
+            obj['type'] = "string";
+        }
+    }
+        
 };
 
 APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
@@ -381,7 +396,7 @@ APIDesigner.prototype.init_controllers = function(){
         var operation = deleteDataArray[3];
         var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
 
-        jagg.message({content: 'Do you want to delete the parameter <strong>' + paramName + '</strong> ?',
+        jagg.message({content: i18n.t('confirm.deleteParam') + ' <strong>' + paramName + '</strong> ?',
             type: 'confirm', title: "Delete Parameter",
             okCallback: function () {
                 API_DESIGNER = APIDesigner();
@@ -392,8 +407,12 @@ APIDesigner.prototype.init_controllers = function(){
 
     this.container.delegate(".delete_scope","click", function(){
         var i = $(this).attr("data-index");
-        API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
-        API_DESIGNER.render_scopes();
+        jagg.message({content: i18n.t('confirm.deleteScope'),
+            type: 'confirm', title: "Delete Scope",
+            okCallback: function () {
+                API_DESIGNER.api_doc['x-wso2-security'].apim['x-wso2-scopes'].splice(i, 1);
+                API_DESIGNER.render_scopes();
+            }});
     });
 
     this.container.delegate("#define_scopes" ,'click', function(){
@@ -545,9 +564,13 @@ APIDesigner.prototype.render_resources = function(){
 };
 
 APIDesigner.prototype.render_resource = function(container){
+    var isBodyRequired = false;
     var operation = this.query(container.attr('data-path'));
     var context = jQuery.extend(true, {}, operation[0]);
     context.resource_path = container.attr('data-path');
+    if (context.resource_path.match(/post/i) || context.resource_path.match(/put/i)) {
+        isBodyRequired = true;
+    }
     var output = Handlebars.partials['designer-resource-template'](context);
     container.html(output);
     container.show();
@@ -567,7 +590,10 @@ APIDesigner.prototype.render_resource = function(container){
         success : this.update_elements
     });
     container.find('.produces').editable({
-        value : "application/json",
+        source: content_types,
+        success : this.update_elements
+    });
+    container.find('.consumes').editable({
         source: content_types,
         success : this.update_elements
     });
@@ -575,11 +601,20 @@ APIDesigner.prototype.render_resource = function(container){
         emptytext: '+ Empty',
         success : this.update_elements
     });
-    container.find('.param_paramType').editable({
-        emptytext: '+ Set Param Type',
-        source: [ { value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", value:"formData"} ],
-        success : this.update_elements
-    });
+    if(isBodyRequired){
+        container.find('.param_paramType').editable({
+            emptytext: '+ Set Param Type',
+            source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
+            success : this.update_elements
+        });
+    } else {
+        container.find('.param_paramType').editable({
+            emptytext: '+ Set Param Type',
+            source: [{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
+            success : this.update_elements
+        });
+    }
+
     container.find('.param_type').editable({
         emptytext: '+ Empty',
         success : this.update_elements
@@ -753,7 +788,7 @@ $(document).ready(function(){
 
         if(designer.has_resources() == false){
             jagg.message({
-                content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)." ,
+                content:"At least one resource should be specified. Do you want to add a wildcard resource (/*)?" ,
                 type:"confirm",
                 title:"Resource not specified",
                 anotherDialog:true,
@@ -856,6 +891,11 @@ $('#go_to_implement').click(function(e){
     thisID = $(this).attr('id');
 });
 
+//To reset the tab to overview
+$('.goTo_api_overview').mousedown(function () {
+    $.cookie("selectedTab", "view");
+});
+
 function getContextValue() {
     var context = $('#context').val();
     var version = $('#apiVersion').val();
@@ -899,4 +939,3 @@ function updateContextPattern(){
         $('#resource_url_pattern_refix').text(context);
     }
 }
-

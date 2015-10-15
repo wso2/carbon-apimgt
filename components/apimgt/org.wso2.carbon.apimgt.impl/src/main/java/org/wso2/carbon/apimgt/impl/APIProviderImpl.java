@@ -37,7 +37,19 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
@@ -47,7 +59,12 @@ import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
@@ -59,7 +76,12 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.common.CommonConstants;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.CollectionImpl;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -76,9 +98,21 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -154,7 +188,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
             Association[] associations = registry.getAssociations(providerPath,
-                                                                  APIConstants.PROVIDER_ASSOCIATION);
+                    APIConstants.PROVIDER_ASSOCIATION);
             for (Association association : associations) {
                 String apiPath = association.getDestinationPath();
                 Resource resource = registry.get(apiPath);
@@ -1056,7 +1090,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 checkIfValidTransport(transports);
             }
         }else{
-            api.setTransports(Constants.TRANSPORT_HTTP+","+Constants.TRANSPORT_HTTPS);
+            api.setTransports(Constants.TRANSPORT_HTTP + "," + Constants.TRANSPORT_HTTPS);
             return;
         }
     }
@@ -1106,7 +1140,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return gatewayManager.isAPIPublished(api, tenantDomain);
         }
 
-    private APITemplateBuilder getAPITemplateBuilder(API api){
+    private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
         corsProperties.put("apiImplementationType", api.getImplementation());
@@ -1154,9 +1188,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
             vtb.addHandler("org.wso2.carbon.apimgt.usage.publisher.APIMgtGoogleAnalyticsTrackingHandler", properties);
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            String extensionHandlerPosition = config.getFirstProperty(APIConstants.EXTENSION_HANDLER_POSITION);
+            String extensionHandlerPosition = getExtensionHandlerPosition();
             if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
                 vtb.addHandlerPriority("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler", Collections.EMPTY_MAP, 0);
             } else {
@@ -1623,7 +1655,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void createAPI(API api) throws APIManagementException {
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                            APIConstants.API_KEY);
+                APIConstants.API_KEY);
 
         //Validate Transports
         validateAndSetTransports(api);
@@ -2121,6 +2153,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 		}
 		return apiList;
 	}
+
+    /**
+     * Retrieves Extension Handler Position from the tenant-config.json
+     *
+     * @return Extension    HandlerPosition
+     * @throws APIManagementException
+     */
+    private String getExtensionHandlerPosition() throws APIManagementException {
+        String extensionHandlerPosition = null;
+        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+        try {
+            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants
+                    .API_TENANT_CONF_LOCATION);
+            if (content != null) {
+                JSONParser jsonParser = new JSONParser();
+                JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
+                extensionHandlerPosition = (String) tenantConf.get(APIConstants.EXTENSION_HANDLER_POSITION);
+            }
+        } catch (RegistryException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        } catch (IOException e) {
+            handleException("Couldn't read/parse tenant configuration for extension handler position", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse tenant configuration for reading extension handler position", e);
+        } catch (UserStoreException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        }
+        return extensionHandlerPosition;
+    }
 
     /**
      * Update the Tier Permissions

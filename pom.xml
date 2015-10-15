@@ -538,7 +538,7 @@
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.throttle.core</artifactId>
-                <version>4.2.1</version>
+                <version>${carbon.throttle.module.version}</version>
             </dependency>
 
             <dependency>
@@ -960,6 +960,7 @@
         <imp.pkg.version.org.wso2.carbon.base>[1.0.0, 1.1.0)</imp.pkg.version.org.wso2.carbon.base>
         <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
 
+	<carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
     </properties>
     <distributionManagement>
         <repository>
