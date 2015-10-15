@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Util methods for test setup
+ * Util methods for Entitlement client use to validate requests
  */
 public class EntitlementClientUtils {
 
@@ -55,7 +55,7 @@ public class EntitlementClientUtils {
         return path;
     }
 
-    public static String getTrustStore() throws Exception {
+    /*public static String getTrustStore() throws Exception {
         if(configProperties != null  && configProperties.getProperty(EntitlementClientConstants.TRUST_STORE_PATH) != null){
             return  configProperties.getProperty(EntitlementClientConstants.TRUST_STORE_PATH);
         } else {
@@ -79,7 +79,7 @@ public class EntitlementClientUtils {
         } else {
             return "wso2carbon";
         }
-    }
+    } */
 
     public static String getServerUrl(){
         if(configProperties != null  && configProperties.getProperty(EntitlementClientConstants.SERVER_URL) != null){
