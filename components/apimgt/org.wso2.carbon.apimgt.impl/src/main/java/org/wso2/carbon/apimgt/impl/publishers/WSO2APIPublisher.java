@@ -727,21 +727,22 @@ public class WSO2APIPublisher implements APIPublisher {
 				}
 				k++;
 			}
-            entity.addPart("tiersCollection", new StringBody(checkValue(tiersSet.toString())));
-            entity.addPart("context", new StringBody(api.getContext()));
-            entity.addPart("bizOwner", new StringBody(checkValue(api.getBusinessOwner())));
-            entity.addPart("bizOwnerMail", new StringBody(checkValue(api.getBusinessOwnerEmail())));
-            entity.addPart("techOwnerMail", new StringBody(checkValue(api.getTechnicalOwnerEmail())));
-            entity.addPart("techOwner", new StringBody(checkValue(api.getTechnicalOwner())));
-            entity.addPart("visibility", new StringBody(api.getVisibility()));
-            entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
-            entity.addPart("endpointType", new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
+			entity.addPart("tiersCollection", new StringBody(checkValue(tiersSet.toString())));
+			entity.addPart("context", new StringBody(api.getContext()));
+			entity.addPart("bizOwner", new StringBody(checkValue(api.getBusinessOwner())));
+			entity.addPart("bizOwnerMail", new StringBody(checkValue(api.getBusinessOwnerEmail())));
+			entity.addPart("techOwnerMail",
+			               new StringBody(checkValue(api.getTechnicalOwnerEmail())));
+			entity.addPart("techOwner", new StringBody(checkValue(api.getTechnicalOwner())));
+			entity.addPart("visibility", new StringBody(api.getVisibility()));
+			entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
+			entity.addPart("endpointType",
+			               new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
             entity.addPart("endpointAuthType", new StringBody(checkValue(String.valueOf(api.isEndpointAuthDigest()))));
             entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
             entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
-
-            entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
-            entity.addPart("advertiseOnly", new StringBody("true"));
+			entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
+			entity.addPart("advertiseOnly", new StringBody("true"));
 
         
 			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
