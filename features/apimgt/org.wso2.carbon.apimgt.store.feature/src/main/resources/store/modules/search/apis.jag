@@ -23,13 +23,13 @@ var searchAPIs = function (query,tenantDomain) {
         };
     }
 };
-var searchPaginatedAPIs = function (query,tenantDomain,start,end) {
+var searchPaginatedAPIs = function (query,tenantDomain,start,end,limitAttributes) {
     var list, i, length, api, result,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        result = store.searchPaginatedAPIsByType(query,tenantDomain,String(start),String(end));
+        result = store.searchPaginatedAPIsByType(query,tenantDomain,String(start),String(end),limitAttributes);
         if (log.isDebugEnabled()) {
             log.debug("searchAPIs : " + stringify(result.apis));
         }

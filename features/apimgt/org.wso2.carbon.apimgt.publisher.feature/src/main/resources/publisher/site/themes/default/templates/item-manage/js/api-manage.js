@@ -90,7 +90,7 @@ $(document).ready(function(){
     else {
 	$('#toggleSequence').parent().next().hide();
     }
-
+    
     if( $("#toggleThrottle").attr('checked') ) {
     $('#toggleThrottle').parent().next().show();
     } 
@@ -272,14 +272,14 @@ $("#toggleThrottle").change(function(e){
     }
 });
 
-function validate_Transports(){
-    var checkedHttpTransport=$('#transport_http').is(":checked");
-    var checkedHttpsTransport=$('#transport_https').is(":checked");
+function validate_Transports() {
+    var checkedHttpTransport = $('#transport_http').is(":checked");
+    var checkedHttpsTransport = $('#transport_https').is(":checked");
     $("#transport_error").remove();
-    if(checkedHttpTransport || checkedHttpsTransport){
-    $( "div.checkbox" ).removeClass('error-multiselect');
+    if (checkedHttpTransport || checkedHttpsTransport) {
+        $("div.checkbox").removeClass('error-multiselect');
         return true;
     }
-    $( "div.checkbox" ).addClass('error-multiselect').after('<div id="transport_error" class="error">This field is required.</div>');
+    $("div.checkbox").addClass('error-multiselect').after('<div id="transport_error" class="error">This field is required.</div>');
     return false;
 }

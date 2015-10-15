@@ -64,7 +64,7 @@ i18n.init(request,localeResourcesBasePath);
 
     }
     </script>
-
+    <script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/jquery-csrf.js"))%>"></script>
 <%
     var data = jagg.data();
     if(data.header) {

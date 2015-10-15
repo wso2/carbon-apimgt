@@ -36,13 +36,14 @@ jagg.block("api/api-info", {
         isAdvertiseOnly= (api.isAdvertiseOnly == null)? false :api.isAdvertiseOnly ;
         }
         if(swaggerString=="noPermissions"){showConsole=false;}
+
+        result = jagg.module("rating").isRatingActivated();
+        isRatingActivated = result.allow;
+
         if (user) {
             username = user.username;
             result = jagg.module("application").getApplications(username);
             applications = result.applications;
-
-            result = jagg.module("rating").isRatingActivated();
-            isRatingActivated = result.allow;
 
             result = jagg.module("subscription").getAPISubscriptions(api, username);
             subscriptions = result.subscriptions;

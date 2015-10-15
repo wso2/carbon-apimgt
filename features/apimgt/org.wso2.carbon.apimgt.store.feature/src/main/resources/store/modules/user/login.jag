@@ -81,9 +81,20 @@ var loginWithSAMLToken = function (token) {
 
     var cookieString = cookie.split(";")[0].split(":")[1];
     var userName = ssoRelyingParty.getSAMLResponseNameId(token);
+
+    var decodedSamlReponse = ssoRelyingParty.decode(token);
+    var groupId = store.getGroupIds(decodedSamlReponse);
+     //Store and empty string instead of null if no group Id is found. This is done so that when checking for a string array
+    //the null value returned would not cause any issue.
+    if(groupId == null){
+        groupId = "";
+    }
+
+    session.put("groupId", groupId);
+
     var subscriber = store.getSubscriber(userName);
     if (!subscriber) {
-        store.addSubscriber(userName);
+        store.addSubscriber(userName, groupId);
         subscriber = store.getSubscriber(userName);
     }
     return {

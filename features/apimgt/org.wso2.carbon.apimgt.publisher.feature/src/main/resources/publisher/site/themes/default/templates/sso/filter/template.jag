@@ -32,10 +32,14 @@
             if(site.ssoConfiguration.keyStoreName == null || site.ssoConfiguration.keyStoreName == ""){
                 site.ssoConfiguration.keyStoreName = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Location");
                 }
+            if(site.ssoConfiguration.nameIdPolicy == null){
+                site.ssoConfiguration.nameIdPolicy = "";
+            }
             ssoRelyingParty.setProperty("identityProviderURL", site.ssoConfiguration.identityProviderURL);
             ssoRelyingParty.setProperty("keyStorePassword", String(site.ssoConfiguration.keyStorePassword));
             ssoRelyingParty.setProperty("identityAlias", String(site.ssoConfiguration.identityAlias));
             ssoRelyingParty.setProperty("keyStoreName", String(site.ssoConfiguration.keyStoreName));
+            ssoRelyingParty.setProperty("nameIdPolicy", site.ssoConfiguration.nameIdPolicy);
 
 	    var samlAuthRequest = ssoRelyingParty.getSAMLAuthRequest();
 	    var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);
