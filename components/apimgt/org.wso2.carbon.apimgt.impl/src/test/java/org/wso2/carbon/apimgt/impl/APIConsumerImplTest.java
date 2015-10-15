@@ -18,8 +18,6 @@ package org.wso2.carbon.apimgt.impl;
 
 import junit.framework.TestCase;
 import org.mockito.Mockito;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 
@@ -35,7 +33,7 @@ public class APIConsumerImplTest extends TestCase {
         String json = "{\n  EnableMonetization : true\n }";
 
         try {
-            when(apimRegistryService.getResourceContent("", "")).thenReturn(json);
+            when(apimRegistryService.getConfigRegistryResourceContent("", "")).thenReturn(json);
             /* TODO: Need to mock out ApimgtDAO and usage of registry else where in order to test this
             APIConsumer apiConsumer = new UserAwareAPIConsumer("__wso2.am.anon__", apimRegistryService);
 

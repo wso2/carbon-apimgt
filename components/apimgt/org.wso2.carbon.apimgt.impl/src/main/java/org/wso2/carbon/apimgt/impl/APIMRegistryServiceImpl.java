@@ -28,8 +28,35 @@ import java.io.UnsupportedEncodingException;
 
 public class APIMRegistryServiceImpl implements APIMRegistryService {
     @Override
-    public String getResourceContent(String tenantDomain, final String registryLocation) throws UserStoreException,
-                                                RegistryException, UnsupportedEncodingException {
+    public String getConfigRegistryResourceContent(String tenantDomain, final String registryLocation)
+                                        throws UserStoreException, RegistryException, UnsupportedEncodingException {
+        String content = null;
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+
+            if (registry.resourceExists(registryLocation)) {
+                Resource resource = registry.get(registryLocation);
+                content = new String((byte[]) resource.getContent(), "UTF-8");
+            }
+        }
+        finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+        return content;
+    }
+
+    @Override
+    public String getGovernanceRegistryResourceContent(String tenantDomain, String registryLocation)
+                                        throws UserStoreException, RegistryException, UnsupportedEncodingException {
         String content = null;
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
