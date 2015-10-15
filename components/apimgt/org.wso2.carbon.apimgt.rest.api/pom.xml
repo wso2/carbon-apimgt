@@ -136,7 +136,7 @@
 								<directory>src/main/webapp</directory>
 							</resource>
 						</webResources>
-						<warName>api#am#v1</warName>
+						<warName>api#am#store#v1</warName>
 					</configuration>
 				</plugin>
             </plugins>
