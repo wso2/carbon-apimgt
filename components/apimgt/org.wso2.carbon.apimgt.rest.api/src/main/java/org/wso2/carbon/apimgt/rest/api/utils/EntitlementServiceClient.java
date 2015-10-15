@@ -48,8 +48,6 @@ public class EntitlementServiceClient {
             String clientAxisConf = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                     File.separator + "conf" + File.separator + "axis2"+ File.separator +"axis2_client.xml";
 
-            ConfigurationContext configContext1 =   ConfigurationContextFactory. createConfigurationContextFromFileSystem(clientRepo,clientAxisConf);
-
             configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem( null, null);
             String serviceEndPoint = EntitlementClientUtils.getServerUrl() + "EntitlementService";
             entitlementServiceStub =
@@ -64,8 +62,7 @@ public class EntitlementServiceClient {
             option.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
             option.setManageSession(true);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(0);
+
         }
     }
 
