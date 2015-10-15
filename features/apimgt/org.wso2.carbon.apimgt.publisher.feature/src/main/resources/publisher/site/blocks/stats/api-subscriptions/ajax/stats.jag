@@ -17,9 +17,9 @@ include("/jagg/jagg.jag");
 
 
         if (action === "getSubscriberCountByAPIs") {
+            mod = jagg.module("statistics");
             var provider = jagg.getUser().username;
             var currentLocation = request.getParameter("currentLocation");
-            mod = jagg.module("statistics");
 
             if (currentLocation.indexOf("all-statistics") >= 0) {
                 result = mod.getSubscriberCountByAPIs(allProviders);
@@ -75,7 +75,7 @@ include("/jagg/jagg.jag");
             } else {
                 obj = {
                     error: false,
-                    usage: result
+                    usage: result.usage
                 }
             }
             print(obj);

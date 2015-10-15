@@ -29,10 +29,8 @@ log = new Log();
         });        
     }
     else if (action === "getTopAppUsers") {
-
-        var subscriber = jagg.getUser().username;
         mod = jagg.module("statistics");
-
+        var subscriber = jagg.getUser().username;
         var from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
         var groupId = session.get("groupId");
@@ -53,9 +51,8 @@ log = new Log();
 
 
     } else if (action === "getPerAppSubscribers") {
-        var subscriber = jagg.getUser().username;
         mod = jagg.module("statistics");
-
+        var subscriber = jagg.getUser().username;
         var from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
         var groupId = session.get("groupId");
@@ -76,8 +73,8 @@ log = new Log();
 
 
     }else if (action === "getFirstAccessTime") {
-        var provider = jagg.getUser().username;
         mod = jagg.module("statistics");
+        var subscriber = jagg.getUser().username;
         result = mod.getFirstAccessTime(subscriber);
 
         if (result.error == "true") {
@@ -105,7 +102,7 @@ log = new Log();
             } else {
                 obj = {
                     error: false,
-                    usage: result
+                    usage: result.usage
                 }
             }
             print(obj);

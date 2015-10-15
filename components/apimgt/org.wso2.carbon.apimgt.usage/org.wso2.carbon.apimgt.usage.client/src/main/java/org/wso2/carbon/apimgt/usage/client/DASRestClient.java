@@ -212,7 +212,7 @@ public class DASRestClient {
 
         //crete the http get request method to RETS API
         HttpGet getRequest = new HttpGet(
-                dasUrl + APIUsageStatisticsClientConstants.DAS_Table_EXIST_REST_API_URL + "?table=" + name);
+                dasUrl + APIUsageStatisticsClientConstants.DAS_TABLE_EXIST_REST_API_URL + "?table=" + name);
 
         //get the encoded REST API credentials
         String cred = RestClientUtil.encodeCredentials(this.user, this.pass);

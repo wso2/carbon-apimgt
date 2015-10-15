@@ -19,7 +19,7 @@ var log = new Log();
             message: 'AuthenticateError'
         });
     } else {
-        var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRestClientImpl;
+        var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 
         var provider = jagg.getUser().username;
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;

@@ -108,7 +108,6 @@ var drawAPIResponseFaultCountTable = function(from,to){
     jagg.post("/site/blocks/stats/faultCount/ajax/stats.jag", { action:"getPerAppAPIFaultCount",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
-
                 $('#PerAppAPIFaultCountTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
                 $('#PerAppAPIFaultCountTable').show();

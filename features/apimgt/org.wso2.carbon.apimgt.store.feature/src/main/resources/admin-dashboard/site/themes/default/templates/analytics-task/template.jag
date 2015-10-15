@@ -2,7 +2,6 @@
 var mod = jagg.module("analytics");
 var analyticsData = outputs.analyticsData;
 var datasourceData = outputs.datasourceData;
-var dataSourceType = outputs.dataSourceType;
 %>
 <div id="listing">
     <div class="title-section">
@@ -549,8 +548,6 @@ var dataSourceType = outputs.dataSourceType;
 
 <script>
 $(document).ready(function() {
-
-
         var enableAnalytics = "<%=analyticsData.analytics.enableAnalytics%>";
 if(enableAnalytics){
     <% if(analyticsData.analytics.eventReceiverURL != '') { %>

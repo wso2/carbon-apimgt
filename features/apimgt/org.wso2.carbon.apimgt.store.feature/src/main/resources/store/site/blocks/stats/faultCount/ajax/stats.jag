@@ -30,9 +30,8 @@ log = new Log();
             });        
         }
         else if (action === "getPerAppAPIFaultCount") {
-        var subscriber = jagg.getUser().username;
         mod = jagg.module("statistics");
-
+        var subscriber = jagg.getUser().username;
         from = request.getParameter("fromDate");
         var to = request.getParameter("toDate");
         var groupId = session.get("groupId");
@@ -57,10 +56,9 @@ log = new Log();
    
 
     }else if (action === "getFirstAccessTime") {
-        var provider = jagg.getUser().username;
         mod = jagg.module("statistics");
+        var subscriber = jagg.getUser().username;
         result = mod.getFirstAccessTime(subscriber);
-
         if (result.error == "true") {
             obj = {
                 error:result.error,
@@ -86,7 +84,7 @@ log = new Log();
             } else {
                 obj = {
                     error: false,
-                    usage: result
+                    usage: result.usage
                 }
             }
             print(obj);

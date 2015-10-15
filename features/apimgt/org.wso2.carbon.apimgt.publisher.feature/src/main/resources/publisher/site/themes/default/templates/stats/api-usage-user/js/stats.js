@@ -250,7 +250,6 @@ var drawChart = function (from, to) {
     jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "getAPIUsageByUser", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate},
         function (json) {
             if (!json.error) {
-
                 $('#tooltipTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
 

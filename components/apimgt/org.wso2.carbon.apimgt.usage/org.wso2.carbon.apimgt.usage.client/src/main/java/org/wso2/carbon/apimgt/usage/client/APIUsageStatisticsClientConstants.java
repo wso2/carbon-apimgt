@@ -136,6 +136,6 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String DAS_SEARCH_REST_API_URL = "/analytics/search";
     public static final String DAS_AGGREGATES_SEARCH_REST_API_URL = "/analytics/aggregates";
-    public static final String DAS_Table_EXIST_REST_API_URL = "/analytics/table_exists";
+    public static final String DAS_TABLE_EXIST_REST_API_URL = "/analytics/table_exists";
 
 }

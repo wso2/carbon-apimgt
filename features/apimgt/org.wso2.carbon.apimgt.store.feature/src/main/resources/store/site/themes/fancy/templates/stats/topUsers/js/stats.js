@@ -111,7 +111,6 @@ var drawTopUsersGraph = function(from,to){
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getTopAppUsers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
-
                 var lentth1 = json.usage.length;
                 $('#topUsersView').empty();
                 for(var k=0 ; k<lentth1 ;k++){

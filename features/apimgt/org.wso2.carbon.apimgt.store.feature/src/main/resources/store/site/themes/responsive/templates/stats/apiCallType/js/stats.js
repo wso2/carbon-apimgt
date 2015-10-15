@@ -9,7 +9,7 @@ var statsEnabled = isDataPublishingEnabled();
             if (!json.error) {
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
-                    var firstAccessDay = new Date(json.usage[0], json.usage[1], json.usage[2]);
+                    var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
 
                     //day picker

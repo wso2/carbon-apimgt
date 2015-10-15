@@ -8,7 +8,7 @@ var statsEnabled = isDataPublishingEnabled();
             if (!json.error) {
                 if( json.usage && json.usage.length > 0){
                     var d = new Date();
-                    var firstAccessDay = new Date(json.usage[0], json.usage[1], json.usage[2]);
+                    var firstAccessDay = new Date(json.usage[0].year, json.usage[0].month, json.usage[0].day);
                     var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(),d.getHours(),d.getMinutes());
 
                     //day picker
@@ -192,7 +192,6 @@ var drawTopAppUsers = function(from,to){
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getTopAppUsers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
-
                 $('#topAppUsersTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
                 $('#topAppUsersTable').show();
@@ -226,7 +225,6 @@ var drawRegisteredUserCountByApplications = function(from,to){
     var toDate = to;
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getPerAppSubscribers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
-
             $('#registeredUseresSpinner').hide();
             if (!json.error) {
                 var length = json.usage.length,data = [];
@@ -524,7 +522,6 @@ var drawAppUsers = function(from,to){
     jagg.post("/site/blocks/stats/topUsers/ajax/stats.jag", { action:"getPerAppSubscribers",currentLocation:currentLocation,fromDate:fromDate,toDate:toDate  },
         function (json) {
             if (!json.error) {
-
                 $('#appUsersTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
                 $('#appUsersTable').show();
