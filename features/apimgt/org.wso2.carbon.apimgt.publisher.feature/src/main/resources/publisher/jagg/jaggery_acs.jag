@@ -17,8 +17,16 @@
 
     // if saml response is not a log out response
     if (samlResponse != null) {
+
         isLogoutResponse = ssoRelyingParty.isLogoutResponse(samlResponse);
         if (!Boolean(isLogoutResponse)) {
+            var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+            var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var domainName = null;
+            if(fullUserName != null){
+                domainName = MultitenantUtils.getTenantDomain(fullUserName);
+            }
             // relay state value should be a valid value, this value is mapped with request uri.
             var relayState = request.getParameter("RelayState");
             var requestedURI = ssoRelyingParty.getRelayStateProperty(relayState);
@@ -30,15 +38,10 @@
 
             // validating the signature
             if(site.ssoConfiguration.responseSigningEnabled === 'true'){
-                var fullUserName = ssoRelyingParty.getSAMLResponseNameId(samlResponse);
-                var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-                var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-                if(fullUserName != null){
-                    var domainName = MultitenantUtils.getTenantDomain(fullUserName);
+
                     if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME !== domainName) {
                         jagg.module("manager").loadTenantRegistry(String(domainName));
                     }
-                }
                 var isSignatureValid = ssoRelyingParty.validateSignature(samlResponse);
                 if (!Boolean(isSignatureValid)) {
                     log.error("SAML response signature is verification failed.");

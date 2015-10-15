@@ -216,11 +216,11 @@ return {
 }
 };
 
-var isURLValid = function (type,url) {
+var isURLValid = function (type,url,invalidStatusCodesRegex) {
     var result, log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-        result = provider.isURLValid(type,url);
+        result = provider.isURLValid(type,url,invalidStatusCodesRegex);
         if (log.isDebugEnabled()) {
             log.debug("Invoke isURLValid" );
         }

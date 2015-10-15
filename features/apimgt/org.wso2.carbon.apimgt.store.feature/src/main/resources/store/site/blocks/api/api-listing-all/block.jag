@@ -40,7 +40,7 @@ jagg.block("api/api-listing-all", {
             apis = response.result.apis;
         } else if (query) {
             mod = jagg.module("search");
-            response = mod.searchPaginatedAPIs(query,tenantDomain,start,end);
+            response = mod.searchPaginatedAPIs(query,tenantDomain,start,end, "true");
             if(response.error){
                 error = true;
                 message = response.message;

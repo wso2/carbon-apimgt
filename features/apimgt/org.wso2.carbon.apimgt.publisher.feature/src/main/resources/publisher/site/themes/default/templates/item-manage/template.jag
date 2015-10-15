@@ -110,7 +110,7 @@
     <legend>Configurations</legend>
 
             <div class="control-group">
-                    <label  class="control-label" >Make this default version</label>
+                    <label  class="control-label">Make this the Default Version</label>
                      <div class="controls">
                         <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
 
@@ -667,7 +667,7 @@
         <div class="control-group">
             <label class="control-label" for="scopeRoles">Roles</label>
             <div class="controls">
-            <input type="text" id="scopeRoles" class="" placeholder="Eg: role1,role2,role3" data-role="tagsinput" />
+            <input type="text" id="scopeRoles" class="" placeholder="E.g.: role1,role2,role3" data-role="tagsinput" />
             </div>
         </div>
         <div class="control-group">
