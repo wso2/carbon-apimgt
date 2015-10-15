@@ -198,6 +198,11 @@ legend {
     margin-top: 10px;
 }
 
+.action-btn-list {
+    height: 40px !important;
+    padding-left: 170px !important;
+}
+
 .wr-action-btn-bar {
     height: 50px;
     display: block;
