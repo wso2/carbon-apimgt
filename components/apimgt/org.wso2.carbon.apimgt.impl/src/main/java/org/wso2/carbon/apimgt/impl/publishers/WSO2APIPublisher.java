@@ -736,11 +736,11 @@ public class WSO2APIPublisher implements APIPublisher {
 			entity.addPart("techOwner", new StringBody(checkValue(api.getTechnicalOwner())));
 			entity.addPart("visibility", new StringBody(api.getVisibility()));
 			entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
-            entity.addPart("endpointType", new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
-            entity.addPart("endpointAuthType", new StringBody(checkValue(String.valueOf(api.isEndpointAuthDigest()))));
-            entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
-            entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
-            entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
+                entity.addPart("endpointType", new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
+                entity.addPart("endpointAuthType", new StringBody(checkValue(String.valueOf(api.isEndpointAuthDigest()))));
+                entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
+                entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
+                entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
 			entity.addPart("advertiseOnly", new StringBody("true"));
 
         
