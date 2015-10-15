@@ -280,7 +280,7 @@ function isPositiveInteger(s) {
             }
             var data = mod.getSwagger12Resource(apiData);
             print(data.swagger);
-        }else if (request.getMethod() == 'POST' && (action === "sampleDesign")) {
+        }   else if (request.getMethod() == 'POST' && (action === "sampleDesign")) {
             mod = jagg.module("api");
             var apiData = {};
             apiData.apiName = request.getParameter("name", "UTF-8");

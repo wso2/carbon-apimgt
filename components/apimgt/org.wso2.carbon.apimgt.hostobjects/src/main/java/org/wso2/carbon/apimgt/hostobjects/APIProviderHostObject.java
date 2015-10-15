@@ -344,9 +344,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String tier = (String) apiData.get("tier", apiData);
 
-        String inSequence =  (String) apiData.get("inSequence", apiData);
-        String outSequence = (String) apiData.get("outSequence", apiData);
-        String faultSequence = (String) apiData.get("faultSequence", apiData);
         String businessOwner = (String) apiData.get("bizOwner", apiData);
         String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
         String technicalOwner = (String) apiData.get("techOwner", apiData);
@@ -402,8 +399,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
 
-        api.removeCustomSequences();
-
         if (!"none".equals(productionTps)) {
             api.setProductionMaxTps(productionTps);
         }
@@ -411,18 +406,6 @@ public class APIProviderHostObject extends ScriptableObject {
         if (!"none".equals(sandboxTps)) {
             api.setSandboxMaxTps(sandboxTps);
         }
-
-		if (!"none".equals(inSequence)) {
-			api.setInSequence(inSequence);
-		}
-		if (!"none".equals(outSequence)) {
-			api.setOutSequence(outSequence);
-		}
-		
-		List<String> sequenceList = apiProvider.getCustomFaultSequences();
-		if (!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
-			api.setFaultSequence(faultSequence);
-		}
 	
         if(!"none".equals(businessOwner)){
             api.setBusinessOwner(businessOwner);
@@ -540,8 +523,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String implementationType = (String) apiData.get("implementation_type", apiData);
-        FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
-        FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
 
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
@@ -626,15 +607,40 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
 
+        String inSequence =  (String) apiData.get("inSequence", apiData);
+        String outSequence = (String) apiData.get("outSequence", apiData);
+        String faultSequence = (String) apiData.get("faultSequence", apiData);
 
+        if (!"none".equals(inSequence))  {
+            api.setInSequence(inSequence);
+        }
 
-        Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
-        String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR + inSeqFile.getName();
-        String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
+        if (!"none".equals(outSequence)) {
+            api.setOutSequence(outSequence);
+        }
 
-        Icon outSeq = new Icon(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
-        String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR + outSeqFile.getName();
-        String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
+        if (!"none".equals(faultSequence))  {
+            api.setFaultSequence(faultSequence);
+        }
+
+        if (apiData.get("inSeqFile", apiData) != null)  {
+            FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
+            Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+            String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
+                               + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME;
+            String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
+            api.setInSequence(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
+        }
+
+        if (apiData.get("outSeqFile", apiData) != null) {
+            FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
+            Icon outSeq = new Icon(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
+            String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
+                                + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME;
+            String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
+            api.setOutSequence(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
+        }
+
 
         //api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
                 

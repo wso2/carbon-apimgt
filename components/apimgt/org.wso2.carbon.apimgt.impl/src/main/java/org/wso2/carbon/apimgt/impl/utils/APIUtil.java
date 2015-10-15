@@ -3320,33 +3320,41 @@ public final class APIUtil {
 	 * @return
 	 * @throws APIManagementException
 	 */
-	public static OMElement getCustomSequence(String sequenceName, int tenantId, String direction)
+	public static OMElement getCustomSequence(String sequenceName, int tenantId, String direction, APIIdentifier identifier)
             throws APIManagementException {
 		org.wso2.carbon.registry.api.Collection seqCollection = null;
 
 		try {
 			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
-			if ("in".equals(direction)) {
-				seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
-			}   else if ("out".equals(direction)) {
-				seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
-			} else if("fault".equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
-            }
 
-			if (seqCollection != null) {
-				String[] childPaths = seqCollection.getChildren();
+            if (APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME.equals(sequenceName)
+                || APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME.equals(sequenceName))  {
 
-                for (String childPath : childPaths) {
-                    Resource sequence = registry.get(childPath);
-                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                        return seqElment;
-                    }
+                Resource sequence = registry.get(getSequencePath(identifier, direction) + RegistryConstants.PATH_SEPARATOR + sequenceName);
+                return APIUtil.buildOMElement(sequence.getContentStream());
+            } else {
+                if ("in".equals(direction)) {
+                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+                }   else if ("out".equals(direction)) {
+                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+                } else if("fault".equals(direction)) {
+                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
                 }
 
-			}
+                if (seqCollection != null) {
+                    String[] childPaths = seqCollection.getChildren();
+
+                    for (String childPath : childPaths) {
+                        Resource sequence = registry.get(childPath);
+                        OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                        if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                            return seqElment;
+                        }
+                    }
+
+                }
+            }
 
 		} catch (Exception e) {
 			String msg = "Issue is in accessing the Registry";
