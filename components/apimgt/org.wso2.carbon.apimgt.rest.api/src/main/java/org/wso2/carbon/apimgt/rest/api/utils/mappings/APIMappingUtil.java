@@ -304,9 +304,11 @@ public class APIMappingUtil {
         Documentation doc = new Documentation(DocumentationType.valueOf(dto.getType().toString()) ,dto.getName());
         doc.setSummary(dto.getSummary());
         String visibility = dto.getVisibility().toString();
+        /*
+        TO-DO following statement will never reach as .tostring will retunr you NPE. Please check logic
         if (visibility == null){
             visibility = APIConstants.DOC_API_BASED_VISIBILITY;
-        }
+        }*/
         doc.setVisibility(Documentation.DocumentVisibility.valueOf(visibility));
         doc.setSourceType(Documentation.DocumentSourceType.INLINE);
         return doc;
