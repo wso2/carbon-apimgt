@@ -388,32 +388,23 @@ $(document).ready(function () {
 
     APP.form.default_endpoint = {
         "schema": {
-            synapseCombo: {
-                type: 'string',
-                title: i18n.t("endpointUi.To Header Synapse"),
-                'enum': ['org.apache.synapse.endpoints.algorithms.RoundRobin', 'other'],
-                'default': 'org.apache.synapse.endpoints.algorithms.RoundRobin'
+            "production_endpoints": {
+                "title": i18n.t("endpointUi.Production Endpoint"),
+                "type": "endpoint"
+            },
+            sandbox_endpoints: {
+                title: i18n.t("endpointUi.Sandbox Endpoint"),
+                type: 'endpoint'
+
             }
         },
-        form: [
-            {
-                key:'synapseCombo',
-                titleMap:{
-                    'org.apache.synapse.endpoints.algorithms.RoundRobin' : i18n.t("endpointUi.Round-robin"),
-                    "other":"Other"
-                },
-                "onChange": function (evt) {
-                    if($(evt.target).val() == 'other'){
-                        $('.algo_class_field').val('');
-                        $('.algo_class_name').show('fast');
-                    }
-                    else{
-                        $('.algo_class_name').hide('fast');
-                        $('.algo_class_field').val($(evt.target).val());
-                    }
-                }
-            }
-        ]
+        form: [{
+            key: 'production_endpoints',
+            "fieldHtmlClass": "input-xlarge validateEndpoints"
+        }, {
+            key: 'sandbox_endpoints',
+            "fieldHtmlClass": "input-xlarge validateEndpoints"
+        }]
     };
 
 // this will convert the config in to json form value

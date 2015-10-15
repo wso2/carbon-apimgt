@@ -564,14 +564,13 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
 
-        if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+        if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE))    {
             api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_INLINE);
-        }
-        else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+        } else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT))   {
             api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
             // Validate endpoint URI format
             validateEndpointURI(api.getEndpointConfig());
-        }else{
+        } else  {
             throw new APIManagementException("Invalid Implementation Type.");
         }
 
@@ -1272,7 +1271,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setDestinationStatsEnabled(destinationStats);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
         api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
