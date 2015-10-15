@@ -39,10 +39,18 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * usageClient class it use to expose the Statistic class instance. it responsible to make instance of the class that is provided by the api-manager.xml
+ */
 public class UsageClient {
     private static final Log log = LogFactory.getLog(UsageClient.class);
     private static APIUsageStatisticsClient usageStatisticsClient;
 
+    /**
+     * central point to initialise datasources or related configuration done by the admin-dashboard analytics section
+     *
+     * @throws APIMgtUsageQueryServiceClientException
+     */
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
 
         try {
@@ -54,11 +62,16 @@ public class UsageClient {
 
     }
 
+    /**
+     * central public method used to get the instance if the statistic client
+     *
+     * @return return the APIUsageStatisticsClient implementation
+     * @throws APIMgtUsageQueryServiceClientException if error in creating instance
+     */
     public static APIUsageStatisticsClient getClient() throws APIMgtUsageQueryServiceClientException {
         if (isDataPublishingEnabled()) {
             try {
-                APIUsageStatisticsClient client = UsageClient.getStatisticClient();
-                return client;
+                return UsageClient.getStatisticClient();
             } catch (APIMgtUsageQueryServiceClientException e) {
                 throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
             }
@@ -67,15 +80,28 @@ public class UsageClient {
         }
     }
 
+    /**
+     * Use to check whether analytics is enabled
+     *
+     * @return return boolean value indicating whether analytics enable
+     */
     public static boolean isDataPublishingEnabled() {
         APIManagerAnalyticsConfiguration con = APIManagerAnalyticsConfiguration.getInstance();
         return con.isAnalyticsEnabled();
     }
 
+    /**
+     * Get the Subscriber count and information related to the APIs
+     *
+     * @param loggedUser user of the current session
+     * @return return list of SubscriberCountByAPIs objects. which contain the list of apis and related subscriber counts
+     * @throws APIManagementException throws exception if error occur
+     */
     public static List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser)
             throws APIManagementException {
         String providerName = null;
 
+        //get the provider
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(loggedUser);
 
         List<SubscriberCountByAPIs> list = new ArrayList<SubscriberCountByAPIs>();
@@ -91,19 +117,20 @@ public class UsageClient {
 
             if (providerName != null) {
                 List<API> apiSet;
+                //get the apis
                 if (providerName.equals("__all_providers__")) {
                     apiSet = apiProvider.getAllAPIs();
                 } else {
                     apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(providerName));
                 }
 
-                //                List<SubscriberCountByAPIs> subscriptionData = new ArrayList<SubscriberCountByAPIs>();
-                //                Map<String, Long> subscriptions = new TreeMap<String, Long>();
-
+                //iterate over apis
                 for (API api : apiSet) {
+                    //ignore created apis
                     if (api.getStatus() == APIStatus.CREATED) {
                         continue;
                     }
+                    //ignore 0 counts
                     long count = apiProvider.getAPISubscriptionCountByAPI(api.getId());
                     if (count == 0) {
                         continue;
@@ -122,7 +149,8 @@ public class UsageClient {
 
             }
         } catch (Exception e) {
-            //handleException("Error while getting subscribers of the provider: " + providerName, e);
+            log.error("Error while getting subscribers of the provider: " + providerName, e);
+            throw new APIManagementException("Error while getting subscribers of the provider: " + providerName, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -131,18 +159,26 @@ public class UsageClient {
         return list;
     }
 
+    /**
+     * Use to get instance of implementation class of the APIUsageStatisticsClient that is defined in the apim-manager.xml
+     *
+     * @return instance of a APIUsageStatisticsClient
+     * @throws APIMgtUsageQueryServiceClientException throws if instantiation problem occur
+     */
     private static APIUsageStatisticsClient getStatisticClient() throws APIMgtUsageQueryServiceClientException {
 
+        //if the instance is already exist return it
         if (usageStatisticsClient != null) {
             return usageStatisticsClient;
         }
 
+        //read the api-manager.xml and get the Statistics class name
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-
         String className = config.getFirstProperty("StatisticClientProvider");
 
         try {
+            //get class from the class name and use the constructor with one String argument to get a instance
             usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor(String.class)
                     .newInstance("");
         } catch (InstantiationException e) {

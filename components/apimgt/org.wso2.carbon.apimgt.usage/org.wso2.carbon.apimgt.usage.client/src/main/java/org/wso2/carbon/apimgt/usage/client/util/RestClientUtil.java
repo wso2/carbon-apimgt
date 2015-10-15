@@ -25,16 +25,34 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * Class contain the util method used by the rest client impl
+ */
 public class RestClientUtil {
+
+    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    /**
+     * conversion from date to long value
+     *
+     * @param date date in the yyyy-MM-dd format
+     * @return long value of the date
+     * @throws ParseException throw when error in parsing date
+     */
     public static long dateToLong(String date) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date fDate = dateFormat.parse(date);
         Long lDate = fDate.getTime();
         return lDate;
     }
 
+    /**
+     * return the ceiling time of the time and convert to long
+     *
+     * @param date date in the yyyy-MM-dd format
+     * @return long ceiling value of date
+     * @throws ParseException throw when error in parsing date
+     */
     public static long getCeilingDateAsLong(String date) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date fDate = dateFormat.parse(date);
         Calendar calender = Calendar.getInstance();
         calender.setTime(fDate);
@@ -45,8 +63,14 @@ public class RestClientUtil {
         return calender.getTimeInMillis();
     }
 
+    /**
+     * return the floor time of the time and convert to long
+     *
+     * @param date date in the yyyy-MM-dd format
+     * @return long floor value of date
+     * @throws ParseException throw when error in parsing date
+     */
     public static long getFloorDateAsLong(String date) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date fDate = dateFormat.parse(date);
         Calendar calender = Calendar.getInstance();
         calender.setTime(fDate);
@@ -57,6 +81,13 @@ public class RestClientUtil {
         return calender.getTimeInMillis();
     }
 
+    /**
+     * get the base 64 encoded username and password
+     *
+     * @param user username
+     * @param pass password
+     * @return encoded basic auth, as string
+     */
     public static String encodeCredentials(String user, String pass) {
         String cred = user + ':' + pass;
         byte[] encodedBytes = Base64.encodeBase64(cred.getBytes());

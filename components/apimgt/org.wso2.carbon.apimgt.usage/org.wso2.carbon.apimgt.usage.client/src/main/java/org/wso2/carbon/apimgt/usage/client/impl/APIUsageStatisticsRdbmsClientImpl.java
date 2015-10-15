@@ -74,6 +74,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 
+/**
+ * Usage statistics class implementation for the APIUsageStatisticsClient.
+ * Use the RDBMS to query and fetch the data for getting usage Statistics
+ */
 public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient {
 
     private static final String API_USAGE_TRACKING = "APIUsageTracking.";
@@ -1370,7 +1374,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
                             faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
-                            faultyDTO.setRequestCount(requestCount);
+                            faultyDTO.setTotalRequestCount(requestCount);
                             break;
                         }
                     }
@@ -2579,18 +2583,30 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return paymentPlan.evaluate(param, calls);
     }
 
+    /**
+     * Custom artifacts deployment. deploy capp related to RDBMS on DAS
+     *
+     * @param url  url of the DAS
+     * @param user user name
+     * @param pass password
+     * @throws Exception general exception throws, because different exception can occur
+     */
     @Override public void deployArtifacts(String url,String user,String pass) throws Exception {
+        //name of the capp to deploy
         String cAppName= "API_Manager_Analytics_RDBMS.car";
         String cAppPath = System.getProperty("carbon.home") + "/statistics";
         cAppPath = cAppPath + '/' + cAppName;
         File file = new File(cAppPath);
 
+        //get the byte array of file
         byte[] byteArray = FileUtils.readFileToByteArray(file);
         DataHandler dataHandler = new DataHandler(byteArray, "application/octet-stream");
 
+        //create the stub to deploy artifacts
         CarbonAppUploaderStub stub = new CarbonAppUploaderStub(url + "/services/CarbonAppUploader");
         ServiceClient client = stub._getServiceClient();
         Options options = client.getOptions();
+        //set the security
         HttpTransportProperties.Authenticator authenticator = new HttpTransportProperties.Authenticator();
         authenticator.setUsername(user);
         authenticator.setPassword(pass);
@@ -2598,11 +2614,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
         client.setOptions(options);
         log.info("Deploying DAS cApp '" + cAppName + "'...");
+        //create UploadedFileItem array and 1st element contain the deploy artifact
         UploadedFileItem[] fileItem = new UploadedFileItem[1];
         fileItem[0]=new UploadedFileItem();
         fileItem[0].setDataHandler(dataHandler);
         fileItem[0].setFileName(cAppName);
         fileItem[0].setFileType("jar");
+        //upload the artifacts
         stub.uploadApp(fileItem);
     }
 

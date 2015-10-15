@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubscriberCountByAPIs {
-    List<String> apiName = new ArrayList<String>();
-    long count;
+    private List<String> apiName = new ArrayList<String>();
+    private long count;
 
     public List<String> getApiName() {
         return apiName;
