@@ -409,6 +409,11 @@ asset.server = function (ctx) {
                         url: 'start',
                         path: 'start.jag',
                         permission:'ASSET_CREATE'
+                    }, {
+                        title: 'Start Creating an API',
+                        url: 'create',
+                        path: 'start.jag',
+                        permission: 'ASSET_CREATE'
                     }],
             apis: [{
                        url: 'swagger',
