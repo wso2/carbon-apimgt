@@ -29,43 +29,10 @@ import org.apache.cxf.message.Message;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-/*import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.exception.BadRequestException;
-import org.wso2.carbon.apimgt.rest.api.exception.PreconditionFailedException;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.core.util.AnonymousSessionUtil;
-import org.wso2.carbon.identity.entitlement.proxy.PEPProxyConfig;
-import org.wso2.carbon.identity.entitlement.proxy.exception.EntitlementProxyException;
-import org.wso2.carbon.registry.core.service.RegistryService;
-import org.wso2.carbon.user.core.UserRealm;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.identity.entitlement.proxy.Attribute;
-import org.wso2.carbon.identity.entitlement.proxy.ProxyConstants;
-import javax.xml.namespace.QName;
-import java.util.HashMap;
-import java.util.Map;
-*/
+
 public class XACMLAuthenticationHandler implements RequestHandler {
 
     private static final Log logger = LogFactory.getLog(XACMLAuthenticationHandler.class);
-    // private PEPProxy pepProxy;
-    private String client;
-    private String cacheType;
-    private int invalidationInterval;
-    private int maxCacheEntries;
-    public static final String SERVER_URL = "serverUrl";
-    public static final String USERNAME = "userName";
-    public static final String PASSWORD = "password";
-    public static final String THRIFT_HOST = "thriftHost";
-    public static final String THRIFT_PORT = "thriftPort";
-    public static final String CLIENT = "client";
-    public static final String REUSE_SESSION = "reuseSession";
-    public static final String JSON = "json";
-    public static final String SOAP = "soap";
-    public static final String THRIFT = "thrift";
-    public static final String BASIC_AUTH = "basicAuth";
-    public static final String WS_XACML = "wsXacml";
 
     /**
      * isUserPermitted requests received at the ml endpoint, using HTTP basic-auth headers as the authentication
@@ -96,10 +63,10 @@ public class XACMLAuthenticationHandler implements RequestHandler {
 
     private Response isUserPermitted(String userName, String resource, String httpMethod, String[] arr) {
         try {
-            EntitlementServiceClient client = new EntitlementServiceClient(null);
+            EntitlementServiceClient client = new EntitlementServiceClient();
             client.validateAction(userName, resource, httpMethod, arr);
         } catch (Exception e) {
-            logger.error("Error while validating XACML request" + e.toString());
+            logger.error("Error while validating XACML request" + e);
         }
         return null;
     }
