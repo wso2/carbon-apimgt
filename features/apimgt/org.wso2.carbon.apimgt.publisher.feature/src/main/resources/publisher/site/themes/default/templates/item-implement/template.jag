@@ -123,6 +123,7 @@
                          <strong>Address Endpoint</strong><p>The direct URL of the service</p>
                          <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
                          <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
                         </div>
 
                         <div id="endpoint_form" class="endpoint_dives" >

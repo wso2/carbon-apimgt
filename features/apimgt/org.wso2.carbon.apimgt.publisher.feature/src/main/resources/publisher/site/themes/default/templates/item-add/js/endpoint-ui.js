@@ -512,9 +512,15 @@ $(document).ready(function () {
         //hide the wsdl field if the endpoint type is wsdl
         if(type == 'wsdl'){
             $('.api_wsdl').hide();
-        }
-        else{
+        } else{
             $('.api_wsdl').show();
+        }
+
+        if($('#endpoint_type').val() == 'default'){
+            $('[name="production_endpoints"]').val("Default");
+            $('[name="production_endpoints"]').attr('readonly','readonly');
+            $('[name="sandbox_endpoints"]').val("Default");
+            $('[name="sandbox_endpoints"]').attr('readonly','readonly');
         }
     });
 
@@ -557,8 +563,7 @@ $(document).ready(function () {
 
         if($('#endpoint_type').val() == 'address'){
             $(".ae_message_content").show();
-        }
-        else{
+        } else  {
             $(".ae_message_content").hide();
         }
         $('#advance_endpoint_config').modal('show');
