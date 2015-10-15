@@ -156,6 +156,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.Inet4Address;
@@ -308,6 +309,7 @@ public final class APIUtil {
                 }
             }
             api.addAvailableTiers(availableTier);
+            api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
@@ -638,6 +640,8 @@ public final class APIUtil {
                 }
 
                 api.addAvailableTiers(availableTier);
+                String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
+                api.setMonetizationCategory(getAPIMonetizationCategory(availableTier, tenantDomainName));
             }
 
             api.setRedirectURL(artifact.getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL));
@@ -2523,6 +2527,30 @@ public final class APIUtil {
         }
     }
 
+    public static void loadTenantConf(int tenantID) throws APIManagementException {
+        RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        try {
+            UserRegistry registry = registryService.getConfigSystemRegistry(tenantID);
+            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                log.debug("Tenant conf already uploaded to the registry");
+                return;
+            }
+
+            log.debug("Adding tenant config to the registry");
+            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/tenant/" + APIConstants.API_TENANT_CONF);
+            byte[] data = IOUtils.toByteArray(inputStream);
+            Resource resource = registry.newResource();
+            resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+            resource.setContent(data);
+
+            registry.put(APIConstants.API_TENANT_CONF_LOCATION, resource);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving tenant conf to the registry", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading tenant conf file content", e);
+        }
+    }
+
     /**
      *
      * @param tenantId
@@ -4306,11 +4334,133 @@ public final class APIUtil {
         GovernanceUtils.associateAspect(resourcePath, APIConstants.API_LIFE_CYCLE, registry);
     }
 
+
     public static String getSequencePath(APIIdentifier identifier, String pathFlow) {
         String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
                               identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                               identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
         return artifactPath + RegistryConstants.PATH_SEPARATOR + pathFlow + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    private static String getAPIMonetizationCategory(Set<Tier> tiers, String tenantDomain) throws APIManagementException{
+        boolean isPaidFound = false;
+        boolean isFreeFound = false;
+        for (Tier tier : tiers) {
+            if (isTierPaid(tier.getName(), tenantDomain)) {
+                isPaidFound = true;
+            }
+            else {
+                isFreeFound = true;
+
+                if (isPaidFound) {
+                    break;
+                }
+            }
+        }
+
+        if (!isPaidFound) {
+            return APIConstants.API_CATEGORY_FREE;
+        }
+        else if (!isFreeFound) {
+            return APIConstants.API_CATEGORY_PAID;
+        }
+        else {
+            return APIConstants.API_CATEGORY_FREEMIUM;
+        }
+    }
+
+    private static boolean isTierPaid(String tierName, String tenantDomain) throws APIManagementException{
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        if (APIConstants.UNLIMITED_TIER.equalsIgnoreCase(tierName)) {
+            return isUnlimitedTierPaid(tenantDomain);
+        }
+
+        Map<String, Tier> tierMap = null;
+        boolean isPaid = false;
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            if (requestedTenantId == 0) {
+                tierMap = APIUtil.getTiers();
+            } else {
+                tierMap = APIUtil.getTiers(requestedTenantId);
+            }
+        }
+        finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+        if (tierMap != null) {
+            Tier tier = tierMap.get(tierName);
+
+            if (tier != null) {
+                final Map<String, Object> tierAttributes = tier.getTierAttributes();
+
+                if (tierAttributes != null) {
+                    String isPaidValue = (String) tierAttributes.get(APIConstants.API_TIER_IS_PAID_ATTRIBUTE);
+
+                    if (isPaidValue != null) {
+                        isPaid = Boolean.parseBoolean(isPaidValue);
+                    }
+                } else {
+                    throw new APIManagementException("Tier attributes not specified for tier " + tierName);
+                }
+            } else {
+                throw new APIManagementException("Tier " + tierName + "cannot be found");
+            }
+        }
+
+        return isPaid;
+    }
+
+    private static boolean isUnlimitedTierPaid(String tenantDomain) throws APIManagementException {
+        JSONObject apiTenantConfig = null;
+        try {
+            String content = null;
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+
+            if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                content = new String((byte[]) resource.getContent(), "UTF-8");
+            }
+
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (JSONObject) parser.parse(content);
+            }
+        } catch (UserStoreException e) {
+            handleException("UserStoreException thrown when getting API tenant config from registry", e);
+        } catch (RegistryException e) {
+            handleException("RegistryException thrown when getting API tenant config from registry", e);
+        } catch (ParseException e) {
+            handleException("ParseException thrown when passing API tenant config from registry", e);
+        } catch (UnsupportedEncodingException e) {
+            handleException("UnsupportedEncodingException thrown when reading content of tenant config from registry", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID);
+
+            if (value != null) {
+                return Boolean.parseBoolean(value.toString());
+            }
+            else {
+                throw new APIManagementException(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant " + tenantDomain);
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -4343,5 +4493,4 @@ public final class APIUtil {
         return client;
 
     }
-
 }

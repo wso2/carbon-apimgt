@@ -22,6 +22,8 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -56,6 +58,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -84,15 +87,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private Object tagCacheMutex = new Object();
     private LRUCache<String,GenericArtifactManager> genericArtifactCache = new LRUCache<String,GenericArtifactManager>(5);
     private Set<API> recentlyAddedAPI;
+    private APIMRegistryService apimRegistryService;
 
     public APIConsumerImpl() throws APIManagementException {
         super();
         readTagCacheConfigs();
     }
 
-    public APIConsumerImpl(String username) throws APIManagementException {
+    public APIConsumerImpl(String username, APIMRegistryService apimRegistryService) throws APIManagementException {
         super(username);
         readTagCacheConfigs();
+        this.apimRegistryService = apimRegistryService;
     }
 
     private void readTagCacheConfigs() {
@@ -2818,5 +2823,45 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return row;
+    }
+
+
+    @Override
+    public boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException {
+        JSONObject apiTenantConfig = null;
+        try {
+            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (JSONObject) parser.parse(content);
+            }
+
+        } catch (UserStoreException e) {
+            handleException("UserStoreException thrown when getting API tenant config from registry", e);
+        } catch (RegistryException e) {
+            handleException("RegistryException thrown when getting API tenant config from registry", e);
+        } catch (ParseException e) {
+            handleException("ParseException thrown when passing API tenant config from registry", e);
+        } catch (UnsupportedEncodingException e) {
+            handleException("UnsupportedEncodingException thrown when reading content of tenant config from registry", e);
+        }
+
+        return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
+    }
+
+    private boolean getTenantConfigValue(String tenantDomain, JSONObject apiTenantConfig, String configKey) throws APIManagementException {
+        if (apiTenantConfig != null) {
+            Object value = apiTenantConfig.get(configKey);
+
+            if (value != null) {
+                return Boolean.valueOf(value.toString());
+            }
+            else {
+                throw new APIManagementException(configKey + " config does not exist for tenant " + tenantDomain);
+            }
+        }
+
+        return false;
     }
 }
