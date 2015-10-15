@@ -10,21 +10,21 @@
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
-            <bean class="org.wso2.carbon.apimgt.rest.api.TagsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.SubscriptionsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.ApisApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.EnvironmentsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.TiersApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.ApplicationsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.BlockSubscriptionApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.TagsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.ApisApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.EnvironmentsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.TiersApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.ApplicationsApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.BlockSubscriptionApi"/>
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>
-            <bean class="org.wso2.carbon.apimgt.rest.api.handlers.BasicAuthenticationHandler"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.handlers.BasicAuthenticationHandler"/>
             <!--<bean class="org.wso2.carbon.apimgt.rest.api.handlers.XACMLAuthenticationHandler"/>-->
 
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.exception.GlobalThrowableMapper" />
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.exception.GlobalThrowableMapper" />
         </jaxrs:providers>
         <jaxrs:properties>
             <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
