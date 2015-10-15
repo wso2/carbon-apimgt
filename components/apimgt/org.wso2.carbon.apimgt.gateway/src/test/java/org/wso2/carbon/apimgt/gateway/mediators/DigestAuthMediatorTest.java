@@ -19,9 +19,10 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import junit.framework.TestCase;
+
 import static org.junit.Assert.*;
 
-public class DigestAuthMediatorTest extends TestCase{
+public class DigestAuthMediatorTest extends TestCase {
 
     DigestAuthMediator mediator;
 
