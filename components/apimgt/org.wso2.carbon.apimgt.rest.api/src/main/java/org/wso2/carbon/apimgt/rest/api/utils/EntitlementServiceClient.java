@@ -47,10 +47,10 @@ public class EntitlementServiceClient {
     public EntitlementServiceClient() throws Exception {
         ConfigurationContext configContext;
         try {
-
-            String clientRepo = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+            String repositoryBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository";
+            String clientRepo = repositoryBasePath +
                     File.separator + "deployment" + File.separator + "client";
-            String clientAxisConf = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+            String clientAxisConf = repositoryBasePath +
                     File.separator + "conf" + File.separator + "axis2" + File.separator + "axis2_client.xml";
 
             configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(clientRepo, clientAxisConf);
@@ -67,7 +67,7 @@ public class EntitlementServiceClient {
             option.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
             option.setManageSession(true);
         } catch (Exception e) {
-            logger.error("Error while initiating entitlement service client " + e.toString());
+            logger.error("Error while initiating entitlement service client " + e.getMessage());
         }
     }
 
@@ -89,9 +89,9 @@ public class EntitlementServiceClient {
                     .getProperty(HTTPConstants.COOKIE_STRING);
             System.out.println("\nCookie is received for subsequent communication :  " + authCookie);
         } catch (RemoteException e) {
-            logger.error("Error while connecting PDP " + e.toString());
+            logger.error("Error while connecting PDP " + e.getMessage());
         } catch (EntitlementServiceException e) {
-            logger.error("Error while validating XACML policy for given request " + e.toString());
+            logger.error("Error while validating XACML policy for given request " + e.getMessage());
         }
         return decision;
     }
