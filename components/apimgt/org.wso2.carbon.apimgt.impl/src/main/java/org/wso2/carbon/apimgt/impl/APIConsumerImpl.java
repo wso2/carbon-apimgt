@@ -1825,6 +1825,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPI;
     }
 
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionByUUID(uuid);
+        return subscribedAPI;
+    }
+
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, null);
         return subscribedAPIs;
@@ -1991,17 +2002,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * Removes a subscription specified by id
+     * Removes a subscription specified by SubscribedAPI object
      *
-     * @param subscription_id id of subscription
+     * @param subscription SubscribedAPI object
      * @throws APIManagementException
      */
-    public void removeSubscriptionById(int subscription_id) throws APIManagementException {
-        SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionById(subscription_id);
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
+        String uuid = subscription.getUUID();
+        SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionByUUID(uuid);
         if (subscribedAPI != null) {
             Application application = subscribedAPI.getApplication();
             APIIdentifier identifier = subscribedAPI.getApiId();
-            apiMgtDAO.removeSubscriptionById(subscription_id, false);
+            apiMgtDAO.removeSubscription(subscription);
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
                 invalidateCachedKeys(application.getId());
             }
@@ -2009,11 +2021,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String appName = application.getName();
                 String logMessage =
                         "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion() +
-                                " subscription (id : " + subscription_id + ") removed from app " + appName;
+                                " subscription (uuid : " + uuid + ") removed from app " + appName;
                 log.debug(logMessage);
             }
         } else {
-            throw new APIManagementException("Subscription for id:" + subscription_id +" does not exist.");
+            throw new APIManagementException("Subscription for UUID:" + uuid +" does not exist.");
         }
     }
 

@@ -146,7 +146,15 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     public SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException;
-    
+
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
+
     /**
      * Returns a set of SubscribedAPI purchased by the given Subscriber
      *
@@ -263,17 +271,17 @@ public interface APIConsumer extends APIManager {
      * @param identifier    APIIdentifier
      * @param userId        id of the user
      * @param applicationId Application Id
-     * @throws APIManagementException if failed to add subscription details to database
+     * @throws APIManagementException if failed to remove subscription details from database
      */
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
 
-    /** Removes a subscription specified by id
-     *
-     * @param subscription_id id of subscription
+    /** Removes a subscription specified by SubscribedAPI object
+     * 
+     * @param subscription SubscribedAPI object which contains the subscription information
      * @throws APIManagementException
      */
-    public void removeSubscriptionById(int subscription_id) throws APIManagementException;
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException;
 
     /**
      * Remove a Subscriber

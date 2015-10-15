@@ -1440,7 +1440,7 @@ public class ApiMgtDAO {
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery = "INSERT " +
                               "INTO AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS, SUBS_CREATE_STATE, " +
-                              "CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?)";
+                              "CREATED_BY, CREATED_TIME, UUID) VALUES (?,?,?,?,?,?,?,?)";
 
             //Adding data to the AM_SUBSCRIPTION table
             //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
@@ -1457,6 +1457,7 @@ public class ApiMgtDAO {
             //TODO Need to find logged in user who perform this subscription
             preparedStforInsert.setString(6, null);
             preparedStforInsert.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            preparedStforInsert.setString(8, UUID.randomUUID().toString());
 
             preparedStforInsert.executeUpdate();
             rs = preparedStforInsert.getGeneratedKeys();
@@ -1488,54 +1489,97 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        PreparedStatement preparedStForUpdateOrDelete = null;
         int apiId = -1;
-        String subStatus = null;
-
+        String uuid;
         try {
             conn = APIMgtDBUtil.getConnection();
             apiId = getAPIID(identifier, conn);
-            String subscriptionStatusQuery = "SELECT " +
-                                             "SUB_STATUS FROM AM_SUBSCRIPTION" +
-                                             " WHERE " +
-                                             "API_ID = ? " +
-                                             "AND APPLICATION_ID = ?";
 
-            ps = conn.prepareStatement(subscriptionStatusQuery);
+            String subscriptionUUIDQuery = "SELECT " +
+                    " UUID FROM AM_SUBSCRIPTION" +
+                    " WHERE " +
+                    "API_ID = ? " +
+                    "AND APPLICATION_ID = ?";
+
+            ps = conn.prepareStatement(subscriptionUUIDQuery);
             ps.setInt(1, apiId);
             ps.setInt(2, applicationId);
             resultSet = ps.executeQuery();
 
             if (resultSet.next())   {
+                uuid = resultSet.getString("UUID");
+                SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
+                removeSubscription(subscribedAPI);
+            } else {
+                throw new APIManagementException(
+                        "UUID does not exist for the given apiId:" + apiId + " and application id:" + applicationId);
+            }
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add subscription ", e);
+                }
+            }
+            handleException("Failed to add subscriber data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+    }
+
+    /** Removes a subscription specified by SubscribedAPI object
+     * 
+     * @param subscription SubscribedAPI object
+     * @throws APIManagementException
+     */
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        PreparedStatement preparedStForUpdateOrDelete = null;
+        String subStatus = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String subscriptionStatusQuery = "SELECT " +
+                    "SUB_STATUS FROM AM_SUBSCRIPTION" +
+                    " WHERE" +
+                    " UUID = ?";
+
+            ps = conn.prepareStatement(subscriptionStatusQuery);
+            ps.setString(1, subscription.getUUID());
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next())   {
                 subStatus = resultSet.getString("SUB_STATUS");
             }
-            
+
             conn.setAutoCommit(false);
 
             // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
-
             String updateQuery = "UPDATE AM_SUBSCRIPTION " +
-                                 " SET " +
-                                 "SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE +
-                                 "' WHERE " +
-                                 "API_ID = ? " +
-                                 "AND APPLICATION_ID = ?";
+                    " SET " +
+                    "SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE + "'" +
+                    " WHERE" +
+                    " UUID = ?";
 
-            String deleteQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
+            String deleteQuery = "DELETE FROM AM_SUBSCRIPTION" + 
+                    " WHERE" + 
+                    " UUID = ?";
 
             if(APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
-               || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
+                    || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
                 preparedStForUpdateOrDelete = conn.prepareStatement(updateQuery);
-                preparedStForUpdateOrDelete.setInt(1, apiId);
-                preparedStForUpdateOrDelete.setInt(2, applicationId);
+                preparedStForUpdateOrDelete.setString(1, subscription.getUUID());
             } else {
                 preparedStForUpdateOrDelete = conn.prepareStatement(deleteQuery);
-                preparedStForUpdateOrDelete.setInt(1, apiId);
-                preparedStForUpdateOrDelete.setInt(2, applicationId);
+                preparedStForUpdateOrDelete.setString(1, subscription.getUUID());
             }
 
             preparedStForUpdateOrDelete.executeUpdate();
-            
+
             // finally commit transaction
             conn.commit();
 
@@ -1554,94 +1598,40 @@ public class ApiMgtDAO {
         }
     }
 
+
     /** Removes a subscription by id by force without considering the subscription blocking state of the user
      * 
      * @param subscription_id id of subscription
      * @throws APIManagementException
      */
     public void removeSubscriptionById(int subscription_id) throws APIManagementException {
-        removeSubscriptionById(subscription_id, true);
-    }
-
-    /** Removes a subscription specified by id
-     * 
-     * @param subscription_id id of subscription
-     * @param force whether to delete by force. If force = true, subscription will be deleted even if user's subscription state is BLOCKED
-     * @throws APIManagementException
-     */
-    public void removeSubscriptionById(int subscription_id, boolean force) throws APIManagementException {
         Connection conn = null;
-        ResultSet resultSet = null;
         PreparedStatement ps = null;
-        PreparedStatement preparedStForUpdateOrDelete = null;
-        String subStatus = null;
-        String deleteQuery = "DELETE FROM AM_SUBSCRIPTION WHERE SUBSCRIPTION_ID = ?";
 
         try {
-            if (!force) {
-                conn = APIMgtDBUtil.getConnection();
-                String subscriptionStatusQuery = "SELECT " +
-                        "SUB_STATUS FROM AM_SUBSCRIPTION" +
-                        " WHERE " +
-                        "SUBSCRIPTION_ID = ?";
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
 
-                ps = conn.prepareStatement(subscriptionStatusQuery);
-                ps.setInt(1, subscription_id);
-                resultSet = ps.executeQuery();
+            // Remove entry from AM_SUBSCRIPTION table
+            String sqlQuery = "DELETE FROM AM_SUBSCRIPTION WHERE SUBSCRIPTION_ID = ?";
 
-                if (resultSet.next()) {
-                    subStatus = resultSet.getString("SUB_STATUS");
-                }
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setInt(1, subscription_id);
+            ps.executeUpdate();
 
-                conn.setAutoCommit(false);
-
-                String updateQuery = "UPDATE AM_SUBSCRIPTION " +
-                        " SET " +
-                        "SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE +
-                        "' WHERE " +
-                        "SUBSCRIPTION_ID = ?";
-
-                // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
-                if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
-                        || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
-                    preparedStForUpdateOrDelete = conn.prepareStatement(updateQuery);
-                    preparedStForUpdateOrDelete.setInt(1, subscription_id);
-                } else {
-                    preparedStForUpdateOrDelete = conn.prepareStatement(deleteQuery);
-                    preparedStForUpdateOrDelete.setInt(1, subscription_id);
-                }
-
-                preparedStForUpdateOrDelete.executeUpdate();
-
-                // finally commit transaction
-                conn.commit();
-
-            } else {
-                conn = APIMgtDBUtil.getConnection();
-                conn.setAutoCommit(false);
-
-                // Remove entry from AM_SUBSCRIPTION table
-                ps = conn.prepareStatement(deleteQuery);
-                ps.setInt(1, subscription_id);
-                ps.executeUpdate();
-
-                // Commit transaction
-                conn.commit();
-            }
+            // Commit transaction
+            conn.commit();
         } catch (SQLException e) {
             if (conn != null) {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add subscription ", e);
+                    log.error("Failed to rollback remove subscription ", e);
                 }
             }
             handleException("Failed to remove subscription data ", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-            if (preparedStForUpdateOrDelete != null) {
-                APIMgtDBUtil.closeAllConnections(preparedStForUpdateOrDelete, null, null);
-            }
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
     }
 
@@ -1729,7 +1719,8 @@ public class ApiMgtDAO {
                     "SUBS.TIER_ID AS TIER_ID, " +
                     "SUBS.SUB_STATUS AS SUB_STATUS, " +
                     "SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
-                    "SUBS.LAST_ACCESSED AS LAST_ACCESSED " +
+                    "SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
+                    "SUBS.UUID AS UUID " +
                     "FROM " +
                     "AM_SUBSCRIPTION SUBS," +
                     "AM_API API " +
@@ -1747,6 +1738,67 @@ public class ApiMgtDAO {
                 int applicationId = resultSet.getInt("APPLICATION_ID");
                 Application application = getApplicationById(applicationId);               
                 subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
+                subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
+                subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
+                subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
+                subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
+                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
+                subscribedAPI.setUUID(resultSet.getString("UUID"));
+                subscribedAPI.setApplication(application);
+            }
+            return subscribedAPI;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve subscription from subscription id", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Application
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getSubscriptionQuery =
+                    "SELECT " +
+                            "SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+                            "API.API_PROVIDER AS API_PROVIDER, " +
+                            "API.API_NAME AS API_NAME, " +
+                            "API.API_VERSION AS API_VERSION, " +
+                            "SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+                            "SUBS.TIER_ID AS TIER_ID, " +
+                            "SUBS.SUB_STATUS AS SUB_STATUS, " +
+                            "SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                            "SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
+                            "SUBS.UUID AS UUID " +
+                            "FROM " +
+                            "AM_SUBSCRIPTION SUBS," +
+                            "AM_API API " +
+                            "WHERE " +
+                            "API.API_ID = SUBS.API_ID AND " +
+                            "UUID = ?";
+            ps = conn.prepareStatement(getSubscriptionQuery);
+            ps.setString(1, uuid);
+            resultSet = ps.executeQuery();
+            SubscribedAPI subscribedAPI = null;
+            if (resultSet.next()) {
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
+                        resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+
+                int applicationId = resultSet.getInt("APPLICATION_ID");
+                Application application = getApplicationById(applicationId);
+                subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
+                subscribedAPI.setUUID(resultSet.getString("UUID"));
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
@@ -1908,6 +1960,8 @@ public class ApiMgtDAO {
                 "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" + 
                 "   ,APP.NAME AS APP_NAME "+ 
                 "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                "   ,SUBS.UUID AS SUB_UUID " +
+                "   ,APP.UUID AS APP_UUID " +
                 "FROM " + 
                 "   AM_SUBSCRIBER SUB,"+ 
                 "   AM_APPLICATION APP, " + 
@@ -1968,12 +2022,14 @@ public class ApiMgtDAO {
                 subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
                 subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
+                subscribedAPI.setUUID(result.getString("SUB_UUID"));
                 subscribedAPI.setTier(new Tier(
                         result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
                 subscribedAPI.setLastAccessed(result.getDate(
                         APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
 
                 Application application = new Application(result.getString("APP_NAME"), subscriber);
+                application.setUUID(result.getString("APP_UUID"));
                 subscribedAPI.setApplication(application);
                 subscribedAPIs.add(subscribedAPI);
             }
@@ -2209,6 +2265,8 @@ public class ApiMgtDAO {
                 "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
                 "   ,APP.NAME AS APP_NAME " +
                 "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                "   ,SUBS.UUID AS SUB_UUID " +
+                "   ,APP.UUID AS APP_UUID " +
                 "FROM " +
                 "   AM_SUBSCRIBER SUB," +
                 "   AM_APPLICATION APP, " +
@@ -2273,6 +2331,7 @@ public class ApiMgtDAO {
                 subscribedAPI.setTier(new Tier(tierName));
                 subscribedAPI.setLastAccessed(result.getDate(
                         APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
+                subscribedAPI.setUUID(result.getString("SUB_UUID"));
                 //setting NULL for subscriber. If needed, Subscriber object should be constructed &
                 // passed in
                 int applicationId = result.getInt("APP_ID");
@@ -2281,6 +2340,7 @@ public class ApiMgtDAO {
                     application = new Application(result.getString("APP_NAME"), subscriber);
                     application.setId(result.getInt("APP_ID"));
                     application.setCallbackUrl(result.getString("CALLBACK_URL"));
+                    application.setUUID(result.getString("APP_UUID"));
                     //String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(subscriber.getName());
                     String tenantAwareUserId = subscriber.getName();
                     Set<APIKey> keys = getApplicationKeys(tenantAwareUserId, applicationId);
