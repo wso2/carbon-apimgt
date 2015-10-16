@@ -307,7 +307,7 @@
                             </div>
 
                         </div>
-                        <p class="help-block">E.g.: http://appserver/resource</p>
+                        <p class="help-block" id="help-block">E.g.: http://appserver/resource</p>
                         <span style="display:none;" class="help-block jsonform-errortext"></span>
                     </div>
                 </fieldset>
