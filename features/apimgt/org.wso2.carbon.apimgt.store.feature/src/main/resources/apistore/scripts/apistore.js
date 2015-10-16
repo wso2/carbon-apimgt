@@ -265,6 +265,11 @@ var apistore = {};
 
             var dateFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss a z");
             var dateFormatted = dateFormat.format(api.getLastUpdated());
+            var tagsAsJSONArray;
+            if(api.getTagSetAsString()){
+             var tagArray = api.getTagSetAsString().split(',');
+                tagsAsJSONArray = JSON.parse(stringify(tagArray));
+            }
 
             apiOb = {
                 name: api.getId().getApiName(),
@@ -272,7 +277,7 @@ var apistore = {};
                 endpoint: api.getUrl(),
                 wsdl: api.getWsdlUrl(),
                 version: api.getId().getVersion(),
-                tags: api.getTagSetAsString(),
+                tags: tagsAsJSONArray,
                 tiers: tierSet,
                 status: api.getStatus().toString(),
                 thumb: APIUtil.getWebContextRoot(api.getThumbnailUrl()),
