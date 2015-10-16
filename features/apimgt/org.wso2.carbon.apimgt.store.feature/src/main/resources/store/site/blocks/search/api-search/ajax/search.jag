@@ -38,9 +38,15 @@ include("/jagg/jagg.jag");
         tenantDomain= jagg.getTenantDomain();
         start = request.getParameter("start");
         end = request.getParameter("end");
+        var limitAttributes =  request.getParameter("limitAttributes");
 
         mod = jagg.module("search");
-        resultSearch = mod.searchPaginatedAPIs(query,tenantDomain,start,end);
+
+        if (limitAttributes == null || limitAttributes.toLowerCase() != "true") {
+            limitAttributes = "false";
+        }
+
+        resultSearch = mod.searchPaginatedAPIs(query, tenantDomain, start, end, limitAttributes);
 
         if (resultSearch.error) {
             obj = {

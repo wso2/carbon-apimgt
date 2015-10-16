@@ -328,7 +328,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     
-    public List<String> getCustomInSequences()  throws APIManagementException;
+    public List<String> getCustomInSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
     
     
     /**
@@ -337,7 +337,7 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     
-    public List<String> getCustomOutSequences()  throws APIManagementException;
+    public List<String> getCustomOutSequences(APIIdentifier apiIdentifier)  throws APIManagementException;
 
     /**
      * Get the list of Custom Fault Sequences.

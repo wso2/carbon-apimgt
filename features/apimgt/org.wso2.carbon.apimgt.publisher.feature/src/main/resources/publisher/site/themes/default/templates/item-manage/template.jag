@@ -1,6 +1,4 @@
-<% jagg.template("item-manage", function(inputs, outputs, jagg) { 
-    var isSynapseGateway = outputs.isSynapseGateway;
-
+<% jagg.template("item-manage", function(inputs, outputs, jagg) {
     var api = outputs.api;
     var createPermitted = outputs.isCreatePermitted;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
@@ -112,7 +110,7 @@
     <legend>Configurations</legend>
 
             <div class="control-group">
-                    <label  class="control-label" >Make this default version</label>
+                    <label  class="control-label">Make this the Default Version</label>
                      <div class="controls">
                         <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
 
@@ -168,50 +166,9 @@
                         <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
                     </div>
                 </div>
-             </div> 
+             </div>
 
             <% if (isSynapseGateway) { %>
-            <div class="control-group">
-                <label class="control-label" for="sequence"><%=i18n.localize("sequence")%>:</label>
-
-
-                <div class="controls">
-                <label class="checkbox">
-                    <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
-                <%
-                if((api.inSequence && (!"none".equals(api.inSequence)))|| (api.outSequence && (!"none".equals(api.outSequence)))
-                	|| ( api.faultSequence && (!"none".equals(api.faultSequence)))){ %>
-                checked="checked"<%}%>><%=i18n.localize("sequenceMsg")%>
-                </label>
-                <table class="table table-bordered table-striped" id="seqTable"
-                <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
-                    <thead>
-                        <tr>
-                            <th><%=i18n.localize("inFlow")%></th>
-                            <th><%=i18n.localize("outFlow")%></th>
-                            <th><%=i18n.localize("faultFlow")%></th>
-                        </tr>
-                    </thead>
-                        <tr>
-                            <td>
-                                <select id="inSequence"  name="inSequence" >
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="outSequence"  name="outSequence">
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                </select>
-                            </td>
-                            <td>
-                                <select id="faultSequence"  name="faultSequence">
-                                    <option value="none" selected="selected"><%=i18n.localize("none")%></option>
-                                </select>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
 
             <div class="control-group">
                             <label class="control-label" for="throttle"><%=i18n.localize("throttle")%></label>
@@ -231,7 +188,7 @@
                                 </thead>
                                     <tr>
                                         <td>
-                                            <%=i18n.localize("prodLimit")%>    
+                                            <%=i18n.localize("prodLimit")%>
                                         </td>
                                         <td>
                                             <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
@@ -239,7 +196,7 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <%=i18n.localize("sandLimit")%>    
+                                            <%=i18n.localize("sandLimit")%>
                                         </td>
                                         <td>
                                             <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
@@ -750,7 +707,7 @@
         <div class="control-group">
             <label class="control-label" for="scopeRoles">Roles</label>
             <div class="controls">
-            <input type="text" id="scopeRoles" class="" placeholder="Eg: role1,role2,role3" data-role="tagsinput" />
+            <input type="text" id="scopeRoles" class="" placeholder="E.g.: role1,role2,role3" data-role="tagsinput" />
             </div>
         </div>
         <div class="control-group">

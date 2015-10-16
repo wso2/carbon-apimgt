@@ -7,6 +7,9 @@ if(outputs.isPublishPermitted){
  %>
 
 <script type="text/javascript">
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
 function checkValue(element) {
     if ($(element).is(":checked") == false) {
         $(element).attr('value', 'false');
@@ -25,6 +28,10 @@ function getSelectedValue(oldStatus) {
     } else {
         $('#deprecateOldVersionsDiv').hide();
         $('#requireResubscriptionDiv').hide();
+        if(newStatus == "RETIRED")  {
+            $('#messageModal').html($('#retire-confirmation').html());
+            $('#messageModal').modal();
+        }
     }
 }
 var initOf_state = '<%=api.status%>';
@@ -141,6 +148,19 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
         <%}%>
 
 </div></div>
+
+<div id="retire-confirmation" style="display:none;">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal">x</button>
+        <h3 class="modal-title"><%=i18n.localize("retireApiTitle")%></h3>
+    </div>
+    <div class="modal-body">
+        <p><%=i18n.localize("retireApi")%></p>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" data-dismiss="modal">Continue</a>
+    </div>
+</div>
 
 <script type="text/javascript">
 function hideMsg() {
