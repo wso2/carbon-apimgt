@@ -400,10 +400,10 @@ $(document).ready(function () {
         },
         form: [{
             key: 'production_endpoints',
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
+            "fieldHtmlClass": "input-xlarge validateEndpoints validateDefaultEndpoint"
         }, {
             key: 'sandbox_endpoints',
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
+            "fieldHtmlClass": "input-xlarge validateEndpoints validateDefaultEndpoint"
         }]
     };
 
