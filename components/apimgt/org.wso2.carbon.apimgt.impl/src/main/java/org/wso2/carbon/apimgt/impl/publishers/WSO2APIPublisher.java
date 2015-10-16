@@ -739,17 +739,17 @@ public class WSO2APIPublisher implements APIPublisher {
 			entity.addPart("endpointType",
 			               new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
             entity.addPart("endpointAuthType", new StringBody(checkValue(String.valueOf(api.isEndpointAuthDigest()))));
-            entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
-            entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
+			entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
+			entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
 
 			entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
 			entity.addPart("advertiseOnly", new StringBody("true"));
 
         
 			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
-			api.getId().getProviderName()));
+                    api.getId().getProviderName()));
 			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-			.getTenantId(tenantDomain);
+                    .getTenantId(tenantDomain);
 			entity.addPart("redirectURL", new StringBody(getExternalStoreRedirectURL(tenantId)));
 			if (api.getTransports() == null) {
 				entity.addPart("http_checked", new StringBody(""));
