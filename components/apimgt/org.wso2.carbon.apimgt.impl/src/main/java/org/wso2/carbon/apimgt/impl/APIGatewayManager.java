@@ -330,16 +330,14 @@ public class APIGatewayManager {
 	 * @throws AxisFault
 	 */
     private void deployCustomSequences(API api, String tenantDomain, Environment environment)
-            throws APIManagementException,
-                   AxisFault {
+            throws APIManagementException, AxisFault {
 
         if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOutSequence())) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 if(tenantDomain != null && !tenantDomain.equals("")){
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                }
-                else{
+                } else    {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
                             (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 }
@@ -368,14 +366,15 @@ public class APIGatewayManager {
     private void deployInSequence(API api, int tenantId, String tenantDomain, Environment environment)
             throws APIManagementException, AxisFault {
 
-        String inSeqExt = APIUtil.getSequenceExtensionName(api) + "--In";
         String inSequenceName = api.getInSequence();
-        OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, "in");
-
-        APIGatewayAdminClient sequenceAdminServiceClient = new APIGatewayAdminClient(api.getId(), environment);
+        OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, "in", api.getId());
 
         if (inSequence != null) {
-            inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
+            String inSeqExt = APIUtil.getSequenceExtensionName(api) + "--In";
+            if (inSequence.getAttribute(new QName("name")) != null) {
+                inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
+            }
+            APIGatewayAdminClient sequenceAdminServiceClient = new APIGatewayAdminClient(api.getId(), environment);
             sequenceAdminServiceClient.addSequence(inSequence, tenantDomain);
         }
     }
@@ -383,14 +382,15 @@ public class APIGatewayManager {
     private void deployOutSequence(API api, int tenantId, String tenantDomain, Environment environment)
             throws APIManagementException, AxisFault {
 
-        String outSeqExt  = APIUtil.getSequenceExtensionName(api) + "--Out";
         String outSequenceName = api.getOutSequence();
-        OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, "out");
-
-        APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+        OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, "out", api.getId());
 
         if (outSequence != null) {
-            outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);
+            String outSeqExt  = APIUtil.getSequenceExtensionName(api) + "--Out";
+            if (outSequence.getAttribute(new QName("name")) != null)    {
+                outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);
+            }
+            APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
             client.addSequence(outSequence, tenantDomain);
         }
     }
@@ -528,7 +528,7 @@ public class APIGatewayManager {
                     client.deleteSequence(faultSequenceName, tenantDomain);
                 }
                 //Get the fault sequence xml
-                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, "fault");
+                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, "fault", api.getId());
 
                 if (faultSequence != null) {
                     //Deploy the fault sequence

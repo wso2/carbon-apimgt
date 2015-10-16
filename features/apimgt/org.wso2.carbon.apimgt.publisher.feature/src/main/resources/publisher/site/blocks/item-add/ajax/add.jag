@@ -263,8 +263,13 @@ if(jagg.isCSRFTokenValid())
 
         }
         else if (action === "getCustomInSequences") {
+
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
+
             mod = jagg.module("api");
-            result = mod.getCustomInSequences();
+            result = mod.getCustomInSequences(apiName, apiVersion, apiProvider);
             if (result.error) {
                 obj = {
                     error:true,
@@ -279,8 +284,11 @@ if(jagg.isCSRFTokenValid())
             print(obj);
         }
         else if (action === "getCustomOutSequences") {
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
             mod = jagg.module("api");
-            result = mod.getCustomOutSequences();
+            result = mod.getCustomOutSequences(apiName, apiVersion, apiProvider);
             if (result.error) {
                 obj = {
                     error:true,

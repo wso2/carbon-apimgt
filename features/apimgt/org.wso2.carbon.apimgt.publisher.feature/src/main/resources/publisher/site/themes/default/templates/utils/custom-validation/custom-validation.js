@@ -67,6 +67,18 @@ $(document).ready(function() {
     $.validator.addMethod('validateEndpoints', function (value, element){
         return APP.is_production_endpoint_specified() || APP.is_sandbox_endpoint_specified();
     }, 'A Production or Sandbox URL must be provided.');
+
+    $.validator.addMethod('validateDefaultEndpoint', function (value, element){
+        var endpointType = $('#endpoint_type').val();
+        if(endpointType == "default")   {
+            if(($('#inSequence :selected').text() != "None") || $('#inSeqFile').val() != "")  {
+                return true;
+            } else  {
+                return false;
+            }
+        }
+        return true;
+    }, 'You must upload or select a message mediation sequence');
     
     $.validator.addMethod('validateProdWSDLService', function (value, element){
     	if (APP.is_production_endpoint_specified()) {

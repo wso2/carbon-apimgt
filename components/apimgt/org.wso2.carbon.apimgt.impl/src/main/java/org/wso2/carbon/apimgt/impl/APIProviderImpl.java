@@ -617,34 +617,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             apiPublished.setOldInSequence(oldApi.getInSequence());
                             apiPublished.setOldOutSequence(oldApi.getOutSequence());
                             //old api contain what environments want to remove
-                            Set<String> environmentsToRemove =
-                                    new HashSet<String>(oldApi.getEnvironments());
+                            Set<String> environmentsToRemove = new HashSet<String>(oldApi.getEnvironments());
                             //updated api contain what environments want to add
-                            Set<String> environmentsToPublish =
-                                    new HashSet<String>(apiPublished.getEnvironments());
-                            Set<String> environmentsRemoved =
-                                    new HashSet<String>(oldApi.getEnvironments());
+                            Set<String> environmentsToPublish = new HashSet<String>(apiPublished.getEnvironments());
+                            Set<String> environmentsRemoved = new HashSet<String>(oldApi.getEnvironments());
                             if (!environmentsToPublish.isEmpty() && !environmentsToRemove.isEmpty()) {
                                 // this block will sort what gateways have to remove and published
                                 environmentsRemoved.retainAll(environmentsToPublish);
                                 environmentsToRemove.removeAll(environmentsRemoved);
                             }
                             // map contain failed to publish Environments
-                            Map<String, String> failedToPublishEnvironments =
-                                    publishToGateway(apiPublished);
+                            Map<String, String> failedToPublishEnvironments = publishToGateway(apiPublished);
                             apiPublished.setEnvironments(environmentsToRemove);
                             // map contain failed to remove Environments
-                            Map<String, String> failedToRemoveEnvironments =
-                                    removeFromGateway(apiPublished);
+                            Map<String, String> failedToRemoveEnvironments = removeFromGateway(apiPublished);
                             environmentsToPublish.removeAll(failedToPublishEnvironments.keySet());
                             environmentsToPublish.addAll(failedToRemoveEnvironments.keySet());
                             apiPublished.setEnvironments(environmentsToPublish);
                             updateApiArtifact(apiPublished, true, false);
                             failedGateways.clear();
-                            failedGateways
-                                    .put("UNPUBLISHED", failedToRemoveEnvironments);
-                            failedGateways
-                                    .put("PUBLISHED", failedToPublishEnvironments);
+                            failedGateways.put("UNPUBLISHED", failedToRemoveEnvironments);
+                            failedGateways.put("PUBLISHED", failedToPublishEnvironments);
                         } else if (api.getStatus() != APIStatus.CREATED && api.getStatus() != APIStatus.RETIRED) {
                             if ("INLINE".equals(api.getImplementation()) && api.getEnvironments().isEmpty()){
                                 api.setEnvironments(
@@ -1654,8 +1647,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if failed to create API
      */
     private void createAPI(API api) throws APIManagementException {
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
         //Validate Transports
         validateAndSetTransports(api);
@@ -2475,15 +2467,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	 * @throws APIManagementException
 	 */
 
-	public List<String> getCustomInSequences() throws APIManagementException {
+	public List<String> getCustomInSequences(APIIdentifier apiIdentifier) throws APIManagementException {
 
 		List<String> sequenceList = new ArrayList<String>();
 		try {
-			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-			                                              .getGovernanceSystemRegistry(tenantId);
+			UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
 			if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
 	            org.wso2.carbon.registry.api.Collection inSeqCollection =
-	                                                                      (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
 	            if (inSeqCollection != null) {
 	             //   SequenceMediatorFactory factory = new SequenceMediatorFactory();
 	                String[] inSeqChildPaths = inSeqCollection.getChildren();
@@ -2494,6 +2485,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	                }
                 }
             }
+
+            String customInSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, "in");
+
+            if(registry.resourceExists(customInSeqFileLocation + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME))    {
+                sequenceList.add(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
+            }
+
 
 		} catch (Exception e) {
 			handleException("Issue is in getting custom InSequences from the Registry", e);
@@ -2507,7 +2505,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	 * @throws APIManagementException
 	 */
 
-	public List<String> getCustomOutSequences() throws APIManagementException {
+	public List<String> getCustomOutSequences(APIIdentifier apiIdentifier) throws APIManagementException {
 
 		List<String> sequenceList = new ArrayList<String>();
 		try {
@@ -2518,15 +2516,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	                                                                       (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
 	            if (outSeqCollection !=null) {
 	                String[] outSeqChildPaths = outSeqCollection.getChildren();
-	                for (int i = 0; i < outSeqChildPaths.length; i++) {
-		                Resource outSequence = registry.get(outSeqChildPaths[i]);
-		                OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-		         
-		                sequenceList.add(seqElment.getAttributeValue(new QName("name")));		               
-	                }
+                    for (String childPath : outSeqChildPaths)   {
+                        Resource outSequence = registry.get(childPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
                 }
             }
 
+            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, "out");
+
+            if(registry.resourceExists(customOutSeqFileLocation + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME))    {
+                sequenceList.add(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
+            }
 		} catch (Exception e) {
 			handleException("Issue is in getting custom OutSequences from the Registry", e);
 		}

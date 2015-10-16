@@ -76,6 +76,7 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -266,8 +267,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return true if update successful, false otherwise
      * @throws APIManagementException
      */
-    public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
+    public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || args.length == 0) {
             handleException("Invalid input parameters to the login method");
@@ -289,8 +289,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return updated;
     }
 
-    public static String jsFunction_getAuthServerURL(Context cx, Scriptable thisObj,
-                                                     Object[] args, Function funObj)
+    public static String jsFunction_getAuthServerURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
@@ -301,8 +300,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return url;
     }
 
-    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj,
-                                                Object[] args, Function funObj)
+    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         String hostName = CarbonUtils.getServerConfiguration().getFirstProperty("HostName");
         String backendHttpsPort = HostObjectUtils.getBackendPort("https");
@@ -322,8 +320,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj,
-                                               Object[] args, Function funObj)
+    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
     	boolean success = false;
     	
@@ -347,9 +344,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String tier = (String) apiData.get("tier", apiData);
 
-        String inSequence =  (String) apiData.get("inSequence", apiData);
-        String outSequence = (String) apiData.get("outSequence", apiData);
-        String faultSequence = (String) apiData.get("faultSequence", apiData);
         String businessOwner = (String) apiData.get("bizOwner", apiData);
         String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
         String technicalOwner = (String) apiData.get("techOwner", apiData);
@@ -400,12 +394,10 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
         String productionTps = (String) apiData.get("productionTps", apiData);
         String sandboxTps = (String) apiData.get("sandboxTps", apiData);
-
-        api.removeCustomSequences();
 
         if (!"none".equals(productionTps)) {
             api.setProductionMaxTps(productionTps);
@@ -414,18 +406,6 @@ public class APIProviderHostObject extends ScriptableObject {
         if (!"none".equals(sandboxTps)) {
             api.setSandboxMaxTps(sandboxTps);
         }
-
-		if (!"none".equals(inSequence)) {
-			api.setInSequence(inSequence);
-		}
-		if (!"none".equals(outSequence)) {
-			api.setOutSequence(outSequence);
-		}
-		
-		List<String> sequenceList = apiProvider.getCustomFaultSequences();
-		if (!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
-			api.setFaultSequence(faultSequence);
-		}
 	
         if(!"none".equals(businessOwner)){
             api.setBusinessOwner(businessOwner);
@@ -456,7 +436,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("swagger", apiData) != null) {
 
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+            Set<URITemplate> uriTemplates =
+                    definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
@@ -503,9 +484,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (registeredResource == null) {
             boolean isNewResourceRegistered = keyManager.registerNewResource(api , null);
             if (!isNewResourceRegistered) {
-                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName
-                        () + "-" + api
-                        .getId().getVersion());
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName()
+                                + "-" + api.getId().getVersion());
             }
         } else {
             //update APIResource.
@@ -531,6 +511,8 @@ public class APIProviderHostObject extends ScriptableObject {
     public static boolean jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
+
+        // Get the InSeq or outSeq here and put into registry
     	
     	if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -541,7 +523,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String implementationType = (String) apiData.get("implementation_type", apiData);
-        
+
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }        
@@ -582,14 +564,13 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
 
-        if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+        if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE))    {
             api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_INLINE);
-        }
-        else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+        } else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT))   {
             api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
             // Validate endpoint URI format
             validateEndpointURI(api.getEndpointConfig());
-        }else{
+        } else  {
             throw new APIManagementException("Invalid Implementation Type.");
         }
 
@@ -624,6 +605,43 @@ public class APIProviderHostObject extends ScriptableObject {
 
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
+
+        String inSequence =  (String) apiData.get("inSequence", apiData);
+        String outSequence = (String) apiData.get("outSequence", apiData);
+        String faultSequence = (String) apiData.get("faultSequence", apiData);
+
+        if (!"none".equals(inSequence))  {
+            api.setInSequence(inSequence);
+        }
+
+        if (!"none".equals(outSequence)) {
+            api.setOutSequence(outSequence);
+        }
+
+        if (!"none".equals(faultSequence))  {
+            api.setFaultSequence(faultSequence);
+        }
+
+        if (apiData.get("inSeqFile", apiData) != null)  {
+            FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
+            Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+            String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
+                               + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME;
+            String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
+            api.setInSequence(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
+        }
+
+        if (apiData.get("outSeqFile", apiData) != null) {
+            FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
+            Icon outSeq = new Icon(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
+            String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
+                                + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME;
+            String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
+            api.setOutSequence(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
+        }
+
+
+        //api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
                 
         return saveAPI(apiProvider, api, null, false);
     	
@@ -664,8 +682,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain))
-        {
+        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
             //Create tenant aware context for API
             context= "/t/"+ providerDomain+context;
         }
@@ -883,12 +900,11 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param apiProvider
      * @param api
      * @param fileHostObject
-     * @param create
+     * @param isNewApi
      * @return true if the API was added successfully
      * @throws APIManagementException
      */
-    private static boolean saveAPI(APIProvider apiProvider,API api,
-                                  FileHostObject fileHostObject, boolean create)
+    private static boolean saveAPI(APIProvider apiProvider, API api, FileHostObject fileHostObject, boolean isNewApi)
             throws APIManagementException, FaultGatewaysException {
     	boolean success = false;
     	boolean isTenantFlowStarted = false;
@@ -905,7 +921,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
                         fileHostObject.getJavaScriptFile().getContentType(), apiProvider, api);
             }
-            if (create) {
+            if (isNewApi) {
             	apiProvider.addAPI(api);
             } else {
                 apiProvider.manageAPI(api);
@@ -938,9 +954,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      * @throws FaultGatewaysException 
      */
-    public static boolean jsFunction_addAPI(Context cx, Scriptable thisObj,
-                                            Object[] args,
-                                            Function funObj)
+    public static boolean jsFunction_addAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
         if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -1257,7 +1271,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setDestinationStatsEnabled(destinationStats);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
         api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
         api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
@@ -4560,9 +4574,18 @@ public class APIProviderHostObject extends ScriptableObject {
      */
 	public static NativeArray jsFunction_getCustomOutSequences(Context cx, Scriptable thisObj,
 	                                                        Object[] args, Function funObj)
-	                                                                                       throws APIManagementException {
+            throws APIManagementException {
 		APIProvider apiProvider = getAPIProvider(thisObj);
-		List<String> sequenceList = apiProvider.getCustomOutSequences();
+        String apiName = (String) args[0];
+        String apiVersion = (String) args[1];
+        String provider = (String) args[2];
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+
+		List<String> sequenceList = apiProvider.getCustomOutSequences(apiIdentifier);
 
 		NativeArray myn = new NativeArray(0);
 		if (sequenceList == null) {
@@ -4585,23 +4608,33 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return
      * @throws APIManagementException
      */
-	public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
-	                                                        Object[] args, Function funObj)
-	                                                                                       throws APIManagementException {
-		APIProvider apiProvider = getAPIProvider(thisObj);
-		List<String> sequenceList = apiProvider.getCustomInSequences();
+    public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
+                                                              Object[] args, Function funObj)
+            throws APIManagementException {
+        APIProvider apiProvider = getAPIProvider(thisObj);
 
-		NativeArray myn = new NativeArray(0);
-		if (sequenceList == null) {
-			return null;
-		} else {
-			for (int i = 0; i < sequenceList.size(); i++) {
-				myn.put(i, myn, sequenceList.get(i));
-			}
-			return myn;
-		}
+        String apiName = (String) args[0];
+        String apiVersion = (String) args[1];
+        String provider = (String) args[2];
 
-	}
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+
+        List<String> sequenceList = apiProvider.getCustomInSequences(apiIdentifier);
+
+        NativeArray myn = new NativeArray(0);
+        if (sequenceList == null) {
+            return null;
+        } else {
+            for (int i = 0; i < sequenceList.size(); i++) {
+                myn.put(i, myn, sequenceList.get(i));
+            }
+            return myn;
+        }
+
+    }
 
     /**
      * Retrieves custom fault sequences from registry
