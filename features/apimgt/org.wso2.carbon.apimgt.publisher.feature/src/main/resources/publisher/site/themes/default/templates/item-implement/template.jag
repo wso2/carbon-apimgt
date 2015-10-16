@@ -183,12 +183,12 @@
                         <% if (isSynapseGateway) { %>
                         <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("sequence")%></legend>
                             <div class="control-group">
-                                <label class="control-label"><%=i18n.localize("sequenceMsg")%></label>
+                                <label class="control-label"><%=i18n.localize("enable.sequence")%></label>
                                 <div class="controls">
                                     <label>
                                         <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
                                             <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
-                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%> >
+                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%>><%=i18n.localize("sequenceMsg")%>
                                     </label>
                                     <table class="table table-bordered table-striped" id="seqTable"
                                         <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
