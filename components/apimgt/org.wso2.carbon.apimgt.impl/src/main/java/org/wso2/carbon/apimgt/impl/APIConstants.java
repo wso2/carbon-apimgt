@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import javax.xml.namespace.QName;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,6 +74,8 @@ public final class APIConstants {
     public static final String API_TENANT_CONF = "tenant-conf.json";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
+
+    public static final String RESOURCE_FOLDER_LOCATION = "repository"+ File.separator + "resources";
 
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
 
