@@ -28,7 +28,6 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -67,10 +66,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -1591,113 +1586,49 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String appName, String fromDate, String toDate, String groupBy)
             throws APIMgtUsageQueryServiceClientException {
 
-        if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
-        }
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
+        String query = "";
         try {
-            connection = dataSource.getConnection();
-            String query, groupByStmt;
-            List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
-            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-
-            //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY)) { //Table exists
-
-                if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)) {
-                    groupByStmt = "year, month, day";
-                } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
-                    groupByStmt = "year, month, day, time";
-                } else {
-                    throw new APIMgtUsageQueryServiceClientException("Unsupported group by parameter " + groupBy +
-                            " for retrieving throttle data of API and app.");
-                }
-
-                query = "SELECT " + groupByStmt + " ," +
-                        "SUM(COALESCE(success_request_count,0)) AS success_request_count, " +
-                        "SUM(COALESCE(throttleout_count,0)) AS throttleout_count " +
-                        "FROM API_THROTTLED_OUT_SUMMARY " +
-                        "WHERE tenantDomain = ? " +
-                        "AND api = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
-                                "" :
-                                "AND apiPublisher = ?") +
-                        (StringUtils.isEmpty(appName) ? "" : " AND applicationName = ?") +
-                        "AND time BETWEEN ? AND ? " +
-                        "GROUP BY " + groupByStmt + " " +
-                        "ORDER BY " + groupByStmt + " ASC";
-
-                statement = connection.prepareStatement(query);
-                int index = 1;
-                statement.setString(index++, tenantDomain);
-                statement.setString(index++, apiName);
-                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    statement.setString(index++, provider);
-                }
-                if (!StringUtils.isEmpty(appName)) {
-                    statement.setString(index++, appName);
-                }
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
-
-                rs = statement.executeQuery();
-                while (rs.next()) {
-                    int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
-                    int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
-                    int year = rs.getInt(APIUsageStatisticsClientConstants.YEAR);
-                    int month = rs.getInt(APIUsageStatisticsClientConstants.MONTH);
-                    String time;
-                    if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
-                        time = rs.getString(APIUsageStatisticsClientConstants.TIME);
-                    } else {
-                        int day = rs.getInt(APIUsageStatisticsClientConstants.DAY);
-                        time = year + "-" + month + "-" + day + " 00:00:00";
-                    }
-                    throttlingData
-                            .add(new APIThrottlingOverTimeDTO(apiName, provider, successRequestCount, throttledOutCount,
-                                    time));
-                }
-
-            } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
-            }
-
-            return throttlingData;
-
-        } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+            query = "api:"+apiName+" AND "+"applicationName:"+appName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
+                    .getCeilingDateAsLong(toDate) + "]";
+        } catch (ParseException e) {
+            handleException("Error occurred while Error parsing date", e);
         }
+        SearchRequestBean request = new SearchRequestBean("", 2, "api_apiPublisher_applicationName_facet",
+                "API_THROTTLED_OUT_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField field = new AggregateField("success_request_count",
+                "SUM", "success_request_count");
+        fields.add(field);
+        AggregateField longTime = new AggregateField("max_request_time",
+                "MAX", "max_request_time");
+        fields.add(longTime);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
+        }.getType();
+
+        List<Result<APIsForThrottleStatsValue>> obj = null;
+        try{
+            obj = restClient.doPost(request, ty);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+
+        List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
+        APIThrottlingOverTimeDTO usage;
+        for (Result<APIsForThrottleStatsValue> result : obj) {
+            APIsForThrottleStatsValue v = result.getValues();
+
+            String api=v.getApi_apiPublisher_applicationName_facet().get(0);
+            String publisher=v.getApi_apiPublisher_applicationName_facet().get(1);
+            String time=RestClientUtil.longToDate(v.getMax_request_time());
+            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottleout_count(), time);
+            throttlingData.add(usage);
+        }
+        return throttlingData;
     }
 
     //this contain the old RDBMS codes and not ported for REST Client yet
@@ -1716,91 +1647,50 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
             String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
 
-        if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
-        }
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
+        String query = "";
         try {
-            connection = dataSource.getConnection();
-            String query = null;
-            List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
-            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-
-            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY)) { //Table exists
-
-                query = "SELECT api, apiPublisher, SUM(COALESCE(success_request_count,0)) " +
-                        "AS success_request_count, SUM(COALESCE(throttleout_count,0)) as throttleout_count " +
-                        "FROM API_THROTTLED_OUT_SUMMARY " +
-                        "WHERE tenantDomain = ? " +
-                        "AND applicationName = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
-                                "" :
-                                "AND apiPublisher = ?") +
-                        "AND time BETWEEN ? AND ? " +
-                        "GROUP BY api, apiPublisher " +
-                        "ORDER BY api ASC";
-
-                statement = connection.prepareStatement(query);
-                int index = 1;
-                statement.setString(index++, tenantDomain);
-                statement.setString(index++, appName);
-                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    statement.setString(index++, provider);
-                }
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
-
-                rs = statement.executeQuery();
-                while (rs.next()) {
-                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
-                    String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
-                    int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
-                    int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
-                    throttlingData
-                            .add(new APIThrottlingOverTimeDTO(api, apiPublisher, successRequestCount, throttledOutCount,
-                                    null));
-                }
-
-            } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
-            }
-
-            return throttlingData;
-
-        } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+            query = "applicationName:"+appName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
+                    .getCeilingDateAsLong(toDate) + "]";
+        } catch (ParseException e) {
+            handleException("Error occurred while Error parsing date", e);
         }
+        SearchRequestBean request = new SearchRequestBean(query, 1, "api_apiPublisher_applicationName_facet",
+                "API_THROTTLED_OUT_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField field0 = new AggregateField("success_request_count",
+                "SUM", "success_request_count");
+        fields.add(field0);
+        AggregateField field1 = new AggregateField("throttleout_count",
+                "SUM", "throttleout_count");
+        fields.add(field1);
+
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
+        }.getType();
+
+        List<Result<APIsForThrottleStatsValue>> obj = null;
+        try{
+            obj = restClient.doPost(request, ty);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+
+        List<APIThrottlingOverTimeDTO> throttlingAppData = new ArrayList<APIThrottlingOverTimeDTO>();
+
+        APIThrottlingOverTimeDTO usage;
+        for (Result<APIsForThrottleStatsValue> result : obj) {
+            APIsForThrottleStatsValue v = result.getValues();
+            String api=v.getApi_apiPublisher_applicationName_facet().get(0);
+            String publisher=v.getApi_apiPublisher_applicationName_facet().get(1);
+
+            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottleout_count(), "");
+            throttlingAppData.add(usage);
+        }
+        return throttlingAppData;
     }
 
     //this contain the old RDBMS codes and not ported for REST Client yet
@@ -1815,77 +1705,33 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override public List<String> getAPIsForThrottleStats(String provider)
             throws APIMgtUsageQueryServiceClientException {
 
-        if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+        String query = "";
+        SearchRequestBean request = new SearchRequestBean("", 0, "api_apiPublisher_applicationName_facet",
+                "API_THROTTLED_OUT_SUMMARY");
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField field = new AggregateField("success_request_count", "SUM", "count");
+        fields.add(field);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
+        }.getType();
+        List<Result<APIsForThrottleStatsValue>> obj=null;
+
+        try{
+             obj = restClient.doPost(request, ty);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-        try {
-            connection = dataSource.getConnection();
-            String query = null;
-            List<String> throttlingAPIData = new ArrayList<String>();
-            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-
-            //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY)) { //Tables exist
-
-                query = "SELECT DISTINCT api FROM API_THROTTLED_OUT_SUMMARY " +
-                        "WHERE tenantDomain = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
-                                "" :
-                                "AND apiPublisher = ? ") +
-                        "ORDER BY api ASC";
-
-                statement = connection.prepareStatement(query);
-                statement.setString(1, tenantDomain);
-                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    statement.setString(2, provider);
-                }
-
-                rs = statement.executeQuery();
-                while (rs.next()) {
-                    String api = rs.getString(APIUsageStatisticsClientConstants.API);
-                    throttlingAPIData.add(api);
-                }
-            } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
-            }
-
-            return throttlingAPIData;
-
-        } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+        List<String> throttlingAPIData = new ArrayList<String>();
+        for (Result<APIsForThrottleStatsValue> result : obj) {
+            APIsForThrottleStatsValue v = result.getValues();
+            throttlingAPIData.add(v.getApi_apiPublisher_applicationName_facet().get(0));
         }
+        return throttlingAPIData;
     }
 
     //this contain the old RDBMS codes and not ported for REST Client yet
@@ -1901,83 +1747,31 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override public List<String> getAppsForThrottleStats(String provider, String apiName)
             throws APIMgtUsageQueryServiceClientException {
+        String query = "";
+        SearchRequestBean request = new SearchRequestBean("", 0, "applicationName_facet", "API_THROTTLED_OUT_SUMMARY");
 
-        if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField field = new AggregateField("success_request_count", "SUM", "count");
+        fields.add(field);
+        request.setAggregateFields(fields);
+
+        Type ty = new TypeToken<List<Result<APPsForThrottleStatsValue>>>() {
+        }.getType();
+        List<Result<APPsForThrottleStatsValue>> obj=null;
+
+        try{
+        obj = restClient.doPost(request, ty);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
         }
-
-        Connection connection = null;
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-        try {
-            connection = dataSource.getConnection();
-            String query = null;
-            List<String> throttlingAppData = new ArrayList<String>();
-            String tenantDomain = MultitenantUtils.getTenantDomain(provider);
-
-            //check whether table exist first
-            if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY)) { //Tables exist
-                query = "SELECT DISTINCT applicationName FROM API_THROTTLED_OUT_SUMMARY " +
-                        "WHERE tenantDomain = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
-                                "" :
-                                "AND apiPublisher = ? ") +
-                        (apiName == null ? "" : "AND api = ? ") +
-                        "ORDER BY applicationName ASC";
-
-                statement = connection.prepareStatement(query);
-                int index = 1;
-                statement.setString(index++, tenantDomain);
-                if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    statement.setString(index++, provider);
-                }
-                if (apiName != null) {
-                    statement.setString(index, apiName);
-                }
-
-                rs = statement.executeQuery();
-                while (rs.next()) {
-                    String applicationName = rs.getString(APIUsageStatisticsClientConstants.APPLICATION_NAME);
-                    throttlingAppData.add(applicationName);
-                }
-
-            } else {
-                throw new APIMgtUsageQueryServiceClientException(
-                        "Statistics Table:" + APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY +
-                                " does not exist.");
-            }
-
-            return throttlingAppData;
-
-        } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+        List<String> throttlingAppData = new ArrayList<String>();
+        for (Result<APPsForThrottleStatsValue> result : obj) {
+            APPsForThrottleStatsValue v = result.getValues();
+            throttlingAppData.add(v.getApplicationName_facet().get(0));
         }
+        return throttlingAppData;
     }
 
     /**

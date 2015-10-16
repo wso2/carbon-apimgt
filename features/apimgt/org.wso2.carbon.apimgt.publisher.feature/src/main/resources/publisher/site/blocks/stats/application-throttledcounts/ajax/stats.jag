@@ -37,63 +37,47 @@ var log = new Log();
 
         if (action === "getThrottleDataOfApplication"){
 
-            if(appName && fromDate && toDate){
-
-                try {
-                    usageStatClient = new APIUsageStatisticsClient(provider);
-                    var throttleData = usageStatClient.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
-                    var result = [];
-
-                    for (var i = 0; i < throttleData.size(); i++) {
-                        var throttleDataObj = throttleData.get(i);
-                        result.push({
-                            apiName : throttleDataObj.getAPIName(),
-                            success_request_count : throttleDataObj.getSuccessRequestCount(),
-                            throttleout_count : throttleDataObj.getThrottleOutCount()
-                        });
-                    }
-
-                    print({
-                        error: false,
-                        usage: result
-                    });
-                } catch (e) {
-                    log.error(e);
-                    print({
-                        error: true,
-                        message: "Error in retrieving throttle data for application: " + appName
-                    });
-                }
-
-            }else{
-                print({
-                    error: true,
-                    message: 'Please provide Application Name, From Date and To Date'
-                });
+            mod = jagg.module("statistics");
+            provider = jagg.getUser().username;
+            if (currentLocation.indexOf("all-statistics") >= 0) {
+                result = mod.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
+            } else {
+                result = mod.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
             }
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    usage: result.usage
+                }
+            }
+            print(obj);
 
         } else if (action === "getAppsForThrottleStats") {
 
-            try {
-                usageStatClient = new APIUsageStatisticsClient(provider);
-                var apps = usageStatClient.getAppsForThrottleStats(provider, apiName);
-                var result = [];
-
-                for (var i = 0; i < apps.size(); i++) {
-                    result.push(apps.get(i));
-                }
-
-                print({
-                    error: false,
-                    usage: result
-                });
-            } catch (e) {
-                log.error(e);
-                print({
-                    error: true,
-                    message: "Error in retrieving application names for throttle stats"
-                });
+            mod = jagg.module("statistics");
+            provider = jagg.getUser().username;
+            if (currentLocation.indexOf("all-statistics") >= 0) {
+                result = mod.getAppsForThrottleStats(allProviders,apiName);
+            } else {
+                result = mod.getAppsForThrottleStats(provider,apiName);
             }
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    usage: result.usage
+                }
+            }
+            print(obj);
 
         } else if (action === "getFirstAccessTime") {
             mod = jagg.module("statistics");

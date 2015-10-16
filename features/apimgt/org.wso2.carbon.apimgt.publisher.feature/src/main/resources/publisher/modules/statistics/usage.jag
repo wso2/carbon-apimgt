@@ -495,4 +495,125 @@ function getAPIsFromAPIRequestsPerHourTable(from,to){
     }
 }
 
+
+function getAppsForThrottleStats(providerName, apiName) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = usageClient.getAppsForThrottleStats(providerName,apiName);
+        if (log.isDebugEnabled()) {
+            log.debug("getProviderAPIFirstAccessTime for : ");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage=JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getThrottleDataOfApplication(appName,providerName,fromDate, toDate) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = usageClient.getThrottleDataOfApplication(appName,providerName,fromDate, toDate);
+        if (log.isDebugEnabled()) {
+            log.debug("getProviderAPIFirstAccessTime for : ");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage=JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+
+function getAPIsForThrottleStats(providerName) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = usageClient.getAPIsForThrottleStats(providerName);
+        if (log.isDebugEnabled()) {
+            log.debug("getProviderAPIFirstAccessTime for : ");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage=JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
+
+function getThrottleDataOfAPIAndApplication(apiName, providerName, appName,fromDate, toDate, groupBy) {
+    var usage = [];
+    var usageout = [];
+    try {
+        usage = usageClient.getThrottleDataOfAPIAndApplication(apiName, providerName, appName,fromDate, toDate,groupBy);
+        if (log.isDebugEnabled()) {
+            log.debug("getProviderAPIFirstAccessTime for : ");
+        }
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage=JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            usage:null
+
+        };
+    }
+}
 %>

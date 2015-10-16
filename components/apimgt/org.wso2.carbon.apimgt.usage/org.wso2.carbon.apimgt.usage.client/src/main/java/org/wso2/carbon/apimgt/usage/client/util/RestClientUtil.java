@@ -94,4 +94,9 @@ public class RestClientUtil {
         return new String(encodedBytes);
     }
 
+    public static String longToDate(long time){
+        Date date=new Date(time);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        return format.format(date);
+    }
 }
