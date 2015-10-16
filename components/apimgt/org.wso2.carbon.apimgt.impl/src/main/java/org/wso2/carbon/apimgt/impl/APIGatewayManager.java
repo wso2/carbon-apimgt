@@ -16,9 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -79,7 +77,7 @@ public class APIGatewayManager {
         }
         for (String environmentName : api.getEnvironments()) {
             Environment environment = environments.get(environmentName);
-            APIGatewayAdminClient client = null;
+            APIGatewayAdminClient client;
             try {
                 client = new APIGatewayAdminClient(api.getId(), environment);
 			String operation;
@@ -106,7 +104,7 @@ public class APIGatewayManager {
                             client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-					setSecurevaultProperty(api,tenantDomain,environment,operation);
+					setSecureVaultProperty(api, tenantDomain, environment, operation);
 					undeployCustomSequences(api,tenantDomain, environment);
 				} else {
 					if (debugEnabled) {
@@ -132,7 +130,7 @@ public class APIGatewayManager {
                             client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
                         }
                     }
-					setSecurevaultProperty(api,tenantDomain,environment,operation);
+					setSecureVaultProperty(api, tenantDomain, environment, operation);
 
                     //Update the custom sequences of the API
 					updateCustomSequences(api, tenantDomain, environment);
@@ -175,7 +173,7 @@ public class APIGatewayManager {
                             client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(), api.getId());
                         }
                     }
-					setSecurevaultProperty(api,tenantDomain,environment,operation);
+					setSecureVaultProperty(api, tenantDomain, environment, operation);
 
                     //Deploy the custom sequences of the API.
 					deployCustomSequences(api, tenantDomain, environment);
@@ -226,7 +224,7 @@ public class APIGatewayManager {
 				String operation ="delete";
 				client.deleteApi(tenantDomain, api.getId());
 				undeployCustomSequences(api, tenantDomain,environment);
-				setSecurevaultProperty(api,tenantDomain,environment,operation);
+				setSecureVaultProperty(api, tenantDomain, environment, operation);
 			}
 
             if(api.isPublishedDefaultVersion()){
@@ -297,7 +295,6 @@ public class APIGatewayManager {
 	 *         available in none.
 	 */
     public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
         for (Environment environment : environments.values()) {
             try {
                 APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
@@ -322,8 +319,7 @@ public class APIGatewayManager {
 	/**
 	 * Get the specified in/out sequences from api object
 	 * 
-	 * @param api
-	 *            -API object
+	 * @param api -API object
 	 * @param tenantDomain
 	 * @param environment
 	 * @throws APIManagementException
@@ -546,10 +542,7 @@ public class APIGatewayManager {
     }
 
     private boolean isSequenceDefined(String sequence){
-        if(sequence != null && !"none".equals(sequence)){
-            return true;
-        }
-        return false;
+        return sequence != null && !"none".equals(sequence);
     }
        
     /**
@@ -560,19 +553,19 @@ public class APIGatewayManager {
      * @param operation -add,delete,update operations for an API
      * @throws APIManagementException
      */
-	private void setSecurevaultProperty(API api, String tenantDomain, Environment environment,String operation)
-	                                                                                          throws APIManagementException {
+	private void setSecureVaultProperty(API api, String tenantDomain, Environment environment, String operation)
+            throws APIManagementException {
 		boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
 		                                                    getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
 		if (api.isEndpointSecured() && isSecureVaultEnabled) {
 			try {							
-				APIGatewayAdminClient securityAdminclient = new APIGatewayAdminClient(api.getId(), environment);
-				if("add".equals(operation.toString())){                                                                                                 
-				securityAdminclient.addSecureVaultProperty(api, tenantDomain);
-				} else if("update".equals(operation.toString())){
-					securityAdminclient.updateSecureVaultProperty(api, tenantDomain);
-				} else if("delete".equals(operation.toString())){
-					securityAdminclient.deleteSecureVaultProperty(api, tenantDomain);
+				APIGatewayAdminClient securityAdminClient = new APIGatewayAdminClient(api.getId(), environment);
+				if("add".equals(operation)){
+				securityAdminClient.addSecureVaultProperty(api, tenantDomain);
+				} else if("update".equals(operation)){
+					securityAdminClient.updateSecureVaultProperty(api, tenantDomain);
+				} else if("delete".equals(operation)){
+					securityAdminClient.deleteSecureVaultProperty(api, tenantDomain);
 				}
 
 			} catch (Exception e) {

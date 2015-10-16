@@ -89,10 +89,8 @@ public abstract class AbstractAPIManager implements APIManager {
         UserRegistry configRegistry;
         try {
             if (username == null) {
-                this.registry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry();
-                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getConfigSystemRegistry();
+                this.registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry();
+                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry();
                 this.username= CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
@@ -107,8 +105,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
                 this.registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
-                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getConfigSystemRegistry(tenantId);
+                configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT( tenantUserName, tenantId);
                 APIUtil.loadTenantAPIPolicy( tenantUserName, tenantId);
@@ -151,7 +148,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 handleException("Error while setting the permissions", e);
             }
         }else if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-            int tenantId = 0;
+            int tenantId;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantManager().getTenantId(tenantDomain);
@@ -448,8 +445,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 Resource docResource = registry.get(docPath);
                 GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
                                                                                     APIConstants.DOCUMENTATION_KEY);
-                GenericArtifact docArtifact = artifactManager.getGenericArtifact(
-                        docResource.getUUID());
+                GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
                 Date contentLastModifiedDate;
                 Date docLastModifiedDate = docResource.getLastModified();
@@ -458,11 +454,9 @@ public abstract class AbstractAPIManager implements APIManager {
                     contentLastModifiedDate = registry.get(contentPath).getLastModified();
                     doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
                                         contentLastModifiedDate : docLastModifiedDate));
-                }else{
+                } else  {
                     doc.setLastUpdated(docLastModifiedDate);
                 }
-
-
                 documentationList.add(doc);
             }
 
@@ -476,7 +470,7 @@ public abstract class AbstractAPIManager implements APIManager {
         List<Documentation> documentationList = new ArrayList<Documentation>();
         String apiResourcePath = APIUtil.getAPIPath(apiId);
         try {
-        	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
             Registry registryType;
             /* If the API provider is a tenant, load tenant registry*/
             boolean isTenantMode=(tenantDomain != null);
@@ -489,7 +483,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 registryType = registry;
             }
             Association[] docAssociations = registryType.getAssociations(apiResourcePath,
-                    APIConstants.DOCUMENTATION_ASSOCIATION);
+                                                                         APIConstants.DOCUMENTATION_ASSOCIATION);
             for (Association association : docAssociations) {
                 String docPath = association.getDestinationPath();
                 Resource docResource = null;
@@ -502,7 +496,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
                 if (docResource != null) {
                     GenericArtifactManager artifactManager = new GenericArtifactManager(registryType,
-                            APIConstants.DOCUMENTATION_KEY);
+                                                                                        APIConstants.DOCUMENTATION_KEY);
                     GenericArtifact docArtifact = artifactManager.getGenericArtifact(
                             docResource.getUUID());
                     Documentation doc = APIUtil.getDocumentation(docArtifact, apiId.getProviderName());
@@ -510,15 +504,15 @@ public abstract class AbstractAPIManager implements APIManager {
                     Date docLastModifiedDate = docResource.getLastModified();
                     if (Documentation.DocumentSourceType.INLINE.equals(doc.getSourceType())) {
                         String contentPath = APIUtil.getAPIDocContentPath(apiId, doc.getName());
-                         try{
-                        contentLastModifiedDate = registryType.get(contentPath).getLastModified();
-                        doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
-                                     contentLastModifiedDate : docLastModifiedDate));
-                         } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
-                        //do nothing. Permission not allowed to access the doc.
-                         }
+                        try    {
+                            contentLastModifiedDate = registryType.get(contentPath).getLastModified();
+                            doc.setLastUpdated((contentLastModifiedDate.after(docLastModifiedDate) ?
+                                                contentLastModifiedDate : docLastModifiedDate));
+                        } catch (org.wso2.carbon.registry.core.secure.AuthorizationFailedException e) {
+                            //do nothing. Permission not allowed to access the doc.
+                        }
 
-                    }else{
+                    } else  {
                         doc.setLastUpdated(docLastModifiedDate);
                     }
                     documentationList.add(doc);
@@ -527,8 +521,8 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (RegistryException e) {
             handleException("Failed to get documentations for api " + apiId.getApiName(), e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-        	handleException("Failed to get documentations for api " + apiId.getApiName(), e);
-		}
+            handleException("Failed to get documentations for api " + apiId.getApiName(), e);
+        }
         return documentationList;
     }
 
@@ -606,7 +600,7 @@ public abstract class AbstractAPIManager implements APIManager {
     	if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             context = "/t/" + tenantDomain + context;
         }
-        return apiMgtDAO.isContextExist(context);
+        return ApiMgtDAO.isContextExist(context);
     }
     
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
@@ -653,8 +647,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             if (registry.resourceExists(thumbPath)) {
                 Resource res = registry.get(thumbPath);
-                Icon icon = new Icon(res.getContentStream(), res.getMediaType());
-                return icon;
+                return new Icon(res.getContentStream(), res.getMediaType());
             }
         } catch (RegistryException e) {
             handleException("Error while loading API icon from the registry", e);
@@ -766,8 +759,6 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return Set<Tier>
      */
     public Set<Tier> getTiers() throws APIManagementException {
-
-
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
         Map<String, Tier> tierMap;
@@ -812,11 +803,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return Map<String, String>
      */
     public Map<String,String> getTenantDomainMappings(String tenantDomain, String apiType) throws APIManagementException {
-        boolean isTenantFlowStarted = false;
-        Map<String,String> domains;
-
-        domains = APIUtil.getDomainMappings(tenantDomain, apiType);
-
+        Map<String,String> domains = APIUtil.getDomainMappings(tenantDomain, apiType);
         return domains;
     }
 
