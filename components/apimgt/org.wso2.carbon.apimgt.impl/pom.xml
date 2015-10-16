@@ -267,7 +267,8 @@
                             org.wso2.carbon.apimgt.impl.internal.*
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}",
+                            !org.wso2.carbon.apimgt.impl.dto.xsd;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.carbon.apimgt.api.model.xsd.*,

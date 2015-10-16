@@ -100,7 +100,8 @@ public class ScopesIssuer {
             String[] userRoles = null;
 
             try {
-                tenantId = tokReqMsgCtx.getTenantID();
+                tenantId = realmService.getTenantManager().
+                                    getTenantId(tokReqMsgCtx.getAuthorizedUser().getTenantDomain());
 
                 // If tenant Id is not set in the tokenReqContext, deriving it from username.
                 if (tenantId == 0 || tenantId == -1) {
