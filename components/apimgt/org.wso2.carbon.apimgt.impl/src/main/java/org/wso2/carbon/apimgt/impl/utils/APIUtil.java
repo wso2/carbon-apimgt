@@ -2536,9 +2536,23 @@ public final class APIUtil {
                 return;
             }
 
+            String tenantConfLocation = CarbonUtils.getCarbonHome() + File.separator +
+                    APIConstants.RESOURCE_FOLDER_LOCATION + File.separator +
+                    APIConstants.API_TENANT_CONF;
+
+            File tenantConfFile = new File(tenantConfLocation);
+
+            byte[] data;
+
+            if (tenantConfFile.exists()) { // Load conf from resources directory in pack if it exists
+                FileInputStream fileInputStream = new FileInputStream(tenantConfFile);
+                data = IOUtils.toByteArray(fileInputStream);
+            } else { // Fallback to loading the conf that is stored at jar level if file does not exist in pack
+                InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/tenant/" + APIConstants.API_TENANT_CONF);
+                data = IOUtils.toByteArray(inputStream);
+            }
+
             log.debug("Adding tenant config to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/tenant/" + APIConstants.API_TENANT_CONF);
-            byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setMediaType(APIConstants.APPLICATION_JSON_MEDIA_TYPE);
             resource.setContent(data);

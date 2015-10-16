@@ -233,6 +233,12 @@
                                     </includes>
                                 </resource>
                                 <resource>
+                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources</directory>
+                                    <includes>
+                                        <include>tenant/tenant-conf.json</include>
+                                    </includes>
+                                </resource>
+                                <resource>
                                     <directory>${project.build.directory}/external/</directory>
                                 </resource>
                             </resources>
