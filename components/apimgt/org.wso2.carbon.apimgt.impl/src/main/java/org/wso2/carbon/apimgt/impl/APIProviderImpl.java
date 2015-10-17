@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -75,6 +76,11 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.beans.LifecycleBean;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleActions;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
+import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.registry.common.CommonConstants;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
@@ -870,7 +876,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIStatus oldStatus = api.getStatus();
                 APIStatus newStatus = APIUtil.getApiStatus(status);
                 String currentUser = this.username;
-                changeAPIStatus(api, newStatus, currentUser, publishToGateway);
+                changeAPIStatus(api, newStatus, APIUtil.appendDomainWithUser(currentUser,tenantDomain), publishToGateway);
 
                 if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
                         && newStatus.equals(APIStatus.PUBLISHED)) {
@@ -913,16 +919,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIStatus currentStatus = api.getStatus();
         if (!currentStatus.equals(status)) {
             api.setStatus(status);
-            MultitenantUtils.getTenantDomain(username);
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             try {
                 //If API status changed to publish we should add it to recently added APIs list
                 //this should happen in store-publisher cluster domain if deployment is distributed
                 //IF new API published we will add it to recently added APIs
                 Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME).removeAll();
-                APIStatusObserverList observerList = APIStatusObserverList.getInstance();
-                observerList.notifyObservers(currentStatus, status, api);
+                //Commented out picking the below APIStatusObserver as this can be done via registry lc executor
+                //APIStatusObserverList observerList = APIStatusObserverList.getInstance();
+                //observerList.notifyObservers(currentStatus, status, api);
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
                 String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
@@ -968,9 +972,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (APIManagementException e) {
             	handleException("Error occured in the status change : " + api.getId().getApiName() + ". " 
             	                                                                                + e.getMessage(), e);
-            }
-            finally {
-                PrivilegedCarbonContext.endTenantFlow();
             }
         }
         if (!failedGateways.isEmpty() &&
@@ -1288,6 +1289,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             artifactManager.addGenericArtifact(artifact);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
+            //Attach the API lifecycle
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             registry.addAssociation(APIUtil.getAPIProviderPath(api.getId()), targetPath,
                                     APIConstants.PROVIDER_ASSOCIATION);
             String roles=artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
@@ -1633,6 +1636,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     artifactManager.newGovernanceArtifact(new QName(api.getId().getApiName()));
             GenericArtifact artifact = APIUtil.createAPIArtifactContent(genericArtifact, api);
             artifactManager.addGenericArtifact(artifact);
+            //Attach the API lifecycle
+            artifact.attachLifecycle(APIConstants.API_LIFE_CYCLE);
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             String providerPath = APIUtil.getAPIProviderPath(api.getId());
             //provider ------provides----> API
@@ -2641,6 +2646,149 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
+            throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
+
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            String currentStatus = apiArtifact.getLifecycleState();
+            if (!currentStatus.equalsIgnoreCase(targetStatus)) {
+                apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
+            }
+            return true;
+        } catch (GovernanceException e) {
+            handleException("Failed to change the life cycle status : ", e);
+            return false;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
+    @Override
+    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
+            throws APIManagementException {
+        GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+        Boolean success = false;
+        try {
+            if (checkItemValue) {
+                apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+            } else {
+                apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+            }
+            success = true;
+        } catch (GovernanceException e) {
+            handleException("Error while setting registry lifecycle checklist items for the API: " +
+                    apiIdentifier.getApiName(), e);
+        }
+        return success;
+    }
+
+    @Override
+    /*
+    * This method returns the lifecycle data for an API including current state,next states.
+    *
+    * @param apiId APIIdentifier
+    * @return Map<String,Object> a map with lifecycle data
+    */
+    public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
+        String path = APIUtil.getAPIPath(apiId);
+        Map<String, Object> lcData = new HashMap<String, Object>();
+
+        try {
+            Resource apiSourceArtifact = registry.get(path);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(
+                    apiSourceArtifact.getUUID());
+            //Get all the actions corresponding to current state of the api artifact
+            String[] actions = artifact.getAllLifecycleActions(APIConstants.API_LIFE_CYCLE);
+            //Put next states into map
+            lcData.put(APIConstants.LC_NEXT_STATES, actions);
+            String lifeCycleState = artifact.getLifecycleState();
+            LifecycleBean bean;
+
+            bean = LifecycleBeanPopulator.getLifecycleBean(path, (UserRegistry) registry, configRegistry);
+            if (bean != null) {
+
+                ArrayList<CheckListItem> checkListItems = new ArrayList<CheckListItem>();
+                ArrayList permissionList = new ArrayList();
+
+                //Get lc properties
+                Property[] lifecycleProps = bean.getLifecycleProperties();
+                //Get roles of the current session holder
+                String[] roleNames = bean.getRolesOfUser();
+
+                for (Property property : lifecycleProps) {
+                    String propName = property.getKey();
+                    String[] propValues = property.getValues();
+                    //Check for permission properties if any exists
+                    if (propValues != null && propValues.length != 0) {
+                        if (propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                                propName.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX) &&
+                                propName.contains(APIConstants.API_LIFE_CYCLE)) {
+                            for (String role : roleNames) {
+                                for (String propValue : propValues) {
+                                    String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "")
+                                                 .replace(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX, "");
+                                    if (propValue.equals(role)) {
+                                        permissionList.add(key);
+                                    } else if (propValue.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                                               propValue.endsWith(APIConstants.LC_PROPERTY_PERMISSION_SUFFIX)) {
+                                        permissionList.add(key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                //Check for lifecycle checklist item properties defined
+                for (Property property : lifecycleProps) {
+                    String propName = property.getKey();
+                    String[] propValues = property.getValues();
+
+                    if (propValues != null && propValues.length != 0) {
+
+                        CheckListItem checkListItem = new CheckListItem();
+                        checkListItem.setVisible("false");
+                        if ((propName.startsWith(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX) &&
+                                propName.endsWith(APIConstants.LC_PROPERTY_ITEM_SUFFIX) &&
+                                propName.contains(APIConstants.API_LIFE_CYCLE))) {
+                            if (propValues.length > 2) {
+                                for (String param : propValues) {
+                                    if ((param.startsWith(APIConstants.LC_STATUS))) {
+                                        checkListItem.setLifeCycleStatus(param.substring(7));
+                                    } else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_NAME))) {
+                                        checkListItem.setName(param.substring(5));
+                                    } else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_VALUE))) {
+                                        checkListItem.setValue(param.substring(6));
+                                    } else if ((param.startsWith(APIConstants.LC_CHECK_ITEM_ORDER))) {
+                                        checkListItem.setOrder(param.substring(6));
+                                    }
+                                }
+                            }
+
+                            String key = propName.replace(APIConstants.LC_PROPERTY_CHECKLIST_PREFIX, "").
+                                    replace(APIConstants.LC_PROPERTY_ITEM_SUFFIX, "");
+                            if (permissionList.contains(key)) { //Set visible to true if the checklist item permits
+                                checkListItem.setVisible("true");
+                            }
+                        }
+
+                        if (checkListItem.matchLifeCycleStatus(lifeCycleState)) {
+                            checkListItems.add(checkListItem);
+                        }
+                    }
+                }
+                lcData.put("items", checkListItems);
+            }
+        } catch (Exception e) {
+            handleException(e.getMessage(), e);
+        }
+        return lcData;
+    }
+
+
 }
-
-
