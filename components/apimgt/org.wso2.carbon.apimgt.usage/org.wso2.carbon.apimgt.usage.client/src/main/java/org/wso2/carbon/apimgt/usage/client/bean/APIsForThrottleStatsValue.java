@@ -47,7 +47,7 @@ public class APIsForThrottleStatsValue {
     public void setThrottleout_count(int throttleout_count) {
         this.throttleout_count = throttleout_count;
     }
-    public List<String> getApi_apiPublisher_applicationName_facet() {
+    public List<String> getColumnNames() {
         return api_apiPublisher_applicationName_facet;
     }
     public void setApi_apiPublisher_applicationName_facet(

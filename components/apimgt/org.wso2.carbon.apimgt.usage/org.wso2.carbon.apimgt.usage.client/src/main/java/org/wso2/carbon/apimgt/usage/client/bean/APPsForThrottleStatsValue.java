@@ -31,7 +31,7 @@ public class APPsForThrottleStatsValue {
         this.count = count;
     }
 
-    public List<String> getApplicationName_facet() {
+    public List<String> getColumnNames() {
         return applicationName_facet;
     }
 

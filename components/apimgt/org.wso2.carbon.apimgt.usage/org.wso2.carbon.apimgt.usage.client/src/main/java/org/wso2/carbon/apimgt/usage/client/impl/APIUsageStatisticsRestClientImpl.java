@@ -28,6 +28,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -1568,8 +1569,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     //Throttling related Methods
 
-    //this contain the old RDBMS codes and not ported for REST Client yet
-
     /**
      * Given API name and Application, returns throttling request counts over time for a given time span
      *
@@ -1586,44 +1585,69 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String appName, String fromDate, String toDate, String groupBy)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query = "";
+        //get the tenant domain
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        //set the query to match tenant
+        String query = "tenantDomain:"+tenantDomain;
+
+        //if provider is not ALL_PROVIDERS set the query to preserve specific provider
+        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
+            query+=" AND apiPublisher:"+provider;
+        }
+
+        //set the application name
+        if(!StringUtils.isEmpty(appName)){
+            query+=" AND "+"applicationName:"+appName;
+        }
+
+        //lucene query with time ranges
         try {
-            query = "api:"+apiName+" AND "+"applicationName:"+appName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
+            query += " AND api:"+apiName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
-        SearchRequestBean request = new SearchRequestBean("", 2, "api_apiPublisher_applicationName_facet",
+
+        //creating request bean
+        SearchRequestBean request = new SearchRequestBean(query, 2, "api_apiPublisher_applicationName_facet",
                 "API_THROTTLED_OUT_SUMMARY");
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+
+        //set the aggregate request to get success count
         AggregateField field = new AggregateField("success_request_count",
                 "SUM", "success_request_count");
         fields.add(field);
+
+        //set the aggregate request to get max time
         AggregateField longTime = new AggregateField("max_request_time",
                 "MAX", "max_request_time");
         fields.add(longTime);
         request.setAggregateFields(fields);
 
-        Type ty = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
         }.getType();
 
+        //do post and get the results
         List<Result<APIsForThrottleStatsValue>> obj = null;
         try{
-            obj = restClient.doPost(request, ty);
+            obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
             handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
+        //get the DTO class from the response bean classes
+        //getColumnNames 0 index contain the api name, index 1 contain the publisher, 2 index contain application
         List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
         APIThrottlingOverTimeDTO usage;
         for (Result<APIsForThrottleStatsValue> result : obj) {
             APIsForThrottleStatsValue v = result.getValues();
 
-            String api=v.getApi_apiPublisher_applicationName_facet().get(0);
-            String publisher=v.getApi_apiPublisher_applicationName_facet().get(1);
+            String api=v.getColumnNames().get(0);
+            String publisher=v.getColumnNames().get(1);
             String time=RestClientUtil.longToDate(v.getMax_request_time());
             usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottleout_count(), time);
             throttlingData.add(usage);
@@ -1631,7 +1655,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return throttlingData;
     }
 
-    //this contain the old RDBMS codes and not ported for REST Client yet
 
     /**
      * Given Application name and the provider, returns throttle data for the APIs of the provider invoked by the
@@ -1647,32 +1670,49 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
             String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
 
-        String query = "";
+        //get the tenant domain
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        //set the query to match tenant
+        String query = "tenantDomain:"+tenantDomain;
+
+        //if provider is not ALL_PROVIDERS set the query to preserve specific provider
+        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
+            query+=" AND apiPublisher:"+provider;
+        }
+
+        //lucene query with time ranges
         try {
-            query = "applicationName:"+appName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
+            query += " AND applicationName:"+appName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
                     .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
+
+        //creating request bean
         SearchRequestBean request = new SearchRequestBean(query, 1, "api_apiPublisher_applicationName_facet",
                 "API_THROTTLED_OUT_SUMMARY");
 
+        //set the aggregate request to get success count
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field0 = new AggregateField("success_request_count",
+        AggregateField success_request_count_field = new AggregateField("success_request_count",
                 "SUM", "success_request_count");
-        fields.add(field0);
-        AggregateField field1 = new AggregateField("throttleout_count",
+        fields.add(success_request_count_field);
+
+        //set the aggregate request to get throttle count
+        AggregateField throttleout_count_fields = new AggregateField("throttleout_count",
                 "SUM", "throttleout_count");
-        fields.add(field1);
+        fields.add(throttleout_count_fields);
 
         request.setAggregateFields(fields);
 
-        Type ty = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
         }.getType();
 
+        //do post and get the results
         List<Result<APIsForThrottleStatsValue>> obj = null;
         try{
-            obj = restClient.doPost(request, ty);
+            obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
@@ -1681,19 +1721,20 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         List<APIThrottlingOverTimeDTO> throttlingAppData = new ArrayList<APIThrottlingOverTimeDTO>();
 
+        //get the DTO class from the response bean classes
+        //getColumnNames 0 index contain the api name, index 1 contain the publisher, 2 index contain application
         APIThrottlingOverTimeDTO usage;
         for (Result<APIsForThrottleStatsValue> result : obj) {
             APIsForThrottleStatsValue v = result.getValues();
-            String api=v.getApi_apiPublisher_applicationName_facet().get(0);
-            String publisher=v.getApi_apiPublisher_applicationName_facet().get(1);
-
-            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottleout_count(), "");
+            String api=v.getColumnNames().get(0);
+            String publisher=v.getColumnNames().get(1);
+            String time=RestClientUtil.longToDate(v.getMax_request_time());
+            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottleout_count(), time);
             throttlingAppData.add(usage);
         }
         return throttlingAppData;
     }
 
-    //this contain the old RDBMS codes and not ported for REST Client yet
 
     /**
      * Get APIs of the provider that consist of throttle data
@@ -1705,8 +1746,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override public List<String> getAPIsForThrottleStats(String provider)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query = "";
-        SearchRequestBean request = new SearchRequestBean("", 0, "api_apiPublisher_applicationName_facet",
+        //get the tenant domain
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        //set the query to match tenant
+        String query = "tenantDomain:"+tenantDomain;
+
+        //if provider is not ALL_PROVIDERS set the query to preserve specific provider
+        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
+            query+=" AND apiPublisher:"+provider;
+        }
+
+        //creating request bean
+        SearchRequestBean request = new SearchRequestBean(query, 0, "api_apiPublisher_applicationName_facet",
                 "API_THROTTLED_OUT_SUMMARY");
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
@@ -1714,27 +1765,30 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         fields.add(field);
         request.setAggregateFields(fields);
 
-        Type ty = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
         }.getType();
         List<Result<APIsForThrottleStatsValue>> obj=null;
 
+        //do post and get the results
         try{
-             obj = restClient.doPost(request, ty);
+             obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
             handleException("Error occurred while Connecting to DAS REST API", e);
         }
 
+        //crete new list with apis in result
         List<String> throttlingAPIData = new ArrayList<String>();
         for (Result<APIsForThrottleStatsValue> result : obj) {
             APIsForThrottleStatsValue v = result.getValues();
-            throttlingAPIData.add(v.getApi_apiPublisher_applicationName_facet().get(0));
+            //getColumnNames 1 st element is api name
+            throttlingAPIData.add(v.getColumnNames().get(0));
         }
         return throttlingAPIData;
     }
 
-    //this contain the old RDBMS codes and not ported for REST Client yet
 
     /**
      * Given provider name and the API name, returns a list of applications through which the corresponding API is
@@ -1747,29 +1801,49 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override public List<String> getAppsForThrottleStats(String provider, String apiName)
             throws APIMgtUsageQueryServiceClientException {
-        String query = "";
-        SearchRequestBean request = new SearchRequestBean("", 0, "applicationName_facet", "API_THROTTLED_OUT_SUMMARY");
+        //get the tenant domain
+        String tenantDomain = MultitenantUtils.getTenantDomain(provider);
+        //set the query to match tenant
+        String query = "tenantDomain:"+tenantDomain;
+
+        //if provider is not ALL_PROVIDERS set the query to preserve specific provider
+        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
+            query+=" AND apiPublisher:"+provider;
+        }
+
+        //set the query to find specific api
+        if( apiName != null ){
+            query+=" AND api:"+apiName;
+        }
+
+        //creating request bean
+        SearchRequestBean request = new SearchRequestBean(query, 0, "applicationName_facet", "API_THROTTLED_OUT_SUMMARY");
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField("success_request_count", "SUM", "count");
         fields.add(field);
         request.setAggregateFields(fields);
 
-        Type ty = new TypeToken<List<Result<APPsForThrottleStatsValue>>>() {
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<APPsForThrottleStatsValue>>>() {
         }.getType();
         List<Result<APPsForThrottleStatsValue>> obj=null;
 
+        //do post and get the results
         try{
-        obj = restClient.doPost(request, ty);
+        obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
             handleException("Error occurred while Connecting to DAS REST API", e);
         }
+
+        //crete new list with apps in result
         List<String> throttlingAppData = new ArrayList<String>();
         for (Result<APPsForThrottleStatsValue> result : obj) {
             APPsForThrottleStatsValue v = result.getValues();
-            throttlingAppData.add(v.getApplicationName_facet().get(0));
+            //getColumnNames 1 st element is app name
+            throttlingAppData.add(v.getColumnNames().get(0));
         }
         return throttlingAppData;
     }
