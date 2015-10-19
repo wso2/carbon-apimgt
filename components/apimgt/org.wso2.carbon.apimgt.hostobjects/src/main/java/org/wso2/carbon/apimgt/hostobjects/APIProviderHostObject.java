@@ -610,6 +610,8 @@ public class APIProviderHostObject extends ScriptableObject {
         String outSequence = (String) apiData.get("outSequence", apiData);
         String faultSequence = (String) apiData.get("faultSequence", apiData);
 
+        api.removeCustomSequences();
+
         if (!"none".equals(inSequence))  {
             api.setInSequence(inSequence);
         }
