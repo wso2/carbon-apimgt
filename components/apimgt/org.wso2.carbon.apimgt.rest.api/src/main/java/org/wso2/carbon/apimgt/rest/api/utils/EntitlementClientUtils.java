@@ -25,14 +25,14 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * Util methods for test setup
+ * Util methods for Entitlement client use to validate requests
  */
 public class EntitlementClientUtils {
 
     private static Properties configProperties;
 
 
-    public static String getPolicyDirectoryPath(String samplePolicyName) {
+    /*public static String getPolicyDirectoryPath(String samplePolicyName) {
         String path = null;
         if(configProperties != null){
             String policyPath =  configProperties.getProperty(EntitlementClientConstants.POLICY_PATH);
@@ -53,9 +53,9 @@ public class EntitlementClientUtils {
             }
         }
         return path;
-    }
+    } */
 
-    public static String getTrustStore() throws Exception {
+    /*public static String getTrustStore() throws Exception {
         if(configProperties != null  && configProperties.getProperty(EntitlementClientConstants.TRUST_STORE_PATH) != null){
             return  configProperties.getProperty(EntitlementClientConstants.TRUST_STORE_PATH);
         } else {
@@ -79,44 +79,43 @@ public class EntitlementClientUtils {
         } else {
             return "wso2carbon";
         }
+    } */
+
+    public static String getServerUrl() {
+        return configProperties != null && configProperties.getProperty(EntitlementClientConstants.SERVER_URL) != null ?
+                configProperties.getProperty(EntitlementClientConstants.SERVER_URL)
+                : "https://localhost:9444/services/";
     }
 
-    public static String getServerUrl(){
-        if(configProperties != null  && configProperties.getProperty(EntitlementClientConstants.SERVER_URL) != null){
-            return configProperties.getProperty(EntitlementClientConstants.SERVER_URL);
-        } else {
-            return "https://localhost:9444/services/";
+    public static String getServerUsername() {
+        return configProperties != null && configProperties.getProperty(EntitlementClientConstants.SERVER_USER_NAME) != null ?
+                configProperties.getProperty(EntitlementClientConstants.SERVER_USER_NAME) :
+                "admin";
+    }
+
+    public static String getServerPassword() {
+        String ret;
+        if (configProperties != null){
+            ret = configProperties.getProperty(EntitlementClientConstants.SERVER_PASSWORD);
+            if(ret !=null){
+                return ret;
+            }
         }
+        return "admin";
     }
-
-    public static String getServerUsername(){
-        if(configProperties != null  && configProperties.getProperty(EntitlementClientConstants.SERVER_USER_NAME) != null){
-            return configProperties.getProperty(EntitlementClientConstants.SERVER_USER_NAME);
-        } else {
-            return "admin";
-        }
-    }
-
-    public static String getServerPassword(){
-        if(configProperties != null  && configProperties.getProperty(EntitlementClientConstants.SERVER_PASSWORD) != null){
-            return configProperties.getProperty(EntitlementClientConstants.SERVER_PASSWORD);
-        } else {
-            return "admin";
-        }
-    }
-
 
     /**
      * reads values from config property file
+     *
      * @throws Exception throws, if fails
      */
     public static void loadConfigProperties() throws Exception {
         Properties properties = new Properties();
         InputStream inputStream = null;
         try {
-            File file = new File((new File(".")).getCanonicalPath() + File.separator +"resources" +
-                    File.separator +"config.properties");
-            if(file.exists()){
+            File file = new File((new File(".")).getCanonicalPath() + File.separator + "resources" +
+                    File.separator + "config.properties");
+            if (file.exists()) {
                 inputStream = new FileInputStream(file);
             } else {
                 String msg = "File does not exist : " + "config.properties";
@@ -133,7 +132,7 @@ public class EntitlementClientUtils {
         }
 
         try {
-            if(inputStream != null){
+            if (inputStream != null) {
                 properties.load(inputStream);
             }
         } catch (IOException e) {
@@ -142,7 +141,7 @@ public class EntitlementClientUtils {
             throw new Exception(msg, e);
         } finally {
             try {
-                if(inputStream!= null){
+                if (inputStream != null) {
                     inputStream.close();
                 }
             } catch (IOException ignored) {

@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
             <type>war</type>
             <version>4.3.0-SNAPSHOT</version>
         </dependency>
@@ -61,7 +61,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api</artifactId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
                                     <overWrite>true</overWrite>
                                     <type>war</type>
                                     <outputDirectory>${basedir}/src/main/resources/</outputDirectory>

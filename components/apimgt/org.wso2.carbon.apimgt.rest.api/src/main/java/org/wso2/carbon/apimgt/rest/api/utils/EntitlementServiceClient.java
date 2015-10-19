@@ -23,6 +23,8 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.transport.http.HttpTransportProperties;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.entitlement.stub.EntitlementServiceException;
 import org.wso2.carbon.identity.entitlement.stub.EntitlementServiceStub;
@@ -31,26 +33,27 @@ import org.wso2.carbon.utils.CarbonUtils;
 import java.io.File;
 import java.rmi.RemoteException;
 
+/**
+ * This class will be used to initiate connection with PDP and get decision based on request
+ */
 public class EntitlementServiceClient {
     EntitlementServiceStub entitlementServiceStub;
-    public EntitlementServiceClient(String[] args) throws Exception {
-        //EntitlementClientUtils.loadConfigProperties();
-        //String trustStore = EntitlementClientUtils.getTrustStore();
-        //System.setProperty("javax.net.ssl.trustStore",  trustStore );
-        //System.setProperty("javax.net.ssl.trustStorePassword", EntitlementClientUtils.getTrustStorePassword());
+    private static final Log logger = LogFactory.getLog(EntitlementServiceClient.class);
+
+    /**
+     * This method will initiate entitlement service client which calls PDP
+     * @throws Exception whenever if failed to initiate client properly.
+     */
+    public EntitlementServiceClient() throws Exception {
         ConfigurationContext configContext;
-        boolean isTenantFlowStarted;
-
         try {
-
-            String clientRepo = CarbonUtils.getCarbonHome() + File.separator + "repository" +
+            String repositoryBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository";
+            String clientRepo = repositoryBasePath +
                     File.separator + "deployment" + File.separator + "client";
-            String clientAxisConf = CarbonUtils.getCarbonHome() + File.separator + "repository" +
-                    File.separator + "conf" + File.separator + "axis2"+ File.separator +"axis2_client.xml";
+            String clientAxisConf = repositoryBasePath +
+                    File.separator + "conf" + File.separator + "axis2" + File.separator + "axis2_client.xml";
 
-            ConfigurationContext configContext1 =   ConfigurationContextFactory. createConfigurationContextFromFileSystem(clientRepo,clientAxisConf);
-
-            configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem( null, null);
+            configContext = ConfigurationContextFactory.createConfigurationContextFromFileSystem(clientRepo, clientAxisConf);
             String serviceEndPoint = EntitlementClientUtils.getServerUrl() + "EntitlementService";
             entitlementServiceStub =
                     new EntitlementServiceStub(configContext, serviceEndPoint);
@@ -64,23 +67,31 @@ public class EntitlementServiceClient {
             option.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
             option.setManageSession(true);
         } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(0);
+            logger.error("Error while initiating entitlement service client " + e.getMessage());
         }
     }
 
-    public String validateAction(String subject, String resource, String action, String[] environment){
+    /**
+     * @param subject     subject to be check with PDP
+     * @param resource    resource name to be checked with PDP
+     * @param action      action to be check with PDP
+     * @param environment environment to be check with PDP
+     * @return Allow if resource can be accessible
+     *         Deny if resource forbidden
+     *         Not Applicable if cannot find matched policy
+     */
+    public String validateAction(String subject, String resource, String action, String[] environment) {
         String decision = "DENY";
         try {
-            decision =entitlementServiceStub.getDecisionByAttributes(subject,resource,action,environment);
+            decision = entitlementServiceStub.getDecisionByAttributes(subject, resource, action, environment);
             System.out.println("\nXACML Decision is received : " + decision);
             String authCookie = (String) entitlementServiceStub._getServiceClient().getServiceContext()
                     .getProperty(HTTPConstants.COOKIE_STRING);
             System.out.println("\nCookie is received for subsequent communication :  " + authCookie);
         } catch (RemoteException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Error while connecting PDP " + e.getMessage());
         } catch (EntitlementServiceException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            logger.error("Error while validating XACML policy for given request " + e.getMessage());
         }
         return decision;
     }
