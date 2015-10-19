@@ -1099,11 +1099,6 @@ paths:
   /environments:
     get:
       description: Get a list of gateway environments configured previously
-      parameters:
-        - in: query
-          name: apiId
-          description: Will return environment list for the provided API
-          type: string
       responses:
         '200':
           description: OK. environment list is returned.
