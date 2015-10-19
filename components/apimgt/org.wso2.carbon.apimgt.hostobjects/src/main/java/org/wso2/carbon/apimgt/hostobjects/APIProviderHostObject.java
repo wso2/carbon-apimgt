@@ -1810,7 +1810,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setDestinationStatsEnabled(destinationStats);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
@@ -3172,7 +3172,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         API api = new API(apiId);
-        api.setAsDefaultVersion(defaultVersion.equals("default_version") ? true : false);
+        api.setAsDefaultVersion(defaultVersion.equals("default_version"));
 
         APIProvider apiProvider = getAPIProvider(thisObj);
         boolean isTenantFlowStarted = false;
@@ -4575,6 +4575,9 @@ public class APIProviderHostObject extends ScriptableObject {
 	public static NativeArray jsFunction_getCustomOutSequences(Context cx, Scriptable thisObj,
 	                                                        Object[] args, Function funObj)
             throws APIManagementException {
+        if (args == null ||  args.length != 3) {
+            handleException("Invalid input parameters.");
+        }
 		APIProvider apiProvider = getAPIProvider(thisObj);
         String apiName = (String) args[0];
         String apiVersion = (String) args[1];
@@ -4611,6 +4614,9 @@ public class APIProviderHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
                                                               Object[] args, Function funObj)
             throws APIManagementException {
+        if (args == null ||  args.length != 3) {
+            handleException("Invalid input parameters.");
+        }
         APIProvider apiProvider = getAPIProvider(thisObj);
 
         String apiName = (String) args[0];
