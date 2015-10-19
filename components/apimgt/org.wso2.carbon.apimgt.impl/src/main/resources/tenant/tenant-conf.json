@@ -1,4 +1,5 @@
 {
   "EnableMonetization" : false,
-  "IsUnlimitedTierPaid" : false
+  "IsUnlimitedTierPaid" : false,
+  "ExtensionHandlerPosition": "bottom"
 }

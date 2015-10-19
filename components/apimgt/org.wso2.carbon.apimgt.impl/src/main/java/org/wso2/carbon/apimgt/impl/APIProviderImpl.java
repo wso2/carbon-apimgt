@@ -2114,7 +2114,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Retrieves Extension Handler Position from the tenant-config.json
      *
-     * @return Extension    HandlerPosition
+     * @return ExtensionHandlerPosition
      * @throws APIManagementException
      */
     private String getExtensionHandlerPosition() throws APIManagementException {
