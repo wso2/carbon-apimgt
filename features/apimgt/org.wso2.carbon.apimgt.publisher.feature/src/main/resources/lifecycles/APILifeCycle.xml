@@ -86,6 +86,7 @@
                     <transition event="Demote to Prototyped" target="Prototyped"/>
                     <transition event="Demote to Created" target="Created"/>
                     <transition event="Deprecate" target="Deprecated"/>
+                    <transition event="Publish" target="Published"/>
                 </state>
 
                 <state id="Blocked">
