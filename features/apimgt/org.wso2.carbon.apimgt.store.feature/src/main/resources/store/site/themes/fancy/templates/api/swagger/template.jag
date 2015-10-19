@@ -116,7 +116,7 @@ var select_environment = function(){
     window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});            
       }
     }else{
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "? envName="+name});
+    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
     }
     change_token();
           };

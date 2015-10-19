@@ -21,9 +21,12 @@ jagg.block("api/api-listing-all", {
         }
 
         var log = new Log();
-                
+
         if(tag == null) { tag = inputs.tag;}
         tenantDomain = jagg.getTenantDomain();
+
+        var consumer = jagg.module("manager").getAPIConsumerObj();
+        var isMonetizationEnabled = consumer.isMonetizationEnabled(tenantDomain);
 
         if(page==null){
         page=1;
@@ -37,7 +40,7 @@ jagg.block("api/api-listing-all", {
             apis = response.result.apis;
         } else if (query) {
             mod = jagg.module("search");
-            response = mod.searchPaginatedAPIs(query,tenantDomain,start,end);
+            response = mod.searchPaginatedAPIs(query,tenantDomain,start,end, "true");
             if(response.error){
                 error = true;
                 message = response.message;
@@ -67,6 +70,7 @@ jagg.block("api/api-listing-all", {
             "apis":apis,
             "totalLength":response.result.totalLength,
             "isMore":response.result.isMore,
+            "isMonetizationEnabled":isMonetizationEnabled,
             "error":error,
             "message":message
         };

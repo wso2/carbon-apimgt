@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import javax.xml.namespace.QName;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -67,6 +68,26 @@ public final class APIConstants {
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
     
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
+
+    public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
+
+    public static final String API_TENANT_CONF = "tenant-conf.json";
+
+    public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
+
+    public static final String RESOURCE_FOLDER_LOCATION = "repository"+ File.separator + "resources";
+
+    public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
+
+    public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
+
+    public static final String API_TIER_IS_PAID_ATTRIBUTE = "IsPaid";
+
+    public static final String API_CATEGORY_FREE = "Free";
+
+    public static final String API_CATEGORY_FREEMIUM = "Freemium";
+
+    public static final String API_CATEGORY_PAID = "Paid";
 
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
@@ -275,7 +296,18 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
+    public static final String LC_NEXT_STATES="nextStates";
+    public static final String LC_PROPERTY_LIFECYCLE_NAME_PREFIX="registry.lifecycle.";
+    public static final String LC_PROPERTY_CHECKLIST_PREFIX="registry.custom_lifecycle.checklist.";
+    public static final String LC_PROPERTY_STATE_SUFFIX=".state";
+    public static final String LC_PROPERTY_PERMISSION_SUFFIX=".item.permission";
+    public static final String LC_PROPERTY_ITEM_SUFFIX=".item";
+    public static final String LC_STATUS="status:";
+    public static final String LC_CHECK_ITEM_NAME="name:";
+    public static final String LC_CHECK_ITEM_VALUE="value:";
+    public static final String LC_CHECK_ITEM_ORDER="order:";
 
 
 
@@ -795,5 +827,8 @@ public final class APIConstants {
     public static final String USER_AGENT = "User-Agent";
 
     public static final long MAX_FILE_SIZE = 1024L;
+
+    public static final String API_CUSTOM_IN_SEQUENCE_FILE_NAME = "custom_in_sequence.xml";
+    public static final String API_CUSTOM_OUT_SEQUENCE_FILE_NAME = "custom_out_sequence.xml";
 
 }

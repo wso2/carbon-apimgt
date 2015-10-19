@@ -84,13 +84,15 @@
     "lifeCycle":"Ciclo de vida",
     "docs":"Docs",
     "users":"Usuarios",
-    "state":"Estado",
+    "state":"Estado actual",
 
     "subsPendingApproval":"Subscription is pending approval",
 
     "propagateChangesToGateway":"Propagar Cambios en API Gateway",
     "requireReSubscription":"Requerir Re-suscripcion",
     "deprecateOldVersions":"Desprobar Versiones Anteriores",
+    "retireApiTitle":"API Jubilado",
+    "retireApi":"API perderá todo su suscripción cuando su estado cambia a JUBILADO",
 
     "created":"CREADO",
     "published":"PUBLICADO",
@@ -225,6 +227,18 @@
 	"techOwner" : "Propietario técnica" ,
 	"techOwnerMail" : "Técnico Propietario Enviar",
 
-    "apiUnavailable" : "API no existe"
+    "apiUnavailable" : "API no existe",
+    "validityCheckMessage" : "WSO2 Gerente de API utiliza HTTP cabeza para comprobar la validez del punto final.",
+    
+    "publish" : "publicar",
+    "deploy as a prototype" : "Implementar como un Prototipo",
+    "demote to created" : "Degradar a Creado",
+    "block" : "Bloquear",
+    "demote to prototyped" : "Degradar a Prototipado",
+    "deprecate" : "desaprobar",
+    "re-publish" : "Volver a publicar",
+    "retire" : "Retirarse"
+    
+    
 
 }

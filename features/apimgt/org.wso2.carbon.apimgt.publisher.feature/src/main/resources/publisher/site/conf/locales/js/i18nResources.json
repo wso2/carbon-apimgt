@@ -4,7 +4,9 @@
             "deleteMsg": "Are you sure you want to delete the file" ,
             "revoke": "Revoke Access Token" ,
             "revokeMsg": "Successfully revoke the access token : ",
-            "ok": "OK"
+            "ok": "OK",
+            "deleteParam" : "Do you want to delete the parameter",
+            "deleteScope" : "Do you want to delete the scope?"
 
 
         },

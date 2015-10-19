@@ -38,7 +38,7 @@ var store = jagg.module("manager").getAPIStoreObj();
 		    		});
 		       } else {
 				response.contentType = "application/force-download";
-				response.addHeader("Content-Disposition","attachment; filename = "+object.name);
+				response.addHeader("Content-Disposition","attachment; filename = \""+object.name +"\"");
 				print(object.Data);
 		       }
 		} catch(e) {

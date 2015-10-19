@@ -1443,6 +1443,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                        currentApi.put("docSummary", currentApi, doc.getSummary());
 	                        currentApi.put("docSourceURL", currentApi, doc.getSourceUrl());
 	                        currentApi.put("docFilePath", currentApi, doc.getFilePath());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
 	
 	                        apiArray.put(i, apiArray, currentApi);
             				i++;
@@ -1481,6 +1482,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                        currentApi.put("description", currentApi, api.getDescription());
 	                        currentApi.put("isAdvertiseOnly", currentApi, api.isAdvertiseOnly());
 	                        currentApi.put("apiOwner", currentApi, api.getApiOwner());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
 	                        
 	                        apiArray.put(i, apiArray, currentApi);
 	                        i++;
@@ -1622,6 +1624,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     currentApi.put("visibility", currentApi, api.getVisibility());
                     currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
                     currentApi.put("description", currentApi, api.getDescription());
+                    currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
                     apiArray.put(i, apiArray, currentApi);
                     i++;
                 }
@@ -1941,7 +1944,8 @@ public class APIStoreHostObject extends ScriptableObject {
                         }
                     }
                     row.put("tiers", row, tierArr);
-                    
+                    row.put("monetizationCategory", row, api.getMonetizationCategory());
+
                     if (returnAPItags) {                    
                         StringBuilder tagsSet = new StringBuilder("");
                         for (int k = 0; k < api.getTags().toArray().length; k++) {
