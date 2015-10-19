@@ -18,15 +18,27 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
+import org.wso2.carbon.apimgt.usage.client.pojo.SubscriberCountByAPIs;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -43,6 +55,7 @@ import java.util.Map;
 public abstract class APIUsageStatisticsClient {
 
     protected static final Map<String, String> subscriberAppsMap = new HashMap<String, String>();
+    private static final Log log = LogFactory.getLog(APIUsageStatisticsClient.class);
 
     /**
      * initialize datasource of implemented APIUsageStatisticsRestClient
@@ -509,4 +522,83 @@ public abstract class APIUsageStatisticsClient {
      * @throws Exception general exception throws, because different exception can occur
      */
     public abstract void deployArtifacts(String url, String user, String pass) throws Exception;
+
+    /**
+     * Get the Subscriber count and information related to the APIs
+     * Abstract method, used by implemented class to override behavior
+     *
+     * @param loggedUser
+     * @return list of SubscriberCountByAPIs
+     * @throws APIManagementException
+     */
+    public abstract List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser) throws APIManagementException;
+
+    /**
+     * Get the Subscriber count and information related to the APIs
+     *
+     * @param loggedUser user of the current session
+     * @return return list of SubscriberCountByAPIs objects. which contain the list of apis and related subscriber counts
+     * @throws APIManagementException throws exception if error occur
+     */
+    protected List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser,APIProvider apiProvider)
+            throws APIManagementException {
+        String providerName = null;
+
+        //get the provider
+        //APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(loggedUser);
+
+        List<SubscriberCountByAPIs> list = new ArrayList<SubscriberCountByAPIs>();
+        boolean isTenantFlowStarted = false;
+        try {
+            providerName = APIUtil.replaceEmailDomain(loggedUser);
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
+            if (providerName != null) {
+                List<API> apiSet;
+                //get the apis
+                if (providerName.equals("__all_providers__")) {
+                    apiSet = apiProvider.getAllAPIs();
+                } else {
+                    apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(providerName));
+                }
+
+                //iterate over apis
+                for (API api : apiSet) {
+                    //ignore created apis
+                    if (api.getStatus() == APIStatus.CREATED) {
+                        continue;
+                    }
+                    //ignore 0 counts
+                    long count = apiProvider.getAPISubscriptionCountByAPI(api.getId());
+                    if (count == 0) {
+                        continue;
+                    }
+
+                    SubscriberCountByAPIs apiSub = new SubscriberCountByAPIs();
+                    List<String> apiName = new ArrayList<String>();
+                    apiName.add(api.getId().getApiName());
+                    apiName.add(api.getId().getVersion());
+                    apiName.add(api.getId().getProviderName());
+
+                    apiSub.setCount(count);
+                    apiSub.setApiName(apiName);
+                    list.add(apiSub);
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("Error while getting subscribers of the provider: " + providerName, e);
+            throw new APIManagementException("Error while getting subscribers of the provider: " + providerName, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return list;
+    }
 }

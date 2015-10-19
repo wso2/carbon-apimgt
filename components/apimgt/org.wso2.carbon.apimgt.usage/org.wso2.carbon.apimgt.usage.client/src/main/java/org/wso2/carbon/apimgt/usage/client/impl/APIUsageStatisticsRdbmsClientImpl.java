@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
+import org.wso2.carbon.apimgt.usage.client.pojo.SubscriberCountByAPIs;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -3184,6 +3185,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         }
+    }
+
+    /**
+     * Get the Subscriber count and information related to the APIs
+     *
+     * @param loggedUser
+     * @return list of SubscriberCountByAPIs
+     * @throws APIManagementException
+     */
+    @Override
+    public List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
+        return super.getSubscriberCountByAPIs(loggedUser,apiProviderImpl);
     }
 
     private static class AppUsage {

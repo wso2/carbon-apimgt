@@ -22,7 +22,7 @@ import java.util.List;
 
 public class APIsForThrottleStatsValue {
     private int success_request_count;
-    private int throttleout_count;
+    private int throttle_out_count;
     private List<String> api_apiPublisher_applicationName_facet;
 
     public long getMax_request_time() {
@@ -41,11 +41,11 @@ public class APIsForThrottleStatsValue {
     public void setSuccess_request_count(int success_request_count) {
         this.success_request_count = success_request_count;
     }
-    public int getThrottleout_count() {
-        return throttleout_count;
+    public int getThrottle_out_count() {
+        return throttle_out_count;
     }
-    public void setThrottleout_count(int throttleout_count) {
-        this.throttleout_count = throttleout_count;
+    public void setThrottle_out_count(int throttle_out_count) {
+        this.throttle_out_count = throttle_out_count;
     }
     public List<String> getColumnNames() {
         return api_apiPublisher_applicationName_facet;

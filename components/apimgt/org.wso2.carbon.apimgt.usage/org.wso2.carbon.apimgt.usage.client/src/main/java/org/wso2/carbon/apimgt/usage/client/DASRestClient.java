@@ -82,6 +82,7 @@ public class DASRestClient {
      */
     CloseableHttpResponse post(String json, String url) throws IOException {
 //        httpClient = new DefaultHttpClient();
+        log.info("Sending Lucene Query : " +json);
 
         if (log.isDebugEnabled()) {
             log.debug("Sending Lucene Query : " +json);

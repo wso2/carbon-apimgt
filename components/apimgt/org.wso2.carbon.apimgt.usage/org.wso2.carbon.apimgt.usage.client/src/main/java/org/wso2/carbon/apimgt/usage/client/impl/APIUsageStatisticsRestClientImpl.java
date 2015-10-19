@@ -131,10 +131,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
         if (serviceDataPublisherAdmin != null) {
 
-            //check whether analitics enable
+            //check whether analytics enable
             if (serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable()) {
                 //get REST API config data
                 RESTAPIConfigData restData = serviceDataPublisherAdmin.getRestAPIConfigData();
+
                 String url = restData.getUrl();
                 String user = restData.getUserName();
                 String pass = restData.getPassword();
@@ -1590,6 +1591,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //set the query to match tenant
         String query = "tenantDomain:"+tenantDomain;
 
+        //if application or api is no available return empty result
+        if(apiName.contains("No APIs Available")){
+            return new ArrayList<APIThrottlingOverTimeDTO>();
+        }
+
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
             query+=" AND apiPublisher:"+provider;
@@ -1615,14 +1621,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
 
         //set the aggregate request to get success count
-        AggregateField field = new AggregateField("success_request_count",
+        AggregateField success_request_count_fields = new AggregateField("success_request_count",
                 "SUM", "success_request_count");
-        fields.add(field);
+        fields.add(success_request_count_fields);
 
         //set the aggregate request to get max time
-        AggregateField longTime = new AggregateField("max_request_time",
-                "MAX", "max_request_time");
-        fields.add(longTime);
+        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count",
+                "MAX", "throttle_out_count");
+        fields.add(throttle_out_count_fields);
         request.setAggregateFields(fields);
 
         //get the type of the required result type
@@ -1649,7 +1655,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String api=v.getColumnNames().get(0);
             String publisher=v.getColumnNames().get(1);
             String time=RestClientUtil.longToDate(v.getMax_request_time());
-            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottleout_count(), time);
+            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottle_out_count(), time);
             throttlingData.add(usage);
         }
         return throttlingData;
@@ -1675,6 +1681,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //set the query to match tenant
         String query = "tenantDomain:"+tenantDomain;
 
+        //if application or api is no available return empty result
+        if(appName.contains("No Apps Available")){
+            return new ArrayList<APIThrottlingOverTimeDTO>();
+        }
+
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
             query+=" AND apiPublisher:"+provider;
@@ -1699,9 +1710,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         fields.add(success_request_count_field);
 
         //set the aggregate request to get throttle count
-        AggregateField throttleout_count_fields = new AggregateField("throttleout_count",
-                "SUM", "throttleout_count");
-        fields.add(throttleout_count_fields);
+        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count",
+                "SUM", "throttle_out_count");
+        fields.add(throttle_out_count_fields);
 
         request.setAggregateFields(fields);
 
@@ -1729,7 +1740,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String api=v.getColumnNames().get(0);
             String publisher=v.getColumnNames().get(1);
             String time=RestClientUtil.longToDate(v.getMax_request_time());
-            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottleout_count(), time);
+            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottle_out_count(), time);
             throttlingAppData.add(usage);
         }
         return throttlingAppData;
@@ -1761,7 +1772,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 "API_THROTTLED_OUT_SUMMARY");
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("success_request_count", "SUM", "count");
+        AggregateField field = new AggregateField("success_request_count", "SUM", "success_request_count");
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1802,6 +1813,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override public List<String> getAppsForThrottleStats(String provider, String apiName)
             throws APIMgtUsageQueryServiceClientException {
         //get the tenant domain
+
+
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
         String query = "tenantDomain:"+tenantDomain;
@@ -1813,6 +1826,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //set the query to find specific api
         if( apiName != null ){
+            if(apiName.contains("No APIs Available")){
+                return new ArrayList<String>();
+            }
             query+=" AND api:"+apiName;
         }
 
@@ -1820,7 +1836,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query, 0, "applicationName_facet", "API_THROTTLED_OUT_SUMMARY");
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("success_request_count", "SUM", "count");
+        AggregateField field = new AggregateField("success_request_count", "SUM", "success_request_count");
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -2185,7 +2201,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * Use to hanle exception of common type in single step
+     * Use to handle exception of common type in single step
      *
      * @param msg custom message
      * @param e   throwable object of the exception
@@ -2194,5 +2210,17 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private static void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
         log.error(msg, e);
         throw new APIMgtUsageQueryServiceClientException(msg, e);
+    }
+
+    /**
+     * Get the Subscriber count and information related to the APIs
+     *
+     * @param loggedUser
+     * @return list of SubscriberCountByAPIs
+     * @throws APIManagementException
+     */
+    @Override
+    public List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
+        return super.getSubscriberCountByAPIs(loggedUser,apiProviderImpl);
     }
 }

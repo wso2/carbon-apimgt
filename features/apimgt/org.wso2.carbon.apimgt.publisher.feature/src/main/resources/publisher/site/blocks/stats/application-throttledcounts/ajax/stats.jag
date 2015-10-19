@@ -19,8 +19,6 @@ var log = new Log();
             message: 'AuthenticateError'
         });
     } else {
-        var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
-
         var provider = jagg.getUser().username;
         var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
         var tenantDomain = MultitenantUtils.getTenantDomain(provider);
@@ -39,11 +37,8 @@ var log = new Log();
 
             mod = jagg.module("statistics");
             provider = jagg.getUser().username;
-            if (currentLocation.indexOf("all-statistics") >= 0) {
-                result = mod.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
-            } else {
-                result = mod.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
-            }
+            result = mod.getThrottleDataOfApplication(appName, provider, fromDate, toDate);
+
             if (result.error == "true") {
                 obj = {
                     error: result.error,
@@ -61,11 +56,8 @@ var log = new Log();
 
             mod = jagg.module("statistics");
             provider = jagg.getUser().username;
-            if (currentLocation.indexOf("all-statistics") >= 0) {
-                result = mod.getAppsForThrottleStats(allProviders,apiName);
-            } else {
-                result = mod.getAppsForThrottleStats(provider,apiName);
-            }
+            result = mod.getAppsForThrottleStats(provider,apiName);
+
             if (result.error == "true") {
                 obj = {
                     error: result.error,

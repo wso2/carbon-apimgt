@@ -54,7 +54,7 @@ public class UsageClient {
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
 
         try {
-            APIUsageStatisticsClient client = UsageClient.getStatisticClient();
+            APIUsageStatisticsClient client = UsageClient.getStatisticClient("");
             client.initializeDataSource();
         } catch (APIMgtUsageQueryServiceClientException e) {
             throw new APIMgtUsageQueryServiceClientException("Error in initializing data sources", e);
@@ -68,10 +68,10 @@ public class UsageClient {
      * @return return the APIUsageStatisticsClient implementation
      * @throws APIMgtUsageQueryServiceClientException if error in creating instance
      */
-    public static APIUsageStatisticsClient getClient() throws APIMgtUsageQueryServiceClientException {
+    public static APIUsageStatisticsClient getClient(String user) throws APIMgtUsageQueryServiceClientException {
         if (isDataPublishingEnabled()) {
             try {
-                return UsageClient.getStatisticClient();
+                return UsageClient.getStatisticClient(user);
             } catch (APIMgtUsageQueryServiceClientException e) {
                 throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
             }
@@ -165,12 +165,7 @@ public class UsageClient {
      * @return instance of a APIUsageStatisticsClient
      * @throws APIMgtUsageQueryServiceClientException throws if instantiation problem occur
      */
-    private static APIUsageStatisticsClient getStatisticClient() throws APIMgtUsageQueryServiceClientException {
-
-        //if the instance is already exist return it
-        if (usageStatisticsClient != null) {
-            return usageStatisticsClient;
-        }
+    private static APIUsageStatisticsClient getStatisticClient(String user) throws APIMgtUsageQueryServiceClientException {
 
         //read the api-manager.xml and get the Statistics class name
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -180,7 +175,7 @@ public class UsageClient {
         try {
             //get class from the class name and use the constructor with one String argument to get a instance
             usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor(String.class)
-                    .newInstance("");
+                    .newInstance(user);
         } catch (InstantiationException e) {
             throw new APIMgtUsageQueryServiceClientException("Cannot instantiate Statistic Client class: " + className,
                     e);
