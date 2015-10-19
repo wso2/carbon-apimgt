@@ -2946,8 +2946,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("RegistryException thrown when getting API tenant config from registry", e);
         } catch (ParseException e) {
             handleException("ParseException thrown when passing API tenant config from registry", e);
-        } catch (UnsupportedEncodingException e) {
-            handleException("UnsupportedEncodingException thrown when reading content of tenant config from registry", e);
         }
 
         return getTenantConfigValue(tenantDomain, apiTenantConfig, APIConstants.API_TENANT_CONF_ENABLE_MONITZATION_KEY);
