@@ -192,7 +192,7 @@ var addDatasourceConfig = function (configData) {
 var addToolbox = function (configData) {
 
     try {
-        var client=org.wso2.carbon.apimgt.usage.client.UsageClient.getClient();
+        var client=org.wso2.carbon.apimgt.usage.client.UsageClient.getClient("");
         client.deployArtifacts(configData.eventAnalyserURL,configData.eventAnalyserUsername,configData.eventAnalyserPassword);
         return {
             error: false

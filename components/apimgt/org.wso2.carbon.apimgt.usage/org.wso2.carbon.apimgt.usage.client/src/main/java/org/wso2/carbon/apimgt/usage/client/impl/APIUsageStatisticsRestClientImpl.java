@@ -84,6 +84,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private DASRestClient restClient;
     private final Gson gson = new Gson();
 
+    /**
+     * Create a rest client instance.
+     * @param username current user name
+     * @throws APIMgtUsageQueryServiceClientException
+     */
     public APIUsageStatisticsRestClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
         APIManagerConfiguration config;
@@ -177,7 +182,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return return list of PerAppApiCountDTO result
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
+    @Override
+    public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get list of applications
@@ -298,8 +304,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return return list of AppUsageDTO result
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get list of applications
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
@@ -415,8 +422,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of AppCallTypeDTO result
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get list of applications
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
@@ -535,7 +543,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of FaultCountDTO result
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
+    @Override
+    public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
         //get list of applications
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
@@ -656,7 +665,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsageByUserDTO
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
+    @Override
+    public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         //get the list of apis usage by user
@@ -767,8 +777,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a List of APIResponseTimeDTO objects, possibly empty
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate,
-            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get the response time data of the apis
         List<APIResponseTime> responseTimes = getAPIResponseTimeData(
@@ -916,8 +927,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a list of APIVersionLastAccessTimeDTO objects, possibly empty
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName,
-            String fromDate, String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         //get the last access time data of the apis
         List<APIAccessTime> accessTimes = getLastAccessTimesByAPIData(
@@ -1057,8 +1069,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a List of APIResourcePathUsageDTO objects, possibly empty
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
 
         //get the usage resource path data of the apis
         List<APIUsageByResourcePath> usageData = this
@@ -1176,8 +1189,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a List of APIDestinationUsageDTO objects, possibly empty
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
 
         //get the destination data of the apis
         List<APIUsageByDestination> usageData = this
@@ -1297,8 +1311,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a List of APIUsageDTO objects - possibly empty
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate,
-            int limit) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate, int limit)
+            throws APIMgtUsageQueryServiceClientException {
         //get the api usage data of the apis
         List<APIUsage> usageData = getUsageByAPIsData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
                 fromDate, toDate, limit);
@@ -1424,8 +1439,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a List of APIResponseFaultCountDTO objects, possibly empty
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate,
-            String toDate) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
 
         //get the response fault count data of the apis
         List<APIResponseFaultCount> faultyData = this
@@ -1582,34 +1598,35 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return Throttling counts over time
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
+    @Override
+    public List<APIThrottlingOverTimeDTO> getThrottleDataOfAPIAndApplication(String apiName, String provider,
             String appName, String fromDate, String toDate, String groupBy)
             throws APIMgtUsageQueryServiceClientException {
 
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        String query = "tenantDomain:"+tenantDomain;
+        String query = "tenantDomain:" + tenantDomain;
 
         //if application or api is no available return empty result
-        if(apiName.contains("No APIs Available")){
+        if (apiName.contains("No APIs Available")) {
             return new ArrayList<APIThrottlingOverTimeDTO>();
         }
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
-        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
-            query+=" AND apiPublisher:"+provider;
+        if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            query += " AND apiPublisher:" + provider;
         }
 
         //set the application name
-        if(!StringUtils.isEmpty(appName)){
-            query+=" AND "+"applicationName:"+appName;
+        if (!StringUtils.isEmpty(appName)) {
+            query += " AND " + "applicationName:" + appName;
         }
 
         //lucene query with time ranges
         try {
-            query += " AND api:"+apiName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query += " AND api:" + apiName + " AND " + "max_request_time: [" + RestClientUtil
+                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -1621,13 +1638,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
 
         //set the aggregate request to get success count
-        AggregateField success_request_count_fields = new AggregateField("success_request_count",
-                "SUM", "success_request_count");
+        AggregateField success_request_count_fields = new AggregateField("success_request_count", "SUM",
+                "success_request_count");
         fields.add(success_request_count_fields);
 
         //set the aggregate request to get max time
-        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count",
-                "MAX", "throttle_out_count");
+        AggregateField max_request_time_fields = new AggregateField("max_request_time", "MAX", "max_request_time");
+        fields.add(max_request_time_fields);
+
+        //set the aggregate request to get success throttle count
+        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count", "SUM", "throttle_out_count");
         fields.add(throttle_out_count_fields);
         request.setAggregateFields(fields);
 
@@ -1637,7 +1657,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //do post and get the results
         List<Result<APIsForThrottleStatsValue>> obj = null;
-        try{
+        try {
             obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
@@ -1652,15 +1672,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (Result<APIsForThrottleStatsValue> result : obj) {
             APIsForThrottleStatsValue v = result.getValues();
 
-            String api=v.getColumnNames().get(0);
-            String publisher=v.getColumnNames().get(1);
-            String time=RestClientUtil.longToDate(v.getMax_request_time());
-            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottle_out_count(), time);
+            String api = v.getColumnNames().get(0);
+            String publisher = v.getColumnNames().get(1);
+            String time = RestClientUtil.longToDate(v.getMax_request_time());
+            usage = new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(),
+                    v.getThrottle_out_count(), time);
             throttlingData.add(usage);
         }
         return throttlingData;
     }
-
 
     /**
      * Given Application name and the provider, returns throttle data for the APIs of the provider invoked by the
@@ -1673,28 +1693,29 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return Throttling counts of APIs of the provider invoked by the given app
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
-            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider, String fromDate,
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        String query = "tenantDomain:"+tenantDomain;
+        String query = "tenantDomain:" + tenantDomain;
 
         //if application or api is no available return empty result
-        if(appName.contains("No Apps Available")){
+        if (appName.contains("No Apps Available")) {
             return new ArrayList<APIThrottlingOverTimeDTO>();
         }
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
-        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
-            query+=" AND apiPublisher:"+provider;
+        if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            query += " AND apiPublisher:" + provider;
         }
 
         //lucene query with time ranges
         try {
-            query += " AND applicationName:"+appName+" AND "+"max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query += " AND applicationName:" + appName + " AND " + "max_request_time: [" + RestClientUtil
+                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -1705,13 +1726,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //set the aggregate request to get success count
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField success_request_count_field = new AggregateField("success_request_count",
-                "SUM", "success_request_count");
+        AggregateField success_request_count_field = new AggregateField("success_request_count", "SUM",
+                "success_request_count");
         fields.add(success_request_count_field);
 
+        //set the aggregate request to get max time
+        AggregateField max_request_time_fields = new AggregateField("max_request_time", "MAX", "max_request_time");
+        fields.add(max_request_time_fields);
+
         //set the aggregate request to get throttle count
-        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count",
-                "SUM", "throttle_out_count");
+        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count", "SUM", "throttle_out_count");
         fields.add(throttle_out_count_fields);
 
         request.setAggregateFields(fields);
@@ -1722,7 +1746,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //do post and get the results
         List<Result<APIsForThrottleStatsValue>> obj = null;
-        try{
+        try {
             obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
@@ -1737,15 +1761,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIThrottlingOverTimeDTO usage;
         for (Result<APIsForThrottleStatsValue> result : obj) {
             APIsForThrottleStatsValue v = result.getValues();
-            String api=v.getColumnNames().get(0);
-            String publisher=v.getColumnNames().get(1);
-            String time=RestClientUtil.longToDate(v.getMax_request_time());
-            usage=new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(), v.getThrottle_out_count(), time);
+            String api = v.getColumnNames().get(0);
+            String publisher = v.getColumnNames().get(1);
+            String time = RestClientUtil.longToDate(v.getMax_request_time());
+            usage = new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(),
+                    v.getThrottle_out_count(), time);
             throttlingAppData.add(usage);
         }
         return throttlingAppData;
     }
-
 
     /**
      * Get APIs of the provider that consist of throttle data
@@ -1754,17 +1778,17 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return List of APIs of the provider that consist of throttle data
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<String> getAPIsForThrottleStats(String provider)
-            throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<String> getAPIsForThrottleStats(String provider) throws APIMgtUsageQueryServiceClientException {
 
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        String query = "tenantDomain:"+tenantDomain;
+        String query = "tenantDomain:" + tenantDomain;
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
-        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
-            query+=" AND apiPublisher:"+provider;
+        if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            query += " AND apiPublisher:" + provider;
         }
 
         //creating request bean
@@ -1779,11 +1803,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
         }.getType();
-        List<Result<APIsForThrottleStatsValue>> obj=null;
+        List<Result<APIsForThrottleStatsValue>> obj = null;
 
         //do post and get the results
-        try{
-             obj = restClient.doPost(request, type);
+        try {
+            obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
@@ -1800,7 +1824,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return throttlingAPIData;
     }
 
-
     /**
      * Given provider name and the API name, returns a list of applications through which the corresponding API is
      * invoked and which consist of success/throttled requests
@@ -1810,30 +1833,31 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return A list of applications through which the corresponding API is invoked and which consist of throttle data
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<String> getAppsForThrottleStats(String provider, String apiName)
+    @Override
+    public List<String> getAppsForThrottleStats(String provider, String apiName)
             throws APIMgtUsageQueryServiceClientException {
         //get the tenant domain
 
-
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        String query = "tenantDomain:"+tenantDomain;
+        String query = "tenantDomain:" + tenantDomain;
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
-        if(!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)){
-            query+=" AND apiPublisher:"+provider;
+        if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            query += " AND apiPublisher:" + provider;
         }
 
         //set the query to find specific api
-        if( apiName != null ){
-            if(apiName.contains("No APIs Available")){
+        if (apiName != null) {
+            if (apiName.contains("No APIs Available")) {
                 return new ArrayList<String>();
             }
-            query+=" AND api:"+apiName;
+            query += " AND api:" + apiName;
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 0, "applicationName_facet", "API_THROTTLED_OUT_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 0, "applicationName_facet",
+                "API_THROTTLED_OUT_SUMMARY");
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField("success_request_count", "SUM", "success_request_count");
@@ -1843,11 +1867,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APPsForThrottleStatsValue>>>() {
         }.getType();
-        List<Result<APPsForThrottleStatsValue>> obj=null;
+        List<Result<APPsForThrottleStatsValue>> obj = null;
 
         //do post and get the results
-        try{
-        obj = restClient.doPost(request, type);
+        try {
+            obj = restClient.doPost(request, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
@@ -1876,8 +1900,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a list containing the data related to API usage
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName,
-            String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         //get the api usgae data of the apis by version
         List<APIUsage> usageData = this
@@ -1987,8 +2012,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return APIFirstAccess containing date
      * @throws APIMgtUsageQueryServiceClientException
      */
-    @Override public List<APIFirstAccess> getFirstAccessTime(String providerName)
-            throws APIMgtUsageQueryServiceClientException {
+    @Override
+    public List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
 
         //check whether API_UTIL class id present
         if (!isTableExist("API_UTIL")) {
@@ -2152,7 +2177,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     //REST Client no need to use this
-    @Override public List<APIUsageRangeCost> evaluate(String param, int calls) throws Exception {
+    @Override
+    public List<APIUsageRangeCost> evaluate(String param, int calls) throws Exception {
         return paymentPlan.evaluate(param, calls);
     }
 
@@ -2164,7 +2190,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @param pass password
      * @throws Exception general exception throws, because different exception can occur
      */
-    @Override public void deployArtifacts(String url, String user, String pass) throws Exception {
+    @Override
+    public void deployArtifacts(String url, String user, String pass) throws Exception {
 
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics.car";
@@ -2221,6 +2248,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
-        return super.getSubscriberCountByAPIs(loggedUser,apiProviderImpl);
+        return super.getSubscriberCountByAPIs(loggedUser, apiProviderImpl);
     }
 }

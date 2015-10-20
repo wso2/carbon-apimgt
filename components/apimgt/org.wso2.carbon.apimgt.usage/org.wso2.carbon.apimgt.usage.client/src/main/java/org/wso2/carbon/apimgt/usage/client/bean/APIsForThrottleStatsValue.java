@@ -24,6 +24,7 @@ public class APIsForThrottleStatsValue {
     private int success_request_count;
     private int throttle_out_count;
     private List<String> api_apiPublisher_applicationName_facet;
+    private long max_request_time;
 
     public long getMax_request_time() {
         return max_request_time;
@@ -33,25 +34,27 @@ public class APIsForThrottleStatsValue {
         this.max_request_time = max_request_time;
     }
 
-    private long max_request_time;
-
     public int getSuccess_request_count() {
         return success_request_count;
     }
+
     public void setSuccess_request_count(int success_request_count) {
         this.success_request_count = success_request_count;
     }
+
     public int getThrottle_out_count() {
         return throttle_out_count;
     }
+
     public void setThrottle_out_count(int throttle_out_count) {
         this.throttle_out_count = throttle_out_count;
     }
+
     public List<String> getColumnNames() {
         return api_apiPublisher_applicationName_facet;
     }
-    public void setApi_apiPublisher_applicationName_facet(
-            List<String> api_apiPublisher_applicationName_facet) {
+
+    public void setApi_apiPublisher_applicationName_facet(List<String> api_apiPublisher_applicationName_facet) {
         this.api_apiPublisher_applicationName_facet = api_apiPublisher_applicationName_facet;
     }
 }
