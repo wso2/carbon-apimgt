@@ -39,7 +39,9 @@
             "invalid": " No v�lido",
             "valid": "V�lido",
             "testUri": "Probar URI",
-            "validating": "Validaci�n en proceso.."
+            "validating": "Validaci�n en proceso..",
+            "missingUrl": " Please provide a url to test",
+            "errorInConnection": " - Error connecting to backend"
         },
 		"failOver":{
 			"title":"Failover State"
