@@ -7257,11 +7257,18 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
-        String getAPISql = "SELECT AMA.API_ID,API_NAME,API_PROVIDER,API_VERSION FROM " +
-                           "AM_API AMA," + accessTokenStoreTable +" ACT, AM_APPLICATION_KEY_MAPPING AKM, " +
-                           "AM_SUBSCRIPTION AMS WHERE ACT.ACCESS_TOKEN=? " +
-                           "AND ACT.CONSUMER_KEY=AKM.CONSUMER_KEY AND AKM.APPLICATION_ID=AMS.APPLICATION_ID AND " +
-                           "AMA.API_ID=AMS.API_ID";
+        String getAPISql =  "SELECT AMA.API_ID, API_NAME, API_PROVIDER, API_VERSION " +
+                            "FROM AM_API AMA, " +
+                                accessTokenStoreTable + " IAT, " +
+                                "AM_APPLICATION_KEY_MAPPING AKM, " +
+                                "AM_SUBSCRIPTION AMS, " +
+                                "IDN_OAUTH_CONSUMER_APPS ICA " +
+                            "WHERE IAT.ACCESS_TOKEN = ? " +
+                                "AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
+                                "AND IAT.CONSUMER_KEY_ID = ICA.ID" +
+                                "AND AKM.APPLICATION_ID = AMS.APPLICATION_ID " +
+                                "AND AMA.API_ID = AMS.API_ID";
+
         Set<APIIdentifier> apiList = new HashSet<APIIdentifier>();
         try {
             connection = APIMgtDBUtil.getConnection();
