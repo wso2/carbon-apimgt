@@ -3,7 +3,8 @@ response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HT
 response.addHeader('Pragma','no-cache'); // HTTP 1.0.
 response.addHeader('Expires','0');
 include("/jagg/jagg.jag");
-store = jagg.module("manager").getAPIStoreObj();
+// Commented out since this is not used in the code and generate sessions without purpose.
+//store = jagg.module("manager").getAPIStoreObj();
 
 // Jaggery API for retrieving API Definition
 
@@ -20,7 +21,7 @@ var log = new Log();
 
     var uri = request.getRequestURI();
     var callPath = uri.replace("/store/api-docs", "");
-    var url;
+    var url, action;
 
     if (uri != null) {
         // replacing @ signs for matcher to work with reverse proxies
@@ -40,11 +41,17 @@ var log = new Log();
             apiNameVal = request.getParameter("name");
             apiVersionVal = request.getParameter("version");
             }else{
-            print({
-                error:true,
-                message:msg.error.invalidAction(action)
-            });
+            //print({
+            //    error:true,
+            //    message:msg.error.invalidAction(action)
+            //});
+            //Invalid URL
+            action = "exit";
         }
+
+        if (action == "exit"){
+            response.sendError(404);
+        } else {
         var url = request.getRequestURL();
         var host = getLocation(url).host;
         var port = getLocation(url).port;
@@ -143,7 +150,7 @@ var log = new Log();
 
         print(jsonObj);
     }
-
+    }
 }());
 
 function sendReceive (httpMethod,data,url){

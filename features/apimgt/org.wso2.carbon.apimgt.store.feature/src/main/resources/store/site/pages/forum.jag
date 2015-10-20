@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-include("header.jag");
+//include("header.jag");
 var site = require("/site/conf/site.json");
 var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
@@ -11,23 +11,32 @@ var log = new Log();
 
 // routing logic
 var uri = request.getRequestURI();
-var callPath=uri.replace("/store/forum","");
+var callPath=uri.replace("/store","");
 
 var action = "list"; // default action list the topics
 if(uri != null) {
     var uriMatcher = new URIMatcher(callPath);
-    if(uriMatcher.match("/new")) {
+    if (uriMatcher.match("/forum") || uriMatcher.match("/forum/")) {
+        action = "list";
+    }
+    else if (uriMatcher.match("/forum/new")) {
         action = "new"; // create topic
     }
-    if(uriMatcher.match("/new/{id}")) {
+    else if (uriMatcher.match("/forum/new/{id}")) {
         action = "new"; // create topic
     }
-    if(uriMatcher.match("/topic/{id}")) {
+    else if (uriMatcher.match("/forum/topic/{id}")) {
         var topic = uriMatcher.elements().id;
         action = "topic";
+    } else {
+        action = "exit";
     }
 }
 
+if(action == "exit"){
+    response.sendError(404);
+} else {
+include("header.jag");
 (function () {
     var apis, site, tag, query, result, mod, user = jagg.getUser();
 
@@ -73,4 +82,5 @@ if(uri != null) {
         }
     });
 }());
+}
 %>
