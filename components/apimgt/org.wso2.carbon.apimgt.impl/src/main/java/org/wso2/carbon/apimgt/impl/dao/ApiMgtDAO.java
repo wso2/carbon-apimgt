@@ -4075,57 +4075,6 @@ public class ApiMgtDAO {
         return subscriber;
     }
 
-<<<<<<< HEAD
-    public String[] getOAuthCredentials(String accessToken, String tokenType) throws APIManagementException {
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
-            APIUtil.checkUserNameAssertionEnabled()) {
-            accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
-        }
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        String consumerKey = null;
-        String consumerSecret = null;
-        String sqlStmt = "SELECT " +
-                         " ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET " +
-                         "FROM " +
-                         " IDN_OAUTH_CONSUMER_APPS ICA," +
-                         accessTokenStoreTable + " IAT" +
-                         " WHERE " +
-                         " IAT.ACCESS_TOKEN = ? AND" +
-                         " IAT.TOKEN_SCOPE = ? AND" +
-                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY";
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlStmt);
-            prepStmt.setString(1, APIUtil.encryptToken(accessToken));
-            prepStmt.setString(2, tokenType);
-            rs = prepStmt.executeQuery();
-
-            if (rs.next()) {
-                consumerKey = rs.getString("CONSUMER_KEY");
-                consumerSecret = rs.getString("CONSUMER_SECRET");
-
-                consumerKey = APIUtil.decryptToken(consumerKey);
-                consumerSecret = APIUtil.decryptToken(consumerSecret);
-            }
-
-        } catch (SQLException e) {
-            handleException("Error when adding a new OAuth consumer.", e);
-        } catch (CryptoException e) {
-            handleException("Error while encrypting/decrypting tokens/app credentials.", e);
-        } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, rs, prepStmt);
-        }
-        return new String[]{consumerKey, consumerSecret};
-    }
-
-=======
->>>>>>> b5bda1df3baee527c5a3c4b099e68ef03f1d523c
     public String[] addOAuthConsumer(String username, int tenantId, String appName, String callbackUrl)
             throws IdentityOAuthAdminException, APIManagementException {
 
