@@ -5,7 +5,7 @@ function isPositiveInteger(s) {
     return !!s.match(/^[0-9]+$/);
 }
 
-
+if(jagg.isCSRFTokenValid())
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
     var mod, obj, result, username,
@@ -51,6 +51,7 @@ function isPositiveInteger(s) {
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
             apiData.visibleTenants = request.getParameter("allowTenants","UTF-8");
             apiData.endpointSecured = request.getParameter("endpointType");
+            apiData.endpointAuthDigest = request.getParameter("endpointAuthType");
             apiData.endpointUTUsername = request.getParameter("epUsername");
             apiData.endpointUTPassword = request.getParameter("epPassword");   
             apiData.inSequence = request.getParameter("inSequence");
@@ -226,7 +227,8 @@ function isPositiveInteger(s) {
             mod = jagg.module("api");
             var type = request.getParameter("type");
             var url = request.getParameter("url");
-            result = mod.isURLValid(type,url);
+            var invalidStatusCodesRegex = "404"; //A regex expression for invalid status codes
+            result = mod.isURLValid(type, url, invalidStatusCodesRegex);
             if (result.error) {
                 obj = {
                     error:true,
@@ -262,8 +264,13 @@ function isPositiveInteger(s) {
 
         }
         else if (action === "getCustomInSequences") {
+
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
+
             mod = jagg.module("api");
-            result = mod.getCustomInSequences();
+            result = mod.getCustomInSequences(apiName, apiVersion, apiProvider);
             if (result.error) {
                 obj = {
                     error:true,
@@ -278,8 +285,11 @@ function isPositiveInteger(s) {
             print(obj);
         }
         else if (action === "getCustomOutSequences") {
+            var apiProvider =request.getParameter("provider");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
             mod = jagg.module("api");
-            result = mod.getCustomOutSequences();
+            result = mod.getCustomOutSequences(apiName, apiVersion, apiProvider);
             if (result.error) {
                 obj = {
                     error:true,

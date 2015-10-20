@@ -39,8 +39,8 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super();
     }
 
-    UserAwareAPIConsumer(String username) throws APIManagementException {
-        super(username);
+    UserAwareAPIConsumer(String username, APIMRegistryService registryService) throws APIManagementException {
+        super(username, registryService);
         this.username = username;
     }
 
