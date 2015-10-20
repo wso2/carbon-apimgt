@@ -29,6 +29,7 @@ import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -58,7 +59,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 
 
 	@Override
-	public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
+	public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
 		if (log.isDebugEnabled()) {
 			log.info("Executing Application registration Workflow..");
@@ -107,7 +108,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 			log.error("Error converting String to OMElement", e);
 			throw new WorkflowException("Error converting String to OMElement", e);
 		}
-
+		return new GeneralWorkflowResponse();
 	}
 
 	/**
@@ -118,7 +119,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 	 * @param workFlowDTO
 	 */
 	@Override
-	public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+	public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
 
         log.info("Application Registration [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO.getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
@@ -133,7 +134,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
                 throw new WorkflowException(msg, e);
             }
         }
-
+		return new GeneralWorkflowResponse();
 	}
 
 	@Override

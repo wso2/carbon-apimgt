@@ -44,6 +44,8 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -665,7 +667,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }finally {
             PaginationContext.destroy();
         }
-        result.put("apis",apiSortedSet);
+        result.put("apis", apiSortedSet);
         result.put("totalLength", totalLength);
         result.put("isMore", isMore);
         return result;
@@ -1735,7 +1737,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         listMap.put(APIConstants.API_OVERVIEW_OWNER, new ArrayList<String>() {
             {
                 add(searchValue);
-            }});
+            }
+        });
         return artifactManager.findGenericArtifacts(listMap);
     }
 
@@ -1907,11 +1910,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return isSubscribed;
     }
 
-    public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
         API api = getAPI(identifier);
+        WorkflowResponse workflowResponse = null;
+        JSONObject addSubscriptionResponse = new JSONObject();
+        int subscriptionId;
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
-            int subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
+            subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
                     APIConstants.SubscriptionStatus.ON_HOLD);
 
             boolean isTenantFlowStarted = false;
@@ -1942,7 +1948,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 workflowDTO.setTierName(identifier.getTier());
                 workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
                 workflowDTO.setSubscriber(userId);
-                addSubscriptionWFExecutor.execute(workflowDTO);
+                workflowResponse = addSubscriptionWFExecutor.execute(workflowDTO);
             } catch (WorkflowException e) {
                 //If the workflow execution fails, roll back transaction by removing the subscription entry.
                 apiMgtDAO.removeSubscriptionById(subscriptionId);
@@ -1958,11 +1964,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 invalidateCachedKeys(applicationId);
             }
             if (log.isDebugEnabled()) {
-                String logMessage = "API Name: " + identifier.getApiName() + ", API Version "+identifier.getVersion()+" subscribe by " + userId + " for app "+ apiMgtDAO.getApplicationNameFromId(applicationId);
+                String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
+                        + " subscribe by " + userId + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
                 log.debug(logMessage);
             }
-
-            return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
+            return new SubscriptionResponse(apiMgtDAO.getSubscriptionStatusById(subscriptionId), null, workflowResponse);
         } else {
             throw new APIManagementException("Subscriptions not allowed on APIs in the state: " +
                     api.getStatus().getStatus());

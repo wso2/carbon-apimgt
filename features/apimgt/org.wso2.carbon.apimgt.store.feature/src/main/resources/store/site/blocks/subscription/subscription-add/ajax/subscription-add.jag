@@ -103,7 +103,8 @@ include("/jagg/jagg.jag");
             };
         } else {
             obj = {
-                error:false
+                error:false,
+                status:result.status 
             }
         }
         print(obj);
