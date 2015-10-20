@@ -299,6 +299,7 @@ var RESOURCES = [
                                    
                      </div>
                 </div>
+
                 <div class="control-group" id="credentials" style="display:none;">
                     <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
                     <div class="controls">

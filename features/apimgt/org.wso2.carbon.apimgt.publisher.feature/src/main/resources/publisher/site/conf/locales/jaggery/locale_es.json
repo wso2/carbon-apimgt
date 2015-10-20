@@ -187,6 +187,7 @@
     "wsdlHelpMsg":"Ex:http://appserver/services/echo?wsdl",
     "sandboxHelpMsg":"Ex:http://test-appserver/services/echo",
     "endpointHelpMsg":"Ex:http://appserver/services/echo",
+    "endpointAuthHelpMsg" :"Select the authentication scheme you require.",
     "imgHelpMsg":"Tamaño máximo 1 MB.",
     "imgHelpMsg2":"Tamaño de imagen recomendada: 100 x 100 pixels.",
     "noLifecycleMsg":"No existen datos sobre el ciclo de vida de esta API.",
@@ -215,6 +216,9 @@
     "secured": "Securizado",
     "nonsecured": "No Securizado",
     "endpointType": "Endpoint Security Scheme",
+    "endpointAuthType" : "Endpoint Auth Type",
+    "basicAuth" : "Basic Auth",
+    "digestAuth" : "Digest Auth",
     "credentials": "Credenciales",
 
     "productionFailoverEp": "Production Fail-over URL",
