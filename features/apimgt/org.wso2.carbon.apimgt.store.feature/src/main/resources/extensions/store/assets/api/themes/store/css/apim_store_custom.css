@@ -26,6 +26,8 @@ a:hover, a:focus {
     -moz-border-radius: 0px;
     -webkit-border-radius: 0px;
     -khtml-border-radius: 0px;
+    background: #2c313b !important;
+    color: #fff !important;
 }
 
 .btn-primary {
@@ -38,6 +40,8 @@ a:hover, a:focus {
 
 .form-control, select.form-control, textarea.form-control, select, textarea, input, .input-large {
 
+    border: 1px solid !important;
+    margin-top: 0px;
     border-radius: 0px;
     -webkit-border-radius: 0px;
     -moz-border-radius: 0px;
@@ -273,7 +277,7 @@ legend {
     color: #00344D;
     background-color: #F9F9F9;
     border-radius: 0px;
-    width: 50%;
+    width: 65%;
     height: 35px;
     border: 1px solid #ccc;
     padding-top: 10px;
@@ -291,7 +295,7 @@ legend {
 }
 
 .custom-form-right > .form-control {
-    width: 50%;
+    width: 65%;
     float: left;
 }
 
@@ -568,4 +572,7 @@ div.navigation-container{
 }
 .app-logo img {    
     padding-left: 15px;
+}
+.dropdown-menu > li > a {
+    color: #fff !important;
 }
