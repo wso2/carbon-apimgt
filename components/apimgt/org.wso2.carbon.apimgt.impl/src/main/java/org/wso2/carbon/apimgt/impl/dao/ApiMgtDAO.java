@@ -439,94 +439,6 @@ public class ApiMgtDAO {
 
     }
 
-    public String getAccessKeyForApplication(String userId, String applicationName,
-                                             String keyType)
-            throws APIManagementException, IdentityException {
-
-        String accessKey = null;
-
-        //identify loggedinuser
-        String loginUserName = getLoginUserName(userId);
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
-            APIUtil.checkUserNameAssertionEnabled()) {
-            accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(loginUserName);
-        }
-
-        //get the tenant id for the corresponding domain
-        //String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = IdentityUtil.getTenantIdOFUser(loginUserName);
-
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sqlQuery =
-                "SELECT " +
-                "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN " +
-                "FROM " +
-                "   AM_SUBSCRIBER SB," +
-                "   AM_APPLICATION APP, " +
-                "   AM_APPLICATION_KEY_MAPPING AKM," +
-                accessTokenStoreTable + " IAT," +
-                "   IDN_OAUTH_CONSUMER_APPS ICA " +
-                "WHERE " +
-                "   SB.USER_ID=? " +
-                "   AND SB.TENANT_ID=? " +
-                "   AND APP.NAME=? " +
-                "   AND AKM.KEY_TYPE=? " +
-                "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
-                "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID" +
-                "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY" +
-                "   AND ICA.USERNAME = IAT.AUTHZ_USER" +
-                "   AND IAT.CONSUMER_KEY = AKM.CONSUMER_KEY";
-
-        if (forceCaseInsensitiveComparisons) {
-            sqlQuery =
-                    "SELECT " +
-                            "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN " +
-                            "FROM " +
-                            "   AM_SUBSCRIBER SB," +
-                            "   AM_APPLICATION APP, " +
-                            "   AM_APPLICATION_KEY_MAPPING AKM," +
-                            accessTokenStoreTable + " IAT," +
-                            "   IDN_OAUTH_CONSUMER_APPS ICA " +
-                            "WHERE " +
-                            "   LOWER(SB.USER_ID)=LOWER(?) " +
-                            "   AND SB.TENANT_ID=? " +
-                            "   AND APP.NAME=? " +
-                            "   AND AKM.KEY_TYPE=? " +
-                            "   AND SB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
-                            "   AND APP.APPLICATION_ID = AKM.APPLICATION_ID" +
-                            "   AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY" +
-                            "   AND ICA.USERNAME = IAT.AUTHZ_USER" +
-                            "   AND IAT.CONSUMER_KEY = AKM.CONSUMER_KEY";
-        }
-
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, loginUserName);
-            ps.setInt(2, tenantId);
-            ps.setString(3, applicationName);
-            ps.setString(4, keyType);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                accessKey = APIUtil.decryptToken(rs.getString(APIConstants.SUBSCRIPTION_FIELD_ACCESS_TOKEN));
-            }
-        } catch (SQLException e) {
-            handleException("Error when executing the SQL query to read the access key for user : "
-                            + loginUserName + "of tenant(id) : " + tenantId, e);
-        } catch (CryptoException e) {
-            handleException("Error when decrypting access key for user : "
-                            + loginUserName + "of tenant(id) : " + tenantId, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
-        }
-        return accessKey;
-    }
-
     /**
      * Get Subscribed APIs for given userId
      *
@@ -847,15 +759,15 @@ public class ApiMgtDAO {
                                     "   AM_SUBSCRIBER SUBS," +
                                     "   AM_APPLICATION APP," +
                                     "   AM_APPLICATION_KEY_MAPPING AKM," +
-                                    "   AM_API API" +
+                                    "   AM_API API," +
+                                    "   IDN_OAUTH_CONSUMER_APPS ICA" +
                                     " WHERE " +
                                     "   IAT.ACCESS_TOKEN = ? " +
                                     "   AND API.CONTEXT = ? " +
                                     "   AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-                                    //versionCheckStr +
                                     (defaultVersionInvoked ? "" : " AND API.API_VERSION = ? ") +
-                                    "   AND IAT.CONSUMER_KEY=AKM.CONSUMER_KEY " +
-                                    //"   AND APP.APPLICATION_ID = APP.APPLICATION_ID" +
+                                    "   ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
+                                    "   ICA.ID = IAT.CONSUMER_KEY_ID" +
                                     "   AND SUB.APPLICATION_ID = APP.APPLICATION_ID" +
                                     "   AND APP.SUBSCRIBER_ID = SUBS.SUBSCRIBER_ID" +
                                     "   AND API.API_ID = SUB.API_ID" +
@@ -1943,7 +1855,7 @@ public class ApiMgtDAO {
      * @param applicationName the application to which the api's are subscribed
      * @param startSubIndex the start index for pagination
      * @param endSubIndex end index for pagination
-     * @param groupId the group id of the application
+     * @param groupingId the group id of the application
      * @return the set of subscribed API's.
      * @throws APIManagementException
      */
@@ -2311,9 +2223,9 @@ public class ApiMgtDAO {
                 scopeAssociationTable + " ISAT, " +
                 " IDN_OAUTH_CONSUMER_APPS ICA " +
                 "WHERE" +
-                " IAT.CONSUMER_KEY = ?" +
+                " ICA.CONSUMER_KEY = ?" +
+                " AND IAT.CONSUMER_KEY_ID = ICA.ID" +
                 " AND IAT.TOKEN_ID = ISAT.TOKEN_ID " +
-                " AND IAT.CONSUMER_KEY = ICA.CONSUMER_KEY" +
                 " AND IAT.AUTHZ_USER = ICA.USERNAME";
     }
 
@@ -3342,7 +3254,7 @@ public class ApiMgtDAO {
                "WHERE" +
                " AKM.APPLICATION_ID = ? AND" +
                " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-               " ICA.CONSUMER_KEY = IAT.CONSUMER_KEY";
+               " ICA.ID = IAT.CONSUMER_KEY_ID";
     }
 
     /**
@@ -3417,7 +3329,7 @@ public class ApiMgtDAO {
                " SM.SUBSCRIPTION_ID = ? AND" +
                " SM.APPLICATION_ID= AKM.APPLICATION_ID AND" +
                " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
-               " ICA.CONSUMER_KEY = IAT.CONSUMER_KEY";
+               " ICA.ID = IAT.CONSUMER_KEY_ID";
     }
 
     /**
@@ -4536,55 +4448,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
         return subscriber;
-    }
-
-    public String[] getOAuthCredentials(String accessToken, String tokenType)
-            throws APIManagementException {
-
-        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
-        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
-            APIUtil.checkUserNameAssertionEnabled()) {
-            accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
-        }
-        Connection connection = null;
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        String consumerKey = null;
-        String consumerSecret = null;
-        String sqlStmt = "SELECT " +
-                         " ICA.CONSUMER_KEY AS CONSUMER_KEY," +
-                         " ICA.CONSUMER_SECRET AS CONSUMER_SECRET " +
-                         "FROM " +
-                         " IDN_OAUTH_CONSUMER_APPS ICA," +
-                         accessTokenStoreTable + " IAT" +
-                         " WHERE " +
-                         " IAT.ACCESS_TOKEN = ? AND" +
-                         " IAT.TOKEN_SCOPE = ? AND" +
-                         " IAT.CONSUMER_KEY = ICA.CONSUMER_KEY";
-
-        try {
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlStmt);
-            prepStmt.setString(1, APIUtil.encryptToken(accessToken));
-            prepStmt.setString(2, tokenType);
-            rs = prepStmt.executeQuery();
-
-            if (rs.next()) {
-                consumerKey = rs.getString("CONSUMER_KEY");
-                consumerSecret = rs.getString("CONSUMER_SECRET");
-
-                consumerKey = APIUtil.decryptToken(consumerKey);
-                consumerSecret = APIUtil.decryptToken(consumerSecret);
-            }
-
-        } catch (SQLException e) {
-            handleException("Error when adding a new OAuth consumer.", e);
-        } catch (CryptoException e) {
-            handleException("Error while encrypting/decrypting tokens/app credentials.", e);
-        } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, rs, prepStmt);
-        }
-        return new String[]{consumerKey, consumerSecret};
     }
 
     public String[] addOAuthConsumer(String username, int tenantId, String appName, String callbackUrl)
@@ -7736,9 +7599,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         ResultSet rs = null;
         String consumerKey = null;
         try {
-            String getConsumerKeySql = "SELECT CONSUMER_KEY " +
-                                       " FROM " + accessTokenStoreTable +
-                                       " WHERE ACCESS_TOKEN=?";
+            String getConsumerKeySql = "SELECT ICA.CONSUMER_KEY " +
+                                       " FROM " + accessTokenStoreTable + " IAT," +
+                                       " IDN_OAUTH_CONSUMER_APPS ICA" +
+                                       " WHERE IAT.ACCESS_TOKEN = ? " +
+                                       " AND ICA.ID = IAT.CONSUMER_KEY_ID";
             connection = APIMgtDBUtil.getConnection();
             smt = connection.prepareStatement(getConsumerKeySql);
             smt.setString(1, APIUtil.encryptToken(accessToken));
