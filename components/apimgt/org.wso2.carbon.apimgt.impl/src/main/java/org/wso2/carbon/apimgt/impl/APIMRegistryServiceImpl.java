@@ -24,12 +24,12 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 public class APIMRegistryServiceImpl implements APIMRegistryService {
     @Override
     public String getConfigRegistryResourceContent(String tenantDomain, final String registryLocation)
-                                        throws UserStoreException, RegistryException, UnsupportedEncodingException {
+                                        throws UserStoreException, RegistryException {
         String content = null;
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -44,7 +44,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
 
             if (registry.resourceExists(registryLocation)) {
                 Resource resource = registry.get(registryLocation);
-                content = new String((byte[]) resource.getContent(), "UTF-8");
+                content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
             }
         }
         finally {
@@ -56,7 +56,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
 
     @Override
     public String getGovernanceRegistryResourceContent(String tenantDomain, String registryLocation)
-                                        throws UserStoreException, RegistryException, UnsupportedEncodingException {
+                                        throws UserStoreException, RegistryException {
         String content = null;
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -71,7 +71,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
 
             if (registry.resourceExists(registryLocation)) {
                 Resource resource = registry.get(registryLocation);
-                content = new String((byte[]) resource.getContent(), "UTF-8");
+                content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
             }
         }
         finally {
