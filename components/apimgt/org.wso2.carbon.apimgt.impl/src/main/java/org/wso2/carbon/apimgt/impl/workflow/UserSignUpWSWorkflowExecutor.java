@@ -29,6 +29,7 @@ import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
@@ -60,7 +61,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
     }
 
     @Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
     	
     	 if (log.isDebugEnabled()) {
              log.debug("Executing User SignUp Webservice Workflow for " + workflowDTO.getWorkflowReference());
@@ -118,10 +119,11 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
             log.error("Error converting String to OMElement", e);
             throw new WorkflowException("Error converting String to OMElement", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     @Override
-	public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
+	public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
 
     	workflowDTO.setStatus(workflowDTO.getStatus());	
     	workflowDTO.setUpdatedTime(System.currentTimeMillis());
@@ -175,6 +177,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
     	} catch (APIManagementException e1) {
     		throw new WorkflowException("Error while accessing signup configuration", e1);
     	}
+        return new GeneralWorkflowResponse();
 	}
 
 

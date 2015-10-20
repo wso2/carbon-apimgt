@@ -73,5 +73,18 @@ i18n.init(request,localeResourcesBasePath);
         <a href="#" class="btn btn-other" data-dismiss="modal">Close</a>
     </div>
 </div>
+
+<div id="redirection-data" style="display:none;">
+    <div class="modal-header">
+        <h3 class="modal-title">Modal header</h3>
+    </div>
+    <div class="modal-body">
+        <p>One fine body…</p>
+    </div>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary">Confirm</a>
+    </div>
+</div>
+
 <% }); %>
 

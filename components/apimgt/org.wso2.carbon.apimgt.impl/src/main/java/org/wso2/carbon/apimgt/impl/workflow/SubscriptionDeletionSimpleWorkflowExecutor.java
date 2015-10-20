@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
@@ -47,14 +48,15 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
     }
 
     @Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workflowDTO);
         super.publishEvents(workflowDTO);
+        return new GeneralWorkflowResponse();
     }
 
     @Override
-    public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         SubscriptionWorkflowDTO subWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         Connection conn = null;
@@ -92,5 +94,6 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
                 log.error("Couldn't close database connection for subscription deletion workflow", e);
             }
         }
+        return new GeneralWorkflowResponse();
     }
 }
