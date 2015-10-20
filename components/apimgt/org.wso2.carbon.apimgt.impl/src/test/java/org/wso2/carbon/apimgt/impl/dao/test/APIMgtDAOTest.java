@@ -174,79 +174,6 @@ public class APIMgtDAOTest extends TestCase {
 	}
 	*/
 
-	/*public String[] testRegisterApplicationAccessToken() throws Exception {
-		String validityTime = "5000";
-		String key2 = "", key4 = "";
-
-		String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
-		if (key1 == null) {
-			apiMgtDAO.registerApplicationAccessToken("CON12", "APPLICATION3", "PRABATH",
-			                                         MultitenantConstants.SUPER_TENANT_ID,
-			                                         "PRODUCTION", null, validityTime);
-			key2 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
-			assertNotNull(key2);
-		}
-		else{
-			key2=key1;
-		}
-		String key3 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
-		if (key3 == null) {
-			apiMgtDAO.registerApplicationAccessToken("CON2", "APPLICATION4", "PRABATH",
-			                                         MultitenantConstants.SUPER_TENANT_ID,
-			                                         "SANDBOX", null, validityTime);
-
-			key4 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
-			assertNotNull(key4);
-		}
-		else{
-			key4 = key3;
-		}
-
-		assertTrue(!key2.equals(key4));
-		return new String[] { key2, key4 };
-	}
-
-	public void testGetSubscribedAPIs() throws Exception {
-		Subscriber subscriber = new Subscriber("SUMEDHA");
-		subscriber.setDescription("Subscriber description");
-		Set<SubscribedAPI> subscribedAPIs = apiMgtDAO.getSubscribedAPIs(subscriber);
-		assertNotNull(subscribedAPIs);
-	}
-
-	public void testAddApplication() throws Exception {
-		Subscriber subscriber = new Subscriber("SUMEDHA");
-		subscriber.setDescription("Subscriber description");
-
-		Application application = new Application("APPLICATION999", subscriber);
-		Application application1 = new Application("APPLICATION998", subscriber);
-
-		apiMgtDAO.addApplication(application, "SUMEDHA");
-		apiMgtDAO.addApplication(application1, "SUMEDHA");
-
-		Application[] applications = apiMgtDAO.getApplications(subscriber);
-		assertNotNull(applications);
-		assertTrue(applications.length > 0);
-		for (int a = 0; a < applications.length; a++) {
-			assertTrue(applications[a].getId() > 0);
-			assertNotNull(applications[a].getName());
-		}
-	}
-
-	public void testAddApplication2() throws Exception {
-		Application application = new Application("APPLICATION1000", null);
-		apiMgtDAO.addApplication(application, "SUMEDHA");
-		Application[] applications = apiMgtDAO.getApplications(null);
-		assertNull(applications);
-
-		Subscriber subscriber = new Subscriber("NEWUSER");
-		applications = apiMgtDAO.getApplications(subscriber);
-		assertNull(applications);
-
-		subscriber = new Subscriber("SUMEDHA");
-		applications = apiMgtDAO.getApplications(subscriber);
-		assertNotNull(applications);
-	}
-    */
 	public void checkSubscribersEqual(Subscriber lhs, Subscriber rhs) throws Exception {
 		assertEquals(lhs.getId(), rhs.getId());
 		assertEquals(lhs.getEmail(), rhs.getEmail());
@@ -431,39 +358,5 @@ public class APIMgtDAOTest extends TestCase {
 			assertEquals("V1.0.0", apiId.getVersion());
 		}
 	}
-	
-
-
-/*
-	public void testUnsubscribe() throws Exception {
-		Subscriber subscriber = new Subscriber("THILINA");
-		Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
-		assertEquals(1, subscriptions.size());
-		SubscribedAPI sub = subscriptions.toArray(new SubscribedAPI[subscriptions.size()])[0];
-		apiMgtDAO.removeSubscription(sub.getApiId(), sub.getApplication().getId());
-
-		subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber);
-		assertTrue(subscriptions.isEmpty());
-	}
-*/
-
-//	public void testIsAccessTokenExists() throws Exception {
-//		boolean exist = apiMgtDAO.isAccessTokenExists(testRegisterApplicationAccessToken()[0]);
-//		assertEquals(true, exist);
-//	}
-
-//	public void testUpdateRefreshedApplicationAccessToken() throws Exception {
-//		String newTok = UUID.randomUUID().toString();
-//		long validityTime = 5000;
-//
-//		apiMgtDAO.updateRefreshedApplicationAccessToken("PRODUCTION", newTok, validityTime);
-//		String key1 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION3", "PRODUCTION");
-//		assertNotNull(key1);
-//
-//		apiMgtDAO.updateRefreshedApplicationAccessToken("PRODUCTION", newTok, validityTime);
-//		String key2 = apiMgtDAO.getAccessKeyForApplication("PRABATH", "APPLICATION4", "SANDBOX");
-//		assertNotNull(key1);
-//		assertTrue(!key1.equals(key2));
-//	}
 
 }
