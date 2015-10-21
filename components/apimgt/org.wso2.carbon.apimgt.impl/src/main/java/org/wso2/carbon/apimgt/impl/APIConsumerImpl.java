@@ -1151,8 +1151,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return tagSet;
     }
 
-	@Override
-	public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
+    @Override
+    public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
         // Fetch the all the tags first.
         Set<Tag> tags = getAllTags(tenantDomain);
         // For each and every tag get additional attributes from the registry.
