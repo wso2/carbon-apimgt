@@ -555,6 +555,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String wsdl = (String) apiData.get("wsdl", apiData);
         String wadl = (String) apiData.get("wadl", apiData);
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
             
@@ -588,8 +589,12 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.setEndpointSecured(true);
         	api.setEndpointUTUsername(endpointUTUsername);
         	api.setEndpointUTPassword(endpointUTPassword);
+            if ("digestAuth".equals(endpointAuthDigest)) {
+                api.setEndpointAuthDigest(true);
+            }
         } else {
             api.setEndpointSecured(false);
+            api.setEndpointAuthDigest(false);
             api.setEndpointUTUsername(null);
             api.setEndpointUTPassword(null);
         }
@@ -609,6 +614,8 @@ public class APIProviderHostObject extends ScriptableObject {
         String inSequence =  (String) apiData.get("inSequence", apiData);
         String outSequence = (String) apiData.get("outSequence", apiData);
         String faultSequence = (String) apiData.get("faultSequence", apiData);
+
+        api.removeCustomSequences();
 
         if (!"none".equals(inSequence))  {
             api.setInSequence(inSequence);
@@ -691,7 +698,7 @@ public class APIProviderHostObject extends ScriptableObject {
         Set<String> tag = new HashSet<String>();
 
         if (tags != null) {
-            if (tags.indexOf(",") >= 0) {
+            if (tags.contains(",")) {
                 String[] userTag = tags.split(",");
                 tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
             } else {
@@ -1026,7 +1033,7 @@ public class APIProviderHostObject extends ScriptableObject {
         Set<String> tag = new HashSet<String>();
 
         if (tags != null) {
-            if (tags.indexOf(",") >= 0) {
+            if (tags.contains(",")) {
                 String[] userTag = tags.split(",");
                 tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
             } else {
@@ -1080,6 +1087,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
 
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 
@@ -1332,6 +1340,9 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
+            if ("digestAuth".equals(endpointAuthDigest)) {
+                api.setEndpointAuthDigest(true);
+            }
         }
 
         checkFileSize(fileHostObject);
@@ -1521,6 +1532,7 @@ public class APIProviderHostObject extends ScriptableObject {
         	visibleTenants = (String) apiData.get("visibleTenants", apiData);
         }
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 
@@ -1582,7 +1594,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String tags = (String) apiData.get("tags", apiData);
         Set<String> tag = new HashSet<String>();
         if (tags != null) {
-            if (tags.indexOf(",") >= 0) {
+            if (tags.contains(",")) {
                 String[] userTag = tags.split(",");
                 tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
             } else {
@@ -1810,12 +1822,15 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setDestinationStatsEnabled(destinationStats);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
+            if("digestAuth".equals(endpointAuthDigest)){
+                api.setEndpointAuthDigest(true);
+            }
         }
 
         try {
@@ -2634,8 +2649,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-    private static String checkTransport(String compare, String transport)
-            throws APIManagementException {
+    private static String checkTransport(String compare, String transport)  throws APIManagementException {
         if(transport!=null){
             List<String> transportList = new ArrayList<String>();
             transportList.addAll(Arrays.asList(transport.split(",")));
@@ -2960,8 +2974,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static void jsFunction_addInlineContent(Context cx,
                                                    Scriptable thisObj, Object[] args,
-                                                   Function funObj)
-            throws APIManagementException {
+                                                   Function funObj) throws APIManagementException {
         String apiName;
         String version;
         String providerName;
@@ -3025,7 +3038,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String visibility = (String) args[11];
         FileHostObject fileHostObject = null;
-        String sourceURL = null;
+        String sourceURL;
 
         boolean isTenantFlowStarted = false;
 
@@ -3172,7 +3185,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         API api = new API(apiId);
-        api.setAsDefaultVersion(defaultVersion.equals("default_version") ? true : false);
+        api.setAsDefaultVersion(defaultVersion.equals("default_version"));
 
         APIProvider apiProvider = getAPIProvider(thisObj);
         boolean isTenantFlowStarted = false;
@@ -3728,9 +3741,6 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            //return myn;
-        }
         String fromDate = (String) args[0];
         String toDate = (String) args[1];
         String apiName = (String)args[2];
@@ -4213,7 +4223,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String invalidStatusCodesRegex = args.length > 2 ? (String) args[2] : "404";
         if (urlVal != null && !urlVal.isEmpty()) {
             urlVal = urlVal.trim();
-            URLConnection conn = null;
             try {
                 URL url = new URL(urlVal);
                 if (type != null && type.equals("wsdl")) {
@@ -4238,10 +4247,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
             } catch (Exception e) {
                 response = e.getMessage();
-            } finally {
-                if (conn != null) {
-                    conn = null;
-                }
             }
         }
         return response;
@@ -4317,7 +4322,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String searchTerm;
         String searchType;
         APIProvider apiProvider = getAPIProvider(thisObj);
-        Map<Integer, APIKey> tokenData = null;
+        Map<Integer, APIKey> tokenData;
         String loggedInUser = ((APIProviderHostObject) thisObj).getUsername();
 
         if (searchValue.contains(":")) {
@@ -4484,10 +4489,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         NativeObject row = new NativeObject();
 
-        if (!list.isEmpty()) {
-            row.put("year",row,list.get(0).toString());
-            row.put("month",row,list.get(1).toString());
-            row.put("day",row,list.get(2).toString());
+        if (list != null && !list.isEmpty()) {
+            row.put("year",row,list.get(0));
+            row.put("month",row,list.get(1));
+            row.put("day",row,list.get(2));
             myn.put(0,myn,row);
         }
 
@@ -4575,6 +4580,9 @@ public class APIProviderHostObject extends ScriptableObject {
 	public static NativeArray jsFunction_getCustomOutSequences(Context cx, Scriptable thisObj,
 	                                                        Object[] args, Function funObj)
             throws APIManagementException {
+        if (args == null ||  args.length != 3) {
+            handleException("Invalid input parameters.");
+        }
 		APIProvider apiProvider = getAPIProvider(thisObj);
         String apiName = (String) args[0];
         String apiVersion = (String) args[1];
@@ -4611,6 +4619,9 @@ public class APIProviderHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
                                                               Object[] args, Function funObj)
             throws APIManagementException {
+        if (args == null ||  args.length != 3) {
+            handleException("Invalid input parameters.");
+        }
         APIProvider apiProvider = getAPIProvider(thisObj);
 
         String apiName = (String) args[0];

@@ -21,10 +21,12 @@ $(document).ready(function(){
 
     $('#endpointType').on('change',function(){
         var endpointType = $('#endpointType').find(":selected").val();
-        if(endpointType == "secured"){
+        if (endpointType == "secured") {
+            var endpointAuthType = $('#endpointAuthType').find(":selected").val();
+            $('#endpointAuthType').show();
             $('#credentials').show();
-        }
-        else{
+        } else {
+            $('#endpointAuthType').hide();
             $('#credentials').hide();
         }
     });
@@ -148,7 +150,7 @@ $(document).ready(function(){
                         name:designer.saved_api.name,
                         version:designer.saved_api.version,
                         provider: designer.saved_api.provider,
-                        status: "PROTOTYPED",
+                        status: "Deploy as a Prototype",
                         publishToGateway:true,
                         requireResubscription:true
                     },

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -36,7 +37,6 @@ public abstract class WorkflowExecutor implements Serializable {
 
     protected String callbackURL;
 
-
     /**
      * Returns the workflow executor type. It is better to follow a convention as PRODUCT_ARTIFACT_ACTION for the
      * workflow type. Ex: AM_SUBSCRIPTION_CREATION.
@@ -51,7 +51,7 @@ public abstract class WorkflowExecutor implements Serializable {
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
      * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         try {
             apiMgtDAO.addWorkflowEntry(workflowDTO);
@@ -59,6 +59,7 @@ public abstract class WorkflowExecutor implements Serializable {
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while persisting workflow", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     /**
@@ -67,14 +68,16 @@ public abstract class WorkflowExecutor implements Serializable {
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
      * @throws WorkflowException - Thrown when the workflow completion was not fully performed.
      */
-    public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        try {
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
+
+       ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+       try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
             publishEvents(workflowDTO);
         } catch (APIManagementException e) {
             throw new WorkflowException("Error while updating workflow", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     /**
@@ -93,8 +96,7 @@ public abstract class WorkflowExecutor implements Serializable {
      * @return UUID
      */
     public String generateUUID() {
-        String UUID = UUIDGenerator.generateUUID();
-        return UUID;
+        return UUIDGenerator.generateUUID();
     }
 
     /**
@@ -145,3 +147,4 @@ public abstract class WorkflowExecutor implements Serializable {
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {}
 
 }
+

@@ -54,8 +54,6 @@ public class APIConsumerImplTest extends TestCase {
             e.printStackTrace();
         } catch (RegistryException e) {
             e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         }
     }
 

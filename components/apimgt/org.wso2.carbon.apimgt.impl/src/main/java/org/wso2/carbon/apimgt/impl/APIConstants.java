@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import javax.xml.namespace.QName;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,6 +74,8 @@ public final class APIConstants {
     public static final String API_TENANT_CONF = "tenant-conf.json";
 
     public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
+
+    public static final String RESOURCE_FOLDER_LOCATION = "repository"+ File.separator + "resources";
 
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
 
@@ -202,6 +205,7 @@ public final class APIConstants {
     public static final String API_URI_AUTH_TYPE ="URITemplate_authType";
     public static final String API_URI_MEDIATION_SCRIPT ="URITemplate_mediationScript";
     public static final String API_OVERVIEW_ENDPOINT_SECURED = "overview_endpointSecured";
+    public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
@@ -293,7 +297,18 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
+    public static final String LC_NEXT_STATES="nextStates";
+    public static final String LC_PROPERTY_LIFECYCLE_NAME_PREFIX="registry.lifecycle.";
+    public static final String LC_PROPERTY_CHECKLIST_PREFIX="registry.custom_lifecycle.checklist.";
+    public static final String LC_PROPERTY_STATE_SUFFIX=".state";
+    public static final String LC_PROPERTY_PERMISSION_SUFFIX=".item.permission";
+    public static final String LC_PROPERTY_ITEM_SUFFIX=".item";
+    public static final String LC_STATUS="status:";
+    public static final String LC_CHECK_ITEM_NAME="name:";
+    public static final String LC_CHECK_ITEM_VALUE="value:";
+    public static final String LC_CHECK_ITEM_ORDER="order:";
 
 
 
@@ -693,6 +708,29 @@ public final class APIConstants {
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
     public static String VELOCITY_LOGGER = "VelocityLogger";
 
+
+    public static class DigestAuthConstants {
+        public static final String REALM = "realm";
+        public static final String NONCE = "nonce";
+        public static final String ALGORITHM = "algorithm";
+        public static final String OPAQUE = "opaque";
+        public static final String QOP = "qop";
+
+        public static final String AUTH = "auth";
+        public static final String AUTH_INT = "auth-int";
+        public static final String MD5 = "MD5";
+        public static final String MD5_SESS = "MD5-sess";
+
+        public static final String POSTFIX = "POSTFIX";
+        public static final String HTTP_METHOD = "HTTP_METHOD";
+        public static final String MESSAGE_BODY = "MessageBody";
+        public static final String UNAMEPASSWORD = "UNAMEPASSWORD";
+        public static final String NONCE_COUNT = "NonceCount";
+        public static final String INIT_NONCE_COUNT = "00000000";
+        public static final String AUTH_HEADER = "AuthHeader";
+        public static final String BACKEND_URL = "BACKEND_URL";
+        public static final String CHARSET = "UTF-8";
+    }
     
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";

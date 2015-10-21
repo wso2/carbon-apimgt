@@ -27,7 +27,7 @@ function triggerSubscribe() {
         $("#subscribe-button").html('Subscribe');
         $("#subscribe-button").removeAttr('disabled');
         if (result.error == false) {
-            if(result.status == 'REJECTED')    {
+            if(result.status.subscriptionStatus == 'REJECTED')    {
                 $('#messageModal').html($('#confirmation-data').html());
                 $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionRejectTitle'));
                 $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionRejected'));
@@ -35,25 +35,74 @@ function triggerSubscribe() {
                 $('#messageModal a.btn-primary').click(function() {
                     window.location.reload();
                 });
-            } else  {
-                $('#messageModal').html($('#confirmation-data').html());
-                $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
-                if(result.status == 'ON_HOLD'){
-                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
-                }else{
-                    $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
+            } else {
+                var jsonPayload = result.status.workflowResponse.jsonPayload;
+                if(jsonPayload != null && jsonPayload != ""){
+                   var jsonObj = JSON.parse(jsonPayload);
+                   var additionalParameters = jsonObj.additionalParameters; 
+                       //add another condition to prevent unnecessary redirection
+		   if (jsonObj.redirectUrl != null) {
+		      $('#messageModal').html($('#confirmation-data').html());
+	              $('#messageModal h3.modal-title').html("Redirection");
+		      $('#messageModal div.modal-body').html("You will be redirected from WSO2 API Manager to " + jsonObj.displayUrl );
+                      $('#messageModal a.btn-primary').html(i18n.t('info.OK'));
+                      $('#messageModal a.btn-other').html(i18n.t('info.cancelSubs'));
+                      $('#messageModal a.btn-primary').click(function () {
+                       if(additionalParameters != null && Object.keys(additionalParameters).length > 0) {
+                         var params = "";
+		         for (var key in additionalParameters) {
+                           if(params != ""){
+                              params = params.concat("&");
+                            }
+                           if (additionalParameters.hasOwnProperty(key)) {
+                              params = params.concat((key.concat("=")).concat(additionalParameters[key]));
+                           }
+                          }
+                         location.href=jsonObj.redirectUrl + "?params=" + params;
+                        }else{
+                          location.href=jsonObj.redirectUrl;
+                        }  
+                      });
+                       
+                      $('#messageModal a.btn-other').click(function () {
+                        jagg.post("/site/blocks/subscription/subscription-remove/ajax/subscription-remove.jag", {
+                             action:"removeSubscription",
+                             name:api.name,
+                             version:api.version,
+                             provider:api.provider,
+                             applicationId:applicationId
+                       }, function (result) {
+                          if (!result.error) {
+                            $('#messageModal').modal("hide");
+                              window.location.reload();
+                          } else {
+                            jagg.message({content:result.message,type:"error"});
+                          }
+                       }, "json");;
+
+                      });
+                    }
+                } else {
+                    $('#messageModal').html($('#confirmation-data').html());
+                    $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
+                    if (result.status == 'ON_HOLD') {
+                        $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
+                    } else {
+                        $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
+                    }
+                    $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
+                    $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
+                    $('#messageModal a.btn-other').click(function () {
+                        window.location.reload();
+                    });
+                    $('#messageModal a.btn-primary').click(function () {
+                        urlPrefix = "selectedApp=" + applicationName + "&" + urlPrefix;
+                        location.href = "../site/pages/subscriptions.jag?" + urlPrefix;
+                    });
                 }
-                $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
-                $('#messageModal a.btn-other').html(i18n.t('info.stayPage'));
-                $('#messageModal a.btn-other').click(function() {
-                    window.location.reload();
-                });
-                $('#messageModal a.btn-primary').click(function() {
-                    urlPrefix = "selectedApp=" + applicationName + "&" + urlPrefix;
-                    location.href = "../site/pages/subscriptions.jag?" + urlPrefix;
-                });
             }
             $('#messageModal').modal();
+
 
 
         } else {

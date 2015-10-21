@@ -29,12 +29,12 @@ public interface APIMRegistryService {
     * Get resource belonging to a given user from the provided path in config registry
     */
     String getConfigRegistryResourceContent(String tenantDomain, final String registryLocation)
-            throws UserStoreException, RegistryException, UnsupportedEncodingException;
+            throws UserStoreException, RegistryException;
 
     /**
      * Get resource belonging to a given user from the provided path in governance registry
      */
     String getGovernanceRegistryResourceContent(String tenantDomain, final String registryLocation)
-            throws UserStoreException, RegistryException, UnsupportedEncodingException;
+            throws UserStoreException, RegistryException;
 
 }

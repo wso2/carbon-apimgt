@@ -84,7 +84,7 @@
     "lifeCycle":"Ciclo de vida",
     "docs":"Docs",
     "users":"Usuarios",
-    "state":"Estado",
+    "state":"Estado actual",
 
     "subsPendingApproval":"Subscription is pending approval",
 
@@ -187,6 +187,7 @@
     "wsdlHelpMsg":"Ex:http://appserver/services/echo?wsdl",
     "sandboxHelpMsg":"Ex:http://test-appserver/services/echo",
     "endpointHelpMsg":"Ex:http://appserver/services/echo",
+    "endpointAuthHelpMsg" :"Select the authentication scheme you require.",
     "imgHelpMsg":"Tamaño máximo 1 MB.",
     "imgHelpMsg2":"Tamaño de imagen recomendada: 100 x 100 pixels.",
     "noLifecycleMsg":"No existen datos sobre el ciclo de vida de esta API.",
@@ -215,6 +216,9 @@
     "secured": "Securizado",
     "nonsecured": "No Securizado",
     "endpointType": "Endpoint Security Scheme",
+    "endpointAuthType" : "Endpoint Auth Type",
+    "basicAuth" : "Basic Auth",
+    "digestAuth" : "Digest Auth",
     "credentials": "Credenciales",
 
     "productionFailoverEp": "Production Fail-over URL",
@@ -228,6 +232,17 @@
 	"techOwnerMail" : "Técnico Propietario Enviar",
 
     "apiUnavailable" : "API no existe",
-    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint."
+    "validityCheckMessage" : "WSO2 Gerente de API utiliza HTTP cabeza para comprobar la validez del punto final.",
+    
+    "publish" : "publicar",
+    "deploy as a prototype" : "Implementar como un Prototipo",
+    "demote to created" : "Degradar a Creado",
+    "block" : "Bloquear",
+    "demote to prototyped" : "Degradar a Prototipado",
+    "deprecate" : "desaprobar",
+    "re-publish" : "Volver a publicar",
+    "retire" : "Retirarse"
+    
+    
 
 }
