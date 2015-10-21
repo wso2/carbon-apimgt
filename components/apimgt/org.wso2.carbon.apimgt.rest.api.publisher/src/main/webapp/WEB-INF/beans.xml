@@ -20,7 +20,7 @@
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.handlers.BasicAuthenticationHandler"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.util.handlers.BasicAuthenticationHandler"/>
             <!--<bean class="org.wso2.carbon.apimgt.rest.api.handlers.XACMLAuthenticationHandler"/>-->
 
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>

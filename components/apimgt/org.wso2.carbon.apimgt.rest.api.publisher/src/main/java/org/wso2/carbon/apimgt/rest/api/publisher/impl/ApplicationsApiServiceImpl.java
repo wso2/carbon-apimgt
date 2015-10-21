@@ -10,7 +10,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ApplicationMappingUtil;
 import java.net.URI;
 import java.net.URISyntaxException;
