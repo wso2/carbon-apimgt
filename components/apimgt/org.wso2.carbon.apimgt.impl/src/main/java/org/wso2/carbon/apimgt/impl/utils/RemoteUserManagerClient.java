@@ -20,7 +20,7 @@ import org.wso2.carbon.utils.CarbonUtils;
  * 
  */
 public class RemoteUserManagerClient {
-	private static int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
+	private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 	private RemoteUserStoreManagerServiceStub userStoreManagerStub;
 
 	public RemoteUserManagerClient(String cookie) throws APIManagementException {
@@ -65,9 +65,9 @@ public class RemoteUserManagerClient {
 	/**
 	 * Return userlist based on a claim
 	 * 
-	 * @param claim
-	 * @param claimValue
-	 * @return
+	 * @param claim - The claim
+	 * @param claimValue - The Claim Value
+	 * @return - A user list
 	 * @throws APIManagementException
 	 */
 	public String[] getUserList(String claim, String claimValue) throws APIManagementException {

@@ -22,16 +22,14 @@ import java.io.StringWriter;
 public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
     private APIGatewayAdminStub apiGatewayAdminStub;
-    private String qualifiedName;
-    private String qualifiedDefaultApiName;
     private Environment environment;
 
 
     public APIGatewayAdminClient(APIIdentifier apiId, Environment environment) throws AxisFault {
-        this.qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
-        this.qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiName();
-        String providerDomain = apiId.getProviderName();
-        providerDomain = APIUtil.replaceEmailDomainBack(providerDomain);
+        //String qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
+        //String qualifiedDefaultApiName = apiId.getProviderName() + "--" + apiId.getApiName();
+        //String providerDomain = apiId.getProviderName();
+        //providerDomain = APIUtil.replaceEmailDomainBack(providerDomain);
         apiGatewayAdminStub = new APIGatewayAdminStub(null, environment.getServerURL() + "APIGatewayAdmin");
         setup(apiGatewayAdminStub, environment);
         this.environment = environment;
@@ -41,8 +39,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * Store the encrypted password into the registry with the unique property name.
      * Property name is constructed as "Provider+ ApiName +Version"
      *
-     * @param api
-     * @param tenantDomain
+     * @param api - The api
+     * @param tenantDomain - The Tenant Domain
      * @throws APIManagementException
      */
     public void addSecureVaultProperty(API api, String tenantDomain) throws APIManagementException {
@@ -70,8 +68,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * Store the encrypted password into the registry with the unique property name.
      * Property name is constructed as "Provider+ ApiName +Version"
      *
-     * @param api
-     * @param tenantDomain
+     * @param api - The api
+     * @param tenantDomain - The tenant domain
      * @throws APIManagementException
      */
     public void deleteSecureVaultProperty(API api, String tenantDomain) throws APIManagementException {
@@ -97,8 +95,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * Update the encrypted password into the registry with the unique property
      * name. Property name is constructed as "Provider+ ApiName +Version"
      *
-     * @param api
-     * @param tenantDomain
+     * @param api - The api
+     * @param tenantDomain - The Tenant Domain
      * @throws APIManagementException
      */
     public void updateSecureVaultProperty(API api, String tenantDomain) throws APIManagementException {
@@ -123,8 +121,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Get the config system registry for tenants
      *
-     * @param tenantDomain
-     * @return
+     * @param tenantDomain - The tenant domain
+     * @return - A UserRegistry instance for the tenant
      * @throws APIManagementException
      */
     private UserRegistry getRegistry(String tenantDomain) throws APIManagementException {
@@ -139,7 +137,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        UserRegistry registry = null;
+        UserRegistry registry;
         try {
             registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getConfigSystemRegistry(tenantId);
@@ -153,13 +151,12 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * encrypt the plain text password
      *
-     * @param cipher        init cipher
      * @param plainTextPass plain text password
      * @return encrypted password
      * @throws APIManagementException
      */
     private String doEncryption(String plainTextPass) throws APIManagementException {
-        String encodedValue = null;
+        String encodedValue;
         try {
             encodedValue = apiGatewayAdminStub.doEncryption(plainTextPass);
 
@@ -173,8 +170,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Add the API to the gateway
      *
-     * @param builder
-     * @param tenantDomain
+     * @param builder - APITemplateBuilder instance
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void addApi(APITemplateBuilder builder, String tenantDomain, APIIdentifier apiId) throws AxisFault {
@@ -195,8 +192,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Add the API to the gateway
      *
-     * @param builder
-     * @param tenantDomain
+     * @param builder - APITemplateBuilder instance
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void addPrototypeApiScriptImpl(APITemplateBuilder builder, String tenantDomain, APIIdentifier apiId)
@@ -235,8 +232,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Get API from the gateway
      *
-     * @param tenantDomain
-     * @return
+     * @param tenantDomain - The Tenant Domain
+     * @return - An APIData instance
      * @throws AxisFault
      */
     public APIData getApi(String tenantDomain, APIIdentifier apiId) throws AxisFault {
@@ -248,7 +245,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             } else {
                 apiData = apiGatewayAdminStub.getApi(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
             }
-            return (APIData) apiData;
+            return apiData;
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
         }
@@ -264,7 +261,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             } else {
                 apiData = apiGatewayAdminStub.getDefaultApi(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
             }
-            return (APIData) apiData;
+            return apiData;
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining default API information from gateway." + e.getMessage(), e);
         }
@@ -273,8 +270,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Update the API in the Gateway
      *
-     * @param builder
-     * @param tenantDomain
+     * @param builder - APITemplateBuilder instance
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void updateApi(APITemplateBuilder builder, String tenantDomain, APIIdentifier apiId) throws AxisFault {
@@ -295,8 +292,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Update the API in the Gateway
      *
-     * @param builder
-     * @param tenantDomain
+     * @param builder - APITemplateBuilder instance
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void updateApiForInlineScript(APITemplateBuilder builder, String tenantDomain, APIIdentifier apiId)
@@ -337,7 +334,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * Delete the API from Gateway
      *
-     * @param tenantDomain
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void deleteApi(String tenantDomain, APIIdentifier apiId) throws AxisFault {
@@ -372,7 +369,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * Deploy the sequence to the gateway
      *
      * @param sequence     - The sequence element , which to be deployed in synapse
-     * @param tenantDomain
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void addSequence(OMElement sequence, String tenantDomain) throws AxisFault {
@@ -395,7 +392,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      * Undeploy the sequence from gateway
      *
      * @param sequenceName -The sequence name, which need to be undeployed from synapse configuration
-     * @param tenantDomain
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void deleteSequence(String sequenceName, String tenantDomain) throws AxisFault {
@@ -415,8 +412,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     /**
      * get the sequence from gateway
      *
-     * @param sequenceName -The sequence name,
-     * @param tenantDomain
+     * @param sequenceName - The sequence name,
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public OMElement getSequence(String sequenceName, String tenantDomain) throws AxisFault {

@@ -97,9 +97,8 @@ public class APIMWSDLReader {
 
 			ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
 
-			OMElement wsdlElement = APIUtil.buildOMElement(byteArrayInputStream);
+			return APIUtil.buildOMElement(byteArrayInputStream);
 
-			return wsdlElement;
 
 		} catch (Exception e) {
 			String msg = " Error occurs when change the addres URL of the WSDL";
@@ -118,9 +117,8 @@ public class APIMWSDLReader {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             writer.writeWSDL(wsdlDefinition.toElement(), byteArrayOutputStream);
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
-            OMElement wsdlElement = APIUtil.buildOMElement(byteArrayInputStream);
+            return APIUtil.buildOMElement(byteArrayInputStream);
 //            String wsdlDoc = toString(byteArrayInputStream);
-            return wsdlElement;
         } catch (Exception e) {
             String msg = " Error occurs when change the addres URL of the WSDL";
             log.error(msg);
@@ -139,8 +137,7 @@ public class APIMWSDLReader {
             wReader.setFeature(org.apache.woden.WSDLReader.FEATURE_VALIDATION, true);
 //            wReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
 //            wReader.setFeature("javax.wsdl.importDocuments", false);
-            org.apache.woden.wsdl20.Description wsdlDefinition1 = wReader.readWSDL(baseURI);
-            return wsdlDefinition1;
+            return wReader.readWSDL(baseURI);
         } catch (org.apache.woden.WSDLException e) {
             String error = "Error occurred reading wsdl document.";
             log.error(error);
@@ -153,7 +150,7 @@ public class APIMWSDLReader {
 
     private void setServiceDefinitionForWSDL2(org.apache.woden.wsdl20.Description definition, API api) throws APIManagementException {
         org.apache.woden.wsdl20.Service[] serviceMap = definition.getServices();
-        URL addressURI = null;
+        URL addressURI;
         try {
             for(org.apache.woden.wsdl20.Service svc : serviceMap){
                 Endpoint[] portMap = svc.getEndpoints();
@@ -242,7 +239,7 @@ public class APIMWSDLReader {
 
 		Map serviceMap = definition.getAllServices();
 		Iterator serviceItr = serviceMap.entrySet().iterator();
-		URL addressURI = null;
+		URL addressURI;
 		try {
 			while (serviceItr.hasNext()) {
 				Map.Entry svcEntry = (Map.Entry) serviceItr.next();
@@ -302,7 +299,6 @@ public class APIMWSDLReader {
 	/**
 	 * Get the addressURl from the Extensibility element
 	 * @param exElement - {@link ExtensibilityElement}
-	 * @return {@link String}
 	 * @throws APIManagementException
 	 */
 

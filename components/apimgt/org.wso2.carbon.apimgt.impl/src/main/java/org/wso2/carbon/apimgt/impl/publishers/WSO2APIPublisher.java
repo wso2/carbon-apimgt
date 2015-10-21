@@ -846,7 +846,7 @@ public class WSO2APIPublisher implements APIPublisher {
 
     /**
      * This method composes and return the publisher URL from the Store URL. 
-     * @param storeEndpoint
+     * @param storeEndpoint - The Store endpoint url
      * @return Publisher URL
      */
     private String getPublisherURLFromStoreURL(String storeEndpoint) {
@@ -917,8 +917,7 @@ public class WSO2APIPublisher implements APIPublisher {
 
         if (statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP ||
                 statusCode == HttpURLConnection.HTTP_SEE_OTHER) {
-            String newUrl = conn.getHeaderField("Location");
-            return newUrl;
+            return conn.getHeaderField("Location");
         } else {
             return imageUrl;
         }

@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -28,18 +26,12 @@ import java.util.Map;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
@@ -52,8 +44,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
+
 
 /**
  * This class contains the utility methods used for self signup
@@ -121,8 +112,8 @@ public final class SelfSignUpUtil {
 	/**
 	 * load configuration from the registry
 	 * 
-	 * @param tenantDomain
-	 * @return
+	 * @param tenantDomain - The Tenant Domain
+	 * @return - A UserRegistrationConfigDTO instance
 	 * @throws APIManagementException
 	 */
 	private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
@@ -180,9 +171,9 @@ public final class SelfSignUpUtil {
 	/**
 	 * Check whether user can signup to the tenant domain
 	 * 
-	 * @param userName
-	 * @param realm
-	 * @return
+	 * @param userName - The user name
+	 * @param realm - The realm
+	 * @return - A boolean value
 	 * @throws APIManagementException
 	 */
 	public static boolean isUserNameWithAllowedDomainName(String userName, UserRealm realm)
@@ -207,8 +198,8 @@ public final class SelfSignUpUtil {
 	/**
 	 * get the full role name list (ex: internal/subscriber)
 	 * 
-	 * @param config
-	 * @return
+	 * @param config - A UserRegistrationConfigDTO instance
+	 * @return - A list object containing role names
 	 */
 	public static List<String> getRoleNames(UserRegistrationConfigDTO config) {
 
@@ -235,14 +226,14 @@ public final class SelfSignUpUtil {
 
 	/**
 	 * modify user name with user storeage information. 
-	 * @param username
-	 * @param signupConfig
-	 * @return
+	 * @param username - The user name
+	 * @param signupConfig - The sign up configuration
+	 * @return - The modified user name
 	 */
 	public static String getDomainSpecificUserName(String username, UserRegistrationConfigDTO signupConfig) {
 		String modifiedUsername = null;	
 		// set tenant specific sign up user storage
-		if (signupConfig != null && signupConfig.getSignUpDomain() != "") {
+		if (signupConfig != null && !signupConfig.getSignUpDomain().equals("")) {
 			
 			int index = username.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
 			/*

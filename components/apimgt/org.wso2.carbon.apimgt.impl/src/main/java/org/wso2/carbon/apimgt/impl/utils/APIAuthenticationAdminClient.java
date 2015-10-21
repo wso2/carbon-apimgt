@@ -153,8 +153,8 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * @throws AxisFault if an error occurs while logging in
      */
     private String loginGateway(Environment environment) throws AxisFault {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        //APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                //getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String user = environment.getUserName();
         String password = environment.getPassword();
         String url = environment.getServerURL();
@@ -178,8 +178,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
             authAdminStub.login(user, password, host);
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
-            String sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-            return sessionCookie;
+            return (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         } catch (RemoteException e) {
             throw new AxisFault("Error while contacting the authentication admin services", e);
         } catch (LoginAuthenticationExceptionException e) {
@@ -219,8 +218,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
             authAdminStub.login(user, password, host);
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
-            String sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-            return sessionCookie;
+            return (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         } catch (RemoteException e) {
             throw new AxisFault("Error while contacting the authentication admin services", e);
         } catch (LoginAuthenticationExceptionException e) {
