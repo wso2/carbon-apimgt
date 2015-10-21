@@ -44,6 +44,12 @@
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
         </dependency>
+    <dependency>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+        <version>${apimgt.api.version}</version>
+        <scope>provided</scope>
+    </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -123,6 +129,7 @@
                             </adviceFile>
                             <bundles>
                             <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.entitlement.stub:4.5.0</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.util:${apimgt.api.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
