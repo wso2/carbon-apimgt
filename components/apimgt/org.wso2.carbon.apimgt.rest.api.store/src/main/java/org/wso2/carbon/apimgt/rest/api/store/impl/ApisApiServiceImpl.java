@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.store.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
-import org.wso2.carbon.apimgt.rest.api.store.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.exception.InternalServerErrorException;
@@ -37,6 +36,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;

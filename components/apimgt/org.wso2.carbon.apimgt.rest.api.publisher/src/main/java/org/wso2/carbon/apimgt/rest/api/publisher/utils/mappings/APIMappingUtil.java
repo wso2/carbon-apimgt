@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
@@ -37,6 +36,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+
 
 public class APIMappingUtil {
 

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.store;
+package org.wso2.carbon.apimgt.rest.api.util;
 
 /**
  * Created by jo on 9/21/15.

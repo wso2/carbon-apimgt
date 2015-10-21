@@ -7,7 +7,6 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -16,6 +15,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+
 
 import javax.ws.rs.core.Response;
 
