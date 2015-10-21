@@ -19,11 +19,12 @@ package org.wso2.carbon.apimgt.rest.api.store.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
+
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.Set;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 public class ConstraintViolationException extends WebApplicationException {
 

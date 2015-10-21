@@ -7,7 +7,6 @@ import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TierMappingUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -19,6 +18,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
 
 public class TiersApiServiceImpl extends TiersApiService {
     @Override
