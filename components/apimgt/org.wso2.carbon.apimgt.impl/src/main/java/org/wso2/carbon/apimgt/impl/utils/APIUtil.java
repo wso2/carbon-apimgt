@@ -138,10 +138,7 @@ import org.wso2.carbon.utils.FileUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import javax.cache.Cache;
-import javax.cache.CacheConfiguration;
-import javax.cache.CacheManager;
-import javax.cache.Caching;
+import javax.cache.*;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -156,7 +153,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.Inet4Address;
@@ -192,6 +188,8 @@ public final class APIUtil {
     private static final Log log = LogFactory.getLog(APIUtil.class);
 
     private static boolean isContextCacheInitialized = false;
+
+    private static boolean isTiersCacheInitialized = false;
 
     private static final String DESCRIPTION = "Allows [1] request(s) per minute.";
 
@@ -4393,42 +4391,25 @@ public final class APIUtil {
             return isUnlimitedTierPaid(tenantDomain);
         }
 
-        Map<String, Tier> tierMap = null;
         boolean isPaid = false;
+        Tier tier = getTierFromCache(tierName, tenantDomain);
 
-        try {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            if (requestedTenantId == 0) {
-                tierMap = APIUtil.getTiers();
-            } else {
-                tierMap = APIUtil.getTiers(requestedTenantId);
-            }
-        }
-        finally {
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        if (tier != null) {
+            final Map<String, Object> tierAttributes = tier.getTierAttributes();
 
-        if (tierMap != null) {
-            Tier tier = tierMap.get(tierName);
+            if (tierAttributes != null) {
+                String isPaidValue = (String) tierAttributes.get(APIConstants.API_TIER_IS_PAID_ATTRIBUTE);
 
-            if (tier != null) {
-                final Map<String, Object> tierAttributes = tier.getTierAttributes();
-
-                if (tierAttributes != null) {
-                    String isPaidValue = (String) tierAttributes.get(APIConstants.API_TIER_IS_PAID_ATTRIBUTE);
-
-                    if (isPaidValue != null) {
-                        isPaid = Boolean.parseBoolean(isPaidValue);
-                    }
-                } else {
-                    throw new APIManagementException("Tier attributes not specified for tier " + tierName);
+                if (isPaidValue != null) {
+                    isPaid = Boolean.parseBoolean(isPaidValue);
                 }
             } else {
-                throw new APIManagementException("Tier " + tierName + "cannot be found");
+                throw new APIManagementException("Tier attributes not specified for tier " + tierName);
             }
+        } else {
+            throw new APIManagementException("Tier " + tierName + "cannot be found");
         }
+
 
         return isPaid;
     }
@@ -4475,6 +4456,53 @@ public final class APIUtil {
         }
 
         return false;
+    }
+
+    public static Tier getTierFromCache(String tierName, String tenantDomain) throws APIManagementException {
+        Map<String, Tier> tierMap = null;
+
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+            if (getTiersCache().containsKey(tierName)) {
+                tierMap = (Map<String, Tier>) getTiersCache().get(tierName);
+            } else {
+                int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+                if (requestedTenantId == 0) {
+                    tierMap = APIUtil.getTiers();
+                } else {
+                    tierMap = APIUtil.getTiers(requestedTenantId);
+                }
+
+                getTiersCache().put(tierName, tierMap);
+            }
+        }
+        finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+        return tierMap.get(tierName);
+    }
+
+
+    public static void clearTiersCache(){
+        getTiersCache().removeAll();
+    }
+
+    private static Cache getTiersCache() {
+        if (!isTiersCacheInitialized) {
+            isTiersCacheInitialized = true;
+            CacheBuilder builder = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    createCacheBuilder(APIConstants.TIERS_CACHE);
+            // TODO: We need to pick a suitable configurable expiry time
+            //return builder.setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS, 10)).build();
+            return builder.build();
+        }
+        else {
+            return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    getCache(APIConstants.TIERS_CACHE);
+        }
     }
     
     /*

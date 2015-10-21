@@ -580,6 +580,7 @@ public final class APIConstants {
     public static final String APP_USER_SCOPE_CACHE = "appUserScopeCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String SELF_SIGN_UP_CONFIG_CACHE = "selfSignupCache";
+    public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
