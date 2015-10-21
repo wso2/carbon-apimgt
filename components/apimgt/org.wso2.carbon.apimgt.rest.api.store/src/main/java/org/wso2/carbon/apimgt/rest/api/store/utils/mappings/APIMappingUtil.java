@@ -30,13 +30,14 @@ import org.wso2.carbon.apimgt.rest.api.store.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SequenceDTO;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
 
 public class APIMappingUtil {
 
