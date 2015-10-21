@@ -4493,4 +4493,30 @@ public final class APIUtil {
         return client;
 
     }
+
+    /**
+     * This method will return a relative URL for given registry resource which we can used to retrieve the resource
+     * from the web UI. For example, URI for a thumbnail icon of a tag can be generated from this method.
+     *
+     * @param resourceType Type of the registry resource. Based on this value the way URL is generate can be changed.
+     * @param tenantDomain tenant domain of the resource
+     * @param resourcePath path of the resource
+     * @return relative path of the registry resource from the web context level
+     */
+    public static String getRegistryResourcePathForUI(APIConstants.RegistryResourceTypesForUI resourceType, String
+            tenantDomain, String resourcePath) {
+        StringBuilder resourcePathBuilder = new StringBuilder();
+        if (APIConstants.RegistryResourceTypesForUI.TAG_THUMBNAIL.equals(resourceType)) {
+            if (tenantDomain != null && !"".equals(tenantDomain)
+                && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                resourcePathBuilder.append(RegistryConstants.PATH_SEPARATOR).append(MultitenantConstants
+                                                                                            .TENANT_AWARE_URL_PREFIX)
+                        .append(RegistryConstants.PATH_SEPARATOR).append(tenantDomain);
+            }
+            resourcePathBuilder.append(APIConstants.REGISTRY_RESOURCE_PREFIX);
+            resourcePathBuilder.append(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+            resourcePathBuilder.append(resourcePath);
+        }
+        return resourcePathBuilder.toString();
+    }
 }

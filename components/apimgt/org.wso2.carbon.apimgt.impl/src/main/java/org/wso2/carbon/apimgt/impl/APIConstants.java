@@ -399,6 +399,7 @@ public final class APIConstants {
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
+    public static final String API_STORE_API_GROUP_DEFAULT_ICON_PATH="images/api-group-default.png";
 
 
     public static final String API_PUBLISHER = "APIPublisher.";
@@ -816,5 +817,11 @@ public final class APIConstants {
 
     public static final String API_CUSTOM_IN_SEQUENCE_FILE_NAME = "custom_in_sequence.xml";
     public static final String API_CUSTOM_OUT_SEQUENCE_FILE_NAME = "custom_out_sequence.xml";
+
+    public static final String REGISTRY_RESOURCE_PREFIX="/registry/resource";
+
+    public static enum RegistryResourceTypesForUI {
+        TAG_THUMBNAIL
+    }
 
 }

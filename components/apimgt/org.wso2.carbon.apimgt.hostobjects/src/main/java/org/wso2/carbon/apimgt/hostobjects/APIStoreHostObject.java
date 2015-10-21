@@ -1747,6 +1747,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 currentTag.put("description", currentTag, tag.getDescription());
                 currentTag.put("isThumbnailExists", currentTag, tag.isThumbnailExists());
                 currentTag.put("count", currentTag, tag.getNoOfOccurrences());
+                currentTag.put("thumbnailUrl", currentTag, tag.getThumbnailUrl());
 
                 tagArray.put(i, tagArray, currentTag);
                 i++;

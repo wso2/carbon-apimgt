@@ -1169,15 +1169,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
 	@Override
 	public Set<Tag> getTagsWithAttributes(String tenantDomain) throws APIManagementException {
-		// Fetch the all the tags first.
-		Set<Tag> tags = getAllTags(tenantDomain);
-		// For each and every tag get additional attributes from the registry.
-		String descriptionPathPattern =
-		                                APIConstants.TAGS_INFO_ROOT_LOCATION +
-		                                        "/%s/description.txt";
-		String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
+        // Fetch the all the tags first.
+        Set<Tag> tags = getAllTags(tenantDomain);
+        // For each and every tag get additional attributes from the registry.
+        String descriptionPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/description.txt";
+        String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
 
-		//if the tenantDomain is not specified super tenant domain is used
+        //if the tenantDomain is not specified super tenant domain is used
         if (tenantDomain == null || "".equals(tenantDomain.trim())) {
             try {
                 tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
@@ -1186,66 +1184,65 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
 
-		//get the registry instance related to the tenant domain
-		UserRegistry govRegistry = null;
-		try {
-			ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-			int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-			                                     .getTenantId(tenantDomain);
-			RegistryService registryService =
-					ServiceReferenceHolder.getInstance()
-					                      .getRegistryService();
-			govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
+        //get the registry instance related to the tenant domain
+        UserRegistry govRegistry = null;
+        try {
+            ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
+        } catch (UserStoreException e) {
+            handleException("Cannot get tenant id for tenant domain name:" + tenantDomain, e);
+        } catch (RegistryException e) {
+            handleException("Cannot get registry for tenant domain name:" + tenantDomain, e);
+        }
 
-		} catch (UserStoreException e) {
-			handleException("Cannot get tenant id for tenant domain name:"+tenantDomain,e);
-		} catch (RegistryException e) {
-			handleException("Cannot get registry for tenant domain name:"+tenantDomain,e);
-		}
-
-		if (govRegistry != null) {
-		for (Tag tag : tags) {
-			// Get the description.
-			Resource descriptionResource = null;
-			String descriptionPath = String.format(descriptionPathPattern, tag.getName());
-			try {
-				if (govRegistry.resourceExists(descriptionPath)) {
-					descriptionResource = govRegistry.get(descriptionPath);
-				}
-			} catch (RegistryException e) {
-				//warn and proceed to the next tag
-				log.warn(String.format("Error while querying the existence of the description for the tag '%s'", tag.getName()));
-			}
-			// The resource is assumed to be a byte array since its the content
-			// of a text file.
-			if (descriptionResource != null) {
-				try {
-					String description = new String((byte[]) descriptionResource.getContent());
-					tag.setDescription(description);
-
-				} catch (ClassCastException e) {
-					//added warnings as it can then proceed to load rest of resources/tags
-					log.warn(String.format("Cannot cast content of %s to byte[]", descriptionPath),
-					                e);
-				}catch (RegistryException e) {
-					//added warnings as it can then proceed to load rest of resources/tags
-					log.warn(String.format("Cannot read content of %s", descriptionPath),
-					                e);
-				}
-			}
-			// Checks whether the thumbnail exists.
-			String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
-			try {
-				tag.setThumbnailExists(govRegistry.resourceExists(thumbnailPath));
-			} catch (RegistryException e) {
-				//warn and then proceed to load rest of tags
-				log.warn(String.format("Error while querying the existence of %s", thumbnailPath),
-				         e);
-			}
-		}
-		}
-		return tags;
-	}
+        if (govRegistry != null) {
+            for (Tag tag : tags) {
+                // Get the description.
+                Resource descriptionResource = null;
+                String descriptionPath = String.format(descriptionPathPattern, tag.getName());
+                try {
+                    if (govRegistry.resourceExists(descriptionPath)) {
+                        descriptionResource = govRegistry.get(descriptionPath);
+                    }
+                } catch (RegistryException e) {
+                    //warn and proceed to the next tag
+                    log.warn(String.format("Error while querying the existence of the description for the tag '%s'", tag.getName()));
+                }
+                // The resource is assumed to be a byte array since its the content
+                // of a text file.
+                if (descriptionResource != null) {
+                    try {
+                        String description = new String((byte[]) descriptionResource.getContent());
+                        tag.setDescription(description);
+                    } catch (ClassCastException e) {
+                        //added warnings as it can then proceed to load rest of resources/tags
+                        log.warn(String.format("Cannot cast content of %s to byte[]", descriptionPath), e);
+                    } catch (RegistryException e) {
+                        //added warnings as it can then proceed to load rest of resources/tags
+                        log.warn(String.format("Cannot read content of %s", descriptionPath), e);
+                    }
+                }
+                // Checks whether the thumbnail exists.
+                String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
+                try {
+                    boolean isThumbnailExists = govRegistry.resourceExists(thumbnailPath);
+                    tag.setThumbnailExists(isThumbnailExists);
+                    if (isThumbnailExists == true) {
+                        tag.setThumbnailUrl(APIUtil.getRegistryResourcePathForUI(APIConstants.
+                                                                                         RegistryResourceTypesForUI.TAG_THUMBNAIL, tenantDomain, thumbnailPath));
+                    } else {
+                        tag.setThumbnailUrl(APIConstants.API_STORE_API_GROUP_DEFAULT_ICON_PATH);
+                    }
+                } catch (RegistryException e) {
+                    //warn and then proceed to load rest of tags
+                    log.warn(String.format("Error while querying the existence of %s", thumbnailPath), e);
+                }
+            }
+        }
+        return tags;
+    }
 
     public void rateAPI(APIIdentifier apiId, APIRating rating,
                         String user) throws APIManagementException {

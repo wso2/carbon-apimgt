@@ -16,16 +16,23 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.UnsupportedEncodingException;
 
 import static org.mockito.Mockito.when;
 
 public class APIConsumerImplTest extends TestCase {
+
+    private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
 
     public void testReadMonetizationConfigAnnonymously() {
         APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryService.class);
@@ -50,5 +57,27 @@ public class APIConsumerImplTest extends TestCase {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * This test case is to test the URIs generated for tag thumbnails when Tag wise listing is enabled in store page.
+     */
+    public void testTagThumbnailURLGeneration() {
+        // Check the URL for super tenant
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        String thumbnailPath = "/apimgt/applicationdata/tags/wso2-group/thumbnail.png";
+        String finalURL = APIUtil.getRegistryResourcePathForUI(APIConstants.
+                                                                       RegistryResourceTypesForUI.TAG_THUMBNAIL, tenantDomain,
+                                                               thumbnailPath);
+        log.info("##### Generated Tag Thumbnail URL > " + finalURL);
+        Assert.assertEquals("/registry/resource/_system/governance" + thumbnailPath, finalURL);
+
+        // Check the URL for other tenants
+        tenantDomain = "apimanager3155.com";
+        finalURL = APIUtil.getRegistryResourcePathForUI(APIConstants.
+                                                                       RegistryResourceTypesForUI.TAG_THUMBNAIL, tenantDomain,
+                                                               thumbnailPath);
+        log.info("##### Generated Tag Thumbnail URL > " + finalURL);
+        Assert.assertEquals("/t/" + tenantDomain + "/registry/resource/_system/governance" + thumbnailPath, finalURL);
     }
 }
