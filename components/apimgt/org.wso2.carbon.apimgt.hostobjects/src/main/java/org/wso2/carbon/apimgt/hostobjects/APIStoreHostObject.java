@@ -39,13 +39,16 @@ import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.UserAwareAPIConsumer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
@@ -60,7 +63,10 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
+import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
+import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
@@ -71,10 +77,6 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
-import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
-import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
-import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.*;
@@ -1747,6 +1749,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 currentTag.put("description", currentTag, tag.getDescription());
                 currentTag.put("isThumbnailExists", currentTag, tag.isThumbnailExists());
                 currentTag.put("count", currentTag, tag.getNoOfOccurrences());
+                currentTag.put("thumbnailUrl", currentTag, tag.getThumbnailUrl());
 
                 tagArray.put(i, tagArray, currentTag);
                 i++;
@@ -2417,15 +2420,16 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static String jsFunction_addSubscription(Context cx,
-                                                    Scriptable thisObj, Object[] args, Function funObj)
+
+    public static SubscriptionResponse jsFunction_addSubscription(Context cx,
+                                                         Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || args.length == 0) {
-            return "";
+           return new SubscriptionResponse(null, null, null);
         }
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
-
+        SubscriptionResponse addSubscriptionResponse;
         String providerName = (String) args[0];
         providerName = APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) args[1];
@@ -2493,8 +2497,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 throw new APIManagementException("Subscription is not allowed for " + userDomain);
             }
             apiIdentifier.setTier(tier);
-            String subsStatus = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
-            return subsStatus;
+            addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
         } catch (APIManagementException e) {
             handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());
             return null;
@@ -2503,15 +2506,17 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+         return addSubscriptionResponse;
     }
 
-    public static boolean jsFunction_addAPISubscription(Context cx,
+    public static SubscriptionResponse jsFunction_addAPISubscription(Context cx,
                                                         Scriptable thisObj, Object[] args, Function funObj) throws APIManagementException {
         if (!isStringArray(args)) {
             throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
         }
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        SubscriptionResponse addSubscriptionResponse  = null;
         String providerName = APIUtil.replaceEmailDomain(args[0].toString());
         String apiName = args[1].toString();
         String version = args[2].toString();
@@ -2526,15 +2531,14 @@ public class APIStoreHostObject extends ScriptableObject {
             apiIdentifier.setTier(tier);
             try {
                 int applicationId = APIUtil.getApplicationId(applicationName, userId);
-                apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
+                addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
             } catch (APIManagementException e) {
                 handleException("Error while adding the subscription for user: " + userId, e);
             }
-            return true;
         } else {
             handleException("Cannot add subscription to with the denied tier");
-            return false;
         }
+        return addSubscriptionResponse;
     }
 
     public static boolean jsFunction_removeSubscriber(Context cx,

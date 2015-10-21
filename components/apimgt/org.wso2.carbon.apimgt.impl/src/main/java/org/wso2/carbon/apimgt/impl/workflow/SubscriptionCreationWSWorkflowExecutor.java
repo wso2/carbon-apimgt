@@ -29,6 +29,7 @@ import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
@@ -61,8 +62,15 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
         return null;
     }
 
+    /**
+     * This method is used to execute the workflow without giving a workflow response back to the caller to execute
+     * some other task after completing the workflow
+     *
+     * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
+     * @throws WorkflowException
+     */
     @Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException{
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         try {
             String action = WorkflowConstants.CREATE_SUBSCRIPTION_WS_ACTION;
@@ -104,10 +112,11 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
             log.error("Error converting String to OMElement", e);
             throw new WorkflowException("Error converting String to OMElement", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     @Override
-    public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
 
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
@@ -132,6 +141,7 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
                 throw new WorkflowException("Could not complete subscription creation workflow", e);
             }
         }
+        return new GeneralWorkflowResponse();
     }
 
     @Override

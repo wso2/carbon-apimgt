@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -47,14 +48,15 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
     }
 
     @Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workflowDTO);
         super.publishEvents(workflowDTO);
+        return new GeneralWorkflowResponse();
     }
 
     @Override
-    public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application application = applicationWorkflowDTO.getApplication();
@@ -92,6 +94,7 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
                 log.error("Couldn't close database connection of delete application workflow", e);
             }
         }
+        return new GeneralWorkflowResponse();
     }
 
 }
