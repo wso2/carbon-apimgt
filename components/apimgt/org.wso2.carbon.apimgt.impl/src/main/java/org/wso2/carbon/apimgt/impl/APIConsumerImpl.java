@@ -1172,16 +1172,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         UserRegistry govRegistry = null;
         try {
             ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomain);
-
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
-
         } catch (UserStoreException e) {
-            handleException("Cannot get tenant id for tenant domain name:"+tenantDomain,e);
+            handleException("Cannot get tenant id for tenant domain name:" + tenantDomain, e);
         } catch (RegistryException e) {
-            handleException("Cannot get registry for tenant domain name:"+tenantDomain,e);
+            handleException("Cannot get registry for tenant domain name:" + tenantDomain, e);
         }
 
         if (govRegistry != null) {
@@ -1203,11 +1200,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     try {
                         String description = new String((byte[]) descriptionResource.getContent());
                         tag.setDescription(description);
-
                     } catch (ClassCastException e) {
                         //added warnings as it can then proceed to load rest of resources/tags
                         log.warn(String.format("Cannot cast content of %s to byte[]", descriptionPath), e);
-                    }catch (RegistryException e) {
+                    } catch (RegistryException e) {
                         //added warnings as it can then proceed to load rest of resources/tags
                         log.warn(String.format("Cannot read content of %s", descriptionPath), e);
                     }
@@ -1215,7 +1211,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 // Checks whether the thumbnail exists.
                 String thumbnailPath = String.format(thumbnailPathPattern, tag.getName());
                 try {
-                    tag.setThumbnailExists(govRegistry.resourceExists(thumbnailPath));
+                    boolean isThumbnailExists = govRegistry.resourceExists(thumbnailPath);
+                    tag.setThumbnailExists(isThumbnailExists);
+                    if (isThumbnailExists == true) {
+                        tag.setThumbnailUrl(APIUtil.getRegistryResourcePathForUI(APIConstants.
+                                                                                         RegistryResourceTypesForUI.TAG_THUMBNAIL, tenantDomain, thumbnailPath));
+                    } else {
+                        tag.setThumbnailUrl(APIConstants.API_STORE_API_GROUP_DEFAULT_ICON_PATH);
+                    }
                 } catch (RegistryException e) {
                     //warn and then proceed to load rest of tags
                     log.warn(String.format("Error while querying the existence of %s", thumbnailPath), e);
