@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.rest.api.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.EnvironmentEndpointsDTO;
 
 public class EnvironmentMappingUtils {
 
@@ -28,6 +29,26 @@ public class EnvironmentMappingUtils {
         environmentDTO.setName(environment.getName());
         environmentDTO.setType(environment.getType());
         environmentDTO.setServerUrl(environment.getServerURL());
+        environmentDTO.setShowInApiConsole(environment.isShowInConsole());
+        String[] gatewayEndpoints = environment.getApiGatewayEndpoint().split(",");
+        EnvironmentEndpointsDTO environmentEndpointsDTO = new EnvironmentEndpointsDTO();
+        for (String gatewayEndpoint : gatewayEndpoints) {
+            if (isHttpURL(gatewayEndpoint)) {
+                environmentEndpointsDTO.setHttp(gatewayEndpoint);
+            } else if (isHttpsURL(gatewayEndpoint)) {
+                environmentEndpointsDTO.setHttps(gatewayEndpoint);
+            }
+        }
+        environmentDTO.setEndpoints(environmentEndpointsDTO);
         return environmentDTO;
     }
+
+    private static boolean isHttpURL (String url) {
+        return url.matches("^http://.*");
+    }
+
+    private static boolean isHttpsURL (String url) {
+        return url.matches("^https://.*");
+    }
+
 }

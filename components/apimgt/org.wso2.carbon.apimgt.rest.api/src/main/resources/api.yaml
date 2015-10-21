@@ -1587,29 +1587,29 @@ definitions:
     required:
       - name
       - type
-      - apiConsole
       - serverUrl
       - endpoints
+      - showInApiConsole
     properties:
       name:
         type: string
       type:
         type: string
-      apiConsole:
-        type: boolean
       serverUrl:
         type: string
+      showInApiConsole:
+        type: boolean
       endpoints:
-        properties:
-          http:
-            type: string
-            description: HTTP environment URL
-          https:
-            type: string
-            description: HTTPS environment URL
-          apiConsole:
-            type: string
-            description: API console url
+        $ref: '#/definitions/EnvironmentEndpoints'
+  EnvironmentEndpoints :
+    title: Environment Endpoints
+    properties:
+      http:
+        type: string
+        description: HTTP environment URL
+      https:
+        type: string
+        description: HTTPS environment URL
   Endpoint:
     title: Endpoint
     required:
