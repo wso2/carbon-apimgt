@@ -106,7 +106,12 @@
             <artifactId>hibernate-validator</artifactId>
             <version>5.0.2.Final</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
+            <version>${apimgt.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>

@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.exception.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.SubscriptionMappingUtil;
 

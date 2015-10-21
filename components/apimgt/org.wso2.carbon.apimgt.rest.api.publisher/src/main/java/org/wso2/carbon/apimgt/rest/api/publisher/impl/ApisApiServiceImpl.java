@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.exception.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;

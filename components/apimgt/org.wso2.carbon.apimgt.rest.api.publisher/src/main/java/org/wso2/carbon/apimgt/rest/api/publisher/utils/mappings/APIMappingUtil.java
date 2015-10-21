@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
