@@ -14,7 +14,6 @@ var verb = request.getMethod();
 
 var topic = request.getParameter('topic');
 var data = request.getContent();
-//var user = jagg.getUser();
 var log = new Log();
 var topicId;
 var replyId;

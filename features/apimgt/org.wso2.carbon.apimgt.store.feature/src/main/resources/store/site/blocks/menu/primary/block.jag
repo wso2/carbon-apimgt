@@ -74,7 +74,6 @@ jagg.block("menu/primary", {
 
         links.push({
             "title":i18n.localize("forum"),
-            //"url":jagg.getMappedUrl("/site/pages/forum.jag"+urlPrefix),
             "url":jagg.getAbsoluteUrl("/forum/"+urlPrefix),
             "classes":"link-forum",
             "classIcon":"fa fa-comment-o",

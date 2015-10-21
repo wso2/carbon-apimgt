@@ -3,8 +3,6 @@ response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HT
 response.addHeader('Pragma','no-cache'); // HTTP 1.0.
 response.addHeader('Expires','0');
 include("/jagg/jagg.jag");
-// Commented out since this is not used in the code and generate sessions without purpose.
-//store = jagg.module("manager").getAPIStoreObj();
 
 // Jaggery API for retrieving API Definition
 
@@ -41,10 +39,6 @@ var log = new Log();
             apiNameVal = request.getParameter("name");
             apiVersionVal = request.getParameter("version");
             }else{
-            //print({
-            //    error:true,
-            //    message:msg.error.invalidAction(action)
-            //});
             //Invalid URL
             action = "exit";
         }

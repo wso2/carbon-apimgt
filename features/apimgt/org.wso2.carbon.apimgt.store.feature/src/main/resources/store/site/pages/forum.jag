@@ -1,6 +1,5 @@
 <%
 include("/jagg/jagg.jag");
-//include("header.jag");
 var site = require("/site/conf/site.json");
 var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
@@ -29,6 +28,7 @@ if(uri != null) {
         var topic = uriMatcher.elements().id;
         action = "topic";
     } else {
+        //Invalid URL
         action = "exit";
     }
 }
