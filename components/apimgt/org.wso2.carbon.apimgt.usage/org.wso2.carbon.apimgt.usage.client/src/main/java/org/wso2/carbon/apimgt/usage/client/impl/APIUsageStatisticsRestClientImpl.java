@@ -58,7 +58,6 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.activation.DataHandler;
-import javax.sql.DataSource;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -77,8 +76,7 @@ import java.util.*;
  */
 public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
-    private static volatile DataSource dataSource = null;
-    private static PaymentPlan paymentPlan;
+    private PaymentPlan paymentPlan;
     private APIProvider apiProviderImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRestClientImpl.class);
     private DASRestClient restClient;
@@ -86,6 +84,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     /**
      * Create a rest client instance.
+     *
      * @param username current user name
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -864,7 +863,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 2, "api_version_context_facet",
+        SearchRequestBean request = new SearchRequestBean(query, 1, "api_version_context_facet",
                 "API_RESPONSE_SUMMARY");
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
@@ -897,15 +896,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //get the POJO class from the response bean classes
-        //getColumnNames 0 index contain the api name, index 1 contain the version, 2 index contain context
+        //getColumnNames 0 index contain the api_version name, index 1 contain context
         APIResponseTime usage;
         for (Result<ResponseTimesByAPIsValue> result : obj) {
             ResponseTimesByAPIsValue v = result.getValues();
 
             usage = new APIResponseTime();
-            usage.setApiName(v.getColumnNames().get(0));
-            usage.setApiVersion(v.getColumnNames().get(1));
-            usage.setContext(v.getColumnNames().get(2));
+            usage.setApiName(v.getColumnNames().get(0).split(":v")[0]);
+            usage.setApiVersion(v.getColumnNames().get(0).split(":v")[1]);
+            usage.setContext(v.getColumnNames().get(1));
             usage.setResponseTime(v.getTotalServiceTime());
             usage.setResponseCount(v.getTotalResponseCount());
 
@@ -1471,22 +1470,22 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
                     //get the usage of the apis individually
                     apiVersionUsageList = getUsageByAPIVersions(providerName, fault.getApiName(), fromDate, toDate);
-                    if (apiVersionUsageList.size() > 0) {
-                        apiVersionUsageDTO = apiVersionUsageList.get(0);
+                    for (int i = 0; i < apiVersionUsageList.size(); i++) {
+                        apiVersionUsageDTO = apiVersionUsageList.get(i);
                         //if both version are equal
                         if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             //get all the request count
                             long requestCount = apiVersionUsageDTO.getCount();
 
-                            //get the fault success count and then percentage
-                            double faultPercentage =
-                                    ((double) requestCount - fault.getFaultCount()) / requestCount * 100;
+                            //get the fault percentage
+                            double faultPercentage = ((double) fault.getFaultCount()) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
 
-                            //then get the fault percentage
-                            faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
+                            //format fault percentage
+                            faultPercentage = Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
                             faultyDTO.setTotalRequestCount(requestCount);
+                            break;
                         }
                     }
 

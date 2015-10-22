@@ -54,7 +54,7 @@ import java.util.Map;
  */
 public abstract class APIUsageStatisticsClient {
 
-    protected static final Map<String, String> subscriberAppsMap = new HashMap<String, String>();
+    protected final Map<String, String> subscriberAppsMap = new HashMap<String, String>();
     private static final Log log = LogFactory.getLog(APIUsageStatisticsClient.class);
 
     /**
