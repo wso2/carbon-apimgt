@@ -61,12 +61,6 @@ public class ApplicationThrottleController {
 
     private static ThrottleContext createThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder, String applicationId){
 
-        //Entry entry = synCtx.getConfiguration().getEntryDefinition(APPLICATION_THROTTLE_POLICY_KEY);
-        //if (entry == null) {
-        //    handleException("Cannot find throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
-        //    return null;
-        //}
-
         //Object entryValue = synCtx.getEntry(APPLICATION_THROTTLE_POLICY_KEY);
         Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY);
         if (entryValue == null || !(entryValue instanceof OMElement)) {

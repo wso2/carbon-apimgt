@@ -56,8 +56,7 @@ public class APILogMessageHandler extends AbstractHandler {
         boolean isLoginRequest = false;
         String logMessage = "";
 
-        org.apache.axis2.context.MessageContext axisMC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         if (applicationName != null) {
             logMessage = " appName=" + applicationName;
