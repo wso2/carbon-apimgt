@@ -76,7 +76,7 @@ public class APIDescriptionGenUtil {
     }
 
     /**
-     * This method is used to get Allowed Requests Count for a tier
+     * This method is used to get Allowed Requests count for a tier
      *
      * @param policy tier policy
      * @return Allowed Requests Count
@@ -148,6 +148,13 @@ public class APIDescriptionGenUtil {
         return attributesMap;
     }
 
+    /**
+     * This method gives the allowed request count for a minute
+     *
+     * @param policy The tier level policy
+     * @return The request count for a minute((maxCount * 60000)/timeDuration)
+     * @throws APIManagementException if policy or parsing error occurs
+     */
     public static long getAllowedCountPerMinute(OMElement policy) throws APIManagementException {
         //Here as the method is about extracting some info from the policy. And it's not concern on compliance to
         // specification. So it just extract the required element.

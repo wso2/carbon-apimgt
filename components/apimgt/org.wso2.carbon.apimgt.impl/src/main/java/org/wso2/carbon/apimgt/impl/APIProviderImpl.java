@@ -525,8 +525,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (APIUtil.isAPIManagementEnabled()) {
             	Cache contextCache = APIUtil.getAPIContextCache();
             	Boolean apiContext = null;
-            	if (contextCache.get(api.getContext()) != null) {
-            		apiContext = Boolean.valueOf(contextCache.get(api.getContext()).toString());
+
+                Object cachedObject = contextCache.get(api.getContext());
+                if (cachedObject != null) {
+            		apiContext = Boolean.valueOf(cachedObject.toString());
             	} 
             	if (apiContext == null) {
                     contextCache.put(api.getContext(), Boolean.TRUE);
@@ -1979,9 +1981,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             //Check if there are already published external APIStores.If yes,removing APIs from them.
             Set<APIStore> apiStoreSet = getPublishedExternalAPIStores(api.getId());
+            WSO2APIPublisher wso2APIPublisher = new WSO2APIPublisher();
             if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
                 for (APIStore store : apiStoreSet) {
-                	new WSO2APIPublisher().deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                    wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
                 }
             }
 
