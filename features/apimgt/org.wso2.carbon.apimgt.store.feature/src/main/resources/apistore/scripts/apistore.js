@@ -47,6 +47,7 @@ var apistore = {};
 
     var DateFormat=Packages.java.text.DateFormat;
     var SimpleDateFormat=Packages.java.text.SimpleDateFormat;
+    var ByteArrayInputStream = Packages.java.io.ByteArrayInputStream;
 
     var TierSet=new HashSet();
     var uriTemplates=new HashSet();
@@ -684,7 +685,7 @@ function getLocation(href) {
             }
 
             var content = APIUtil.getDocument(username, resourcepath, tenantDomain);
-            document.data = content.get("Data");
+            document.data = new Stream(new ByteArrayInputStream(content.get("Data")));
             document.contentType = content.get("contentType");
             document.name = content.get("name");
             if (log.isDebugEnabled()) {
