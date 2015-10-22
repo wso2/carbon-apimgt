@@ -2868,10 +2868,8 @@ public class APIStoreHostObject extends ScriptableObject {
             }
 
             //check whether application exist prior to get subscriptions
-            if (!(appName == null || appName.isEmpty()) &&
-                    !APIUtil.isApplicationExist(username, appName, groupingId)) {
-                String message = "Application " + appName + " does not exist for user " +
-                        "" + username;
+            if (!StringUtils.isEmpty(appName) && !APIUtil.isApplicationExist(username, appName, groupingId)) {
+                String message = "Application " + appName + " does not exist for user " + username;
                 log.error(message);
                 throw new ApplicationNotFoundException(message);
             }
@@ -3434,8 +3432,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 //check whether application exist prior to get subscription
                 if (!APIUtil.isApplicationExist(username, applicationName, groupingId)) {
-                    String message = "Application " + applicationName + " does not exist for user " +
-                            "" + username;
+                    String message = "Application " + applicationName + " does not exist for user " + username;
                     log.error(message);
                     throw new ApplicationNotFoundException(message);
                 }

@@ -423,19 +423,18 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return true if document already exists for the given api
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    public boolean isDocumentationExist(APIIdentifier identifier, String docName)
-            throws APIManagementException {
+    public boolean isDocumentationExist(APIIdentifier identifier, String docName) throws APIManagementException {
         String docPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
-                identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
-                APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + docName;
+                         identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                         identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
+                         identifier.getVersion() + RegistryConstants.PATH_SEPARATOR +
+                         APIConstants.DOC_DIR + RegistryConstants.PATH_SEPARATOR + docName;
         try {
             return registry.resourceExists(docPath);
         } catch (RegistryException e) {
             handleException("Failed to check existence of the document :" + docPath, e);
-            return false;
         }
+        return false;
     }
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {

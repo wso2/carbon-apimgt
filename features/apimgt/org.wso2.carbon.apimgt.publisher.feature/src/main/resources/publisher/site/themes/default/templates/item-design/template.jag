@@ -132,7 +132,7 @@
                          <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div id="swagger_file_help" class="alert alert-danger hide" role="alert">
-                         Enter a valid Swagger file
+                         <%=i18n.localize("invalidSwaggerFileErrorMsg")%>
                          <button type="button" class="close" id="fileErrorMsgClose"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="form-inline">
