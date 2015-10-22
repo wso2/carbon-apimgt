@@ -38,8 +38,8 @@ public class APIDescriptionGenUtil {
     public static String generateDescriptionFromPolicy(OMElement policy) throws APIManagementException {
         //Here as the method is about extracting some info from the policy. And it's not concern on compliance to
         // specification. So it just extract the required element.
-        OMElement maxCount = null;
-        OMElement timeUnit = null;
+        OMElement maxCount;
+        OMElement timeUnit;
         long requestPerMinute;
         try {
             maxCount = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName
@@ -60,8 +60,7 @@ public class APIDescriptionGenUtil {
             }
             requestPerMinute = (Long.parseLong(maxCount.getText().trim()) * 60000) / (Long.parseLong(timeUnit.getText().trim()));
             if (requestPerMinute >= 1) {
-                String description = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMinute));
-                return description;
+                return DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMinute));
             }
             return DESCRIPTION;
         } catch (NullPointerException npe) {
@@ -119,8 +118,8 @@ public class APIDescriptionGenUtil {
     public static long getAllowedCountPerMinute(OMElement policy) throws APIManagementException {
         //Here as the method is about extracting some info from the policy. And it's not concern on compliance to
         // specification. So it just extract the required element.
-        OMElement maxCount = null;
-        OMElement timeUnit = null;
+        OMElement maxCount;
+        OMElement timeUnit;
         long requestPerMinute;
         try {
             maxCount = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName

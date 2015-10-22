@@ -22,8 +22,8 @@ import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.codehaus.jettison.json.JSONException;
-import org.json.simple.JSONObject;
+//import org.codehaus.jettison.json.JSONException;
+//import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -120,7 +120,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             throws APIManagementException;
 
     public abstract Map<String, String> populateCustomClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,
-                                                             String version, String accessToken) throws APIManagementException;
+            String version, String accessToken) throws APIManagementException;
     public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version)
             throws APIManagementException {
         //To have backward compatibility with implementations done based on TokenGenerator interface
@@ -160,6 +160,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             return base64EncodedHeader + "." + base64EncodedBody + ".";
         }
     }
+
+
 
     public String buildHeader(APIKeyValidationInfoDTO keyValidationInfoDTO) throws APIManagementException {
         String jwtHeader = null;
@@ -268,8 +270,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             signature.update(dataInBytes);
 
             //sign the assertion and return the signature
-            byte[] signedInfo = signature.sign();
-            return signedInfo;
+            return signature.sign();
 
         } catch (NoSuchAlgorithmException e) {
             String error = "Signature algorithm not found.";
@@ -314,7 +315,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     /**
      * Helper method to add public certificate to JWT_HEADER to signature verification.
      *
-     * @param endUserName
+     * @param endUserName - The end user name
      * @throws APIManagementException
      */
     private String addCertToHeader(String endUserName) throws APIManagementException {
@@ -324,14 +325,14 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             String tenantDomain = MultitenantUtils.getTenantDomain(endUserName);
             //get tenantId
             int tenantId = APIUtil.getTenantId(endUserName);
-            Certificate publicCert = null;
+            Certificate publicCert;
 
             if (!(publicCerts.containsKey(tenantId))) {
                 //get tenant's key store manager
                 APIUtil.loadTenantRegistry(tenantId);
                 KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantId);
 
-                KeyStore keyStore = null;
+                KeyStore keyStore;
                 if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     //derive key store name
                     String ksName = tenantDomain.trim().replace(".", "-");
@@ -339,7 +340,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                     keyStore = tenantKSM.getKeyStore(jksName);
                     publicCert = keyStore.getCertificate(tenantDomain);
                 } else {
-                    keyStore = tenantKSM.getPrimaryKeyStore();
+                    //keyStore = tenantKSM.getPrimaryKeyStore();
                     publicCert = tenantKSM.getDefaultPrimaryCertificate();
                 }
                 if (publicCert != null) {
@@ -397,7 +398,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
      * Helper method to hexify a byte array.
      * TODO:need to verify the logic
      *
-     * @param bytes
+     * @param bytes - The input byte array
      * @return hexadecimal representation
      */
     private String hexify(byte bytes[]) {

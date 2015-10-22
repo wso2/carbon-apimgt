@@ -34,8 +34,8 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
     public RESTAPIAdminClient(APIIdentifier apiId, Environment environment) throws AxisFault {
         this.qualifiedName = apiId.getProviderName() + "--" + apiId.getApiName() + ":v" + apiId.getVersion();
         this.qualifiedDefaultApiName=apiId.getProviderName() + "--" + apiId.getApiName();
-        String providerDomain = apiId.getProviderName();
-        providerDomain=providerDomain.replace("-AT-", "@");
+        //String providerDomain = apiId.getProviderName();
+        //providerDomain=providerDomain.replace("-AT-", "@");
         restApiAdminStub = new RestApiAdminStub(null, environment.getServerURL() + "RestApiAdmin");
         setup(restApiAdminStub, environment);
         this.environment = environment;
@@ -43,8 +43,8 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
     
 	/**
 	 * Add the API to the gateway
-	 * @param builder
-	 * @param tenantDomain
+	 * @param builder - APITemplateBuilder instance
+	 * @param tenantDomain - The Tenant Domain
 	 * @throws AxisFault
 	 */
 	public void addApi(APITemplateBuilder builder, String tenantDomain ) throws AxisFault {
@@ -64,8 +64,8 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 
     /**
      * Add the API to the gateway
-     * @param builder
-     * @param tenantDomain
+     * @param builder - APITemplateBuilder instance
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void addPrototypeApiScriptImpl(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
@@ -100,8 +100,8 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 
 	/**
 	 * Get API from the gateway
-	 * @param tenantDomain
-	 * @return
+	 * @param tenantDomain - The Tenant Domain
+	 * @return - An APIData instance
 	 * @throws AxisFault
 	 */
     public APIData getApi(String tenantDomain) throws AxisFault {
@@ -113,7 +113,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
              }else {
             	 apiData = restApiAdminStub.getApiByName(qualifiedName);	
              }
-            return (APIData) apiData;
+            return apiData;
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
         }
@@ -128,15 +128,15 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
             }else {
                 apiData = restApiAdminStub.getApiByName(qualifiedDefaultApiName);
             }
-            return (APIData) apiData;
+            return apiData;
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining default API information from gateway." + e.getMessage(), e);
         }
     }
     /**
      * Update the API in the Gateway
-     * @param builder
-     * @param tenantDomain
+     * @param builder - APITemplateBuilder instance
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
 	public void updateApi(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
@@ -156,8 +156,8 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 
     /**
      * Update the API in the Gateway
-     * @param builder
-     * @param tenantDomain
+     * @param builder - APITemplateBuilder instance
+     * @param tenantDomain - The Tenant Domain
      * @throws AxisFault
      */
     public void updateApiForInlineScript(APITemplateBuilder builder, String tenantDomain) throws AxisFault {
@@ -193,7 +193,7 @@ public class RESTAPIAdminClient extends AbstractAPIGatewayAdminClient {
 
 	/**
 	 * Delete the API from Gateway
-	 * @param tenantDomain
+	 * @param tenantDomain - The Tenant Domain
 	 * @throws AxisFault
 	 */
 	public void deleteApi(String tenantDomain) throws AxisFault {
