@@ -3052,7 +3052,7 @@ public class APIProviderHostObject extends ScriptableObject {
             //add documentation is allowed only if document name does not already exist for this api
             if (apiProvider.isDocumentationExist(apiId, docName)) {
                 handleException("Error occurred while adding the document. " + docName +
-                    " already exists for API " + apiName + "-" + version);
+                    " already exists for API " + apiName + '-' + version);
             }
 
             if (doc.getType() == DocumentationType.OTHER) {
@@ -4117,7 +4117,7 @@ public class APIProviderHostObject extends ScriptableObject {
             //update documentation is allowed only if documentation name already exists for this api
             if (!apiProvider.isDocumentationExist(apiId, docName)) {
                 handleException("Error occurred while updating the document. " + docName +
-                        " does not exist for API " + apiName + "-" + version);
+                        " does not exist for API " + apiName + '-' + version);
             }
 
             if (doc.getType() == DocumentationType.OTHER) {

@@ -1,12 +1,12 @@
 <% jagg.template("documentation/inline-editor", function(inputs, outputs, jagg) {
 var mode = request.getParameter("mode");
-var infoMappedUrl=jagg.getMappedUrl("/site/pages/item-info.jag");
-var tenantDomain= encode.forUriComponent(request.getParameter("tenant"));
+var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag");
+var tenantDomain = encode.forUriComponent(request.getParameter("tenant"));
 var urlPostfix;
-if(tenantDomain!='null'){
-    urlPostfix="&tenant="+tenantDomain;
-}else{
-    urlPostfix='';
+if (tenantDomain != 'null') {
+    urlPostfix = "&tenant=" + tenantDomain;
+} else {
+    urlPostfix = '';
 }
 %>
 <script type="text/javascript">
