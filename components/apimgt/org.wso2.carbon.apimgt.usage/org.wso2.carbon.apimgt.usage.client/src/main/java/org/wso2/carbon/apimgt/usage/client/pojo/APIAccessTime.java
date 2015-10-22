@@ -23,6 +23,18 @@ public class APIAccessTime {
     private String apiVersion;
     private String context;
     private long accessTime;
+    private String username;
+
+    public APIAccessTime(String apiName, String apiVersion, String context, long accessTime, String username) {
+        this.apiName = apiName;
+        this.apiVersion = apiVersion;
+        this.context = context;
+        this.accessTime = accessTime;
+        this.username = username;
+    }
+
+    public APIAccessTime() {
+    }
 
     public String getApiName() {
         return apiName;
@@ -64,5 +76,4 @@ public class APIAccessTime {
         this.username = username;
     }
 
-    private String username;
 }

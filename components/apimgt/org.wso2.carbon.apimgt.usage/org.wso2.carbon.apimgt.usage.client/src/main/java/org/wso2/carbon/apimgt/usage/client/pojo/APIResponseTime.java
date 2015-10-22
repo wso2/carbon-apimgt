@@ -22,6 +22,19 @@ public class APIResponseTime {
     private String apiName;
     private String apiVersion;
     private String context;
+    private double responseTime;
+    private long responseCount;
+
+    public APIResponseTime(String apiName, String apiVersion, String context, double responseTime, long responseCount) {
+        this.apiName = apiName;
+        this.apiVersion = apiVersion;
+        this.context = context;
+        this.responseTime = responseTime;
+        this.responseCount = responseCount;
+    }
+
+    public APIResponseTime() {
+    }
 
     public String getApiName() {
         return apiName;
@@ -63,6 +76,4 @@ public class APIResponseTime {
         this.responseCount = responseCount;
     }
 
-    private double responseTime;
-    private long responseCount;
 }

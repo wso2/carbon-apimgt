@@ -48,8 +48,7 @@ import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
-import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
-import org.wso2.carbon.apimgt.usage.client.pojo.SubscriberCountByAPIs;
+import org.wso2.carbon.apimgt.usage.client.pojo.*;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -74,7 +73,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-
 /**
  * Usage statistics class implementation for the APIUsageStatisticsClient.
  * Use the RDBMS to query and fetch the data for getting usage Statistics
@@ -90,8 +88,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
     private final Gson gson = new Gson();
 
-    public APIUsageStatisticsRdbmsClientImpl(String username)
-            throws APIMgtUsageQueryServiceClientException {
+    public APIUsageStatisticsRdbmsClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
         APIManagerConfiguration config;
         APIManagerAnalyticsConfiguration apiManagerAnalyticsConfiguration;
@@ -105,7 +102,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String billingConfig = config.getFirstProperty("EnableBillingAndUsage");
             boolean isBillingEnabled = Boolean.parseBoolean(billingConfig);
             if (isBillingEnabled) {
-                String filePath = (new StringBuilder()).append(CarbonUtils.getCarbonHome()).append(File.separator).append("repository").append(File.separator).append("conf").append(File.separator).append("billing-conf.xml").toString();
+                String filePath = (new StringBuilder()).append(CarbonUtils.getCarbonHome()).append(File.separator)
+                        .append("repository").append(File.separator).append("conf").append(File.separator)
+                        .append("billing-conf.xml").toString();
                 element = buildOMElement(new FileInputStream(filePath));
                 paymentPlan = new PaymentPlan(element);
             }
@@ -115,9 +114,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             apiProviderImpl = APIManagerFactory.getInstance().getAPIProvider(username);
 
         } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Exception while instantiating API manager core objects", e);
+            throw new APIMgtUsageQueryServiceClientException("Exception while instantiating API manager core objects",
+                    e);
         }
-
 
     }
 
@@ -146,8 +145,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     @Override
     public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString = "";
@@ -162,16 +160,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        List<FaultCountDTO> usage=getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeySetString,
-                fromDate, toDate, limit);
+        List<FaultCountDTO> usage = getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY,
+                concatenatedKeySetString, fromDate, toDate, limit);
 
         return usage;
     }
 
     @Override
     public List<AppUsageDTO> getTopAppUsers(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString = "";
@@ -186,8 +183,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        List<AppUsageDTO> usage=getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString,
-                fromDate, toDate, limit);
+        List<AppUsageDTO> usage = getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
+                concatenatedKeySetString, fromDate, toDate, limit);
         return usage;
     }
 
@@ -200,8 +197,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<AppUsageDTO> getTopAppUsageData(String tableName, String keyString, String fromDate, String toDate,
-            int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
@@ -230,18 +226,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String userId = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
                     long requestCount = resultSet.getLong("net_total_requests");
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
-                    String appName=subscriberAppsMap.get(consumerKey);
+                    String appName = subscriberAppsMap.get(consumerKey);
 
-                    boolean found=false;
-                    for(AppUsageDTO dto: topAppUsageDataList){
-                        if(dto.getAppName().equals(appName)){
+                    boolean found = false;
+                    for (AppUsageDTO dto : topAppUsageDataList) {
+                        if (dto.getAppName().equals(appName)) {
                             dto.addToUserCountArray(userId, requestCount);
-                            found=true;
+                            found = true;
                             break;
                         }
                     }
 
-                    if(!found){
+                    if (!found) {
                         appUsageDTO = new AppUsageDTO();
                         appUsageDTO.setAppName(appName);
                         appUsageDTO.addToUserCountArray(userId, requestCount);
@@ -251,8 +247,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException
-                    ("Error occurred while querying top app usage data from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying top app usage data from JDBC database", e);
         } finally {
             if (resultSet != null) {
                 try {
@@ -293,9 +289,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a collection containing the data related to API faulty invocations
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<FaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate,
-            String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<FaultCountDTO> getFaultAppUsageData(String tableName, String keyString, String fromDate, String toDate,
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
@@ -325,18 +320,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     long faultCount = resultSet.getLong("total_faults");
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
 
-                    String appName=subscriberAppsMap.get(consumerKey);
+                    String appName = subscriberAppsMap.get(consumerKey);
 
-                    boolean found=false;
-                    for(FaultCountDTO dto: falseAppUsageDataList){
-                        if(dto.getAppName().equals(appName)){
+                    boolean found = false;
+                    for (FaultCountDTO dto : falseAppUsageDataList) {
+                        if (dto.getAppName().equals(appName)) {
                             dto.addToApiFaultCountArray(apiName, faultCount);
-                            found=true;
+                            found = true;
                             break;
                         }
                     }
 
-                    if(!found){
+                    if (!found) {
                         faultCountDTO = new FaultCountDTO();
                         faultCountDTO.setAppName(appName);
                         faultCountDTO.addToApiFaultCountArray(apiName, faultCount);
@@ -346,8 +341,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException
-                    ("Error occurred while querying API faulty invocation data from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying API faulty invocation data from JDBC database", e);
         } finally {
             if (resultSet != null) {
                 try {
@@ -380,28 +375,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return falseAppUsageDataList;
     }
 
-    @Deprecated
-    private Collection<AppUsage> getAppUsageData(OMElement data) {
-        List<AppUsage> usageData = new ArrayList<AppUsage>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                usageData.add(new AppUsage(rowElement));
-            }
-        }
-        return usageData;
-
-
-    }
-
     @Override
     public List<AppCallTypeDTO> getAppApiCallType(String subscriberName, String groupId, String fromDate, String toDate,
-            int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString = "";
@@ -416,8 +392,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        List<AppCallTypeDTO> usage=getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
-                concatenatedKeySetString, fromDate, toDate, limit);
+        List<AppCallTypeDTO> usage = getAPICallTypeUsageData(
+                APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, concatenatedKeySetString, fromDate,
+                toDate, limit);
         return usage;
 
     }
@@ -431,8 +408,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
     private List<AppCallTypeDTO> getAPICallTypeUsageData(String tableName, String keyString, String fromDate,
-            String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
@@ -457,7 +433,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
                         + "resourcePath";
 
-
                 resultSet = statement.executeQuery(query);
                 AppCallTypeDTO appCallTypeDTO;
                 while (resultSet.next()) {
@@ -469,19 +444,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     List<String> callTypeList = new ArrayList<String>();
                     callTypeList.add(resource + " (" + callType + ")");
 
-                    String appName=subscriberAppsMap.get(consumerKey);
+                    String appName = subscriberAppsMap.get(consumerKey);
 
-
-                    boolean found=false;
-                    for(AppCallTypeDTO dto: appApiCallTypeList){
-                        if(dto.getAppName().equals(appName)){
+                    boolean found = false;
+                    for (AppCallTypeDTO dto : appApiCallTypeList) {
+                        if (dto.getAppName().equals(appName)) {
                             dto.addGToApiCallTypeArray(apiName, callTypeList);
-                            found=true;
+                            found = true;
                             break;
                         }
                     }
 
-                    if(!found){
+                    if (!found) {
                         appCallTypeDTO = new AppCallTypeDTO();
                         appCallTypeDTO.setAppName(appName);
                         appCallTypeDTO.addGToApiCallTypeArray(apiName, callTypeList);
@@ -491,8 +465,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException
-                    ("Error occurred while querying API call type data from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying API call type data from JDBC database", e);
         } finally {
             if (resultSet != null) {
                 try {
@@ -525,29 +499,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return appApiCallTypeList;
     }
 
-    @Deprecated
-    private Collection<AppCallType> getCallTypeUsageData(OMElement data) {
-        List<AppCallType> usageData = new ArrayList<AppCallType>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                usageData.add(new AppCallType(rowElement));
-            }
-        }
-        return usageData;
-
-
-    }
-
-
     @Override
     public List<PerAppApiCountDTO> perAppPerAPIUsage(String subscriberName, String groupId, String fromDate,
-            String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         List<String> subscriberApps = getAppsBySubscriber(subscriberName, groupId);
         String concatenatedKeySetString = "";
@@ -562,8 +516,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             concatenatedKeySetString += ",'" + subscriberApps.get(i) + "'";
         }
 
-        List<PerAppApiCountDTO> usage= getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeySetString,
-                fromDate, toDate, limit);
+        List<PerAppApiCountDTO> usage = getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
+                concatenatedKeySetString, fromDate, toDate, limit);
         return usage;
     }
 
@@ -573,7 +527,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @param keyArray string array containing the keys
      * @return set of keys as a comma separated single string
      */
-    private String buildKeySetString(String[] keyArray){
+    private String buildKeySetString(String[] keyArray) {
 
         String keySetString = "";
 
@@ -598,9 +552,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a collection containing the data related to per App API usage
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate, String toDate,
-            int limit)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<PerAppApiCountDTO> getPerAppAPIUsageData(String tableName, String keyString, String fromDate,
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
@@ -632,18 +585,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     long requestCount = resultSet.getLong("total_calls");
                     String consumerKey = resultSet.getString(APIUsageStatisticsClientConstants.CONSUMERKEY);
 
-                    String appName=subscriberAppsMap.get(consumerKey);
+                    String appName = subscriberAppsMap.get(consumerKey);
 
-                    boolean found=false;
-                    for(PerAppApiCountDTO dto: perAppUsageDataList){
-                        if(dto.getAppName().equals(appName)){
+                    boolean found = false;
+                    for (PerAppApiCountDTO dto : perAppUsageDataList) {
+                        if (dto.getAppName().equals(appName)) {
                             dto.addToApiCountArray(apiName, requestCount);
-                            found=true;
+                            found = true;
                             break;
                         }
                     }
 
-                    if(!found){
+                    if (!found) {
                         apiUsageDTO = new PerAppApiCountDTO();
                         apiUsageDTO.setAppName(appName);
                         apiUsageDTO.addToApiCountArray(apiName, requestCount);
@@ -653,8 +606,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException
-                    ("Error occurred while querying per App usage data from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying per App usage data from JDBC database", e);
         } finally {
             if (resultSet != null) {
                 try {
@@ -687,8 +640,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return perAppUsageDataList;
     }
 
-
-
     /**
      * Returns a list of APIUsageDTO objects that contain information related to APIs that
      * belong to a particular provider and the number of total API calls each API has processed
@@ -709,31 +660,32 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
-                    String[] apiData = {usage.apiName, usage.apiVersion,  providerAPI.getId().getProviderName()};
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
+                    String[] apiData = { usage.getApiName(), usage.getApiVersion(),
+                            providerAPI.getId().getProviderName() };
 
                     JSONArray jsonArray = new JSONArray();
-                    jsonArray.add(0,apiData[0]);
-                    jsonArray.add(1,apiData[1]);
-                    jsonArray.add(2,apiData[2]);
+                    jsonArray.add(0, apiData[0]);
+                    jsonArray.add(1, apiData[1]);
+                    jsonArray.add(2, apiData[2]);
                     String apiName = jsonArray.toJSONString();
 
                     APIUsageDTO usageDTO = usageByAPIs.get(apiName);
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usage.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usage.getRequestCount());
                     } else {
                         usageDTO = new APIUsageDTO();
                         usageDTO.setApiName(apiName);
-                        usageDTO.setCount(usage.requestCount);
+                        usageDTO.setCount(usage.getRequestCount());
                         usageByAPIs.put(apiName, usageDTO);
                     }
                 }
             }
         }
 
-        List<APIUsageDTO> usage= getAPIUsageTopEntries(new ArrayList<APIUsageDTO>(usageByAPIs.values()), limit);
+        List<APIUsageDTO> usage = getAPIUsageTopEntries(new ArrayList<APIUsageDTO>(usageByAPIs.values()), limit);
         return usage;
     }
 
@@ -780,8 +732,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException
-                    ("Error occurred while querying API usage data from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying API usage data from JDBC database", e);
         } finally {
             if (resultSet != null) {
                 try {
@@ -830,20 +782,20 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<APIUsage> usageData = this
                 .queryBetweenTwoDaysForAPIUsageByVersion(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
                         null, null, apiName);
-//        Collection<APIUsage> usageData = getUsageData(omElement);
+        //        Collection<APIUsage> usageData = getUsageData(omElement);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
 
         for (APIUsage usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
 
                     APIVersionUsageDTO usageDTO = new APIVersionUsageDTO();
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setCount(usage.requestCount);
-                    usageByVersions.put(usage.apiVersion, usageDTO);
+                    usageDTO.setVersion(usage.getApiVersion());
+                    usageDTO.setCount(usage.getRequestCount());
+                    usageByVersions.put(usage.getApiVersion(), usageDTO);
                 }
             }
         }
@@ -863,25 +815,26 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException
      */
-    public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName,
-                                                          String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
+    public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
-        List<APIUsage> usageData = this.queryBetweenTwoDaysForAPIUsageByVersion(
-                APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY, fromDate, toDate, apiName);
-//        Collection<APIUsage> usageData = getUsageData(omElement);
+        List<APIUsage> usageData = this
+                .queryBetweenTwoDaysForAPIUsageByVersion(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
+                        fromDate, toDate, apiName);
+        //        Collection<APIUsage> usageData = getUsageData(omElement);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
 
         for (APIUsage usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                    providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                    providerAPI.getContext().equals(usage.context)) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
 
                     APIVersionUsageDTO usageDTO = new APIVersionUsageDTO();
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setCount(usage.requestCount);
-                    usageByVersions.put(usage.apiVersion, usageDTO);
+                    usageDTO.setVersion(usage.getApiVersion());
+                    usageDTO.setCount(usage.getRequestCount());
+                    usageByVersions.put(usage.getApiVersion(), usageDTO);
                 }
             }
         }
@@ -909,22 +862,22 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
         for (APIUsageByResourcePath usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
 
                     APIResourcePathUsageDTO usageDTO = new APIResourcePathUsageDTO();
-                    usageDTO.setApiName(usage.apiName);
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setMethod(usage.method);
-                    usageDTO.setContext(usage.context);
-                    usageDTO.setCount(usage.requestCount);
-                    usageDTO.setTime(usage.time);
+                    usageDTO.setApiName(usage.getApiName());
+                    usageDTO.setVersion(usage.getApiVersion());
+                    usageDTO.setMethod(usage.getMethod());
+                    usageDTO.setContext(usage.getContext());
+                    usageDTO.setCount(usage.getRequestCount());
+                    usageDTO.setTime(usage.getTime());
                     usageByResourcePath.add(usageDTO);
                 }
             }
         }
-        List<APIResourcePathUsageDTO> usage= usageByResourcePath;
+        List<APIResourcePathUsageDTO> usage = usageByResourcePath;
         return usage;
     }
 
@@ -932,29 +885,30 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     public List<APIDestinationUsageDTO> getAPIUsageByDestination(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        List<APIUsageByDestination> usageData= this.queryToGetAPIUsageByDestination(
-                APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY, fromDate, toDate);
+        List<APIUsageByDestination> usageData = this
+                .queryToGetAPIUsageByDestination(APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY,
+                        fromDate, toDate);
 
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIDestinationUsageDTO> usageByResourcePath = new ArrayList<APIDestinationUsageDTO>();
 
         for (APIUsageByDestination usage : usageData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(usage.apiName) &&
-                        providerAPI.getId().getVersion().equals(usage.apiVersion) &&
-                        providerAPI.getContext().equals(usage.context)) {
+                if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
+                        providerAPI.getContext().equals(usage.getContext())) {
 
                     APIDestinationUsageDTO usageDTO = new APIDestinationUsageDTO();
-                    usageDTO.setApiName(usage.apiName);
-                    usageDTO.setVersion(usage.apiVersion);
-                    usageDTO.setDestination(usage.destination);
-                    usageDTO.setContext(usage.context);
-                    usageDTO.setCount(usage.requestCount);
+                    usageDTO.setApiName(usage.getApiName());
+                    usageDTO.setVersion(usage.getApiVersion());
+                    usageDTO.setDestination(usage.getDestination());
+                    usageDTO.setContext(usage.getContext());
+                    usageDTO.setCount(usage.getRequestCount());
                     usageByResourcePath.add(usageDTO);
                 }
             }
         }
-        List<APIDestinationUsageDTO> usage= usageByResourcePath;
+        List<APIDestinationUsageDTO> usage = usageByResourcePath;
         return usage;
     }
 
@@ -970,25 +924,26 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     public List<APIUsageByUserDTO> getAPIUsageByUser(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
-        List<APIUsageByUserName> usageData = this.queryBetweenTwoDaysForAPIUsageByUser(providerName, fromDate, toDate, null);
-        
+        List<APIUsageByUserName> usageData = this
+                .queryBetweenTwoDaysForAPIUsageByUser(providerName, fromDate, toDate, null);
+
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
-        
+
         List<APIUsageByUserDTO> usageByName = new ArrayList<APIUsageByUserDTO>();
 
         for (APIUsageByUserName usage : usageData) {
-            if (tenantDomain.equals(MultitenantUtils.getTenantDomain(usage.apipublisher))) {
+            if (tenantDomain.equals(MultitenantUtils.getTenantDomain(usage.getApipublisher()))) {
                 APIUsageByUserDTO usageDTO = new APIUsageByUserDTO();
-                usageDTO.setApiName(usage.apiName);
-                usageDTO.setVersion(usage.apiVersion);
-                usageDTO.setUserID(usage.userID);
-                usageDTO.setCount(usage.requestCount);
+                usageDTO.setApiName(usage.getApiName());
+                usageDTO.setVersion(usage.getApiVersion());
+                usageDTO.setUserID(usage.getUserID());
+                usageDTO.setCount(usage.getRequestCount());
                 usageByName.add(usageDTO);
             }
         }
 
-        List<APIUsageByUserDTO> usage= usageByName;
-//        return gson.toJson(usage);
+        List<APIUsageByUserDTO> usage = usageByName;
+        //        return gson.toJson(usage);
         return usage;
     }
 
@@ -1002,32 +957,31 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      */
     @Override
     public List<APIResponseTimeDTO> getProviderAPIServiceTime(String providerName, String fromDate, String toDate,
-            int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
-        Collection<APIResponseTime> responseTimes =
-                getAPIResponseTimeData(APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
+        Collection<APIResponseTime> responseTimes = getAPIResponseTimeData(
+                APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, Double> apiCumulativeServiceTimeMap = new HashMap<String, Double>();
         Map<String, Long> apiUsageMap = new TreeMap<String, Long>();
         for (APIResponseTime responseTime : responseTimes) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(responseTime.apiName) &&
-                        providerAPI.getId().getVersion().equals(responseTime.apiVersion) &&
-                        providerAPI.getContext().equals(responseTime.context)) {
+                if (providerAPI.getId().getApiName().equals(responseTime.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(responseTime.getApiVersion()) &&
+                        providerAPI.getContext().equals(responseTime.getContext())) {
 
-                    String apiName = responseTime.apiName + " (" + providerAPI.getId().getProviderName() + ")";
+                    String apiName = responseTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
                     Double cumulativeResponseTime = apiCumulativeServiceTimeMap.get(apiName);
 
                     if (cumulativeResponseTime != null) {
                         apiCumulativeServiceTimeMap.put(apiName,
-                                cumulativeResponseTime + responseTime.responseTime * responseTime.responseCount);
-                        apiUsageMap.put(apiName,
-                                apiUsageMap.get(apiName) + responseTime.responseCount);
+                                cumulativeResponseTime + responseTime.getResponseTime() * responseTime
+                                        .getResponseCount());
+                        apiUsageMap.put(apiName, apiUsageMap.get(apiName) + responseTime.getResponseCount());
                     } else {
-                        apiCumulativeServiceTimeMap.put(apiName,
-                                responseTime.responseTime * responseTime.responseCount);
-                        apiUsageMap.put(apiName, responseTime.responseCount);
+                        apiCumulativeServiceTimeMap
+                                .put(apiName, responseTime.getResponseTime() * responseTime.getResponseCount());
+                        apiUsageMap.put(apiName, responseTime.getResponseCount());
                     }
                 }
             }
@@ -1042,7 +996,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             responseTimeDTO.setServiceTime(Double.parseDouble(format.format(responseTime)));
             responseTimeByAPI.put(key, responseTimeDTO);
         }
-        List<APIResponseTimeDTO> usage= getResponseTimeTopEntries(new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);
+        List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(
+                new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);
         return usage;
     }
 
@@ -1090,8 +1045,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
 
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException
-                    ("Error occurred while querying API response times from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying API response times from JDBC database", e);
         } finally {
             if (resultSet != null) {
                 try {
@@ -1135,22 +1090,21 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      */
     @Override
     public List<APIVersionLastAccessTimeDTO> getProviderAPIVersionUserLastAccess(String providerName, String fromDate,
-            String toDate, int limit)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
-        Collection<APIAccessTime> accessTimes =
-                getLastAccessData(APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY);
+        Collection<APIAccessTime> accessTimes = getLastAccessData(
+                APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIAccessTime> lastAccessTimes = new TreeMap<String, APIAccessTime>();
         for (APIAccessTime accessTime : accessTimes) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(accessTime.apiName) &&
-                        providerAPI.getId().getVersion().equals(accessTime.apiVersion) &&
-                        providerAPI.getContext().equals(accessTime.context)) {
+                if (providerAPI.getId().getApiName().equals(accessTime.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(accessTime.getApiVersion()) &&
+                        providerAPI.getContext().equals(accessTime.getContext())) {
 
-                    String apiName = accessTime.apiName + " (" + providerAPI.getId().getProviderName() + ")";
+                    String apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
                     APIAccessTime lastAccessTime = lastAccessTimes.get(apiName);
-                    if (lastAccessTime == null || lastAccessTime.accessTime < accessTime.accessTime) {
+                    if (lastAccessTime == null || lastAccessTime.getAccessTime() < accessTime.getAccessTime()) {
                         lastAccessTimes.put(apiName, accessTime);
                         break;
                     }
@@ -1164,12 +1118,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             APIVersionLastAccessTimeDTO accessTimeDTO = new APIVersionLastAccessTimeDTO();
             accessTimeDTO.setApiName(entry.getKey());
             APIAccessTime lastAccessTime = entry.getValue();
-            accessTimeDTO.setApiVersion(lastAccessTime.apiVersion);
-            accessTimeDTO.setLastAccessTime(dateFormat.format(lastAccessTime.accessTime));
-            accessTimeDTO.setUser(lastAccessTime.username);
+            accessTimeDTO.setApiVersion(lastAccessTime.getApiVersion());
+            accessTimeDTO.setLastAccessTime(dateFormat.format(lastAccessTime.getAccessTime()));
+            accessTimeDTO.setUser(lastAccessTime.getUsername());
             accessTimeByAPI.put(entry.getKey(), accessTimeDTO);
         }
-        List<APIVersionLastAccessTimeDTO> usage= getLastAccessTimeTopEntries(new ArrayList<APIVersionLastAccessTimeDTO>(accessTimeByAPI.values()), limit);
+        List<APIVersionLastAccessTimeDTO> usage = getLastAccessTimeTopEntries(
+                new ArrayList<APIVersionLastAccessTimeDTO>(accessTimeByAPI.values()), limit);
         return usage;
     }
 
@@ -1218,14 +1173,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
                 String version = resultSet.getString(APIUsageStatisticsClientConstants.VERSION);
                 String context = resultSet.getString(APIUsageStatisticsClientConstants.CONTEXT);
-                double accessTime = resultSet.getDouble(APIUsageStatisticsClientConstants.REQUEST_TIME);
+                long accessTime = resultSet.getLong(APIUsageStatisticsClientConstants.REQUEST_TIME);
                 String username = resultSet.getString(APIUsageStatisticsClientConstants.USER_ID);
                 lastAccessTimeData.add(new APIAccessTime(apiName, version, context, accessTime, username));
             }
 
         } catch (SQLException e) {
-            throw new APIMgtUsageQueryServiceClientException
-                    ("Error occurred while querying last access data for APIs from JDBC database", e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying last access data for APIs from JDBC database", e);
         } finally {
             if (resultSet != null) {
                 try {
@@ -1277,8 +1232,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.context) &&
-                        api.getId().getApiName().equals(apiName)) {
+                if (api.getContext().equals(usageEntry.context) && api.getId().getApiName().equals(apiName)) {
                     PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.username);
                     if (usageDTO != null) {
                         usageDTO.setCount(usageDTO.getCount() + usageEntry.requestCount);
@@ -1296,22 +1250,23 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
-    public List<APIRequestsByUserAgentsDTO> getUserAgentSummaryForALLAPIs() throws APIMgtUsageQueryServiceClientException{
+    public List<APIRequestsByUserAgentsDTO> getUserAgentSummaryForALLAPIs()
+            throws APIMgtUsageQueryServiceClientException {
 
         OMElement omElement = this.buildOMElementFromDatabaseTable("API_USERAGENT_SUMMARY");
         Collection<APIUserAgent> userAgentData = getUserAgent(omElement);
         Map<String, APIRequestsByUserAgentsDTO> apiRequestByUserAgents = new TreeMap<String, APIRequestsByUserAgentsDTO>();
         APIRequestsByUserAgentsDTO userAgentsDTO = null;
         for (APIUserAgent usageEntry : userAgentData) {
-            if(!apiRequestByUserAgents.containsKey(usageEntry.userAgent)) {
+            if (!apiRequestByUserAgents.containsKey(usageEntry.userAgent)) {
                 userAgentsDTO = new APIRequestsByUserAgentsDTO();
                 userAgentsDTO.setUserAgent(usageEntry.userAgent);
                 userAgentsDTO.setCount(usageEntry.totalRequestCount);
                 apiRequestByUserAgents.put(usageEntry.userAgent, userAgentsDTO);
-            }else{
+            } else {
                 userAgentsDTO = new APIRequestsByUserAgentsDTO();
-                userAgentsDTO=(APIRequestsByUserAgentsDTO)apiRequestByUserAgents.get(usageEntry.userAgent);
-                userAgentsDTO.setCount(userAgentsDTO.getCount()+usageEntry.totalRequestCount);
+                userAgentsDTO = (APIRequestsByUserAgentsDTO) apiRequestByUserAgents.get(usageEntry.userAgent);
+                userAgentsDTO.setCount(userAgentsDTO.getCount() + usageEntry.totalRequestCount);
                 apiRequestByUserAgents.remove(usageEntry.userAgent);
                 apiRequestByUserAgents.put(usageEntry.userAgent, userAgentsDTO);
             }
@@ -1319,9 +1274,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return new ArrayList<APIRequestsByUserAgentsDTO>(apiRequestByUserAgents.values());
     }
 
-    public List<APIRequestsByHourDTO> getAPIRequestsByHour(String fromDate, String toDate,String apiName) throws APIMgtUsageQueryServiceClientException{
-        String Date = null ;
-        OMElement omElement = this.queryBetweenTwoDaysForAPIRequestsByHour("API_REQUESTS_PERHOUR", fromDate, toDate,apiName);
+    public List<APIRequestsByHourDTO> getAPIRequestsByHour(String fromDate, String toDate, String apiName)
+            throws APIMgtUsageQueryServiceClientException {
+        String Date = null;
+        OMElement omElement = this
+                .queryBetweenTwoDaysForAPIRequestsByHour("API_REQUESTS_PERHOUR", fromDate, toDate, apiName);
         Collection<APIRequestsByHour> apiRequestsByHoursData = getAPIRequestsByHour(omElement);
         Map<String, APIRequestsByHourDTO> apiRequestsByHour = new TreeMap<String, APIRequestsByHourDTO>();
         APIRequestsByHourDTO apiRequestsByHourDTO = null;
@@ -1332,14 +1289,16 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             apiRequestsByHourDTO.setDate(usageEntry.date);
             apiRequestsByHourDTO.setRequestCount(usageEntry.requestCount);
             apiRequestsByHourDTO.setTier(usageEntry.tier);
-            apiRequestsByHour.put(usageEntry.date.concat(usageEntry.tier),apiRequestsByHourDTO);
+            apiRequestsByHour.put(usageEntry.date.concat(usageEntry.tier), apiRequestsByHourDTO);
         }
         return new ArrayList<APIRequestsByHourDTO>(apiRequestsByHour.values());
     }
 
-    public List<String> getAPIsFromAPIRequestsPerHourTable(String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException{
-        String Date = null ;
-        OMElement omElement = this.queryBetweenTwoDaysForAPIsFromAPIRequestsPerHourTable("API_REQUESTS_PERHOUR", fromDate, toDate);
+    public List<String> getAPIsFromAPIRequestsPerHourTable(String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+        String Date = null;
+        OMElement omElement = this
+                .queryBetweenTwoDaysForAPIsFromAPIRequestsPerHourTable("API_REQUESTS_PERHOUR", fromDate, toDate);
         Collection<String> apisList = getAPIsFromAPIRequestByHour(omElement);
 
         return new ArrayList<String>(apisList);
@@ -1356,22 +1315,23 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         APIVersionUsageDTO apiVersionUsageDTO;
         for (APIResponseFaultCount fault : faultyData) {
             for (API providerAPI : providerAPIs) {
-                if (providerAPI.getId().getApiName().equals(fault.apiName) &&
-                        providerAPI.getId().getVersion().equals(fault.apiVersion) &&
-                        providerAPI.getContext().equals(fault.context)) {
+                if (providerAPI.getId().getApiName().equals(fault.getApiName()) &&
+                        providerAPI.getId().getVersion().equals(fault.getApiVersion()) &&
+                        providerAPI.getContext().equals(fault.getContext())) {
 
                     APIResponseFaultCountDTO faultyDTO = new APIResponseFaultCountDTO();
-                    faultyDTO.setApiName(fault.apiName);
-                    faultyDTO.setVersion(fault.apiVersion);
-                    faultyDTO.setContext(fault.context);
-                    faultyDTO.setCount(fault.faultCount);
+                    faultyDTO.setApiName(fault.getApiName());
+                    faultyDTO.setVersion(fault.getApiVersion());
+                    faultyDTO.setContext(fault.getContext());
+                    faultyDTO.setCount(fault.getFaultCount());
 
-                    apiVersionUsageList = getUsageByAPIVersions(providerName, fault.apiName, fromDate, toDate);
+                    apiVersionUsageList = getUsageByAPIVersions(providerName, fault.getApiName(), fromDate, toDate);
                     for (int i = 0; i < apiVersionUsageList.size(); i++) {
                         apiVersionUsageDTO = apiVersionUsageList.get(i);
-                        if (apiVersionUsageDTO.getVersion().equals(fault.apiVersion)) {
+                        if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             long requestCount = apiVersionUsageDTO.getCount();
-                            double faultPercentage = ((double)requestCount - fault.faultCount) / requestCount * 100;
+                            double faultPercentage =
+                                    ((double) requestCount - fault.getFaultCount()) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
                             faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
@@ -1388,8 +1348,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return faultyCount;
     }
 
-    public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName,
-                                                          String apiVersion, int limit) throws APIMgtUsageQueryServiceClientException {
+    public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
+            int limit) throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion);
         Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
@@ -1417,7 +1377,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
-    public List<APIVersionUserUsageDTO> getUsageBySubscriber(String subscriberName, String period) throws Exception, APIManagementException {
+    public List<APIVersionUserUsageDTO> getUsageBySubscriber(String subscriberName, String period)
+            throws Exception, APIManagementException {
 
         List<APIVersionUserUsageDTO> apiUserUsages = new ArrayList<APIVersionUserUsageDTO>();
 
@@ -1434,25 +1395,25 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
         Collection<APIVersionUsageByUserMonth> usageData = getUsageAPIBySubscriberMonthly(subscriberName, period);
 
-            for (APIVersionUsageByUserMonth usageEntry : usageData) {
+        for (APIVersionUsageByUserMonth usageEntry : usageData) {
 
-                if (usageEntry.username.equals(subscriberName) && usageEntry.month.equals(period)) {
+            if (usageEntry.username.equals(subscriberName) && usageEntry.month.equals(period)) {
 
-                    List<APIUsageRangeCost> rangeCosts = evaluate(usageEntry.apiName, (int) usageEntry.requestCount);
+                List<APIUsageRangeCost> rangeCosts = evaluate(usageEntry.apiName, (int) usageEntry.requestCount);
 
-                    for (APIUsageRangeCost rangeCost : rangeCosts)  {
-                        APIVersionUserUsageDTO userUsageDTO = new APIVersionUserUsageDTO();
-                        userUsageDTO.setApiname(usageEntry.apiName);
-                        userUsageDTO.setContext(usageEntry.context);
-                        userUsageDTO.setVersion(usageEntry.apiVersion);
-                        userUsageDTO.setCount(rangeCost.getRangeInvocationCount());
-                        userUsageDTO.setCost(rangeCost.getCost().toString());
-                        userUsageDTO.setCostPerAPI(rangeCost.getCostPerUnit().toString());
-                        apiUserUsages.add(userUsageDTO);
+                for (APIUsageRangeCost rangeCost : rangeCosts) {
+                    APIVersionUserUsageDTO userUsageDTO = new APIVersionUserUsageDTO();
+                    userUsageDTO.setApiname(usageEntry.apiName);
+                    userUsageDTO.setContext(usageEntry.context);
+                    userUsageDTO.setVersion(usageEntry.apiVersion);
+                    userUsageDTO.setCount(rangeCost.getRangeInvocationCount());
+                    userUsageDTO.setCost(rangeCost.getCost().toString());
+                    userUsageDTO.setCostPerAPI(rangeCost.getCostPerUnit().toString());
+                    apiUserUsages.add(userUsageDTO);
 
-                    }
                 }
             }
+        }
 
         return apiUserUsages;
     }
@@ -1507,8 +1468,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return usageData;
     }
 
-    private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData,
-                                                               int limit) {
+    private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<APIResponseTimeDTO>() {
             public int compare(APIResponseTimeDTO o1, APIResponseTimeDTO o2) {
                 // Note that o2 appears before o1
@@ -1524,8 +1484,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return usageData;
     }
 
-    private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(
-            List<APIVersionLastAccessTimeDTO> usageData, int limit) {
+    private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
+            int limit) {
         Collections.sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
@@ -1554,18 +1514,17 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * @deprecated please do not use this function as this may cause memory overflow. This loads a whole database table into memory as XML object
      * @param tableName - database table
      * @return OMElement
-     * @throws APIMgtUsageQueryServiceClientException
-     * Fetches the data from the passed table and builds a OEMElemnet
+     * @throws APIMgtUsageQueryServiceClientException Fetches the data from the passed table and builds a OEMElemnet
+     * @deprecated please do not use this function as this may cause memory overflow. This loads a whole database table into memory as XML object
      */
     @Deprecated
     private OMElement buildOMElementFromDatabaseTable(String tableName) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1627,22 +1586,21 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * @deprecated please do not use this function as this may cause memory overflow.
-     * This loads a whole database table into memory as XML object
-     *
      * @param columnFamily name of the table
-     * @param fromDate starting date of the duration for the query
-     * @param toDate last date of the duration for the query
+     * @param fromDate     starting date of the duration for the query
+     * @param toDate       last date of the duration for the query
      * @return XML object containing the specified table
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while retrieving data
+     * @deprecated please do not use this function as this may cause memory overflow.
+     * This loads a whole database table into memory as XML object
      */
     @Deprecated
     private OMElement queryBetweenTwoDays(String columnFamily, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1654,7 +1612,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             //TODO: API_FAULT_COUNT need to populate according to match with given time range
             if (!columnFamily.equals(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY)) {
-                query = "SELECT * FROM  " + columnFamily + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
+                query = "SELECT * FROM  " + columnFamily + " WHERE " + APIUsageStatisticsClientConstants.TIME
+                        + " BETWEEN " +
                         "\'" + fromDate + "\' AND \'" + toDate + "\'";
             } else {
                 query = "SELECT * FROM  " + columnFamily;
@@ -1704,12 +1663,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    private OMElement queryBetweenTwoDaysForAPIRequestsByHour(String columnFamily, String fromDate, String toDate,String apiName)
-            throws APIMgtUsageQueryServiceClientException {
+    private OMElement queryBetweenTwoDaysForAPIRequestsByHour(String columnFamily, String fromDate, String toDate,
+            String apiName) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                                                             "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1721,7 +1680,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             //TODO: API_FAULT_COUNT need to populate according to match withQuery given time range
 
-            query = "SELECT * FROM  " + columnFamily + " WHERE " + " API =\'" + apiName + "\' AND "+" requestTime "+ " BETWEEN " +
+            query = "SELECT * FROM  " + columnFamily + " WHERE " + " API =\'" + apiName + "\' AND " + " requestTime "
+                    + " BETWEEN " +
                     "\'" + fromDate + "\' AND \'" + toDate + "\' ";
 
             rs = statement.executeQuery(query);
@@ -1734,7 +1694,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String columnValue = rs.getString(columnName);
                     String xmlEscapedValue = StringEscapeUtils.escapeXml(columnValue);
                     returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + xmlEscapedValue +
-                                               "</" + columnName.toLowerCase() + ">");
+                            "</" + columnName.toLowerCase() + ">");
                 }
                 returnStringBuilder.append("</row>");
             }
@@ -1770,12 +1730,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     @Deprecated
-    private OMElement queryBetweenTwoDaysForAPIsFromAPIRequestsPerHourTable(String columnFamily, String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+    private OMElement queryBetweenTwoDaysForAPIsFromAPIRequestsPerHourTable(String columnFamily, String fromDate,
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                                                             "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1787,7 +1747,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             //TODO: API_FAULT_COUNT need to populate according to match with given time range
 
-            query = "SELECT DISTINCT API FROM  " + columnFamily + " WHERE TIER<>\'Unauthenticated\' AND"+" requestTime "+ " BETWEEN " +
+            query = "SELECT DISTINCT API FROM  " + columnFamily + " WHERE TIER<>\'Unauthenticated\' AND"
+                    + " requestTime " + " BETWEEN " +
                     "\'" + fromDate + "\' AND \'" + toDate + "\' ";
 
             rs = statement.executeQuery(query);
@@ -1800,7 +1761,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String columnValue = rs.getString(columnName);
                     String xmlEscapedValue = StringEscapeUtils.escapeXml(columnValue);
                     returnStringBuilder.append("<" + columnName.toLowerCase() + ">" + xmlEscapedValue +
-                                               "</" + columnName.toLowerCase() + ">");
+                            "</" + columnName.toLowerCase() + ">");
                 }
                 returnStringBuilder.append("</row>");
             }
@@ -1835,13 +1796,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    private List<APIResponseFaultCount> queryBetweenTwoDaysForFaulty(String tableName, String fromDate,
-            String toDate)
+    private List<APIResponseFaultCount> queryBetweenTwoDaysForFaulty(String tableName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1899,25 +1859,24 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     private List<APIUsageByResourcePath> queryToGetAPIUsageByResourcePath(String tableName, String fromDate,
-            String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
         Statement statement = null;
         ResultSet rs = null;
-        List<APIUsageByResourcePath> usage=new ArrayList<APIUsageByResourcePath>();
+        List<APIUsageByResourcePath> usage = new ArrayList<APIUsageByResourcePath>();
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
             String query;
 
-            query = "SELECT api,version,apiPublisher,context,method,total_request_count,time FROM "
-                    + tableName + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
+            query = "SELECT api,version,apiPublisher,context,method,total_request_count,time FROM " + tableName
+                    + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
                     "\'" + fromDate + "\' AND \'" + toDate + "\'";
             rs = statement.executeQuery(query);
             APIUsageByResourcePath apiUsageByResourcePath;
@@ -1962,11 +1921,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     private List<APIUsageByDestination> queryToGetAPIUsageByDestination(String tableName, String fromDate,
-            String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+            String toDate) throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -1981,7 +1939,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
             query = "SELECT api,version,apiPublisher,context,destination,SUM(total_request_count) as total_request_count FROM  "
                     + tableName + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                    "\'" + fromDate + "\' AND \'" + toDate + "\'" + " GROUP BY api,version,apiPublisher,context,destination";
+                    "\'" + fromDate + "\' AND \'" + toDate + "\'"
+                    + " GROUP BY api,version,apiPublisher,context,destination";
 
             rs = statement.executeQuery(query);
             APIUsageByDestination apiUsageByDestination;
@@ -1992,8 +1951,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 String context = rs.getString("context");
                 String destination = rs.getString("destination");
                 long requestCount = rs.getLong("total_request_count");
-                apiUsageByDestination = new APIUsageByDestination(apiName, version, context, destination,
-                        requestCount);
+                apiUsageByDestination = new APIUsageByDestination(apiName, version, context, destination, requestCount);
                 usageByResourcePath.add(apiUsageByDestination);
             }
             return usageByResourcePath;
@@ -2026,12 +1984,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     private List<APIUsage> queryBetweenTwoDaysForAPIUsageByVersion(String tableName, String fromDate, String toDate,
-            String apiName)
-            throws APIMgtUsageQueryServiceClientException {
+            String apiName) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2095,11 +2052,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    private List<APIUsageByUserName> queryBetweenTwoDaysForAPIUsageByUser(String providerName, String fromDate, String toDate, Integer limit)
-            throws APIMgtUsageQueryServiceClientException {
+    private List<APIUsageByUserName> queryBetweenTwoDaysForAPIUsageByUser(String providerName, String fromDate,
+            String toDate, Integer limit) throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         int resultsLimit = APIUsageStatisticsClientConstants.DEFAULT_RESULTS_LIMIT;
@@ -2117,39 +2074,50 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String oracleQuery;
             String mssqlQuery;
             if (fromDate != null && toDate != null) {
-                query = "SELECT API, API_VERSION,VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
+                query = "SELECT API, API_VERSION,VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
+                        +
                         "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                        "\'" + fromDate + "\' AND \'" + toDate + "\'" + 
+                        "\'" + fromDate + "\' AND \'" + toDate + "\'" +
                         " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
-                oracleQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                              "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                              "\'" + fromDate + "\' AND \'" + toDate + "\'" + 
-                              " GROUP BY API, API_VERSION, VERSION, USERID, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
+                oracleQuery =
+                        "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
+                                +
+                                "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME
+                                + " BETWEEN " +
+                                "\'" + fromDate + "\' AND \'" + toDate + "\'" +
+                                " GROUP BY API, API_VERSION, VERSION, USERID, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
 
-
-                mssqlQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                             "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
-                             "\'" + fromDate + "\' AND \'" + toDate + "\'" + 
-                             " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
+                mssqlQuery =
+                        "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
+                                +
+                                "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME
+                                + " BETWEEN " +
+                                "\'" + fromDate + "\' AND \'" + toDate + "\'" +
+                                " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
             } else {
-                query = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                        "FROM API_REQUEST_SUMMARY" + 
+                query = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
+                        +
+                        "FROM API_REQUEST_SUMMARY" +
                         " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
-                oracleQuery = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                              "FROM API_REQUEST_SUMMARY" + 
-                              " GROUP BY API, API_VERSION, VERSION, APIPUBLISHER, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
+                oracleQuery =
+                        "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
+                                +
+                                "FROM API_REQUEST_SUMMARY" +
+                                " GROUP BY API, API_VERSION, VERSION, APIPUBLISHER, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
-                mssqlQuery = "SELECT  API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT " +
-                             "FROM API_REQUEST_SUMMARY" + 
-                             " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
+                mssqlQuery =
+                        "SELECT  API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
+                                +
+                                "FROM API_REQUEST_SUMMARY" +
+                                " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
             }
             if ((connection.getMetaData().getDriverName()).contains("Oracle")) {
                 query = oracleQuery;
             }
-            if(connection.getMetaData().getDatabaseProductName().contains("Microsoft")){
+            if (connection.getMetaData().getDatabaseProductName().contains("Microsoft")) {
                 query = mssqlQuery;
             }
 
@@ -2170,8 +2138,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 requestCount = rs.getLong("total_request_count");
                 publisher = rs.getString("apipublisher");
                 if (publisher != null) {
-                    APIUsageByUserName usage = new APIUsageByUserName(apiName, apiVersion, context, userID,
-                            requestCount, publisher);
+                    APIUsageByUserName usage = new APIUsageByUserName(apiName, apiVersion, context, userID, publisher,
+                            requestCount);
                     usageByName.add(usage);
                 }
             }
@@ -2230,184 +2198,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     @Deprecated
-    private Collection<APIUsage> getUsageData(OMElement data) {
-        List<APIUsage> usageData = new ArrayList<APIUsage>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                usageData.add(new APIUsage(rowElement));
-            }
-        }
-        return usageData;
-    }
-
-    @Deprecated
-    private Collection<AppAPIUsage> getAppAPIUsageData(OMElement data) {
-        List<AppAPIUsage> usageData = new ArrayList<AppAPIUsage>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                usageData.add(new AppAPIUsage(rowElement));
-            }
-        }
-        return usageData;
-    }
-
-    @Deprecated
-    private Collection<APIUsageByResourcePath> getUsageDataByResourcePath(OMElement data) {
-        List<APIUsageByResourcePath> usageData = new ArrayList<APIUsageByResourcePath>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                usageData.add(new APIUsageByResourcePath(rowElement));
-            }
-        }
-        return usageData;
-    }
-
-    @Deprecated
-    private Collection<APIUsageByDestination> getUsageDataByDestination(OMElement data) {
-        List<APIUsageByDestination> usageData = new ArrayList<APIUsageByDestination>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                usageData.add(new APIUsageByDestination(rowElement));
-            }
-        }
-        return usageData;
-    }
-
-    @Deprecated
-    private Collection<APIUsageByUserName> getUsageDataByAPIName(OMElement data, String tenantDomain) {
-        List<APIUsageByUserName> usageData = new ArrayList<APIUsageByUserName>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                String apiProvider = null;
-                if (rowElement.getFirstChildWithName(new QName("apipublisher")) != null) {
-                    apiProvider = rowElement.getFirstChildWithName(new QName("apipublisher")).getText();
-                    if (apiProvider != null && tenantDomain.equals(MultitenantUtils.getTenantDomain(apiProvider))) {
-                        usageData.add(new APIUsageByUserName(rowElement));
-                    }
-                }
-
-            }
-        }
-        return usageData;
-    }
-
-    @Deprecated
-    private Collection<APIResponseFaultCount> getAPIResponseFaultCount(OMElement data) {
-        List<APIResponseFaultCount> faultyData = new ArrayList<APIResponseFaultCount>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                faultyData.add(new APIResponseFaultCount(rowElement));
-            }
-        }
-        return faultyData;
-    }
-
-    @Deprecated
-    private Collection<AppAPIResponseFaultCount> getAppAPIResponseFaultCount(OMElement data) {
-        List<AppAPIResponseFaultCount> faultyData = new ArrayList<AppAPIResponseFaultCount>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                faultyData.add(new AppAPIResponseFaultCount(rowElement));
-            }
-        }
-        return faultyData;
-    }
-
-    @Deprecated
-    private Collection<APIResponseTime> getResponseTimeData(OMElement data) {
-        List<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
-
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                if (rowElement.getFirstChildWithName(new QName(
-                        APIUsageStatisticsClientConstants.SERVICE_TIME)) != null) {
-                    responseTimeData.add(new APIResponseTime(rowElement));
-                }
-            }
-        }
-        return responseTimeData;
-    }
-
-    @Deprecated
-    private Collection<APIAccessTime> getAccessTimeData(OMElement data) {
-        List<APIAccessTime> accessTimeData = new ArrayList<APIAccessTime>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                accessTimeData.add(new APIAccessTime(rowElement));
-            }
-        }
-        return accessTimeData;
-    }
-
-    @Deprecated
-    private Collection<APIUsageByUser> getUsageBySubscriber(OMElement data) {
-        List<APIUsageByUser> usageData = new ArrayList<APIUsageByUser>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                usageData.add(new APIUsageByUser(rowElement));
-            }
-        }
-        return usageData;
-    }
-
-    @Deprecated
     private Collection<APIUserAgent> getUserAgent(OMElement data) {
         List<APIUserAgent> userAgentData = new ArrayList<APIUserAgent>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
+        OMElement rowsElement = data.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.ROWS));
+        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(APIUsageStatisticsClientConstants.ROW));
         if (rowIterator != null) {
             while (rowIterator.hasNext()) {
                 OMElement rowElement = (OMElement) rowIterator.next();
@@ -2420,14 +2214,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     @Deprecated
     private Collection<APIRequestsByHour> getAPIRequestsByHour(OMElement data) {
         List<APIRequestsByHour> apiRequestsByHours = new ArrayList<APIRequestsByHour>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
+        OMElement rowsElement = data.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.ROWS));
+        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(APIUsageStatisticsClientConstants.ROW));
         if (rowIterator != null) {
             while (rowIterator.hasNext()) {
                 OMElement rowElement = (OMElement) rowIterator.next();
-                if(!rowElement.getFirstChildWithName(new QName("tier")).getText().equalsIgnoreCase("Unauthenticated")){
+                if (!rowElement.getFirstChildWithName(new QName("tier")).getText()
+                        .equalsIgnoreCase("Unauthenticated")) {
                     apiRequestsByHours.add(new APIRequestsByHour(rowElement));
                 }
 
@@ -2439,10 +2232,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     @Deprecated
     private Collection<String> getAPIsFromAPIRequestByHour(OMElement data) {
         List<String> apisList = new ArrayList<String>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
+        OMElement rowsElement = data.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.ROWS));
+        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(APIUsageStatisticsClientConstants.ROW));
         if (rowIterator != null) {
             while (rowIterator.hasNext()) {
                 OMElement rowElement = (OMElement) rowIterator.next();
@@ -2453,63 +2244,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return apisList;
     }
 
-    @Deprecated
-    private Collection<APIVersionUsageByUser> getUsageAPIBySubscriber(OMElement data) {
-        List<APIVersionUsageByUser> usageData = new ArrayList<APIVersionUsageByUser>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                for (int i = 0; i < usageData.size(); i++) {
-                    if (usageData.get(i).apiName.equals(rowElement.getFirstChildWithName(new QName(
-                            APIUsageStatisticsClientConstants.API)).getText()) && usageData.get(i).apiVersion.equals(rowElement.getFirstChildWithName(new QName(
-                            APIUsageStatisticsClientConstants.VERSION)).getText())) {
-                        usageData.get(i).requestCount = usageData.get(i).requestCount + (long) Double.parseDouble(rowElement.getFirstChildWithName(new QName(
-                                APIUsageStatisticsClientConstants.REQUEST)).getText());
-                        //    return usageData;
-                    }
-
-                }
-                usageData.add(new APIVersionUsageByUser(rowElement));
-            }
-        }
-        return usageData;
-    }
-
-    @Deprecated
-    private Collection<APIVersionUsageByUserMonth> getUsageAPIBySubscriberMonthly(OMElement data) {
-        List<APIVersionUsageByUserMonth> usageData = new ArrayList<APIVersionUsageByUserMonth>();
-        OMElement rowsElement = data.getFirstChildWithName(new QName(
-                APIUsageStatisticsClientConstants.ROWS));
-        Iterator rowIterator = rowsElement.getChildrenWithName(new QName(
-                APIUsageStatisticsClientConstants.ROW));
-        if (rowIterator != null) {
-            while (rowIterator.hasNext()) {
-                OMElement rowElement = (OMElement) rowIterator.next();
-                for (int i = 0; i < usageData.size(); i++) {
-                    if (usageData.get(i).apiName.equals(rowElement.getFirstChildWithName(new QName(
-                            APIUsageStatisticsClientConstants.API)).getText()) && usageData.get(i).apiVersion.equals(rowElement.getFirstChildWithName(new QName(
-                            APIUsageStatisticsClientConstants.VERSION)).getText())) {
-                        usageData.get(i).requestCount = usageData.get(i).requestCount + (long) Double.parseDouble(rowElement.getFirstChildWithName(new QName(
-                                APIUsageStatisticsClientConstants.REQUEST)).getText());
-                    }
-
-                }
-                usageData.add(new APIVersionUsageByUserMonth(rowElement));
-            }
-        }
-        return usageData;
-    }
-
     private Collection<APIVersionUsageByUserMonth> getUsageAPIBySubscriberMonthly(String subscriberName, String period)
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2592,9 +2332,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @param pass password
      * @throws Exception general exception throws, because different exception can occur
      */
-    @Override public void deployArtifacts(String url,String user,String pass) throws Exception {
+    @Override
+    public void deployArtifacts(String url, String user, String pass) throws Exception {
         //name of the capp to deploy
-        String cAppName= "API_Manager_Analytics_RDBMS.car";
+        String cAppName = "API_Manager_Analytics_RDBMS.car";
         String cAppPath = System.getProperty("carbon.home") + "/statistics";
         cAppPath = cAppPath + '/' + cAppName;
         File file = new File(cAppPath);
@@ -2617,7 +2358,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         log.info("Deploying DAS cApp '" + cAppName + "'...");
         //create UploadedFileItem array and 1st element contain the deploy artifact
         UploadedFileItem[] fileItem = new UploadedFileItem[1];
-        fileItem[0]=new UploadedFileItem();
+        fileItem[0] = new UploadedFileItem();
         fileItem[0].setDataHandler(dataHandler);
         fileItem[0].setFileName(cAppName);
         fileItem[0].setFileType("jar");
@@ -2625,23 +2366,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         stub.uploadApp(fileItem);
     }
 
-    //    @Deprecated
-//    private Collection<APIFirstAccess> getFirstAccessTime(OMElement data) {
-//        List<APIFirstAccess> usageData = new ArrayList<APIFirstAccess>();
-//        OMElement rowsElement = data.getFirstChildWithName(new QName(
-//                APIUsageStatisticsClientConstants.ROWS));
-//        OMElement rowElement = rowsElement.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.ROW));
-//
-//        if (rowElement!=null) {
-//            usageData.add(new APIFirstAccess(rowElement));
-//        }
-//
-//        return usageData;
-//    }
-
     @Override
     public List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
-        return getFirstAccessTime(providerName,1);
+        return getFirstAccessTime(providerName, 1);
     }
 
     public List<APIFirstAccess> getFirstAccessTime(String providerName, int limit)
@@ -2659,12 +2386,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return APIFirstAccessList;
     }
 
-    private APIFirstAccess queryFirstAccess(String columnFamily)
-            throws APIMgtUsageQueryServiceClientException {
+    private APIFirstAccess queryFirstAccess(String columnFamily) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2694,17 +2420,17 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             APIFirstAccess firstAccess = null;
 
             while (rs.next()) {
-                year = rs.getInt("year")+"";
-                month = rs.getInt("month")-1+"";
-                day = rs.getInt("day")+"";
+                year = rs.getInt("year") + "";
+                month = rs.getInt("month") - 1 + "";
+                day = rs.getInt("day") + "";
                 firstAccess = new APIFirstAccess(year, month, day);
             }
 
             return firstAccess;
 
         } catch (Exception e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database" +
-                                                             e.getMessage(), e);
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Error occurred while querying from JDBC database" + e.getMessage(), e);
         } finally {
             if (rs != null) {
                 try {
@@ -2733,8 +2459,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private Collection<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
             throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2747,8 +2473,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY, connection)) {//Table Exists
-                query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY
-                        + " WHERE " + APIUsageStatisticsClientConstants.API + " = '" + apiName + "'";
+                query = "SELECT * FROM " + APIUsageStatisticsClientConstants.KEY_USAGE_SUMMARY + " WHERE "
+                        + APIUsageStatisticsClientConstants.API + " = '" + apiName + "'";
                 if (apiVersion != null) {
                     query += " AND " + APIUsageStatisticsClientConstants.VERSION + " = '" + apiVersion + "'";
                 }
@@ -2758,7 +2484,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String username = rs.getString(APIUsageStatisticsClientConstants.USER_ID);
                     long requestCount = rs.getLong(APIUsageStatisticsClientConstants.REQUEST);
                     String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
-                    usageData.add(new APIUsageByUser(context,username,requestCount,version));
+                    usageData.add(new APIUsageByUser(context, username, requestCount, version));
                 }
             }
             return usageData;
@@ -2771,7 +2497,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     rs.close();
                 } catch (SQLException e) {
                     //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.",e);
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
                 }
             }
             if (statement != null) {
@@ -2779,7 +2505,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     statement.close();
                 } catch (SQLException e) {
                     //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.",e);
+                    log.error("Error occurred while closing the statement from JDBC database.", e);
                 }
             }
             if (connection != null) {
@@ -2787,20 +2513,21 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     connection.close();
                 } catch (SQLException e) {
                     //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.",e);
+                    log.error("Error occurred while closing the JDBC database connection.", e);
                 }
             }
         }
     }
 
-    /** Given API name and Application, returns throttling request counts over time for a given time span
-     * 
-     * @param apiName Name of the API
+    /**
+     * Given API name and Application, returns throttling request counts over time for a given time span
+     *
+     * @param apiName  Name of the API
      * @param provider Provider name
-     * @param appName Application name
+     * @param appName  Application name
      * @param fromDate Start date of the time span
-     * @param toDate End date of time span
-     * @param groupBy Group by parameter. Supported parameters are :day,hour
+     * @param toDate   End date of time span
+     * @param groupBy  Group by parameter. Supported parameters are :day,hour
      * @return Throttling counts over time
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -2809,8 +2536,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2824,15 +2551,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
-                
-                if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)){
+
+                if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)) {
                     groupByStmt = "year, month, day";
-                } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)){
+                } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
                     groupByStmt = "year, month, day, time";
                 } else {
-                    throw new APIMgtUsageQueryServiceClientException(
-                            "Unsupported group by parameter " + groupBy +
-                                    " for retrieving throttle data of API and app.");
+                    throw new APIMgtUsageQueryServiceClientException("Unsupported group by parameter " + groupBy +
+                            " for retrieving throttle data of API and app.");
                 }
 
                 query = "SELECT " + groupByStmt + " ," +
@@ -2841,7 +2567,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         "FROM API_THROTTLED_OUT_SUMMARY " +
                         "WHERE tenantDomain = ? " +
                         "AND api = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
+                                "" :
                                 "AND apiPublisher = ?") +
                         (StringUtils.isEmpty(appName) ? "" : " AND applicationName = ?") +
                         "AND time BETWEEN ? AND ? " +
@@ -2865,19 +2592,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 while (rs.next()) {
                     int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
                     int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
-                    int year =  rs.getInt(APIUsageStatisticsClientConstants.YEAR);
-                    int month =  rs.getInt(APIUsageStatisticsClientConstants.MONTH);
+                    int year = rs.getInt(APIUsageStatisticsClientConstants.YEAR);
+                    int month = rs.getInt(APIUsageStatisticsClientConstants.MONTH);
                     String time;
                     if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
                         time = rs.getString(APIUsageStatisticsClientConstants.TIME);
                     } else {
-                        int day =  rs.getInt(APIUsageStatisticsClientConstants.DAY);
+                        int day = rs.getInt(APIUsageStatisticsClientConstants.DAY);
                         time = year + "-" + month + "-" + day + " 00:00:00";
                     }
-                    throttlingData.add(
-                            new APIThrottlingOverTimeDTO(apiName, provider, successRequestCount, throttledOutCount,
-                                    time)
-                    );
+                    throttlingData
+                            .add(new APIThrottlingOverTimeDTO(apiName, provider, successRequestCount, throttledOutCount,
+                                            time));
                 }
 
             } else {
@@ -2918,23 +2644,23 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    /** Given Application name and the provider, returns throttle data for the APIs of the provider invoked by the 
-     *  given application
-     * 
-     * @param appName Application name
+    /**
+     * Given Application name and the provider, returns throttle data for the APIs of the provider invoked by the
+     * given application
+     *
+     * @param appName  Application name
      * @param provider Provider name
      * @param fromDate Start date of the time span
-     * @param toDate End date of time span
+     * @param toDate   End date of time span
      * @return Throttling counts of APIs of the provider invoked by the given app
      * @throws APIMgtUsageQueryServiceClientException
      */
-    public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider,
-            String fromDate, String toDate)
-            throws APIMgtUsageQueryServiceClientException {
+    public List<APIThrottlingOverTimeDTO> getThrottleDataOfApplication(String appName, String provider, String fromDate,
+            String toDate) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2953,7 +2679,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         "FROM API_THROTTLED_OUT_SUMMARY " +
                         "WHERE tenantDomain = ? " +
                         "AND applicationName = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
+                                "" :
                                 "AND apiPublisher = ?") +
                         "AND time BETWEEN ? AND ? " +
                         "GROUP BY api, apiPublisher " +
@@ -3018,18 +2745,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    /** Get APIs of the provider that consist of throttle data 
-     * 
+    /**
+     * Get APIs of the provider that consist of throttle data
+     *
      * @param provider Provider name
      * @return List of APIs of the provider that consist of throttle data
      * @throws APIMgtUsageQueryServiceClientException
      */
-    public List<String> getAPIsForThrottleStats(String provider)
-            throws APIMgtUsageQueryServiceClientException {
+    public List<String> getAPIsForThrottleStats(String provider) throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -3046,7 +2773,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 query = "SELECT DISTINCT api FROM API_THROTTLED_OUT_SUMMARY " +
                         "WHERE tenantDomain = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
+                                "" :
                                 "AND apiPublisher = ? ") +
                         "ORDER BY api ASC";
 
@@ -3055,7 +2783,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                     statement.setString(2, provider);
                 }
-                
+
                 rs = statement.executeQuery();
                 while (rs.next()) {
                     String api = rs.getString(APIUsageStatisticsClientConstants.API);
@@ -3099,11 +2827,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    /** Given provider name and the API name, returns a list of applications through which the corresponding API is
-     *  invoked and which consist of success/throttled requests
-     * 
+    /**
+     * Given provider name and the API name, returns a list of applications through which the corresponding API is
+     * invoked and which consist of success/throttled requests
+     *
      * @param provider Provider name
-     * @param apiName Name of th API
+     * @param apiName  Name of th API
      * @return A list of applications through which the corresponding API is invoked and which consist of throttle data
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -3111,8 +2840,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throws APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
-            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure " +
-                    "that the data source is properly configured in the APIUsageTracker configuration.");
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -3128,7 +2857,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Tables exist
                 query = "SELECT DISTINCT applicationName FROM API_THROTTLED_OUT_SUMMARY " +
                         "WHERE tenantDomain = ? " +
-                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ? "" :
+                        (provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS) ?
+                                "" :
                                 "AND apiPublisher = ? ") +
                         (apiName == null ? "" : "AND api = ? ") +
                         "ORDER BY applicationName ASC";
@@ -3139,7 +2869,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                     statement.setString(index++, provider);
                 }
-                if( apiName != null ){
+                if (apiName != null) {
                     statement.setString(index, apiName);
                 }
 
@@ -3196,122 +2926,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      */
     @Override
     public List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
-        return super.getSubscriberCountByAPIs(loggedUser,apiProviderImpl);
-    }
-
-    private static class AppUsage {
-
-
-        private String userid;
-        private long requestCount;
-        private String consumerKey;
-
-        @Deprecated
-        public AppUsage(OMElement row) {
-
-            userid = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            consumerKey = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONSUMERKEY)).getText();
-
-        }
-
-        public AppUsage(String userId, long requestCount, String consumerKey) {
-
-            this.userid = userId;
-            this.requestCount = requestCount;
-            this.consumerKey = consumerKey;
-        }
-    }
-
-    private static class AppCallType {
-
-        private String apiName;
-        private String callType;
-        private String consumerKey;
-        private String resource;
-
-        @Deprecated
-        public AppCallType(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            consumerKey = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONSUMERKEY)).getText();
-            callType = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.METHOD)).getText();
-            resource = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.RESOURCE)).getText();
-        }
-
-        public AppCallType(String apiName, String callType, String consumerKey, String resource) {
-
-            this.apiName = apiName;
-            this.callType = callType;
-            this.consumerKey = consumerKey;
-            this.resource = resource;
-        }
-    }
-
-    private static class APIUsage {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private long requestCount;
-
-        @Deprecated
-        public APIUsage(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-        }
-
-        public APIUsage(String apiName, String context, String apiVersion, long requestCount) {
-
-            this.apiName = apiName;
-            this.context = context;
-            this.apiVersion = apiVersion;
-            this.requestCount = requestCount;
-        }
-    }
-
-    private static class AppAPIUsage {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private long requestCount;
-        private String consumerKey;
-
-        @Deprecated
-        public AppAPIUsage(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            consumerKey = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONSUMERKEY)).getText();
-        }
-
-        public AppAPIUsage(String apiName, String apiVersion, String context, long requestCount, String consumerKey) {
-
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.requestCount = requestCount;
-            this.consumerKey = consumerKey;
-        }
+        return super.getSubscriberCountByAPIs(loggedUser, apiProviderImpl);
     }
 
     private static class APIUsageByUser {
@@ -3321,229 +2936,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         private long requestCount;
         private String apiVersion;
 
-        @Deprecated
-        public APIUsageByUser(OMElement row) {
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            username = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-        }
-
         public APIUsageByUser(String context, String username, long requestCount, String apiVersion) {
             this.context = context;
             this.username = username;
             this.requestCount = requestCount;
             this.apiVersion = apiVersion;
-        }
-    }
-
-    private static class APIUsageByResourcePath {
-
-        private String apiName;
-        private String apiVersion;
-        private String method;
-        private String context;
-        private long requestCount;
-        private String time;
-
-        public APIUsageByResourcePath(String apiName, String apiVersion, String method, String context,
-                long requestCount, String time) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.method = method;
-            this.context = context;
-            this.requestCount = requestCount;
-            this.time = time;
-        }
-
-        @Deprecated
-        public APIUsageByResourcePath(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            method = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.METHOD)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            time = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.TIME)).getText();
-        }
-    }
-
-    private static class APIUsageByDestination {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private String destination;
-        private long requestCount;
-
-        public APIUsageByDestination(String apiName, String apiVersion, String context, String destination,
-                long requestCount) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.destination = destination;
-            this.requestCount = requestCount;
-        }
-
-        @Deprecated
-        public APIUsageByDestination(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            destination = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.DESTINATION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-        }
-    }
-
-    private static class APIUsageByUserName {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private String userID;
-        private String apipublisher;
-        private long requestCount;
-
-        public APIUsageByUserName(String apiName, String apiVersion, String context, String userID, long requestCount,
-                String apipublisher) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.userID = userID;
-            this.requestCount = requestCount;
-            this.apipublisher = apipublisher;
-        }
-
-        @Deprecated
-        public APIUsageByUserName(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            userID = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-        }
-    }
-
-    private static class APIResponseFaultCount {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-//        private String requestTime;
-        private long faultCount;
-
-        public APIResponseFaultCount(String apiName, String apiVersion, String context, long faultCount) {
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.faultCount = faultCount;
-        }
-
-        @Deprecated
-        public APIResponseFaultCount(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            OMElement invocationTimeEle = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.INVOCATION_TIME));
-            OMElement faultCountEle = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.FAULT));
-//            if (invocationTimeEle != null) {
-//                requestTime = invocationTimeEle.getText();
-//            }
-            if (faultCountEle != null) {
-                faultCount = (long) Double.parseDouble(faultCountEle.getText());
-            }
-        }
-    }
-
-    private static class AppAPIResponseFaultCount {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private String requestTime;
-        private long faultCount;
-        private String consumerKey;
-
-        @Deprecated
-        public AppAPIResponseFaultCount(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            OMElement invocationTimeEle = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.INVOCATION_TIME));
-            OMElement faultCountEle = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.FAULT));
-            consumerKey = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONSUMERKEY)).getText();
-            if (invocationTimeEle != null) {
-                requestTime = invocationTimeEle.getText();
-            }
-            if (faultCountEle != null) {
-                faultCount = (long) Double.parseDouble(faultCountEle.getText());
-            }
-        }
-
-        public AppAPIResponseFaultCount
-                (String apiName, String apiVersion, String context, long faultCount, String consumerKey) {
-
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.consumerKey = consumerKey;
-            if (faultCount != 0) {
-                this.faultCount = faultCount;
-            }
-        }
-    }
-
-    private static class APIVersionUsageByUser {
-
-        private String context;
-        private String username;
-        private long requestCount;
-        private String apiVersion;
-        private String apiName;
-
-        @Deprecated
-        public APIVersionUsageByUser(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            username = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-
         }
     }
 
@@ -3558,18 +2955,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
         @Deprecated
         public APIVersionUsageByUserMonth(OMElement row) {
-            apiName = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API)).getText();
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            username = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-            requestCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST)).getText());
-            apiVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.VERSION)).getText();
-            month = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.MONTH)).getText();
+            apiName = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.API)).getText();
+            context = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.CONTEXT)).getText();
+            username = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.USER_ID)).getText();
+            requestCount = (long) Double.parseDouble(
+                    row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.REQUEST)).getText());
+            apiVersion = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.VERSION)).getText();
+            month = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.MONTH)).getText();
         }
 
         public APIVersionUsageByUserMonth(String apiName, String apiVersion, String context, String username,
@@ -3583,93 +2975,26 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    private static class APIResponseTime {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private double responseTime;
-        private long responseCount;
-
-        @Deprecated
-        public APIResponseTime(OMElement row) {
-            String nameVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API_VERSION)).getText();
-            int index = nameVersion.lastIndexOf(":v");
-            apiName = nameVersion.substring(0, index);
-            apiVersion = nameVersion.substring(index + 2);
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            responseTime = Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.SERVICE_TIME)).getText());
-            responseCount = (long) Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.RESPONSE)).getText());
-        }
-
-        public APIResponseTime
-                (String apiName, String apiVersion, String context, double responseTime, long responseCount) {
-
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.responseTime = responseTime;
-            this.responseCount = responseCount;
-        }
-    }
-
-    private static class APIAccessTime {
-
-        private String apiName;
-        private String apiVersion;
-        private String context;
-        private double accessTime;
-        private String username;
-
-        @Deprecated
-        public APIAccessTime(OMElement row) {
-            String nameVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API_VERSION)).getText();
-            int index = nameVersion.lastIndexOf(":v");
-            apiName = nameVersion.substring(0, index);
-            apiVersion = nameVersion.substring(index + 2);
-            context = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.CONTEXT)).getText();
-            accessTime = Double.parseDouble(row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.REQUEST_TIME)).getText());
-            username = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.USER_ID)).getText();
-        }
-
-        public APIAccessTime(String apiName, String apiVersion, String context, double accessTime, String username) {
-
-            this.apiName = apiName;
-            this.apiVersion = apiVersion;
-            this.context = context;
-            this.accessTime = accessTime;
-            this.username = username;
-        }
-    }
-
-    public static class APIUserAgent{
+    public static class APIUserAgent {
         private String apiName;
         private String apiVersion;
         private String userAgent;
         private int totalRequestCount;
 
         @Deprecated
-        public APIUserAgent(OMElement row){
-            String nameVersion = row.getFirstChildWithName(new QName(
-                    APIUsageStatisticsClientConstants.API_VERSION)).getText();
+        public APIUserAgent(OMElement row) {
+            String nameVersion = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.API_VERSION))
+                    .getText();
             int index = nameVersion.lastIndexOf(":v");
             apiName = nameVersion.substring(0, index);
             apiVersion = nameVersion.substring(index + 2);
             userAgent = row.getFirstChildWithName(new QName("useragent")).getText();
-            totalRequestCount =  Integer.parseInt(row.getFirstChildWithName(new QName("total_request_count")).getText());
+            totalRequestCount = Integer.parseInt(row.getFirstChildWithName(new QName("total_request_count")).getText());
         }
 
     }
 
-    public static class APIRequestsByHour{
+    public static class APIRequestsByHour {
         private String apiName;
         private String apiVersion;
         private String requestCount;
@@ -3677,7 +3002,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         private String tier;
 
         @Deprecated
-        public APIRequestsByHour(OMElement row){
+        public APIRequestsByHour(OMElement row) {
             apiName = row.getFirstChildWithName(new QName("api")).getText();
             apiVersion = row.getFirstChildWithName(new QName("api_version")).getText();
             requestCount = row.getFirstChildWithName(new QName("total_request_count")).getText();

@@ -22,6 +22,17 @@ public class APIResponseFaultCount {
     private String apiName;
     private String apiVersion;
     private String context;
+    private long faultCount;
+
+    public APIResponseFaultCount(String apiName, String apiVersion, String context, long faultCount) {
+        this.apiName = apiName;
+        this.apiVersion = apiVersion;
+        this.context = context;
+        this.faultCount = faultCount;
+    }
+
+    public APIResponseFaultCount() {
+    }
 
     public String getApiName() {
         return apiName;
@@ -55,5 +66,4 @@ public class APIResponseFaultCount {
         this.faultCount = faultCount;
     }
 
-    private long faultCount;
 }

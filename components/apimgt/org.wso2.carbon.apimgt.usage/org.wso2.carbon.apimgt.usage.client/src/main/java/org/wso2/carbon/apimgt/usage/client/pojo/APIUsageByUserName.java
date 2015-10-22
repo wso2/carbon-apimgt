@@ -22,6 +22,22 @@ public class APIUsageByUserName {
     private String apiName;
     private String apiVersion;
     private String context;
+    private String userID;
+    private String apipublisher;
+    private long requestCount;
+
+    public APIUsageByUserName(String apiName, String apiVersion, String context, String userID, String apipublisher,
+            long requestCount) {
+        this.apiName = apiName;
+        this.apiVersion = apiVersion;
+        this.context = context;
+        this.userID = userID;
+        this.apipublisher = apipublisher;
+        this.requestCount = requestCount;
+    }
+
+    public APIUsageByUserName() {
+    }
 
     public String getApiName() {
         return apiName;
@@ -71,7 +87,4 @@ public class APIUsageByUserName {
         this.requestCount = requestCount;
     }
 
-    private String userID;
-    private String apipublisher;
-    private long requestCount;
 }

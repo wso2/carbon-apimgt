@@ -23,6 +23,22 @@ public class APIUsageByResourcePath {
     private String apiVersion;
     private String method;
     private String context;
+    private long requestCount;
+    private String time;
+
+    public APIUsageByResourcePath(String apiName, String apiVersion, String method, String context, long requestCount,
+            String time) {
+        this.apiName = apiName;
+        this.apiVersion = apiVersion;
+        this.method = method;
+        this.context = context;
+        this.requestCount = requestCount;
+        this.time = time;
+    }
+
+    public APIUsageByResourcePath() {
+
+    }
 
     public String getApiName() {
         return apiName;
@@ -72,6 +88,4 @@ public class APIUsageByResourcePath {
         this.time = time;
     }
 
-    private long requestCount;
-    private String time;
 }

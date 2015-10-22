@@ -23,6 +23,19 @@ public class APIUsageByDestination {
     private String apiVersion;
     private String context;
     private String destination;
+    private long requestCount;
+
+    public APIUsageByDestination(String apiName, String apiVersion, String context, String destination,
+            long requestCount) {
+        this.apiName = apiName;
+        this.apiVersion = apiVersion;
+        this.context = context;
+        this.destination = destination;
+        this.requestCount = requestCount;
+    }
+
+    public APIUsageByDestination() {
+    }
 
     public String getApiName() {
         return apiName;
@@ -64,5 +77,4 @@ public class APIUsageByDestination {
         this.requestCount = requestCount;
     }
 
-    private long requestCount;
 }

@@ -24,6 +24,18 @@ public class APIUsage {
     private String context;
     private long requestCount;
 
+    public APIUsage(String apiName, String context, String apiVersion, long requestCount) {
+
+        this.apiName = apiName;
+        this.context = context;
+        this.apiVersion = apiVersion;
+        this.requestCount = requestCount;
+    }
+
+    public APIUsage() {
+
+    }
+
     public String getApiName() {
         return apiName;
     }
