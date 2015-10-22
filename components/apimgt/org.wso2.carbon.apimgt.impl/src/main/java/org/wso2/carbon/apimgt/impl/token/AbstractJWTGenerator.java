@@ -120,7 +120,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             throws APIManagementException;
 
     public abstract Map<String, String> populateCustomClaims(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext,
-                                                             String version, String accessToken) throws APIManagementException;
+            String version, String accessToken) throws APIManagementException;
     public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version)
             throws APIManagementException {
         //To have backward compatibility with implementations done based on TokenGenerator interface

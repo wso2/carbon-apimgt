@@ -48,8 +48,6 @@ public class LocalDatabaseCreator extends DatabaseCreator {
         File scripFile = new File(scripPath);
         if(scripFile.exists()){
             super.createRegistryDatabase();
-        }else {
-            return;
         }
     }
 

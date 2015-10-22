@@ -30,7 +30,7 @@ public class EndpointBckConfigContext extends ConfigContextDecorator {
         //this.api = api;
         //check if endpoint_config not set
         String endpoint_config = api.getEndpointConfig();
-        if(endpoint_config == null && "".equals(endpoint_config)){
+        if(endpoint_config == null || "".equals(endpoint_config)){
             // Without setting the context make the endpoint_config json of api
             // The following config will be picked up by EndpointConfigContext
             endpoint_config = "{\"production_endpoints\":{\"url\":\""+ api.getUrl()+"\", \"config\":null},\"sandbox_endpoint\":{\"url\":\""+api.getSandboxUrl()+"\",\"config\":null},\"endpoint_type\":\"http\"}";
