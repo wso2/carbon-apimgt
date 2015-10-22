@@ -4163,7 +4163,7 @@ public final class APIUtil {
             if (registryType.resourceExists(resourceUrl)) {
                 apiDocResource = registryType.get(resourceUrl);
                 inStream = apiDocResource.getContentStream();
-                documentMap.put("Data", inStream);
+                documentMap.put("Data", IOUtils.toByteArray(inStream));
                 documentMap.put("contentType", apiDocResource.getMediaType());
                 String[] content = apiDocResource.getPath().split("/");
                 documentMap.put("name", content[content.length - 1]);
@@ -4178,6 +4178,9 @@ public final class APIUtil {
             handleException(
                     "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain,
                     e);
+        } catch (IOException e) {
+            log.error("Couldn't convert object stream to byte stream  " + userName, e);
+            handleException("Couldn't convert object stream to byte stream  " + userName, e);
         }
         return documentMap;
     }
