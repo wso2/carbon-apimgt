@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.amber.oauth2.common.OAuth;
+import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -330,7 +330,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             builder.append(applicationTokenScope);
 
             for (String scope : tokenRequest.getScope()) {
-                builder.append(" " + scope);
+                builder.append(" ").append(scope);
             }
 
             tokParams.add(new BasicNameValuePair("scope", builder.toString()));
@@ -561,8 +561,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException {
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        Set<String> activeTokens = apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
-        return activeTokens;
+        return apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
     }
 
     @Override

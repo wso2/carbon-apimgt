@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -129,7 +130,7 @@ public final class SelfSignUpUtil {
 					.getRegistry(RegistryType.SYSTEM_GOVERNANCE);
 			if (registry.resourceExists(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION)) {
 				Resource resource = registry.get(APIConstants.SELF_SIGN_UP_CONFIG_LOCATION);
-				String content = new String((byte[]) resource.getContent());
+				String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                 OMElement element = AXIOMUtil.stringToOM(content);
                 config = new UserRegistrationConfigDTO();
                 

@@ -84,7 +84,7 @@
     "lifeCycle":"Ciclo de vida",
     "docs":"Docs",
     "users":"Usuarios",
-    "state":"Estado",
+    "state":"Estado actual",
 
     "subsPendingApproval":"Subscription is pending approval",
 
@@ -232,6 +232,17 @@
 	"techOwnerMail" : "Técnico Propietario Enviar",
 
     "apiUnavailable" : "API no existe",
-    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint."
+    "validityCheckMessage" : "WSO2 Gerente de API utiliza HTTP cabeza para comprobar la validez del punto final.",
+    
+    "publish" : "publicar",
+    "deploy as a prototype" : "Implementar como un Prototipo",
+    "demote to created" : "Degradar a Creado",
+    "block" : "Bloquear",
+    "demote to prototyped" : "Degradar a Prototipado",
+    "deprecate" : "desaprobar",
+    "re-publish" : "Volver a publicar",
+    "retire" : "Retirarse"
+    
+    
 
 }

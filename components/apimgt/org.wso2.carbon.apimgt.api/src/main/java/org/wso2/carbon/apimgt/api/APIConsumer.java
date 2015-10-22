@@ -235,10 +235,10 @@ public interface APIConsumer extends APIManager {
      * @param identifier    APIIdentifier
      * @param userId        id of the user
      * @param applicationId Application Id
-     * @return String subscription status
+     * @return SubscriptionResponse subscription response object
      * @throws APIManagementException if failed to add subscription details to database
      */
-    public String addSubscription(APIIdentifier identifier, String userId, int applicationId)
+    public SubscriptionResponse addSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException;
 
     /**

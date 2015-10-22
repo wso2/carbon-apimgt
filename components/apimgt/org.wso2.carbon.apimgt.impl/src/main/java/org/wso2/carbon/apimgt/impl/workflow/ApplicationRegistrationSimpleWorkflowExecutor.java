@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -43,7 +44,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 	 * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException
 	 */
 
-    public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workFlowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
             log.info("Executing Application creation Workflow..");
@@ -52,6 +53,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
         workFlowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workFlowDTO);
         super.publishEvents(workFlowDTO);
+		return new GeneralWorkflowResponse();
     }
 
 	/**
@@ -61,7 +63,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 	 * 
 	 * @param workFlowDTO - WorkflowDTO
 	 */
-	public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+	public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
 		if (log.isDebugEnabled()) {
 			log.info("Complete  Application Registration Workflow..");
 		}
@@ -79,6 +81,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 			log.error(msg, e);
 			throw new WorkflowException(msg, e);
 		}
+		return new GeneralWorkflowResponse();
 	}
 
 	@Override

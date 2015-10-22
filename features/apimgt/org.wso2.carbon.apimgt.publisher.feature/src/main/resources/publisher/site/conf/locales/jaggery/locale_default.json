@@ -106,7 +106,7 @@
     "lifeCycle":"Lifecycle",
     "docs":"Docs",
     "users":"Users",
-    "state":"State",
+    "state":"Current State",
 
     "propagateChangesToGateway":"Propagate Changes to the API Gateway",
     "requireReSubscription":"Require Re-Subscription",
@@ -288,6 +288,7 @@
     "more":"More >>",
     "throttlingTier":"Throttling Tier",
 	"sequence":"Message Mediation Policies",
+    "enable.sequence":"Enable Message Mediation",
     "inFlow":"In Flow",
     "outFlow":"Out Flow",
     "faultFlow":"Fault Flow",
@@ -344,5 +345,14 @@
     "apiUnavailable" : "API does not exist",
     "removeAPIFromExternalStoresWarning" : "This API is not PUBLISHED. Please remove from external stores.",
     "SampleAPI" : "Deploy Sample API",
-    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint."
+    "validityCheckMessage" : "WSO2 API Manager uses HTTP Head to check the validity of the endpoint.",
+    
+    "publish" : "Publish",
+    "deploy as a prototype" : "Deploy as a Prototype",
+    "demote to created" : "Demote to Created",
+    "block" : "Block",
+    "demote to prototyped" : "Demote to Prototyped",
+    "deprecate" : "Deprecate",
+    "re-publish" : "Re-Publish",
+    "retire" : "Retire"
 }

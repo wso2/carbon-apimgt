@@ -44,7 +44,7 @@ APISamples.prototype.deploySample1 = function (defaultTier) {
                                 if (isPublishPermitted) {
                                     var urlPublished = "/site/blocks/life-cycles/ajax/life-cycles.jag";
                                     var result2 = jagg.post(urlPublished, {action: "updateStatus", name: "WeatherAPI",
-                                            version: "1.0.0", provider: username, status: "PUBLISHED", publishToGateway: true,
+                                            version: "1.0.0", provider: username, status: "Publish", publishToGateway: true,
                                             requireResubscription: true},
                                         function (result) {
                                             if (!result.error) {
