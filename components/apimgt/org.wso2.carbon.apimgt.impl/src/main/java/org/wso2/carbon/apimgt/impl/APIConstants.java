@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -604,7 +605,9 @@ public final class APIConstants {
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
-    public static final Set<String> SUPPORTED_METHODS = new HashSet<String>((Arrays.asList(new String[] {"get","put","post","delete","head","options"})));
+    public static final Set<String> SUPPORTED_METHODS =
+            Collections.unmodifiableSet(new HashSet<String>(
+                    (Arrays.asList(new String[]{"get","put","post","delete","head","options"}))));
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
@@ -726,7 +729,7 @@ public final class APIConstants {
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
-    public static String VELOCITY_LOGGER = "VelocityLogger";
+    public static final String VELOCITY_LOGGER = "VelocityLogger";
 
 
     public static class DigestAuthConstants {
@@ -803,7 +806,7 @@ public final class APIConstants {
         public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
     }
 
-    public static String CORS_SEQUENCE_NAME = "_cors_request_handler_";
+    public static final String CORS_SEQUENCE_NAME = "_cors_request_handler_";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
