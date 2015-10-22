@@ -90,11 +90,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
@@ -556,6 +552,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String wsdl = (String) apiData.get("wsdl", apiData);
         String wadl = (String) apiData.get("wadl", apiData);
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
             
@@ -589,8 +586,12 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.setEndpointSecured(true);
         	api.setEndpointUTUsername(endpointUTUsername);
         	api.setEndpointUTPassword(endpointUTPassword);
+            if ("digestAuth".equals(endpointAuthDigest)) {
+                api.setEndpointAuthDigest(true);
+            }
         } else {
             api.setEndpointSecured(false);
+            api.setEndpointAuthDigest(false);
             api.setEndpointUTUsername(null);
             api.setEndpointUTPassword(null);
         }
@@ -1083,6 +1084,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
 
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 
@@ -1335,6 +1337,9 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
+            if ("digestAuth".equals(endpointAuthDigest)) {
+                api.setEndpointAuthDigest(true);
+            }
         }
 
         checkFileSize(fileHostObject);
@@ -1524,6 +1529,7 @@ public class APIProviderHostObject extends ScriptableObject {
         	visibleTenants = (String) apiData.get("visibleTenants", apiData);
         }
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 
@@ -1819,6 +1825,9 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
+            if("digestAuth".equals(endpointAuthDigest)){
+                api.setEndpointAuthDigest(true);
+            }
         }
 
         try {
@@ -3965,9 +3974,12 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
-    public static String jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
                                                                                        throws APIManagementException {
-        String response = "";
+        boolean isConnectionError = true;
+        String response = null;
+        NativeObject data = new NativeObject();
+
         if (args == null || !isStringValues(args)) {
             handleException("Invalid input parameters.");
         }
@@ -3981,6 +3993,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 if (type != null && type.equals("wsdl")) {
                     validateWsdl(urlVal);
                     response = "success";
+                    isConnectionError = false;
                 }
                 // checking http,https endpoints up to resource level by doing
                 // http HEAD. And other end point
@@ -3995,14 +4008,15 @@ public class APIProviderHostObject extends ScriptableObject {
                     return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
                 } else if (url.getProtocol().matches("http")) {
                     return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
-                } else {
-                    return "error while connecting";
                 }
             } catch (Exception e) {
                 response = e.getMessage();
             }
         }
-        return response;
+
+        data.put("response", data, response);
+        data.put("isConnectionError", data, isConnectionError);
+        return data;
 
     }
 
@@ -4609,11 +4623,15 @@ public class APIProviderHostObject extends ScriptableObject {
      * Validate the backend by sending HTTP HEAD
      *
      * @param urlVal - backend URL
+     * @param invalidStatusCodesRegex - Regex for the invalid status code
      * @return - status of HTTP HEAD Request to backend
      */
-    private static String sendHttpHEADRequest(String urlVal, String invalidStatusCodesRegex) {
+    private static NativeObject sendHttpHEADRequest(String urlVal, String invalidStatusCodesRegex) {
 
-        String response = "error while connecting";
+        boolean isConnectionError = true;
+        String response = null;
+
+        NativeObject data = new NativeObject();
 
         HttpClient client = new DefaultHttpClient();
         HttpHead head = new HttpHead(urlVal);
@@ -4635,21 +4653,36 @@ public class APIProviderHostObject extends ScriptableObject {
         try {
             HttpResponse httpResponse = client.execute(head);
             String statusCode = String.valueOf(httpResponse.getStatusLine().getStatusCode());
-
-            //If the endpoint doesn't match the regex which specify invalid status codes, it will return success.
+            String reasonPhrase = String.valueOf(httpResponse.getStatusLine().getReasonPhrase());
+            //If the endpoint doesn't match the regex which specify the invalid status code, it will return success.
             if (!statusCode.matches(invalidStatusCodesRegex)) {
                 if (log.isDebugEnabled() && statusCode.equals("405")) {
                     log.debug("Endpoint doesn't support HTTP HEAD");
                 }
                 response = "success";
+                isConnectionError = false;
+
+            } else {
+                 //This forms the real backend response to be sent to the client
+                data.put("statusCode", data, statusCode);
+                data.put("reasonPhrase", data, reasonPhrase);
+                response = "";
+                isConnectionError = false;
             }
         } catch (IOException e) {
             // sending a default error message.
-            log.error("Error occurred while connecting backend : " + urlVal + ", reason : " + e.getMessage());
+            log.error("Error occurred while connecting to backend : " + urlVal + ", reason : " + e.getMessage());
+            String[] errorMsg = e.getMessage().split(": ");
+            if (errorMsg.length > 1) {
+                response = errorMsg[errorMsg.length - 1]; //This is to get final readable part of the error message in the exception and send to the client
+                isConnectionError = false;
+            }
         } finally {
             client.getConnectionManager().shutdown();
         }
-        return response;
+        data.put("response", data, response);
+        data.put("isConnectionError", data, isConnectionError);
+        return data;
     }
     /**
      * retrieves active tenant domains and return true or false to display private

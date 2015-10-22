@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -35,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 
 public abstract class AbstractApplicationRegistrationWorkflowExecutor extends WorkflowExecutor{
 
@@ -45,7 +45,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
        return WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION;
     }
 
-    public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workFlowDTO) throws WorkflowException {
         log.debug("Executing AbstractApplicationRegistrationWorkflowExecutor...");
         ApiMgtDAO dao = new ApiMgtDAO();
         try {
@@ -58,9 +58,10 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             log.error("Error while creating Application Registration entry.", e);
             throw new WorkflowException("Error while creating Application Registration entry.", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
-    public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+    public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         log.debug("Completing AbstractApplicationRegistrationWorkflowExecutor...");
         ApiMgtDAO dao = new ApiMgtDAO();
         try {
@@ -104,6 +105,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             log.error("Error while completing Application Registration entry.", e);
             throw new WorkflowException("Error while completing Application Registration entry.", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     /**

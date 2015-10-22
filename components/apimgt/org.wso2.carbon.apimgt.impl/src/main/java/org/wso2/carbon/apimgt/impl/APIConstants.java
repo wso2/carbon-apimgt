@@ -145,7 +145,7 @@ public final class APIConstants {
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
-    public static final String TOKEN_SCOPE_ASSOCIATION_TABLE = "IDN_OAUTH2_SCOPE_ASSOCIATION";
+    public static final String TOKEN_SCOPE_ASSOCIATION_TABLE = "IDN_OAUTH2_ACCESS_TOKEN_SCOPE";
     public static final String CONSUMER_KEY_SECRET_TABLE = "IDN_OAUTH_CONSUMER_APPS";
 
     public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
@@ -205,6 +205,7 @@ public final class APIConstants {
     public static final String API_URI_AUTH_TYPE ="URITemplate_authType";
     public static final String API_URI_MEDIATION_SCRIPT ="URITemplate_mediationScript";
     public static final String API_OVERVIEW_ENDPOINT_SECURED = "overview_endpointSecured";
+    public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
@@ -413,6 +414,7 @@ public final class APIConstants {
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
+    public static final String API_STORE_API_GROUP_DEFAULT_ICON_PATH="images/api-group-default.png";
 
 
     public static final String API_PUBLISHER = "APIPublisher.";
@@ -706,6 +708,29 @@ public final class APIConstants {
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
     public static String VELOCITY_LOGGER = "VelocityLogger";
 
+
+    public static class DigestAuthConstants {
+        public static final String REALM = "realm";
+        public static final String NONCE = "nonce";
+        public static final String ALGORITHM = "algorithm";
+        public static final String OPAQUE = "opaque";
+        public static final String QOP = "qop";
+
+        public static final String AUTH = "auth";
+        public static final String AUTH_INT = "auth-int";
+        public static final String MD5 = "MD5";
+        public static final String MD5_SESS = "MD5-sess";
+
+        public static final String POSTFIX = "POSTFIX";
+        public static final String HTTP_METHOD = "HTTP_METHOD";
+        public static final String MESSAGE_BODY = "MessageBody";
+        public static final String UNAMEPASSWORD = "UNAMEPASSWORD";
+        public static final String NONCE_COUNT = "NonceCount";
+        public static final String INIT_NONCE_COUNT = "00000000";
+        public static final String AUTH_HEADER = "AuthHeader";
+        public static final String BACKEND_URL = "BACKEND_URL";
+        public static final String CHARSET = "UTF-8";
+    }
     
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -830,5 +855,11 @@ public final class APIConstants {
 
     public static final String API_CUSTOM_IN_SEQUENCE_FILE_NAME = "custom_in_sequence.xml";
     public static final String API_CUSTOM_OUT_SEQUENCE_FILE_NAME = "custom_out_sequence.xml";
+
+    public static final String REGISTRY_RESOURCE_PREFIX="/registry/resource";
+
+    public static enum RegistryResourceTypesForUI {
+        TAG_THUMBNAIL
+    }
 
 }

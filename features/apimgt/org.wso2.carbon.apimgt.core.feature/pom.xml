@@ -110,6 +110,11 @@
 	    <groupId>org.wso2.carbon</groupId>
 	    <artifactId>org.wso2.carbon.throttle.core</artifactId>
 	</dependency>
+	<dependency>
+            <groupId>net.sf.ehcache.wso2</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>1.5.0.wso2v3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -286,6 +291,7 @@
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
+				<bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
                             </bundles>
                             <importBundles>
                                 <!--importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.thrift.authentication:${carbon.identity.version}</importBundleDef-->
