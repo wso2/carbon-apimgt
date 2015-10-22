@@ -51,7 +51,7 @@ public interface APIKeyDataStore {
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
-    public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
+    APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey,
                                                  String requiredAuthenticationLevel, String clientDomain,
                                                  String matchingResource, String httpVerb) throws APISecurityException;
 
@@ -63,13 +63,12 @@ public interface APIKeyDataStore {
      * @return an APIKeyValidationInfoDTO instance containing key validation data
      * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException on error
      */
-    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
-    ) throws APISecurityException;
+    ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws APISecurityException;
 
 
     /**
      * Clean up any resources allocated to this API key data store instance.
      */
-    public void cleanup();
+    void cleanup();
 
 }

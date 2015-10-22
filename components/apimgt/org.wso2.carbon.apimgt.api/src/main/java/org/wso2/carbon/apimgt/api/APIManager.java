@@ -42,7 +42,7 @@ public interface APIManager {
      * @return a List of API objects (partially initialized), possibly empty
      * @throws APIManagementException on error
      */
-    public List<API> getAllAPIs() throws APIManagementException;
+    List<API> getAllAPIs() throws APIManagementException;
     /**
      * Returns details of an API
      *
@@ -50,7 +50,7 @@ public interface APIManager {
      * @return An API object related to the given identifier or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    public API getAPI(String apiPath) throws APIManagementException;
+    API getAPI(String apiPath) throws APIManagementException;
     /**
      * Returns details of an API
      *
@@ -58,7 +58,7 @@ public interface APIManager {
      * @return An API object related to the given identifier or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    public API getAPI(APIIdentifier identifier) throws APIManagementException;
+    API getAPI(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Checks the Availability of given APIIdentifier
@@ -67,7 +67,7 @@ public interface APIManager {
      * @return true, if already exists. False, otherwise
      * @throws APIManagementException if failed to get API availability
      */
-    public boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException;
+    boolean isAPIAvailable(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Checks whether the given API context is already registered in the system
@@ -76,7 +76,7 @@ public interface APIManager {
      * @return true if the context already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    public boolean isContextExist(String context) throws APIManagementException;
+    boolean isContextExist(String context) throws APIManagementException;
 
     /**
      * Checks whether the given API name is already registered in the system
@@ -85,7 +85,7 @@ public interface APIManager {
      * @return true if the api name already exists and false otherwise
      * @throws APIManagementException if failed to check the context availability
      */
-    public boolean isApiNameExist(String apiName) throws APIManagementException;
+    boolean isApiNameExist(String apiName) throws APIManagementException;
 
     /**
      * Returns a set of API versions for the given provider and API name
@@ -95,8 +95,7 @@ public interface APIManager {
      * @return Set of version strings (possibly empty)
      * @throws APIManagementException if failed to get version for api
      */
-    public Set<String> getAPIVersions(String providerName, String apiName)
-            throws APIManagementException;
+    Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api
@@ -106,8 +105,7 @@ public interface APIManager {
      * @return true if document already exists for the given api
      * @throws APIManagementException if failed to check existence of the documentation
      */
-    public boolean isDocumentationExist(APIIdentifier identifier, String docName)
-            throws APIManagementException;
+    boolean isDocumentationExist(APIIdentifier identifier, String docName) throws APIManagementException;
 
     /**
      * Returns a list of documentation attached to a particular API
@@ -116,8 +114,7 @@ public interface APIManager {
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId)
-            throws APIManagementException;
+    List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Returns a list of documentation attached to a particular API
@@ -126,7 +123,7 @@ public interface APIManager {
      * @return List<Documentation>
      * @throws APIManagementException if failed to get Documentations
      */
-    public List<Documentation> getAllDocumentation(APIIdentifier apiId,String loggedUserName)
+    List<Documentation> getAllDocumentation(APIIdentifier apiId,String loggedUserName)
             throws APIManagementException;
 
     /**
@@ -138,9 +135,7 @@ public interface APIManager {
      * @return Documentation
      * @throws APIManagementException if failed to get Documentation
      */
-    public Documentation getDocumentation(APIIdentifier apiId,
-                                          DocumentationType docType,
-                                          String docName) throws APIManagementException;
+    Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType, String docName) throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation
@@ -150,8 +145,7 @@ public interface APIManager {
      * @return if failed to get doc content
      * @throws APIManagementException if the asking documentation content is unavailable
      */
-    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
-            throws APIManagementException;
+    String getDocumentationContent(APIIdentifier identifier, String documentationName) throws APIManagementException;
 
     /**
      * Retrieves the subscriber from the given access token
@@ -160,7 +154,7 @@ public interface APIManager {
      * @return Subscriber
      * @throws APIManagementException if failed to get Subscriber from access token
      */
-    public Subscriber getSubscriberById(String accessToken) throws APIManagementException;
+    Subscriber getSubscriberById(String accessToken) throws APIManagementException;
 
     /**
      * Creates a new subscriber. The newly created subscriber id will be set in the given object.
@@ -169,7 +163,7 @@ public interface APIManager {
      * @param groupingId - the groupId to which the subscriber belongs to
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed add subscriber
      */
-    public void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException;
+    void addSubscriber(Subscriber subscriber, String groupingId) throws APIManagementException;
 
     /**
      * Updates the details of the given subscriber.
@@ -177,7 +171,7 @@ public interface APIManager {
      * @param subscriber The subscriber to be updated
      * @throws APIManagementException if failed to update subscriber
      */
-    public void updateSubscriber(Subscriber subscriber) throws APIManagementException;
+    void updateSubscriber(Subscriber subscriber) throws APIManagementException;
 
     /**
      * Returns the subscriber for the given subscriber id.
@@ -186,7 +180,7 @@ public interface APIManager {
      * @return The looked up subscriber or null if the requested subscriber does not exist
      * @throws APIManagementException if failed to get Subscriber
      */
-    public Subscriber getSubscriber(int subscriberId) throws APIManagementException;
+    Subscriber getSubscriber(int subscriberId) throws APIManagementException;
 
     /**
      * Returns a set of APIs purchased by the given Subscriber
@@ -195,7 +189,7 @@ public interface APIManager {
      * @return Set<API>
      * @throws APIManagementException if failed to get API for subscriber
      */
-    public Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
+    Set<API> getSubscriberAPIs(Subscriber subscriber) throws APIManagementException;
 
     /**
      * Associates the given icon image with the specified path.
@@ -205,7 +199,7 @@ public interface APIManager {
      * @return a String URL pointing to the image that was added
      * @throws APIManagementException if an error occurs while adding the icon image
      */
-    public String addIcon(String resourcePath, Icon icon) throws APIManagementException;
+    String addIcon(String resourcePath, Icon icon) throws APIManagementException;
 
     /**
      * Retrieves the icon image associated with a particular API as a stream.
@@ -214,7 +208,7 @@ public interface APIManager {
      * @return an Icon containing image content and content type information
      * @throws APIManagementException if an error occurs while retrieving the image
      */
-    public Icon getIcon(APIIdentifier identifier) throws APIManagementException;
+    Icon getIcon(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Cleans up any resources acquired by this APIManager instance. It is recommended
@@ -222,7 +216,7 @@ public interface APIManager {
      *
      * @throws APIManagementException if an error occurs while cleaning up
      */
-    public void cleanup() throws APIManagementException;
+    void cleanup() throws APIManagementException;
 
 
     /**
@@ -232,7 +226,7 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    public boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
+    boolean isApplicationTokenExists(String accessToken) throws APIManagementException;
 
     /**
      * Check whether an application access token is already revoked.
@@ -241,7 +235,7 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    public boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException;
+    boolean isApplicationTokenRevoked(String accessToken) throws APIManagementException;
 
     /**
      * Return information related to a specific access token
@@ -250,7 +244,8 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    public APIKey getAccessTokenData(String accessToken) throws APIManagementException;
+    APIKey getAccessTokenData(String accessToken) throws APIManagementException;
+
     /**
     /**
      * Return information related to access token by a searchTerm and searchType       *
@@ -262,7 +257,7 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
+    Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
             throws APIManagementException;
 
     /**
@@ -272,7 +267,7 @@ public interface APIManager {
      * @return
      * @throws APIManagementException
      */
-    public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
+    Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
 
     /**
     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
@@ -280,7 +275,7 @@ public interface APIManager {
     * @return Set<Tier>
     * @throws APIManagementException if failed to get the predefined tiers
     */
-    public Set<Tier> getTiers() throws APIManagementException;
+    Set<Tier> getTiers() throws APIManagementException;
 
 
 
@@ -290,7 +285,7 @@ public interface APIManager {
      * @return Set<Tier>
      * @throws APIManagementException if failed to get the predefined tiers
      */
-    public Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
+    Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
      * Returns a list of domain name mappings store / gateway.
@@ -298,7 +293,7 @@ public interface APIManager {
      * @return Set<Tier>
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to get the predefined tiers
      */
-    public Map<String,String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
+    Map<String,String> getTenantDomainMappings(String tenantDomain, String appType) throws APIManagementException;
 
     /**
      * Check whether the given scope key is already available under given tenant
@@ -308,7 +303,7 @@ public interface APIManager {
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
-    public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
+    boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException;
     
     /**
      * Check whether the given scope key is already assigned to an API under given tenant
@@ -319,7 +314,7 @@ public interface APIManager {
      * @return true if the scope key is already available
      * @throws APIManagementException if failed to check the context availability
      */
-    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
+    boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) throws APIManagementException;
 
     /**
      * Check if a given context template already exists
@@ -330,5 +325,5 @@ public interface APIManager {
      * @return boolean - true if the template exists, false otherwise.
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
-    public boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
+    boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
 }
