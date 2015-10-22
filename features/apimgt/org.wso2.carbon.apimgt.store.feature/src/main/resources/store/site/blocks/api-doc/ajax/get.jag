@@ -142,7 +142,7 @@ var log = new Log();
         }
         jsonObj.paths = paths;
 
-        print(jsonObj);
+        print(JSON.stringify(jsonObj));
     }
     }
 }());
