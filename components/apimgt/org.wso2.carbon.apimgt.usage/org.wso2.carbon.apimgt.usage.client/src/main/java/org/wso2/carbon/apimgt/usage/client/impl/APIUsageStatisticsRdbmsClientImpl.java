@@ -2603,7 +2603,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     }
                     throttlingData
                             .add(new APIThrottlingOverTimeDTO(apiName, provider, successRequestCount, throttledOutCount,
-                                            time));
+                                    time));
                 }
 
             } else {
@@ -2916,7 +2916,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
         }
     }
-
 
     private static class APIUsageByUser {
 

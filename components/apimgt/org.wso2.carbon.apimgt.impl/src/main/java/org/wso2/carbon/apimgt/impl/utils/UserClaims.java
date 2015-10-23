@@ -20,7 +20,6 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 
-import javax.cache.Cache;
 import java.io.Serializable;
 import java.util.SortedMap;
 

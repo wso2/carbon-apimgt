@@ -47,6 +47,7 @@
     "businessInformationTitle" : "Business Information",
     "apiResourcesTitle" : "API Resources",
     "invalidSwaggerUrlErrorMsg": "Invalid swagger url",
+    "invalidSwaggerFileErrorMsg": "Invalid swagger file",
     "createFromExistingAPI" : "Use an existing API's endpoint or the API definition to create an API.",
     "createFromExistingSOAPEndpoint" : "Use an existing SOAP endpoint to create a managed API. Import WSDL of the SOAP service.",
     "designNewAPI" : "Design and prototype a new API.",

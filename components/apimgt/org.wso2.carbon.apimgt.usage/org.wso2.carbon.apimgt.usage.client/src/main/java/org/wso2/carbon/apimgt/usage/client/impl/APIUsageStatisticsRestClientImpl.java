@@ -123,12 +123,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     e);
         }
 
-    }/**/
+    }
 
     /**
      * Default constructor
      */
-    public APIUsageStatisticsRestClientImpl(){
+    public APIUsageStatisticsRestClientImpl() {
 
     }
 
@@ -152,7 +152,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 String pass = restData.getPassword();
                 //crete new restClient instance
                 restClient = new DASRestClient(url, user, pass);
-                log.info("Initialised DASRestClient");
+                //log.info("Initialised DASRestClient");
             }
         }
     }
@@ -2244,6 +2244,5 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         log.error(msg, e);
         throw new APIMgtUsageQueryServiceClientException(msg, e);
     }
-
 
 }

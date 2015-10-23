@@ -50,8 +50,7 @@ public class MutualAuthHostObject extends ScriptableObject {
      * @return
      * @throws Exception
      */
-    public static Scriptable jsConstructor(Context cx, Object[] args, Function ctorObj,
-                                           boolean inNewExpr)
+    public static Scriptable jsConstructor(Context cx, Object[] args, Function ctorObj, boolean inNewExpr)
             throws Exception {
 
         mutualAuthHostObject = new MutualAuthHostObject();
@@ -67,8 +66,7 @@ public class MutualAuthHostObject extends ScriptableObject {
      * @throws Exception
      */
     public static boolean jsFunction_validateUserNameHeader(Context cx, Scriptable thisObj,
-                                                            Object[] args,
-                                                            Function funObj) throws Exception {
+                                                            Object[] args, Function funObj) throws Exception {
 
         int argLength = args.length;
         if (argLength != 1 || !(args[0] instanceof String) ) {
@@ -79,21 +77,19 @@ public class MutualAuthHostObject extends ScriptableObject {
         String userNameHeader = (String) args[0];
 
         try {
-            if (userNameHeader != null) {
 
-                String tenantDomain = MultitenantUtils.getTenantDomain(userNameHeader);
-                String userName = MultitenantUtils.getTenantAwareUsername(userNameHeader);
-                TenantManager tenantManager = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
-                int tenantId = tenantManager.getTenantId(tenantDomain);
+            String tenantDomain = MultitenantUtils.getTenantDomain(userNameHeader);
+            String userName = MultitenantUtils.getTenantAwareUsername(userNameHeader);
+            TenantManager tenantManager = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
+            int tenantId = tenantManager.getTenantId(tenantDomain);
 
-                UserStoreManager userstore = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(tenantId).getUserStoreManager();
+            UserStoreManager userstore = ServiceReferenceHolder.getInstance().getRealmService().
+                    getTenantUserRealm(tenantId).getUserStoreManager();
 
-                if (userstore.isExistingUser(userName)) {
-                    isValidUser = true;
-                }
-
+            if (userstore.isExistingUser(userName)) {
+                isValidUser = true;
             }
+
         } catch (Exception e) {
             log.error("Error validating the user " + e.getMessage(), e);
             throw new ScriptException("Error validating the user " + userNameHeader);

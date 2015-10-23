@@ -69,9 +69,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
+import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -163,8 +164,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static void handleFaultGateWayException(FaultGatewaysException e) throws FaultGatewaysException {
         throw e;
     }
-    public static NativeObject jsFunction_login(Context cx, Scriptable thisObj,
-                                                Object[] args, Function funObj)
+    public static NativeObject jsFunction_login(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         if (args==null || args.length == 0 || !isStringValues(args)) {
@@ -644,9 +644,6 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setOutSequence(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
         }
 
-
-        //api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
-                
         return saveAPI(apiProvider, api, null, false);
     	
     }
@@ -1653,8 +1650,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 //process scopes
                 JSONArray scopes = (JSONArray) resourceConfig.get("scopes");
                 Set<Scope> scopeList = new LinkedHashSet<Scope>();
-                for (int i=0; i < scopes.size(); i++)
-                {
+                for (int i=0; i < scopes.size(); i++)   {
                     Map scope = (Map) scopes.get(i); //access with get() method
                     Scope scopeObj = new Scope();
                     scopeObj.setKey((String) scope.get("key"));
@@ -1936,9 +1932,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException if API couldn't found
      * @throw FaultGatewaysException if any gateway couldn't update or create api
      */
-    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
-                                                    Object[] args,
-                                                    Function funObj)
+    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, FaultGatewaysException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -2058,10 +2052,8 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-    public static boolean jsFunction_updateTierPermissions(Context cx, Scriptable thisObj,
-            Object[] args,
-            Function funObj)
-            		throws APIManagementException {
+    public static boolean jsFunction_updateTierPermissions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
     	if (args == null ||args.length == 0) {
     		handleException("Invalid input parameters.");
     	}
@@ -2069,12 +2061,12 @@ public class APIProviderHostObject extends ScriptableObject {
     	NativeObject tierData = (NativeObject) args[0];
     	boolean success = false;
     	String tierName = (String) tierData.get("tierName", tierData);
-    	String permissiontype = (String) tierData.get("permissiontype", tierData);
+    	String permissionType = (String) tierData.get("permissiontype", tierData);
     	String roles = (String) tierData.get("roles", tierData);
 
     	try {
     		APIProvider apiProvider = getAPIProvider(thisObj);
-    		apiProvider.updateTierPermissions(tierName, permissiontype, roles);
+    		apiProvider.updateTierPermissions(tierName, permissionType, roles);
     		return true;
 
     	} catch (APIManagementException e) {
@@ -2260,7 +2252,7 @@ public class APIProviderHostObject extends ScriptableObject {
             if(!tenantDomain.equals(userTenantDomain)){
                 throw new APIManagementException("Invalid Operation: Cannot access API:" + apiId + "from current tenant.");
             }
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -2508,24 +2500,6 @@ public class APIProviderHostObject extends ScriptableObject {
                     sub.count = entry.getValue();
                     subscriptionData.add(sub);
                 }
-//                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
-//                    public int compare(APISubscription o1, APISubscription o2) {
-//                        // Note that o2 appears before o1
-//                        // This is because we need to sort in the descending order
-//                        return (int) (o2.count - o1.count);
-//                    }
-//                });
-//                if (subscriptionData.size() > 10) {
-//                    APISubscription other = new APISubscription();
-//                    other.name = "[Other]";
-//                    for (int i = 10; i < subscriptionData.size(); i++) {
-//                        other.count = other.count + subscriptionData.get(i).count;
-//                    }
-//                    while (subscriptionData.size() > 10) {
-//                        subscriptionData.remove(10);
-//                    }
-//                    subscriptionData.add(other);
-//                }
 
                 int i = 0;
                 for (APISubscription sub : subscriptionData) {
@@ -2546,9 +2520,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getTiers(Context cx, Scriptable thisObj,
-                                                  Object[] args,
-                                                  Function funObj) {
+    public static NativeArray jsFunction_getTiers(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         NativeArray myn = new NativeArray(1);
         APIProvider apiProvider = getAPIProvider(thisObj);
         try {
@@ -2677,11 +2649,7 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         NativeArray myn = new NativeArray(0);
         APIProvider apiProvider = getAPIProvider(thisObj);
-        /*String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }*/
+
         try {
             List<API> apiList = apiProvider.getAllAPIs();
             if (apiList != null) {
@@ -3053,7 +3021,7 @@ public class APIProviderHostObject extends ScriptableObject {
             //add documentation is allowed only if document name does not already exist for this api
             if (apiProvider.isDocumentationExist(apiId, docName)) {
                 handleException("Error occurred while adding the document. " + docName +
-                    " already exists for API " + apiName + "-" + version);
+                    " already exists for API " + apiName + '-' + version);
             }
 
             if (doc.getType() == DocumentationType.OTHER) {
@@ -3127,8 +3095,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_removeDocumentation(Context cx, Scriptable thisObj,
-                                                         Object[] args, Function funObj)
+    public static boolean jsFunction_removeDocumentation(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || !isStringValues(args)) {
             handleException("Invalid number of parameters or their types.");
@@ -3166,8 +3133,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_createNewAPIVersion(Context cx, Scriptable thisObj,
-                                                         Object[] args, Function funObj)
+    public static boolean jsFunction_createNewAPIVersion(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         boolean success;
@@ -3249,8 +3215,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static String jsFunction_isContextExist(Context cx, Scriptable thisObj,
-                                                   Object[] args, Function funObj)
+    public static String jsFunction_isContextExist(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         Boolean contextExist = false;
         if (args != null && isStringValues(args)) {
@@ -3272,8 +3237,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return contextExist.toString();
     }
 
-    public static String jsFunction_isApiNameExist(Context cx, Scriptable thisObj,
-                                                   Object[] args, Function funObj)
+    public static String jsFunction_isApiNameExist(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         Boolean apiExist = false;
         if (args != null && isStringValues(args)) {
@@ -3677,9 +3641,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
 
-    public static boolean jsFunction_hasCreatePermission(Context cx, Scriptable thisObj,
-                                                         Object[] args,
-                                                         Function funObj) {
+    public static boolean jsFunction_hasCreatePermission(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         APIProvider provider = getAPIProvider(thisObj);
         if (provider instanceof UserAwareAPIProvider) {
             try {
@@ -3692,9 +3654,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return false;
     }
 
-    public static boolean jsFunction_hasManageTierPermission(Context cx, Scriptable thisObj,
-            Object[] args,
-            Function funObj) {
+    public static boolean jsFunction_hasManageTierPermission(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
     	APIProvider provider = getAPIProvider(thisObj);
     	if (provider instanceof UserAwareAPIProvider) {
     		try {
@@ -3707,9 +3667,7 @@ public class APIProviderHostObject extends ScriptableObject {
     	return false;
     }
 
-    public static boolean jsFunction_hasUserPermissions(Context cx, Scriptable thisObj,
-                                                        Object[] args,
-                                                        Function funObj)
+    public static boolean jsFunction_hasUserPermissions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || !isStringValues(args)) {
             handleException("Invalid input parameters.");
@@ -3719,9 +3677,7 @@ public class APIProviderHostObject extends ScriptableObject {
                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
     }
 
-    public static boolean jsFunction_hasPublishPermission(Context cx, Scriptable thisObj,
-                                                          Object[] args,
-                                                          Function funObj) {
+    public static boolean jsFunction_hasPublishPermission(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         APIProvider provider = getAPIProvider(thisObj);
         if (provider instanceof UserAwareAPIProvider) {
             try {
@@ -3734,8 +3690,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return false;
     }
 
-    public static void jsFunction_loadRegistryOfTenant(Context cx,
-                                                       Scriptable thisObj, Object[] args, Function funObj){
+    public static void jsFunction_loadRegistryOfTenant(Context cx, Scriptable thisObj, Object[] args, Function funObj){
         String tenantDomain = args[0].toString();
         if(tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
             try {
@@ -3883,7 +3838,7 @@ public class APIProviderHostObject extends ScriptableObject {
             //update documentation is allowed only if documentation name already exists for this api
             if (!apiProvider.isDocumentationExist(apiId, docName)) {
                 handleException("Error occurred while updating the document. " + docName +
-                        " does not exist for API " + apiName + "-" + version);
+                        " does not exist for API " + apiName + '-' + version);
             }
 
             if (doc.getType() == DocumentationType.OTHER) {
@@ -4152,7 +4107,9 @@ public class APIProviderHostObject extends ScriptableObject {
 
         try {
             SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-            keyMgtClient.revokeAccessToken(accessToken, consumerKey, authUser);
+            if (keyMgtClient != null)   {
+                keyMgtClient.revokeAccessToken(accessToken, consumerKey, authUser);
+            }
 
             Set<APIIdentifier> apiIdentifierSet = apiProvider.getAPIByAccessToken(accessToken);
             List<org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping> mappings = new ArrayList<org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping>();
@@ -4260,34 +4217,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         return valid;
     }
-
-   /* public static NativeArray jsFunction_getExternalAPIStores(Context cx,
-                                                              Scriptable thisObj, Object[] args,
-                                                              Function funObj)
-            throws APIManagementException {
-        Set<APIStore> apistoresList = APIUtil.getExternalAPIStores();
-        NativeArray myn = new NativeArray(0);
-        if (apistoresList == null) {
-            return null;
-        } else {
-            Iterator it = apistoresList.iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object apistoreObject = it.next();
-                APIStore apiStore = (APIStore) apistoreObject;
-                row.put("displayName", row, apiStore.getDisplayName());
-                row.put("name", row, apiStore.getName());
-                row.put("endpoint", row, apiStore.getEndpoint());
-
-                myn.put(i, myn, row);
-                i++;
-
-            }
-            return myn;
-        }
-
-    }*/
 
     /**
      * Retrieves custom sequences from registry
@@ -4473,7 +4402,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 Iterator entries = domains.entrySet().iterator();
                 while (entries.hasNext()) {
                     Map.Entry thisEntry = (Map.Entry) entries.next();
-                    return "https://" + (String) thisEntry.getValue();
+                    return "https://" + thisEntry.getValue();
                 }
             }
         }
@@ -4486,34 +4415,27 @@ public class APIProviderHostObject extends ScriptableObject {
 	}
 
     public static boolean jsFunction_isDataPublishingEnabled(Context cx, Scriptable thisObj,
-            Object[] args, Function funObj)
+                                                             Object[] args, Function funObj)
             		throws APIManagementException {
-    	if (HostObjectUtils.checkDataPublishingEnabled()) {
-    		return true;
-    	}
-    	return false;
+        return HostObjectUtils.checkDataPublishingEnabled();
     }
 
     public static boolean jsFunction_showAPIStoreURL(Context cx,Scriptable thisObj, Object[] args,
                                                      Function funObj) {
 
-    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-    if(config!=null){
-    return Boolean.parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
-    }else{
-    return false;
-    }
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+
+        return config != null && Boolean.parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
     }
 
     public static boolean jsFunction_showAPIDocVisibility(Context cx,Scriptable thisObj, Object[] args,
-                                                     Function funObj) {
+                                                          Function funObj) {
 
-    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-    if(config!=null){
-    return Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
-    }else{
-    return false;
-    }
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+
+        return config != null
+               && Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
+
     }
 
     /**
@@ -4539,8 +4461,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
                 } else if (epType instanceof String && "http".equals(epType)) {
                     // extract production uri from config
-                    Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
-                    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
+                    Object prodEPs = jsonObject.get("production_endpoints");
+                    Object sandEPs = jsonObject.get("sandbox_endpoints");
 
                     if(prodEPs == null && sandEPs == null){
                         handleException("No Endpoint is defined");

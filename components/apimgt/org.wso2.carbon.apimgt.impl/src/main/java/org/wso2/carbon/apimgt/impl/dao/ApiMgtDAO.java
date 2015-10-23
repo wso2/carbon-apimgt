@@ -425,7 +425,6 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
-
     }
 
     /**
@@ -4825,7 +4824,7 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
 
-            if (groupId != null && !groupId.equals("null") && !groupId.isEmpty()) {
+            if (!StringUtils.isEmpty(groupId)) {
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseWithGroupIdCaseInsensitive;
                 } else {
@@ -4842,7 +4841,7 @@ public class ApiMgtDAO {
             preparedStatement = connection.prepareStatement(sqlQuery);
             preparedStatement.setString(1, appName);
 
-            if (groupId != null && !groupId.equals("null") && !groupId.equals("")) {
+            if (!StringUtils.isEmpty(groupId)) {
                 preparedStatement.setString(2, groupId);
                 preparedStatement.setString(3, subscriber.getName());
             } else {
@@ -4860,7 +4859,7 @@ public class ApiMgtDAO {
             }
 
         } catch (SQLException e) {
-            handleException("Error when getting the application id from" + " the persistence store.", e);
+            handleException("Error while getting the id  of " + appName + " from the persistence store.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
         }

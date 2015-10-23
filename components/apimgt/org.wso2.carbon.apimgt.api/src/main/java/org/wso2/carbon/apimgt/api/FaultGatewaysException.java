@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import java.util.List;
 import java.util.Map;
 
 public class FaultGatewaysException extends Exception {

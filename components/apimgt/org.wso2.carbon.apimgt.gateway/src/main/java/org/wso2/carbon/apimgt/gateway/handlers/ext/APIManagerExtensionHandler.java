@@ -16,20 +16,16 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.ext;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.WSDL2Constants;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 
-import java.util.Date;
 import java.util.Map;
-import java.util.TreeMap;
+
 
 /**
  * A simple extension handler for the APIs deployed in the API gateway. This handler first

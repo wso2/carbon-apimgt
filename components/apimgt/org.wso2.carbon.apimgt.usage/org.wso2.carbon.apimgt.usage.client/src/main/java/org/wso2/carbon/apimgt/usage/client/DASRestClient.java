@@ -34,8 +34,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
 import org.wso2.carbon.apimgt.usage.client.bean.FirstAccessRequestSearchBean;
-import org.wso2.carbon.apimgt.usage.client.bean.SearchRequestBean;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
+import org.wso2.carbon.apimgt.usage.client.bean.SearchRequestBean;
 import org.wso2.carbon.apimgt.usage.client.bean.TableExistResponseBean;
 import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 
@@ -58,14 +58,14 @@ public class DASRestClient {
 
     /**
      * get instance providing DAS configuration
-     * @param url DAS rest api location
-     * @param user  DAS rest api username
-     * @param pass  DAs rest api password
+     *
+     * @param url  DAS rest api location
+     * @param user DAS rest api username
+     * @param pass DAs rest api password
      */
     public DASRestClient(String url, String user, String pass) {
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        httpClient = HttpClients.custom()
-                .setConnectionManager(cm).build();
+        httpClient = HttpClients.custom().setConnectionManager(cm).build();
         this.dasUrl = url;
         this.user = user;
         this.pass = pass;
@@ -73,19 +73,17 @@ public class DASRestClient {
     }
 
     /**
-     *Do a post request to the DAS REST
+     * Do a post request to the DAS REST
      *
      * @param json lucene json request
-     * @param url DAS rest api location
-     * @return  return the HttpResponse after the request sent
+     * @param url  DAS rest api location
+     * @return return the HttpResponse after the request sent
      * @throws IOException throw if the connection exception occur
      */
     CloseableHttpResponse post(String json, String url) throws IOException {
-//        httpClient = new DefaultHttpClient();
-        log.info("Sending Lucene Query : " +json);
 
         if (log.isDebugEnabled()) {
-            log.debug("Sending Lucene Query : " +json);
+            log.debug("Sending Lucene Query : " + json);
         }
 
         HttpPost postRequest = new HttpPost(url);
@@ -104,7 +102,7 @@ public class DASRestClient {
             //send the request
             response = httpClient.execute(postRequest, context);
         } finally {
-//            httpClient.getConnectionManager().shutdown();
+            //            httpClient.getConnectionManager().shutdown();
         }
 
         return response;
@@ -113,12 +111,13 @@ public class DASRestClient {
 
     /**
      * Generic method to parse the response to the given class type
+     *
      * @param response HttpResponse came form the HTTP request
-     * @param type  type of the class that need to parse
-     * @param <T>   class of the expected class
-     * @return  return list of Result having indicated objects
+     * @param type     type of the class that need to parse
+     * @param <T>      class of the expected class
+     * @return return list of Result having indicated objects
      * @throws IllegalStateException throws if httpclient face and illegal state
-     * @throws IOException throws if connection error occur
+     * @throws IOException           throws if connection error occur
      */
     <T> List<Result<T>> parse(CloseableHttpResponse response, Type type) throws IllegalStateException, IOException {
 
@@ -156,15 +155,15 @@ public class DASRestClient {
 
     /**
      * Top level method to make post request and return java object type response for the general aggregate search requests
+     *
      * @param request SearchRequestBean representing the lucene json object for search records
-     * @param type  type of the expected java object type
-     * @param <T> expected values of the Result object
+     * @param type    type of the expected java object type
+     * @param <T>     expected values of the Result object
      * @return return list of Result objects containing the <T> values
      * @throws JsonSyntaxException throws if error occur parsing response back to the java
-     * @throws IOException throws if connection error occur to the REST API
+     * @throws IOException         throws if connection error occur to the REST API
      */
-    public <T> List<Result<T>> doPost(SearchRequestBean request, Type type)
-            throws JsonSyntaxException, IOException {
+    public <T> List<Result<T>> doPost(SearchRequestBean request, Type type) throws JsonSyntaxException, IOException {
 
         //get the json string of the request object
         String json = gson.toJson(request);
@@ -181,12 +180,13 @@ public class DASRestClient {
 
     /**
      * Top level method to make post request and return java object type response for first access time requests
+     *
      * @param request FirstAccessRequestSearchBean representing the lucene json object for first access time search
-     * @param type type of the expected java object type
-     * @param <T> expected values of the Result object
+     * @param type    type of the expected java object type
+     * @param <T>     expected values of the Result object
      * @return return list of Result objects containing the <T> values
      * @throws JsonSyntaxException throws if error occur parsing response back to the java
-     * @throws IOException throws if connection error occur to the REST API
+     * @throws IOException         throws if connection error occur to the REST API
      */
     public <T> List<Result<T>> doPost(FirstAccessRequestSearchBean request, Type type)
             throws JsonSyntaxException, IOException {
@@ -204,10 +204,11 @@ public class DASRestClient {
 
     /**
      * use to check provided Table is present in the DAS Data access layer
+     *
      * @param name Table name
      * @return TableExistResponseBean which contain the row response from the REST API
      * @throws JsonSyntaxException throws if parsing error occur
-     * @throws IOException throws if connection problem occur
+     * @throws IOException         throws if connection problem occur
      */
     public TableExistResponseBean isTableExist(String name) throws JsonSyntaxException, IOException {
 
@@ -235,7 +236,7 @@ public class DASRestClient {
             //pass to java object
             obj = gson.fromJson(reader, type);
         } finally {
-//            httpClient.getConnectionManager().shutdown();
+            //            httpClient.getConnectionManager().shutdown();
 
             if (reader != null) {
                 try {
