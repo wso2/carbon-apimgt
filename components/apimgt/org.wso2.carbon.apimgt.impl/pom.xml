@@ -120,8 +120,8 @@
           <artifactId>httpmime</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.event.core</artifactId>
+            <groupId>org.wso2.carbon.registry</groupId>
+            <artifactId>org.wso2.carbon.registry.event.core</artifactId>
         </dependency>
         <!-- <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
