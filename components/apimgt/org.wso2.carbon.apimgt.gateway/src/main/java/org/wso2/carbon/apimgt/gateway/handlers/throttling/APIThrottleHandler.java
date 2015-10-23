@@ -640,8 +640,8 @@ public class APIThrottleHandler extends AbstractHandler {
                             if(isContinueOnThrottleReached(resourceAndHTTPVerbThrottlingTier)){
                                 // This means that we are allowing the requests to continue even after the throttling
                                 // limit has reached.
-                                if (synCtx.getProperty("isThrottleOutIgnored") == null) {
-                                    synCtx.setProperty("isThrottleOutIgnored", true);
+                                if (synCtx.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY) == null) {
+                                    synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, true);
                                 }
                             }else{
                                 return false;
@@ -715,8 +715,8 @@ public class APIThrottleHandler extends AbstractHandler {
                     if(isContinueOnThrottleReached(consumerRoleID)){
                         // This means that we are allowing the requests to continue even after the throttling
                         // limit has reached.
-                        if (synCtx.getProperty("isThrottleOutIgnored") == null) {
-                            synCtx.setProperty("isThrottleOutIgnored", true);
+                        if (synCtx.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY) == null) {
+                            synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, true);
                         }
                     } else {
                         return false;

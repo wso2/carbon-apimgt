@@ -1625,7 +1625,7 @@ public final class APIUtil {
                 OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
 
                 String tierName = id.getText();
-                if (!APIConstants.UNAUTHENTICATED_TIER.equalsIgnoreCase(tierName)) {
+                if (APIConstants.UNAUTHENTICATED_TIER.equalsIgnoreCase(tierName)) {
                     continue;
                 }
                 // Constructing the tier object

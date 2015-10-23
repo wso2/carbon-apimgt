@@ -511,6 +511,16 @@ public final class APIConstants {
     public static final String THROTTLE_POLICY_ATTRIBUTE_TEMPLATE =
             "<throttle:%s xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">%s</throttle:%s>";
 
+    // This property is used to indicate whether a throttle out event has happened
+    // There is a property added to the message context when such an event happens.
+    public static final String API_USAGE_THROTTLE_OUT_PROPERTY_KEY = "isThrottleOutIgnored";
+
+    public static final String THROTTLE_OUT_REASON_KEY = "THROTTLED_OUT_REASON";
+
+// The following properties describes the reason for the throttle out.
+    public static final String THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED = "HARD_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_SOFT_LIMIT_EXCEEDED = "SOFT_LIMIT_EXCEEDED";
+
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
     public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
