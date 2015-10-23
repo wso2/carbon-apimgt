@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 public class APIThrottleConstants {
 
     public static final int THROTTLE_OUT_ERROR_CODE = 900800;
@@ -33,9 +35,9 @@ public class APIThrottleConstants {
 
     public static final String SANDBOX_HARD_LIMIT = "SANDBOX_HARD_LIMIT";
 
-    public static final String THROTTLED_OUT_REASON = "THROTTLED_OUT_REASON";
+    public static final String THROTTLED_OUT_REASON = APIConstants.THROTTLE_OUT_REASON_KEY;
 
-    public static final String HARD_LIMIT_EXCEEDED = "HARD_LIMIT_EXCEEDED";
+    public static final String HARD_LIMIT_EXCEEDED = APIConstants.THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED;
 
     public static final int SC_TOO_MANY_REQUESTS = 429;
 }
