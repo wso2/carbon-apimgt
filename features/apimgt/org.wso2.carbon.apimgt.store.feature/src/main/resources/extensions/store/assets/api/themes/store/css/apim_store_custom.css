@@ -146,8 +146,16 @@ p {
 
 .border-top {
     border-top: 0px solid #E0E0E0;
-    margin: 15px 15px 30px 15px;
-    width: 98%;
+    margin: 0px;
+    width: 100%;
+    padding: 30px 20px;
+}
+
+.base-url {
+    background: #161616;
+    color: #fff;
+    margin-left: 80px;
+    padding: 2px;
 }
 
 legend {
@@ -334,7 +342,6 @@ label {
     top: -72px;
     position: relative;
     left: -277px;
-    float: left;
 }
 
 #resource_default {
