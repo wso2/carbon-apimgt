@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyGenerateRequestDTO;
 
 import java.util.List;
 
@@ -129,9 +131,9 @@ public class ApplicationsApi  {
     @Path("/{applicationId}/generate-keys")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = ApplicationDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = ApplicationKeyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Application updated."),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Specified Production or Sandbox keys generated."),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error"),
         
@@ -140,7 +142,7 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.") })
 
     public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "Application Id",required=true ) @PathParam("applicationId") String applicationId,
-    @ApiParam(value = "Application object that needs to be updated" ,required=true ) ApplicationDTO body,
+    @ApiParam(value = "Application Key Generation object that includes request parameters" ,required=true ) ApplicationKeyGenerateRequestDTO body,
     @ApiParam(value = "Media type of the entity in the request body. Should denote XML or JSON, default is JSON."  )@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)

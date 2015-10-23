@@ -647,18 +647,18 @@ paths:
         - $ref: '#/parameters/applicationId'
         - in: body
           name: body
-          description: Application object that needs to be updated
+          description: Application Key Generation object that includes request parameters
           required: true
           schema:
-            $ref: '#/definitions/Application'
+            $ref: '#/definitions/ApplicationKeyGenerateRequest'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       responses:
         '200':
-          description: OK. Application updated.
+          description: OK. Specified Production or Sandbox keys generated.
           schema:
-            $ref: '#/definitions/Application'
+            $ref: '#/definitions/ApplicationKey'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -1414,36 +1414,10 @@ definitions:
         type: string
       groupId:
         type: string
-      key:
-        properties:
-          production:
-            properties:
-              consumerKey:
-                type: string
-              consumerSecret:
-                type: string
-              accessToken:
-                type: string
-              validityTime:
-                type: integer
-              allowedDomains:
-                type: array
-                items:
-                  type: string
-          sandbox:
-            properties:
-              consumerKey:
-                type: string
-              consumerSecret:
-                type: string
-              accessToken:
-                type: string
-              validityTime:
-                type: integer
-              allowedDomains:
-                type: array
-                items:
-                  type: string
+      keys:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationKey'
   Document:
     title: Document
     required:
@@ -1659,3 +1633,70 @@ definitions:
                   - NeverTimeOut
               duration:
                 type: integer
+  Token :
+    title: Token details for invoking APIs
+    properties:
+      accessToken:
+        type: string
+        description: Access token
+      refreshToken:
+        type: string
+        description: Refresh token
+      tokenState:
+        type: string
+        description: Token state
+      tokenScopes:
+        type: array
+        items: 
+          type: string
+        description: Valid scopes for the access token
+      validityTime:
+        type: integer
+        format: int64
+        description: Maximum validity time for the access token
+  ApplicationKey :
+    title: Application key details
+    properties:
+      consumerKey:
+        type: string
+        description: Consumer key of the application
+      consumerSecret:
+        type: string
+        description: Consumer secret of the application
+      supportedGrantTypes:
+        type: array
+        items: 
+          type: string
+        description: Supported grant types for the application
+      keyState:
+        type: string
+        description: State of the key generation of the application
+      clientName:
+        description: Application client representation
+        type: string
+      token:
+        description: Token details object
+        $ref: '#/definitions/Token'
+  ApplicationKeyGenerateRequest :
+    title: Application key generation request object
+    properties:
+      tokenType:
+        type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
+      validityTime:
+        type: string
+      callbackUrl:
+        type: string
+        description: Callback URL
+      accessAllowDomains:
+        type: array
+        items: 
+          type: string
+        description: Allowed domains for the access token
+      scopes:
+        type: array
+        items: 
+          type: string
+        description: Allowed scopes for the access token
