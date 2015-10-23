@@ -296,7 +296,7 @@
                             javax.naming,
                             javax.sql,
                             javax.wsdl.*,
-                            javax.xml.*,
+                            javax.xml.*;version="0.0.0",
                             org.json.*,
                             org.slf4j,
                             org.w3c.dom,
