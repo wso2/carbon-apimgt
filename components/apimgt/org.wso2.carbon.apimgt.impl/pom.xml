@@ -105,14 +105,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
         </dependency>
-        <!--dependency>
-             <groupId>org.wso2.carbon.commons</groupId>
-             <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-        </dependency-->
-        <!--dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.um.ws.api</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.utils</artifactId>
