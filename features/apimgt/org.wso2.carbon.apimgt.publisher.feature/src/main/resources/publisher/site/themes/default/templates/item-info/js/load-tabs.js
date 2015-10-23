@@ -77,7 +77,7 @@ $(document).ready(function() {
             var clickedTab = e.target.href.split('#')[1];
             ////////////// edit tab
             pushDataForTabs(clickedTab);
-            $.cookie("selectedTab", clickedTab,  {path: "/"});
+            $.cookie("selectedTab", clickedTab, {path: "/"});
         }});
 
     });

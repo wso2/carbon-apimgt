@@ -4323,7 +4323,13 @@ public final class APIUtil {
         return null;
     }
 
-     public static boolean isStringArray(Object[] args) {
+    /**
+    * Check whether input array is a string array
+    *
+    * @param args Object array
+    * @return whether provided array is a String array
+    */
+    public static boolean isStringArray(Object[] args) {
         int argsCount = args.length;
         for (int i = 0; i < argsCount; i++) {
             if (!(args[i] instanceof String)) {
