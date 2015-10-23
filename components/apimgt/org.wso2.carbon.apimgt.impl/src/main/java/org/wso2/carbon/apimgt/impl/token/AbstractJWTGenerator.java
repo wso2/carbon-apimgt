@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.token;
 
-import org.apache.commons.codec.binary.Base64;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -129,25 +129,23 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
     public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version, String accessToken)
             throws APIManagementException {
-
-
         String jwtHeader = buildHeader(keyValidationInfoDTO);
 
         /*//add cert thumbprint to header
      String headerWithCertThumb = addCertToHeader(endUserName);*/
 
-        String base64UrlEncodedHeader = "";
+        String base64EncodedHeader = "";
         if (jwtHeader != null) {
-            base64UrlEncodedHeader = Base64.encodeBase64URLSafeString(jwtHeader.getBytes());
+            base64EncodedHeader = Base64Utils.encode(jwtHeader.getBytes());
         }
-        String base64UrlEncodedBody = "";
+        String base64EncodedBody = "";
         String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version,accessToken);
         if (jwtBody != null) {
-            base64UrlEncodedBody = Base64.encodeBase64URLSafeString(jwtBody.getBytes());
+            base64EncodedBody = Base64Utils.encode(jwtBody.getBytes());
         }
 
         if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
-            String assertion = base64UrlEncodedHeader + "." + base64UrlEncodedBody;
+            String assertion = base64EncodedHeader + "." + base64EncodedBody;
 
             //get the assertion signed
             byte[] signedAssertion = signJWT(assertion, keyValidationInfoDTO.getEndUserName());
@@ -155,11 +153,11 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion));
             }
-            String base64UrlEncodedAssertion = Base64.encodeBase64URLSafeString(signedAssertion);
+            String base64EncodedAssertion = Base64Utils.encode(signedAssertion);
 
-            return base64UrlEncodedHeader + "." + base64UrlEncodedBody + "." + base64UrlEncodedAssertion;
+            return base64EncodedHeader + "." + base64EncodedBody + "." + base64EncodedAssertion;
         } else {
-            return base64UrlEncodedHeader + "." + base64UrlEncodedBody + ".";
+            return base64EncodedHeader + "." + base64EncodedBody + ".";
         }
     }
 
@@ -360,7 +358,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             byte[] digestInBytes = digestValue.digest();
 
             String publicCertThumbprint = hexify(digestInBytes);
-            String base64EncodedThumbPrint = Base64.encodeBase64URLSafeString(publicCertThumbprint.getBytes());
+            String base64EncodedThumbPrint = Base64Utils.encode(publicCertThumbprint.getBytes());
             //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64EncodedThumbPrint);
             //headerWithCertThumb = headerWithCertThumb.replaceAll("\\[2\\]", signatureAlgorithm);
             //return headerWithCertThumb;
