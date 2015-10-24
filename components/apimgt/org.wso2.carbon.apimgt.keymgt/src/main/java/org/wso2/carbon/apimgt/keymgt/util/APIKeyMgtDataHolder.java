@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -118,7 +119,7 @@ public class APIKeyMgtDataHolder {
                         tokenGenerator = new JWTGenerator();
                     } else {
                         try {
-                            tokenGenerator = (TokenGenerator) Class.forName(clazz).newInstance();
+                            tokenGenerator = (TokenGenerator) APIUtil.getClassForName(clazz);
                         } catch (InstantiationException e) {
                             log.error("Error while instantiating class " + clazz, e);
                         } catch (IllegalAccessException e) {
