@@ -94,7 +94,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
         if (claimsRetrieverImplClass != null) {
             try {
-                claimsRetriever = (ClaimsRetriever) Class.forName(claimsRetrieverImplClass).newInstance();
+                claimsRetriever = (ClaimsRetriever) APIUtil.getClassForName(claimsRetrieverImplClass);
                 claimsRetriever.init();
             } catch (ClassNotFoundException e) {
                 log.error("Cannot find class: " + claimsRetrieverImplClass, e);
