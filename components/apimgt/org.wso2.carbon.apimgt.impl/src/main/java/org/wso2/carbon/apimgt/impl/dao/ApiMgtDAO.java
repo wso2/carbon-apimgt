@@ -1293,7 +1293,7 @@ public class ApiMgtDAO {
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery = "INSERT " +
                               "INTO AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS, SUBS_CREATE_STATE, " +
-                              "CREATED_BY, CREATED_TIME) VALUES (?,?,?,?,?,?,?)";
+                              "CREATED_BY, CREATED_TIME, UUID) VALUES (?,?,?,?,?,?,?,?)";
 
             //Adding data to the AM_SUBSCRIPTION table
             //ps = conn.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
@@ -1310,6 +1310,7 @@ public class ApiMgtDAO {
             //TODO Need to find logged in user who perform this subscription
             preparedStforInsert.setString(6, null);
             preparedStforInsert.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
+            preparedStforInsert.setString(8, UUID.randomUUID().toString());
 
             preparedStforInsert.executeUpdate();
             rs = preparedStforInsert.getGeneratedKeys();
@@ -1350,21 +1351,83 @@ public class ApiMgtDAO {
             throws APIManagementException {
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        PreparedStatement preparedStForUpdateOrDelete = null;
         int apiId = -1;
+        String uuid;
+        try {
+            apiId = getAPIID(identifier, conn);
+
+            String subscriptionUUIDQuery = "SELECT " +
+                    " UUID FROM AM_SUBSCRIPTION" +
+                    " WHERE " +
+                    "API_ID = ? " +
+                    "AND APPLICATION_ID = ?";
+
+            ps = conn.prepareStatement(subscriptionUUIDQuery);
+            ps.setInt(1, apiId);
+            ps.setInt(2, applicationId);
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next())   {
+                uuid = resultSet.getString("UUID");
+                SubscribedAPI subscribedAPI = new SubscribedAPI(uuid);
+                removeSubscription(subscribedAPI, conn);
+            } else {
+                throw new APIManagementException(
+                        "UUID does not exist for the given apiId:" + apiId + " and application id:" + applicationId);
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to add subscriber data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+        }
+    }
+
+    /** Removes a subscription specified by SubscribedAPI object
+     *
+     * @param subscription SubscribedAPI object
+     * @throws APIManagementException
+     */
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            removeSubscription(subscription, conn);
+            conn.commit();
+        } catch (SQLException e) {
+            handleException("Failed to add subscriber data ", e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.error("Couldn't close database connection for removing subscription", e);
+            }
+        }
+    }
+
+    /** Removes a subscription specified by SubscribedAPI object
+     * 
+     * @param subscription SubscribedAPI object
+     * @param conn database connection object
+     * @throws APIManagementException
+     */
+    public void removeSubscription(SubscribedAPI subscription, Connection conn) throws APIManagementException {
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        PreparedStatement preparedStForUpdateOrDelete = null;
         String subStatus = null;
 
         try {
-            apiId = getAPIID(identifier, conn);
             String subscriptionStatusQuery = "SELECT " +
-                                             "SUB_STATUS FROM AM_SUBSCRIPTION" +
-                                             " WHERE " +
-                                             "API_ID = ? " +
-                                             "AND APPLICATION_ID = ?";
+                    "SUB_STATUS FROM AM_SUBSCRIPTION" +
+                    " WHERE" +
+                    " UUID = ?";
 
             ps = conn.prepareStatement(subscriptionStatusQuery);
-            ps.setInt(1, apiId);
-            ps.setInt(2, applicationId);
+            ps.setString(1, subscription.getUUID());
             resultSet = ps.executeQuery();
 
             if (resultSet.next())   {
@@ -1372,25 +1435,23 @@ public class ApiMgtDAO {
             }
 
             // If the user was unblocked, remove the entry from DB, else change the status and keep the entry.
-
             String updateQuery = "UPDATE AM_SUBSCRIPTION " +
-                                 " SET " +
-                                 "SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE +
-                                 "' WHERE " +
-                                 "API_ID = ? " +
-                                 "AND APPLICATION_ID = ?";
+                    " SET " +
+                    "SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE + "'" +
+                    " WHERE" +
+                    " UUID = ?";
 
-            String deleteQuery = "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ?";
+            String deleteQuery = "DELETE FROM AM_SUBSCRIPTION" + 
+                    " WHERE" + 
+                    " UUID = ?";
 
             if(APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
-               || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
+                    || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus)) {
                 preparedStForUpdateOrDelete = conn.prepareStatement(updateQuery);
-                preparedStForUpdateOrDelete.setInt(1, apiId);
-                preparedStForUpdateOrDelete.setInt(2, applicationId);
+                preparedStForUpdateOrDelete.setString(1, subscription.getUUID());
             } else {
                 preparedStForUpdateOrDelete = conn.prepareStatement(deleteQuery);
-                preparedStForUpdateOrDelete.setInt(1, apiId);
-                preparedStForUpdateOrDelete.setInt(2, applicationId);
+                preparedStForUpdateOrDelete.setString(1, subscription.getUUID());
             }
 
             preparedStForUpdateOrDelete.executeUpdate();
@@ -1404,6 +1465,12 @@ public class ApiMgtDAO {
         }
     }
 
+
+    /** Removes a subscription by id by force without considering the subscription blocking state of the user
+     * 
+     * @param subscription_id id of subscription
+     * @throws APIManagementException
+     */
     public void removeSubscriptionById(int subscription_id) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -1488,6 +1555,126 @@ public class ApiMgtDAO {
             } finally {
                 APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
             }
+        return null;
+    }
+
+    /** returns the SubscribedAPI object which is related to the subscriptionId
+     * 
+     * @param subscriptionId subscription id
+     * @return
+     * @throws APIManagementException 
+     */
+    public SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getSubscriptionQuery = 
+                    "SELECT " +
+                    "SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+                    "API.API_PROVIDER AS API_PROVIDER, " +
+                    "API.API_NAME AS API_NAME, " +
+                    "API.API_VERSION AS API_VERSION, " +
+                    "SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+                    "SUBS.TIER_ID AS TIER_ID, " +
+                    "SUBS.SUB_STATUS AS SUB_STATUS, " +
+                    "SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                    "SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
+                    "SUBS.UUID AS UUID " +
+                    "FROM " +
+                    "AM_SUBSCRIPTION SUBS," +
+                    "AM_API API " +
+                    "WHERE " +
+                    "API.API_ID = SUBS.API_ID AND " +
+                    "SUBSCRIPTION_ID = ?";
+            ps = conn.prepareStatement(getSubscriptionQuery);
+            ps.setInt(1, subscriptionId);
+            resultSet = ps.executeQuery();
+            SubscribedAPI subscribedAPI = null;
+            if (resultSet.next()) {
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
+                        resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+                
+                int applicationId = resultSet.getInt("APPLICATION_ID");
+                Application application = getApplicationById(applicationId);               
+                subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
+                subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
+                subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
+                subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
+                subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
+                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
+                subscribedAPI.setUUID(resultSet.getString("UUID"));
+                subscribedAPI.setApplication(application);
+            }
+            return subscribedAPI;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve subscription from subscription id", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return null;
+    }
+
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Application
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String getSubscriptionQuery =
+                    "SELECT " +
+                            "SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
+                            "API.API_PROVIDER AS API_PROVIDER, " +
+                            "API.API_NAME AS API_NAME, " +
+                            "API.API_VERSION AS API_VERSION, " +
+                            "SUBS.APPLICATION_ID AS APPLICATION_ID, " +
+                            "SUBS.TIER_ID AS TIER_ID, " +
+                            "SUBS.SUB_STATUS AS SUB_STATUS, " +
+                            "SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE, " +
+                            "SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
+                            "SUBS.UUID AS UUID " +
+                            "FROM " +
+                            "AM_SUBSCRIPTION SUBS," +
+                            "AM_API API " +
+                            "WHERE " +
+                            "API.API_ID = SUBS.API_ID AND " +
+                            "UUID = ?";
+            ps = conn.prepareStatement(getSubscriptionQuery);
+            ps.setString(1, uuid);
+            resultSet = ps.executeQuery();
+            SubscribedAPI subscribedAPI = null;
+            if (resultSet.next()) {
+                APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
+                        resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
+
+                int applicationId = resultSet.getInt("APPLICATION_ID");
+                Application application = getApplicationById(applicationId);
+                subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
+                subscribedAPI.setUUID(resultSet.getString("UUID"));
+                subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
+                subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
+                subscribedAPI.setSubCreatedStatus(resultSet.getString("SUBS_CREATE_STATE"));
+                subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
+                subscribedAPI.setLastAccessed(resultSet.getDate("LAST_ACCESSED"));
+                subscribedAPI.setApplication(application);
+            }
+            return subscribedAPI;
+        } catch (SQLException e) {
+            handleException("Failed to retrieve subscription from subscription id", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
         return null;
     }
 
@@ -1614,29 +1801,31 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
-        String sqlQuery = "SELECT " +
-                "   SUBS.SUBSCRIPTION_ID" +
-                "   ,API.API_PROVIDER AS API_PROVIDER"+
-                "   ,API.API_NAME AS API_NAME" +
+        String sqlQuery = "SELECT " + 
+                "   SUBS.SUBSCRIPTION_ID AS SUBS_ID" +
+                "   ,API.API_PROVIDER AS API_PROVIDER" +
+                "   ,API.API_NAME AS API_NAME" + 
                 "   ,API.API_VERSION AS API_VERSION" +
                 "   ,SUBS.TIER_ID AS TIER_ID" +
-                "   ,APP.APPLICATION_ID AS APP_ID"+
+                "   ,APP.APPLICATION_ID AS APP_ID" +
                 "   ,SUBS.LAST_ACCESSED AS LAST_ACCESSED" +
-                "   ,SUBS.SUB_STATUS AS SUB_STATUS"+
+                "   ,SUBS.SUB_STATUS AS SUB_STATUS" +
                 "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
-                "   ,APP.NAME AS APP_NAME "+
+                "   ,APP.NAME AS APP_NAME " +
                 "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
-                "FROM " +
-                "   AM_SUBSCRIBER SUB,"+
+                "   ,SUBS.UUID AS SUB_UUID " +
+                "   ,APP.UUID AS APP_UUID " +
+                "FROM " + 
+                "   AM_SUBSCRIBER SUB," +
                 "   AM_APPLICATION APP, " +
                 "   AM_SUBSCRIPTION SUBS, " +
                 "   AM_API API " +
-                "WHERE "+
-                "   SUB.TENANT_ID = ? "+
+                "WHERE "+ 
+                "   SUB.TENANT_ID = ? " +
                 "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
-                "   AND API.API_ID=SUBS.API_ID"+
+                "   AND API.API_ID=SUBS.API_ID" +
                 "   AND APP.NAME= ? " +
-                "   AND SUBS.SUBS_CREATE_STATE = '"+
+                "   AND SUBS.SUBS_CREATE_STATE = '" +
                 APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'";
 
         String whereClausewithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))" ;
@@ -1683,12 +1872,17 @@ public class ApiMgtDAO {
                                                                 result.getString("API_NAME"), result.getString("API_VERSION"));
 
                 SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
                 subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
-                subscribedAPI.setTier(new Tier(result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
-                subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
+                subscribedAPI.setUUID(result.getString("SUB_UUID"));
+                subscribedAPI.setTier(new Tier(
+                        result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID)));
+                subscribedAPI.setLastAccessed(result.getDate(
+                        APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
 
                 Application application = new Application(result.getString("APP_NAME"), subscriber);
+                application.setUUID(result.getString("APP_UUID"));
                 subscribedAPI.setApplication(application);
                 subscribedAPIs.add(subscribedAPI);
             }
@@ -1905,7 +2099,7 @@ public class ApiMgtDAO {
         subscriber.setName(subscribedUserName);
 
         String sqlQuery = "SELECT " +
-                "   SUBS.SUBSCRIPTION_ID" +
+                "   SUBS.SUBSCRIPTION_ID AS SUBS_ID" +
                 "   ,API.API_PROVIDER AS API_PROVIDER" +
                 "   ,API.API_NAME AS API_NAME" +
                 "   ,API.API_VERSION AS API_VERSION" +
@@ -1916,6 +2110,8 @@ public class ApiMgtDAO {
                 "   ,SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE" +
                 "   ,APP.NAME AS APP_NAME " +
                 "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
+                "   ,SUBS.UUID AS SUB_UUID " +
+                "   ,APP.UUID AS APP_UUID " +
                 "FROM " +
                 "   AM_SUBSCRIBER SUB," +
                 "   AM_APPLICATION APP, " +
@@ -1973,10 +2169,14 @@ public class ApiMgtDAO {
                                                                 result.getString("API_NAME"), result.getString("API_VERSION"));
 
                 SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+                subscribedAPI.setSubscriptionId(result.getInt("SUBS_ID"));
                 subscribedAPI.setSubStatus(result.getString("SUB_STATUS"));
                 subscribedAPI.setSubCreatedStatus(result.getString("SUBS_CREATE_STATE"));
                 String tierName=result.getString(APIConstants.SUBSCRIPTION_FIELD_TIER_ID);
                 subscribedAPI.setTier(new Tier(tierName));
+                subscribedAPI.setLastAccessed(result.getDate(
+                        APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
+                subscribedAPI.setUUID(result.getString("SUB_UUID"));
                 subscribedAPI.setLastAccessed(result.getDate(APIConstants.SUBSCRIPTION_FIELD_LAST_ACCESS));
                 //setting NULL for subscriber. If needed, Subscriber object should be constructed &
                 // passed in
@@ -1986,6 +2186,7 @@ public class ApiMgtDAO {
                     application = new Application(result.getString("APP_NAME"), subscriber);
                     application.setId(result.getInt("APP_ID"));
                     application.setCallbackUrl(result.getString("CALLBACK_URL"));
+                    application.setUUID(result.getString("APP_UUID"));
                     String tenantAwareUserId = subscriber.getName();
                     Set<APIKey> keys = getApplicationKeys(tenantAwareUserId, applicationId);
                     for (APIKey key : keys) {
@@ -4609,8 +4810,8 @@ public class ApiMgtDAO {
             //This query to update the AM_APPLICATION table
             String sqlQuery = "INSERT " +
                               "INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, CALLBACK_URL, DESCRIPTION, "
-                              + "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME)" +
-                              " VALUES (?,?,?,?,?,?,?,?,?)";
+                              + "APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UUID)" +
+                              " VALUES (?,?,?,?,?,?,?,?,?,?)";
             // Adding data to the AM_APPLICATION  table
             //ps = conn.prepareStatement(sqlQuery);
             ps = conn.prepareStatement(sqlQuery, new String[]{"APPLICATION_ID"});
@@ -4632,6 +4833,7 @@ public class ApiMgtDAO {
             ps.setString(7, application.getGroupId());
             ps.setString(8, subscriber.getName());
             ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
+            ps.setString(10, UUID.randomUUID().toString());
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -4750,17 +4952,27 @@ public class ApiMgtDAO {
 	 * @throws APIManagementException
 	 */
     public String getApplicationStatus(String appName, String userId) throws APIManagementException {
+        int applicationId = getApplicationId(appName, userId);
+        return getApplicationStatusById(applicationId);
+    }
+
+    /** get the status of the Application creation process given the application Id
+     * 
+     * @param applicationId Id of the Application
+     * @return
+     * @throws APIManagementException
+     */
+    public String getApplicationStatusById(int applicationId) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
         String status = null;
-        int applicationId = getApplicationId(appName, userId);
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
 
-            String sqlQuery = "SELECT   APPLICATION_STATUS FROM   AM_APPLICATION " + "WHERE "
-                            + "   APPLICATION_ID= ?";
+            String sqlQuery = "SELECT APPLICATION_STATUS FROM AM_APPLICATION " + "WHERE "
+                    + "   APPLICATION_ID= ?";
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, applicationId);
@@ -5040,6 +5252,7 @@ public class ApiMgtDAO {
                 + "   ,APPLICATION_STATUS  "
                 + "   ,USER_ID  "
                 + "   ,GROUP_ID  "
+                + "   ,UUID "
                 + "FROM "
                 + "   AM_APPLICATION APP, "
                 + "   AM_SUBSCRIBER SUB  "
@@ -5094,6 +5307,7 @@ public class ApiMgtDAO {
                 application.setDescription(rs.getString("DESCRIPTION"));
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setGroupId(rs.getString("GROUP_ID"));
+                application.setUUID(rs.getString("UUID"));
 
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName() , application.getId());
                 Map<String,OAuthApplicationInfo> keyMap = getOAuthApplications(application.getId());
@@ -5169,6 +5383,11 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
+    /** Deletes an Application along with subscriptions, keys and registration data 
+     *
+     * @param application Application object to be deleted from the database which consists of Id
+     * @throws APIManagementException
+     */
     public void deleteApplication(Application application) throws APIManagementException {
         Connection con = null;
         try {
@@ -6427,7 +6646,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     "APP.DESCRIPTION, " +
                     "APP.SUBSCRIBER_ID,"+
                     "APP.APPLICATION_STATUS, " +
-                    "SUB.USER_ID " +
+                    "SUB.USER_ID, " +
+                    "APP.UUID " +
                     "FROM " +
                     "AM_SUBSCRIBER SUB," +
                     "AM_APPLICATION APP " +
@@ -6452,6 +6672,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
                 break;
@@ -6466,6 +6687,70 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return application;
     }
 
+    /** Retrieves the Application which is corresponding to the given UUID String
+     * 
+     * @param uuid UUID of Application
+     * @return
+     * @throws APIManagementException
+     */
+    public Application getApplicationByUUID(String uuid) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        Application application = null;
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            String query = "SELECT " +
+                    "APP.APPLICATION_ID," +
+                    "APP.NAME," +
+                    "APP.SUBSCRIBER_ID," +
+                    "APP.APPLICATION_TIER," +
+                    "APP.CALLBACK_URL," +
+                    "APP.DESCRIPTION, " +
+                    "APP.SUBSCRIBER_ID,"+
+                    "APP.APPLICATION_STATUS, " +
+                    "APP.UUID," +
+                    "SUB.USER_ID " +
+                    "FROM " +
+                    "AM_SUBSCRIBER SUB," +
+                    "AM_APPLICATION APP " +
+                    "WHERE APP.UUID = ? " +
+                    "AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, uuid);
+
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String applicationName = rs.getString("NAME");
+                String subscriberId = rs.getString("SUBSCRIBER_ID");
+                String subscriberName = rs.getString("USER_ID");
+
+                Subscriber subscriber = new Subscriber(subscriberName);
+                subscriber.setId(Integer.parseInt(subscriberId));
+                application = new Application(applicationName, subscriber);
+
+                application.setDescription(rs.getString("DESCRIPTION"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setCallbackUrl(rs.getString("CALLBACK_URL"));
+                application.setId(rs.getInt("APPLICATION_ID"));
+                application.setUUID(rs.getString("UUID"));
+                application.setTier(rs.getString("APPLICATION_TIER"));
+                subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
+                break;
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while obtaining details of the Application : " + uuid, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return application;
+    }
 
     /**
      * update URI templates define for an API
