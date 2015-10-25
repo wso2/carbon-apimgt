@@ -16,9 +16,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
 
 public class ApplicationMappingUtil {
 
@@ -31,6 +33,10 @@ public class ApplicationMappingUtil {
         applicationDTO.setName(application.getName());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getSubscriber().getName());
+        for(APIKey apiKey : application.getKeys()) {
+            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+            applicationDTO.getKeys().add(applicationKeyDTO);
+        }
         return applicationDTO;
     }
 

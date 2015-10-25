@@ -1671,16 +1671,19 @@ definitions:
       keyState:
         type: string
         description: State of the key generation of the application
-      clientName:
-        description: Application client representation
+      keyType:
+        description: Key type
         type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
       token:
         description: Token details object
         $ref: '#/definitions/Token'
   ApplicationKeyGenerateRequest :
     title: Application key generation request object
     properties:
-      tokenType:
+      keyType:
         type: string
         enum:
           - PRODUCTION

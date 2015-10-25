@@ -154,11 +154,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
             Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
-                    username, application.getName(), body.getTokenType().toString(), body.getCallbackUrl(),
+                    username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                     accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
                     jsonParams);
 
-            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails);
+            ApplicationKeyDTO applicationKeyDTO =
+                    ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
             ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
             List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
             applicationKeyDTOs.add(applicationKeyDTO);
