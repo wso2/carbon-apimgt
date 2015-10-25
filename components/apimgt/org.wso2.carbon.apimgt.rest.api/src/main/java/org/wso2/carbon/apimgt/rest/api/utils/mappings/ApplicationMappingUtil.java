@@ -22,6 +22,9 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ApplicationMappingUtil {
 
     public static ApplicationDTO fromApplicationtoDTO (Application application) {
@@ -33,10 +36,12 @@ public class ApplicationMappingUtil {
         applicationDTO.setName(application.getName());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getSubscriber().getName());
+        List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
         for(APIKey apiKey : application.getKeys()) {
             ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
-            applicationDTO.getKeys().add(applicationKeyDTO);
+            applicationKeyDTOs.add(applicationKeyDTO);
         }
+        applicationDTO.setKeys(applicationKeyDTOs);
         return applicationDTO;
     }
 

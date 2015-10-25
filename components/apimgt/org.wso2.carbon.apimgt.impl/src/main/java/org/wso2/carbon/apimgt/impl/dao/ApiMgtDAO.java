@@ -6724,7 +6724,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             rs = prepStmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String applicationName = rs.getString("NAME");
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -6740,7 +6740,11 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                break;
+
+                Set<APIKey> keys = getApplicationKeys(subscriber.getName() , application.getId());
+                for (APIKey key : keys) {
+                    application.addKey(key);
+                }
             }
 
         } catch (SQLException e) {

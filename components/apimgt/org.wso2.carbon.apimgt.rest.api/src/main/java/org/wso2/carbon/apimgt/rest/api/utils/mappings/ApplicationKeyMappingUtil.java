@@ -75,11 +75,14 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
         applicationKeyDTO.setKeyState(apiKey.getState());
-        applicationKeyDTO.setSupportedGrantTypes(null); //todo
+        applicationKeyDTO.setSupportedGrantTypes(null); //todo not supported by impl yet
 
         TokenDTO tokenDTO = new TokenDTO();
-        tokenDTO.setTokenState(null); //todo
-        tokenDTO.setRefreshToken(null); //todo
+        tokenDTO.setTokenState(null); //todo not supported by impl yet
+        tokenDTO.setRefreshToken(null); //todo not supported by impl yet
+        if (apiKey.getTokenScope() != null) {
+            tokenDTO.setTokenScopes(Arrays.asList(apiKey.getTokenScope().split(" ")));
+        }
         tokenDTO.setAccessToken(apiKey.getAccessToken());
         tokenDTO.setValidityTime(apiKey.getValidityPeriod());
         applicationKeyDTO.setToken(tokenDTO);
