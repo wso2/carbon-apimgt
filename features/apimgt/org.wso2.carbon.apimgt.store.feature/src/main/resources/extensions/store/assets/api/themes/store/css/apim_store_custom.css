@@ -298,8 +298,9 @@ legend {
 }
 
 .regen-btn {
-    margin-top: -2px;
+    margin-top: -58px;
     height: 35px;
+    margin-left: 277px;
 }
 
 .custom-form-right > .form-control {
@@ -392,6 +393,8 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
 
 .curlurl-genbtn {
     white-space: nowrap;
+    margin-left: -10px;
+    margin-top: -40px;
 }
 
 .curl-testurlp-wrapper {
@@ -564,13 +567,13 @@ div.top-menu-right-custom {
 .dropdown-menu {
     background-color: #333;
     color: #ccc;
-    left: 70px;
+    left: -10px;
     max-height: 402px;
     overflow: hidden;
     padding-bottom: 10px;
     padding-left: 0;
     padding-top: 10px;
-    top: 7px;
+    top: 4px;
     width: auto;
     border-radius: 0px;
 }
