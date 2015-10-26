@@ -213,7 +213,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS net_total_requests" +
+                        "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
                         " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
@@ -306,7 +306,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "consumerKey, api,SUM(" + APIUsageStatisticsClientConstants.FAULT + ") AS total_faults " +
+                        "consumerKey, api,SUM(" + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") AS total_faults " +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                         " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
@@ -569,7 +569,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "*,SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS total_calls " +
+                        "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
                         " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
                         " WHERE " +
                         APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
@@ -715,7 +715,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         APIUsageStatisticsClientConstants.API + "," +
                         APIUsageStatisticsClientConstants.CONTEXT + "," +
                         APIUsageStatisticsClientConstants.VERSION + "," +
-                        "SUM(" + APIUsageStatisticsClientConstants.REQUEST + ") AS aggregateSum " +
+                        "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
                         " FROM " +
                         tableName +
                         " GROUP BY " +
@@ -1023,12 +1023,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
             query = "SELECT " +
                     "TempTable.*, " +
-                    "SUM(" + APIUsageStatisticsClientConstants.RESPONSE + ") AS totalTime ," +
+                    "SUM(" + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime ," +
                     "SUM(weighted_service_time) AS totalWeightTime " +
                     " FROM " +
                     "(SELECT " +
                     "*, (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
-                    APIUsageStatisticsClientConstants.RESPONSE + ") AS weighted_service_time " +
+                    APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS weighted_service_time " +
                     " FROM " +
                     APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
                     " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION;
@@ -2265,8 +2265,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
                         + APIUsageStatisticsClientConstants.VERSION + "," + APIUsageStatisticsClientConstants.CONTEXT
-                        + ",sum(" + APIUsageStatisticsClientConstants.REQUEST + ") as "
-                        + APIUsageStatisticsClientConstants.REQUEST + "," + APIUsageStatisticsClientConstants.MONTH
+                        + ",sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as "
+                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," + APIUsageStatisticsClientConstants.MONTH
                         + "," + APIUsageStatisticsClientConstants.USER_ID + " FROM  "
                         + APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY + " WHERE "
                         + APIUsageStatisticsClientConstants.MONTH + " = '" + period + "' AND "
@@ -2281,7 +2281,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     String apiVersion = rs.getString(APIUsageStatisticsClientConstants.VERSION);
                     String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
                     String username = rs.getString(APIUsageStatisticsClientConstants.USER_ID);
-                    long requestCount = rs.getLong(APIUsageStatisticsClientConstants.REQUEST);
+                    long requestCount = rs.getLong(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
                     String month = rs.getString(APIUsageStatisticsClientConstants.MONTH);
                     usageData.add(new APIVersionUsageByUserMonth(apiName, apiVersion, context, username, requestCount,
                             month));
@@ -2482,7 +2482,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 while (rs.next()) {
                     String context = rs.getString(APIUsageStatisticsClientConstants.CONTEXT);
                     String username = rs.getString(APIUsageStatisticsClientConstants.USER_ID);
-                    long requestCount = rs.getLong(APIUsageStatisticsClientConstants.REQUEST);
+                    long requestCount = rs.getLong(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT);
                     String version = rs.getString(APIUsageStatisticsClientConstants.VERSION);
                     usageData.add(new APIUsageByUser(context, username, requestCount, version));
                 }
@@ -2947,7 +2947,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             context = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.CONTEXT)).getText();
             username = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.USER_ID)).getText();
             requestCount = (long) Double.parseDouble(
-                    row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.REQUEST)).getText());
+                    row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT)).getText());
             apiVersion = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.VERSION)).getText();
             month = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.MONTH)).getText();
         }

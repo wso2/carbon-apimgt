@@ -122,7 +122,7 @@ public class UsageClient {
             throw new APIMgtUsageQueryServiceClientException(
                     "Cannot access the constructor in Statistic Client class: " + className, e);
         } catch (InvocationTargetException e) {
-            throw new APIMgtUsageQueryServiceClientException("");
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while getting constructor");
         } catch (NoSuchMethodException e) {
             throw new APIMgtUsageQueryServiceClientException(
                     "Cannot found expected constructor in Statistic Client class: " + className, e);

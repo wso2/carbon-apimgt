@@ -234,16 +234,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String query = null;
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
-                    .dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
+                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 1, "key_api_facet", tableName);
+        SearchRequestBean request = new SearchRequestBean(query, 1, APIUsageStatisticsClientConstants.KEY_API_FACET,
+                tableName);
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField f = new AggregateField("total_request_count", "SUM", "count");
+        AggregateField f = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
         fields.add(f);
         request.setAggregateFields(fields);
 
@@ -355,17 +357,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String query = null;
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
-                    .dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
+                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 1, "key_userId_facet", tableName);
+        SearchRequestBean request = new SearchRequestBean(query, 1, APIUsageStatisticsClientConstants.KEY_USERID_FACET,
+                tableName);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_request_count", "SUM", "count");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -475,16 +479,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
-                    .dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
+                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3, "key_api_method_path_facet", tableName);
+        SearchRequestBean request = new SearchRequestBean(query, 3,
+                APIUsageStatisticsClientConstants.KEY_API_METHOD_PATH_FACET, tableName);
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_request_count", "SUM", "count");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -593,16 +599,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.dateToLong(fromDate) + " TO " + RestClientUtil
-                    .dateToLong(toDate) + "] AND ( " + keyString + " )";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.dateToLong(fromDate)
+                    + " TO " + RestClientUtil.dateToLong(toDate) + "] AND ( " + keyString + " )";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 1, "consumerKey_api_facet", "API_FAULT_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 1,
+                APIUsageStatisticsClientConstants.CONSUMERKEY_API_FACET,
+                APIUsageStatisticsClientConstants.API_FAULT_SUMMARY);
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_fault_count", "SUM", "count");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -714,18 +723,20 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String query = null;
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3, "api_version_userId_apiPublisher_facet",
-                "API_REQUEST_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 3,
+                APIUsageStatisticsClientConstants.API_VERSION_USERID_APIPUBLISHER_FACET,
+                APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_request_count", "SUM", "count");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM, APIUsageStatisticsClientConstants.ALIAS_COUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -863,19 +874,24 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 1, "api_version_context_facet",
-                "API_RESPONSE_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 1,
+                APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET,
+                APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field0 = new AggregateField("serviceTime", "SUM", "totalServiceTime");
-        AggregateField field1 = new AggregateField("total_response_count", "SUM", "totalResponseCount");
+        AggregateField field0 = new AggregateField(APIUsageStatisticsClientConstants.SERVICE_TIME,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTALSERVICETIME);
+        AggregateField field1 = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTALRESPONSECOUNT);
         fields.add(field0);
         fields.add(field1);
         request.setAggregateFields(fields);
@@ -1008,18 +1024,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3, "api_version_userId_context_facet",
-                "API_REQUEST_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 3,
+                APIUsageStatisticsClientConstants.API_VERSION_USERID_CONTEXT_FACET,
+                APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("max_request_time", "MAX", "lastAccessTime");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.REQUEST_TIME,
+                APIUsageStatisticsClientConstants.AGGREGATE_MAX,
+                APIUsageStatisticsClientConstants.ALIAS_LASTACCESSTIME);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1128,18 +1147,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3, "api_version_context_method_facet",
-                "API_RESOURCE_USAGE_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 3,
+                APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_METHOD_FACET,
+                APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_request_count", "SUM", "totalRequestCount");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTALREQUESTCOUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1246,18 +1268,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3, "api_version_context_dest_facet",
-                "API_DESTINATION_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 3,
+                APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_DEST_FACET,
+                APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_request_count", "SUM", "totalRequestCount");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTALREQUESTCOUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1381,18 +1406,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 2, "api_version_context_facet",
-                "API_VERSION_USAGE_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 2,
+                APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET,
+                APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_request_count", "SUM", "totalRequestCount");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTALREQUESTCOUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1534,18 +1562,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //extending lucene query with time ranges
         try {
-            query = "max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
-                    .getCeilingDateAsLong(toDate) + "]";
+            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
+                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3, "api_version_apiPublisher_context_facet",
-                "API_FAULT_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 3,
+                APIUsageStatisticsClientConstants.API_VERSION_APIPUBLISHER_CONTEXT_FACET,
+                APIUsageStatisticsClientConstants.API_FAULT_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_fault_count", "SUM", "totalFaultCount");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTALFAULTCOUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1631,29 +1662,36 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //lucene query with time ranges
         try {
-            query += " AND api:" + apiName + " AND " + "max_request_time: [" + RestClientUtil
-                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
+            query += " AND api:" + apiName + " AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": ["
+                    + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate)
+                    + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 2, "api_apiPublisher_applicationName_facet",
-                "API_THROTTLED_OUT_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 2,
+                APIUsageStatisticsClientConstants.API_APIPUBLISHER_APPLICATIONNAME_FACET,
+                APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
 
         //set the aggregate request to get success count
-        AggregateField success_request_count_fields = new AggregateField("success_request_count", "SUM",
-                "success_request_count");
+        AggregateField success_request_count_fields = new AggregateField(
+                APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(success_request_count_fields);
 
         //set the aggregate request to get max time
-        AggregateField max_request_time_fields = new AggregateField("max_request_time", "MAX", "max_request_time");
+        AggregateField max_request_time_fields = new AggregateField(APIUsageStatisticsClientConstants.REQUEST_TIME,
+                APIUsageStatisticsClientConstants.AGGREGATE_MAX, APIUsageStatisticsClientConstants.REQUEST_TIME);
         fields.add(max_request_time_fields);
 
         //set the aggregate request to get success throttle count
-        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count", "SUM", "throttle_out_count");
+        AggregateField throttle_out_count_fields = new AggregateField(
+                APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT, APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_THROTTLE_OUT_COUNT);
         fields.add(throttle_out_count_fields);
         request.setAggregateFields(fields);
 
@@ -1720,28 +1758,36 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //lucene query with time ranges
         try {
-            query += " AND applicationName:" + appName + " AND " + "max_request_time: [" + RestClientUtil
-                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
+            query +=
+                    " AND applicationName:" + appName + " AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": ["
+                            + RestClientUtil.getFloorDateAsLong(fromDate) + " TO " + RestClientUtil
+                            .getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 1, "api_apiPublisher_applicationName_facet",
-                "API_THROTTLED_OUT_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 1,
+                APIUsageStatisticsClientConstants.API_APIPUBLISHER_APPLICATIONNAME_FACET,
+                APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         //set the aggregate request to get success count
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField success_request_count_field = new AggregateField("success_request_count", "SUM",
-                "success_request_count");
+        AggregateField success_request_count_field = new AggregateField(
+                APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(success_request_count_field);
 
         //set the aggregate request to get max time
-        AggregateField max_request_time_fields = new AggregateField("max_request_time", "MAX", "max_request_time");
+        AggregateField max_request_time_fields = new AggregateField(APIUsageStatisticsClientConstants.REQUEST_TIME,
+                APIUsageStatisticsClientConstants.AGGREGATE_MAX, APIUsageStatisticsClientConstants.REQUEST_TIME);
         fields.add(max_request_time_fields);
 
         //set the aggregate request to get throttle count
-        AggregateField throttle_out_count_fields = new AggregateField("throttleout_count", "SUM", "throttle_out_count");
+        AggregateField throttle_out_count_fields = new AggregateField(
+                APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT, APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_THROTTLE_OUT_COUNT);
         fields.add(throttle_out_count_fields);
 
         request.setAggregateFields(fields);
@@ -1798,11 +1844,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 0, "api_apiPublisher_applicationName_facet",
-                "API_THROTTLED_OUT_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 0,
+                APIUsageStatisticsClientConstants.API_APIPUBLISHER_APPLICATIONNAME_FACET,
+                APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("success_request_count", "SUM", "success_request_count");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1862,11 +1911,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 0, "applicationName_facet",
-                "API_THROTTLED_OUT_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 0,
+                APIUsageStatisticsClientConstants.APPLICATIONNAME_FACET,
+                APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("success_request_count", "SUM", "success_request_count");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -1955,18 +2007,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //lucene query with time ranges
         try {
-            query = "api:" + apiName + " AND max_request_time: [" + RestClientUtil.getFloorDateAsLong(fromDate) + " TO "
-                    + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
+            query = "api:" + apiName + " AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
+                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 2, "api_version_context_facet",
-                "API_VERSION_USAGE_SUMMARY");
+        SearchRequestBean request = new SearchRequestBean(query, 2,
+                APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET,
+                APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField("total_request_count", "SUM", "totalRequestCount");
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTALREQUESTCOUNT);
         fields.add(field);
         request.setAggregateFields(fields);
 
@@ -2022,12 +2077,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<APIFirstAccess> getFirstAccessTime(String providerName) throws APIMgtUsageQueryServiceClientException {
 
         //check whether API_UTIL class id present
-        if (!isTableExist("API_UTIL")) {
+        if (!isTableExist(APIUsageStatisticsClientConstants.DAS_TABLE_API_UTIL)) {
             return new ArrayList<APIFirstAccess>();
         }
 
         //getting the search bean
-        APIFirstAccess firstAccess = this.queryFirstAccess("API_UTIL");
+        APIFirstAccess firstAccess = this.queryFirstAccess(APIUsageStatisticsClientConstants.DAS_TABLE_API_UTIL);
         List<APIFirstAccess> APIFirstAccessList = new ArrayList<APIFirstAccess>();
 
         APIFirstAccess fTime;
@@ -2201,13 +2256,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics.car";
-        String cAppPath = System.getProperty("carbon.home") + "/statistics";
-        cAppPath = cAppPath + '/' + cAppName;
+        String cAppPath = System.getProperty("carbon.home") + File.pathSeparatorChar + "statistics";
+        cAppPath = cAppPath + File.pathSeparatorChar + cAppName;
         File file = new File(cAppPath);
 
         //get the byte array of file
         byte[] byteArray = FileUtils.readFileToByteArray(file);
-        DataHandler dataHandler = new DataHandler(byteArray, "application/octet-stream");
+        DataHandler dataHandler = new DataHandler(byteArray,
+                APIUsageStatisticsClientConstants.APPLICATION_OCTET_STREAM);
 
         //create the stub to deploy artifacts
         CarbonAppUploaderStub stub = new CarbonAppUploaderStub(url + "/services/CarbonAppUploader");
