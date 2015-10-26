@@ -6691,6 +6691,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     "APP.SUBSCRIBER_ID,"+
                     "APP.APPLICATION_STATUS, " +
                     "SUB.USER_ID, " +
+                    "APP.GROUP_ID," +
                     "APP.UUID " +
                     "FROM " +
                     "AM_SUBSCRIBER SUB," +
@@ -6703,7 +6704,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             rs = prepStmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String applicationName = rs.getString("NAME");
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -6716,10 +6717,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                break;
             }
 
         } catch (SQLException e) {
@@ -6755,6 +6756,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     "APP.DESCRIPTION, " +
                     "APP.SUBSCRIBER_ID,"+
                     "APP.APPLICATION_STATUS, " +
+                    "APP.GROUP_ID, " +
                     "APP.UUID," +
                     "SUB.USER_ID " +
                     "FROM " +
@@ -6781,6 +6783,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
