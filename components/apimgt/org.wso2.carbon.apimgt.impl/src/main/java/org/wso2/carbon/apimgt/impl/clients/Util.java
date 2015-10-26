@@ -40,6 +40,7 @@ import java.util.List;
 /**
  * Utility class used by service clients
  */
+@SuppressWarnings("unchecked")
 public class Util {
 
     private static final Log log = LogFactory.getLog(Util.class);
@@ -56,7 +57,7 @@ public class Util {
 
     public static String getAuthHeader(String username) throws Exception {
 
-        //Get the filesystem keystore default primary certificate
+        //Get the filesystem key store default primary certificate
         KeyStoreManager keyStoreManager;
         keyStoreManager = KeyStoreManager.getInstance(MultitenantConstants.SUPER_TENANT_ID);
         try {

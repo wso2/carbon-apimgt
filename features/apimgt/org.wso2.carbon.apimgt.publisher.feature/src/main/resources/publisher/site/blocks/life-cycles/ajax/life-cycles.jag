@@ -39,7 +39,7 @@ if(jagg.isCSRFTokenValid())
         var lcs = mod.getLifeCyclesEvents({provider:request.getParameter("provider"),name:request.getParameter("name"),
         															version:request.getParameter("version")}).lcs;
 
-        if (!result) {
+     	if (result.error == true) {
             obj = {
                 error:true,
                 message:result.message
