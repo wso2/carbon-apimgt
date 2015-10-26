@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.impl;
 import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.SubscriptionsApiService;
@@ -70,7 +71,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             List<SubscriptionDTO> subscriptionDTOs = new ArrayList<>();
             for (SubscribedAPI subscription : subscriptions) {
-                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptiontoDTO(subscription);
+                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
                 subscriptionDTOs.add(subscriptionDTO);
             }
             return Response.ok().entity(subscriptionDTOs).build();
@@ -96,7 +97,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                     apiConsumer.addSubscription(apiIdentifier, username, application.getId());
             SubscribedAPI addedSubscribedAPI = apiConsumer.getSubscriptionByUUID(
                     subscriptionResponse.getSubscriptionUUID());
-            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptiontoDTO(addedSubscribedAPI);
+            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
             return Response
                     .created(new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTIONS + "/" + addedSubscribedAPI.getUUID()))
                     .entity(addedSubscriptionDTO).build();
@@ -113,11 +114,32 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             apiConsumer = RestApiUtil.getConsumer(username);
             SubscribedAPI subscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
             if (subscribedAPI != null) {
-                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptiontoDTO(subscribedAPI);
+                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
                 return Response.ok().entity(subscriptionDTO).build();
             } else {
                 throw new NotFoundException();
             }
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
+    }
+
+    @Override public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = null;
+        APIConsumer apiConsumer = null;
+        try {
+            apiProvider = RestApiUtil.getProvider(username);
+            SubscribedAPI subscribedAPI = SubscriptionMappingUtil.fromDTOToSubscription(body);
+            apiProvider.updateSubscription(subscribedAPI);
+
+            //retrieve the updated Subscription
+            apiConsumer = RestApiUtil.getConsumer(username);
+            SubscribedAPI updatedSubscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
+            return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }

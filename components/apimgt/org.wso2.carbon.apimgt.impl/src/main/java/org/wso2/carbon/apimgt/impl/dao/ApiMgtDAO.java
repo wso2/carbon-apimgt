@@ -3647,6 +3647,51 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * This method is used to update the subscription
+     * 
+     * @param subscribedAPI subscribedAPI object that represents the new subscription detals
+     * @throws APIManagementException if failed to update subscription
+     */
+    public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query to update the AM_SUBSCRIPTION table
+            String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, UPDATED_BY = ?, UPDATED_TIME = ? " +
+                    "WHERE UUID = ?";
+
+            //Updating data to the AM_SUBSCRIPTION table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, subscribedAPI.getSubStatus());
+            //TODO Need to find logged in user who does this update.
+            ps.setString(2, null);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setString(4, subscribedAPI.getUUID());
+            ps.execute();
+
+            // finally commit transaction
+            conn.commit();
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update subscription ", e);
+                }
+            }
+            handleException("Failed to update subscription data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
     public void updateSubscriptionStatus(int subscriptionId, String status) throws APIManagementException{
 
         Connection conn = null;
