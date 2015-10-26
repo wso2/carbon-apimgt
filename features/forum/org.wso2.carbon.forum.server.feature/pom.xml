@@ -67,7 +67,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum:${carbon.forum.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <!--<importBundleDef>rhino:js</importBundleDef>-->

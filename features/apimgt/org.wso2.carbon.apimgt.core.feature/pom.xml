@@ -274,17 +274,17 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${apimgt.api.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${apimgt.impl.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${apimgt.keymgt.stub.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${apimgt.keymgt.client.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${apimgt.keymgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${apimgt.usage.publisher}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${apimgt.usage.client}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core:${apimgt.core.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${apimgt.statsupdate.stub.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${apimgt.gateway.stub.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub:${carbon.kernel.version}</bundleDef-->
