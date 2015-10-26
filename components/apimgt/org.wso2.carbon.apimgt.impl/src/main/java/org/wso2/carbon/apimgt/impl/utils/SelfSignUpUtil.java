@@ -46,6 +46,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
 
+
 /**
  * This class contains the utility methods used for self signup
  */
@@ -112,8 +113,8 @@ public final class SelfSignUpUtil {
 	/**
 	 * load configuration from the registry
 	 * 
-	 * @param tenantDomain
-	 * @return
+	 * @param tenantDomain - The Tenant Domain
+	 * @return - A UserRegistrationConfigDTO instance
 	 * @throws APIManagementException
 	 */
 	private static UserRegistrationConfigDTO getSignupConfigurationFromRegistry(String tenantDomain)
@@ -171,9 +172,9 @@ public final class SelfSignUpUtil {
 	/**
 	 * Check whether user can signup to the tenant domain
 	 * 
-	 * @param userName
-	 * @param realm
-	 * @return
+	 * @param userName - The user name
+	 * @param realm - The realm
+	 * @return - A boolean value
 	 * @throws APIManagementException
 	 */
 	public static boolean isUserNameWithAllowedDomainName(String userName, UserRealm realm)
@@ -198,8 +199,8 @@ public final class SelfSignUpUtil {
 	/**
 	 * get the full role name list (ex: internal/subscriber)
 	 * 
-	 * @param config
-	 * @return
+	 * @param config - A UserRegistrationConfigDTO instance
+	 * @return - A list object containing role names
 	 */
 	public static List<String> getRoleNames(UserRegistrationConfigDTO config) {
 
@@ -226,9 +227,9 @@ public final class SelfSignUpUtil {
 
 	/**
 	 * modify user name with user storeage information. 
-	 * @param username
-	 * @param signupConfig
-	 * @return
+	 * @param username - The user name
+	 * @param signupConfig - The sign up configuration
+	 * @return - The modified user name
 	 */
 	public static String getDomainSpecificUserName(String username, UserRegistrationConfigDTO signupConfig) {
 		String modifiedUsername = null;	

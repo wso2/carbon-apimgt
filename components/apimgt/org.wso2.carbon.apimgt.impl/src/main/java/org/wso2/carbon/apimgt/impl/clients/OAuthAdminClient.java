@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.identity.oauth.stub.OAuthAdminServiceStub;
 import org.wso2.carbon.identity.oauth.stub.dto.OAuthConsumerAppDTO;
 
-
+@SuppressWarnings("unused")
 public class OAuthAdminClient {
 
     private static final Log log = LogFactory.getLog(OAuthAdminClient.class);
@@ -68,17 +68,13 @@ public class OAuthAdminClient {
 
     public OAuthConsumerAppDTO getOAuthApplicationData(String consumerKey, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminServiceStub.getOAuthApplicationData(consumerKey);
-
-        return oAuthConsumerAppDTO;
+        return oAuthAdminServiceStub.getOAuthApplicationData(consumerKey);
 
     }
 
     public OAuthConsumerAppDTO getOAuthApplicationDataByAppName(String appName, String username) throws Exception {
         Util.setAuthHeaders(oAuthAdminServiceStub._getServiceClient(), username);
-        OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminServiceStub.getOAuthApplicationDataByAppName(appName);
-
-        return oAuthConsumerAppDTO;
+        return oAuthAdminServiceStub.getOAuthApplicationDataByAppName(appName);
     }
 
     public void registerOAuthApplicationData(OAuthConsumerAppDTO application, String username) throws Exception {

@@ -21,8 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -77,7 +76,7 @@ public class ScopesIssuer {
         List<String> reqScopeList = Arrays.asList(requestedScopes);
 
         try {
-            Map<String, String> appScopes = null;
+            Map<String, String> appScopes;
             ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
             //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
@@ -96,8 +95,8 @@ public class ScopesIssuer {
 
             int tenantId;
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserStoreManager userStoreManager = null;
-            String[] userRoles = null;
+            UserStoreManager userStoreManager;
+            String[] userRoles;
 
             try {
                 tenantId = realmService.getTenantManager().
@@ -105,7 +104,7 @@ public class ScopesIssuer {
 
                 // If tenant Id is not set in the tokenReqContext, deriving it from username.
                 if (tenantId == 0 || tenantId == -1) {
-                    tenantId = IdentityUtil.getTenantIdOFUser(username);
+                    tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
                 }
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
                 userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
@@ -155,10 +154,6 @@ public class ScopesIssuer {
         } catch (APIManagementException e) {
             log.error("Error while getting scopes of application " + e.getMessage());
             return false;
-        } catch (IdentityException e) {
-            //Log and return since we do not want to stop issuing the token in case of scope validation failures.
-            log.error("Error when obtaining tenant Id of user " + username, e);
-            return false;
         }
         return true;
     }
@@ -166,8 +161,8 @@ public class ScopesIssuer {
     /**
      * Determines if the scope is specified in the whitelist.
      *
-     * @param scope
-     * @return
+     * @param scope - The scope key to check
+     * @return - 'true' if the scope is white listed. 'false' if not.
      */
     public boolean isWhiteListedScope(String scope) {
         for (String scopeTobeSkipped : scopeSkipList) {
@@ -184,7 +179,7 @@ public class ScopesIssuer {
      * token will be issued for default scope.
      *
      * @param requestedScopes - The set of requested scopes
-     * @return
+     * @return - The subset of scopes that are allowed
      */
     private String[] getAllowedScopes(List<String> requestedScopes) {
         List<String> authorizedScopes = new ArrayList<String>();

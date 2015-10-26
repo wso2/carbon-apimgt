@@ -2658,7 +2658,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             return true;
         } catch (GovernanceException e) {
-            handleException("Failed to change the life cycle status : ", e);
+            handleException("Failed to change the life cycle status : " + e.getMessage(), e);
             return false;
         } finally {
             PrivilegedCarbonContext.endTenantFlow();

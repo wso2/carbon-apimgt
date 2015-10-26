@@ -56,7 +56,6 @@ public class APITokenAuthenticator {
 
             ResourceInfoDTO resourceInfoDTO = null;
             VerbInfoDTO verbInfoDTO;
-            int i = 0;
             for (URITemplate uriTemplate : uriTemplates) {
                 if (resourceInfoDTO != null && resourceInfoDTO.getUrlPattern().equalsIgnoreCase(uriTemplate.getUriTemplate())) {
                     HashSet<VerbInfoDTO> verbs = (HashSet<VerbInfoDTO>) resourceInfoDTO.getHttpVerbs();
@@ -85,8 +84,7 @@ public class APITokenAuthenticator {
         return apiInfoDTO;
     }
 
-    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
-    ) throws APIManagementException {
+    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws APIManagementException {
         try {
             return ApiMgtDAO.getAllURITemplates(context, apiVersion);
         } catch (APIManagementException e) {
@@ -165,7 +163,7 @@ public class APITokenAuthenticator {
                     }
                     //If the urlPattern ends with a '/', remove that as well.
                     //urlPattern = RESTUtils.trimTrailingSlashes(urlPattern);
-                    if (urlPattern != null && urlPattern.endsWith("/")) {
+                    if (urlPattern.endsWith("/")) {
                         urlPattern = urlPattern.substring(0, urlPattern.length() - 1);
                     }
 

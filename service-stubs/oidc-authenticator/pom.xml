@@ -29,7 +29,10 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <name>OpenID Connect Authenticator stubs</name>
+
+
     <modules>
         <module>org.wso2.carbon.apimgt.authenticator.oidc.stub</module>
     </modules>
+
 </project>

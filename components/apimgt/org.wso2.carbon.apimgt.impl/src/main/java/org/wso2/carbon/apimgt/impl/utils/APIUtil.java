@@ -1557,7 +1557,7 @@ public final class APIUtil {
                     String type=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
                     String className =
                             storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
-                    store.setPublisher((APIPublisher) Class.forName(className).newInstance());
+                    store.setPublisher((APIPublisher) getClassForName(className));
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
@@ -2219,9 +2219,9 @@ public final class APIUtil {
             throws APIManagementException {
         try {
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
-                                                                                       RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                                                                + artifactPath);
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
+                            RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                            + artifactPath);
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -2389,8 +2389,8 @@ public final class APIUtil {
                     ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantID).
                             getAuthorizationManager();
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
-                                                                APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
-                                                                + APIConstants.EXTERNAL_API_STORES_LOCATION);
+                    APIUtil.getMountedPath(RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
+                            + APIConstants.EXTERNAL_API_STORES_LOCATION);
             authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
 
         } catch (RegistryException e) {
@@ -4321,7 +4321,13 @@ public final class APIUtil {
         return null;
     }
 
-     public static boolean isStringArray(Object[] args) {
+    /**
+    * Check whether input array is a string array
+    *
+    * @param args Object array
+    * @return whether provided array is a String array
+    */
+    public static boolean isStringArray(Object[] args) {
         int argsCount = args.length;
         for (int i = 0; i < argsCount; i++) {
             if (!(args[i] instanceof String)) {
@@ -4589,5 +4595,18 @@ public final class APIUtil {
             resourcePathBuilder.append(resourcePath);
         }
         return resourcePathBuilder.toString();
+    }
+
+    /**
+     * Gets the instance of a class given the class name.
+     * @param className the fully qualified name of the class.
+     * @return an instance of the class with the given name
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+
+    public static Object getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        return Class.forName(className).newInstance();
     }
 }

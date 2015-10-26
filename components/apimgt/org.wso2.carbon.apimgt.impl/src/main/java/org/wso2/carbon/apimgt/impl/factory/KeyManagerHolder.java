@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
@@ -73,7 +74,7 @@ public class KeyManagerHolder {
                 } else {
                     // If APIKeyManager section is enabled, class name is picked from there.
                     String clazz = apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT);
-                    keyManager = (KeyManager) Class.forName(clazz).newInstance();
+                    keyManager = (KeyManager) APIUtil.getClassForName(clazz);
                     Set<String> configKeySet = apiManagerConfiguration.getConfigKeySet();
 
                     KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();

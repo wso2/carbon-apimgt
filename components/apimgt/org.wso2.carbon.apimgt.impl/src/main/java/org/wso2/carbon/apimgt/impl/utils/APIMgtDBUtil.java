@@ -217,8 +217,8 @@ public final class APIMgtDBUtil {
     /**
      * Function converts IS to String
      * Used for handling blobs
-     * @param is
-     * @return
+     * @param is - The Input Stream
+     * @return - The inputStream as a String
      */
     public static String getStringFromInputStream(InputStream is) {
         BufferedReader br = null;

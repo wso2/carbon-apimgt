@@ -20,11 +20,11 @@ $(document).ready(function(){
         $(btn).val(i18n.t('validationMsgs.validating'));
 
         if (url == '') {
-            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
-            var toFade = $(btn).next();
+            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-exclamation-sign icon-white"></i>'+ i18n.t('validationMsgs.missingUrl')+'</span>');
+            var toFade = $(btn).parent().parent().find('.url_validate_label');
+            var foo = setTimeout(function() {$(toFade).hide();}, 3000);
             $(btn).removeClass("loadingButton-small");
             $(btn).val(i18n.t('validationMsgs.testUri'));
-            var foo = setTimeout(function(){$(toFade).hide()},3000);
             return;
         }
         if (!type) {
@@ -33,17 +33,29 @@ $(document).ready(function(){
         jagg.post("/site/blocks/item-add/ajax/add.jag", { action:"isURLValid", type:type,url:url },
                   function (result) {
                       if (!result.error) {
-                          if (result.response == "success") {
-                              $(btn).parent().after(' <span class="label label-success url_validate_label"><i class="icon-ok icon-white"></i>'+ i18n.t('validationMsgs.valid')+'</span>');
+                          if (result.response.response == "success") {
+                              $(btn).parent().after(' <span class="label label-success url_validate_label"><i class="icon-ok icon-white"></i>' + i18n.t('validationMsgs.valid') + '</span>');
 
                           } else {
-                              $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>'+ i18n.t('validationMsgs.invalid')+'</span>');
+                              if (result.response.isConnectionError) {
+                                if (result.response.response == null) {
+                                    $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid')+ '<br/>' + i18n.t('validationMsgs.errorInConnection') + '</span>');
+                                } else { //When an exception is thrown from jsFunction_isURLValid
+                                    $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '</span>');
+                                }
+                              } else {
+                                    if (result.response.statusCode == null) { //When an exception is thrown from sendHttpHEADRequest method
+                                        $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + result.response.response + '</span>');
+                                    } else {
+                                        $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
+                                    }
+                              }
+
                           }
                           var toFade = $(btn).parent().parent().find('.url_validate_label');
                           var foo = setTimeout(function() {
                                 $(toFade).hide();
                           }, 3000);
-
                       }
                       $(btn).removeClass("loadingButton-small");
                       $(btn).val(i18n.t('validationMsgs.testUri'));

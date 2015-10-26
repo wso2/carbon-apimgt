@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.amber.oauth2.common.OAuth;
+import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

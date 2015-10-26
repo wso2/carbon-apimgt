@@ -62,8 +62,7 @@ public class ApplicationUtils {
     public static Application populateApplication(String workflowReference)
             throws APIManagementException {
         int appId = dao.getApplicationIdForAppRegistration(workflowReference);
-        Application application = dao.getApplicationById(appId);
-        return application;
+        return dao.getApplicationById(appId);
     }
 
 
@@ -72,9 +71,9 @@ public class ApplicationUtils {
      * Further it will initiate new OauthAppRequest  object and set applicationInfo object as its own property.
      * @param clientName client Name.
      * @param callbackURL This is the call back URL of the application
-     * @param tokenScope
-     * @param clientDetails
-     * @param clientId
+     * @param tokenScope The token scope
+     * @param clientDetails The client details
+     * @param clientId The ID of the client
      * @return appRequest object of OauthAppRequest.
      * @throws APIManagementException
      */

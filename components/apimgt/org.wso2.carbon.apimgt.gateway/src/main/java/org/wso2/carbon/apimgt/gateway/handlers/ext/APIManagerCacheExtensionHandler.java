@@ -12,7 +12,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import javax.cache.Caching;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
