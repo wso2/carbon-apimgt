@@ -34,5 +34,6 @@
         <module>org.wso2.carbon.apimgt.keymgt.stub</module>
         <module>org.wso2.carbon.apimgt.gateway.stub</module>
         <module>org.wso2.carbon.apimgt.statsupdate.stub</module>
+        <module>org.wso2.carbon.apimgt.tier.cache.stub</module>
     </modules>
 </project>

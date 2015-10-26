@@ -4486,12 +4486,20 @@ public final class APIUtil {
     }
 
 
-    public static void clearTiersCache(){
-        getTiersCache().removeAll();
+    public static void clearTiersCache(String tenantDomain){
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+            getTiersCache().removeAll();
+        }
+        finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     private static Cache getTiersCache() {
-        if (!isTiersCacheInitialized) {
+        /*if (!isTiersCacheInitialized) {
             isTiersCacheInitialized = true;
             CacheBuilder builder = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                     createCacheBuilder(APIConstants.TIERS_CACHE);
@@ -4499,10 +4507,10 @@ public final class APIUtil {
             //return builder.setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS, 10)).build();
             return builder.build();
         }
-        else {
+        else {*/
             return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                     getCache(APIConstants.TIERS_CACHE);
-        }
+        //}
     }
     
     /*
