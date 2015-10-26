@@ -6809,7 +6809,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                                 "IDN_OAUTH_CONSUMER_APPS ICA " +
                             "WHERE IAT.ACCESS_TOKEN = ? " +
                                 "AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-                                "AND IAT.CONSUMER_KEY_ID = ICA.ID" +
+                                "AND IAT.CONSUMER_KEY_ID = ICA.ID " +
                                 "AND AKM.APPLICATION_ID = AMS.APPLICATION_ID " +
                                 "AND AMA.API_ID = AMS.API_ID";
 
