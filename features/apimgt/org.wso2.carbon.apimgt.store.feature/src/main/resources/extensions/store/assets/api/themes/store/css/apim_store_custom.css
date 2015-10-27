@@ -586,3 +586,30 @@ div.navigation-container{
 .dropdown-menu > li > a {
     color: #fff !important;
 }
+.appDiv {
+    float:left;
+}
+.tierDiv {
+    float:left;
+    clear: left;
+    margin-top: 10px;
+}
+.subsBtnDiv {
+    float:left;
+    clear: left;
+    margin-top: 10px;
+}
+#tier-label {
+    float:left;
+}
+#tiers-list {
+    float:left;
+    clear: left;
+    margin-top: 5px;
+    width: 170px;
+}
+
+#application-list {
+    margin-top: 5px;
+    width: 170px;
+}
