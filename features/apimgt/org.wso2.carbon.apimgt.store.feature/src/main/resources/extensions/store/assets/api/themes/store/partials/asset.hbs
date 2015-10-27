@@ -10,7 +10,6 @@
             <h3>{{assets.name}}</h3>
 
             <div class="clear"></div>
-            <hr>
         </div>
     </div>
     <div class="asset-details-header ">
@@ -25,7 +24,7 @@
             class="img-responsive"/>
             {{/if}}
             </div>
-            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-8 ">
+            <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5 ">
                 <div class="col-lg-9">
                     <span class="asset-rating" style="float:left">
                         <div style="width:{{assets.ratingPx}}px"></div>
@@ -41,6 +40,48 @@
                 </div>
 
             </div>
+            {{#if cuser.username}}
+            {{#if showSubscribe}}
+            <div class='col-lg-5'>
+                <div class="col-lg-5 appDiv">
+                    <label><strong>Applications</strong></label>
+                    <select id='application-list' class="span12">
+                        {{#unless subscribedToDefault}}
+                            <option value="-">{{t "Select Application..."}}</option>
+                        {{/unless}}
+                        <option value="createNewApp">{{t "New Application..."}}</option>
+                        <optgroup label="My Applications">
+                            {{#each applications}}
+                                <option value="{{id}}" {{#if selectedDefault}} selected {{/if}}>{{name}}</option>
+                            {{/each}}
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="col-lg-5 tierDiv">
+                    <label id="tier-label"><strong>Tiers</strong></label>
+                    <select id="tiers-list" name="tiers-list" class="span12">
+                        {{#if tiers}}
+                            {{#each tiers}}
+                                <option value="{{this}}">{{this}}</option>
+                            {{/each}}{{/if}}
+                    </select>
+                </div>
+                <div class="col-lg-5 subsBtnDiv">
+                    <div class="simple-space-maker">
+                        <button onclick="triggerSubscribe()" id="subscribe-button"
+                                class="btn btn-primary span12" {{#unless tiersAvailable}}
+                                disabled="disabled" {{/unless}}>{{t "Subscribe"}}
+                        </button>
+                        {{#unless tiersAvailable}}
+                            <span id="subsBtnDesc"
+                                  class="help-block">{{t "You may not be entitled to any of the available tiers"}}</span>
+                        {{/unless}}
+
+                    </div>
+                </div>
+            </div>
+            {{/if}}
+            {{/if}}
         </div>
         <!-- end of asset details-->
 
@@ -72,50 +113,7 @@
             <!--</table>-->
         <!--</div>-->
     <!--</div>-->
-    {{#if cuser.username}}
-    {{#if showSubscribe}}
-
-        <div class='col-lg-12 border-top panel appStyleFix'>
-            <div class="col-lg-3 padding-left">
-                <label><strong>Applications</strong></label>
-                <select id='application-list' class="span12">
-                    {{#unless subscribedToDefault}}
-                        <option value="-">{{t "Select Application..."}}</option>
-                    {{/unless}}
-                    <option value="createNewApp">{{t "New Application..."}}</option>
-                    <optgroup label="My Applications">
-                        {{#each applications}}
-                            <option value="{{id}}" {{#if selectedDefault}} selected {{/if}}>{{name}}</option>
-                        {{/each}}
-                    </optgroup>
-                </select>
-            </div>
-            <div class="col-lg-2 padding-left">
-                <label><strong>Tiers</strong></label>
-                <select id="tiers-list" name="tiers-list" class="span12">
-                    {{#if tiers}}
-                        {{#each tiers}}
-                            <option value="{{this}}">{{this}}</option>
-                        {{/each}}{{/if}}
-                </select>
-            </div>
-            <div class="col-lg-1">
-                <div class="simple-space-maker">
-                    <button onclick="triggerSubscribe()" id="subscribe-button"
-                            class="btn btn-primary span12" {{#unless tiersAvailable}}
-                            disabled="disabled" {{/unless}}>{{t "Subscribe"}}
-                    </button>
-                    {{#unless tiersAvailable}}
-                        <span id="subsBtnDesc"
-                              class="help-block">{{t "You may not be entitled to any of the available tiers"}}</span>
-                    {{/unless}}
-
-                </div>
-            </div>
-        </div>
     </div>
-    {{/if}}
-    {{/if}}
     <input type="hidden" id="apiname" value="{{api.name}}">
     <input type="hidden" id="version" value="{{api.version}}">
     <input type="hidden" id="provider" value="{{api.provider}}">
