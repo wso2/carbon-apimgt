@@ -9,7 +9,13 @@ function getFirstAccessTime(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
+        if(usageClient==null){
+            return {
+                error:true
+            };
+        }
         usage = usageClient.getFirstAccessTime(providerName);
+
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIFirstAccessTime for : " + server);
         }

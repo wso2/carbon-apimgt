@@ -262,11 +262,12 @@ function getProviderAPIServiceTime(providerName,from,to, server) {
     }
 }
 
-function getSubscriberCountByAPIs(providerName) {
+function getSubscriberCountByAPIs(providerName, isAllStatistics) {
     var usage = [];
     var usageout = [];
     try {
-        usage = usageClient.getSubscriberCountByAPIs(providerName);
+        var usageClient=org.wso2.carbon.apimgt.usage.client.UsageClient;
+        usage = usageClient.getSubscriberCountByAPIs(providerName, isAllStatistics);
         if (log.isDebugEnabled()) {
             log.debug("getSubscriberCountByAPIs for : " + providerName);
         }
@@ -355,6 +356,11 @@ function getFirstAccessTime(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
+        if(usageClient==null){
+            return {
+                error:true
+            };
+        }
         usage = usageClient.getFirstAccessTime(providerName);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIFirstAccessTime for : ");

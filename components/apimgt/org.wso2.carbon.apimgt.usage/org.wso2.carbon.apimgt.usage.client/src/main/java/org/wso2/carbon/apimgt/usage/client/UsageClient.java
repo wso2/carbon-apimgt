@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.apimgt.usage.client.pojo.SubscriberCountByAPIs;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -90,6 +91,50 @@ public class UsageClient {
         return con.isAnalyticsEnabled();
     }
 
+
+    /**
+     * Use to get instance of implementation class of the APIUsageStatisticsClient that is defined in the apim-manager.xml
+     *
+     * @return instance of a APIUsageStatisticsClient
+     * @throws APIMgtUsageQueryServiceClientException throws if instantiation problem occur
+     */
+    private static APIUsageStatisticsClient getStatisticClient(String user) throws APIMgtUsageQueryServiceClientException {
+
+        //read the api-manager.xml and get the Statistics class name
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String className = config.getFirstProperty("StatisticClientProvider");
+
+        try {
+            //get class from the class name and use the constructor with one String argument to get a instance
+            if(user!=null) {
+                usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor(String.class)
+                        .newInstance(user);
+            }else{
+                usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor()
+                        .newInstance();
+            }
+
+        } catch (InstantiationException e) {
+            throw new APIMgtUsageQueryServiceClientException("Cannot instantiate Statistic Client class: " + className,
+                    e);
+        } catch (IllegalAccessException e) {
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Cannot access the constructor in Statistic Client class: " + className, e);
+        } catch (InvocationTargetException e) {
+            throw new APIMgtUsageQueryServiceClientException("");
+        } catch (NoSuchMethodException e) {
+            throw new APIMgtUsageQueryServiceClientException(
+                    "Cannot found expected constructor in Statistic Client class: " + className, e);
+        } catch (ClassNotFoundException e) {
+            throw new APIMgtUsageQueryServiceClientException("Cannot found the Statistic Client class: " + className,
+                    e);
+        }
+
+        return usageStatisticsClient;
+    }
+
+
     /**
      * Get the Subscriber count and information related to the APIs
      *
@@ -97,12 +142,17 @@ public class UsageClient {
      * @return return list of SubscriberCountByAPIs objects. which contain the list of apis and related subscriber counts
      * @throws APIManagementException throws exception if error occur
      */
-    public static List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser)
-            throws APIManagementException {
-        String providerName = null;
+    public static List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser,boolean isAllStatistics)
+            throws APIManagementException{
 
         //get the provider
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(loggedUser);
+        String providerName = null;
+        if (isAllStatistics) {
+            providerName = "__all_providers__";
+        } else {
+            providerName = loggedUser;
+        }
 
         List<SubscriberCountByAPIs> list = new ArrayList<SubscriberCountByAPIs>();
         boolean isTenantFlowStarted = false;
@@ -157,42 +207,7 @@ public class UsageClient {
             }
         }
         return list;
-    }
 
-    /**
-     * Use to get instance of implementation class of the APIUsageStatisticsClient that is defined in the apim-manager.xml
-     *
-     * @return instance of a APIUsageStatisticsClient
-     * @throws APIMgtUsageQueryServiceClientException throws if instantiation problem occur
-     */
-    private static APIUsageStatisticsClient getStatisticClient(String user) throws APIMgtUsageQueryServiceClientException {
-
-        //read the api-manager.xml and get the Statistics class name
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        String className = config.getFirstProperty("StatisticClientProvider");
-
-        try {
-            //get class from the class name and use the constructor with one String argument to get a instance
-            usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor(String.class)
-                    .newInstance(user);
-        } catch (InstantiationException e) {
-            throw new APIMgtUsageQueryServiceClientException("Cannot instantiate Statistic Client class: " + className,
-                    e);
-        } catch (IllegalAccessException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Cannot access the constructor in Statistic Client class: " + className, e);
-        } catch (InvocationTargetException e) {
-            throw new APIMgtUsageQueryServiceClientException("");
-        } catch (NoSuchMethodException e) {
-            throw new APIMgtUsageQueryServiceClientException(
-                    "Cannot found expected constructor in Statistic Client class: " + className, e);
-        } catch (ClassNotFoundException e) {
-            throw new APIMgtUsageQueryServiceClientException("Cannot found the Statistic Client class: " + className,
-                    e);
-        }
-
-        return usageStatisticsClient;
     }
 
 }

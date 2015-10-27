@@ -2917,17 +2917,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    /**
-     * Get the Subscriber count and information related to the APIs
-     *
-     * @param loggedUser
-     * @return list of SubscriberCountByAPIs
-     * @throws APIManagementException
-     */
-    @Override
-    public List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser) throws APIManagementException {
-        return super.getSubscriberCountByAPIs(loggedUser, apiProviderImpl);
-    }
 
     private static class APIUsageByUser {
 
