@@ -2338,13 +2338,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     public void deployArtifacts(String url, String user, String pass) throws Exception {
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics_RDBMS.car";
-        String cAppPath = System.getProperty("carbon.home") + "/statistics";
-        cAppPath = cAppPath + '/' + cAppName;
+        String cAppPath = System.getProperty("carbon.home") + File.separator + "statistics";
+        cAppPath = cAppPath + File.separator + cAppName;
         File file = new File(cAppPath);
 
         //get the byte array of file
         byte[] byteArray = FileUtils.readFileToByteArray(file);
-        DataHandler dataHandler = new DataHandler(byteArray, "application/octet-stream");
+        DataHandler dataHandler = new DataHandler(byteArray,
+                APIUsageStatisticsClientConstants.APPLICATION_OCTET_STREAM);
 
         //create the stub to deploy artifacts
         CarbonAppUploaderStub stub = new CarbonAppUploaderStub(url + "/services/CarbonAppUploader");
