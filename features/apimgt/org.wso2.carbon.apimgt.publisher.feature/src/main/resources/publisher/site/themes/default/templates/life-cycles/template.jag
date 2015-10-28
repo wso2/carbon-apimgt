@@ -39,9 +39,10 @@ var provider=$("#provider").val();
                   if (!result.error) {
                      $('#statusUpdateMsg').show();
                      setTimeout(function(){
-    location = ''
-  },1000)
-
+    						location = ''
+  					 },1000)
+                  } else {
+                    jagg.message({content:result.message,type:"error"});
                   }
               }, "json");
 

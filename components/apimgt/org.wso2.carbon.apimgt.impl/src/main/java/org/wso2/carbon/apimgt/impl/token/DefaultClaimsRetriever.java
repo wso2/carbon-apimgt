@@ -21,11 +21,8 @@ package org.wso2.carbon.apimgt.impl.token;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.ClaimCache;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
 import org.wso2.carbon.apimgt.impl.utils.UserClaims;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -34,7 +31,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -120,7 +116,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     private String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
         String[] temp = new String[claims.length];
         for (int i = 0; i < claims.length; i++) {
-            temp[i] = claims[i].getClaim().getClaimUri().toString();
+            temp[i] = claims[i].getClaim().getClaimUri();
        
         }
         return temp;

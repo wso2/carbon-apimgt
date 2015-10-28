@@ -28,36 +28,7 @@ import java.util.ArrayList;
 
 public class ThriftAPIDataStore implements APIKeyDataStore{
 
-    private static final ThriftKeyValidatorClientPool clientPool =
-            ThriftKeyValidatorClientPool.getInstance();
-    /**
-     * Validate the given API key for the specified API context and version.
-     *
-     * @param context    Context of an API
-     * @param apiVersion A valid version of the API
-     * @param apiKey     An API key string - Not necessarily a valid key
-     * @return an APIKeyValidationInfoDTO instance containing key validation data
-     * @throws org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException
-     *          on error
-     */
-    /*public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey, String clientDomain)
-            throws APISecurityException {
-        ThriftKeyValidatorClient client = null;
-        try {
-            client = clientPool.get();
-            return client.getAPIKeyData(context, apiVersion, apiKey, APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN, clientDomain);
-        } catch (Exception e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error while accessing backend services for API key validation", e);
-        } finally {
-            try {
-                if (client != null) {
-                    clientPool.release(client);
-                }
-            } catch (Exception ignored) {
-            }
-        }
-    }*/
+    private static final ThriftKeyValidatorClientPool clientPool = ThriftKeyValidatorClientPool.getInstance();
 
     /**
      * Validate the given API key for the specified API context and version.

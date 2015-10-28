@@ -51,12 +51,9 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
-import org.apache.synapse.util.AXIOMUtils;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -532,7 +529,7 @@ public class APIThrottleHandler extends AbstractHandler {
                         info = applicationRoleBasedAccessController.canAccess(applicationThrottleContext, applicationId, applicationRoleId);
                         if (log.isDebugEnabled()) {
                             log.debug("Throttle by Application " + applicationId);
-                            log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
+                            log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
                         }
                     } catch (ThrottleException e) {
                         log.warn("Exception occurred while performing role " +
@@ -756,7 +753,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
                 if (log.isDebugEnabled()) {
                     log.debug("Throttle by hard limit " + throttleKey);
-                    log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
+                    log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
                 }
 
                 if (info != null && !info.isAccessAllowed()) {

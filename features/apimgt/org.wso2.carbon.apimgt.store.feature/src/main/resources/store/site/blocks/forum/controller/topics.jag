@@ -28,19 +28,28 @@ var tenantDomain = "carbon.super";
 var date = new Date();
 
 var uri = request.getRequestURI();
-var callPath = uri.replace("/store/forum/api/topic", "");
+var callPath = uri.replace("/store/forum/api", "");
+var action;
 
 if (uri != null) {
     var uriMatcher = new URIMatcher(callPath);
 
-    if (uriMatcher.match("/{topicId}/{page}")) {
+    if (uriMatcher.match("/topic") || uriMatcher.match("/topic/")) {
+        // create topic
+        topicId = null;
+    } else if (uriMatcher.match("/topic/{topicId}/{page}")) {
         topicId = uriMatcher.elements().topicId;
-    }
-    if (uriMatcher.match("/{topicId}/")) {
+    } else if (uriMatcher.match("/topic/{topicId}/")) {
         topicId = uriMatcher.elements().topicId;
+    } else {
+        //Invalid URL
+        action = "exit";
     }
 }
 
+if (action == "exit") {
+    response.sendError(404);
+} else {
 var storeForum = Packages.org.wso2.carbon.forum.registry.RegistryForumManager;
 var forum = new storeForum();
 
@@ -331,7 +340,7 @@ if(validation_errors != true){
 }
 
 print(message);
-
+}
 function getDate(date) {
     var dateStr = date.toString();
     var splitArray = dateStr.split(" ");

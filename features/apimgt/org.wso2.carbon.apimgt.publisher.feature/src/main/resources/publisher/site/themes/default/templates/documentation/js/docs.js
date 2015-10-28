@@ -104,7 +104,7 @@ var updateDocumentation = function (rowId, docName, docType, summary, sourceType
 
     else{
         if (docType == "Public Forum" || docType == "Support Forum") {
-                    disableInline("forum");
+            disableInline("forum");
         }
         if (sourceType == "INLINE") {
             $('#optionsRadios6').attr('checked', true);
