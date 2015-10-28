@@ -138,6 +138,22 @@ public interface APIConsumer extends APIManager {
      */
     void removeAPIRating(APIIdentifier apiId, String user) throws APIManagementException;
 
+    /** returns the SubscribedAPI object which is related to the subscriptionId
+     *
+     * @param subscriptionId subscription id
+     * @return
+     * @throws APIManagementException
+     */
+    SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException;
+
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
+
     /**
      * Returns a set of SubscribedAPI purchased by the given Subscriber
      *
@@ -240,14 +256,29 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * 
+     * @param subscriptionId id of the subscription
+     * @return
+     * @throws APIManagementException if failed to get subscription detail from database
+     */
+    String getSubscriptionStatusById(int subscriptionId) throws APIManagementException;
+ 
+    /**
      * Unsubscribe the specified user from the specified API in the given application
      *
      * @param identifier    APIIdentifier
      * @param userId        id of the user
      * @param applicationId Application Id
-     * @throws APIManagementException if failed to add subscription details to database
+     * @throws APIManagementException if failed to remove subscription details from database
      */
     void removeSubscription(APIIdentifier identifier, String userId, int applicationId) throws APIManagementException;
+
+    /** Removes a subscription specified by SubscribedAPI object
+     * 
+     * @param subscription SubscribedAPI object which contains the subscription information
+     * @throws APIManagementException
+     */
+    void removeSubscription(SubscribedAPI subscription) throws APIManagementException;
 
     /**
      * Remove a Subscriber
@@ -290,7 +321,7 @@ public interface APIConsumer extends APIManager {
      * @param userId      User Id
      * @throws APIManagementException if failed to add Application
      */
-    String addApplication(Application application, String userId) throws APIManagementException;
+    int addApplication(Application application, String userId) throws APIManagementException;
 
     /**
      * Updates the details of the specified user application.
@@ -300,7 +331,20 @@ public interface APIConsumer extends APIManager {
      */
     void updateApplication(Application application) throws APIManagementException;
 
+    /**
+     * Function to remove an Application from the API Store
+     * @param application - The Application Object that represents the Application
+     * @throws APIManagementException
+     */
     void removeApplication(Application application) throws APIManagementException;
+
+    /** get the status of the Application creation process given the application Id
+     *
+     * @param applicationId Id of the Application
+     * @return
+     * @throws APIManagementException
+     */
+    String getApplicationStatusById(int applicationId) throws APIManagementException;
 
     /**
      * Creates a request for getting Approval for Application Registration.
@@ -379,7 +423,22 @@ public interface APIConsumer extends APIManager {
      */
     Application getApplicationsByName(String userId , String ApplicationName , String groupId) throws APIManagementException;
 
+    /**
+     * Returns the corresponding application given the Id
+     * @param id Id of the Application
+     * @return it will return Application corresponds to the id.
+     * @throws APIManagementException
+     */
+    Application getApplicationById(int id) throws APIManagementException;
 
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid) throws APIManagementException;
+ 
     /**
      * @param subscriber the subscriber in relation to the identifiers
      * @param identifier the identifiers of the API's the subscriber is subscribed to
