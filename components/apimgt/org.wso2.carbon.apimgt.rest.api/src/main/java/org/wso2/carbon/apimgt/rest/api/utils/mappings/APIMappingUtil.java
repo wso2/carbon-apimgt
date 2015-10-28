@@ -42,6 +42,7 @@ public class APIMappingUtil {
 
     public static APIIdentifier getAPIIdentifier(String apiId){
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
+        // apiId format: provider-apiName-version
         String providerName = apiIdDetails[0];
         String apiName = apiIdDetails[1];
         String version = apiIdDetails[2];
@@ -145,7 +146,8 @@ public class APIMappingUtil {
 
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
-        APIIdentifier apiId = new APIIdentifier(dto.getProvider(), dto.getName(), dto.getVersion());
+        String provider = APIUtil.replaceEmailDomain(dto.getProvider());
+        APIIdentifier apiId = new APIIdentifier(provider, dto.getName(), dto.getVersion());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
 
         //if not supertenant append /t/wso2.com/ to context
@@ -153,7 +155,7 @@ public class APIMappingUtil {
         model.setContextTemplate(dto.getContext());
         model.setDescription(dto.getDescription());
 
-        model.setStatus(APIStatus.CREATED);
+        model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
 
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
@@ -225,6 +227,24 @@ public class APIMappingUtil {
         //endpoint configs, business info and thumbnail requires mapping
         return model;
 
+    }
+
+    private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
+        // switch case statements are not working as APIStatus.<STATUS>.toString() or APIStatus.<STATUS>.getStatus()
+        //  is not a constant
+        if (apiStatus.equals(APIStatus.BLOCKED.toString())) {
+            return APIStatus.BLOCKED;
+        } else if (apiStatus.equals(APIStatus.CREATED.toString())) {
+            return APIStatus.CREATED;
+        } else if (apiStatus.equals(APIStatus.PUBLISHED.toString())) {
+            return APIStatus.PUBLISHED;
+        } else if (apiStatus.equals(APIStatus.DEPRECATED.toString())) {
+            return APIStatus.DEPRECATED;
+        } else if (apiStatus.equals(APIStatus.PROTOTYPED.toString())) {
+            return APIStatus.PROTOTYPED;
+        } else {
+            return null; // how to handle this?
+        }
     }
 
     private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) {

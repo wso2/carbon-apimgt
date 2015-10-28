@@ -208,13 +208,20 @@ public class ApisApiServiceImpl extends ApisApiService {
         boolean isTenantFlowStarted = false;
         APIDTO updatedApiDTO = null;
         try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            APIIdentifier apiIdentifier;
+            if (RestApiUtil.isUUID(apiId)) {
+                apiIdentifier = apiProvider.getAPIInformationByUUID(apiId, tenantDomain).getId();
+            } else {
+                apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+            }
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
             body.setProvider(apiIdentifier.getProviderName());
-            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
+            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body);
 
-            APIProvider apiProvider = RestApiUtil.getProvider();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -223,7 +230,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
-            apiProvider.updateAPI(apiToAdd);
+            apiProvider.updateAPI(apiToUpdate);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
