@@ -109,8 +109,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 paymentPlan = new PaymentPlan(element);
             }
             String targetEndpoint = apiManagerAnalyticsConfiguration.getBamServerUrlGroups();
-            if (targetEndpoint == null || targetEndpoint.equals(""))
+            if (targetEndpoint == null || targetEndpoint.equals("")) {
                 throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
+            }
             apiProviderImpl = APIManagerFactory.getInstance().getAPIProvider(username);
 
         } catch (Exception e) {
@@ -306,7 +307,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (isTableExist(tableName, connection)) {
 
                 query = "SELECT " +
-                        "consumerKey, api,SUM(" + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT + ") AS total_faults " +
+                        "consumerKey, api,SUM(" + APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT
+                        + ") AS total_faults " +
                         " FROM " + tableName +
                         " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                         " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
@@ -2266,9 +2268,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 query = "SELECT " + APIUsageStatisticsClientConstants.API + ","
                         + APIUsageStatisticsClientConstants.VERSION + "," + APIUsageStatisticsClientConstants.CONTEXT
                         + ",sum(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") as "
-                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," + APIUsageStatisticsClientConstants.MONTH
-                        + "," + APIUsageStatisticsClientConstants.USER_ID + " FROM  "
-                        + APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY + " WHERE "
+                        + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ","
+                        + APIUsageStatisticsClientConstants.MONTH + "," + APIUsageStatisticsClientConstants.USER_ID
+                        + " FROM  " + APIUsageStatisticsClientConstants.KEY_USAGE_MONTH_SUMMARY + " WHERE "
                         + APIUsageStatisticsClientConstants.MONTH + " = '" + period + "' AND "
                         + APIUsageStatisticsClientConstants.USER_ID + " = '" + subscriberName + "' GROUP BY "
                         + APIUsageStatisticsClientConstants.API_VERSION + ", "
@@ -2947,7 +2949,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             context = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.CONTEXT)).getText();
             username = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.USER_ID)).getText();
             requestCount = (long) Double.parseDouble(
-                    row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT)).getText());
+                    row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT))
+                            .getText());
             apiVersion = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.VERSION)).getText();
             month = row.getFirstChildWithName(new QName(APIUsageStatisticsClientConstants.MONTH)).getText();
         }

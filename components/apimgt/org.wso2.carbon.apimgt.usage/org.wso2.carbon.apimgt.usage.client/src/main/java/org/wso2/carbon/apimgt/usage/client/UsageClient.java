@@ -106,12 +106,15 @@ public class UsageClient {
         String className = config.getFirstProperty("StatisticClientProvider");
 
         try {
-            //get class from the class name and use the constructor with one String argument to get a instance
+
+            //get the Class from the class name
+            Class statClass=APIUtil.getClassFromName(className);
+            //use the constructor and pass appropriate args to get a instance
             if(user!=null) {
-                usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor(String.class)
+                usageStatisticsClient = (APIUsageStatisticsClient) statClass.getConstructor(String.class)
                         .newInstance(user);
             }else{
-                usageStatisticsClient = (APIUsageStatisticsClient) Class.forName(className).getConstructor()
+                usageStatisticsClient = (APIUsageStatisticsClient) statClass.getConstructor()
                         .newInstance();
             }
 
@@ -160,8 +163,8 @@ public class UsageClient {
             providerName = APIUtil.replaceEmailDomain(loggedUser);
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
@@ -198,9 +201,10 @@ public class UsageClient {
                 }
 
             }
-        } catch (Exception e) {
+        /*} catch (Exception e) {
             log.error("Error while getting subscribers of the provider: " + providerName, e);
             throw new APIManagementException("Error while getting subscribers of the provider: " + providerName, e);
+            */
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();

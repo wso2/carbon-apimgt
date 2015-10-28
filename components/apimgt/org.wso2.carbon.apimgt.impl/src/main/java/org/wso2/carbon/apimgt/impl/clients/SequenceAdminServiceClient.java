@@ -26,92 +26,90 @@ import org.wso2.carbon.sequences.stub.types.SequenceAdminServiceStub;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
- * SequenceAdmin service client to deploy the custom sequences to multiple gateway environemnets.
- * 
+ * SequenceAdmin service client to deploy the custom sequences to multiple gateway environments.
  */
-
+@SuppressWarnings("unused")
 public class SequenceAdminServiceClient extends AbstractAPIGatewayAdminClient {
-	private SequenceAdminServiceStub sequenceAdminStub;
+    private SequenceAdminServiceStub sequenceAdminStub;
 
-	public SequenceAdminServiceClient(Environment environment) throws AxisFault {
-		sequenceAdminStub = new SequenceAdminServiceStub(null, environment.getServerURL() +
-		                                                       "SequenceAdminService");
-		setup(sequenceAdminStub, environment);
-	}
+    public SequenceAdminServiceClient(Environment environment) throws AxisFault {
+        sequenceAdminStub = new SequenceAdminServiceStub(null, environment.getServerURL() +
+                "SequenceAdminService");
+        setup(sequenceAdminStub, environment);
+    }
 
-	/**
-	 * Deploy the sequence to the gateway
-	 * 
-	 * @param sequence  - The sequence element , which to be deployed in synapse
-	 * @param tenantDomain
-	 * @throws AxisFault
-	 */
-	public void addSequence(OMElement sequence, String tenantDomain) throws AxisFault {
-		try {
-			if (tenantDomain != null && !("").equals(tenantDomain) &&
-			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-				sequenceAdminStub.addSequenceForTenant(sequence, tenantDomain);
-			} else {
-				sequenceAdminStub.addSequence(sequence);
-			}
-
-		} catch (Exception e) {
-			throw new AxisFault("Error while adding new sequence", e);
-		}
-	}
-
-	/**
-	 * Undeploy the sequence from gateway
-	 * @param sequenceName -The sequence name, which need to be undeployed from synapse configuration
-	 * @param tenantDomain
-	 * @throws AxisFault
-	 */
-	public void deleteSequence(String sequenceName, String tenantDomain) throws AxisFault {
-		try {
-			if (tenantDomain != null && !("").equals(tenantDomain) &&
-			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-				sequenceAdminStub.deleteSequenceForTenant(sequenceName, tenantDomain);
-			} else {
-				sequenceAdminStub.deleteSequence(sequenceName);
-			}
-
-		} catch (Exception e) {
-			throw new AxisFault("Error while deleting sequence", e);
-		}
-	}
-
-	/**
-	 * get the sequence from gateway
-	 * 
-	 * @param sequenceName
-	 *            -The sequence name,
-	 * @param tenantDomain
-	 * @throws AxisFault
-	 */
-	public OMElement getSequence(String sequenceName, String tenantDomain) throws AxisFault {
-		try {
-			if (tenantDomain != null && !("").equals(tenantDomain) &&
-			    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-				return (OMElement) sequenceAdminStub.getSequenceForTenant(sequenceName, tenantDomain);
-			} else {
-				return  (OMElement) sequenceAdminStub.getSequence(sequenceName);
-			}
-			
-		} catch (Exception e) {
-			throw new AxisFault("Error while retriving the sequence", e);
-		}
-	}
-
-    public boolean isExistingSequence(String sequenceName, String tenantDomain) throws AxisFault{
-        try{
+    /**
+     * Deploy the sequence to the gateway
+     *
+     * @param sequence     The sequence element , which to be deployed in synapse
+     * @param tenantDomain Tenant Domain
+     * @throws AxisFault
+     */
+    public void addSequence(OMElement sequence, String tenantDomain) throws AxisFault {
+        try {
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
-                return sequenceAdminStub.isExistingSequenceForTenant(sequenceName, tenantDomain);
+                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                sequenceAdminStub.addSequenceForTenant(sequence, tenantDomain);
+            } else {
+                sequenceAdminStub.addSequence(sequence);
             }
-            else{
+
+        } catch (Exception e) {
+            throw new AxisFault("Error while adding new sequence", e);
+        }
+    }
+
+    /**
+     * Un-deploy the sequence from gateway
+     *
+     * @param sequenceName The sequence name, which need to be undeployed from synapse configuration
+     * @param tenantDomain Tenant Domain
+     * @throws AxisFault
+     */
+    public void deleteSequence(String sequenceName, String tenantDomain) throws AxisFault {
+        try {
+            if (tenantDomain != null && !("").equals(tenantDomain) &&
+                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                sequenceAdminStub.deleteSequenceForTenant(sequenceName, tenantDomain);
+            } else {
+                sequenceAdminStub.deleteSequence(sequenceName);
+            }
+
+        } catch (Exception e) {
+            throw new AxisFault("Error while deleting sequence", e);
+        }
+    }
+
+    /**
+     * get the sequence from gateway
+     *
+     * @param sequenceName -The sequence name,
+     * @param tenantDomain Tenant Domain
+     * @throws AxisFault
+     */
+    public OMElement getSequence(String sequenceName, String tenantDomain) throws AxisFault {
+        try {
+            if (tenantDomain != null && !("").equals(tenantDomain) &&
+                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                return sequenceAdminStub.getSequenceForTenant(sequenceName, tenantDomain);
+            } else {
+                return sequenceAdminStub.getSequence(sequenceName);
+            }
+
+        } catch (Exception e) {
+            throw new AxisFault("Error while retrieving the sequence", e);
+        }
+    }
+
+    public boolean isExistingSequence(String sequenceName, String tenantDomain) throws AxisFault {
+        try {
+            if (tenantDomain != null && !("").equals(tenantDomain) &&
+                    !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                return sequenceAdminStub.isExistingSequenceForTenant(sequenceName, tenantDomain);
+            } else {
                 return sequenceAdminStub.isExistingSequence(sequenceName);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new AxisFault("Error while checking for existence of sequence : " + sequenceName +
                     " in tenant " + tenantDomain, e);
         }

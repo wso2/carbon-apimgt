@@ -114,8 +114,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 paymentPlan = new PaymentPlan(element);
             }
             String targetEndpoint = apiManagerAnalyticsConfiguration.getBamServerUrlGroups();
-            if (targetEndpoint == null || targetEndpoint.equals(""))
+            if (targetEndpoint == null || targetEndpoint.equals("")) {
                 throw new APIMgtUsageQueryServiceClientException("Required BAM server URL parameter unspecified");
+            }
             apiProviderImpl = APIManagerFactory.getInstance().getAPIProvider(username);
 
         } catch (Exception e) {
@@ -1962,7 +1963,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public List<APIVersionUsageDTO> getUsageByAPIVersions(String providerName, String apiName, String fromDate,
             String toDate) throws APIMgtUsageQueryServiceClientException {
 
-        //get the api usgae data of the apis by version
+        //get the api usage data of the apis by version
         List<APIUsage> usageData = this
                 .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY, fromDate,
                         toDate, apiName);

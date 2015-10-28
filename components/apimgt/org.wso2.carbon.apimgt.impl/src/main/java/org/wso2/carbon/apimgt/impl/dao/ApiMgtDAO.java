@@ -140,7 +140,7 @@ public class ApiMgtDAO {
                     tokenGenerator = new JWTGenerator();
                 } else {
                     try {
-                        tokenGenerator = (TokenGenerator) Class.forName(clazz).newInstance();
+                        tokenGenerator = (TokenGenerator) APIUtil.getClassForName(clazz);
                     } catch (InstantiationException e) {
                         log.error("Error while instantiating class " + clazz, e);
                     } catch (IllegalAccessException e) {
