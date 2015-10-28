@@ -5,6 +5,8 @@ import org.wso2.carbon.apimgt.rest.api.dto.*;
 
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyGenerateRequestDTO;
 
 import java.util.List;
 
@@ -19,6 +21,6 @@ public abstract class ApplicationsApiService {
     public abstract Response applicationsApplicationIdGet(String applicationId,String accept,String ifNoneMatch,String ifModifiedSince);
     public abstract Response applicationsApplicationIdPut(String applicationId,ApplicationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response applicationsApplicationIdDelete(String applicationId,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response applicationsApplicationIdGenerateKeysPost(String applicationId,ApplicationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response applicationsApplicationIdGenerateKeysPost(String applicationId,ApplicationKeyGenerateRequestDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
 }
 

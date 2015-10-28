@@ -1,21 +1,45 @@
+/*
+ *
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package org.wso2.carbon.apimgt.rest.api.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.utils.mappings.ApplicationMappingUtil;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
@@ -113,9 +137,35 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             throw new InternalServerErrorException(e);
         }
     }
+
     @Override
-    public Response applicationsApplicationIdGenerateKeysPost(String applicationId,ApplicationDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    @SuppressWarnings("unchecked")
+    public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
+            ApplicationKeyGenerateRequestDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
+            JSONObject jsonParamObj = new JSONObject();
+            jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+            String jsonParams = jsonParamObj.toString();
+            String tokenScopes = StringUtils.join(body.getScopes(), " ");
+
+            Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
+                    username, application.getName(), body.getTokenType().toString(), body.getCallbackUrl(),
+                    accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
+                    jsonParams);
+
+            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails);
+            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+            List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
+            applicationKeyDTOs.add(applicationKeyDTO);
+            applicationDTO.setKeys(applicationKeyDTOs);
+            return Response.ok().entity(applicationDTO).build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 }
