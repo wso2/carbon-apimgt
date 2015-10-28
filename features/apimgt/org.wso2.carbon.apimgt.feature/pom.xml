@@ -81,11 +81,11 @@
                                 <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core.feature:${apimgt.core.feature.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.feature:${apimgt.gateway.feature}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.publisher.feature:${apimgt.publisher.feature.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.store.feature:${apimgt.store.feature.version}</includedFeatureDef>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.startup.publisher.feature:${apimgt.publisher.feature.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core.feature:${carbon.apimgt.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.feature:${carbon.apimgt.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.publisher.feature:${carbon.apimgt.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.store.feature:${carbon.apimgt.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.startup.publisher.feature:${carbon.apimgt.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

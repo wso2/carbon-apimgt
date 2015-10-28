@@ -55,7 +55,6 @@
         <dependency>
             <groupId>commons-codec.wso2</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>${commons-codec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -110,9 +109,4 @@
             </plugin>
         </plugins>
     </build>
-	<properties>
-		<commons-codec.version>1.4.0.wso2v1</commons-codec.version>
-		<opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <mitreid-connect-version>1.1.10</mitreid-connect-version>
-	</properties>
 </project>

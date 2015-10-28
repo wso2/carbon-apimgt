@@ -140,7 +140,7 @@ public class ApiMgtDAO {
                     tokenGenerator = new JWTGenerator();
                 } else {
                     try {
-                        tokenGenerator = (TokenGenerator) Class.forName(clazz).newInstance();
+                        tokenGenerator = (TokenGenerator) APIUtil.getClassForName(clazz);
                     } catch (InstantiationException e) {
                         log.error("Error while instantiating class " + clazz, e);
                     } catch (IllegalAccessException e) {
@@ -425,7 +425,6 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
-
     }
 
     /**
@@ -7095,7 +7094,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                                 "IDN_OAUTH_CONSUMER_APPS ICA " +
                             "WHERE IAT.ACCESS_TOKEN = ? " +
                                 "AND ICA.CONSUMER_KEY = AKM.CONSUMER_KEY " +
-                                "AND IAT.CONSUMER_KEY_ID = ICA.ID" +
+                                "AND IAT.CONSUMER_KEY_ID = ICA.ID " +
                                 "AND AKM.APPLICATION_ID = AMS.APPLICATION_ID " +
                                 "AND AMA.API_ID = AMS.API_ID";
 
