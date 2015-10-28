@@ -162,7 +162,7 @@ var getActiveTenantDomains=function(){
 
 var getUsageClient = function(){
     var user = jagg.getUser();
-	return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user);
+    return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user);
 }
 
 %>

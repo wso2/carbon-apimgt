@@ -38,7 +38,7 @@ var getAnalyticsConfig = function (analyticsData) {
                 eventAnalyserUsername: username,
                 eventAnalyserPassword: password
             };
-        } else /*if (eventingConfig.getServiceStatsEnable())*/ {
+        } else {
             conf = {
                 enableAnalytics: eventingConfig.getServiceStatsEnable(),
                 eventReceiverURL: eventingConfig.getUrl(),
@@ -48,11 +48,7 @@ var getAnalyticsConfig = function (analyticsData) {
                 eventAnalyserUsername: analyzingConfigData.getUserName(),
                 eventAnalyserPassword: analyzingConfigData.getPassword()
             };
-        }/*else{
-	         conf = {
-              	enableAnalytics:eventingConfig.getServiceStatsEnable(),
-            };
-	    }*/
+        }
         return {
             error: false,
             analytics: conf

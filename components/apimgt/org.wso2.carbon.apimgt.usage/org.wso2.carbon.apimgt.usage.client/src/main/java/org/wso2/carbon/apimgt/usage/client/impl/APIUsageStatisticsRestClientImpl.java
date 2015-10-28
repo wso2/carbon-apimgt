@@ -2257,8 +2257,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics.car";
-        String cAppPath = System.getProperty("carbon.home") + File.pathSeparatorChar + "statistics";
-        cAppPath = cAppPath + File.pathSeparatorChar + cAppName;
+        String cAppPath = System.getProperty("carbon.home") + File.separator + "statistics";
+        cAppPath = cAppPath + File.separator + cAppName;
         File file = new File(cAppPath);
 
         //get the byte array of file

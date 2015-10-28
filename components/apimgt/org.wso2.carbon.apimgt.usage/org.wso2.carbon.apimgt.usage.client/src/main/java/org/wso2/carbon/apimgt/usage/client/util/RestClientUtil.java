@@ -94,6 +94,11 @@ public class RestClientUtil {
         return new String(encodedBytes);
     }
 
+    /**
+     * Parsing long value to the Date format
+     * @param time time in long
+     * @return
+     */
     public static String longToDate(long time){
         Date date=new Date(time);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");

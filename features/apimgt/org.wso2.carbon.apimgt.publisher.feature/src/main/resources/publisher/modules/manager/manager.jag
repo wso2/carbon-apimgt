@@ -101,7 +101,7 @@ var getAPIStoreObj = function() {
 
 var getUsageClient = function(){
     var user = jagg.getUser();
-	return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user.username);
+    return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user.username);
 }
 
 %>
