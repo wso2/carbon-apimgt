@@ -3084,7 +3084,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String groupingExtractorClass = APIUtil.getGroupingExtractorImplementation();
                 if (groupingExtractorClass != null) {
                         try {
-                                LoginPostExecutor groupingExtractor = (LoginPostExecutor)APIUtil.getClassForName(groupingExtractorClass);
+                                LoginPostExecutor groupingExtractor = (LoginPostExecutor)
+                                        APIUtil.getClassForName(groupingExtractorClass).newInstance();
                                 return  groupingExtractor.getGroupingIdentifiers(response);
                             } catch (ClassNotFoundException e) {
                                 handleException(groupingExtractorClass+" is not found in run time", e);

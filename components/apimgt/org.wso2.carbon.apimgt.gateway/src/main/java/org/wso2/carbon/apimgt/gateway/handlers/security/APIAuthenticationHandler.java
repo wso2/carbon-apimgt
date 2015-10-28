@@ -98,7 +98,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             authenticatorType = OAuthAuthenticator.class.getName();
         }
         try {
-            authenticator = (Authenticator) APIUtil.getClassForName(authenticatorType);
+            authenticator = (Authenticator) APIUtil.getClassForName(authenticatorType).newInstance();
         } catch (Exception e) {
             // Just throw it here - Synapse will handle it
             throw new SynapseException("Error while initializing authenticator of " +

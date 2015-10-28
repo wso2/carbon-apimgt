@@ -74,7 +74,7 @@ public class KeyManagerHolder {
                 } else {
                     // If APIKeyManager section is enabled, class name is picked from there.
                     String clazz = apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT);
-                    keyManager = (KeyManager) APIUtil.getClassForName(clazz);
+                    keyManager = (KeyManager) APIUtil.getClassForName(clazz).newInstance();
                     Set<String> configKeySet = apiManagerConfiguration.getConfigKeySet();
 
                     KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
