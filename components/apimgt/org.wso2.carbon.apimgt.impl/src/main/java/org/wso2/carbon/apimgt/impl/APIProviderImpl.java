@@ -1450,6 +1450,49 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Removes a given documentation
+     *
+     * @param apiId   APIIdentifier
+     * @param docType the type of the documentation
+     * @param docName name of the document
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          if failed to remove documentation
+     */
+    public void removeDocumentation(APIIdentifier apiId, String docId)
+            throws APIManagementException {
+        String docPath ;
+
+        try {
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                                APIConstants.DOCUMENTATION_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            docPath = artifact.getPath();
+            String docFilePath =  artifact.getAttribute(APIConstants.DOC_FILE_PATH);
+
+            if(docFilePath!=null)
+            {
+                File tempFile = new File(docFilePath);
+                String fileName = tempFile.getName();
+                docFilePath = APIUtil.getDocumentationFilePath(apiId,fileName);
+                if(registry.resourceExists(docFilePath))
+                {
+                    registry.delete(docFilePath);
+                }
+            }
+
+            Association[] associations = registry.getAssociations(docPath,
+                                                                  APIConstants.DOCUMENTATION_KEY);
+
+            for (Association association : associations) {
+                registry.delete(association.getDestinationPath());
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to delete documentation", e);
+        }
+    }
+
+
+    /**
      * Adds Documentation to an API
      *
      * @param apiId         APIIdentifier
@@ -1731,6 +1774,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             GenericArtifact artifact = artifactManager.newGovernanceArtifact(new QName(documentation.getName()));
             artifactManager.addGenericArtifact(APIUtil.createDocArtifactContent(artifact, apiId, documentation));
             String apiPath = APIUtil.getAPIPath(apiId);
+
             //Adding association from api to documentation . (API -----> doc)
             registry.addAssociation(apiPath, artifact.getPath(),APIConstants.DOCUMENTATION_ASSOCIATION);
             String docVisibility = documentation.getVisibility().name();
@@ -1755,6 +1799,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),visibility, authorizedRoles, filePath);
                 registry.addAssociation(artifact.getPath(), filePath,APIConstants.DOCUMENTATION_FILE_ASSOCIATION);
             }
+            documentation.setId(artifact.getId());
         } catch (RegistryException e) {
             handleException("Failed to add documentation", e);
         } catch (UserStoreException e) {
