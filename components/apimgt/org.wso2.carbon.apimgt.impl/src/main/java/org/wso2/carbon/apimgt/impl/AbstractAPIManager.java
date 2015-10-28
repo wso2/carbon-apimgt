@@ -333,6 +333,27 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    /**
+     * Get API by registry artifact id
+     *
+     * @param uuid  Registry artifact id
+     * @return API of the provided artifact id
+     * @throws APIManagementException
+     */
+    public API getAPIbyUUID(String uuid) throws APIManagementException {
+        try {
+            //registry of the current logged in user has been directly used
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
+            return APIUtil.getAPIForPublishing(apiArtifact, registry);
+
+        } catch (RegistryException e) {
+            handleException("Failed to get API", e);
+            return null;
+        }
+    }
+
     public API getAPI(String apiPath) throws APIManagementException {
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
@@ -547,6 +568,21 @@ public abstract class AbstractAPIManager implements APIManager {
             Resource docResource = registry.get(docPath);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getUUID());
             documentation = APIUtil.getDocumentation(artifact);
+        } catch (RegistryException e) {
+            handleException("Failed to get documentation details", e);
+        }
+        return documentation;
+    }
+
+    public Documentation getDocumentation(String docId) throws APIManagementException {
+        Documentation documentation = null;
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                            APIConstants.DOCUMENTATION_KEY);
+        try {
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            if(null != artifact) {
+                documentation = APIUtil.getDocumentation(artifact);
+            }
         } catch (RegistryException e) {
             handleException("Failed to get documentation details", e);
         }

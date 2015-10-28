@@ -28,6 +28,7 @@ public class Application {
 
     private int id;
     private String name;
+    private String uuid;
     private Subscriber subscriber;
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
@@ -48,6 +49,11 @@ public class Application {
 
     public Application(int appId) {
         id = appId;
+        this.subscriber = new Subscriber(null);
+    }
+
+    public Application(String uuid) {
+        this.uuid = uuid;
         this.subscriber = new Subscriber(null);
     }
 
@@ -166,5 +172,13 @@ public class Application {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUUID() {
+        return uuid;
     }
 }
