@@ -472,7 +472,7 @@
             <div class="controls">
                 {{#each verbs}}
                     <label class="checkbox inline" style="text-transform:uppercase;">
-                    <input type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
+                    <input id="{{ . }}" type="checkbox" value="{{ . }}" class="http_verb_select" >  {{ . }}
                     </label>
                 {{/each}}
                 <div class "checkbox inline" id="options" style="display: none;" >
