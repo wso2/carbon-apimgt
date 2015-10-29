@@ -1,16 +1,34 @@
 function APISamples(defaultTier) {
-    this.sample1_swagger = "{\"paths\":{ \"/*\":{\"get\":{\"parameters\":[{\"description\":\"Name of the City\"," +
-        "\"name\":\"q\",\"type\":\"string\",\"required\":false,\"in\":\"query\"}],\"responses\":{\"200\":{ } }," +
-        "\"x-auth-type\":\"Application & Application User\", \"x-throttling-tier\":\"" + defaultTier + "\" }}}," +
-        "\"swagger\":\"2.0\",\"info\":{ \"title\":\"WeatherAPI\",\"version\":\"1.0.0\"}}";
+    this.sample1_swagger = "{\"paths\":{\"/add\":{\"get\":{\"summary\":\"add x and y\", " +
+    "\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\", " +
+    "\"produces\":\"application/json\",\"parameters\":[{\"name\":\"x\",\"required\":true, " +
+    "\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\": " +
+    "\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/subtract\":{\"get\":{ " +
+    "\"summary\":\"subtract y from x\",\"x-auth-type\":\"Application & Application User\", " +
+    "\"x-throttling-tier\":\"Unlimited\",\"produces\":\"application/json\",\"parameters\":[{ " +
+    "\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\", " +
+    "\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}," +
+    "\"/multiply\":{\"get\":{\"summary\": \"multiply x by y\",\"x-auth-type\":" +
+    "\"Application & Application User\", \"x-throttling-tier\":\"Unlimited\",\"produces\":" +
+    "\"application/json\",\"parameters\":[{ \"name\":\"x\",\"required\":true,\"type\":" +
+    "\"string\",\"in\":\"query\"},{\"name\":\"y\", \"required\":true,\"type\":\"string\"," +
+    "\"in\":\"query\"}],\"responses\":{\"200\":{}}}}, \"/divide\":{\"get\":{\"summary\":" +
+    "\"divide x by y\",\"x-auth-type\": \"Application & Application User\"," +
+    "\"x-throttling-tier\":\"Unlimited\",\"produces\": \"application/json\",\"parameters\":[{ " +
+    "\"name\":\"x\",\"required\":true,\"type\": \"string\",\"in\":\"query\"},{\"name\":\"y\", " +
+    "\"required\":true,\"type\":\"string\",\"in\": \"query\"}],\"responses\":{\"200\":{}}}}}, " +
+    "\"swagger\":\"2.0\",\"info\":{\"title\": \"Calculator\",\"description\": " +
+    "\"Simple calculator API to perform addition, subtraction, multiplication and division.\", " +
+    "\"version\":\"1.0\"},\"basePath\":\"/calc/1.0\",\"host\":\"localhost:8243\"}";
 }
 
 
 APISamples.prototype.deploySample1 = function (defaultTier) {
     var addAPIUrl = "/site/blocks/item-design/ajax/add.jag";
-    var addAPIData = {action: 'sampleDesign', name: 'WeatherAPI', provider: username, version: '1.0.0',
-        description: 'The WeatherAPI gives the weather details according to the city name', tags: 'weather',
-        visibility: 'public', context: 'weather', swagger: this.sample1_swagger, apiThumb: '/site/themes/default/images/weatherAPI.png'};
+    var addAPIData = {action: 'sampleDesign', name: 'CalculatorAPI', provider: username,
+        version: '1.0', description: 'Simple calculator API to perform addition, subtraction, ' +
+        'multiplication and division.', tags: 'calculator', visibility: 'public', context: 'calc',
+        swagger: this.sample1_swagger, apiThumb: '/site/themes/default/images/calculatorAPI.png'};
 
     jagg.message({
         content:"" ,
@@ -31,27 +49,34 @@ APISamples.prototype.deploySample1 = function (defaultTier) {
         function (apiAddResult) {
             if (!apiAddResult.error) {
                 var urlDesign = '/site/blocks/item-design/ajax/add.jag';
-                jagg.post(urlDesign, {action: "implement", name: "WeatherAPI", version: "1.0.0", provider: username,
-                        implementation_methods: "endpoint", endpoint_type: "http",
-                        endpoint_config: '{"production_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null}, "sandbox_endpoints":{"url":"http://api.openweathermap.org/data/2.5/weather","config":null}, "endpoint_type":"http"}',
-                        production_endpoints: "http://api.openweathermap.org/data/2.5/weather", sandbox_endpoints: "http://api.openweathermap.org/data/2.5/weather",
-                        endpointType: "nonsecured", swagger: this.sample1_swagger},
+                jagg.post(urlDesign, {action: "implement", name: "CalculatorAPI", version: "1.0",
+                provider: username,  implementation_methods: "endpoint", endpoint_type: "http",
+                endpoint_config: '{"production_endpoints":{"url": ' +
+                '"http://localhost:9763/apimgt-calculator-api/api","config":null}, ' +
+                '"sandbox_endpoints":{"url":"http://localhost:9763/apimgt-calculator-api/api", ' +
+                '"config":null}, "endpoint_type":"http"}', production_endpoints:
+                "http://localhost:9763/apimgt-calculator-api/api", sandbox_endpoints:
+                "http://localhost:9763/apimgt-calculator-api/api", endpointType: "nonsecured",
+                swagger: this.sample1_swagger},
                     function (result) {
-                        jagg.post(urlDesign, {action: "manage", name: "WeatherAPI", provider: username, version: "1.0.0",
-                                default_version_checked: " ", tier: defaultTier, tiersCollection: defaultTier, transport_http: "http",
-                                transport_https: "https", swagger: this.sample1_swagger},
+                        jagg.post(urlDesign, {action: "manage", name: "CalculatorAPI",
+                            provider: username, version: "1.0", default_version_checked: " ",
+                            tier: defaultTier, tiersCollection: defaultTier,
+                            transport_http: "http", transport_https: "https",
+                            swagger: this.sample1_swagger},
                             function (result) {
                                 if (isPublishPermitted) {
                                     var urlPublished = "/site/blocks/life-cycles/ajax/life-cycles.jag";
-                                    var result2 = jagg.post(urlPublished, {action: "updateStatus", name: "WeatherAPI",
-                                            version: "1.0.0", provider: username, status: "Publish", publishToGateway: true,
-                                            requireResubscription: true},
+                                    var result2 = jagg.post(urlPublished, {action: "updateStatus",
+                                        name: "CalculatorAPI", version: "1.0", provider: username,
+                                        status: "Publish", publishToGateway: true,
+                                        requireResubscription: true},
                                         function (result) {
                                             if (!result.error) {
                                                 window.location.assign(siteContext + "/site/pages/index.jag");
                                                 $(".modal-body").removeClass("loadingButton");
                                                 jagg.message({
-                                                    content: "Sample WeatherAPI is Deployed Successfully",
+                                                    content: "Sample CalculatorAPI is Deployed Successfully",
                                                     type: "info",
                                                     title: "Success"
                                                 });
@@ -61,7 +86,7 @@ APISamples.prototype.deploySample1 = function (defaultTier) {
                                     window.location.assign(siteContext + "/site/pages/index.jag");
                                     $(".modal-body").removeClass("loadingButton");
                                     jagg.message({
-                                        content: "Sample WeatherAPI is Deployed Successfully",
+                                        content: "Sample CalculatorAPI is Deployed Successfully",
                                         type: "info",
                                         title: "Success"
                                     });
