@@ -81,7 +81,7 @@ public class APIMappingUtil {
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
-
+        dto.setEndpointConfig(model.getEndpointConfig());
         List<SequenceDTO> sequences = null;
 
         String inSequenceName = model.getInSequence();
@@ -183,7 +183,7 @@ public class APIMappingUtil {
         context = updateContextWithVersion(dto.getVersion(), originalContext, context);
         model.setContext(context);
         model.setDescription(dto.getDescription());
-
+        model.setEndpointConfig(dto.getEndpointConfig());
         model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
 
         model.setAsDefaultVersion(dto.getIsDefaultVersion());

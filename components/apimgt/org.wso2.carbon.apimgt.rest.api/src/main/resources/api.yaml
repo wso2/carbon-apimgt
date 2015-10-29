@@ -1372,6 +1372,8 @@ definitions:
         type: array
         items:
           type: string
+      endpointConfig:
+        type: string
       endpoint:
         properties:
           type:

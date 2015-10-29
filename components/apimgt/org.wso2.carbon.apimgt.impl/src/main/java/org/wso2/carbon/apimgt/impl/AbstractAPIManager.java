@@ -383,8 +383,14 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
-            return APIUtil.getAPIInformation(apiArtifact, registry);
-
+            if (apiArtifact != null) {
+                return APIUtil.getAPIInformation(apiArtifact, registry);
+            } else {
+                String errorMessage =
+                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                handleException(errorMessage);
+                return null;
+            }
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
             return null;
