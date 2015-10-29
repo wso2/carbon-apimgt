@@ -31,6 +31,8 @@ import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +42,7 @@ import java.util.Set;
 
 public class APIMappingUtil {
 
-    public static APIIdentifier getAPIIdentifier(String apiId){
+    public static APIIdentifier getAPIIdentifierFromApiId(String apiId){
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
         // apiId format: provider-apiName-version
         String providerName = apiIdDetails[0];
@@ -50,14 +52,27 @@ public class APIMappingUtil {
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }
 
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        APIIdentifier apiIdentifier;
+        if (RestApiUtil.isUUID(apiId)) {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            apiIdentifier = apiProvider.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
+        } else {
+            apiIdentifier = getAPIIdentifierFromApiId(apiId);
+        }
+        return  apiIdentifier;
+    }
+
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getProvider();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
-        dto.setProvider(model.getId().getProviderName());
+        String providerName = model.getId().getProviderName();
+        dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
         dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());

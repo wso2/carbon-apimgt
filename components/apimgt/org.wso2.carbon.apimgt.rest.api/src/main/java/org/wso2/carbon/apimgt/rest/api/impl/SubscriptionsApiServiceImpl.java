@@ -56,11 +56,11 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 if (RestApiUtil.isUUID(apiId)) {
                     api = apiProvider.getAPIbyUUID(apiId);
                 } else {
-                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
                     api = apiProvider.getAPI(apiIdentifier);
                 }*/
 
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
                 subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupId);
 
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -90,7 +90,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             apiConsumer = RestApiUtil.getConsumer(username);
             String apiId = body.getApiId();
             String applicationId = body.getApplicationId();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifier(apiId);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
             apiIdentifier.setTier(body.getTier());
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             SubscriptionResponse subscriptionResponse =

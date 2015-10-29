@@ -365,11 +365,13 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             Registry registry;
             if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(requestedTenantDomain);
+                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(requestedTenantDomain);
                 registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceSystemRegistry(id);
             } else {
-                if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                if (this.tenantDomain != null && !this.tenantDomain
+                        .equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
                     registry = ServiceReferenceHolder.getInstance().
                             getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);

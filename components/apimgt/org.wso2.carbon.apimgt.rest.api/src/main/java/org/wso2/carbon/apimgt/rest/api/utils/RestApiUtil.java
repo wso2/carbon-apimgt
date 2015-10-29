@@ -24,9 +24,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.context.CarbonContext;
 
 import javax.validation.ConstraintViolation;
@@ -40,7 +42,7 @@ public class RestApiUtil {
 
     private static final Log log = LogFactory.getLog(RestApiUtil.class);
 
-    public static APIProvider getProvider() throws APIManagementException {
+    public static APIProvider getLoggedInUserProvider() throws APIManagementException {
         String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         return APIManagerFactory.getInstance().getAPIProvider(loggedInUser);
     }
