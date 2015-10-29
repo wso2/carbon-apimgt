@@ -48,4 +48,5 @@ public final class  ApplicationConstants {
     public static final String OAUTH_CLIENT_USERNAME = "username";
     public static final String OAUTH_CLIENT_APPLICATION = "application";
     public static final String VALIDITY_PERIOD = "validityPeriod";
+    public static final String OAUTH_APP_DETAILS = "appDetails";
 }

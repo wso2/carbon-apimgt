@@ -208,6 +208,14 @@ public interface APIProvider extends APIManager {
     void removeDocumentation(APIIdentifier apiId, String docType, String docName) throws APIManagementException;
 
     /**
+     * Removes a given documentation
+     *
+     * @param apiId   APIIdentifier
+     * @param docId UUID of the doc
+     * @throws APIManagementException if failed to remove documentation
+     */
+    public void removeDocumentation(APIIdentifier apiId, String docId)throws APIManagementException;
+    /**
      * Adds Documentation to an API
      *
      * @param apiId         APIIdentifier

@@ -418,6 +418,8 @@ public final class APIUtil {
             }
 
             api = new API(apiIdentifier);
+            //set uuid
+            api.setUUID(artifact.getId());
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
@@ -857,6 +859,7 @@ public final class APIUtil {
                 type = DocumentationType.OTHER;
             }
             documentation = new Documentation(type, artifact.getAttribute(APIConstants.DOC_NAME));
+            documentation.setId(artifact.getId());
             documentation.setSummary(artifact.getAttribute(APIConstants.DOC_SUMMARY));
             String visibilityAttr = artifact.getAttribute(APIConstants.DOC_VISIBILITY);
             Documentation.DocumentVisibility documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
@@ -1557,7 +1560,7 @@ public final class APIUtil {
                     String type=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
                     String className =
                             storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
-                    store.setPublisher((APIPublisher) getClassForName(className));
+                    store.setPublisher((APIPublisher) getClassForName(className).newInstance());
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
@@ -4598,7 +4601,7 @@ public final class APIUtil {
     }
 
     /**
-     * Gets the instance of a class given the class name.
+     * Gets the  class given the class name.
      * @param className the fully qualified name of the class.
      * @return an instance of the class with the given name
      * @throws ClassNotFoundException
@@ -4606,7 +4609,7 @@ public final class APIUtil {
      * @throws InstantiationException
      */
 
-    public static Object getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        return Class.forName(className).newInstance();
+    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        return Class.forName(className);
     }
 }

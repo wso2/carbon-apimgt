@@ -703,8 +703,21 @@ public class APIStoreHostObject extends ScriptableObject {
                 String validityPeriod = (String) args[5];
 	            String scopes = (String) args[7];
 	            String username = String.valueOf(args[0]);
-	            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-	            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                String applicationName = (String) args[1];
+                String tokenType = (String) args[2];
+                String callbackUrl = (String) args[3];
+                String groupingId = (String)args[8];
+                String jsonParams = null;
+                if(args.length == 10){
+                    jsonParams = (String) args[9];
+                }else{
+                    jsonParams = null;
+                }
+
+
+	            /*String tenantDomain = MultitenantUtils.getTenantDomain(username);
+	            int tenantId =
+			            ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
 			                                  .getTenantId(tenantDomain);
 
                 if (null == validityPeriod || validityPeriod.isEmpty()) { // In case a validity period is unspecified
@@ -717,15 +730,6 @@ public class APIStoreHostObject extends ScriptableObject {
                         validityPeriod = String.valueOf(defaultValidityPeriod);
                     }
                 }
-
-                String jsonParams;
-                if(args.length == 10)   {
-                    jsonParams = (String) args[9];
-                } else  {
-                    jsonParams = null;
-                }
-
-
 	            //checking for authorized scopes
 	            Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 	            List<Scope> authorizedScopes = new ArrayList<Scope>();
@@ -746,17 +750,15 @@ public class APIStoreHostObject extends ScriptableObject {
 	            } else {
 		            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
 	            }
-
-	            String applicationName = (String) args[1];
-                String tokenType = (String) args[2];
-                String callbackUrl = (String) args[3]; 
-                String groupingId = (String)args[8];
-        
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
                         username, applicationName, tokenType, callbackUrl,
 		                accessAllowDomainsArray, validityPeriod, authScopeString, groupingId,
                         jsonParams);
-
+                */
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
+                        username, applicationName, tokenType, callbackUrl,
+                        accessAllowDomainsArray, validityPeriod, scopes, groupingId,
+                        jsonParams);
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
                 boolean first = true;
@@ -3338,13 +3340,13 @@ public class APIStoreHostObject extends ScriptableObject {
         if (args != null && args.length >= 4 && isStringArray(args)) {
             String name = (String) args[0];
 
-            if(StringUtils.isEmpty(name.trim())){
+            if(StringUtils.isEmpty(name.trim())) {
                 handleException("Application Name is empty.");
             }
             String username = (String) args[1];
             String tier = (String) args[2];
 
-            if(StringUtils.isEmpty(tier.trim())){
+            if(StringUtils.isEmpty(tier.trim())) {
                 handleException("No tier is defined for the Application.");
             }
             String callbackUrl = (String) args[3];
@@ -3365,9 +3367,10 @@ public class APIStoreHostObject extends ScriptableObject {
                 application.setGroupId(groupId);
             }
 
-            status = apiConsumer.addApplication(application, username);
+            int applicationId = apiConsumer.addApplication(application, username);
+            status = apiConsumer.getApplicationStatusById(applicationId);
             return status;
-        } else{
+        } else {
             handleException("Missing parameters.");
         }
 

@@ -39,7 +39,7 @@ public class BasicAuthenticationHandler implements RequestHandler {
     private static final Log logger = LogFactory.getLog(BasicAuthenticationHandler.class);
 
     /**
-     * Authenticate requests received at the ml endpoint, using HTTP basic-auth headers as the authentication
+     * authenticate requests received at the REST API endpoint, using HTTP basic-auth headers as the authentication
      * mechanism. This method returns a null value which indicates that the request to be processed. 
      */
     @Override
@@ -78,18 +78,18 @@ public class BasicAuthenticationHandler implements RequestHandler {
                     .build();
         }
 
-        return Authenticate(certObject, username, password);
+        return authenticate(certObject, username, password);
     }
 
     /**
-     * Authenticate with the user credentials.
+     * authenticate with the user credentials.
      *
      * @param certObject   Certificate object of the request
      * @param username     Username
      * @param password     Password
      * @return             Response, if unauthorized. Null, if Authorized.
      */
-    private Response Authenticate(Object certObject, String username, String password){
+    private Response authenticate(Object certObject, String username, String password){
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         RealmService realmService = (RealmService)carbonContext.getOSGiService(RealmService.class, null);
         RegistryService registryService = (RegistryService) carbonContext.getOSGiService(RegistryService.class, null);

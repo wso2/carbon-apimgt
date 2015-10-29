@@ -153,6 +153,6 @@ public class APILogMessageHandler extends AbstractHandler {
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        return !log.isDebugEnabled() ||mediate(messageContext, DIRECTION_OUT);
+        return !log.isDebugEnabled() || mediate(messageContext, DIRECTION_OUT);
     }
 }

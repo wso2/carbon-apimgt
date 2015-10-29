@@ -164,7 +164,7 @@
 
 													<span class="label label-warning" id = "timeWarn" style="display:none;"><%=i18n.localize("timeWarn")%></span>
 													<a class="icon-question-sign help_popup_prod"></a>
-													<button class="show-hide-key btn btn-primary" onclick="regenerate('<%=encode.forJavaScript(app.name)%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
+													<button id="btn-regeneratekeys-prod" class="show-hide-key btn btn-primary" onclick="regenerate('<%=encode.forJavaScript(app.name)%>','PRODUCTION',200,this,'pull-right','<%=app.prodConsumerKey%>','<%=app.prodConsumerSecret%>')" ><i class="fa fa-repeat"></i> <%=i18n.localize("regenerate")%></button>
 													<div id="prodtoken_help"></div>
 												</div>
 											</div>
@@ -248,7 +248,7 @@
 									id="btnProvideKeyProductionCancle">Cancel</button>
                         	</div>
                         	<div class="cDivDefaultBtnSet">
-								<button  class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
+								<button id="btn-generatekeys-prod" class="app-key-generate-button btn btn-primary btn-generatekeys" onclick="jagg
 								.sessionAwareJS({redirect:'/site/pages/subscriptions.jag'})"
 									   data-application="<%=encode.forHtmlAttribute(app.name)%>"
 									   data-callbackUrl="<%=encode.forHtmlAttribute(app.callbackUrl)%>"
@@ -582,7 +582,7 @@
                 }
             %>
                 <div class="span4 keyListPadding">
-                    <div class="thumbnail <% if(api.status == "DEPRECATED" || api.status == "RETIRED" || api.status == "BLOCKED") { %>deprecated<% } %>">
+                    <div id="<%=api.name%>" class="thumbnail <% if(api.status == "DEPRECATED" || api.status == "RETIRED" || api.status == "BLOCKED") { %>deprecated<% } %>">
                         <div class="deprecatedLabel">
                             <% if(api.status == "DEPRECATED") { %>
                             <span class="label label-warning"><%=i18n.localize("deprecated")%></span>
