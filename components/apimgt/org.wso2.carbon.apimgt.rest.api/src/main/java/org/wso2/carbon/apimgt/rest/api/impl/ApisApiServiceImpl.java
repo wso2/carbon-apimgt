@@ -64,7 +64,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
 
-            apis = apiProvider.searchAPIs(query,type, loggedInUser);
+            //We should send null as the provider, Otherwise serchAPIs will return all APIs of the provider 
+            // instead of looking at type and query
+            apis = apiProvider.searchAPIs(query, type, null);
             for (API temp : apis) {
                 list.add(APIMappingUtil.fromAPItoDTO(temp));
             }

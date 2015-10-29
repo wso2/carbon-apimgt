@@ -161,13 +161,27 @@ public class APIMappingUtil {
 
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
-        String provider = APIUtil.replaceEmailDomain(dto.getProvider());
-        APIIdentifier apiId = new APIIdentifier(provider, dto.getName(), dto.getVersion());
+        String provider = dto.getProvider();
+        String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
+        APIIdentifier apiId = new APIIdentifier(providerEmailDomainReplaced, dto.getName(), dto.getVersion());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
 
-        //if not supertenant append /t/wso2.com/ to context
-        model.setContext(dto.getContext());  //context should change if tenant
-        model.setContextTemplate(dto.getContext());
+        String context = dto.getContext();
+        final String originalContext = context;
+        context = context.startsWith("/") ? context : ("/" + context);
+        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context = "/t/" + providerDomain + context;
+        }
+
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+        model.setContextTemplate(context);
+
+        context = updateContextWithVersion(dto.getVersion(), originalContext, context);
+        model.setContext(context);
         model.setDescription(dto.getDescription());
 
         model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
@@ -347,5 +361,30 @@ public class APIMappingUtil {
         doc.setVisibility(Documentation.DocumentVisibility.valueOf(visibility));
         doc.setSourceType(Documentation.DocumentSourceType.INLINE);
         return doc;
+    }
+
+    private static String updateContextWithVersion(String version, String contextVal, String context) {
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }else{
+            context = context.replace(RestApiConstants.API_VERSION_PARAM, version);
+        }
+        return context;
+    }
+
+    private static String checkAndSetVersionParam(String context) {
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(RestApiConstants.API_VERSION_PARAM)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + RestApiConstants.API_VERSION_PARAM;
+        }
+        return context;
     }
 }
