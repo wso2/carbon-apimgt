@@ -62,6 +62,10 @@
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
         </dependency>
         <dependency>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+    </dependency>
+        <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
             <version>2.7.17</version>
