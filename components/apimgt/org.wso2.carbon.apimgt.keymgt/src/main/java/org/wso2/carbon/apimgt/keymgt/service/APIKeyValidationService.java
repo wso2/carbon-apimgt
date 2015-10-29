@@ -55,7 +55,7 @@ public class APIKeyValidationService extends AbstractAdmin {
                 KeyValidationHandler validationHandler = (KeyValidationHandler) APIUtil.getClassForName
                         (ServiceReferenceHolder.getInstance().
                                 getAPIManagerConfigurationService().getAPIManagerConfiguration().
-                                getFirstProperty(APIConstants.API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME));
+                                getFirstProperty(APIConstants.API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME)).newInstance();
                 log.info("Initialised KeyValidationHandler instance successfully");
                 if (keyValidationHandler == null) {
                     synchronized (this) {

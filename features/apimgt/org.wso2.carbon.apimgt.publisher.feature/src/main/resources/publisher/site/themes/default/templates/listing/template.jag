@@ -193,7 +193,7 @@
     <div class="alert alert-info">
         <%if(outputs.isCreatePermitted){ %>
       <div style="padding-bottom:10px"><%=i18n.localize("noAPIsMsg1")%></div>
-        <div style="display: inline"><a class="btn btn-primary" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
+        <div style="display: inline"><a class="btn btn-primary" id="btnAddNewApi" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
         <div style="display: inline"><a class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=defaultTier%>')" ><%=i18n.localize("SampleAPI")%></a></div>
         <%}else{%>
         <div style="padding-bottom:10px"><%=i18n.localize("noAPIsMsg")%></div>

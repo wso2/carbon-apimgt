@@ -70,7 +70,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                     if (publisher == null) {
                         try {
                             log.debug("Instantiating Data Publisher");
-                            publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass);
+                            publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
                             publisher.init();
                         } catch (ClassNotFoundException e) {
                             log.error("Class not found " + publisherClass);

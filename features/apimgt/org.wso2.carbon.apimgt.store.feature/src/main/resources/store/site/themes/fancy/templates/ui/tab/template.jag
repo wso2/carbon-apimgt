@@ -18,7 +18,7 @@
     %>
     <%if(tab.title!=undefined ||tab.title!=null){%>
         <li class="<%=clazz%>">
-            <a href="#tab<%=String(i)%>"><%=tab.title%></a>
+            <a id="<%=String(i)%>" href="#tab<%=String(i)%>"><%=tab.title%></a>
         </li>
     <% }} %>
     </ul>
