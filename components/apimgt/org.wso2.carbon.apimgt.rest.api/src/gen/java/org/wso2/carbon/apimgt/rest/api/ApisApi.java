@@ -30,9 +30,9 @@ public class ApisApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of available APIs qualifying under a given search condition.", response = APIListDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Retrieving APIs\n", notes = "Get a list of available APIs qualifying under a given search condition.\n", response = APIListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of APIs is returned."),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of qualifying APIs is returned."),
         
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
         
@@ -40,9 +40,9 @@ public class ApisApi  {
 
     public Response apisGet(@ApiParam(value = "Maximum size of API array to return.",required=true) @QueryParam("limit") String limit,
     @ApiParam(value = "Starting point of the item list.",required=true) @QueryParam("offset") String offset,
-    @ApiParam(value = "** Search condition **.\n\nIf no advanced attribute modifier is found search will match the given query string against API Name.\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match if the API provider is wso2.\n\nSupported attribute modifiers are [ **version, context, status, description, subcontext, doc, provider, tag **  ]\n") @QueryParam("query") String query,
-    @ApiParam(value = " prototype / production ") @QueryParam("type") String type,
-    @ApiParam(value = " List supported sorting attributes ") @QueryParam("sort") String sort,
+    @ApiParam(value = "**Search condition**.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match an API if the provider of the API is wso2.\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, tag **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n") @QueryParam("query") String query,
+    @ApiParam(value = "List prototype or production APIs.\n") @QueryParam("type") String type,
+    @ApiParam(value = "** Sort expression **\n\nA *sort expression* consists of a sequence of names of API \nproperties concatenated by a '+' or '-' (indicating ascending or \ndecending order) separated by a comma. The sequence of names \ncorresponds to a conjunction. \n") @QueryParam("sort") String sort,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
