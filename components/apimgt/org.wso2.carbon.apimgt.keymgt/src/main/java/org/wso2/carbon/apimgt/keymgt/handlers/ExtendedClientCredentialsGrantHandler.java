@@ -67,21 +67,11 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
             throws IdentityOAuth2Exception {
 
         boolean validateResult = super.validateGrant(tokReqMsgCtx);
-        int tenantId = tokReqMsgCtx.getTenantID();
-        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-            try {
-                tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getDomain
-                        (tenantId);
-            } catch (UserStoreException e) {
-                log.error("Error occurred while obtaining Tenant Domain from Tenant ID", e);
-                throw new IdentityOAuth2Exception(e.getMessage());
-            }
-        }
-        //String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
-        //username = username + "@" + tenantDomain;
         User user = tokReqMsgCtx.getAuthorizedUser();
-        user.setUserName(user.getUserName() + "@" + tenantDomain);
+        String tenantDomain = user.getTenantDomain();
+        String username = user.getUserName();
+        username = username + "@" + tenantDomain;
+        user.setUserName(username);
         tokReqMsgCtx.setAuthorizedUser(user);
 
         return validateResult;

@@ -46,7 +46,7 @@ public class APIMgtFaultHandler extends AbstractMediator {
                         PrivilegedCarbonContext.startTenantFlow();
                         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                                 setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                        publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass)
+                        publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance()
                         ;
                         publisher.init();
                     } catch (ClassNotFoundException e) {

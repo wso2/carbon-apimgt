@@ -581,6 +581,7 @@ public final class APIConstants {
     public static final String APP_USER_SCOPE_CACHE = "appUserScopeCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String SELF_SIGN_UP_CONFIG_CACHE = "selfSignupCache";
+    public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
@@ -690,6 +691,16 @@ public final class APIConstants {
         public static final String CONSUMER_SECRET = "consumerSecret";
         public static final String CLIENT_DETAILS = "appDetails";
         public static final String CALLBACK_URL = "callbackUrl";
+        public static final String KEY_STATE = "keyState";
+    }
+
+    public static class AccessTokenConstants {
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String REFRESH_TOKEN = "refreshToken";
+        public static final String VALIDITY_TIME = "validityTime";
+        public static final String TOKEN_DETAILS = "tokenDetails";
+        public static final String TOKEN_STATE = "tokenState";
+        public static final String TOKEN_SCOPES = "tokenScope";
     }
     
     //key  of the endpoint securevault

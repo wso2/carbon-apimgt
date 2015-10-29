@@ -30,8 +30,7 @@ if(jagg.isCSRFTokenValid())
             apiData.description = request.getParameter("description","UTF-8");
  	        if(request.getParameter("http_checked") == null && request.getParameter("https_checked") == null){
                 apiData.transports = null;
-            }
-            else{
+            } else{
                 apiData.transports=request.getParameter("http_checked")+","+request.getParameter("https_checked");
             }
             apiData.endpoint = request.getParameter("endpoint");
@@ -84,22 +83,22 @@ if(jagg.isCSRFTokenValid())
                 errorMsg = "Invalid input for Sandbox TPS";
             }
 
-            if(errorMsg != null){
-             obj = {
+            if (errorMsg != null)   {
+                obj = {
                     error:true,
                     message:errorMsg,
                 };
-            print(obj);
-            return;    
+                print(obj);
+                return;
             }
 
-            if(externalAPIStores!=null){
-            var externalAPIStoresVals=externalAPIStores.split("::");
-             for(var k=0;k<externalAPIStoresVals.length;k++){
-             if(externalAPIStoresVals[k]!=''){
-             externalAPIStoresArray.push(externalAPIStoresVals[k]);
-             }
-             }
+            if(externalAPIStores!=null) {
+                var externalAPIStoresVals=externalAPIStores.split("::");
+                for(var k=0;k<externalAPIStoresVals.length;k++) {
+                    if(externalAPIStoresVals[k]!='')    {
+                        externalAPIStoresArray.push(externalAPIStoresVals[k]);
+                    }
+                }
             }
             apiData.externalAPIStores = externalAPIStoresArray;
             
@@ -111,29 +110,27 @@ if(jagg.isCSRFTokenValid())
             var uriMethodArr = new Array();
             var uriAuthMethodArr = new Array();
             var throttlingTierArr = new Array();
-            if(resCount==0){
-            uriTemplateArr.push(request.getParameter("uriTemplate-0"));
-            uriMethodArr.push(request.getParameter("resourceMethod-0"));
 
-            var authType=request.getParameter("resourceMethodAuthType-0");
-            var throttlingTier=request.getParameter("resourceMethodThrottlingTier-0");
+            if(resCount==0) {
+                uriTemplateArr.push(request.getParameter("uriTemplate-0"));
+                uriMethodArr.push(request.getParameter("resourceMethod-0"));
 
-            uriAuthMethodArr.push(authType);
-            throttlingTierArr.push(throttlingTier);
-            }else{
-            for (var i = 0; i < resCount; i++) {
-            uriTemplateArr.push(request.getParameter("uriTemplate-" +i));
-            uriMethodArr.push(request.getParameter("resourceMethod-" +i));
+                var authType=request.getParameter("resourceMethodAuthType-0");
+                var throttlingTier=request.getParameter("resourceMethodThrottlingTier-0");
 
-            var authType=request.getParameter("resourceMethodAuthType-" +i);
-            var tierName=request.getParameter("resourceMethodThrottlingTier-" +i);
+                uriAuthMethodArr.push(authType);
+                throttlingTierArr.push(throttlingTier);
+            } else  {
+                for (var i = 0; i < resCount; i++) {
+                    uriTemplateArr.push(request.getParameter("uriTemplate-" +i));
+                    uriMethodArr.push(request.getParameter("resourceMethod-" +i));
 
-            uriAuthMethodArr.push(authType);
-            throttlingTierArr.push(tierName);
+                    var authType=request.getParameter("resourceMethodAuthType-" +i);
+                    var tierName=request.getParameter("resourceMethodThrottlingTier-" +i);
 
-
-
-            }
+                    uriAuthMethodArr.push(authType);
+                    throttlingTierArr.push(tierName);
+                }
             }
             apiData.uriTemplateArr = uriTemplateArr;
 
@@ -148,9 +145,9 @@ if(jagg.isCSRFTokenValid())
                 apiData.provider = provider;
             }
 
-            if(action === "addAPI"){            
+            if(action === "addAPI") {
             	result = mod.addAPI(apiData);
-            }else{            
+            } else  {
             	result = mod.updateAPI(apiData);
             }
             if (result.error == true) {
@@ -183,7 +180,7 @@ if(jagg.isCSRFTokenValid())
 
             print(obj);
 
-        }else if (action === "isContextExist") {
+        } else if (action === "isContextExist") {
             mod = jagg.module("api");
             var context = request.getParameter("context");
             var oldContext = request.getParameter("oldContext");
@@ -202,7 +199,7 @@ if(jagg.isCSRFTokenValid())
 
             print(obj);
 
-        }else if (action === "validateRoles") {
+        } else if (action === "validateRoles") {
             mod = jagg.module("api");
             var user=jagg.getUser().username;
             var roles = request.getParameter("roles");
@@ -221,9 +218,7 @@ if(jagg.isCSRFTokenValid())
 
             print(obj);
 
-        }
-
-        else if (action === "isURLValid") {
+        } else if (action === "isURLValid") {
             mod = jagg.module("api");
             var type = request.getParameter("type");
             var url = request.getParameter("url");
@@ -243,9 +238,7 @@ if(jagg.isCSRFTokenValid())
 
             print(obj);
 
-        }
-
-        else if (action === "getTiers") {
+        } else if (action === "getTiers") {
             mod = jagg.module("api");
             result = mod.getTiers();
             if (result.error) {
@@ -262,8 +255,7 @@ if(jagg.isCSRFTokenValid())
 
             print(obj);
 
-        }
-        else if (action === "getCustomInSequences") {
+        } else if (action === "getCustomInSequences") {
 
             var apiProvider =request.getParameter("provider");
             var apiName = request.getParameter("apiName");
@@ -283,8 +275,7 @@ if(jagg.isCSRFTokenValid())
                 }
             }
             print(obj);
-        }
-        else if (action === "getCustomOutSequences") {
+        } else if (action === "getCustomOutSequences") {
             var apiProvider =request.getParameter("provider");
             var apiName = request.getParameter("apiName");
             var apiVersion = request.getParameter("apiVersion");
@@ -302,8 +293,7 @@ if(jagg.isCSRFTokenValid())
                 }
             }
             print(obj);
-        }
-        else if (action === "getCustomFaultSequences") {
+        } else if (action === "getCustomFaultSequences") {
             mod = jagg.module("api");
             result = mod.getCustomFaultSequences();
             if (result.error) {
@@ -318,9 +308,7 @@ if(jagg.isCSRFTokenValid())
                 }
             }
             print(obj);
-        }
-
-        else {
+        } else {
             print({
                       error:true,
                       message:msg.error.invalidAction(action)
