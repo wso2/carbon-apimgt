@@ -687,3 +687,11 @@ body {
 .set-height-40 {
     height:40px;
 }
+
+.ast-desc {
+    margin-top: -25px;
+}
+
+.ast-img {
+    display: block;
+}
