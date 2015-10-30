@@ -39,7 +39,7 @@ public class BasicAuthenticationHandler implements RequestHandler {
     private static final Log logger = LogFactory.getLog(BasicAuthenticationHandler.class);
 
     /**
-     * authenticate requests received at the ml endpoint, using HTTP basic-auth headers as the authentication
+     * authenticate requests received at the REST API endpoint, using HTTP basic-auth headers as the authentication
      * mechanism. This method returns a null value which indicates that the request to be processed. 
      */
     @Override

@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import java.math.BigDecimal;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,7 +16,7 @@ public class TagDTO  {
   private String name = null;
   
   
-  private BigDecimal weight = null;
+  private Integer weight = null;
 
   
   /**
@@ -36,10 +35,10 @@ public class TagDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("weight")
-  public BigDecimal getWeight() {
+  public Integer getWeight() {
     return weight;
   }
-  public void setWeight(BigDecimal weight) {
+  public void setWeight(Integer weight) {
     this.weight = weight;
   }
 
