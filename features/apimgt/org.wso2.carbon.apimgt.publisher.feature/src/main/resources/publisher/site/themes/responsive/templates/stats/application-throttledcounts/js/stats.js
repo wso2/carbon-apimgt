@@ -161,11 +161,11 @@ var drawThrottledTimeGraph = function (fromDate, toDate) {
                         for (var i = 0; i < length; i++) {
                             successValues.push({
                                     "x" : result[i].apiName,
-                                    "y" : result[i].success_request_count
+                                    "y" : result[i].successRequestCount
                             });
                             throttledValues.push({
                                     "x" : result[i].apiName,
-                                    "y" : result[i].throttleout_count
+                                    "y" : result[i].throttleOutCount
                             });
                         }
 
