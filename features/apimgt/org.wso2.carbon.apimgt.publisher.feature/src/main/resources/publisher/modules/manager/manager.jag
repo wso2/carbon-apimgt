@@ -98,4 +98,10 @@ var getAPIStoreObj = function() {
     var store = require('apistore');
     return new store.APIStore();
 };
+
+var getUsageClient = function(){
+    var user = jagg.getUser();
+    return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user.username);
+}
+
 %>

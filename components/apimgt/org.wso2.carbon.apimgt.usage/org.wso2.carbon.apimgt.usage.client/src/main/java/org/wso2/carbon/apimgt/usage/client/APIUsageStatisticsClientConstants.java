@@ -24,7 +24,7 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String API_THROTTLED_OUT_SUMMARY = "API_THROTTLED_OUT_SUMMARY";
 
-    public static final String CONSUMERKEY = "consumerkey";
+    public static final String CONSUMERKEY = "consumerKey";
 
     public static final String RESOURCE = "resourcepath";
 
@@ -62,7 +62,7 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String ROW = "row";
 
-    public static final String REQUEST = "total_request_count";
+    public static final String TOTAL_REQUEST_COUNT = "total_request_count";
 
     public static final String API = "api";
 
@@ -76,11 +76,11 @@ public final class APIUsageStatisticsClientConstants {
     
     public static final String CONTEXT= "context";
     
-    public static final String RESPONSE = "total_response_count";
+    public static final String TOTAL_RESPONSE_COUNT = "total_response_count";
 
 	public static final String INVOCATION_TIME = "requesttime";
 
-    public static final String FAULT = "total_fault_count";
+    public static final String TOTAL_FAULT_COUNT = "total_fault_count";
 
     public static final String REQUEST_TIME = "max_request_time";
 
@@ -129,5 +129,41 @@ public final class APIUsageStatisticsClientConstants {
     public static final String GROUP_BY_DAY = "day";
 
     public static final String GROUP_BY_WEEK = "week";
+
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_OCTET_STREAM="application/octet-stream";
+    public static final String HTTP_AUTH_HEADER_NAME = "Authorization";
+    public static final String HTTP_AUTH_HEADER_TYPE = "Basic";
+
+    public static final String DAS_SEARCH_REST_API_URL = "/analytics/search";
+    public static final String DAS_AGGREGATES_SEARCH_REST_API_URL = "/analytics/aggregates";
+    public static final String DAS_TABLE_EXIST_REST_API_URL = "/analytics/table_exists";
+
+    public static final String DAS_TABLE_API_UTIL = "API_UTIL";
+
+    public static final String KEY_API_FACET = "key_api_facet";
+    public static final String KEY_USERID_FACET = "key_userId_facet";
+    public static final String KEY_API_METHOD_PATH_FACET ="key_api_method_path_facet";
+    public static final String CONSUMERKEY_API_FACET ="consumerKey_api_facet";
+    public static final String API_VERSION_USERID_APIPUBLISHER_FACET = "api_version_userId_apiPublisher_facet";
+    public static final String API_VERSION_CONTEXT_FACET ="api_version_context_facet";
+    public static final String API_VERSION_USERID_CONTEXT_FACET="api_version_userId_context_facet";
+    public static final String API_VERSION_CONTEXT_METHOD_FACET ="api_version_context_method_facet";
+    public static final String API_VERSION_CONTEXT_DEST_FACET="api_version_context_dest_facet";
+    public static final String API_VERSION_APIPUBLISHER_CONTEXT_FACET ="api_version_apiPublisher_context_facet";
+    public static final String API_APIPUBLISHER_APPLICATIONNAME_FACET="api_apiPublisher_applicationName_facet";
+    public static final String APPLICATIONNAME_FACET="applicationName_facet";
+
+    public static final String AGGREGATE_SUM="SUM";
+    public static final String AGGREGATE_MAX="MAX";
+
+    public static final String ALIAS_COUNT="count";
+    public static final String ALIAS_TOTALSERVICETIME = "totalServiceTime";
+    public static final String ALIAS_TOTALRESPONSECOUNT = "totalResponseCount";
+    public static final String ALIAS_LASTACCESSTIME ="lastAccessTime";
+    public static final String ALIAS_TOTALREQUESTCOUNT ="totalRequestCount";
+    public static final String ALIAS_TOTALFAULTCOUNT="totalFaultCount";
+    public static final String ALIAS_SUCCESS_REQUEST_COUNT="success_request_count";
+    public static final String ALIAS_THROTTLE_OUT_COUNT="throttle_out_count";
 
 }

@@ -244,6 +244,8 @@ public final class APIUtil {
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            //set uuid
+            api.setUUID(artifact.getId());
             // set url
             api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
             api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
@@ -610,6 +612,8 @@ public final class APIUtil {
             if (apiId == -1) {
                 return null;
             }
+            //set uuid
+            api.setUUID(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
@@ -1942,6 +1946,8 @@ public final class APIUtil {
                api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
                //set last access time
                api.setLastUpdated(registry.get(artifactPath).getLastModified());
+               //set uuid
+               api.setUUID(artifact.getId());
                // set url
                api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
                api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
@@ -3568,6 +3574,8 @@ public final class APIUtil {
              String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
              String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
              api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+             //set uuid
+             api.setUUID(artifact.getId());
              api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
              api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
              api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -4610,6 +4618,19 @@ public final class APIUtil {
      */
 
     public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        return Class.forName(className);
+    }
+
+    /**
+     * Gets the instance of a class given the class name.
+     * @param className the fully qualified name of the class.
+     * @return an instance of the class with the given name
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+
+    public static Class getClassFromName(String className) throws ClassNotFoundException {
         return Class.forName(className);
     }
 }

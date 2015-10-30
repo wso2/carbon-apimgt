@@ -15,7 +15,7 @@ public class APIListDTO  {
   
   
   
-  private String count = null;
+  private Integer count = null;
   
   
   private String next = null;
@@ -31,10 +31,10 @@ public class APIListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("count")
-  public String getCount() {
+  public Integer getCount() {
     return count;
   }
-  public void setCount(String count) {
+  public void setCount(Integer count) {
     this.count = count;
   }
 

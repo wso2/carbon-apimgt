@@ -7,8 +7,8 @@ import org.wso2.carbon.apimgt.rest.api.factories.ApplicationsApiServiceFactory;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyGenerateRequestDTO;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ApplicationsApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of applications", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of applications", response = ApplicationListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Application list returned."),
         
@@ -131,7 +131,7 @@ public class ApplicationsApi  {
     @Path("/{applicationId}/generate-keys")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = ApplicationKeyDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = ApplicationDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Specified Production or Sandbox keys generated."),
         
