@@ -24,8 +24,11 @@ public class SubscriptionDTO  {
   
   private String tier = null;
   
+  public enum StatusEnum {
+     BLOCKED,  PROD_ONLY_BLOCKED,  UNBLOCKED,  ON_HOLD,  REJECTED, 
+  };
   
-  private String status = null;
+  private StatusEnum status = null;
 
   
   /**
@@ -80,10 +83,10 @@ public class SubscriptionDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("status")
-  public String getStatus() {
+  public StatusEnum getStatus() {
     return status;
   }
-  public void setStatus(String status) {
+  public void setStatus(StatusEnum status) {
     this.status = status;
   }
 

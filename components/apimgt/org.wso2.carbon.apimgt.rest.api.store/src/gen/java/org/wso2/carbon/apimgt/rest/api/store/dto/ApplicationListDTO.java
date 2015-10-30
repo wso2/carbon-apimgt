@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
 import java.util.*;
 
 import io.swagger.annotations.*;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class APIListDTO  {
+public class ApplicationListDTO  {
   
   
   
@@ -24,7 +24,7 @@ public class APIListDTO  {
   private String previous = null;
   
   
-  private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>() ;
+  private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>() ;
 
   
   /**
@@ -69,10 +69,10 @@ public class APIListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<APIInfoDTO> getList() {
+  public List<ApplicationInfoDTO> getList() {
     return list;
   }
-  public void setList(List<APIInfoDTO> list) {
+  public void setList(List<ApplicationInfoDTO> list) {
     this.list = list;
   }
 
@@ -81,7 +81,7 @@ public class APIListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIListDTO {\n");
+    sb.append("class ApplicationListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");

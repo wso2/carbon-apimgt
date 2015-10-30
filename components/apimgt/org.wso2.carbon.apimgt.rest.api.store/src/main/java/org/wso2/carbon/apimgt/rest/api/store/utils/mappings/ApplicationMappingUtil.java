@@ -16,9 +16,16 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ApplicationMappingUtil {
 
@@ -31,6 +38,12 @@ public class ApplicationMappingUtil {
         applicationDTO.setName(application.getName());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getSubscriber().getName());
+        List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
+        for(APIKey apiKey : application.getKeys()) {
+            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+            applicationKeyDTOs.add(applicationKeyDTO);
+        }
+        applicationDTO.setKeys(applicationKeyDTOs);
         return applicationDTO;
     }
 
@@ -43,5 +56,31 @@ public class ApplicationMappingUtil {
         application.setUUID(applicationDTO.getApplicationId());
         application.setGroupId(applicationDTO.getGroupId());
         return application;
+    }
+
+    public static ApplicationListDTO fromApplicationsToDTO (Application[] applications) {
+        ApplicationListDTO applicationListDTO = new ApplicationListDTO();
+        List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
+        if (applicationInfoDTOs == null) {
+            applicationInfoDTOs = new ArrayList<>();
+            applicationListDTO.setList(applicationInfoDTOs);
+        }
+        for (Application application : applications) {
+            applicationInfoDTOs.add(fromApplicationToInfoDTO(application));
+        }
+        applicationListDTO.setCount(applications.length);
+        return applicationListDTO;
+    }
+
+    public static ApplicationInfoDTO fromApplicationToInfoDTO (Application application) {
+        ApplicationInfoDTO applicationInfoDTO = new ApplicationInfoDTO();
+        applicationInfoDTO.setApplicationId(application.getUUID());
+        applicationInfoDTO.setThrottlingTier(application.getTier());
+        applicationInfoDTO.setDescription(application.getDescription());
+        applicationInfoDTO.setCallbackUrl(application.getCallbackUrl());
+        applicationInfoDTO.setName(application.getName());
+        applicationInfoDTO.setGroupId(application.getGroupId());
+        applicationInfoDTO.setSubscriber(application.getSubscriber().getName());
+        return applicationInfoDTO;
     }
 }
