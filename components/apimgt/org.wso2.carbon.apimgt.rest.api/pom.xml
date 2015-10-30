@@ -107,6 +107,13 @@
             <version>5.0.2.Final</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
+            <version>4.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <pluginManagement>
@@ -129,7 +136,7 @@
 								<directory>src/main/webapp</directory>
 							</resource>
 						</webResources>
-						<warName>api#am#v1</warName>
+						<warName>api#am#store#v1</warName>
 					</configuration>
 				</plugin>
             </plugins>

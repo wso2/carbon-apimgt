@@ -53,6 +53,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -1825,6 +1826,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return subscribedAPI;
     }
 
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionByUUID(uuid);
+        return subscribedAPI;
+    }
+
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException {
         Set<SubscribedAPI> subscribedAPIs = getSubscribedAPIs(subscriber, null);
         return subscribedAPIs;
@@ -1991,17 +2003,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * Removes a subscription specified by id
+     * Removes a subscription specified by SubscribedAPI object
      *
-     * @param subscription_id id of subscription
+     * @param subscription SubscribedAPI object
      * @throws APIManagementException
      */
-    public void removeSubscriptionById(int subscription_id) throws APIManagementException {
-        SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionById(subscription_id);
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
+        String uuid = subscription.getUUID();
+        SubscribedAPI subscribedAPI = apiMgtDAO.getSubscriptionByUUID(uuid);
         if (subscribedAPI != null) {
             Application application = subscribedAPI.getApplication();
             APIIdentifier identifier = subscribedAPI.getApiId();
-            apiMgtDAO.removeSubscriptionById(subscription_id, false);
+            apiMgtDAO.removeSubscription(subscription);
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
                 invalidateCachedKeys(application.getId());
             }
@@ -2009,11 +2022,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String appName = application.getName();
                 String logMessage =
                         "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion() +
-                                " subscription (id : " + subscription_id + ") removed from app " + appName;
+                                " subscription (uuid : " + uuid + ") removed from app " + appName;
                 log.debug(logMessage);
             }
         } else {
-            throw new APIManagementException("Subscription for id:" + subscription_id +" does not exist.");
+            throw new APIManagementException("Subscription for UUID:" + uuid +" does not exist.");
         }
     }
 
@@ -2230,7 +2243,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * @param jsonString oAuthApplication parameters as a json string.
      * @return
      * @throws APIManagementException
-     */
+
     @Override
     public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
                                                                          String tokenType, String callbackUrl,
@@ -2347,6 +2360,205 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
     }
+    */
+
+    //==================================================================================================================
+    /**
+     * This method specifically implemented for REST API by removing application and data access logic
+     * from host object layer. So as per new implementation we need to pass requested scopes to this method
+     * as tokenScope. So we will do scope related other logic here in this method.
+     * So host object should only pass required 9 parameters.
+     * */
+     @Override
+    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
+                                                                         String tokenType, String callbackUrl,
+                                                                         String[] allowedDomains, String validityTime,
+                                                                         String tokenScope, String groupingId,
+                                                                         String jsonString
+                                                                         )
+            throws APIManagementException {
+
+        boolean isTenantFlowStarted = false;
+        // we should have unique names for applications. There for we will
+        // append, the word 'production' or 'sandbox'
+        // according to the token type.
+        StringBuilder applicationNameAfterAppend = new StringBuilder(applicationName);
+        //-------------------------------------------------------------------------------
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        int tenantId =
+                0;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        //checking for authorized scopes
+        Set<Scope> scopeSet = new LinkedHashSet<Scope>();
+        List<Scope> authorizedScopes = new ArrayList<Scope>();
+        String authScopeString;
+        if (tokenScope != null && tokenScope.length() != 0 &&
+                !tokenScope.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
+            scopeSet.addAll(getScopesByScopeKeys(tokenScope, tenantId));
+            authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
+        }
+
+        if (!authorizedScopes.isEmpty()) {
+            StringBuilder scopeBuilder = new StringBuilder();
+            for (Scope scope : authorizedScopes) {
+                scopeBuilder.append(scope.getKey()).append(" ");
+            }
+            authScopeString = scopeBuilder.toString();
+        } else {
+            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
+        }
+        //-------------------------------------------------------------------------------
+
+
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            // initiate WorkflowExecutor
+            WorkflowExecutor appRegistrationWorkflow = null;
+            // initiate ApplicationRegistrationWorkflowDTO
+            ApplicationRegistrationWorkflowDTO appRegWFDto = null;
+
+            ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
+
+            // get APIM application by Application Name and userId.
+            Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
+
+            // if its a PRODUCTION application.
+            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
+                // initiate workflow type. By default simple work flow will be
+                // executed.
+                appRegistrationWorkflow =
+                        WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                appRegWFDto =
+                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
+                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+
+            }// if it is a sandBox application.
+            else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { // if
+                // its
+                // a
+                // SANDBOX
+                // application.
+                appRegistrationWorkflow =
+                        WorkflowExecutorFactory.getInstance()
+                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                appRegWFDto =
+                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
+                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            }
+            // Build key manager instance and create oAuthAppRequest by
+            // jsonString.
+            OAuthAppRequest request =
+                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(), null,
+                            callbackUrl, authScopeString, jsonString);
+            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
+
+            // Setting request values in WorkflowDTO - In future we should keep
+            // Application/OAuthApplication related
+            // information in the respective entities not in the workflowDTO.
+            appRegWFDto.setStatus(WorkflowStatus.CREATED);
+            appRegWFDto.setCreatedTime(System.currentTimeMillis());
+            appRegWFDto.setTenantDomain(tenantDomain);
+            appRegWFDto.setTenantId(tenantId);
+            appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
+            appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
+            appRegWFDto.setApplication(application);
+            request.setMappingId(appRegWFDto.getWorkflowReference());
+            if (!application.getSubscriber().getName().equals(userId)) {
+                appRegWFDto.setUserName(application.getSubscriber().getName());
+            } else {
+                appRegWFDto.setUserName(userId);
+            }
+
+            appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
+            appRegWFDto.setAppInfoDTO(request);
+            appRegWFDto.setDomainList(allowedDomains);
+
+            appRegWFDto.setKeyDetails(appKeysDto);
+            appRegistrationWorkflow.execute(appRegWFDto);
+
+            Map<String, Object> keyDetails = new HashMap<String, Object>();
+            keyDetails.put("keyState", appRegWFDto.getStatus().toString());
+            OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
+
+            if (applicationInfo != null) {
+                keyDetails.put("consumerKey", applicationInfo.getClientId());
+                keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
+                keyDetails.put("appDetails", applicationInfo.getJsonString());
+            }
+
+            // There can be instances where generating the Application Token is
+            // not required. In those cases,
+            // token info will have nothing.
+            AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
+            if (tokenInfo != null) {
+                keyDetails.put("accessToken", tokenInfo.getAccessToken());
+                keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
+                keyDetails.put("tokenDetails", tokenInfo.getJSONString());
+                keyDetails.put("tokenScope", tokenInfo.getScopes());
+            }
+            return keyDetails;
+        } catch (WorkflowException e) {
+            log.error("Could not execute Workflow", e);
+            throw new APIManagementException("Could not execute Workflow", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+    }
+
+    private static List<Scope> getAllowedScopesForUserApplication(String username,
+                                                                  Set<Scope> reqScopeSet) {
+        String[] userRoles = null;
+        org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
+
+        List<Scope> authorizedScopes = new ArrayList<Scope>();
+        try {
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(MultitenantUtils.getTenantDomain(username));
+            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+            userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            // Log and return since we do not want to stop issuing the token in
+            // case of scope validation failures.
+            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
+        }
+
+        List<String> userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
+
+        //Iterate the requested scopes list.
+        for (Scope scope : reqScopeSet) {
+            //Get the set of roles associated with the requested scope.
+            String roles = scope.getRoles();
+
+            //If the scope has been defined in the context of the App and if roles have been defined for the scope
+            if (roles != null && roles.length() != 0) {
+                List<String> roleList =
+                        new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", "").split(",")));
+                //Check if user has at least one of the roles associated with the scope
+                roleList.retainAll(userRoleList);
+                if (!roleList.isEmpty()) {
+                    authorizedScopes.add(scope);
+                }
+            }
+        }
+
+        return authorizedScopes;
+    }
+    //=================================================================================================================
+
 
     public Map<String, String> completeApplicationRegistration(String userId, String applicationName, String tokenType,
                                                                String tokenScope, String groupingId)
