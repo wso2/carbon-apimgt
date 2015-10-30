@@ -27,9 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -74,7 +72,7 @@ public class APIMappingUtil {
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
-        dto.setContext(model.getContext());
+        dto.setContext(model.getContextTemplate());
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
@@ -82,7 +80,7 @@ public class APIMappingUtil {
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
         dto.setEndpointConfig(model.getEndpointConfig());
-        List<SequenceDTO> sequences = null;
+        List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
         if (inSequenceName != null && !inSequenceName.isEmpty()) {
@@ -256,6 +254,34 @@ public class APIMappingUtil {
         //endpoint configs, business info and thumbnail requires mapping
         return model;
 
+    }
+
+    public static APIListDTO fromAPIListToDTO (List<API> apiList) {
+        APIListDTO apiListDTO = new APIListDTO();
+        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
+        if (apiInfoDTOs == null) {
+            apiInfoDTOs = new ArrayList<>();
+            apiListDTO.setList(apiInfoDTOs);
+        }
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(api));
+        }
+        apiListDTO.setCount(apiList.size());
+        return apiListDTO;
+    }
+
+    public static APIInfoDTO fromAPIToInfoDTO(API api) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setDescription(api.getDescription());
+        apiInfoDTO.setContext(api.getContextTemplate());
+        apiInfoDTO.setId(api.getUUID());
+        APIIdentifier apiId = api.getId();
+        apiInfoDTO.setName(apiId.getApiName());
+        apiInfoDTO.setVersion(apiId.getVersion());
+        apiInfoDTO.setProvider(apiId.getProviderName());
+        apiInfoDTO.setStatus(api.getStatus().toString());
+        apiInfoDTO.setType(null); //todo
+        return apiInfoDTO;
     }
 
     private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
