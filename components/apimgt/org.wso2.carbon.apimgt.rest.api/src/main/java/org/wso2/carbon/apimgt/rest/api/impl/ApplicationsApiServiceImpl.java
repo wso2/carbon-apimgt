@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.utils.mappings.ApplicationKeyMappingUtil;
@@ -57,15 +58,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         if (subscriber == null) {
             subscriber = username;
         }
-
-        List<ApplicationDTO> applicationDTOList = new ArrayList<>();
+        ApplicationListDTO applicationListDTO;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application[] applications = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
-            for (Application application : applications) {
-                applicationDTOList.add(ApplicationMappingUtil.fromApplicationtoDTO(application));
-            }
-            return Response.ok().entity(applicationDTOList).build();
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications);
+            return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }

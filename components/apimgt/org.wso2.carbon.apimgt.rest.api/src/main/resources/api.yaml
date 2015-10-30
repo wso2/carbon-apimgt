@@ -662,20 +662,7 @@ paths:
         '200':
           description: OK. Application list returned.
           schema:
-            title: ApplicationList
-            properties:
-              count:
-                type: string
-              next:
-                type: string
-                description: Link to next page. Empty if no more applications are to be returned.
-              previous:
-                type: string
-                description: Link to previous page. Empty if current page is first page.
-              list:
-                type: array
-                items:
-                  $ref: '#/definitions/Application'
+            $ref: '#/definitions/ApplicationList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -1774,6 +1761,21 @@ definitions:
             type: string
           technicalOwnerEmail:
             type: string
+  ApplicationList:
+    title: ApplicationList
+    properties:
+      count:
+        type: integer
+      next:
+        type: string
+        description: Link for next page. Empty if no more APIs to be returned.
+      previous:
+        type: string
+        description: Link for previous page. Empty if current page is first page.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationInfo'
   Application:
     title: Application
     required:
@@ -1801,6 +1803,23 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationKey'
+  ApplicationInfo:
+    title: Application info object with basic application details
+    properties:
+      applicationId:
+        type: string
+      name:
+        type: string
+      subscriber:
+        type: string
+      throttlingTier:
+        type: string
+      callbackUrl:
+        type: string
+      description:
+        type: string
+      groupId:
+        type: string
   Document:
     title: Document
     required:

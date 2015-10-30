@@ -80,7 +80,7 @@ public class APIMappingUtil {
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
         dto.setEndpointConfig(model.getEndpointConfig());
-        List<SequenceDTO> sequences = null;
+        List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
         if (inSequenceName != null && !inSequenceName.isEmpty()) {
@@ -264,13 +264,13 @@ public class APIMappingUtil {
             apiListDTO.setList(apiInfoDTOs);
         }
         for (API api : apiList) {
-            apiInfoDTOs.add(fromAPIToAPIInfoDTO(api));
+            apiInfoDTOs.add(fromAPIToInfoDTO(api));
         }
         apiListDTO.setCount(apiList.size());
         return apiListDTO;
     }
 
-    public static APIInfoDTO fromAPIToAPIInfoDTO (API api) {
+    public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
         apiInfoDTO.setContext(api.getContextTemplate());
