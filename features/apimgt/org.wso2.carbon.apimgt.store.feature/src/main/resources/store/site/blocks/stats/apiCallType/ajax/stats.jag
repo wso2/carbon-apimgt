@@ -70,7 +70,7 @@ log = new Log();
     } else if (action === "isDataPublishingEnabled") {
             mod = jagg.module("statistics");
             result = mod.isDataPublishingEnabled();
-            
+
             if (result.error == "true") {
                 obj = {
                     error: result.error,

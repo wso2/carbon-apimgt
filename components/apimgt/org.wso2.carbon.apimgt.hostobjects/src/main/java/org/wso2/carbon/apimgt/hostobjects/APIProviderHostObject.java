@@ -72,6 +72,8 @@ import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -3307,10 +3309,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String providerName = (String) args[0];
         String apiName = (String) args[1];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUsageByAPIVersions(providerName, apiName);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionUsage", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3326,52 +3328,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("count", row, usage.getCount());
                 myn.put(i, myn, row);
                 i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
-                                                             Object[] args, Function funObj)
-            throws APIManagementException {
-
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        List<APIUsageDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageByAPIs(providerName, fromDate, toDate, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIUsageDTO usage = (APIUsageDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-
-
             }
         }
         return myn;
@@ -3394,10 +3350,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String providerName = (String) args[0];
         String apiName = (String) args[1];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUsageBySubscribers(providerName, apiName, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUserUsage", e);
+            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUserUsage", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3418,109 +3374,11 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getAPIUsageByResourcePath(Context cx, Scriptable thisObj,
-                                                                   Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResourcePathUsageDTO> list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        if (args == null ||  args.length==0) {
-            handleException("Invalid input parameters.");
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-
-        try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIUsageByResourcePath(providerName, fromDate, toDate);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIResourcePathUsageDTO usage = (APIResourcePathUsageDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("version", row, usage.getVersion());
-                row.put("method", row, usage.getMethod());
-                row.put("context", row, usage.getContext());
-                row.put("count", row, usage.getCount());
-                row.put("time", row, usage.getTime());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIUsageByDestination(Context cx, Scriptable thisObj,
-                                                                  Object[] args, Function funObj)
-            throws APIManagementException {
-    	List<APIDestinationUsageDTO> list = null;
-    	NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-    	if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-    		return myn;
-    	}
-    	if (args == null ||  args.length==0) {
-    		handleException("Invalid input parameters.");
-    	}
-
-    	String providerName = (String) args[0];
-    	String fromDate = (String) args[1];
-    	String toDate = (String) args[2];
-
-    	try {
-    		APIUsageStatisticsClient client =
-    				new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-    		list = client.getAPIUsageByDestination(providerName, fromDate, toDate);
-    	} catch (APIMgtUsageQueryServiceClientException e) {
-    		          log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage ", e);
-    	}
-
-    	Iterator it = null;
-    	if (list != null) {
-    		it = list.iterator();
-    	}
-    	int i = 0;
-    	if (it != null) {
-    		while (it.hasNext()) {
-    			NativeObject row = new NativeObject();
-    		    Object usageObject = it.next();
-    		    APIDestinationUsageDTO usage = (APIDestinationUsageDTO) usageObject;
-    		    row.put("apiName", row, usage.getApiName());
-    		    row.put("version", row, usage.getVersion());
-    		    row.put("destination", row, usage.getDestination());
-    		    row.put("context", row, usage.getContext());
-    		    row.put("count", row, usage.getCount());
-    		    myn.put(i, myn, row);
-    		    i++;
-    		    }
-    	}
-    	return myn;
-    }
 
     public static NativeArray jsFunction_getAPIUsageByUser(Context cx, Scriptable thisObj,
                                                            Object[] args, Function funObj)
             throws APIManagementException {
-        List<APIUsageByUserDTO> list = null;
+        /*String list = null;
         NativeArray myn = new NativeArray(0);
         if (!HostObjectUtils.isStatPublishingEnabled()) {
             return myn;
@@ -3537,11 +3395,11 @@ public class APIProviderHostObject extends ScriptableObject {
         String toDate = (String) args[2];
 
         try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client =
+                    new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getAPIUsageByUser(providerName,fromDate,toDate);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
 
         Iterator it = null;
@@ -3562,7 +3420,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 i++;
             }
         }
-        return myn;
+        return myn;*/
+        return null;
     }
 
     public static NativeArray jsFunction_getProviderAPIVersionUserUsage(Context cx,
@@ -3585,10 +3444,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String apiName = (String) args[1];
         String version = (String) args[2];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUsageBySubscribers(providerName, apiName, version, 10);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUserUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUserUsage", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3609,54 +3468,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getProviderAPIVersionUserLastAccess(Context cx,
-                                                                             Scriptable thisObj,
-                                                                             Object[] args,
-                                                                             Function funObj)
-            throws APIManagementException {
-        List<APIVersionLastAccessTimeDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getLastAccessTimesByAPI(providerName, fromDate, toDate, 50);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIVersionLastAccessTimeDTO usage = (APIVersionLastAccessTimeDTO) usageObject;
-                row.put("api_name", row, usage.getApiName());
-                row.put("api_version", row, usage.getApiVersion());
-                row.put("user", row, usage.getUser());
-                Date date = new Date(String.valueOf(usage.getLastAccessTime()));
-                row.put("lastAccess", row, Long.valueOf(date.getTime()).toString());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
     public static NativeArray jsFunction_getUserAgentSummaryForALLAPIs(Context cx,
                                                                        Scriptable thisObj,
                                                                        Object[] args,
@@ -3664,10 +3475,10 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIRequestsByUserAgentsDTO> list = null;
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUserAgentSummaryForALLAPIs();
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
         }
         NativeArray myn = new NativeArray(0);
         Iterator it = null;
@@ -3704,10 +3515,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String toDate = (String) args[1];
         String apiName = (String)args[2];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getAPIRequestsByHour(fromDate, toDate,apiName);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3733,53 +3544,9 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
 
-
-    public static NativeArray jsFunction_getProviderAPIServiceTime(Context cx, Scriptable thisObj,
-                                                                   Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResponseTimeDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getResponseTimesByAPIs(providerName, fromDate, toDate, 50);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIServiceTime", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIResponseTimeDTO usage = (APIResponseTimeDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("serviceTime", row, usage.getServiceTime());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_searchAPIs(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws APIManagementException {
+    public static NativeArray jsFunction_searchAPIs(Context cx, Scriptable thisObj,
+                                                    Object[] args,
+                                                    Function funObj) throws APIManagementException {
         NativeArray myn = new NativeArray(0);
 
         if (args == null || args.length==0) {
@@ -4372,53 +4139,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
-    public static NativeArray jsFunction_getAPIResponseFaultCount(Context cx, Scriptable thisObj,
-                                                                  Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResponseFaultCountDTO> list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        if (args == null || args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIResponseFaultCount(providerName, fromDate, toDate);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
 
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object faultObject = it.next();
-                APIResponseFaultCountDTO fault = (APIResponseFaultCountDTO) faultObject;
-                row.put("apiName", row, fault.getApiName());
-                row.put("version", row, fault.getVersion());
-                row.put("context", row, fault.getContext());
-                row.put("count", row, fault.getCount());
-                row.put("faultPercentage", row, fault.getFaultPercentage());
-                row.put("totalRequestCount",row,fault.getRequestCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
 
     public static NativeArray jsFunction_getFirstAccessTime(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
@@ -4432,16 +4153,16 @@ public class APIProviderHostObject extends ScriptableObject {
             return myn;
         }
 
-        List<String> list = null;
+        List<APIFirstAccess> list = null;
         if (args.length == 0) {
             handleException("Invalid number of parameters.");
         }
         String providerName = (String) args[0];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getFirstAccessTime(providerName,1);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
         NativeObject row = new NativeObject();
 
