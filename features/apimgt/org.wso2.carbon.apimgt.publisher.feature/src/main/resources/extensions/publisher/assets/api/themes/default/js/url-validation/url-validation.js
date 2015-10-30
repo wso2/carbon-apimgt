@@ -16,7 +16,7 @@ $(document).ready(function(){
         $(btn).html("Validating..");
 
         if (url == '') {
-            $(btn).parent().after(' <span class="label label-warning url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
+            $(btn).parent().append(' <span class="label label-warning url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
             $(btn).removeClass("loadingButton-small");
             $(btn).html("Test URI");
             var toFade = $(btn).parent().parent().find('.url_validate_label');
