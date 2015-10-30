@@ -1750,43 +1750,6 @@ definitions:
           type: string
       endpointConfig:
         type: string
-      endpoint:
-        properties:
-          type:
-            type: string
-            enum:
-              - http
-              - address
-              - wsdl
-              - failover
-              - load_balanced
-          config:
-            properties:
-              algorithm:
-                type: string
-              failoverState:
-                type: boolean
-              algorithmClassName:
-                type: string
-              sessionManagement:
-                type: string
-                enum:
-                  - Transport
-                  - SOAP
-                  - ClientID
-                  - None
-              sessionTimeout:
-                type: integer
-              endpointSecured:
-                type: boolean
-              username:
-                type: string
-              password:
-                type: string
-          endpoints:
-            type: array
-            items:
-              $ref: '#/definitions/Endpoint'
       sequences:
         type: array
         items:
@@ -2010,55 +1973,6 @@ definitions:
       https:
         type: string
         description: HTTPS environment URL
-  Endpoint:
-    title: Endpoint
-    required:
-      - type
-      - url
-    properties:
-      type:
-        type: string
-        enum:
-          - Production
-          - Sandbox
-          - ProductionFailOver
-          - SandboxFailOver
-      url:
-        type: string
-      config:
-        properties:
-          suspendState:
-            properties:
-              errorCodes:
-                type: array
-                items:
-                  type: string
-              initialDuration:
-                type: integer
-              maxDuration:
-                type: integer
-              factor:
-                type: integer
-          timeoutState:
-            properties:
-              errorCodes:
-                type: array
-                items:
-                  type: string
-              retriesBeforeSuspension:
-                type: integer
-              retryDelay:
-                type: integer
-          connectionTimeout:
-            properties:
-              action:
-                type: string
-                enum:
-                  - ExecuteFaultSequence
-                  - DiscardMessage
-                  - NeverTimeOut
-              duration:
-                type: integer
   Token :
     title: Token details for invoking APIs
     properties:
