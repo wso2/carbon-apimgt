@@ -41,6 +41,7 @@ a:hover, a:focus {
 .form-control, select.form-control, textarea.form-control, select, textarea, input, .input-large {
 
     border: 1px solid !important;
+    border-color: #ccc !important;
     margin-top: 0px;
     border-radius: 0px;
     -webkit-border-radius: 0px;
@@ -53,6 +54,11 @@ a:hover, a:focus {
     -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
     -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+}
+
+.form-control:focus {
+    border-color: #777 !important;
+    box-shadow: inset 0 0px 0px rgba(0,0,0,.075), 0 0 0px rgba(102, 175, 233, .6) !important;
 }
 
 .white-bg {
@@ -399,7 +405,7 @@ div.top-menu-right-custom .navbar-nav > li > a:hover {
 
 .curl-testurlp-wrapper {
     display: none;
-    margin-left: 220px;
+    margin-left: 178px;
 }
 
 .curl-copyinfo {
