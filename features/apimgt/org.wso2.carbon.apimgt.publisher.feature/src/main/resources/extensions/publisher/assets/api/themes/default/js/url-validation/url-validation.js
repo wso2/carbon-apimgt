@@ -56,9 +56,9 @@ $(document).ready(function(){
                    success: function (response) {
                        if (!response.error) {
                            if(response.data.response === "success") {
-                               $(btn).parent().after(' <span class="label label-success url_validate_label"><i class="icon-ok icon-white"></i>Valid URL</span>');
+                               $(btn).parent().append(' <span class="label label-success url_validate_label"><i class="icon-ok icon-white"></i>Valid URL</span>');
                            } else if(response.data.response === "error while connecting") {
-                               $(btn).parent().after(' <span class="label label-warning url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
+                               $(btn).parent().append(' <span class="label label-warning url_validate_label"><i class="icon-remove icon-white"></i>Invalid URL</span>');
                            }
                            var toFade = $(btn).parent().parent().find('.url_validate_label');
                            var foo = setTimeout(function() {

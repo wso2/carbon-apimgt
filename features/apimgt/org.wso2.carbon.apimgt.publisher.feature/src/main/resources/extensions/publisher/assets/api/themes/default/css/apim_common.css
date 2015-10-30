@@ -455,7 +455,7 @@ label {
 }
 
 #prototype_endpoint {
-    width: 86%;
+    width: 60%;
     height: 35px;
     margin-right: 0px !important;
 }
@@ -683,3 +683,7 @@ body {
     margin-top: 2px; background-color: #333; font-weight: 100; padding:5px 5px;}
 .padding-none{padding:0px;}
 .padding-right-none{padding-right: 0px;}
+
+.set-height-40 {
+    height:40px;
+}
