@@ -852,7 +852,7 @@
         <carbon.apimgt.handlers.stub.package.import.version.range>[2.0.0, 3.0.0)</carbon.apimgt.handlers.stub.package.import.version.range>
 
 	<!-- Carbon Governance -->
-        <carbon.governance.version>4.6.0</carbon.governance.version>
+        <carbon.governance.version>4.6.1</carbon.governance.version>
 
         <!-- Carbon Registry -->
         <carbon.registry.version>4.5.0</carbon.registry.version>
@@ -942,8 +942,8 @@
         <carbon.feature.version>1.4.0</carbon.feature.version>
         <uuid.feature.version>1.4.0</uuid.feature.version>
         <sso.feature.version>1.4.0</sso.feature.version>
-        <es.feature.version>2.3.4</es.feature.version>
-        <carbon.social.version>2.3.4</carbon.social.version>
+        <es.feature.version>2.3.9</es.feature.version>
+        <carbon.social.version>2.3.9</carbon.social.version>
         <i18n.feature.version>1.4.0</i18n.feature.version>
 
         <!--jaggery-->

@@ -370,7 +370,7 @@ label {
 }
 
 .margin-left-chk {
-    margin-left: 335px;
+    margin-left: 255px;
 }
 
 #add_resource {
@@ -451,12 +451,13 @@ label {
 }
 
 .input-append {
-    width: 75%;
+    width: 81%;
 }
 
 #prototype_endpoint {
-    width: 87%;
+    width: 86%;
     height: 35px;
+    margin-right: 0px !important;
 }
 
 .form-horizontal .checkbox-inline {
@@ -553,12 +554,16 @@ label {
 
 .btn-success {
     color: #fff;
-    background-color: #237bd5;
+    background-color: #007D85;
     border: none;
 }
 
 .btn-success:hover {
-    background-color: #1965b2;
+    background-color: #1A6065;
+}
+
+.btn-success:active {
+    background-color: #1A6065;
 }
 
 .inlineDocName {
@@ -650,7 +655,9 @@ button.btn-api-del {
 .radio > input[type=radio] {
     opacity: 1;
 }
-
+.wr-main-content div.asset-well img{
+    width:100%;
+}
 footer {
     position: fixed;
 }
@@ -674,3 +681,5 @@ body {
     color: white;
     float: left;
     margin-top: 2px; background-color: #333; font-weight: 100; padding:5px 5px;}
+.padding-none{padding:0px;}
+.padding-right-none{padding-right: 0px;}
