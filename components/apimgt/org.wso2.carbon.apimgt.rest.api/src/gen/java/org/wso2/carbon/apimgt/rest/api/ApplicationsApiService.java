@@ -5,7 +5,6 @@ import org.wso2.carbon.apimgt.rest.api.dto.*;
 
 import org.wso2.carbon.apimgt.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyGenerateRequestDTO;
 
 import java.util.List;

@@ -3647,6 +3647,51 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * This method is used to update the subscription
+     * 
+     * @param subscribedAPI subscribedAPI object that represents the new subscription detals
+     * @throws APIManagementException if failed to update subscription
+     */
+    public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query to update the AM_SUBSCRIPTION table
+            String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, UPDATED_BY = ?, UPDATED_TIME = ? " +
+                    "WHERE UUID = ?";
+
+            //Updating data to the AM_SUBSCRIPTION table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, subscribedAPI.getSubStatus());
+            //TODO Need to find logged in user who does this update.
+            ps.setString(2, null);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setString(4, subscribedAPI.getUUID());
+            ps.execute();
+
+            // finally commit transaction
+            conn.commit();
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update subscription ", e);
+                }
+            }
+            handleException("Failed to update subscription data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
     public void updateSubscriptionStatus(int subscriptionId, String status) throws APIManagementException{
 
         Connection conn = null;
@@ -6646,6 +6691,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     "APP.SUBSCRIBER_ID,"+
                     "APP.APPLICATION_STATUS, " +
                     "SUB.USER_ID, " +
+                    "APP.GROUP_ID," +
                     "APP.UUID " +
                     "FROM " +
                     "AM_SUBSCRIBER SUB," +
@@ -6658,7 +6704,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             rs = prepStmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String applicationName = rs.getString("NAME");
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -6671,10 +6717,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                break;
             }
 
         } catch (SQLException e) {
@@ -6710,6 +6756,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     "APP.DESCRIPTION, " +
                     "APP.SUBSCRIBER_ID,"+
                     "APP.APPLICATION_STATUS, " +
+                    "APP.GROUP_ID, " +
                     "APP.UUID," +
                     "SUB.USER_ID " +
                     "FROM " +
@@ -6723,7 +6770,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             rs = prepStmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String applicationName = rs.getString("NAME");
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -6736,10 +6783,15 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                break;
+
+                Set<APIKey> keys = getApplicationKeys(subscriber.getName() , application.getId());
+                for (APIKey key : keys) {
+                    application.addKey(key);
+                }
             }
 
         } catch (SQLException e) {

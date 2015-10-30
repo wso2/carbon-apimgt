@@ -658,7 +658,7 @@ paths:
         '200':
           description: OK. Specified Production or Sandbox keys generated.
           schema:
-            $ref: '#/definitions/ApplicationKey'
+            $ref: '#/definitions/Application'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -792,6 +792,48 @@ paths:
             $ref: '#/definitions/Error'
         '406':
           description: Not Acceptable. The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+    put:
+      description: Update subscription details
+      parameters:
+        - $ref: '#/parameters/subscriptionId'
+        - in: body
+          name: body
+          description: Subscription object that needs to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      responses:
+        '200':
+          description: OK. Subscription updated
+          schema:
+            $ref: '#/definitions/Subscription'
+            Location:
+              description: The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
+              type: string
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found. The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
+          description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
     delete:
@@ -1330,6 +1372,8 @@ definitions:
         type: array
         items:
           type: string
+      endpointConfig:
+        type: string
       endpoint:
         properties:
           type:
@@ -1501,6 +1545,12 @@ definitions:
         type: string
       status:
         type: string
+        enum:
+          - BLOCKED
+          - PROD_ONLY_BLOCKED
+          - UNBLOCKED
+          - ON_HOLD
+          - REJECTED
   Sequence:
     title: Sequence
     required:
@@ -1671,16 +1721,19 @@ definitions:
       keyState:
         type: string
         description: State of the key generation of the application
-      clientName:
-        description: Application client representation
+      keyType:
+        description: Key type
         type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
       token:
         description: Token details object
         $ref: '#/definitions/Token'
   ApplicationKeyGenerateRequest :
     title: Application key generation request object
     properties:
-      tokenType:
+      keyType:
         type: string
         enum:
           - PRODUCTION
