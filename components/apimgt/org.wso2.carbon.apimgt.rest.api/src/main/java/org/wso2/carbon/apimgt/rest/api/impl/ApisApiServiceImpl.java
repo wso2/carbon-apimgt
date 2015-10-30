@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.exception.NotFoundException;
@@ -49,11 +50,10 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch){
         List<API> apis;
-        List<APIDTO> list = new ArrayList<APIDTO>();
+        APIListDTO apiListDTO;
         boolean isTenantFlowStarted = false;
 
         try {
-            String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             /*String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
@@ -67,9 +67,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             //We should send null as the provider, Otherwise serchAPIs will return all APIs of the provider 
             // instead of looking at type and query
             apis = apiProvider.searchAPIs(query, type, null);
-            for (API temp : apis) {
-                list.add(APIMappingUtil.fromAPItoDTO(temp));
-            }
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(apis);
+            return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         } /*finally {
@@ -77,7 +76,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }     */
-        return Response.ok().entity(list).build();
     }
     @Override
     public Response apisPost(APIDTO body,String contentType){

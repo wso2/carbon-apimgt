@@ -1644,7 +1644,7 @@ definitions:
     title: APIList
     properties:
       count:
-        type: string
+        type: integer
       next:
         type: string
         description: Link for next page. Empty if no more APIs to be returned.
