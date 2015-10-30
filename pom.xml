@@ -121,17 +121,6 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-
-            <repository>
-                <id>wso2-nexus-staging</id>
-                <name>WSO2 staging Repository</name>
-                <url>http://maven.wso2.org/nexus/content/repositories/orgwso2carbondeployment-069/</url>
-                <releases>
-                    <enabled>true</enabled>
-                    <updatePolicy>daily</updatePolicy>
-                    <checksumPolicy>ignore</checksumPolicy>
-                </releases>
-            </repository>
     </repositories>
 
     <pluginRepositories>
@@ -169,7 +158,7 @@
             </releases>
         </pluginRepository>
     </pluginRepositories>
-
+    
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -850,7 +839,7 @@
         <carbon.registry.version>4.4.8</carbon.registry.version>
         <carbon.mediation.version>4.4.11-SNAPSHOT</carbon.mediation.version>
         <carbon.identity.version>4.6.0-SNAPSHOT</carbon.identity.version>
-        <carbon.deployment.version>4.6.0-alpha</carbon.deployment.version>
+        <carbon.deployment.version>4.6.0</carbon.deployment.version>
 
         <carbon.governance.version>4.5.8</carbon.governance.version>
         <carbon.multitenancy.version>4.5.0-m1</carbon.multitenancy.version>
