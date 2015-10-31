@@ -95,6 +95,8 @@ public class APIThrottleHandler extends AbstractHandler {
 
     public static final String RESOURCE_THROTTLE_KEY = "resource_throttle_context";
 
+    public static final String RESOURCE_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/res-tiers.xml";
+
 
     /**
      * The property key that used when the ConcurrentAccessController
@@ -818,7 +820,15 @@ public class APIThrottleHandler extends AbstractHandler {
                         throttle = ThrottleFactory.createMediatorThrottle(
                                 PolicyEngine.getPolicy((OMElement) entryValue));
 
-                        ThrottleContext throttleContext = throttle.getThrottleContext(
+                        Object resEntryValue = synCtx.getEntry(RESOURCE_THROTTLE_POLICY_KEY);
+                        if (resEntryValue == null || !(resEntryValue instanceof OMElement)) {
+                            handleException("Unable to load throttling policy using key: " + RESOURCE_THROTTLE_POLICY_KEY);
+                            return;
+                        }
+
+                        Throttle resThrottle = ThrottleFactory.createMediatorThrottle(
+                                PolicyEngine.getPolicy((OMElement) resEntryValue));
+                        ThrottleContext throttleContext = resThrottle.getThrottleContext(
                                 ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
 
                         if (throttleContext != null) {

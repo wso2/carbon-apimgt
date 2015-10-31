@@ -68,6 +68,8 @@ public final class APIConstants {
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
     
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
+    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
+    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 

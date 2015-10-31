@@ -8,6 +8,7 @@
     //fetch and display tiers
     var mod = jagg.module("api");
     var tiers = mod.getTiers().tiers;
+    var resourceTiers = mod.getResourceTiers().tiers;
     var default_tier = tiers[tiers.length -1].tierName;
     for (var i = 0; i < tiers.length; i++){
         if(tiers[i].defaultTier){
@@ -30,8 +31,8 @@
       { "value": "Application & Application User", "text":"<%=i18n.localize("application&applicationUser")%>"}
     ];
     var TIERS =[
-        <% for (var i = 0; i < tiers.length; i++) { 
-        %>{ "value": "<%= tiers[i].tierName %>", "text": "<%= tiers[i].tierDisplayName %>" }<% if((i+1) != tiers.length){%>,<%}%>
+        <% for (var i = 0; i < resourceTiers.length; i++) {
+        %>{ "value": "<%= resourceTiers[i].tierName %>", "text": "<%= resourceTiers[i].tierDisplayName %>" }<% if((i+1) != resourceTiers.length){%>,<%}%>
         <% } %>
     ];
 

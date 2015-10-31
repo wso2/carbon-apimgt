@@ -38,7 +38,7 @@ import java.io.IOException;
 
 public class ApplicationThrottleController {
     
-    public static final String APPLICATION_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/tiers.xml";
+    public static final String APPLICATION_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/app-tiers.xml";
 
     public static final String APP_THROTTLE_CONTEXT_PREFIX = "APP_THROTTLE_CONTEXT_";
 
