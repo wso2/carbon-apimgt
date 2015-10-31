@@ -29,46 +29,47 @@
 	<name>WSO2 Carbon - API Manager Rest API Utility</name>
 	<description>Key Management Rest API utility and Extensions</description>
 	<url>http://wso2.org</url>
-    <properties>
-        <jackson.version>1.8.6</jackson.version>
-    </properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.core</artifactId>
+            <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.utils</artifactId>
+            <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.logging</artifactId>
+            <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.keymgt.stub</artifactId>
+            <scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon</groupId>
 			<artifactId>org.wso2.carbon.authenticator.stub</artifactId>
+            <scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.apimgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
-        	</dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.api</artifactId>
+            <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-        <groupId>org.wso2.carbon.apimgt</groupId>
-        <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-    </dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
             <version>2.7.17</version>
+            <scope>provided</scope>
         </dependency>
         <!--dependency>
             <groupId>org.apache.cxf</groupId>
@@ -77,24 +78,10 @@
             <scope>provided</scope>
         </dependency-->
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-jaxrs</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
             <version>4.1.6.RELEASE</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -106,6 +93,7 @@
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jaxrs</artifactId>
             <version>1.5.2</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -121,6 +109,7 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>5.0.2.Final</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -157,7 +146,7 @@
                             *;resolution:=optional
 						</Import-Package>
 						<Export-Package>
-							org.wso2.carbon.apimgt.rest.api.util.*;version="${apimgt.keymgt.client.version}"
+							org.wso2.carbon.apimgt.rest.api.util.*;version="${carbon.apimgt.version}"
 						</Export-Package>
 					</instructions>
 				</configuration>
