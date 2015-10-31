@@ -19,12 +19,12 @@
      <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>2.0.1-SNAPSHOT</version>
+        <version>2.0.1</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.1</version>
     <artifactId>feature-categories</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 - Feature Categories Module</name>
