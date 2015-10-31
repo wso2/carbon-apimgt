@@ -26,11 +26,10 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
     <packaging>war</packaging>
-    <name>WSO2 API Manager REST API</name>
-    <description>WSO2 API Manager REST API</description>
+    <name>WSO2 API Manager Store REST API</name>
+    <description>WSO2 API Manager REST API for API Store</description>
     <properties>
         <jackson.version>1.8.6</jackson.version>
     </properties>
@@ -100,6 +99,10 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
