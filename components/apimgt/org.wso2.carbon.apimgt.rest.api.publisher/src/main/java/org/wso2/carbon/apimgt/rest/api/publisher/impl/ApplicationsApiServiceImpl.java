@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ApplicationMappingUtil;

@@ -19,7 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.validation;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.validation.constraints.ValidateParamEquality;
 
 import javax.validation.ConstraintValidator;

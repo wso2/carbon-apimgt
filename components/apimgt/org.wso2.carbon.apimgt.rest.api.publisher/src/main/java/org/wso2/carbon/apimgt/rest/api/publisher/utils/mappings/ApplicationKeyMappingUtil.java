@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TokenDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import java.util.Arrays;
 import java.util.Map;
 

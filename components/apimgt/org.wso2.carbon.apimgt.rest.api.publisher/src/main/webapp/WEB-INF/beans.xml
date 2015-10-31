@@ -24,7 +24,7 @@
             <!--<bean class="org.wso2.carbon.apimgt.rest.api.handlers.XACMLAuthenticationHandler"/>-->
 
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.exception.GlobalThrowableMapper" />
+            <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper" />
         </jaxrs:providers>
         <jaxrs:properties>
             <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
