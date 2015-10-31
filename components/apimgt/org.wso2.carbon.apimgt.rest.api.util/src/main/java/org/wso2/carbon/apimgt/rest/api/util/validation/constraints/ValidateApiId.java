@@ -15,9 +15,9 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.validation.constraints;
+package org.wso2.carbon.apimgt.rest.api.util.validation.constraints;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.validation.ApiIdValidator;
+import org.wso2.carbon.apimgt.rest.api.util.validation.ApiIdValidator;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
@@ -36,7 +36,7 @@ import java.lang.annotation.Retention;
 public @interface ValidateApiId {
 
     public static final String DEFAULT_ERROR_MESSAGE =
-            "Invalid API Identifier. Please use a proper UUID or API-Version-Provider template";
+            "Invalid API Identifier. Please use a proper UUID or provider-name-version template";
 
     String message() default DEFAULT_ERROR_MESSAGE;
 

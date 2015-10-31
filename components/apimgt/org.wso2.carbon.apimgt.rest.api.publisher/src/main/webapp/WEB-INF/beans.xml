@@ -32,7 +32,7 @@
         </jaxrs:properties>
     </jaxrs:server>
 
-    <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.publisher.interceptors.ValidationInInterceptor"/>
+    <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.ValidationInInterceptor"/>
     <cxf:bus>
         <cxf:inInterceptors>
             <ref bean="ValidationInInterceptor"/>

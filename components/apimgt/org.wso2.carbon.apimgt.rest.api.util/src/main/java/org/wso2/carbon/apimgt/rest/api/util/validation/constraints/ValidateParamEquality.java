@@ -15,12 +15,11 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.validation.constraints;
+package org.wso2.carbon.apimgt.rest.api.util.validation.constraints;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.validation.ParameterEqualityValidator;
+import org.wso2.carbon.apimgt.rest.api.util.validation.ParameterEqualityValidator;
 
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

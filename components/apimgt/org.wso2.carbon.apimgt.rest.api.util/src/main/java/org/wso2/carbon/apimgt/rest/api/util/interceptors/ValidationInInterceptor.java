@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.interceptors;
+package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
 import java.lang.reflect.Method;
 import java.util.List;
