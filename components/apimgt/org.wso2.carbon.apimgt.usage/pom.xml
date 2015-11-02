@@ -37,19 +37,11 @@
 
 
     <dependencies>
-
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
-
     </dependencies>
 
-    <repositories>
-        <repository>
-             <id>wso2-maven2-repository</id>
-	    <url>http://dist.wso2.org/maven2</url>
-	</repository>
-    </repositories>
 
 </project>
