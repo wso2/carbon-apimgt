@@ -231,11 +231,11 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
                         var timeX = normalizeTime(convertDateToLong(result[0].time));
                         successValues.push({
                                 "x" : timeX,
-                                "y" : result[0].success_request_count
+                                "y" : result[0].successRequestCount
                         });
                         throttledValues.push({
                                 "x" : timeX,
-                                "y" : result[0].throttleout_count
+                                "y" : result[0].throttleOutCount
                         });
 
                         for (var i = 1; i < length; i++) {
@@ -259,11 +259,11 @@ var drawThrottledTimeGraph = function (apiName, appName, fromDate, toDate) {
                             timeX = normalizeTime(convertDateToLong(result[i].time));
                             successValues.push({
                                 "x" : timeX,
-                                "y" : result[i].success_request_count
+                                "y" : result[i].successRequestCount
                             });
                             throttledValues.push({
                                 "x" : timeX,
-                                "y" : result[i].throttleout_count
+                                "y" : result[i].throttleOutCount
                             });
                         }
 

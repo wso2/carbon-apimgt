@@ -80,7 +80,7 @@ public class APIManagerInterceptorComponent {
 		APIMgtUsageDataPublisher publisher = null;
 
 		try {
-			publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(statsPublisherClass);
+			publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(statsPublisherClass).newInstance();
 		} catch (InstantiationException e) {
 			String msg = "Error instantiating";
 			log.error(msg + statsPublisherClass);

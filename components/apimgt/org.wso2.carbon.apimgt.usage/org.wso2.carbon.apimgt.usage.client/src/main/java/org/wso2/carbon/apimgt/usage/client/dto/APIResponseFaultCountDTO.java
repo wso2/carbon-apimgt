@@ -28,23 +28,31 @@ public class APIResponseFaultCountDTO {
 
     private double faultPercentage;
 
-	private String requestTime;
+    private String requestTime;
 
     private long count;
 
-    private long requestCount;
+    private long totalRequestCount;
 
     private String appName;
 
     private String consumerKey;
 
-    public String getconsumerKey() {return consumerKey; }
+    public String getconsumerKey() {
+        return consumerKey;
+    }
 
-    public void setconsumerKey(String consumerKey) { this.consumerKey = consumerKey;}
+    public void setconsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
 
-    public String getappName() {return appName; }
+    public String getappName() {
+        return appName;
+    }
 
-    public void setappName(String appName) { this.appName = appName;}
+    public void setappName(String appName) {
+        this.appName = appName;
+    }
 
     public String getApiName() {
         return apiName;
@@ -94,7 +102,11 @@ public class APIResponseFaultCountDTO {
         this.faultPercentage = faultPercentage;
     }
 
-    public long getRequestCount() { return requestCount; }
+    public long getTotalRequestCount() {
+        return totalRequestCount;
+    }
 
-    public void setRequestCount(long requestCount) { this.requestCount = requestCount; }
+    public void setTotalRequestCount(long totalRequestCount) {
+        this.totalRequestCount = totalRequestCount;
+    }
 }

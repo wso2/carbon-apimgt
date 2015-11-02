@@ -28,6 +28,9 @@ jagg.module("manager", {
      },
      invokeService:function () {
        return jagg.require(jagg.getModulesDir() + "manager/client.jag").invokeService.apply(this, arguments);
+     },
+     getUsageClient:function () {
+       return jagg.require(jagg.getModulesDir() + "manager/manager.jag").getUsageClient.apply(this, arguments);
      }
 
  });

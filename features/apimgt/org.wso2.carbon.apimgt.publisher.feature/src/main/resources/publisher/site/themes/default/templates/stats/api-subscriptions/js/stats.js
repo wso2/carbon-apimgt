@@ -35,7 +35,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                      for (var i = 0; i < length; i++) {
 
-                         var apiData= JSON.parse(json.usage[i].apiName);
+                         var apiData= json.usage[i].apiName;
 
                          apiName_Provider = "" + truncate(apiData[0], 20) + " (" + apiData[2] + ")";
                          inputData.push({
@@ -287,7 +287,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                             });
 
                             paths.on("click", function(d){
-                            document.location.href="/publisher/info?name="+api_name+"&version="+d.data.version+"&provider="+provider+"/";
+                            document.location.href=jagg.site.context+"/info?name="+api_name+"&version="+d.data.version+"&provider="+provider;
                             });
 
 

@@ -21,9 +21,9 @@ include("/jagg/jagg.jag");
             var provider = jagg.getUser().username;
             var currentLocation = request.getParameter("currentLocation");
             if (currentLocation.indexOf("all-statistics") >= 0) {
-                result = mod.getSubscriberCountByAPIs(allProviders);
+                result = mod.getSubscriberCountByAPIs(provider, true);
             } else {
-                result = mod.getSubscriberCountByAPIs(provider);
+                result = mod.getSubscriberCountByAPIs(provider, false);
             }
             if (result.error == "true") {
                 obj = {

@@ -13,6 +13,6 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 
 public abstract class EnvironmentsApiService {
-    public abstract Response environmentsGet();
+    public abstract Response environmentsGet(String apiId);
 }
 
