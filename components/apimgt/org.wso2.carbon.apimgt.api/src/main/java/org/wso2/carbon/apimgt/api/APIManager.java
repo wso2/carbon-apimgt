@@ -54,6 +54,24 @@ public interface APIManager {
     /**
      * Returns details of an API
      *
+     * @param uuid UUID of the API's registry artifact
+     * @return An API object related to the given artifact id or null
+     * @throws APIManagementException if failed get API from APIIdentifier
+     */
+    API getAPIbyUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get minimal details of API by registry artifact id
+     *
+     * @param uuid  Registry artifact id
+     * @return API of the provided artifact id
+     * @throws APIManagementException
+     */
+    API getAPIInformationByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+
+    /**
+     * Returns details of an API
+     *
      * @param identifier APIIdentifier
      * @return An API object related to the given identifier or null
      * @throws APIManagementException if failed get API from APIIdentifier
@@ -136,6 +154,15 @@ public interface APIManager {
      * @throws APIManagementException if failed to get Documentation
      */
     Documentation getDocumentation(APIIdentifier apiId, DocumentationType docType, String docName) throws APIManagementException;
+
+    /**
+     * Returns the specified document attached to the given API
+     *
+     * @param docId   DocumentID
+     * @return Documentation
+     * @throws APIManagementException if failed to get Documentation
+     */
+    public Documentation getDocumentation(String docId) throws APIManagementException;
 
     /**
      * This method used to get the content of a documentation

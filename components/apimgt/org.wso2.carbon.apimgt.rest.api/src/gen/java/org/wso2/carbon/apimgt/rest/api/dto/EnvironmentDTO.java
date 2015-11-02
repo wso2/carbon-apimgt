@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.dto;
 
+import org.wso2.carbon.apimgt.rest.api.dto.EnvironmentEndpointsDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,10 +20,13 @@ public class EnvironmentDTO  {
   private String type = null;
   
   @NotNull
-  private Boolean apiConsole = null;
+  private String serverUrl = null;
   
   @NotNull
-  private String serverUrl = null;
+  private Boolean showInApiConsole = null;
+  
+  @NotNull
+  private EnvironmentEndpointsDTO endpoints = null;
 
   
   /**
@@ -52,24 +56,36 @@ public class EnvironmentDTO  {
   /**
    **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("apiConsole")
-  public Boolean getApiConsole() {
-    return apiConsole;
-  }
-  public void setApiConsole(Boolean apiConsole) {
-    this.apiConsole = apiConsole;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
   @JsonProperty("serverUrl")
   public String getServerUrl() {
     return serverUrl;
   }
   public void setServerUrl(String serverUrl) {
     this.serverUrl = serverUrl;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("showInApiConsole")
+  public Boolean getShowInApiConsole() {
+    return showInApiConsole;
+  }
+  public void setShowInApiConsole(Boolean showInApiConsole) {
+    this.showInApiConsole = showInApiConsole;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("endpoints")
+  public EnvironmentEndpointsDTO getEndpoints() {
+    return endpoints;
+  }
+  public void setEndpoints(EnvironmentEndpointsDTO endpoints) {
+    this.endpoints = endpoints;
   }
 
   
@@ -81,8 +97,9 @@ public class EnvironmentDTO  {
     
     sb.append("  name: ").append(name).append("\n");
     sb.append("  type: ").append(type).append("\n");
-    sb.append("  apiConsole: ").append(apiConsole).append("\n");
     sb.append("  serverUrl: ").append(serverUrl).append("\n");
+    sb.append("  showInApiConsole: ").append(showInApiConsole).append("\n");
+    sb.append("  endpoints: ").append(endpoints).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

@@ -208,6 +208,14 @@ public interface APIProvider extends APIManager {
     void removeDocumentation(APIIdentifier apiId, String docType, String docName) throws APIManagementException;
 
     /**
+     * Removes a given documentation
+     *
+     * @param apiId   APIIdentifier
+     * @param docId UUID of the doc
+     * @throws APIManagementException if failed to remove documentation
+     */
+    public void removeDocumentation(APIIdentifier apiId, String docId)throws APIManagementException;
+    /**
      * Adds Documentation to an API
      *
      * @param apiId         APIIdentifier
@@ -289,6 +297,15 @@ public interface APIProvider extends APIManager {
      *          If failed to update subscription status
      */
     void updateSubscription(APIIdentifier apiId, String subStatus, int appId) throws APIManagementException;
+
+
+    /**
+     * This method is used to update the subscription
+     *
+     * @param subscribedAPI subscribedAPI object that represents the new subscription detals
+     * @throws APIManagementException if failed to update subscription
+     */
+    void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException;
     
     /**
      * Update the Tier Permissions

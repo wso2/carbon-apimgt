@@ -180,7 +180,7 @@ public class HostObjectUtils {
     }
 
     /**
-    *This methos is to check whether stat publishing is enabled
+    *This methods is to check whether stat publishing is enabled
     * @return boolean
      */
     protected static boolean checkDataPublishingEnabled() {

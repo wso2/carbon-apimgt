@@ -89,7 +89,7 @@
 
     <div class="row-fluid">
         <div class="span12">
-            <div class="api-implement-type" value="#managed-api">
+            <div id="select-managed-api" class="api-implement-type" value="#managed-api">
                 <div class="span1">
                     <i class="fa fa-cogs fa-3x"></i>
                 </div>

@@ -333,6 +333,73 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    /**
+     * Get API by registry artifact id
+     *
+     * @param uuid  Registry artifact id
+     * @return API of the provided artifact id
+     * @throws APIManagementException
+     */
+    public API getAPIbyUUID(String uuid) throws APIManagementException {
+        try {
+            //registry of the current logged in user has been directly used
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
+            return APIUtil.getAPIForPublishing(apiArtifact, registry);
+
+        } catch (RegistryException e) {
+            handleException("Failed to get API", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get minimal details of API by registry artifact id
+     *
+     * @param uuid  Registry artifact id
+     * @return API of the provided artifact id
+     * @throws APIManagementException
+     */
+    public API getAPIInformationByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        try {
+            Registry registry;
+            if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                registry = ServiceReferenceHolder.getInstance().
+                        getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !this.tenantDomain
+                        .equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
+                    registry = ServiceReferenceHolder.getInstance().
+                            getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    // both requested tenant and logged in user's tenant are carbon.super
+                    registry = this.registry;
+                }
+            }
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+
+            GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
+            if (apiArtifact != null) {
+                return APIUtil.getAPIInformation(apiArtifact, registry);
+            } else {
+                String errorMessage =
+                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                handleException(errorMessage);
+                return null;
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to get API", e);
+            return null;
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Failed to get API", e);
+            return null;
+        }
+    }
+
     public API getAPI(String apiPath) throws APIManagementException {
         try {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
@@ -547,6 +614,21 @@ public abstract class AbstractAPIManager implements APIManager {
             Resource docResource = registry.get(docPath);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getUUID());
             documentation = APIUtil.getDocumentation(artifact);
+        } catch (RegistryException e) {
+            handleException("Failed to get documentation details", e);
+        }
+        return documentation;
+    }
+
+    public Documentation getDocumentation(String docId) throws APIManagementException {
+        Documentation documentation = null;
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
+                                                                            APIConstants.DOCUMENTATION_KEY);
+        try {
+            GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            if(null != artifact) {
+                documentation = APIUtil.getDocumentation(artifact);
+            }
         } catch (RegistryException e) {
             handleException("Failed to get documentation details", e);
         }

@@ -249,6 +249,8 @@ public final class APIUtil {
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            //set uuid
+            api.setUUID(artifact.getId());
             // set url
             api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
             api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
@@ -423,6 +425,8 @@ public final class APIUtil {
             }
 
             api = new API(apiIdentifier);
+            //set uuid
+            api.setUUID(artifact.getId());
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
@@ -613,6 +617,8 @@ public final class APIUtil {
             if (apiId == -1) {
                 return null;
             }
+            //set uuid
+            api.setUUID(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
@@ -861,6 +867,7 @@ public final class APIUtil {
                 type = DocumentationType.OTHER;
             }
             documentation = new Documentation(type, artifact.getAttribute(APIConstants.DOC_NAME));
+            documentation.setId(artifact.getId());
             documentation.setSummary(artifact.getAttribute(APIConstants.DOC_SUMMARY));
             String visibilityAttr = artifact.getAttribute(APIConstants.DOC_VISIBILITY);
             Documentation.DocumentVisibility documentVisibility = Documentation.DocumentVisibility.API_LEVEL;
@@ -1479,7 +1486,7 @@ public final class APIUtil {
                     String type=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
                     String className =
                             storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_CLASS_NAME));
-                    store.setPublisher((APIPublisher) getClassForName(className));
+                    store.setPublisher((APIPublisher) getClassForName(className).newInstance());
                     store.setType(type); //Set Store type [eg:wso2]
                     String name=storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
@@ -1980,6 +1987,8 @@ public final class APIUtil {
                api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
                //set last access time
                api.setLastUpdated(registry.get(artifactPath).getLastModified());
+               //set uuid
+               api.setUUID(artifact.getId());
                // set url
                api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
                api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
@@ -3594,6 +3603,8 @@ public final class APIUtil {
              String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
              String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
              api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+             //set uuid
+             api.setUUID(artifact.getId());
              api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
              api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
              api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -4596,6 +4607,19 @@ public final class APIUtil {
     }
 
     /**
+     * Gets the  class given the class name.
+     * @param className the fully qualified name of the class.
+     * @return an instance of the class with the given name
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+
+    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        return Class.forName(className);
+    }
+
+    /**
      * Gets the instance of a class given the class name.
      * @param className the fully qualified name of the class.
      * @return an instance of the class with the given name
@@ -4604,7 +4628,7 @@ public final class APIUtil {
      * @throws InstantiationException
      */
 
-    public static Object getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        return Class.forName(className).newInstance();
+    public static Class getClassFromName(String className) throws ClassNotFoundException {
+        return Class.forName(className);
     }
 }
