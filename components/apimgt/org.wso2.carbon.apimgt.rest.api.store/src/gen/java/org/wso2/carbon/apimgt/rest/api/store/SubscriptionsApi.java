@@ -62,46 +62,6 @@ public class SubscriptionsApi  {
     {
     return delegate.subscriptionsPost(body,contentType);
     }
-    @POST
-    @Path("/block-subscription")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Block a subscription.", response = Void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nSubscription was blocked successfully."),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. \nInvalid request or validation error"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. \nRequested subscription does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
-
-    public Response subscriptionsBlockSubscriptionPost(@ApiParam(value = "Subscription Id",required=true) @QueryParam("subscriptionId") String subscriptionId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    {
-    return delegate.subscriptionsBlockSubscriptionPost(subscriptionId,ifMatch,ifUnmodifiedSince);
-    }
-    @POST
-    @Path("/unblock-subscription")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Unblock a subscription.", response = Void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nSubscription was unblocked successfully."),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. \nInvalid request or validation error"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. \nRequested subscription does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
-
-    public Response subscriptionsUnblockSubscriptionPost(@ApiParam(value = "Subscription Id",required=true) @QueryParam("subscriptionId") String subscriptionId,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    {
-    return delegate.subscriptionsUnblockSubscriptionPost(subscriptionId,ifMatch,ifUnmodifiedSince);
-    }
     @GET
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })

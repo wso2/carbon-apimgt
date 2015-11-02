@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.SequenceDTO;
 import java.util.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
 
@@ -24,12 +23,6 @@ public class APIDTO  {
   
   private String description = null;
   
-  public enum TypeEnum {
-     REST,  SOAP, 
-  };
-  
-  private TypeEnum type = null;
-  
   @NotNull
   private String context = null;
   
@@ -46,15 +39,6 @@ public class APIDTO  {
   private String status = null;
   
   
-  private String responseCaching = null;
-  
-  
-  private Integer cacheTimeout = null;
-  
-  
-  private String destinationStatsEnabled = null;
-  
-  
   private Boolean isDefaultVersion = null;
   
   
@@ -65,33 +49,6 @@ public class APIDTO  {
   
   
   private List<String> tiers = new ArrayList<String>();
-  
-  public enum VisibilityEnum {
-     PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
-  };
-  
-  private VisibilityEnum visibility = null;
-  
-  
-  private List<String> visibleRoles = new ArrayList<String>();
-  
-  
-  private List<String> visibleTenants = new ArrayList<String>();
-  
-  
-  private String endpointConfig = null;
-  
-  
-  private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
-  
-  public enum SubscriptionAvailabilityEnum {
-     current_tenant,  all_tenants,  specific_tenants, 
-  };
-  
-  private SubscriptionAvailabilityEnum subscriptionAvailability = null;
-  
-  
-  private List<String> subscriptionAvailableTenants = new ArrayList<String>();
   
   
   private APIBusinessInformationDTO businessInformation = null;
@@ -131,18 +88,6 @@ public class APIDTO  {
   }
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
   }
 
   
@@ -211,42 +156,6 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("responseCaching")
-  public String getResponseCaching() {
-    return responseCaching;
-  }
-  public void setResponseCaching(String responseCaching) {
-    this.responseCaching = responseCaching;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("cacheTimeout")
-  public Integer getCacheTimeout() {
-    return cacheTimeout;
-  }
-  public void setCacheTimeout(Integer cacheTimeout) {
-    this.cacheTimeout = cacheTimeout;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("destinationStatsEnabled")
-  public String getDestinationStatsEnabled() {
-    return destinationStatsEnabled;
-  }
-  public void setDestinationStatsEnabled(String destinationStatsEnabled) {
-    this.destinationStatsEnabled = destinationStatsEnabled;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
@@ -295,90 +204,6 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("visibility")
-  public VisibilityEnum getVisibility() {
-    return visibility;
-  }
-  public void setVisibility(VisibilityEnum visibility) {
-    this.visibility = visibility;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("visibleRoles")
-  public List<String> getVisibleRoles() {
-    return visibleRoles;
-  }
-  public void setVisibleRoles(List<String> visibleRoles) {
-    this.visibleRoles = visibleRoles;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("visibleTenants")
-  public List<String> getVisibleTenants() {
-    return visibleTenants;
-  }
-  public void setVisibleTenants(List<String> visibleTenants) {
-    this.visibleTenants = visibleTenants;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("endpointConfig")
-  public String getEndpointConfig() {
-    return endpointConfig;
-  }
-  public void setEndpointConfig(String endpointConfig) {
-    this.endpointConfig = endpointConfig;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("sequences")
-  public List<SequenceDTO> getSequences() {
-    return sequences;
-  }
-  public void setSequences(List<SequenceDTO> sequences) {
-    this.sequences = sequences;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("subscriptionAvailability")
-  public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
-    return subscriptionAvailability;
-  }
-  public void setSubscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
-    this.subscriptionAvailability = subscriptionAvailability;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("subscriptionAvailableTenants")
-  public List<String> getSubscriptionAvailableTenants() {
-    return subscriptionAvailableTenants;
-  }
-  public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
-    this.subscriptionAvailableTenants = subscriptionAvailableTenants;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
   public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
@@ -397,26 +222,15 @@ public class APIDTO  {
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  type: ").append(type).append("\n");
     sb.append("  context: ").append(context).append("\n");
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
     sb.append("  status: ").append(status).append("\n");
-    sb.append("  responseCaching: ").append(responseCaching).append("\n");
-    sb.append("  cacheTimeout: ").append(cacheTimeout).append("\n");
-    sb.append("  destinationStatsEnabled: ").append(destinationStatsEnabled).append("\n");
     sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
-    sb.append("  visibility: ").append(visibility).append("\n");
-    sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
-    sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
-    sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
-    sb.append("  sequences: ").append(sequences).append("\n");
-    sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
-    sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("}\n");
     return sb.toString();

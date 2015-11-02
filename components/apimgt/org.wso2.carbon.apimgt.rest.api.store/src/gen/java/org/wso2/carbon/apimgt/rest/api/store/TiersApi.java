@@ -8,7 +8,6 @@ import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.TierPermissionDTO;
 
 import java.util.List;
 
@@ -42,46 +41,6 @@ public class TiersApi  {
     {
     return delegate.tiersGet(accept,ifNoneMatch);
     }
-    @POST
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new tier", response = TierDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 201, message = "Created. \nSuccessful response with the newly created object as entity in the body. \nLocation header contains URL of newly created entity."),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. \nInvalid request or validation error"),
-        
-        @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. \nThe entity of the request was in a not supported format.") })
-
-    public Response tiersPost(@ApiParam(value = "Tier object that should to be added" ,required=true ) TierDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is JSON." ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
-    {
-    return delegate.tiersPost(body,contentType);
-    }
-    @POST
-    @Path("/update-permission")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update tier permission", response = TierDTO.class, responseContainer = "List")
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nSuccessfully updated tier permissions"),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. \nInvalid request or validation error."),
-        
-        @io.swagger.annotations.ApiResponse(code = 403, message = "Forbidden. \nThe request must be conditional but no condition has been specified."),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. \nRequested tier does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
-
-    public Response tiersUpdatePermissionPost(@ApiParam(value = "Name of the tier",required=true) @QueryParam("tierName") String tierName,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince,
-    @ApiParam(value = ""  ) TierPermissionDTO permissions)
-    {
-    return delegate.tiersUpdatePermissionPost(tierName,ifMatch,ifUnmodifiedSince,permissions);
-    }
     @GET
     @Path("/{tierName}")
     @Consumes({ "application/json" })
@@ -102,46 +61,6 @@ public class TiersApi  {
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the \nformerly retrieved variant of the resource."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
     return delegate.tiersTierNameGet(tierName,accept,ifNoneMatch,ifModifiedSince);
-    }
-    @PUT
-    @Path("/{tierName}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update tier details", response = TierDTO.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nSubscription updated."),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. \nInvalid request or validation error."),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. \nThe resource to be updated does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
-
-    public Response tiersTierNamePut(@ApiParam(value = "Tier name",required=true ) @PathParam("tierName") String tierName,
-    @ApiParam(value = "Tier object that needs to be modified" ,required=true ) TierDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is JSON." ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    {
-    return delegate.tiersTierNamePut(tierName,body,contentType,ifMatch,ifUnmodifiedSince);
-    }
-    @DELETE
-    @Path("/{tierName}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Remove a tier", response = Void.class)
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nResource successfully deleted."),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. \nResource to be deleted does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
-
-    public Response tiersTierNameDelete(@ApiParam(value = "Tier name",required=true ) @PathParam("tierName") String tierName,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
-    {
-    return delegate.tiersTierNameDelete(tierName,ifMatch,ifUnmodifiedSince);
     }
 }
 
