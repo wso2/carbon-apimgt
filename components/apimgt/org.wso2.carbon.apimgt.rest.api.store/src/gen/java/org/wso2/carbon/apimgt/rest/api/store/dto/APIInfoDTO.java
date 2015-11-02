@@ -113,9 +113,9 @@ public class APIInfoDTO  {
 
   
   /**
-   * If the provider value is not given user invoking the api will be used as the provider.
+   * If the provider value is not given, the user invoking the API will be used as the provider.
    **/
-  @ApiModelProperty(value = "If the provider value is not given user invoking the api will be used as the provider.")
+  @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider.")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;

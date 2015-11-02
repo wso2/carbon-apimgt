@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.SequenceDTO;
 import java.util.*;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -57,13 +58,13 @@ public class APIDTO  {
   private Boolean isDefaultVersion = null;
   
   
-  private List<String> transport = new ArrayList<String>() ;
+  private List<String> transport = new ArrayList<String>();
   
   
-  private List<String> tags = new ArrayList<String>() ;
+  private List<String> tags = new ArrayList<String>();
   
   
-  private List<String> tiers = new ArrayList<String>() ;
+  private List<String> tiers = new ArrayList<String>();
   
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
@@ -72,16 +73,16 @@ public class APIDTO  {
   private VisibilityEnum visibility = null;
   
   
-  private List<String> visibleRoles = new ArrayList<String>() ;
+  private List<String> visibleRoles = new ArrayList<String>();
   
   
-  private List<String> visibleTenants = new ArrayList<String>() ;
+  private List<String> visibleTenants = new ArrayList<String>();
   
   
   private String endpointConfig = null;
   
   
-  private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>() ;
+  private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
   
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
@@ -90,7 +91,10 @@ public class APIDTO  {
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
   
   
-  private List<String> subscriptionAvailableTenants = new ArrayList<String>() ;
+  private List<String> subscriptionAvailableTenants = new ArrayList<String>();
+  
+  
+  private APIBusinessInformationDTO businessInformation = null;
 
   
   /**
@@ -372,6 +376,18 @@ public class APIDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("businessInformation")
+  public APIBusinessInformationDTO getBusinessInformation() {
+    return businessInformation;
+  }
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -401,6 +417,7 @@ public class APIDTO  {
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
+    sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

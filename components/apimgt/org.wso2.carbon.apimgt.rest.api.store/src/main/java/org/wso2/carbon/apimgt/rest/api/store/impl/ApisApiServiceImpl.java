@@ -47,7 +47,7 @@ import java.util.List;
 public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
-    public Response apisGet(String limit,String offset,String query,String type,String sort,String accept,String ifNoneMatch){
+    public Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch){
         List<API> apis;
         APIListDTO apiListDTO;
         boolean isTenantFlowStarted = false;
@@ -269,7 +269,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().build();
     }
     @Override
-    public Response apisApiIdDocumentsGet(String apiId,String limit,String offset,String query,String accept,String ifNoneMatch){
+    public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch){
         List<DocumentDTO> list = new ArrayList<DocumentDTO>();
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();

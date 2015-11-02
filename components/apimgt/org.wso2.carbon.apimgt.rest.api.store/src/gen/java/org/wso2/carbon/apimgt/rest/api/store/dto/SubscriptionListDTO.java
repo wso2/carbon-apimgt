@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import java.util.*;
 
 import io.swagger.annotations.*;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class ApplicationListDTO  {
+public class SubscriptionListDTO  {
   
   
   
@@ -24,13 +24,13 @@ public class ApplicationListDTO  {
   private String previous = null;
   
   
-  private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>();
+  private List<SubscriptionDTO> list = new ArrayList<SubscriptionDTO>();
 
   
   /**
-   * Number of applications returned.
+   * Number of Subscriptions returned.
    **/
-  @ApiModelProperty(value = "Number of applications returned.")
+  @ApiModelProperty(value = "Number of Subscriptions returned.")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -70,10 +70,10 @@ public class ApplicationListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<ApplicationInfoDTO> getList() {
+  public List<SubscriptionDTO> getList() {
     return list;
   }
-  public void setList(List<ApplicationInfoDTO> list) {
+  public void setList(List<SubscriptionDTO> list) {
     this.list = list;
   }
 
@@ -82,7 +82,7 @@ public class ApplicationListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ApplicationListDTO {\n");
+    sb.append("class SubscriptionListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");
