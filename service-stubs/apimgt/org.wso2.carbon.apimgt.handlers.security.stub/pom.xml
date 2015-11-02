@@ -39,7 +39,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.1</version>
                 <executions>
                     <execution>
                         <id>source-code-generation</id>
@@ -98,7 +97,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.handlers.security.stub.*;version=${apimgt.handlers.security.stub.version},
+                            org.wso2.carbon.apimgt.handlers.security.stub.*;version=${carbon.apimgt.version},
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,

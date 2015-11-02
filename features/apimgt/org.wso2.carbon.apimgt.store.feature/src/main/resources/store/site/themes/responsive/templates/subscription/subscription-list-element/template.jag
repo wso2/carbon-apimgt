@@ -531,11 +531,11 @@
             	<table class="table table-bordered">
             		<thead>
             			<tr>
-						 <th>API</th>
-				         <th>Owner</th>
-				         <th>Subscription Status</th>
-				         <th>Subscription</th>
-				         <th>Actions</th>   			
+            			    <th><%=i18n.localize("api")%></th>
+            			    <th><%=i18n.localize("apiOwner")%></th>
+            			    <th><%=i18n.localize("subscriptionStatus")%></th>
+            			    <th><%=i18n.localize("subscription")%></th>
+            			    <th><%=i18n.localize("actions")%></th>
             			</tr>
             		</thead>
             		<tbody>
@@ -757,7 +757,7 @@
 				}
 
 				$('#'+id).attr('data-granttype', granttype);
-        		$('#'+id).html('curl -k -d "grant_type='+grantTypeVal+'" -H "Authorization: Basic '+encodedString+', Content-Type: application/x-www-form-urlencoded" '+gatewayurlendpoint+'/token');
+        		$('#'+id).html('curl -k -d "grant_type='+grantTypeVal+'" -H "Authorization: Basic '+encodedString+'" '+gatewayurlendpoint+'/token');
         		$('#'+id).closest('.row').show();
         		$('#'+id+ 'Copy').show();
             }

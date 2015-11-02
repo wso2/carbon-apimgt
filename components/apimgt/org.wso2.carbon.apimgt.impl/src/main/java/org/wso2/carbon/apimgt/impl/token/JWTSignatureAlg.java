@@ -24,7 +24,7 @@ public enum JWTSignatureAlg {
 
     private String jwsCompliantCode;
 
-    private JWTSignatureAlg(String s){
+    JWTSignatureAlg(String s){
         jwsCompliantCode = s;
     }
 

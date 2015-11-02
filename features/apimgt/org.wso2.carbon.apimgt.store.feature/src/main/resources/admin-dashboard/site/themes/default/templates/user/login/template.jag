@@ -27,7 +27,7 @@
                        <div class="alert alert-error" id="loginError" style="display:none">
                            <span id="loginErrorSpan"></span>
                        </div>
-                       <form class="" action="index.jag" id="loginForm">
+                       <form class="" action="index.jag" id="loginForm" autocomplete="off">
                            <label><%=i18n.localize("username")%>:<span class="requiredAstrix">*</span></label>
                            <input type="text" id="username" autofocus="autofocus" validation="required"  />
 
@@ -63,6 +63,7 @@
         var mod,httpsUrl;
         mod = jagg.module("manager");
         httpsUrl= mod.getHTTPsURL();
-        response.sendRedirect(httpsUrl+site.context);
+
+        response.sendRedirect(jagg.getHttpsUrl("/"));
 } %>
 <%});%>

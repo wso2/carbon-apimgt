@@ -35,9 +35,9 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                      for (var i = 0; i < length; i++) {
 
-                         var apiData= JSON.parse(json.usage[i].apiName);
+                         var apiData= json.usage[i].apiName;
 
-                         apiName_Provider=""+apiData[0]+" ("+apiData[2]+")";
+                         apiName_Provider = "" + truncate(apiData[0], 20) + " (" + apiData[2] + ")";
                          inputData.push({
                                   "apiName_Provider":apiName_Provider,
                                   "api_name":apiData[0],
@@ -287,7 +287,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                             });
 
                             paths.on("click", function(d){
-                            document.location.href="/publisher/info?name="+api_name+"&version="+d.data.version+"&provider="+provider+"/";
+                            document.location.href=jagg.site.context+"/info?name="+api_name+"&version="+d.data.version+"&provider="+provider;
                             });
 
 
@@ -531,5 +531,12 @@ return result ? {
     b: parseInt(result[3], 16)
     } : null;
 }
+
+function truncate(name, length) {
+    if (name.length > length)
+        return name.substring(0, length) + '...';
+    else
+        return name;
+};
 
 

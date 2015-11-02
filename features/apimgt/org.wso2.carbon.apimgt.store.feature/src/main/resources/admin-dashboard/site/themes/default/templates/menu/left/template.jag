@@ -3,10 +3,10 @@
     var ssoEnabled = site.ssoConfiguration.enabled;
 
     var reqUrl = request.getRequestURI();
-    var listUrl=jagg.getAbsoluteUrl("/site/pages/index.jag");
-    var listMappedUrl=jagg.getMappedUrl("/site/pages/index.jag");
-    var subsUrl=jagg.getAbsoluteUrl("/site/pages/index.jag");
-    var subsMappedUrl=jagg.getMappedUrl("/site/pages/index.jag");
+    var listUrl=jagg.url("/site/pages/index.jag");
+    var listMappedUrl=jagg.url("/site/pages/index.jag");
+    var subsUrl=jagg.url("/site/pages/index.jag");
+    var subsMappedUrl=jagg.url("/site/pages/index.jag");
 
     
     var partWithContext = request.getRequestURL().split(
@@ -31,9 +31,9 @@
         <li <%if(reqUrl.match("tasks") && task =="appRegistration"){%>class="active"<% } %>><a href="<%=listMappedUrl%>?task=appRegistration"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?task=appRegistration',e:event,ssoEnabled:<%=ssoEnabled%>})"><%="Application Registration"%></a></li>
     <li class="nav-header"><%=i18n.localize("settings")%></li>        
-        <li <%if (reqUrl.match("themeupload")){%>class="active"<% } %>><a href="<%= partWithContext %>/themeupload"
+        <li <%if (reqUrl.match("themeupload")){%>class="active"<% } %>><a href="<%= jagg.url("/themeupload") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("themeUpload") %></a></li>
-        <li <%if (reqUrl.match("analytics")){%>class="active"<% } %>><a href="<%= partWithContext %>/analytics"
+        <li <%if (reqUrl.match("analytics")){%>class="active"<% } %>><a href="<%= jagg.url("/analytics") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("analytics") %></a></li>
      </ul>
 </div>

@@ -39,28 +39,35 @@ import org.wso2.carbon.apimgt.api.ApplicationNotFoundException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.UserAwareAPIConsumer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.keymgt.client.APIAuthenticationServiceClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
+import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIConstants.ApplicationStatus;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
+import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
+import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
+import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserRealm;
@@ -71,10 +78,6 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
 import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
 import org.wso2.carbon.utils.CarbonUtils;
-import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceException;
-import org.wso2.carbon.identity.user.registration.stub.UserRegistrationAdminServiceStub;
-import org.wso2.carbon.identity.user.registration.stub.dto.UserDTO;
-import org.wso2.carbon.identity.user.registration.stub.dto.UserFieldDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.*;
@@ -219,23 +222,23 @@ public class APIStoreHostObject extends ScriptableObject {
             return myn;
         }
 
-        List<String> list = null;
+        List<APIFirstAccess> list = null;
         if (args.length == 0) {
             handleException("Invalid number of parameters.");
         }
         String subscriberName = (String) args[0];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getFirstAccessTime(subscriberName, 1);
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
+            list = client.getFirstAccessTime(subscriberName,1);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for StoreAPIUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for StoreAPIUsage", e);
         }
         NativeObject row = new NativeObject();
 
-        if (!list.isEmpty()) {
-            row.put("year", row, list.get(0).toString());
-            row.put("month", row, list.get(1).toString());
-            row.put("day", row, list.get(2).toString());
+        if (list != null && !list.isEmpty()) {
+            row.put("year", row, list.get(0));
+            row.put("month", row, list.get(1));
+            row.put("day", row, list.get(2));
             myn.put(0, myn, row);
         }
 
@@ -245,365 +248,34 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getAppApiCallType(Context cx, Scriptable thisObj,
                                                            Object[] args, Function funObj)
             throws APIManagementException {
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
 
-        List<AppCallTypeDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String subscriberName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        String groupId = (String) args[3];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getAppApiCallType(subscriberName, groupId, fromDate, toDate, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-
-        int i = 0;
-        if (it != null) {
-            // Sort API Usage by Application Name
-            NativeObject perAPICallType;
-
-            Map<String, NativeArray> appCallTypeUsageMap = new HashMap<String, NativeArray>();
-
-            while (it.hasNext()) {
-                AppCallTypeDTO appCallTypeDTO = (AppCallTypeDTO) it.next();
-                NativeArray callType = new NativeArray(0);
-                perAPICallType = new NativeObject();
-
-
-                List<String> callTypeList = appCallTypeDTO.getCallType();
-                int j = 0;
-                for (String type : callTypeList) {
-                    callType.put(j, callType, type);
-                    j++;
-
-                }
-
-                perAPICallType.put("apiName", perAPICallType, appCallTypeDTO.getApiName());
-                perAPICallType.put("callType", perAPICallType, callType);
-
-
-                if (appCallTypeUsageMap.containsKey(appCallTypeDTO.getappName()) && appCallTypeUsageMap != null) {
-                    NativeArray apiCallType = appCallTypeUsageMap.get(appCallTypeDTO.getappName());
-
-                    apiCallType.put(apiCallType.size(), apiCallType, perAPICallType);
-                } else {
-
-                    NativeArray apiCalltype = new NativeArray(0);
-                    apiCalltype.put(0, apiCalltype, perAPICallType);
-                    appCallTypeUsageMap.put(appCallTypeDTO.getappName(), apiCalltype);
-                }
-            }
-
-            for (Map.Entry entry : appCallTypeUsageMap.entrySet()) {
-                NativeObject row = new NativeObject();
-                row.put("appName", row, entry.getKey());
-                row.put("apiCallTypeArray", row, entry.getValue());
-
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        }
-        return myn;
+        return null;
     }
 
     public static NativeArray jsFunction_getPerAppAPIFaultCount(Context cx, Scriptable thisObj,
                                                                 Object[] args, Function funObj)
             throws APIManagementException {
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
 
-        List<APIResponseFaultCountDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String subscriberName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        String groupId = (String) args[3];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getPerAppFaultCount(subscriberName, groupId, fromDate, toDate, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for faultCount", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-
-        int i = 0;
-        if (it != null) {
-            // Sort API Usage by Application Name
-            NativeObject perAPICount;
-
-            Map<String, NativeArray> faultCountMap = new HashMap<String, NativeArray>();
-
-            while (it.hasNext()) {
-                APIResponseFaultCountDTO faultCount = (APIResponseFaultCountDTO) it.next();
-                perAPICount = new NativeObject();
-
-                perAPICount.put("apiName", perAPICount, faultCount.getApiName());
-                perAPICount.put("count", perAPICount, faultCount.getCount());
-
-                if (faultCountMap.containsKey(faultCount.getappName())) {
-                    NativeArray faultCountList = faultCountMap.get(faultCount.getappName());
-
-                    faultCountList.put(faultCountList.size(), faultCountList, perAPICount);
-                } else {
-
-                    NativeArray faultCountList = new NativeArray(0);
-                    faultCountList.put(0, faultCountList, perAPICount);
-                    faultCountMap.put(faultCount.getappName(), faultCountList);
-                }
-            }
-
-            for (Map.Entry entry : faultCountMap.entrySet()) {
-                NativeObject row = new NativeObject();
-                row.put("appName", row, entry.getKey());
-                row.put("apiCountArray", row, entry.getValue());
-
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        }
-        return myn;
+        return null;
     }
 
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
                                                              Object[] args, Function funObj)
             throws APIManagementException {
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        List<APIUsageDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String subscriberName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        String groupId = (String) args[3];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.perAppPerAPIUsage(subscriberName, groupId, fromDate, toDate, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-
-        int i = 0;
-        if (it != null) {
-            // Sort API Usage by Application Name
-            NativeObject perAPICount;
-
-            Map<String, NativeArray> appAPIUsageMap = new HashMap<String, NativeArray>();
-
-            while (it.hasNext()) {
-                APIUsageDTO apiUsage = (APIUsageDTO) it.next();
-                perAPICount = new NativeObject();
-
-                perAPICount.put("apiName", perAPICount, apiUsage.getApiName());
-                perAPICount.put("count", perAPICount, apiUsage.getCount());
-                String APPNAME = apiUsage.getappName();
-
-                if (appAPIUsageMap.containsKey(apiUsage.getappName()) && appAPIUsageMap != null) {
-                    NativeArray appCountList = appAPIUsageMap.get(apiUsage.getappName());
-
-                    appCountList.put(appCountList.size(), appCountList, perAPICount);
-                } else {
-
-                    NativeArray appCountList = new NativeArray(0);
-                    appCountList.put(0, appCountList, perAPICount);
-                    appAPIUsageMap.put(apiUsage.getappName(), appCountList);
-                }
-            }
-
-            for (Map.Entry entry : appAPIUsageMap.entrySet()) {
-                NativeObject row = new NativeObject();
-                row.put("appName", row, entry.getKey());
-                row.put("apiCountArray", row, entry.getValue());
-
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        }
-        return myn;
+        return null;
     }
 
     public static NativeArray jsFunction_getTopAppUsers(Context cx, Scriptable thisObj,
                                                         Object[] args, Function funObj)
             throws APIManagementException {
-        List<AppUsageDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String subscriberName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        String groupId = (String) args[3];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getTopAppUsers(subscriberName, groupId, fromDate, toDate, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
 
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-
-        int i = 0;
-        if (it != null) {
-            // Sort API Usage by Application Name
-            NativeObject userCount;
-
-
-            List<String> appNames = new ArrayList<String>();
-            List<NativeArray> appUsageList = new ArrayList<NativeArray>();
-
-            while (it.hasNext()) {
-                AppUsageDTO appUsageDTO = (AppUsageDTO) it.next();
-                userCount = new NativeObject();
-
-
-                userCount.put("user", userCount, appUsageDTO.getUserid());
-                userCount.put("count", userCount, appUsageDTO.getCount());
-
-
-                if (appNames.contains(appUsageDTO.getappName())) {
-
-                    int index = appNames.indexOf(appUsageDTO.getappName());
-                    NativeArray userCountList = appUsageList.get(index);
-
-                    userCountList.put(userCountList.size(), userCountList, userCount);
-                } else {
-                    appNames.add(appUsageDTO.getappName());
-                    NativeArray userCountList = new NativeArray(0);
-                    userCountList.put(0, userCountList, userCount);
-                    appUsageList.add(userCountList);
-
-                }
-            }
-
-            for (String appName : appNames) {
-                NativeObject row = new NativeObject();
-                row.put("appName", row, appName);
-                row.put("userCountArray", row, appUsageList.get(i));
-
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        }
-        return myn;
+        return null;
     }
 
     public static NativeArray jsFunction_getPerAppSubscribers(Context cx, Scriptable thisObj,
                                                               Object[] args, Function funObj)
             throws APIManagementException {
         NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        List<AppRegisteredUsersDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String subscriberName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        String groupId = (String) args[3];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getAppRegisteredUsers(subscriberName, groupId);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-
-        int i = 0;
-        if (it != null) {
-            // Sort API Usage by Application Name
-
-
-            Map<String, NativeArray> appUsersMap = new HashMap<String, NativeArray>();
-
-            while (it.hasNext()) {
-                AppRegisteredUsersDTO appUser = (AppRegisteredUsersDTO) it.next();
-
-
-                if (appUsersMap.containsKey(appUser.getappName()) && appUsersMap != null) {
-                    NativeArray userList = appUsersMap.get(appUser.getappName());
-
-                    userList.put(userList.size(), userList, appUser.getUser());
-                } else {
-
-                    NativeArray userList = new NativeArray(0);
-                    userList.put(0, userList, appUser.getUser());
-                    appUsersMap.put(appUser.getappName(), userList);
-                }
-            }
-
-            for (Map.Entry entry : appUsersMap.entrySet()) {
-                NativeObject row = new NativeObject();
-                row.put("appName", row, entry.getKey());
-                row.put("userArray", row, entry.getValue());
-
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        }
         return myn;
     }
 
@@ -618,8 +290,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return url;
     }
 
-    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj,
-                                                Object[] args, Function funObj)
+    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         String hostName = null;
@@ -645,8 +316,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
-    public static String jsFunction_getHTTPURL(Context cx, Scriptable thisObj,
-                                               Object[] args, Function funObj)
+    public static String jsFunction_getHTTPURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         return "http://" + System.getProperty(hostName) + ":" + System.getProperty(httpPort);
     }
@@ -655,8 +325,7 @@ public class APIStoreHostObject extends ScriptableObject {
      * getting key for API subscriber args[] list String subscriberID, String
 	 * api, String apiVersion, String Date
 	 */
-    public static String jsFunction_getKey(Context cx, Scriptable thisObj,
-                                           Object[] args, Function funObj)
+    public static String jsFunction_getKey(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args != null && isStringArray(args)) {
@@ -706,7 +375,19 @@ public class APIStoreHostObject extends ScriptableObject {
                 String validityPeriod = (String) args[5];
 	            String scopes = (String) args[7];
 	            String username = String.valueOf(args[0]);
-	            String tenantDomain = MultitenantUtils.getTenantDomain(username);
+                String applicationName = (String) args[1];
+                String tokenType = (String) args[2];
+                String callbackUrl = (String) args[3];
+                String groupingId = (String)args[8];
+                String jsonParams = null;
+                if(args.length == 10){
+                    jsonParams = (String) args[9];
+                }else{
+                    jsonParams = null;
+                }
+
+
+	            /*String tenantDomain = MultitenantUtils.getTenantDomain(username);
 	            int tenantId =
 			            ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
 			                                  .getTenantId(tenantDomain);
@@ -721,15 +402,6 @@ public class APIStoreHostObject extends ScriptableObject {
                         validityPeriod = String.valueOf(defaultValidityPeriod);
                     }
                 }
-
-                String jsonParams = null;
-                if(args.length == 10){
-                    jsonParams = (String) args[9];
-                }else{
-                    jsonParams = null;
-                }
-
-
 	            //checking for authorized scopes
 	            Set<Scope> scopeSet = new LinkedHashSet<Scope>();
 	            List<Scope> authorizedScopes = new ArrayList<Scope>();
@@ -750,17 +422,15 @@ public class APIStoreHostObject extends ScriptableObject {
 	            } else {
 		            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
 	            }
-
-	            String applicationName = (String) args[1];
-                String tokenType = (String) args[2];
-                String callbackUrl = (String) args[3]; 
-                String groupingId = (String)args[8];
-        
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
                         username, applicationName, tokenType, callbackUrl,
 		                accessAllowDomainsArray, validityPeriod, authScopeString, groupingId,
                         jsonParams);
-
+                */
+                Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
+                        username, applicationName, tokenType, callbackUrl,
+                        accessAllowDomainsArray, validityPeriod, scopes, groupingId,
+                        jsonParams);
                 NativeObject row = new NativeObject();
                 String authorizedDomains = "";
                 boolean first = true;
@@ -840,7 +510,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     }
                 }
 
-                String jsonParams = null;
+                String jsonParams;
                 if (args.length == 10) {
                     jsonParams = (String) args[9];
                 } else {
@@ -958,9 +628,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 String applicationName = (String) apiData.get("applicationName", apiData);
 
                 String keyType = (String) apiData.get("keytype", apiData);
-                String authorizedDomains = (String) apiData.get("authorizedDomains", apiData);
-                //this map will hold response that we are getting from Application registration process.
-                Map<String, Object> keyDetails;
+
                 getAPIConsumer(thisObj).mapExistingOAuthClient(jsonString, userName, clientId, applicationName,
                                                                keyType, new String[]{"ALL"});
 
@@ -1001,8 +669,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 String groupingId = (String) args[2];
                 String username = (String) args[3];
 
-                //this map will hold response that we are getting from Application registration process.
-                Map<String, Object> keyDetails;
                 getAPIConsumer(thisObj).cleanUpApplicationRegistration(applicationName, keyType, groupingId, username);
 
             } catch (Exception e) {
@@ -1173,12 +839,6 @@ public class APIStoreHostObject extends ScriptableObject {
         String username = decodedString.split(":")[0];
         String password = decodedString.split(":")[1];
 
-        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-        //String url = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
-        //if (url == null) {
-        //    throw new APIManagementException("API key manager URL unspecified");
-        //}
-
         try {
 
             //RealmService realmService = OAuthComponentServiceHolder.getRealmService();
@@ -1227,8 +887,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getTopRatedAPIs(Context cx,
-                                                         Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getTopRatedAPIs(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         NativeArray myn = new NativeArray(0);
@@ -1266,8 +925,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getRecentlyAddedAPIs(Context cx,
-                                                              Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getRecentlyAddedAPIs(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         NativeArray apiArray = new NativeArray(0);
         if (args != null && args.length != 0) {
@@ -1443,6 +1101,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                        currentApi.put("docSummary", currentApi, doc.getSummary());
 	                        currentApi.put("docSourceURL", currentApi, doc.getSourceUrl());
 	                        currentApi.put("docFilePath", currentApi, doc.getFilePath());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
 	
 	                        apiArray.put(i, apiArray, currentApi);
             				i++;
@@ -1481,6 +1140,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	                        currentApi.put("description", currentApi, api.getDescription());
 	                        currentApi.put("isAdvertiseOnly", currentApi, api.isAdvertiseOnly());
 	                        currentApi.put("apiOwner", currentApi, api.getApiOwner());
+                            currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
 	                        
 	                        apiArray.put(i, apiArray, currentApi);
 	                        i++;
@@ -1524,8 +1184,7 @@ public class APIStoreHostObject extends ScriptableObject {
     	
     }
 
-    public static NativeArray jsFunction_getAPIsWithTag(Context cx,
-                                                        Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getAPIsWithTag(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         NativeArray apiArray = new NativeArray(0);
         if (args != null && isStringArray(args)) {
@@ -1622,6 +1281,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     currentApi.put("visibility", currentApi, api.getVisibility());
                     currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
                     currentApi.put("description", currentApi, api.getDescription());
+                    currentApi.put("monetizationCategory", currentApi, api.getMonetizationCategory());
                     apiArray.put(i, apiArray, currentApi);
                     i++;
                 }
@@ -1670,8 +1330,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return apiArray;
     }
 
-    public static NativeArray jsFunction_getAllTags(Context cx,
-                                                    Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getAllTags(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         NativeArray tagArray = new NativeArray(0);
         Set<Tag> tags;
@@ -1709,7 +1368,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return tagArray;
     }
 
-    public static NativeArray jsFunction_getTagsWithAttributes(Context cx, Scriptable thisObj, Object[] args, Function funObj) throws APIManagementException {
+    public static NativeArray jsFunction_getTagsWithAttributes(Context cx, Scriptable thisObj, Object[] args,
+                                                               Function funObj) throws APIManagementException {
 
 
         NativeArray tagArray = new NativeArray(0);
@@ -1744,6 +1404,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 currentTag.put("description", currentTag, tag.getDescription());
                 currentTag.put("isThumbnailExists", currentTag, tag.isThumbnailExists());
                 currentTag.put("count", currentTag, tag.getNoOfOccurrences());
+                currentTag.put("thumbnailUrl", currentTag, tag.getThumbnailUrl());
 
                 tagArray.put(i, tagArray, currentTag);
                 i++;
@@ -1753,8 +1414,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return tagArray;
     }
 
-    public static NativeArray jsFunction_getAllPublishedAPIs(Context cx,
-                                                             Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getAllPublishedAPIs(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         Set<API> apiSet;
         NativeArray myn = new NativeArray(0);
@@ -1819,8 +1479,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
     
-    public static NativeObject jsFunction_getAllPaginatedPrototypedAPIs(Context cx,
-            							Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getAllPaginatedPrototypedAPIs(Context cx, Scriptable thisObj,
+                                                                        Object[] args, Function funObj)
             										throws ScriptException, APIManagementException {
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
     	String tenantDomain;
@@ -1842,8 +1502,8 @@ public class APIStoreHostObject extends ScriptableObject {
     	
     }
 
-    public static NativeObject jsFunction_getAllPaginatedPublishedAPIs(Context cx,
-                                                                       Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getAllPaginatedPublishedAPIs(Context cx, Scriptable thisObj,
+                                                                       Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
     	
     	APIConsumer apiConsumer = getAPIConsumer(thisObj);
@@ -1867,8 +1527,8 @@ public class APIStoreHostObject extends ScriptableObject {
             
     }
     
-    private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start, 
-    		int end, String status, boolean returnAPItags) {
+    private static NativeObject getPaginatedAPIsByStatus(APIConsumer apiConsumer, String tenantDomain, int start,
+                                                         int end, String status, boolean returnAPItags) {
     	
     	Set<API> apiSet;
         Map<String, Object> resultMap;
@@ -1941,7 +1601,8 @@ public class APIStoreHostObject extends ScriptableObject {
                         }
                     }
                     row.put("tiers", row, tierArr);
-                    
+                    row.put("monetizationCategory", row, api.getMonetizationCategory());
+
                     if (returnAPItags) {                    
                         StringBuilder tagsSet = new StringBuilder("");
                         for (int k = 0; k < api.getTags().toArray().length; k++) {
@@ -1974,9 +1635,8 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws ScriptException
      * @throws APIManagementException
      */
-    public static NativeArray jsFunction_getAPIEndpointURLs(Context cx, Scriptable thisObj, Object[] args,
-                                                            Function funObj) throws ScriptException,
-                                                                            APIManagementException {
+    public static NativeArray jsFunction_getAPIEndpointURLs(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
         String providerName;
         String apiName;
         String version;
@@ -2037,9 +1697,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getAPI(Context cx, Scriptable thisObj,
-                                                Object[] args, Function funObj) throws ScriptException,
-            APIManagementException {
+    public static NativeArray jsFunction_getAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
 
         String providerName;
         String apiName;
@@ -2145,11 +1804,11 @@ public class APIStoreHostObject extends ScriptableObject {
                         List<NativeArray> uriTemplatesArr = new ArrayList<NativeArray>();
                         if (uriTemplates.size() != 0) {
                             NativeArray uriTempArr = new NativeArray(uriTemplates.size());
-                            Iterator i = uriTemplates.iterator();
+                            Iterator uriTemplateIterator = uriTemplates.iterator();
 
-                            while (i.hasNext()) {
+                            while (uriTemplateIterator.hasNext()) {
                                 List<String> utArr = new ArrayList<String>();
-                                URITemplate ut = (URITemplate) i.next();
+                                URITemplate ut = (URITemplate) uriTemplateIterator.next();
                                 utArr.add(ut.getUriTemplate());
                                 utArr.add(ut.getMethodsAsString().replaceAll("\\s", ","));
                                 utArr.add(ut.getAuthTypeAsString().replaceAll("\\s", ","));
@@ -2178,8 +1837,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
                         row.put("subscriptionAvailability", row, api.getSubscriptionAvailability());
                         row.put("subscriptionAvailableTenants", row, api.getSubscriptionAvailableTenants());
-                        row.put("isDefaultVersion",row,api.isDefaultVersion());
-                        row.put("transports",row,api.getTransports());
+                        row.put("isDefaultVersion", row,api.isDefaultVersion());
+                        row.put("transports", row,api.getTransports());
 
                         myn.put(0, myn, row);
 
@@ -2213,8 +1872,8 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException
      */
     public static NativeArray jsFunction_getHTTPsGatewayEndpointURLs(Context cx, Scriptable thisObj,
-                                         Object[] args, Function funObj) throws ScriptException,
-                                         APIManagementException {
+                                                                     Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
     	NativeArray myn = new NativeArray(0);
     	
     	APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
@@ -2240,8 +1899,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    private static String filterUrlsByTransport(List<String> urlsList, List<String> transportList,
-                                                String transportName) {
+    private static String filterUrlsByTransport(List<String> urlsList, List<String> transportList, String transportName) {
         String endpointUrl = "";
         if (transportList.contains(transportName)) {
        for (String env : urlsList){
@@ -2253,10 +1911,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return endpointUrl;
     }
 
-    public static boolean jsFunction_isSubscribed(Context cx, Scriptable thisObj,
-                                                  Object[] args, Function funObj)
-            throws ScriptException,
-            APIManagementException {
+    public static boolean jsFunction_isSubscribed(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException {
 
         String username = null;
         if (args != null && args.length != 0) {
@@ -2274,8 +1930,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getAllDocumentation(Context cx,
-                                                             Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getAllDocumentation(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of parameters.");
@@ -2341,8 +1996,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getComments(Context cx,
-                                                     Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getComments(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         Comment[] commentlist = new Comment[0];
         String providerName = "";
@@ -2380,8 +2034,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
-    public static NativeArray jsFunction_addComments(Context cx,
-                                                     Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_addComments(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         String providerName = "";
         String apiName = "";
@@ -2413,15 +2066,16 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static String jsFunction_addSubscription(Context cx,
-                                                    Scriptable thisObj, Object[] args, Function funObj)
+
+    public static SubscriptionResponse jsFunction_addSubscription(Context cx, Scriptable thisObj,
+                                                                  Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || args.length == 0) {
-            return "";
+           return new SubscriptionResponse(null, null, null);
         }
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
-
+        SubscriptionResponse addSubscriptionResponse;
         String providerName = (String) args[0];
         providerName = APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) args[1];
@@ -2489,8 +2143,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 throw new APIManagementException("Subscription is not allowed for " + userDomain);
             }
             apiIdentifier.setTier(tier);
-            String subsStatus = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
-            return subsStatus;
+            addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
         } catch (APIManagementException e) {
             handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());
             return null;
@@ -2499,15 +2152,18 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+         return addSubscriptionResponse;
     }
 
-    public static boolean jsFunction_addAPISubscription(Context cx,
-                                                        Scriptable thisObj, Object[] args, Function funObj) throws APIManagementException {
+    public static SubscriptionResponse jsFunction_addAPISubscription(Context cx, Scriptable thisObj,
+                                                                     Object[] args, Function funObj)
+            throws APIManagementException {
         if (!isStringArray(args)) {
             throw new APIManagementException("Invalid input parameters for AddAPISubscription method");
         }
 
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        SubscriptionResponse addSubscriptionResponse  = null;
         String providerName = APIUtil.replaceEmailDomain(args[0].toString());
         String apiName = args[1].toString();
         String version = args[2].toString();
@@ -2522,19 +2178,18 @@ public class APIStoreHostObject extends ScriptableObject {
             apiIdentifier.setTier(tier);
             try {
                 int applicationId = APIUtil.getApplicationId(applicationName, userId);
-                apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
+                addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
             } catch (APIManagementException e) {
                 handleException("Error while adding the subscription for user: " + userId, e);
             }
-            return true;
         } else {
             handleException("Cannot add subscription to with the denied tier");
-            return false;
         }
+        return addSubscriptionResponse;
     }
 
-    public static boolean jsFunction_removeSubscriber(Context cx,
-                                                      Scriptable thisObj, Object[] args, Function funObj)
+    public static boolean jsFunction_removeSubscriber(Context cx, Scriptable thisObj,
+                                                      Object[] args, Function funObj)
             throws APIManagementException {
         String providerName = "";
         String apiName = "";
@@ -2561,8 +2216,8 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
-    public static NativeArray jsFunction_rateAPI(Context cx,
-                                                 Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_rateAPI(Context cx, Scriptable thisObj,
+                                                 Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         NativeArray myn = new NativeArray(0);
@@ -2638,8 +2293,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_removeAPIRating(Context cx,
-                                                         Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_removeAPIRating(Context cx, Scriptable thisObj,
+                                                         Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         NativeArray myn = new NativeArray(0);
@@ -2684,8 +2339,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getSubscriptions(Context cx,
-                                                          Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getSubscriptions(Context cx, Scriptable thisObj,
+                                                          Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         NativeArray myn = new NativeArray(0);
@@ -2738,8 +2393,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return null;
     }
 
-    public static NativeObject jsFunction_createApplicationKeys(Context cx,
-                                                                Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_createApplicationKeys(Context cx, Scriptable thisObj,
+                                                                Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         if (args != null && args.length > 7) {
             try {
@@ -2780,8 +2435,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-	private static List<Scope> getAllowedScopesForUserApplication(String username,
-	                                                              Set<Scope> reqScopeSet) {
+	private static List<Scope> getAllowedScopesForUserApplication(String username, Set<Scope> reqScopeSet) {
         String[] userRoles = null;
         org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
 
@@ -2852,8 +2506,7 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
-                                                              Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -2889,10 +2542,8 @@ public class APIStoreHostObject extends ScriptableObject {
             }
 
             //check whether application exist prior to get subscriptions
-            if (!(appName == null || appName.isEmpty()) &&
-                    !APIUtil.isApplicationExist(username, appName, groupingId)) {
-                String message = "Application " + appName + " does not exist for user " +
-                        "" + username;
+            if (!StringUtils.isEmpty(appName) && !APIUtil.isApplicationExist(username, appName, groupingId)) {
+                String message = "Application " + appName + " does not exist for user " + username;
                 log.error(message);
                 throw new ApplicationNotFoundException(message);
             }
@@ -3227,8 +2878,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeObject jsFunction_getSubscriber(Context cx,
-                                                        Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getSubscriber(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args != null && isStringArray(args)) {
@@ -3255,8 +2905,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return null;
     }
 
-    public static boolean jsFunction_addSubscriber(Context cx,
-                                                   Scriptable thisObj, Object[] args, Function funObj)
+    public static boolean jsFunction_addSubscriber(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException, UserStoreException {
 
         if (args != null && isStringArray(args)) {
@@ -3267,7 +2916,8 @@ public class APIStoreHostObject extends ScriptableObject {
             subscriber.setEmail("");
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(MultitenantUtils.getTenantDomain((String) args[0]));
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(MultitenantUtils.getTenantDomain((String) args[0]));
                 subscriber.setTenantId(tenantId);
                 apiConsumer.addSubscriber(subscriber, groupId);
             } catch (APIManagementException e) {
@@ -3282,8 +2932,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return false;
     }
 
-    public static NativeArray jsFunction_getApplications(Context cx,
-                                                         Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getApplications(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         NativeArray myn = new NativeArray(0);
@@ -3331,8 +2980,8 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException
      *
      */
-    public static NativeObject jsFunction_getApplicationByName(Context cx,
-                                                               Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_getApplicationByName(Context cx, Scriptable thisObj,
+                                                               Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         if (args != null) {
             String userId = (String) args[0];
@@ -3356,21 +3005,20 @@ public class APIStoreHostObject extends ScriptableObject {
         return null;
     }
 
-    public static String jsFunction_addApplication(Context cx,
-                                                   Scriptable thisObj, Object[] args, Function funObj)
+    public static String jsFunction_addApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         String status = null;
         if (args != null && args.length >= 4 && isStringArray(args)) {
             String name = (String) args[0];
 
-            if(StringUtils.isEmpty(name.trim())){
+            if(StringUtils.isEmpty(name.trim())) {
                 handleException("Application Name is empty.");
             }
             String username = (String) args[1];
             String tier = (String) args[2];
 
-            if(StringUtils.isEmpty(tier.trim())){
+            if(StringUtils.isEmpty(tier.trim())) {
                 handleException("No tier is defined for the Application.");
             }
             String callbackUrl = (String) args[3];
@@ -3391,17 +3039,17 @@ public class APIStoreHostObject extends ScriptableObject {
                 application.setGroupId(groupId);
             }
 
-            status = apiConsumer.addApplication(application, username);
+            int applicationId = apiConsumer.addApplication(application, username);
+            status = apiConsumer.getApplicationStatusById(applicationId);
             return status;
-        } else{
+        } else {
             handleException("Missing parameters.");
         }
 
         return status;
     }
 
-    public static boolean jsFunction_sleep(Context cx,
-                                           Scriptable thisObj, Object[] args, Function funObj) {
+    public static boolean jsFunction_sleep(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         if (isStringArray(args)) {
             String millis = (String) args[0];
             try {
@@ -3414,8 +3062,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return true;
     }
 
-    public static boolean jsFunction_removeApplication(Context cx,
-                                                       Scriptable thisObj, Object[] args, Function funObj)
+    public static boolean jsFunction_removeApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args != null && args.length > 2 && isStringArray(args)) {
@@ -3440,8 +3087,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return false;
     }
 
-    public static NativeArray jsFunction_getSubscriptionsByApplication(Context cx,
-                                                                       Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getSubscriptionsByApplication(Context cx, Scriptable thisObj,
+                                                                       Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         NativeArray myn = new NativeArray(0);
@@ -3460,8 +3107,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
                 //check whether application exist prior to get subscription
                 if (!APIUtil.isApplicationExist(username, applicationName, groupingId)) {
-                    String message = "Application " + applicationName + " does not exist for user " +
-                            "" + username;
+                    String message = "Application " + applicationName + " does not exist for user " + username;
                     log.error(message);
                     throw new ApplicationNotFoundException(message);
                 }
@@ -3492,8 +3138,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static boolean jsFunction_updateApplication(Context cx,
-                                                       Scriptable thisObj, Object[] args, Function funObj)
+    public static boolean jsFunction_updateApplication(Context cx, Scriptable thisObj,
+                                                       Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args != null && args.length > 5 && isStringArray(args)) {
@@ -3542,8 +3188,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return false;
     }
 
-    public static NativeObject jsFunction_resumeWorkflow(Context cx,
-                                                         Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject jsFunction_resumeWorkflow(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, WorkflowException {
 
         NativeObject row = new NativeObject();
@@ -3608,8 +3253,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return row;
     }
 
-    public static boolean jsFunction_updateApplicationTier(Context cx,
-                                                           Scriptable thisObj, Object[] args, Function funObj)
+    public static boolean jsFunction_updateApplicationTier(Context cx,Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
 
         if (args != null && isStringArray(args)) {
@@ -3633,8 +3277,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return false;
     }
 
-    public static NativeArray jsFunction_getInlineContent(Context cx,
-                                                          Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getInlineContent(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         String apiName;
         String version;
@@ -3702,9 +3345,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
     }
 
-    public static boolean jsFunction_hasSubscribePermission(Context cx, Scriptable thisObj,
-                                                            Object[] args,
-                                                            Function funObj)
+    public static boolean jsFunction_hasSubscribePermission(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException {
         APIConsumer consumer = getAPIConsumer(thisObj);
         if (consumer instanceof UserAwareAPIConsumer) {
@@ -3728,14 +3369,7 @@ public class APIStoreHostObject extends ScriptableObject {
             String fields = args[2].toString();
 
             APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-            /*
-             * boolean workFlowEnabled =
-             * Boolean.parseBoolean(config.getFirstProperty
-             * (APIConstants.SELF_SIGN_UP_ENABLED));
-             * if (!workFlowEnabled) {
-             * handleException("Self sign up has been disabled on this server");
-             * }
-             */
+
             String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
 
@@ -3764,7 +3398,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 // get the signup configuration
                 UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
                 // set tenant specific sign up user storage
-                if (signupConfig != null && signupConfig.getSignUpDomain() != "") {
+                if (signupConfig != null && !signupConfig.getSignUpDomain().isEmpty()) {
                     if (!signupConfig.isSignUpEnabled()) {
                         handleException("Self sign up has been disabled for this tenant domain");
                     }
@@ -3775,19 +3409,16 @@ public class APIStoreHostObject extends ScriptableObject {
                      */
 
                     if (index > 0) {
-                        username =
-                                   signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
+                        username = signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
                                            username.substring(index + 1);
                     } else {
-                        username =
-                                   signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
+                        username = signupConfig.getSignUpDomain().toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR +
                                            username;
                     }
                 }
 
                 // check whether admin credentials are correct.
-                boolean validCredentials =
-                                           checkCredentialsForAuthServer(signupConfig.getAdminUserName(),
+                boolean validCredentials = checkCredentialsForAuthServer(signupConfig.getAdminUserName(),
                                                                          signupConfig.getAdminPassword(), serverURL);
 
                 if (validCredentials) {
@@ -3814,8 +3445,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     signUpWFDto.setTenantDomain(tenantDomain);
 
                     try {
-                        int tenantId =
-                                       ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                                                              .getTenantId(tenantDomain);
                         signUpWFDto.setTenantId(tenantId);
                     } catch (org.wso2.carbon.user.api.UserStoreException e) {
@@ -3830,15 +3460,13 @@ public class APIStoreHostObject extends ScriptableObject {
                         userSignUpWFExecutor.execute(signUpWFDto);
                     } catch (WorkflowException e) {
                         log.error("Unable to execute User SignUp Workflow", e);
-                        // removeUser(username, config, serverURL);
                         removeTenantUser(username, signupConfig, serverURL);
 
                         handleException("Unable to execute User SignUp Workflow", e);
                     }
                 } else {
-                    customErrorMsg =
-                                     "Unable to add a user. Please check credentials in "
-                                             + "the signup-config.xml in the registry";
+                    customErrorMsg = "Unable to add a user. Please check credentials in "
+                                     + "the signup-config.xml in the registry";
                     handleException(customErrorMsg);
                 }
 
@@ -3923,8 +3551,7 @@ public class APIStoreHostObject extends ScriptableObject {
 	 * @param newPassword new password to be set.
 	 *
 	 */
-	private static void changeTenantUserPassword(String username,
-	                                             UserRegistrationConfigDTO signupConfig,
+	private static void changeTenantUserPassword(String username, UserRegistrationConfigDTO signupConfig,
 	                                             String serverURL, String newPassword)
 			throws RemoteException, UserAdminUserAdminException {
 
@@ -4094,8 +3721,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_removeSubscription(Context cx, Scriptable thisObj,
-                                                        Object[] args,
-                                                        Function funObj)
+                                                        Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -4131,8 +3757,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeArray jsFunction_getPublishedAPIsByProvider(Context cx, Scriptable thisObj,
-                                                                    Object[] args,
-                                                                    Function funObj)
+                                                                    Object[] args, Function funObj)
             throws APIManagementException {
         NativeArray apiArray = new NativeArray(0);
         if (args != null) {
@@ -4212,8 +3837,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeObject jsFunction_refreshToken(Context cx, Scriptable thisObj,
-                                                       Object[] args,
-                                                       Function funObj)
+                                                       Object[] args, Function funObj)
             throws AxisFault, APIManagementException {
 
         NativeObject row = new NativeObject();
@@ -4244,44 +3868,43 @@ public class APIStoreHostObject extends ScriptableObject {
                 response = apiConsumer.renewAccessToken(oldAccessToken, clientId, clientSecret,
                                                         validityTime,
                                                         accessAllowDomainsArray, requestedScopeArray, jsonInput);
+                row.put("accessToken", row, response.getAccessToken());
+                row.put("consumerKey", row, response.getConsumerKey());
+                row.put("consumerSecret", row, response.getConsumerKey());
+
+                row.put("responseParams", row, response.getJSONString());
+                row.put("tokenScope", row, response.getScopes());
+                if (isApplicationAccessTokenNeverExpire(response.getValidityPeriod())) {
+                    row.put("validityTime", row, -1);
+                } else {
+                    row.put("validityTime", row, response.getValidityPeriod());
+                }
             } catch (APIManagementException e) {
                 String errorMessage = "Error while renewing Access Token for Consumer Key " + clientId;
                 if (args[0] != null) {
-                    errorMessage = "Error while renewing Access Token for Consumer Key " + clientId 
+                    errorMessage = "Error while renewing Access Token for Consumer Key " + clientId
                             + " and user " + args[0];
                 }
                 handleException(errorMessage);
             }
 
-            row.put("accessToken", row, response.getAccessToken());
-            row.put("consumerKey", row, response.getConsumerKey());
-            row.put("consumerSecret", row, response.getConsumerKey());
-
-            row.put("responseParams", row, response.getJSONString());
-            row.put("tokenScope", row, response.getScopes());
 
             boolean isRegenarateOptionEnabled = true;
             if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
                 isRegenarateOptionEnabled = false;
             }
 
-            if (isApplicationAccessTokenNeverExpire(response.getValidityPeriod())) {
-                row.put("validityTime", row, -1);
-            } else {
-                row.put("validityTime", row, response.getValidityPeriod());
-            }
             row.put("enableRegenarate", row, isRegenarateOptionEnabled);
             return row;
-         } else {
+        } else {
             handleException("Invalid types of input parameters.");
             return null;
-            }
+        }
     }
 
 
     public static void jsFunction_addAccessAllowDomains(Context cx, Scriptable thisObj,
-                                                                  Object[] args,
-                                                                  Function funObj) throws APIManagementException {
+                                                        Object[] args, Function funObj) throws APIManagementException {
         String oAuthConsumerKey = args[0].toString();
         NativeArray accessAllowDomainsArr = (NativeArray) args[1];
         String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
@@ -4299,8 +3922,8 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static void jsFunction_updateAccessAllowDomains(Context cx, Scriptable thisObj,
-                                                           Object[] args,
-                                                           Function funObj) throws APIManagementException, AxisFault {
+                                                           Object[] args, Function funObj)
+            throws APIManagementException, AxisFault {
         String accessToken = (String) args[0];
         NativeArray accessAllowDomainsArr = (NativeArray) args[1];
         String[] accessAllowDomainsArray = new String[(int) accessAllowDomainsArr.getLength()];
@@ -4328,8 +3951,8 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws AxisFault
      */
     public static NativeObject jsFunction_checkIfSubscriberRoleAttached(Context cx, Scriptable thisObj,
-                                                                        Object[] args,
-                                                                        Function funObj) throws APIManagementException, AxisFault {
+                                                                        Object[] args, Function funObj)
+            throws APIManagementException, AxisFault {
         String userName = (String) args[0];
         Boolean valid;
 
@@ -4391,12 +4014,12 @@ public class APIStoreHostObject extends ScriptableObject {
         String period = (String) args[1];
 
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIStoreHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
             list = client.getUsageBySubscriber(subscriberName, period);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
+            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         } catch (Exception e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
+            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
 
         Iterator it = null;
@@ -4426,16 +4049,12 @@ public class APIStoreHostObject extends ScriptableObject {
     /**
      * Check the APIs' adding comment is turned on or off
      *
-     * @param cx
-     * @param thisObj
-     * @param args
-     * @param funObj
      * @return
      * @throws APIManagementException
      */
     public static boolean jsFunction_isCommentActivated() throws APIManagementException {
 
-        boolean commentActivated = false;
+        boolean commentActivated;
         APIManagerConfiguration config =
                 ServiceReferenceHolder.getInstance()
                         .getAPIManagerConfigurationService()
@@ -4443,20 +4062,12 @@ public class APIStoreHostObject extends ScriptableObject {
 
         commentActivated = Boolean.valueOf(config.getFirstProperty(APIConstants.API_STORE_DISPLAY_COMMENTS));
 
-        if (commentActivated) {
-            return true;
-        } else {
-            return false;
-        }
+        return commentActivated;
     }
 
     /**
      * Check the APIs' adding rating facility is turned on or off
      *
-     * @param cx
-     * @param thisObj
-     * @param args
-     * @param funObj
      * @return
      * @throws APIManagementException
      */
@@ -4470,27 +4081,20 @@ public class APIStoreHostObject extends ScriptableObject {
 
         ratingActivated = Boolean.valueOf(config.getFirstProperty(APIConstants.API_STORE_DISPLAY_RATINGS));
 
-        if (ratingActivated) {
-            return true;
-        } else {
-            return false;
-        }
+        return ratingActivated;
     }
 
     /**
      * @return true if billing enabled else false
      * @throws APIManagementException
      */
-    public static boolean jsFunction_isBillingEnabled()
-            throws APIManagementException {
+    public static boolean jsFunction_isBillingEnabled() throws APIManagementException {
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String billingConfig = config.getFirstProperty(APIConstants.BILLING_AND_USAGE_CONFIGURATION);
         return Boolean.parseBoolean(billingConfig);
     }
 
-    public static NativeArray jsFunction_getTiers(Context cx, Scriptable thisObj,
-                                                  Object[] args,
-                                                  Function funObj) {
+    public static NativeArray jsFunction_getTiers(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         NativeArray myn = new NativeArray(0);
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         Set<Tier> tiers;
@@ -4522,8 +4126,7 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static NativeArray jsFunction_getDeniedTiers(Context cx, Scriptable thisObj,
-                                                        Object[] args,
-                                                        Function funObj) throws APIManagementException {
+                                                        Object[] args, Function funObj) throws APIManagementException {
 
         NativeArray myn = new NativeArray(0);
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
@@ -4543,8 +4146,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getUserFields(Context cx,
-                                                       Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeArray jsFunction_getUserFields(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException {
         UserFieldDTO[] userFields = getOrderedUserFieldDTO();
         NativeArray myn = new NativeArray(0);
@@ -4559,9 +4161,7 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static boolean jsFunction_hasUserPermissions(Context cx,
-                                                        Scriptable thisObj, Object[] args,
-                                                        Function funObj)
+    public static boolean jsFunction_hasUserPermissions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
         if (args != null && isStringArray(args)) {
             String username = args[0].toString();
@@ -4648,15 +4248,13 @@ public class APIStoreHostObject extends ScriptableObject {
         return validityPeriod < 0 || validityPeriod == Long.MAX_VALUE;
     }
 
-    public static boolean jsFunction_isEnableEmailUsername(Context cx,
-                                                           Scriptable thisObj, Object[] args,
-                                                           Function funObj) {
+    public static boolean jsFunction_isEnableEmailUsername(Context cx, Scriptable thisObj,
+                                                           Object[] args, Function funObj) {
         return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName"));
     }
 
-    public static String jsFunction_getAPIPublisherURL(Context cx,
-                                                       Scriptable thisObj, Object[] args,
-                                                       Function funObj) {
+    public static String jsFunction_getAPIPublisherURL(Context cx, Scriptable thisObj,
+                                                       Object[] args, Function funObj) {
 
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         if (config != null) {
@@ -4665,12 +4263,9 @@ public class APIStoreHostObject extends ScriptableObject {
         return null;
     }
 
-    public static boolean jsFunction_hasPublisherAccess(Context cx,
-                                                        Scriptable thisObj, Object[] args,
-                                                        Function funObj) {
+    public static boolean jsFunction_hasPublisherAccess(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         String usernameWithDomain = (String) args[0];
         String tenantDomain = MultitenantUtils.getTenantDomain(usernameWithDomain);
-        boolean isSuperTenant = false;
         if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
         }
@@ -4690,10 +4285,9 @@ public class APIStoreHostObject extends ScriptableObject {
     public static boolean jsFunction_isDataPublishingEnabled(Context cx, Scriptable thisObj,
                                                              Object[] args, Function funObj)
             throws APIManagementException {
-        if (HostObjectUtils.checkDataPublishingEnabled()) {
-            return true;
-        }
-        return false;
+
+        return HostObjectUtils.checkDataPublishingEnabled();
+
     }
 
     public String getUsername() {
@@ -4720,8 +4314,7 @@ public class APIStoreHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static NativeObject jsFunction_getDomainMappings(Context cx, Scriptable thisObj,
-                                                            Object[] args,
-                                                            Function funObj) throws APIManagementException {
+                                                            Object[] args, Function funObj) throws APIManagementException {
         NativeObject myn = new NativeObject();
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         Map<String, String> domains = new HashMap<String, String>();

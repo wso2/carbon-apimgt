@@ -40,6 +40,7 @@ import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
@@ -50,7 +51,7 @@ import java.util.Set;
  * interface {@link org.wso2.carbon.governance.registry.extensions.interfaces.Execution}
  * This class consists methods that will create, prototype, publish, block, deprecate and
  * retire  an API to API Manager.
- *
+ * <p/>
  * This executor used to publish a service to API store as a API.
  *
  * @see org.wso2.carbon.governance.registry.extensions.interfaces.Execution
@@ -80,9 +81,15 @@ public class APIExecutor implements Execution {
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
-        String user = "admin"; //need to pass the logged in user here
+        String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        String userWithDomain = APIUtil.appendDomainWithUser(user, domain);
+        //String userWithDomain = APIUtil.appendDomainWithUser(user, domain);
+        
+        String userWithDomain = user;
+        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)){
+             userWithDomain = APIUtil.appendDomainWithUser(user, domain);
+        }       
+        
         userWithDomain = APIUtil.replaceEmailDomainBack(userWithDomain);
 
         try {
@@ -108,15 +115,24 @@ public class APIExecutor implements Execution {
                     && newStatus.equals(APIStatus.PUBLISHED)) {
                 Set<Tier> tiers = api.getAvailableTiers();
                 String endPoint = api.getEndpointConfig();
-                if(endPoint != null && endPoint.trim().length() > 0){
-                    if(tiers == null || tiers.size()<= 0 ){
-                       throw new APIManagementException("Failed to publish service to API store while executing APIExecutor. No Tiers selected");
+                if (endPoint != null && endPoint.trim().length() > 0) {
+                    if (tiers == null || tiers.size() <= 0) {
+                        throw new APIManagementException("Failed to publish service to API store while executing " +
+                                                         "APIExecutor. No Tiers selected");
                     }
-                }else{
-                    throw new APIManagementException("Failed to publish service to API store while executing APIExecutor. No endpoint selected");
+                } else {
+                    throw new APIManagementException("Failed to publish service to API store while executing APIExecutor." +
+                                                     " No endpoint selected");
                 }
             }
-            executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, false, true);
+            boolean deprecateOldVersions = false;
+            boolean makeKeysForwardCompatible = false;
+            //If the API status is CREATED ,check for check list items of lifecycle
+            if (oldStatus.equals(APIStatus.CREATED)) {
+                deprecateOldVersions = apiArtifact.isLCItemChecked(0, APIConstants.API_LIFE_CYCLE);
+                makeKeysForwardCompatible = !(apiArtifact.isLCItemChecked(1, APIConstants.API_LIFE_CYCLE));
+            }
+            executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, deprecateOldVersions, makeKeysForwardCompatible);
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
 

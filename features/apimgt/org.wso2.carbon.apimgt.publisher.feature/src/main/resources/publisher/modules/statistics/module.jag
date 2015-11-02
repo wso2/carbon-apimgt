@@ -25,8 +25,6 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIResponseFaultCount.apply(this, arguments);
     },getAPIUsageByUser:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIUsageByUser.apply(this, arguments);
-    },getAPIFaultyAnalyzeByTime:function () {
-        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIFaultyAnalyzeByTime.apply(this, arguments);
     },getFirstAccessTime:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getFirstAccessTime.apply(this, arguments);
     },isDataPublishingEnabled:function () {
@@ -37,6 +35,14 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIRequestsPerHour.apply(this, arguments);        
     },getAPIsFromAPIRequestsPerHourTable:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIsFromAPIRequestsPerHourTable.apply(this, arguments);        
+    },getAppsForThrottleStats:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAppsForThrottleStats.apply(this, arguments);
+    },getThrottleDataOfApplication:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getThrottleDataOfApplication.apply(this, arguments);
+    },getAPIsForThrottleStats:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getAPIsForThrottleStats.apply(this, arguments);
+    },getThrottleDataOfAPIAndApplication:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getThrottleDataOfAPIAndApplication.apply(this, arguments);
     }
 
 });

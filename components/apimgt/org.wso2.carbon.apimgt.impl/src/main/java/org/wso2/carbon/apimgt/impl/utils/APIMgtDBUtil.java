@@ -217,8 +217,8 @@ public final class APIMgtDBUtil {
     /**
      * Function converts IS to String
      * Used for handling blobs
-     * @param is
-     * @return
+     * @param is - The Input Stream
+     * @return - The inputStream as a String
      */
     public static String getStringFromInputStream(InputStream is) {
         BufferedReader br = null;
@@ -232,13 +232,13 @@ public final class APIMgtDBUtil {
                 sb.append(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error occurred while reading from buffered reader.", e);
         } finally {
             if (br != null) {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Error occurred while closing the buffered reader.", e);
                 }
             }
         }

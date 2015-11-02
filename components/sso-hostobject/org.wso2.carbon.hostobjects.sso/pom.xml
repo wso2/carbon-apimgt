@@ -29,48 +29,40 @@
     <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Single Sign-On Relying party HostObject</name>
-    <description>signle sign-on relying party</description>
+    <description>Single Sign-On relying party</description>
 
     <dependencies>
         <dependency>
             <groupId>rhino.wso2</groupId>
             <artifactId>js</artifactId>
-            <version>${rhino.js.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>opensaml.wso2</groupId>
             <artifactId>opensaml2</artifactId>
-            <version>2.4.1.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>commons-codec.wso2</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.4.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>${carbon.kernel.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
-            <version>${jaggery.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>${commons-lang.version}</version>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
-            <version>2.2.3</version>
          </dependency>
     </dependencies>
 
@@ -106,8 +98,4 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
-        <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-    </properties>
 </project>

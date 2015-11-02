@@ -113,7 +113,8 @@
                         <Export-Package>
                             org.wso2.carbon.apimgt.api.xsd.*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.api.model.xsd*;version="${carbon.apimgt.version}",
-                            org.wso2.carbon.apimgt.keymgt.stub.*;version="${apimgt.keymgt.stub.version}"
+                            org.wso2.carbon.apimgt.impl.dto.xsd*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,

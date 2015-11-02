@@ -27,9 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
@@ -66,12 +68,13 @@ public class KeyManagerHolder {
             try {
                 // If APIKeyManager section is disabled, we are reading values defined in APIKeyValidator section.
                 if (apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT) == null) {
-                    keyManager = (KeyManager) Class.forName("org.wso2.carbon.apimgt.keymgt.AMDefaultKeyManagerImpl").newInstance();
+                    //keyManager = (KeyManager) Class.forName("org.wso2.carbon.apimgt.keymgt.AMDefaultKeyManagerImpl").newInstance();
+                    keyManager = new AMDefaultKeyManagerImpl();
                     keyManager.loadConfiguration(null);
                 } else {
                     // If APIKeyManager section is enabled, class name is picked from there.
                     String clazz = apiManagerConfiguration.getFirstProperty(APIConstants.KEY_MANAGER_CLIENT);
-                    keyManager = (KeyManager) Class.forName(clazz).newInstance();
+                    keyManager = (KeyManager) APIUtil.getClassForName(clazz).newInstance();
                     Set<String> configKeySet = apiManagerConfiguration.getConfigKeySet();
 
                     KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();

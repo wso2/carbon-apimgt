@@ -43,14 +43,11 @@ public class LocalDatabaseCreator extends DatabaseCreator {
     public void createRegistryDatabase() throws Exception{
 
         String databaseType = DatabaseCreator.getDatabaseType(this.dataSource.getConnection());
-        String dbscriptName = getDbScriptLocation(databaseType);
 
         String scripPath = getDbScriptLocation(databaseType);
         File scripFile = new File(scripPath);
         if(scripFile.exists()){
             super.createRegistryDatabase();
-        }else {
-            return;
         }
     }
 
@@ -60,8 +57,7 @@ public class LocalDatabaseCreator extends DatabaseCreator {
             log.debug("Loading database script from :" + scriptName);
         }
         String carbonHome = System.getProperty("carbon.home");
-        return  carbonHome +
-                "/dbscripts/apimgt/" + scriptName;
+        return  carbonHome + "/dbscripts/apimgt/" + scriptName;
 
     }
 }

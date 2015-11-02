@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -39,13 +41,13 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super();
     }
 
-    UserAwareAPIConsumer(String username) throws APIManagementException {
-        super(username);
+    UserAwareAPIConsumer(String username, APIMRegistryService registryService) throws APIManagementException {
+        super(username, registryService);
         this.username = username;
     }
 
     @Override
-    public String addSubscription(APIIdentifier identifier,
+    public SubscriptionResponse addSubscription(APIIdentifier identifier,
                                 String userId, int applicationId) throws APIManagementException {
         checkSubscribePermission();
         return super.addSubscription(identifier, userId, applicationId);
@@ -59,7 +61,13 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public String addApplication(Application application, String userId) throws APIManagementException {
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
+        checkSubscribePermission();
+        super.removeSubscription(subscription);
+    }
+
+    @Override
+    public int addApplication(Application application, String userId) throws APIManagementException {
         checkSubscribePermission();
         return super.addApplication(application, userId);
     }

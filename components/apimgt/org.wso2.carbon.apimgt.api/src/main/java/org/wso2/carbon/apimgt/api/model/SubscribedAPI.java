@@ -27,6 +27,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class SubscribedAPI {
 
+    private int subscriptionId;
     private Tier tier;
     private Subscriber subscriber;
     private APIIdentifier apiId;
@@ -35,12 +36,17 @@ public class SubscribedAPI {
     private String subStatus;
     private String subCreatedStatus;
     private List<APIKey> keys = new ArrayList<APIKey>();
+    private String uuid;
 
     private boolean isBlocked;   //TODO: what is the difference & usage of revoking & blocking users
 
     public SubscribedAPI(Subscriber subscriber, APIIdentifier apiId) {
         this.subscriber = subscriber;
         this.apiId = apiId;
+    }
+
+    public SubscribedAPI (String uuid) {
+        this.uuid = uuid;
     }
 
     public void setApplication(Application application) {
@@ -107,6 +113,22 @@ public class SubscribedAPI {
 
     public void setSubCreatedStatus(String subCreatedStatus) {
         this.subCreatedStatus = subCreatedStatus;
+    }
+
+    public int getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(int subscriptionId) {
+        this.subscriptionId = subscriptionId;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUUID() {
+        return uuid;
     }
 
     @Override

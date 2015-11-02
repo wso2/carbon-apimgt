@@ -56,10 +56,9 @@ public class TenantManagerHostObject extends ScriptableObject {
         return "APIManager";
     }
 
-    public static Scriptable jsConstructor(Context cx, Object[] args, Function ctorObj,
-                                           boolean inNewExpr) throws ScriptException {
-        TenantManagerHostObject Obj = new TenantManagerHostObject();
-        return Obj;
+    public static Scriptable jsConstructor(Context cx, Object[] args, Function ctorObj, boolean inNewExpr)
+            throws ScriptException {
+        return new TenantManagerHostObject();
     }
 
     private static void handleException(String msg) throws APIManagementException {
@@ -83,7 +82,7 @@ public class TenantManagerHostObject extends ScriptableObject {
         try{
             uploadFile = (FileHostObject) args[0];
             tenant = (String) args[1];
-        }catch (ClassCastException ce){
+        } catch (ClassCastException ce) {
             handleException("Invalid input parameters for addTenantTheme");
         }
 
@@ -103,7 +102,7 @@ public class TenantManagerHostObject extends ScriptableObject {
         InputStream zipInputStream = null;
         try{
             zipInputStream = themeFile.getInputStream();
-        }catch(ScriptException e) {
+        } catch(ScriptException e) {
              handleException("Error occurred while deploying tenant theme file" , e);
         }
 

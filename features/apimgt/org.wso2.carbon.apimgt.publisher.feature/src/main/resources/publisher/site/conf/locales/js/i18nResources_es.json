@@ -4,7 +4,9 @@
             "deleteMsg": "Est� seguro que desea eliminar el archivo" ,
             "revoke": "Revocar Access Token" ,
             "revokeMsg": "El Access Token ha sido eliminado con �xito : ",
-            "ok": "OK"
+            "ok": "OK",
+            "deleteParam" : "Do you want to delete the parameter",
+            "deleteScope" : "Do you want to delete the scope?"
 
 
         },
@@ -37,7 +39,9 @@
             "invalid": " No v�lido",
             "valid": "V�lido",
             "testUri": "Probar URI",
-            "validating": "Validaci�n en proceso.."
+            "validating": "Validaci�n en proceso..",
+            "missingUrl": " Please provide a url to test",
+            "errorInConnection": " - Error connecting to backend"
         },
 		"failOver":{
 			"title":"Failover State"

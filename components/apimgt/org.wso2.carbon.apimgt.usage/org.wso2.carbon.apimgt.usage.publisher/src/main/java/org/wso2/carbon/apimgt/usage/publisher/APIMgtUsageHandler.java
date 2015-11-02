@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
@@ -69,7 +70,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                     if (publisher == null) {
                         try {
                             log.debug("Instantiating Data Publisher");
-                            publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).newInstance();
+                            publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
                             publisher.init();
                         } catch (ClassNotFoundException e) {
                             log.error("Class not found " + publisherClass);

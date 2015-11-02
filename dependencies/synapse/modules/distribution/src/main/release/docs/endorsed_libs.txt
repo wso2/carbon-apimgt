@@ -1,3 +1,0 @@
-Place libraries which should be placed in endorsed directories here.
-
-e.g. Xerces and its dependencies (xercesImpl.jar and xml-apis.jar)

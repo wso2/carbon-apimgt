@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
 import java.util.ArrayList;
@@ -34,25 +33,6 @@ import java.util.ArrayList;
 public class WSAPIKeyDataStore implements APIKeyDataStore {
 
     private static final APIKeyValidatorClientPool clientPool = APIKeyValidatorClientPool.getInstance();
-
-    /*public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
-                                                 String apiKey, String clientDomain) throws APISecurityException {
-        APIKeyValidatorClient client = null;
-        try {
-            client = clientPool.get();
-            return client.getAPIKeyData(context, apiVersion, apiKey, APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN, clientDomain);
-        } catch (Exception e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error while accessing backend services for API key validation", e);
-        } finally {
-            try {
-                if (client != null) {
-                    clientPool.release(client);
-                }
-            } catch (Exception ignored) {
-            }
-        }
-    }*/
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
                                                  String apiKey,String requiredAuthenticationLevel, String clientDomain,

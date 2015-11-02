@@ -17,7 +17,12 @@ var getAPIStoreURL = function() {
     var result,log=new Log();
     var provider = getAPIProviderObj();
     try {
-    result = provider.getAPIStoreURL();
+        var tenantDomain = String(jagg.getTenantDomain());
+        if(tenantDomain != null && tenantDomain != undefined){
+            result = provider.getAPIStoreURL(tenantDomain);
+        }else{
+            result = provider.getAPIStoreURL();
+        }
     if (log.isDebugEnabled()) {
     log.debug("getAPIStoreURL : ");
     }
@@ -93,4 +98,10 @@ var getAPIStoreObj = function() {
     var store = require('apistore');
     return new store.APIStore();
 };
+
+var getUsageClient = function(){
+    var user = jagg.getUser();
+    return org.wso2.carbon.apimgt.usage.client.UsageClient.getClient(user.username);
+}
+
 %>

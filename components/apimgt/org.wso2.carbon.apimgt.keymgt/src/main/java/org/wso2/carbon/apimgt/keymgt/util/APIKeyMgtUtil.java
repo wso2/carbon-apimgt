@@ -20,16 +20,6 @@ package org.wso2.carbon.apimgt.keymgt.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -37,10 +27,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
-import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.registry.core.Registry;
@@ -84,16 +72,9 @@ public class APIKeyMgtUtil {
     /**
      * Get a database connection instance from the Identity Persistence Manager
      * @return Database Connection
-     * @throws APIKeyMgtException Error when getting an instance of the identity Persistence Manager
      */
-    public static Connection getDBConnection() throws APIKeyMgtException {
-        try {
-            return IdentityDatabaseUtil.getDBConnection();
-        } catch (IdentityException e) {
-            String errMsg = "Error when getting a database connection from the Identity Persistence Manager";
-            log.error(errMsg, e);
-            throw new APIKeyMgtException(errMsg, e);
-        }
+    public static Connection getDBConnection(){
+        return IdentityDatabaseUtil.getDBConnection();
     }
 
     /**
@@ -196,34 +177,5 @@ public class APIKeyMgtUtil {
             return null;
         }
     }
-    
-    /**
-     * Return a http client instance
-     * @param port - server port
-     * @param protocol- service endpoint protocol http/https 
-     * @return
-     */
-	public static HttpClient getHttpClient(int port, String protocol) {
-		SchemeRegistry registry = new SchemeRegistry();
-		X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-		SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-		socketFactory.setHostnameVerifier(hostnameVerifier);
-		if ("https".equals(protocol)) {
-			if (port >= 0) {
-				registry.register(new Scheme("https", port, socketFactory));
-			} else {
-				registry.register(new Scheme("https", 443, socketFactory));
-			}
-		} else if ("http".equals(protocol)) {
-			if (port >= 0) {
-				registry.register(new Scheme("http", port, PlainSocketFactory.getSocketFactory()));
-			} else {
-				registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-			}
-		}
-		HttpParams params = new BasicHttpParams();
-		ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
-		HttpClient client = new DefaultHttpClient(tcm, params);
-		return client;
-	}
+
 }

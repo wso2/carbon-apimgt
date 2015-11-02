@@ -56,8 +56,7 @@ public class APILogMessageHandler extends AbstractHandler {
         boolean isLoginRequest = false;
         String logMessage = "";
 
-        org.apache.axis2.context.MessageContext axisMC =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         if (applicationName != null) {
             logMessage = " appName=" + applicationName;
@@ -99,7 +98,7 @@ public class APILogMessageHandler extends AbstractHandler {
         String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         if (requestURI != null) {
             logMessage = logMessage + " , requestURI=" + requestURI;
-            if (requestURI.equalsIgnoreCase("/login/")) {
+            if (requestURI.equalsIgnoreCase("/token/")) {
                 isLoginRequest = true;
             }
         }
@@ -154,6 +153,6 @@ public class APILogMessageHandler extends AbstractHandler {
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        return !log.isDebugEnabled() ||mediate(messageContext, DIRECTION_OUT);
+        return !log.isDebugEnabled() || mediate(messageContext, DIRECTION_OUT);
     }
 }

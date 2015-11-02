@@ -20,26 +20,22 @@ package org.wso2.carbon.apimgt.impl.workflow;
 
 import java.util.List;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 
 /**
  * This is a simple work flow extension to have Application creation process
- * 
+ *
  */
 public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor {
 
-	private static final Log log =
-	                               LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
+	private static final Log log = LogFactory.getLog(ApplicationCreationSimpleWorkflowExecutor.class);
 
 	@Override
 	public String getWorkflowType() {
@@ -48,34 +44,34 @@ public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor 
 
 	/**
 	 * Execute the workflow executor
-	 * 
+	 *
 	 * @param workFlowDTO
 	 *            - {@link ApplicationWorkflowDTO}
 	 * @throws WorkflowException
 	 */
 
-    public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workFlowDTO) throws WorkflowException {
         if (log.isDebugEnabled()) {
             log.info("Executing Application creation Workflow..");
         }
         workFlowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workFlowDTO);
         super.publishEvents(workFlowDTO);
-
+		return new GeneralWorkflowResponse();
     }
 
 	/**
 	 * Complete the external process status
 	 * Based on the workflow status we will update the status column of the
 	 * Application table
-	 * 
+	 *
 	 * @param workFlowDTO - WorkflowDTO
 	 */
-	public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+	public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
 		if (log.isDebugEnabled()) {
 			log.info("Complete  Application creation Workflow..");
 		}
-		
+
 		String status = null;
 		if ("CREATED".equals(workFlowDTO.getStatus().toString())) {
 			status = APIConstants.ApplicationStatus.APPLICATION_CREATED;
@@ -86,7 +82,7 @@ public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor 
 		}
 
 		ApiMgtDAO dao = new ApiMgtDAO();
-		
+
 		try {
 			dao.updateApplicationStatus(Integer.parseInt(workFlowDTO.getWorkflowReference()),status);
 		} catch (APIManagementException e) {
@@ -94,6 +90,7 @@ public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor 
 			log.error(msg, e);
 			throw new WorkflowException(msg, e);
 		}
+		return new GeneralWorkflowResponse();
 	}
 
 	@Override

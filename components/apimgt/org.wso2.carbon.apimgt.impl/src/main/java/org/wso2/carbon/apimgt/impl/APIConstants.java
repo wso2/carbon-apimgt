@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import javax.xml.namespace.QName;
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -67,6 +68,26 @@ public final class APIConstants {
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
     
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
+
+    public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
+
+    public static final String API_TENANT_CONF = "tenant-conf.json";
+
+    public static final String API_TENANT_CONF_LOCATION = API_APPLICATION_DATA_LOCATION + "/" + API_TENANT_CONF;
+
+    public static final String RESOURCE_FOLDER_LOCATION = "repository"+ File.separator + "resources";
+
+    public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
+
+    public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
+
+    public static final String API_TIER_IS_PAID_ATTRIBUTE = "IsPaid";
+
+    public static final String API_CATEGORY_FREE = "Free";
+
+    public static final String API_CATEGORY_FREEMIUM = "Freemium";
+
+    public static final String API_CATEGORY_PAID = "Paid";
 
     //location for custom url domain mapings. "<tenant-id>" will be replaced by actual tenant name.
     public static final String API_DOMAIN_MAPPINGS = "/customurl/api-cloud/<tenant-id>/urlMapping/<tenant-id>";
@@ -124,7 +145,8 @@ public final class APIConstants {
     public static final String DOC_SHARED_VISIBILITY = "PRIVATE";
 
     public static final String ACCESS_TOKEN_STORE_TABLE = "IDN_OAUTH2_ACCESS_TOKEN";
-    public static final String TOKEN_SCOPE_ASSOCIATION_TABLE = "IDN_OAUTH2_SCOPE_ASSOCIATION";
+    public static final String TOKEN_SCOPE_ASSOCIATION_TABLE = "IDN_OAUTH2_ACCESS_TOKEN_SCOPE";
+    public static final String CONSUMER_KEY_SECRET_TABLE = "IDN_OAUTH_CONSUMER_APPS";
 
     public static final String CONSUMER_KEY_ACCESS_TOKEN_MAPPING_TABLE = "CONSUMER_KEY_ACCESS_TOKEN_MAPPING";
     
@@ -183,6 +205,7 @@ public final class APIConstants {
     public static final String API_URI_AUTH_TYPE ="URITemplate_authType";
     public static final String API_URI_MEDIATION_SCRIPT ="URITemplate_mediationScript";
     public static final String API_OVERVIEW_ENDPOINT_SECURED = "overview_endpointSecured";
+    public static final String API_OVERVIEW_ENDPOINT_AUTH_DIGEST = "overview_endpointAuthDigest";
     public static final String API_OVERVIEW_ENDPOINT_USERNAME = "overview_endpointUsername";
     public static final String API_OVERVIEW_ENDPOINT_PASSWORD = "overview_endpointPpassword";
     public static final String API_OVERVIEW_TRANSPORTS = "overview_transports";
@@ -194,6 +217,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CACHE_TIMEOUT = "overview_cacheTimeout";
 
     public static final String PROTOTYPE_OVERVIEW_IMPLEMENTATION = "overview_implementation";
+    public static final String API_PRODUCTION_THROTTLE_MAXTPS = "overview_productionTps";
+    public static final String API_SANDBOX_THROTTLE_MAXTPS = "overview_sandboxTps";
 
     public static final String IMPLEMENTATION_TYPE_ENDPOINT = "ENDPOINT";
     public static final String IMPLEMENTATION_TYPE_INLINE = "INLINE";
@@ -272,7 +297,19 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
+    public static final String LC_NEXT_STATES="nextStates";
+    public static final String LC_PROPERTY_LIFECYCLE_NAME_PREFIX="registry.lifecycle.";
+    public static final String LC_PROPERTY_CHECKLIST_PREFIX="registry.custom_lifecycle.checklist.";
+    public static final String LC_PROPERTY_STATE_SUFFIX=".state";
+    public static final String LC_PROPERTY_PERMISSION_SUFFIX=".item.permission";
+    public static final String LC_PROPERTY_ITEM_SUFFIX=".item";
+    public static final String LC_STATUS="status:";
+    public static final String LC_CHECK_ITEM_NAME="name:";
+    public static final String LC_CHECK_ITEM_VALUE="value:";
+    public static final String LC_CHECK_ITEM_ORDER="order:";
+
 
 
     public static class TokenStatus {
@@ -377,6 +414,7 @@ public final class APIConstants {
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
+    public static final String API_STORE_API_GROUP_DEFAULT_ICON_PATH="images/api-group-default.png";
 
 
     public static final String API_PUBLISHER = "APIPublisher.";
@@ -543,6 +581,7 @@ public final class APIConstants {
     public static final String APP_USER_SCOPE_CACHE = "appUserScopeCache";
     public static final String APP_SCOPE_CACHE = "appScopeCache";
     public static final String SELF_SIGN_UP_CONFIG_CACHE = "selfSignupCache";
+    public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
@@ -652,6 +691,16 @@ public final class APIConstants {
         public static final String CONSUMER_SECRET = "consumerSecret";
         public static final String CLIENT_DETAILS = "appDetails";
         public static final String CALLBACK_URL = "callbackUrl";
+        public static final String KEY_STATE = "keyState";
+    }
+
+    public static class AccessTokenConstants {
+        public static final String ACCESS_TOKEN = "accessToken";
+        public static final String REFRESH_TOKEN = "refreshToken";
+        public static final String VALIDITY_TIME = "validityTime";
+        public static final String TOKEN_DETAILS = "tokenDetails";
+        public static final String TOKEN_STATE = "tokenState";
+        public static final String TOKEN_SCOPES = "tokenScope";
     }
     
     //key  of the endpoint securevault
@@ -670,6 +719,29 @@ public final class APIConstants {
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
     public static String VELOCITY_LOGGER = "VelocityLogger";
 
+
+    public static class DigestAuthConstants {
+        public static final String REALM = "realm";
+        public static final String NONCE = "nonce";
+        public static final String ALGORITHM = "algorithm";
+        public static final String OPAQUE = "opaque";
+        public static final String QOP = "qop";
+
+        public static final String AUTH = "auth";
+        public static final String AUTH_INT = "auth-int";
+        public static final String MD5 = "MD5";
+        public static final String MD5_SESS = "MD5-sess";
+
+        public static final String POSTFIX = "POSTFIX";
+        public static final String HTTP_METHOD = "HTTP_METHOD";
+        public static final String MESSAGE_BODY = "MessageBody";
+        public static final String UNAMEPASSWORD = "UNAMEPASSWORD";
+        public static final String NONCE_COUNT = "NonceCount";
+        public static final String INIT_NONCE_COUNT = "00000000";
+        public static final String AUTH_HEADER = "AuthHeader";
+        public static final String BACKEND_URL = "BACKEND_URL";
+        public static final String CHARSET = "UTF-8";
+    }
     
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";
@@ -713,6 +785,13 @@ public final class APIConstants {
         DELETE,
         HEAD,
         OPTIONS
+    }
+
+    public static class ConfigParameters {
+        private ConfigParameters() {
+            throw new AssertionError();
+        }
+        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
     }
 
     public static String CORS_SEQUENCE_NAME = "_cors_request_handler_";
@@ -784,5 +863,14 @@ public final class APIConstants {
     public static final String USER_AGENT = "User-Agent";
 
     public static final long MAX_FILE_SIZE = 1024L;
+
+    public static final String API_CUSTOM_IN_SEQUENCE_FILE_NAME = "custom_in_sequence.xml";
+    public static final String API_CUSTOM_OUT_SEQUENCE_FILE_NAME = "custom_out_sequence.xml";
+
+    public static final String REGISTRY_RESOURCE_PREFIX="/registry/resource";
+
+    public static enum RegistryResourceTypesForUI {
+        TAG_THUMBNAIL
+    }
 
 }

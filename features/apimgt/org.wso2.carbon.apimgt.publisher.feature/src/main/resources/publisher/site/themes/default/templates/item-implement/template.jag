@@ -4,19 +4,32 @@
     var permitted=outputs.isPermitted;
     var isCreatePermitted=outputs.isCreatePermitted;
     var mod = jagg.module("api");
+    var isSynapseGateway = mod.isSynapseGateway().isSynapseGateway;
     var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
     var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
     var apiStatus = api.status;
+
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 %>
-<script language="javascript">
+<script type="text/javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},
       { "value": "<%=i18n.localize("applicationUser")%>", "text":"<%=i18n.localize("applicationUser")%>"},
       { "value": "<%=i18n.localize("application&applicationUser")%>", "text":"<%=i18n.localize("application&applicationUser")%>"}
-    ];    
+    ];
+    var insequence = "<%=api.inSequence%>";
+    var outsequence = "<%=api.outSequence%>";
+    var faultsequence = "<%=api.faultSequence%>";
+    var inSequencesLoaded = false;
+    var outSequencesLoaded = false;
+    var faultSequencesLoaded = false;
+    var apiProvider = "<%=api.provider%>"
+    var apiVersion = "<%=api.version%>"
+    var apiName = "<%=api.name%>"
 </script>   
 <div id="item-add">
 <%
@@ -27,7 +40,7 @@
     var manage_wlabel = "";
     if( api.availableTiers !=""){
         manage_wlabel = "wizard-done";      
-    }else{
+    } else {
         var manage_w_link = '#';        
     } 
 %>
@@ -76,13 +89,13 @@
 
     <div class="row-fluid">
         <div class="span12">
-            <div class="api-implement-type" value="#managed-api">
+            <div id="select-managed-api" class="api-implement-type" value="#managed-api">
                 <div class="span1">
                     <i class="fa fa-cogs fa-3x"></i>
                 </div>
                 <div class="span11">
                     <h4>Managed API</h4>
-                    <p>Provide endpoints of the production API and sandbox API to be managed.</p>
+                    <p>Provide the production and sandbox endpoints of the API to be managed.</p>
                 </div>
             </div>
 
@@ -100,6 +113,7 @@
                                         <option value="address">Address Endpoint</option>
                                         <option value="failover">Failover Endpoint</option>
                                         <option value="load_balance">Load balanced Endpoint</option>
+                                        <option value="default">Default Endpoint</option>
                                     </select>
                                     <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
                                 </div>
@@ -112,6 +126,7 @@
                          <strong>Address Endpoint</strong><p>The direct URL of the service</p>
                          <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
                          <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
+                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
                         </div>
 
                         <div id="endpoint_form" class="endpoint_dives" >
@@ -137,6 +152,18 @@
                             </div>
                         </div>
 
+                        <div class="control-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
+                            <label class="control-label" for="endpointAuthType"><%=i18n.localize("endpointAuthType")%>:<span class="requiredAstrix">*</span></label>
+                            <div class="controls">
+                            <select class="select required" id="endpointAuthType" name="endpointAuthType" >
+                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
+                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
+                            </select>
+                            <a class="icon-question-sign help_popup" help_data="endpointAuth_help"></a>
+                            <p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
+                            </div>
+                        </div>
+
                         <div class="control-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
                             <label class="control-label" for="credentials"><%=i18n.localize("credentials")%>:<span class="requiredAstrix">*</span></label>
                             <div class="controls">
@@ -145,7 +172,7 @@
                             </div>
                         </div>
 
-                        <% if(isDataPublishingEnabled) { %>
+                        <% if(isDataPublishingEnabled || api.destinationStats == "Enabled") { %>
                         <!--Southboud statistics -->
                         <div class="control-group">
                             <label class="control-label" for="destinationStats"><%=i18n.localize("destinationStats")%>:</label>
@@ -162,6 +189,67 @@
                         <% }%>
 
                         </div><!-- more option endpoint -->
+                    </fieldset>
+
+                    <fieldset>
+                        <% if (isSynapseGateway) { %>
+                        <legend style="margin-left:0px;text-indent:10px"><%=i18n.localize("sequence")%></legend>
+                            <div class="control-group">
+                                <label class="control-label"><%=i18n.localize("enable.sequence")%></label>
+                                <div class="controls">
+                                    <label>
+                                        <input type="checkbox" id="toggleSequence" name="sequence_check" id="sequence_check"
+                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
+                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%>><%=i18n.localize("sequenceMsg")%>
+                                    </label>
+                                    <table class="table table-bordered table-striped" id="seqTable"
+                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
+                                            <thead>
+                                                <tr>
+                                                    <th><%=i18n.localize("inFlow")%></th>
+                                                    <th><%=i18n.localize("outFlow")%></th>
+                                                    <th><%=i18n.localize("faultFlow")%></th>
+                                                </tr>
+                                            </thead>
+                                            <tr>
+                                                <td>
+                                                    <select id="inSequence"  name="inSequence" >
+                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select id="outSequence"  name="outSequence">
+                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select id="faultSequence"  name="faultSequence">
+                                                        <option value="none" selected="selected"><%=i18n.localize("none")%></option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <div id="inpFile" class="pull-left">
+                                                        <div id="apiThumb-container"  style="display: inline;">
+                                                            <input type="file" class="input-xlarge " id="inSeqFile"  name="inSeqFile" />
+                                                        </div>
+                                                    </div>
+                                                    <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
+                                                </td>
+                                                <td>
+                                                    <div id="inpFile" class="pull-left">
+                                                        <div id="apiThumb-container"  style="display: inline;">
+                                                            <input type="file" class="input-xlarge " id="outSeqFile"  name="outSeqFile" />
+                                                        </div>
+                                                    </div>
+                                                    <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
+                                                </td>
+                                            </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        <%}%>
                     </fieldset>
 
                     <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
@@ -184,8 +272,8 @@
                     <i class="fa fa-cog fa-3x" ></i>
                 </div>
                 <div class="span11">
-                    <h4 >Prototype</h4>
-                    <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. Inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
+                    <h4>Prototyped API</h4>
+                    <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
                 </div>
             </div>
 
@@ -227,11 +315,11 @@
 
                             <a style="margin-left:3px" class="icon-question-sign help_popup" help_data="endpoint_test_help"></a>
                             <div id="endpoint_test_help" class="hide">
-                                <p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p>
+                                <p><%=i18n.localize("validityCheckMessage")%></p>
                             </div>
 
                         </div>
-                        <p class="help-block">E.g.,: http://appserver/resource</p>
+                        <p class="help-block" id="help-block">E.g.: http://appserver/resource</p>
                         <span style="display:none;" class="help-block jsonform-errortext"></span>
                     </div>
                 </fieldset>
@@ -407,7 +495,7 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
         });
 
         $('#goToStore-btn').click(function(){
-            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>', '_blank');
+            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
             location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
         });
 

@@ -4,13 +4,11 @@ import org.apache.axiom.om.OMElement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
-import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
-import org.wso2.carbon.base.ServerConfigurationException;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.application.common.cache.BaseCache;
-import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.ResponseHeader;
@@ -54,29 +52,19 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
         super.init();
 
-        IdentityConfigParser configParser = null;
-        try {
-            configParser = IdentityConfigParser.getInstance();
-            OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
+        IdentityConfigParser configParser;
+        configParser = IdentityConfigParser.getInstance();
+        OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
 
-            // Get the required claim uris that needs to be included in the response.
-            parseRequiredHeaderClaimUris(oauthElem.getFirstChildWithName(getQNameWithIdentityNS(REQUIRED_CLAIM_URIS)));
+        // Get the required claim uris that needs to be included in the response.
+        parseRequiredHeaderClaimUris(oauthElem.getFirstChildWithName(getQNameWithIdentityNS(REQUIRED_CLAIM_URIS)));
 
-            // read login config
-            parseLoginConfig(oauthElem);
+        // read login config
+        parseLoginConfig(oauthElem);
 
-            userClaimsCache = new BaseCache<String, Claim[]>("UserClaimsCache");
-            if(userClaimsCache != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Successfully created UserClaimsCache under "+ OAuthConstants.OAUTH_CACHE_MANAGER);
-                }
-            } else {
-                log.error("Error while creating UserClaimsCache");
-            }
-
-        } catch (ServerConfigurationException e) {
-            log.error("Error when reading the OAuth Configurations. " +
-                    "OAuth related functionality might be affected.", e);
+        userClaimsCache = new BaseCache<String, Claim[]>("UserClaimsCache");
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully created UserClaimsCache under " + OAuthConstants.OAUTH_CACHE_MANAGER);
         }
     }
 
@@ -94,15 +82,10 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         if(isValidated){
 
             int tenantId;
+            tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
 
-            try {
-                tenantId = IdentityUtil.getTenantIdOFUser(username);
-            } catch (IdentityException e) {
-                throw new IdentityOAuth2Exception(e.getMessage(), e);
-            }
-
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            UserStoreManager userStoreManager = null;
+            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
+            UserStoreManager userStoreManager;
             try {
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
             } catch (UserStoreException e) {
@@ -128,11 +111,8 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
                         if(mapClaimValues != null && mapClaimValues.length > 0){
                             ResponseHeader header;
-                            for (Iterator<String> iterator = requiredHeaderClaimUris.iterator(); iterator.hasNext(); ) {
-                                String claimUri = iterator.next();
-
-                                for (int j = 0; j < mapClaimValues.length; j++) {
-                                    Claim claim = mapClaimValues[j];
+                            for (String claimUri : requiredHeaderClaimUris) {
+                                for (Claim claim : mapClaimValues) {
                                     if (claimUri.equals(claim.getClaimUri())) {
                                         header = new ResponseHeader();
                                         header.setKey(claim.getDisplayTag());
@@ -165,12 +145,6 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         return ScopesIssuer.getInstance().setScopes(tokReqMsgCtx);
     }
 
-    /**
-     * identify the login username is primary or secondary
-     *
-     * @param userID
-     * @return
-     */
     private String getLoginUserName(String userID) {
         String loginUserName = userID;
         if (isSecondaryLogin(userID)) {
@@ -180,10 +154,10 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
     }
 
     /**
-     * Identify whether the loggedin user used his Primary Login name or
+     * Identify whether the logged in user used his Primary Login name or
      * Secondary login name
      *
-     * @param userId
+     * @param userId - The username used to login.
      * @return <code>true</code> if secondary login name is used,
      *         <code>false</code> if primary login name has been used
      */
@@ -192,53 +166,32 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         if (loginConfiguration.get(EMAIL_LOGIN) != null) {
             Map<String, String> emailConf = loginConfiguration.get(EMAIL_LOGIN);
             if ("true".equalsIgnoreCase(emailConf.get(PRIMARY_LOGIN))) {
-                if (isUserLoggedInEmail(userId)) {
-                    return false;
-                } else {
-                    return true;
-                }
+                return !isUserLoggedInEmail(userId);
             }
-            if ("false".equalsIgnoreCase(emailConf.get(PRIMARY_LOGIN))) {
-                if (isUserLoggedInEmail(userId)) {
-                    return true;
-                } else {
-                    return false;
-                }
+            else if ("false".equalsIgnoreCase(emailConf.get(PRIMARY_LOGIN))) {
+                return isUserLoggedInEmail(userId);
             }
         }
-        if (loginConfiguration.get(USERID_LOGIN) != null) {
+        else if (loginConfiguration.get(USERID_LOGIN) != null) {
             Map<String, String> userIdConf = loginConfiguration.get(USERID_LOGIN);
             if ("true".equalsIgnoreCase(userIdConf.get(PRIMARY_LOGIN))) {
-                if (isUserLoggedInEmail(userId)) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return isUserLoggedInEmail(userId);
             }
-            if ("false".equalsIgnoreCase(userIdConf.get(PRIMARY_LOGIN))) {
-                if (isUserLoggedInEmail(userId)) {
-                    return false;
-                } else {
-                    return true;
-                }
+            else if ("false".equalsIgnoreCase(userIdConf.get(PRIMARY_LOGIN))) {
+                return !isUserLoggedInEmail(userId);
             }
         }
         return false;
     }
 
     /**
-     * Identify whether the loggedin user used his ordinal username or email
+     * Identify whether the logged in user used his ordinal username or email
      *
-     * @param userId
-     * @return
+     * @param userId - username used to login.
+     * @return - <code>true</code> if userId contains '@'. <code>false</code> otherwise
      */
     private boolean isUserLoggedInEmail(String userId) {
-
-        if (userId.contains("@")) {
-            return true;
-        } else {
-            return false;
-        }
+        return userId.contains("@");
     }
 
     /**
@@ -248,12 +201,12 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
      * each and every users. If it is not unique, we will pick the very first
      * entry from the userlist.
      *
-     * @param login
-     * @return
+     * @param login - username used to login.
+     * @return -
      */
     private String getPrimaryFromSecondary(String login) {
 
-        String claimURI = null, username = null;
+        String claimURI, username = null;
         if (isUserLoggedInEmail(login)) {
             Map<String, String> emailConf = loginConfiguration.get(EMAIL_LOGIN);
             claimURI = emailConf.get(CLAIM_URI);
@@ -263,13 +216,13 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
         }
 
         try {
-            RealmService realmSvc = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmSvc = APIKeyMgtDataHolder.getRealmService();
             RealmConfiguration config = new RealmConfiguration();
             UserRealm realm = realmSvc.getUserRealm(config);
             org.wso2.carbon.user.core.UserStoreManager storeManager = realm.getUserStoreManager();
             String user[] = storeManager.getUserList(claimURI, login, null);
             if (user.length > 0) {
-                username = user[0].toString();
+                username = user[0];
             }
         } catch (UserStoreException e) {
             log.error("Error while retrieving the primaryLogin name using secondary login name : " + login, e);
@@ -325,7 +278,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
      *	</LoginConfig>
      *	.....
      *   </OAuth>
-     * @param oauthConfigElem
+     * @param oauthConfigElem - The '<LoginConfig>' xml configuration element in the api-manager.xml
      */
     private void parseLoginConfig(OMElement oauthConfigElem) {
         OMElement loginConfigElem =  oauthConfigElem.getFirstChildWithName(getQNameWithIdentityNS(LOGIN_CONFIG));

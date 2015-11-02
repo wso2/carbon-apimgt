@@ -29,6 +29,7 @@ import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
@@ -61,40 +62,22 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
         return null;
     }
 
+    /**
+     * This method is used to execute the workflow without giving a workflow response back to the caller to execute
+     * some other task after completing the workflow
+     *
+     * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
+     * @throws WorkflowException
+     */
     @Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException{
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         try {
-            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-                    .getContextService().getClientConfigContext(), null);
-            Options options = new Options();
-            options.setAction("http://workflow.subscription.apimgt.carbon.wso2.org/initiate");
-            options.setTo(new EndpointReference(serviceEndpoint));
-            if(contentType != null){
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
-            }
+            String action = WorkflowConstants.CREATE_SUBSCRIPTION_WS_ACTION;
+            ServiceClient client = getClient(action);
 
-            HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
-
-            //Consider this as a secured service if username and password are not null. Unsecured if not.
-            if(username != null && password != null){
-                auth.setUsername(username);
-                auth.setPassword(password);
-                auth.setPreemptiveAuthentication(true);
-                List<String> authSchemes = new ArrayList<String>();
-                authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
-                auth.setAuthSchemes(authSchemes);
-
-                if(contentType == null){
-                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
-                }
-                options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
-                options.setManageSession(true);
-            }
-
-            client.setOptions(options);
-
-            String payload = "<wor:SubscriptionApprovalWorkFlowProcessRequest xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
+            String payload = "<wor:SubscriptionApprovalWorkFlowProcessRequest " +
+                    "         xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
                     "         <wor:apiName>$1</wor:apiName>\n" +
                     "         <wor:apiVersion>$2</wor:apiVersion>\n" +
                     "         <wor:apiContext>$3</wor:apiContext>\n" +
@@ -129,10 +112,11 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
             log.error("Error converting String to OMElement", e);
             throw new WorkflowException("Error converting String to OMElement", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     @Override
-    public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
 
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
@@ -157,7 +141,77 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
                 throw new WorkflowException("Could not complete subscription creation workflow", e);
             }
         }
+        return new GeneralWorkflowResponse();
     }
+
+    @Override
+    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
+        String errorMsg = null;
+        super.cleanUpPendingTask(workflowExtRef);
+        try {
+            String action = WorkflowConstants.DELETE_SUBSCRIPTION_WS_ACTION;
+            ServiceClient client = getClient(action);
+
+            String payload = "<wor:CancelSubscriptionApprovalWorkflowProcessRequest " +
+                    "           xmlns:wor=\"http://workflow.subscription.apimgt.carbon.wso2.org\">\n" +
+                    "           <wor:workflowExtRef>" + workflowExtRef + "</wor:workflowExtRef>\n" +
+                    "        </wor:CancelSubscriptionApprovalWorkflowProcessRequest>";
+
+            client.fireAndForget(AXIOMUtil.stringToOM(payload));
+        } catch (AxisFault axisFault) {
+            errorMsg = "Error sending out cancel pending subscription approval process message. cause: " +
+                    axisFault.getMessage();
+            throw new WorkflowException(errorMsg, axisFault);
+        } catch (XMLStreamException e) {
+            errorMsg = "Error converting subscription cleanup String to OMElement. cause: " + e.getMessage();
+            throw new WorkflowException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Retrieves configured ServiceClient for communication with external services
+     *
+     * @param action web service action to use
+     * @return configured service client
+     * @throws AxisFault
+     */
+    public ServiceClient getClient(String action) throws AxisFault {
+        ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
+                .getContextService().getClientConfigContext(), null);
+        Options options = new Options();
+        options.setAction(action);
+        options.setTo(new EndpointReference(serviceEndpoint));
+
+        if (contentType != null) {
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
+        } else {
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                    HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+        }
+
+        HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
+
+        // Assumes authentication is required if username and password is given
+        if (username != null && password != null) {
+            auth.setUsername(username);
+            auth.setPassword(password);
+            auth.setPreemptiveAuthentication(true);
+            List<String> authSchemes = new ArrayList<String>();
+            authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
+            auth.setAuthSchemes(authSchemes);
+
+            if (contentType == null) {
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+            }
+            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
+                    auth);
+            options.setManageSession(true);
+        }
+        client.setOptions(options);
+
+        return client;
+    }
+
 
     public String getServiceEndpoint() {
         return serviceEndpoint;

@@ -156,6 +156,18 @@ var reqUrl = request.getRequestURI();
                 </div>
                 <%} else {%>
                 <li>
+                <div class="version-provider-wrapper">
+                <%if(outputs.isMonetizationEnabled) {%>
+                    <div class="ribbon-wrapper">
+                    <%if (api.monetizationCategory.equalsIgnoreCase("Freemium")) { %>
+                        <div class="ribbon-yellow">FREEMIUM</div>
+                    <%} else if (api.monetizationCategory.equalsIgnoreCase("Free")) { %>
+                        <div class="ribbon-green">FREE</div>
+                    <%} else { %>
+                        <div class="ribbon-blue">PAID</div>
+                    <%}%>
+                    </div>
+                <%}%>
                     <div class="thumbnail">
                         <a href="<%=path%>">
                             <% if(thumbURL == null) { %>

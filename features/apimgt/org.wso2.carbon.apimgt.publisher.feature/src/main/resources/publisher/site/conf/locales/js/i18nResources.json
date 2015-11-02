@@ -4,7 +4,9 @@
             "deleteMsg": "Are you sure you want to delete the file" ,
             "revoke": "Revoke Access Token" ,
             "revokeMsg": "Successfully revoke the access token : ",
-            "ok": "OK"
+            "ok": "OK",
+            "deleteParam" : "Do you want to delete the parameter",
+            "deleteScope" : "Do you want to delete the scope?"
 
 
         },
@@ -37,7 +39,9 @@
             "invalid": " Invalid",
             "valid": "Valid",
             "testUri": "Test URI",
-            "validating": "Validating.."
+            "validating": "Validating..",
+            "missingUrl": " Please provide a url to test",
+            "errorInConnection": " - Error connecting to backend"
         },
 		"failOver":{
 			"title":"Failover State"
