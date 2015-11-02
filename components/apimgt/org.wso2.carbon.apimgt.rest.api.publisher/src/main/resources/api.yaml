@@ -1722,17 +1722,7 @@ paths:
             OK. 
             Tag list is returned.
           schema:
-# 
-# No separate tagList object defined because only few list members are expected
-#
-            title: Tag List
-            properties:
-              count:
-                type: string
-              list:
-                type: array
-                items:
-                  $ref: '#/definitions/Tag'
+            $ref: '#/definitions/TagList'
           headers:
             Content-Type:
               description: |
@@ -1784,14 +1774,7 @@ paths:
             OK. 
             Environment list is returned.
           schema:
-            title: Environment List
-            properties:
-              count:
-                type: string
-              list:
-                type: array
-                items:
-                  $ref: '#/definitions/Environment'
+            $ref: '#/definitions/EnvironmentList'
           headers:
             Content-Type:
               description: |
@@ -2427,6 +2410,21 @@ definitions:
         type: integer
 
 #-----------------------------------------------------
+# The Tag List resource
+#-----------------------------------------------------
+  TagList:
+    title: Tag List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Tags returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Tag'
+
+#-----------------------------------------------------
 # The Error resource
 #-----------------------------------------------------
   Error:
@@ -2496,6 +2494,22 @@ definitions:
         type: boolean
       endpoints:
         $ref: '#/definitions/EnvironmentEndpoints'
+
+#-----------------------------------------------------
+# The Environment List resource
+#-----------------------------------------------------
+  EnvironmentList:
+    title: Environment List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Environments returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Environment'
+
 
 #-----------------------------------------------------
 # The Environment Endpoint resource
