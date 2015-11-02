@@ -167,7 +167,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
     @Override
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
-        APIDTO apiToReturn = new APIDTO();
+        APIDTO apiToReturn;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
