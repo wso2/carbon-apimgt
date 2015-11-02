@@ -75,6 +75,17 @@
                     <artifactId>carbon-p2-plugin</artifactId>
                     <version>${carbon.p2.plugin.version}</version>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.axis2</groupId>
+                    <artifactId>axis2-java2wsdl-maven-plugin</artifactId>
+                    <version>${axis2-java2wsdl-maven-plugin.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <extensions>
@@ -822,6 +833,12 @@
                 <version>1.5.0.wso2v3</version>
             </dependency>
 
+            <dependency>
+                <groupId>opensaml.wso2</groupId>
+                <artifactId>opensaml2</artifactId>
+                <version>2.4.1.wso2v1</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -858,6 +875,8 @@
 
         <maven-scr-plugin.version>1.7.2</maven-scr-plugin.version>
         <maven-bundle-plugin.version>2.5.3</maven-bundle-plugin.version>
+        <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
+        <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 
         <!-- Axis2 Version -->
         <axis2.wso2.version>1.6.1-wso2v14</axis2.wso2.version>
