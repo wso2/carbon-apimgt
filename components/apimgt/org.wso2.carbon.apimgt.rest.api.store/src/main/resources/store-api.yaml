@@ -109,10 +109,9 @@ paths:
             corresponds to a conjunction. 
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
-# Tags can be used to filter APIs in the online documentation
-#      tags:
-#        - API Collection
-#        - Retrieve
+      tags:
+        - API Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -155,9 +154,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - API (individual)
-#        - Retrieve
+      tags:
+        - API (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -221,9 +220,9 @@ paths:
           type: string
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - API (individual)
-#        - Retrieve Documents
+      tags:
+        - API (individual)
+        - Retrieve Documents
       responses:
         200:
           description: |
@@ -274,9 +273,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - API (individual)
-#        - Retrieve Document
+      tags:
+        - API (individual)
+        - Retrieve Document
       responses:
         200:
           description: |
@@ -334,9 +333,9 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - Application Collection
-#        - Retrieve
+      tags:
+        - Application Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -386,9 +385,9 @@ paths:
           schema:
             $ref: '#/definitions/Application'
         - $ref: '#/parameters/Content-Type'
-#      tags:
-#        - Application (individual)
-#        - Create
+      tags:
+        - Application (individual)
+        - Create
       responses:
         201:
           description: |
@@ -439,9 +438,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - Application (individual)
-#        - Retrieve
+      tags:
+        - Application (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -498,9 +497,9 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - Application (individual)
-#        - Update
+      tags:
+        - Application (individual)
+        - Update
       responses:
         200:
           description: |
@@ -555,9 +554,9 @@ paths:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - Application (individual)
-#        - Delete
+      tags:
+        - Application (individual)
+        - Delete
       responses:
         200:
           description: |
@@ -599,9 +598,9 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
-#      tags:
-#        - Application (individual)
-#        - Generate Keys
+      tags:
+        - Application (individual)
+        - Generate Keys
       responses:
         200:
           description: |
@@ -662,9 +661,9 @@ paths:
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - Subscription Collection
-#        - Retrieve
+      tags:
+        - Subscription Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -707,9 +706,9 @@ paths:
           schema:
             $ref: '#/definitions/Subscription'
         - $ref: '#/parameters/Content-Type'
-#      tags:
-#        - Subscription (individual)
-#        - Create
+      tags:
+        - Subscription (individual)
+        - Create
       responses:
         201:
           description: |
@@ -758,9 +757,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - Subscription (individual)
-#        - Retrieve
+      tags:
+        - Subscription (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -799,9 +798,9 @@ paths:
         - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - Subscription (individual)
-#        - Delete
+      tags:
+        - Subscription (individual)
+        - Delete
       responses:
         200:
           description: |
@@ -834,9 +833,9 @@ paths:
       parameters:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - Tier Collection
-#        - Retrieve
+      tags:
+        - Tier Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -882,9 +881,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - Tier (individual)
-#        - Retrieve
+      tags:
+        - Tier (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -956,9 +955,9 @@ paths:
 
             If no attribute modifier is found search will match the given query string against Tag Name.
           type: string
-#      tags:
-#        - Tag Collection
-#        - Retrieve
+      tags:
+        - Tag Collection
+        - Retrieve
       responses:
         200:
           description: |

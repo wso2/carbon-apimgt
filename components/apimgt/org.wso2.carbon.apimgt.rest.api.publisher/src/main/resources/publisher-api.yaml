@@ -109,10 +109,9 @@ paths:
             corresponds to a conjunction. 
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
-# Tags can be used to filter APIs in the online documentation
-#      tags:
-#        - API Collection
-#        - Retrieve
+      tags:
+        - API Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -154,9 +153,9 @@ paths:
           schema:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
-#      tags:
-#        - API Collection
-#        - Create
+      tags:
+        - API Collection
+        - Create
       responses:
         201:
           description: |
@@ -207,9 +206,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - API (individual)
-#        - Retrieve
+      tags:
+        - API (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -266,9 +265,9 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - API (individual)
-#        - Update
+      tags:
+        - API (individual)
+        - Update
       responses:
         200:
           description: |
@@ -329,9 +328,9 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - API (individual)
-#        - Delete
+      tags:
+        - API (individual)
+        - Delete
       responses:
         200:
           description: |
@@ -373,9 +372,9 @@ paths:
           type: string
           in: query
         - $ref: '#/parameters/apiId-Q'
-#      tags:
-#        - API (individual)
-#        - Copy
+      tags:
+        - API (individual)
+        - Copy
       responses:
         201:
           description: |
@@ -425,9 +424,9 @@ paths:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - API (individual)
-#        - Change Lifecycle
+      tags:
+        - API (individual)
+        - Change Lifecycle
       responses:
         200:
           description: |
@@ -487,9 +486,9 @@ paths:
           type: string
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - API (individual)
-#        - Retrieve Documents
+      tags:
+        - API (individual)
+        - Retrieve Documents
       responses:
         200:
           description: |
@@ -539,9 +538,9 @@ paths:
           schema:
             $ref: '#/definitions/Document'
         - $ref: '#/parameters/Content-Type'
-#      tags:
-#        - API (individual)
-#        - Add Document
+      tags:
+        - API (individual)
+        - Add Document
       responses:
         201:
           description: |
@@ -592,9 +591,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - API (individual)
-#        - Retrieve Document
+      tags:
+        - API (individual)
+        - Retrieve Document
       responses:
         200:
           description: |
@@ -653,9 +652,9 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - API (individual)
-#        - Update Document
+      tags:
+        - API (individual)
+        - Update Document
       responses:
         200:
           description: |
@@ -712,9 +711,9 @@ paths:
         - $ref: '#/parameters/documentId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - API (individual)
-#        - Delete Document
+      tags:
+        - API (individual)
+        - Delete Document
       responses:
         200:
           description: | 
@@ -750,9 +749,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - Application (individual)
-#        - Retrieve
+      tags:
+        - Application (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -810,9 +809,9 @@ paths:
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - Subscription Collection
-#        - Retrieve
+      tags:
+        - Subscription Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -856,9 +855,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - Subscription (individual)
-#        - Retrieve
+      tags:
+        - Subscription (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -902,9 +901,9 @@ paths:
         - $ref: '#/parameters/If-Unmodified-Since'
       description: |
         Block a subscription.
-#      tags:
-#        - Subscription (individual)
-#        - Block
+      tags:
+        - Subscription (individual)
+        - Block
       responses:
         200:
           description: |
@@ -955,9 +954,9 @@ paths:
         - $ref: '#/parameters/If-Unmodified-Since'
       description: |
         Unblock a subscription.
-#      tags:
-#        - Subscription (individual)
-#        - Unblock Subscription
+      tags:
+        - Subscription (individual)
+        - Unblock Subscription
       responses:
         200:
           description: |
@@ -1007,9 +1006,9 @@ paths:
       parameters:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-#      tags:
-#        - Tier Collection
-#        - Retrieve
+      tags:
+        - Tier Collection
+        - Retrieve
       responses:
         200:
           description: |
@@ -1054,9 +1053,9 @@ paths:
           schema:
             $ref: '#/definitions/Tier'
         - $ref: '#/parameters/Content-Type'
-#      tags:
-#        - Tier (individual)
-#        - Create
+      tags:
+        - Tier (individual)
+        - Create
       responses:
         201:
           description: |
@@ -1106,9 +1105,9 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-#      tags:
-#        - Tier (individual)
-#        - Retrieve
+      tags:
+        - Tier (individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -1166,9 +1165,9 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - Tier (individual)
-#        - Update
+      tags:
+        - Tier (individual)
+        - Update
       responses:
         200:
           description: |
@@ -1224,9 +1223,9 @@ paths:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
-#      tags:
-#        - Tier (individual)
-#        - Delete
+      tags:
+        - Tier (individual)
+        - Delete
       responses:
         200:
           description: |
@@ -1266,9 +1265,9 @@ paths:
             $ref: '#/definitions/TierPermission'
       description: |
         Update tier permission
-#      tags:
-#        - Tier (individual)
-#        - Update Permission
+      tags:
+        - Tier (individual)
+        - Update Permission
       responses:
         200:
           description: |
@@ -1332,9 +1331,9 @@ paths:
           description: |
             Will return environment list for the provided API.
           type: string
-#      tags:
-#        - Environment Collection
-#        - Retrieve
+      tags:
+        - Environment Collection
+        - Retrieve
       responses:
         200:
           description: |
