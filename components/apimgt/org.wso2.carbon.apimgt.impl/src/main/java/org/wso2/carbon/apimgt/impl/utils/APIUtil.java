@@ -2657,12 +2657,28 @@ public final class APIUtil {
 
     public static void loadTenantAPIPolicy(String tenant, int tenantID)
                                                                        throws APIManagementException {
+
+        loadTenantAPIPolicy(tenant,tenantID,APIConstants.API_TIER_LOCATION,"/tiers/default-tiers.xml");
+        loadTenantAPIPolicy(tenant,tenantID,APIConstants.APP_TIER_LOCATION,"/tiers/default-app-tiers.xml");
+        loadTenantAPIPolicy(tenant,tenantID,APIConstants.RES_TIER_LOCATION,"/tiers/default-res-tiers.xml");
+    }
+
+    /**
+     *  Load the throttling policy  to the registry for tenants for individual level
+     *
+     * @param tenant
+     * @param tenantID
+     * @throws APIManagementException
+     */
+    private static void loadTenantAPIPolicy(String tenant, int tenantID,String location,String fileName)
+            throws APIManagementException {
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-            if (govRegistry.resourceExists(APIConstants.API_TIER_LOCATION)) {
+            String API_TIER_LOCATION=APIConstants.API_APPLICATION_DATA_LOCATION + "/api-tiers.xml";
+            if (govRegistry.resourceExists(location)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Tier policies already uploaded to the tenant's registry space");
                 }
@@ -2671,11 +2687,11 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding API tier policies to the tenant's registry");
             }
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/tiers/default-tiers.xml");
+            InputStream inputStream = APIManagerComponent.class.getResourceAsStream(fileName);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
-            govRegistry.put(APIConstants.API_TIER_LOCATION, resource);
+            govRegistry.put(location, resource);
 
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving policy information to the registry", e);
@@ -2683,7 +2699,6 @@ public final class APIUtil {
             throw new APIManagementException("Error while reading policy file content", e);
         }
     }
-
     /**
      * Load the External API Store Configuration  to the registry
      *

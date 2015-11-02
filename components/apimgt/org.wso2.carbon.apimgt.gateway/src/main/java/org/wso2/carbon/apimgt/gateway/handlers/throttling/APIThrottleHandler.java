@@ -666,6 +666,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 if (roleID != null) {
                     // If this is a clustered env.
                     //check for configuration role of the caller
+                    config=context.getThrottleConfiguration();
                     String consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
                     if (isClusteringEnable) {
                         context.setConfigurationContext(cc);
