@@ -1,8 +1,0 @@
-<%
-jagg.initializer("oidc/filter", {
-
-    preInitialize:function () {
-
-    }
-});
-%>
