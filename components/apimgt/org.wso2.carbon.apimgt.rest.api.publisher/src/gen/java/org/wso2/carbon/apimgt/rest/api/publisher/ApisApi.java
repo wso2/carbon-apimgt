@@ -216,7 +216,7 @@ public class ApisApi  {
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API.", response = APIDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API.", response = DocumentDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nDocument returned."),
         

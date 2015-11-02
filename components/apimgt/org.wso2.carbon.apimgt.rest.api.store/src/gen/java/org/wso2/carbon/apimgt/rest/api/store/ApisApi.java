@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 
 import java.util.List;
 
@@ -96,7 +97,7 @@ public class ApisApi  {
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API.", response = APIDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API.", response = DocumentDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nDocument returned."),
         

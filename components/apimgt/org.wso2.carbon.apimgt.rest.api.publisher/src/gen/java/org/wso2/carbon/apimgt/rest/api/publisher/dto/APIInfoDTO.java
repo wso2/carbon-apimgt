@@ -21,12 +21,6 @@ public class APIInfoDTO  {
   
   private String description = null;
   
-  public enum TypeEnum {
-     REST,  SOAP, 
-  };
-  
-  private TypeEnum type = null;
-  
   
   private String context = null;
   
@@ -73,18 +67,6 @@ public class APIInfoDTO  {
   }
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
   }
 
   
@@ -146,7 +128,6 @@ public class APIInfoDTO  {
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  type: ").append(type).append("\n");
     sb.append("  context: ").append(context).append("\n");
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");

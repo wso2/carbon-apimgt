@@ -125,8 +125,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         APIDTO newVersionedApi = null;
 
         try {
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
            /* String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -273,7 +274,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         List<DocumentDTO> list = new ArrayList<DocumentDTO>();
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            List<Documentation> docs = apiProvider.getAllDocumentation(APIMappingUtil.getAPIIdentifierFromApiId(apiId));
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            List<Documentation> docs = apiProvider.getAllDocumentation(apiIdentifier);
             for (org.wso2.carbon.apimgt.api.model.Documentation temp : docs) {
                 list.add(APIMappingUtil.fromDocumentationtoDTO(temp));
             }
@@ -288,7 +291,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
-            apiProvider.addDocumentation(APIMappingUtil.getAPIIdentifierFromApiId(apiId),doc);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            apiProvider.addDocumentation(apiIdentifier, doc);
             return Response.status(Response.Status.CREATED).header("Location", "/apis/" + apiId + "/documents/" + doc.getId()).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -317,7 +322,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
-            apiProvider.updateDocumentation(APIMappingUtil.getAPIIdentifierFromApiId(apiId), doc);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            apiProvider.updateDocumentation(apiIdentifier, doc);
             return Response.ok().entity(APIMappingUtil.fromDocumentationtoDTO(doc)).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -334,7 +341,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             if(null == doc){
                 throw new NotFoundException();
             }
-            apiProvider.removeDocumentation(APIMappingUtil.getAPIIdentifierFromApiId(apiId), documentId);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            apiProvider.removeDocumentation(apiIdentifier, documentId);
             return Response.ok().build();
 
         } catch (APIManagementException e) {

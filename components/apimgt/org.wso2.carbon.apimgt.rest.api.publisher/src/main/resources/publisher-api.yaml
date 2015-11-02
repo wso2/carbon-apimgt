@@ -601,7 +601,7 @@ paths:
             OK. 
             Document returned.
           schema:
-            $ref: '#/definitions/API'
+            $ref: '#/definitions/Document'
           headers:
             Content-Type:
               description: |
@@ -1591,11 +1591,6 @@ definitions:
         type: string
       description:
         type: string
-      type:
-        type: string
-        enum:
-          - REST
-          - SOAP
       context:
         type: string
       version:
@@ -1626,11 +1621,6 @@ definitions:
         type: string
       description:
         type: string
-      type:
-        type: string
-        enum:
-          - REST
-          - SOAP
       context:
         type: string
       version:

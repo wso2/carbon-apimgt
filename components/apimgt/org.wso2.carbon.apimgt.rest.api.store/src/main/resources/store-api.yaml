@@ -283,7 +283,7 @@ paths:
             OK. 
             Document returned.
           schema:
-            $ref: '#/definitions/API'
+            $ref: '#/definitions/Document'
           headers:
             Content-Type:
               description: |

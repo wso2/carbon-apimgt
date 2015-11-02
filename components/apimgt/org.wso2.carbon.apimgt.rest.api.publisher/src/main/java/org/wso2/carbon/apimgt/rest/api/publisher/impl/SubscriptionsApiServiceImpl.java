@@ -112,5 +112,26 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
     }
     
+    /*
+    @Override
+    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
 
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider = null;
+        APIConsumer apiConsumer = null;
+        try {
+            apiProvider = RestApiUtil.getProvider(username);
+            SubscribedAPI subscribedAPI = SubscriptionMappingUtil.fromDTOToSubscription(body);
+            apiProvider.updateSubscription(subscribedAPI);
+
+            //retrieve the updated Subscription
+            apiConsumer = RestApiUtil.getConsumer(username);
+            SubscribedAPI updatedSubscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
+            return Response.ok().entity(subscriptionDTO).build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
+    }*/
 }
