@@ -588,12 +588,7 @@ paths:
         Get a particular document associated with an API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - name: documentId
-          in: path
-          description: Document Id
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/documentId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -647,13 +642,7 @@ paths:
         Update document details.
       parameters:
         - $ref: '#/parameters/apiId'
-        - name: documentId
-          in: path
-          description: |
-            Document Identifier
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/documentId'
         - in: body
           name: body
           description: |
@@ -720,13 +709,7 @@ paths:
         Delete a document of an API
       parameters:
         - $ref: '#/parameters/apiId'
-        - name: documentId
-          in: path
-          description: |
-            Document Identifier
-          required: true
-          type: number
-          format: integer
+        - $ref: '#/parameters/documentId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
 #      tags:
@@ -1807,8 +1790,9 @@ parameters:
     name: apiId
     in: path
     description: |
-      **API ID** consisting of the name of the API, the identifier of the version and 
-      of the provider of the API. Should be formatted as **name/version/provider**.
+      **API ID** consisting of the **UUID** of the API. 
+      The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
+      Should be formatted as **provider-name-version**.
     required: true
     type: string
 
@@ -1818,8 +1802,20 @@ parameters:
     name: apiId
     in: query
     description: |
-      **API Identifier** consisting of the name of the API, the identifier of the version and 
-      of the provider of the API. Should be formatted as **name/version/provider**.
+      **API ID** consisting of the **UUID** of the API. 
+      The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+      Should be formatted as **provider-name-version**.
+    required: true
+    type: string
+
+
+# Document Identifier
+# Specified as part of the path expression
+  documentId:
+    name: documentId
+    in: path
+    description: |
+      **Document Identifier**
     required: true
     type: string
 
@@ -1829,8 +1825,7 @@ parameters:
     name: applicationId
     in: path
     description: |
-      **Application Identifier** consisting of the name of the API, the identifier of the version and 
-      of the provider of the API. Should be formatted as **name/version/provider**.
+      **Application Identifier** consisting of the UUID of the Application.
     required: true
     type: string
 
@@ -1840,8 +1835,7 @@ parameters:
     name: applicationId
     in: query
     description: |
-      **Application Identifier** consisting of the name of the API, the identifier of the version and 
-      of the provider of the API. Should be formatted as **name/version/provider**.
+      **Application Identifier** consisting of the UUID of the Application.
     required: true
     type: string
 
@@ -1911,9 +1905,7 @@ parameters:
     description: |
       Maximum size of resource array to return.
     default: 25
-    required: true
-    type: number
-    format: integer
+    type: integer
 
 # Used for pagination:
 # The order number of an instance in a qualified set of resoures
@@ -1924,9 +1916,7 @@ parameters:
     description: |
       Starting point within the complete list of items qualified.  
     default: 0
-    required: true
-    type: number
-    format: integer
+    type: integer
 
 # The HTTP Accept header
   Accept:
@@ -1935,7 +1925,6 @@ parameters:
     description: |
       Media types acceptable for the response. Default is JSON.
     default: JSON
-    required: true
     type: string
 
 # The HTTP Content-Type header
