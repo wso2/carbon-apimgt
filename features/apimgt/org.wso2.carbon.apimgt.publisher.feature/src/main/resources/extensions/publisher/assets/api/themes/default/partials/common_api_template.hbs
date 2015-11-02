@@ -89,12 +89,12 @@
                     </div>
                     <div class="form-inline">
                         <div class="control-group toggleRadios">
-                            <div class="controls">
-                                <label class="control-label sub-select-label">Upload swagger definition as</label>
-                                <label class="radio sub-labels"><input type="radio" class="select-file"
+                            <div class="controls col-lg-12 padding-bottom">
+                                <label class="control-label sub-select-label col-lg-5">Upload swagger definition as</label>
+                                <label class="radio sub-labels col-lg-3"><input type="radio" class="select-file"
                                                                        name="import-definition" id=""
                                                                        value="swagger_import_file"/>Swagger File</label>
-                                <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url"
+                                <label class="radio sub-labels urlSelect-label col-lg-3"><input type="radio" class="select-url"
                                                                                        name="import-definition"
                                                                                        value="swagger_import_url"/>Swagger
                                     Url</label>
@@ -102,19 +102,19 @@
                         </div>
                     </div>
                     <div class="control-group toggleContainers">
-                        <div class="controls" style="display: none">
-                            <input type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
+                        <div class="controls padding-left col-lg-12 margin-bottom" style="display: none">
+                            <input class="margin-left" type="file" id="swagger_import_file" name="swagger_import_file" size="chars">
                         </div>
-                        <div class="controls" style="display: none">
-                            <label>Definition URL:</label>
-                            <input type="text" placeholder="" class="span12" id="swagger_import_url"
+                        <div class="controls col-lg-12" style="display: none">
+                            <label class="margin-left">Definition URL:</label>
+                            <input type="text" placeholder="" class="margin-left" id="swagger_import_url"
                                    name="swagger_import_url">
-                            <span class="help-block">Example : http://petstore.swagger.io/v2/swagger.json </span>
+                            <span class="help-block margin-left">Example : http://petstore.swagger.io/v2/swagger.json </span>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button class="btn btn-primary has-spinner" id="import_swagger">Import</button>
+                <div class="modal-footer margin-left">
+                    <button class="btn btn-primary has-spinner margin-left" id="import_swagger">Import</button>
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
                 </div>
             </div>
