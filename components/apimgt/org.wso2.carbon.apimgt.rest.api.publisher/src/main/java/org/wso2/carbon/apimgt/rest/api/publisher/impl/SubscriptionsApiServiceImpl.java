@@ -105,6 +105,19 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             throw new InternalServerErrorException(e);
         }
     }
+
+    @Override
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
+
+    @Override
+    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
+            String ifUnmodifiedSince) {
+        return null;
+    }
+
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
             String ifModifiedSince) {
@@ -124,7 +137,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
     }
 
-    @Override public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String accept,
+    /*
+    @Override
+    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String accept,
             String ifNoneMatch, String ifModifiedSince) {
 
         String username = RestApiUtil.getLoggedInUsername();
@@ -143,7 +158,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
-    }
+    }*/
 
     @Override
     public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch, String ifUnmodifiedSince) {
