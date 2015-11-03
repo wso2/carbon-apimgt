@@ -4,6 +4,8 @@
 
     var i, classes, path, callbackUrl, description, app, apps = outputs.applications;
 
+    var tenant = request_tenant;
+
     var errors = outputs.error;
     if(errors == true){
     %>
@@ -23,6 +25,10 @@
     var page = 1;
     var numberOfPages = parseInt(length / itemsPerPage);
     var urlPrefix ="";
+
+    if(tenant != null) {
+	urlPrefix = "tenant=" + tenant;
+    } 
 
 
     if (length % itemsPerPage != 0) {
