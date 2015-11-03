@@ -14,17 +14,20 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.exception;
+package org.wso2.carbon.apimgt.rest.api.util.exception;
+
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
-/**
- * Created by jo on 9/21/15.
- */
-public class PreconditionFailedException extends WebApplicationException {
+public class BadRequestException extends WebApplicationException {
 
-    public PreconditionFailedException(){
-        super(Response.Status.PRECONDITION_FAILED);
+    List<ErrorListItemDTO> list;
+
+    public BadRequestException(List<ErrorListItemDTO> l){
+        super(Response.Status.BAD_REQUEST);
+        list = l;
     }
 }

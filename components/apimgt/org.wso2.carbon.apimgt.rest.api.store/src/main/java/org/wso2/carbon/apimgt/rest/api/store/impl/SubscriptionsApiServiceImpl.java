@@ -23,14 +23,14 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.rest.api.store.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.store.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.store.exception.NotFoundException;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;

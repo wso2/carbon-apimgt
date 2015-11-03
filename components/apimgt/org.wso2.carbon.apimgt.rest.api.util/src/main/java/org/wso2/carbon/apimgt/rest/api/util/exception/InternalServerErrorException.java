@@ -14,19 +14,14 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher;
+package org.wso2.carbon.apimgt.rest.api.util.exception;
 
-/**
- * Created by jo on 9/21/15.
- */
-public final class RestApiConstants {
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
-    public static final String APPLICATION_JSON = "application/json";
+public class InternalServerErrorException extends WebApplicationException {
 
-    public static final String API_ID_DELIMITER = "-";
-
-    public static final String RESOURCE_PATH_APIS = "/apis";
-    public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
-    public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
-    public static final String API_VERSION_PARAM="{version}";
+    public InternalServerErrorException(Throwable e){
+        super(e, Response.Status.INTERNAL_SERVER_ERROR);
+    }
 }

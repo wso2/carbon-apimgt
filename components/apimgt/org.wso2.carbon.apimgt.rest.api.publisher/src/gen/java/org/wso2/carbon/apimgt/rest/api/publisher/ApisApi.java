@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.util.validation.constraints.ValidateApiId;
 
 import java.util.List;
 
@@ -119,7 +120,7 @@ public class ApisApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
-    public Response apisApiIdGet(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") String apiId,
+    public Response apisApiIdGet(@ApiParam(value = "**API ID** consisting of the name of the API, the identifier of the version and of the provider of the API. \nShould be formatted as **name/version/provider**\n",required=true ) @PathParam("apiId") @ValidateApiId String apiId,
     @ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Modified-Since") String ifModifiedSince)

@@ -15,12 +15,12 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.validation;
+package org.wso2.carbon.apimgt.rest.api.util.validation;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.publisher.validation.constraints.ValidateParamEquality;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.validation.constraints.ValidateParamEquality;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

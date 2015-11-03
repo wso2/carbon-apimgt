@@ -15,11 +15,12 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.exception;
+package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
 import javax.validation.ConstraintViolation;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;

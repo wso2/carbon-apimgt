@@ -28,19 +28,18 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;

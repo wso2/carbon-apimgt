@@ -15,13 +15,13 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.publisher.validation.constraints;
+package org.wso2.carbon.apimgt.rest.api.util.validation.constraints;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.validation.ApiIdValidator;
-import static java.lang.annotation.ElementType.FIELD;
+import org.wso2.carbon.apimgt.rest.api.util.validation.ParameterEqualityValidator;
+
 import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 import javax.validation.Constraint;
@@ -29,19 +29,32 @@ import javax.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
-@Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
+@Constraint(validatedBy = ParameterEqualityValidator.class)
+@Target({ METHOD, CONSTRUCTOR, ANNOTATION_TYPE })
 @Retention(RUNTIME)
-@Constraint(validatedBy = ApiIdValidator.class)
 @Documented
-public @interface ValidateApiId {
+public @interface ValidateParamEquality {
 
-    public static final String DEFAULT_ERROR_MESSAGE =
-            "Invalid API Identifier. Please use a proper UUID or API-Version-Provider template";
-
+    public static final String DEFAULT_ERROR_MESSAGE = "Specified objects are not equal.";
     String message() default DEFAULT_ERROR_MESSAGE;
 
     Class<?>[] groups() default { };
 
     Class<? extends Payload>[] payload() default { };
+    
+    int index0();
+    String index0Field() default "";
+    int index1();
+    String index1Field() default "";
 
+    /**
+     * Defines several <code>@ValidateParamEquality</code> annotations on the same element
+     */
+    @Target({METHOD, CONSTRUCTOR, ANNOTATION_TYPE})
+    @Retention(RUNTIME)
+    @Documented
+    @interface List
+    {
+        ValidateParamEquality[] value();
+    }
 }

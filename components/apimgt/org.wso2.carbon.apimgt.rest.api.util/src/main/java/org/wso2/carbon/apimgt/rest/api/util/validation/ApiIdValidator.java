@@ -15,9 +15,9 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.validation;
+package org.wso2.carbon.apimgt.rest.api.util.validation;
 
-import org.wso2.carbon.apimgt.rest.api.store.validation.constraints.ValidateApiId;
+import org.wso2.carbon.apimgt.rest.api.util.validation.constraints.ValidateApiId;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -30,7 +30,7 @@ public class ApiIdValidator implements ConstraintValidator<ValidateApiId, String
     public boolean isValid(String apiId, ConstraintValidatorContext constraintContext) {
         if (apiId == null) {
             return false;
-        } else if (apiId.matches("[\\w.]+-[\\w.]+-[\\w.@]+")) { //matches API-Version-Provider format
+        } else if (apiId.matches("[\\w.@]+-[\\w.]+-[\\w.]+")) { //matches provider-name-version template
             return true;
         } else if (apiId.toLowerCase().matches(
                 "[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}")) { // matches UUID format 

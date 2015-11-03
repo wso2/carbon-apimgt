@@ -14,16 +14,15 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.exception;
+package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-
 
 public class GlobalThrowableMapper implements ExceptionMapper<Throwable>{
 

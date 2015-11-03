@@ -15,7 +15,7 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.interceptors;
+package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -29,8 +29,8 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.message.MessageContentsList;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
-import org.wso2.carbon.apimgt.rest.api.store.exception.ConstraintViolationException;
-import org.wso2.carbon.apimgt.rest.api.store.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ConstraintViolationException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.ValidationException;

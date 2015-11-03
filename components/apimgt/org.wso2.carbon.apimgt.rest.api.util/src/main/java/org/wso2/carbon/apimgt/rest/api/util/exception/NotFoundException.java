@@ -14,14 +14,11 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.exception;
+package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-/**
- * Created by jo on 9/21/15.
- */
 public class NotFoundException extends WebApplicationException {
 
     public NotFoundException(){
