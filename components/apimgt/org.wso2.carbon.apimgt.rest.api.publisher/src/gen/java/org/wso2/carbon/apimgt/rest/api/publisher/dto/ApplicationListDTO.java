@@ -24,12 +24,13 @@ public class ApplicationListDTO  {
   private String previous = null;
   
   
-  private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>() ;
+  private List<ApplicationInfoDTO> list = new ArrayList<ApplicationInfoDTO>();
 
   
   /**
+   * Number of applications returned.
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Number of applications returned.")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -40,9 +41,9 @@ public class ApplicationListDTO  {
 
   
   /**
-   * Link for next page. Empty if no more APIs to be returned.
+   * Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.
    **/
-  @ApiModelProperty(value = "Link for next page. Empty if no more APIs to be returned.")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -53,9 +54,9 @@ public class ApplicationListDTO  {
 
   
   /**
-   * Link for previous page. Empty if current page is first page.
+   * Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.
    **/
-  @ApiModelProperty(value = "Link for previous page. Empty if current page is first page.")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;

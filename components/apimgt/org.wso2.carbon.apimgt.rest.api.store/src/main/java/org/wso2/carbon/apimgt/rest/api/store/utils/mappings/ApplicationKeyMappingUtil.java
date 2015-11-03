@@ -21,13 +21,13 @@ package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TokenDTO;
-import org.wso2.carbon.apimgt.rest.api.store.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
+
 import java.util.Arrays;
 import java.util.Map;
 

@@ -38,9 +38,13 @@ public class RestApiUtil {
 
     private static final Log log = LogFactory.getLog(RestApiUtil.class);
 
-    public static APIProvider getProvider () throws APIManagementException {
+    public static APIProvider getLoggedInUserProvider() throws APIManagementException {
         String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         return APIManagerFactory.getInstance().getAPIProvider(loggedInUser);
+    }
+
+    public static APIProvider getProvider(String username) throws APIManagementException {
+        return APIManagerFactory.getInstance().getAPIProvider(username);
     }
     
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations){

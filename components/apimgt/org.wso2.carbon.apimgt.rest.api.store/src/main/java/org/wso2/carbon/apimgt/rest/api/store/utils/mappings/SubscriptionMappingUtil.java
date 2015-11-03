@@ -18,9 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 
 public class SubscriptionMappingUtil {
@@ -32,14 +30,5 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setTier(subscription.getTier().getName());
         return subscriptionDTO;
-    }
-
-    public static SubscribedAPI fromDTOToSubscription(SubscriptionDTO subscription) {
-        SubscribedAPI subscribedAPI = new SubscribedAPI(subscription.getSubscriptionId());
-        subscribedAPI.setSubStatus(subscription.getStatus().toString());
-        subscribedAPI.setTier(new Tier(subscription.getTier()));
-        subscribedAPI.setApplication(new Application(subscription.getApplicationId()));
-        //subscribedAPI.setAPIId(subscription.getApiId()); //todo need to add support in impl
-        return subscribedAPI;
     }
 }
