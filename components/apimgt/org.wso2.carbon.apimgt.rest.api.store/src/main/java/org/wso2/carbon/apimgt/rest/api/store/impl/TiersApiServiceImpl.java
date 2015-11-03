@@ -69,7 +69,8 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(tierDTOs).build();
     }
 
-    @Override public Response tiersPost(TierDTO body, String contentType) {
+    @Override
+    public Response tiersPost(TierDTO body, String contentType) {
         boolean isTenantFlowStarted = false;
         URI createdApiUri = null;
         TierDTO  createdTierDTO = null;
@@ -103,13 +104,21 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.created(createdApiUri).entity(createdTierDTO).build();
     }
 
-    @Override public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
+    @Override
+    public Response tiersUpdatePermissionPost(String tierName, String ifMatch, String ifUnmodifiedSince,
+            TierPermissionDTO permissions) {
+        return null;
+    }
+
+    @Override
+    public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
             String ifModifiedSince){
         //backend method requires
         return Response.ok().entity(null).build();
     }
 
-    @Override public Response tiersTierNamePut(String tierName, TierDTO body, String contentType, String ifMatch,
+    @Override
+    public Response tiersTierNamePut(String tierName, TierDTO body, String contentType, String ifMatch,
             String ifUnmodifiedSince) {
         boolean isTenantFlowStarted = false;
         TierDTO  updatedTierDTO = null;
@@ -139,7 +148,8 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().entity(updatedTierDTO).build();
     }
 
-    @Override public Response tiersTierNameDelete(String tierName, String ifMatch, String ifUnmodifiedSince){
+    @Override
+    public Response tiersTierNameDelete(String tierName, String ifMatch, String ifUnmodifiedSince){
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -164,11 +174,4 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.ok().build();
     }
 
-    @Override
-    public Response tiersTierNameUpdatePermissionPost(String tierName,
-                                                      TierPermissionDTO permissions,
-                                                      String contentType, String ifMatch,
-                                                      String ifUnmodifiedSince) {
-        return Response.ok().build();
-    }
 }

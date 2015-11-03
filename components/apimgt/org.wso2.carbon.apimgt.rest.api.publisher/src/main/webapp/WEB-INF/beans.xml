@@ -16,7 +16,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.EnvironmentsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.TiersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.BlockSubscriptionApi"/>
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>

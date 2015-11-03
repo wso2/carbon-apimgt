@@ -36,7 +36,7 @@ public class ApplicationDTO  {
   private String groupId = null;
   
   
-  private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>() ;
+  private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
 
   
   /**

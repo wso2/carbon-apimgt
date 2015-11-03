@@ -103,6 +103,11 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.created(createdApiUri).entity(createdTierDTO).build();
     }
 
+    @Override public Response tiersUpdatePermissionPost(String tierName, String ifMatch, String ifUnmodifiedSince,
+            TierPermissionDTO permissions) {
+        return null;
+    }
+
     @Override public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
             String ifModifiedSince){
         //backend method requires
@@ -163,12 +168,5 @@ public class TiersApiServiceImpl extends TiersApiService {
         }
         return Response.ok().build();
     }
-
-    @Override
-    public Response tiersTierNameUpdatePermissionPost(String tierName,
-                                                      TierPermissionDTO permissions,
-                                                      String contentType, String ifMatch,
-                                                      String ifUnmodifiedSince) {
-        return Response.ok().build();
-    }
+    
 }

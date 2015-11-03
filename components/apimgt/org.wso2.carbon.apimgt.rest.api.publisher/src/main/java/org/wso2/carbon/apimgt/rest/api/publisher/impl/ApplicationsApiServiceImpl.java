@@ -46,7 +46,7 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
-    public Response applicationsGet(String subscriber, String groupId, String limit, String offset, String accept,
+    public Response applicationsGet(String subscriber, String groupId, Integer limit, Integer offset, String accept,
             String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
 
@@ -88,6 +88,11 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         } catch (APIManagementException | URISyntaxException e) {
             throw new InternalServerErrorException(e);
         }
+    }
+
+    @Override public Response applicationsGenerateKeysPost(String applicationId, String contentType,
+            ApplicationKeyGenerateRequestDTO body, String ifMatch, String ifUnmodifiedSince) {
+        return null;
     }
 
     @Override
@@ -136,6 +141,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         }
     }
 
+    /*
     @Override
     @SuppressWarnings("unchecked")
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
@@ -178,4 +184,5 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             throw new InternalServerErrorException(e);
         }
     }
+    */
 }

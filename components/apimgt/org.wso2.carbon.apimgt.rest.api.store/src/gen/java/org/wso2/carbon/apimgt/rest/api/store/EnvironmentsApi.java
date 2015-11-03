@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.store.factories.EnvironmentsApiServiceFac
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.EnvironmentListDTO;
 
 import java.util.List;
 
@@ -25,19 +26,17 @@ public class EnvironmentsApi  {
 
     @GET
     
-    
-    
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of gateway environments configured previously", response = Void.class)
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of gateway environments configured previously.", response = EnvironmentListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. environment list is returned."),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nEnvironment list is returned."),
         
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. \nEmpty body because the client has already the latest version of the requested resource."),
         
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist."),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. \nRequested API does not exist.") })
 
-    public Response environmentsGet(@ApiParam(value = "Will return environment list for the provided API") @QueryParam("apiId") String apiId)
+    public Response environmentsGet(@ApiParam(value = "Will return environment list for the provided API.") @QueryParam("apiId") String apiId)
     {
     return delegate.environmentsGet(apiId);
     }
