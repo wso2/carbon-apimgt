@@ -18,17 +18,28 @@
 
 package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.dto.SubscriptionDTO;
 
 public class SubscriptionMappingUtil {
-    public static SubscriptionDTO fromSubscriptiontoDTO(SubscribedAPI subscription) {
+    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         subscriptionDTO.setApiId(subscription.getApiId().toString());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
-        subscriptionDTO.setStatus(subscription.getSubStatus());
+        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setTier(subscription.getTier().getName());
         return subscriptionDTO;
+    }
+
+    public static SubscribedAPI fromDTOToSubscription(SubscriptionDTO subscription) {
+        SubscribedAPI subscribedAPI = new SubscribedAPI(subscription.getSubscriptionId());
+        subscribedAPI.setSubStatus(subscription.getStatus().toString());
+        subscribedAPI.setTier(new Tier(subscription.getTier()));
+        subscribedAPI.setApplication(new Application(subscription.getApplicationId()));
+        //subscribedAPI.setAPIId(subscription.getApiId()); //todo need to add support in impl
+        return subscribedAPI;
     }
 }

@@ -31,8 +31,9 @@ import javax.ws.rs.core.Response;
 
 public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
     @Override
-    public Response environmentsGet(){
+    public Response environmentsGet(String apiId) {
 
+        //todo : need to get environments of API if apiId is specified 
         APIManagerConfiguration config =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                         .getAPIManagerConfiguration();

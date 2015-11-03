@@ -27,7 +27,11 @@ public final class RestApiConstants {
 
     public static final String RESOURCE_PATH_APIS = "/apis";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
-
+    public static final String SERVER_URL = "/applications";
+    public static final String SERVER_USER_NAME = "/applications";
+    public static final String SERVER_PASSWORD = "/applications";
+    public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
+    public static final String API_VERSION_PARAM="{version}";
 
 
 

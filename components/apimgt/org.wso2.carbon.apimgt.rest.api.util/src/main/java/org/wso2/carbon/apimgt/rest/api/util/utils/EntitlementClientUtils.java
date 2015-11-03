@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.util.utils;
 
 import java.io.*;
 import java.util.Properties;
+import org.wso2.carbon.apimgt.rest.api.util.*;
 
 /**
  * Util methods for Entitlement client use to validate requests
@@ -78,21 +79,21 @@ public class EntitlementClientUtils {
     } */
 
     public static String getServerUrl() {
-        return configProperties != null && configProperties.getProperty(DynamicClientRegistrationUtils.SERVER_URL) != null ?
-                configProperties.getProperty(DynamicClientRegistrationUtils.SERVER_URL)
+        return configProperties != null && configProperties.getProperty(RestApiConstants.SERVER_URL) != null ?
+                configProperties.getProperty(RestApiConstants.SERVER_URL)
                 : "https://localhost:9444/services/";
     }
 
     public static String getServerUsername() {
-        return configProperties != null && configProperties.getProperty(DynamicClientRegistrationUtils.SERVER_USER_NAME) != null ?
-                configProperties.getProperty(DynamicClientRegistrationUtils.SERVER_USER_NAME) :
+        return configProperties != null && configProperties.getProperty(RestApiConstants.SERVER_USER_NAME) != null ?
+                configProperties.getProperty(RestApiConstants.SERVER_USER_NAME) :
                 "admin";
     }
 
     public static String getServerPassword() {
         String ret;
         if (configProperties != null){
-            ret = configProperties.getProperty(DynamicClientRegistrationUtils.SERVER_PASSWORD);
+            ret = configProperties.getProperty(RestApiConstants.SERVER_PASSWORD);
             if(ret !=null){
                 return ret;
             }

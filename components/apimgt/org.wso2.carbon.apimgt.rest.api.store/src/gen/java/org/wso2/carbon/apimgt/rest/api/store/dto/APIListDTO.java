@@ -15,7 +15,7 @@ public class APIListDTO  {
   
   
   
-  private String count = null;
+  private Integer count = null;
   
   
   private String next = null;
@@ -24,25 +24,26 @@ public class APIListDTO  {
   private String previous = null;
   
   
-  private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>() ;
+  private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
 
   
   /**
+   * Number of APIs returned.
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Number of APIs returned.")
   @JsonProperty("count")
-  public String getCount() {
+  public Integer getCount() {
     return count;
   }
-  public void setCount(String count) {
+  public void setCount(Integer count) {
     this.count = count;
   }
 
   
   /**
-   * Link for next page. Empty if no more APIs to be returned.
+   * Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.
    **/
-  @ApiModelProperty(value = "Link for next page. Empty if no more APIs to be returned.")
+  @ApiModelProperty(value = "Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.")
   @JsonProperty("next")
   public String getNext() {
     return next;
@@ -53,9 +54,9 @@ public class APIListDTO  {
 
   
   /**
-   * Link for previous page. Empty if current page is first page.
+   * Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.
    **/
-  @ApiModelProperty(value = "Link for previous page. Empty if current page is first page.")
+  @ApiModelProperty(value = "Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.")
   @JsonProperty("previous")
   public String getPrevious() {
     return previous;

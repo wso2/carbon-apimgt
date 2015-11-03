@@ -52,7 +52,7 @@ public class TiersApiServiceImpl extends TiersApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-            APIProvider apiProvider = RestApiUtil.getProvider();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Set<Tier> tiers = apiProvider.getTiers() ;
 
             for (Tier tier : tiers) {
@@ -82,7 +82,7 @@ public class TiersApiServiceImpl extends TiersApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-            APIProvider apiProvider = RestApiUtil.getProvider();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             apiProvider.addTier(TierMappingUtil.fromDTOtoTier(body));
 
@@ -122,7 +122,7 @@ public class TiersApiServiceImpl extends TiersApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-            APIProvider apiProvider = RestApiUtil.getProvider();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             apiProvider.updateTier(TierMappingUtil.fromDTOtoTier(body));
 
@@ -150,7 +150,7 @@ public class TiersApiServiceImpl extends TiersApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-            APIProvider apiProvider = RestApiUtil.getProvider();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             //getTierbyname
             apiProvider.removeTier(new Tier("sample"));//can we have a remove tier by name method?
 
