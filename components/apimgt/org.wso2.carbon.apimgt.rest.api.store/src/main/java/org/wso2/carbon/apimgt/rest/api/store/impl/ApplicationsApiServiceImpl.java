@@ -18,36 +18,27 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
-    public Response applicationsGet(String subscriber, String groupId, String limit, String offset, String accept,
+    public Response applicationsGet(String subscriber, String groupId, Integer limit, Integer offset, String accept,
             String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
 
@@ -89,6 +80,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         } catch (APIManagementException | URISyntaxException e) {
             throw new InternalServerErrorException(e);
         }
+    }
+
+    @Override
+    public Response applicationsGenerateKeysPost(String applicationId, String contentType,
+            ApplicationKeyGenerateRequestDTO body, String ifMatch, String ifUnmodifiedSince) {
+        return null;
     }
 
     @Override
@@ -137,6 +134,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         }
     }
 
+    /*
     @Override
     @SuppressWarnings("unchecked")
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
@@ -179,4 +177,5 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             throw new InternalServerErrorException(e);
         }
     }
+    */
 }

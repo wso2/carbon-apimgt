@@ -23,7 +23,7 @@ public class TokenDTO  {
   private String tokenState = null;
   
   
-  private List<String> tokenScopes = new ArrayList<String>() ;
+  private List<String> tokenScopes = new ArrayList<String>();
   
   
   private Long validityTime = null;

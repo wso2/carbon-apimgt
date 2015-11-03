@@ -32,12 +32,6 @@ public class DocumentDTO  {
   };
   
   private SourceEnum source = null;
-  
-  public enum VisibilityEnum {
-     OWNER_ONLY,  PRIVATE,  API_LEVEL, 
-  };
-  
-  private VisibilityEnum visibility = null;
 
   
   /**
@@ -100,18 +94,6 @@ public class DocumentDTO  {
   }
 
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("visibility")
-  public VisibilityEnum getVisibility() {
-    return visibility;
-  }
-  public void setVisibility(VisibilityEnum visibility) {
-    this.visibility = visibility;
-  }
-
-  
 
   @Override
   public String toString()  {
@@ -123,7 +105,6 @@ public class DocumentDTO  {
     sb.append("  type: ").append(type).append("\n");
     sb.append("  summary: ").append(summary).append("\n");
     sb.append("  source: ").append(source).append("\n");
-    sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

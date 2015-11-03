@@ -17,7 +17,7 @@ public class TierPermissionDTO  {
   private String enableAccess = null;
   
   
-  private List<String> roles = new ArrayList<String>() ;
+  private List<String> roles = new ArrayList<String>();
 
   
   /**
