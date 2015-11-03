@@ -252,10 +252,32 @@
 }
 
 .swagger_editer_header{
-    padding: 10px;
-    background: #4a4a4a;
+    padding: 5px;
+    background: #0E0E0E;
 }
 
 body.modal-open {
     overflow: hidden;
+}
+
+button#update_swagger {
+    position: relative;
+    top: 36px;
+}
+
+button#close_swagger_editor {
+    position: relative;
+    top: 36px;
+    height: 32px;
+    padding-top: 5px;
+}
+
+.modal-footer {
+    border: 0px;
+    margin-left: 18px;
+    margin-top: 10px;
+}
+
+label.margin-left, span.help-block, .margin-left{
+    margin-left: 15px;
 }
