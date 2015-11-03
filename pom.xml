@@ -890,9 +890,9 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
+                <groupId>org.wso2.carbon.identity</groupId>
                 <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
-                <version>4.2.0</version>
+                <version>${carbon.identity.version}</version>
             </dependency>
 
         </dependencies>
