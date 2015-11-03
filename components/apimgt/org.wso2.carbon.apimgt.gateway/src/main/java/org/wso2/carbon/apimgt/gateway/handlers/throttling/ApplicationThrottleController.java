@@ -122,7 +122,7 @@ public class ApplicationThrottleController {
                 // a more general exception(e.g. a Runtime exception if the XML doc has an
                 // external DTD deceleration and if not connected to internet) which in case
                 // just log for debugging
-                log.error("Error while reading the resource '" + key + "'", e);
+                log.error("Error while reading the resource '" + key + '\'', e);
             } finally {
                 try {
                     resource.discard();

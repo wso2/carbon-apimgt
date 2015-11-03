@@ -16,7 +16,9 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 
+import org.wso2.balana.attr.BooleanAttribute;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.utils.xml.StringUtils;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -25,8 +27,13 @@ public class TierNameComparator implements Comparator<Tier>, Serializable {
 
     @Override
     public int compare(Tier tier1, Tier tier2) {
-
+        if (tier1.getDisplayName() != null && tier2.getDisplayName() != null) {
             return tier1.getDisplayName().compareToIgnoreCase(tier2.getDisplayName());
+        }else if (tier1.getName() != null && tier2.getName() != null){
+            return tier1.getName().compareToIgnoreCase(tier2.getName());
+        }else{
+            return 0;
+        }
 
     }
 }
