@@ -23,9 +23,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.rest.api.store.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagDTO;
-import org.wso2.carbon.apimgt.rest.api.store.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.store.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TagMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
