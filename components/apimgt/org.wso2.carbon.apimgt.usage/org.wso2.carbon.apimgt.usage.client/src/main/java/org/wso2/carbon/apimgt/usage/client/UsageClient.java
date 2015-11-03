@@ -160,8 +160,8 @@ public class UsageClient {
         List<SubscriberCountByAPIs> list = new ArrayList<SubscriberCountByAPIs>();
         boolean isTenantFlowStarted = false;
         try {
-            providerName = APIUtil.replaceEmailDomain(loggedUser);
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            loggedUser = APIUtil.replaceEmailDomain(loggedUser);
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(loggedUser));
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
                 isTenantFlowStarted = true;
@@ -174,7 +174,7 @@ public class UsageClient {
                 if (providerName.equals("__all_providers__")) {
                     apiSet = apiProvider.getAllAPIs();
                 } else {
-                    apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(providerName));
+                    apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(loggedUser));
                 }
 
                 //iterate over apis
