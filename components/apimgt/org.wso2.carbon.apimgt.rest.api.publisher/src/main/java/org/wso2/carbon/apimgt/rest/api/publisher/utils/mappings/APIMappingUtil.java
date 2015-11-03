@@ -280,7 +280,6 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setStatus(api.getStatus().toString());
-        apiInfoDTO.setType(null); //todo
         return apiInfoDTO;
     }
 

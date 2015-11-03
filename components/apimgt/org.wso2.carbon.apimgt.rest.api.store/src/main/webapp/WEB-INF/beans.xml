@@ -13,7 +13,6 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.TagsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.ApisApi"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.store.EnvironmentsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.TiersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.ApplicationsApi"/>
             

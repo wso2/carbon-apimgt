@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationKeyDTO;
-import java.util.*;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,34 +12,28 @@ import javax.validation.constraints.NotNull;
 public class ApplicationDTO  {
   
   
-  @NotNull
+  
   private String applicationId = null;
   
-  @NotNull
+  
   private String name = null;
   
-  @NotNull
+  
   private String subscriber = null;
   
-  @NotNull
+  
   private String throttlingTier = null;
-  
-  
-  private String callbackUrl = null;
   
   
   private String description = null;
   
   
   private String groupId = null;
-  
-  
-  private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
 
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("applicationId")
   public String getApplicationId() {
     return applicationId;
@@ -53,7 +45,7 @@ public class ApplicationDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -64,9 +56,8 @@ public class ApplicationDTO  {
 
   
   /**
-   * If subscriber is not given user invoking the API will be taken as the subscriber.
    **/
-  @ApiModelProperty(required = true, value = "If subscriber is not given user invoking the API will be taken as the subscriber.")
+  @ApiModelProperty(value = "")
   @JsonProperty("subscriber")
   public String getSubscriber() {
     return subscriber;
@@ -78,25 +69,13 @@ public class ApplicationDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("throttlingTier")
   public String getThrottlingTier() {
     return throttlingTier;
   }
   public void setThrottlingTier(String throttlingTier) {
     this.throttlingTier = throttlingTier;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("callbackUrl")
-  public String getCallbackUrl() {
-    return callbackUrl;
-  }
-  public void setCallbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
   }
 
   
@@ -124,18 +103,6 @@ public class ApplicationDTO  {
   }
 
   
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("keys")
-  public List<ApplicationKeyDTO> getKeys() {
-    return keys;
-  }
-  public void setKeys(List<ApplicationKeyDTO> keys) {
-    this.keys = keys;
-  }
-
-  
 
   @Override
   public String toString()  {
@@ -146,10 +113,8 @@ public class ApplicationDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  subscriber: ").append(subscriber).append("\n");
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
-    sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
-    sb.append("  keys: ").append(keys).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

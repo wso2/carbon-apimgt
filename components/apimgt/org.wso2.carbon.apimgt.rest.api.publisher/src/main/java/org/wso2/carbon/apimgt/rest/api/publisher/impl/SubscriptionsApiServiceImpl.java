@@ -82,31 +82,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body, String contentType) {
-        String username = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = null;
-        try {
-            //todo: Validation for allowed throttling tiers and Tenant based validation for subscription
-            apiConsumer = RestApiUtil.getConsumer(username);
-            String apiId = body.getApiId();
-            String applicationId = body.getApplicationId();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-            apiIdentifier.setTier(body.getTier());
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
-            SubscriptionResponse subscriptionResponse =
-                    apiConsumer.addSubscription(apiIdentifier, username, application.getId());
-            SubscribedAPI addedSubscribedAPI = apiConsumer.getSubscriptionByUUID(
-                    subscriptionResponse.getSubscriptionUUID());
-            SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
-            return Response
-                    .created(new URI(RestApiConstants.RESOURCE_PATH_SUBSCRIPTIONS + "/" + addedSubscribedAPI.getUUID()))
-                    .entity(addedSubscriptionDTO).build();
-        } catch (APIManagementException | URISyntaxException e) {
-            throw new InternalServerErrorException(e);
-        }
-    }
-
-    @Override
     public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String ifMatch,
             String ifUnmodifiedSince) {
         return null;
@@ -136,7 +111,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             throw new InternalServerErrorException(e);
         }
     }
-
+    
     /*
     @Override
     public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String accept,
@@ -159,18 +134,4 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             throw new InternalServerErrorException(e);
         }
     }*/
-
-    @Override
-    public Response subscriptionsSubscriptionIdDelete(String subscriptionId, String ifMatch, String ifUnmodifiedSince) {
-        String username = RestApiUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = null;
-        try {
-            apiConsumer = RestApiUtil.getConsumer(username);
-            SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
-            apiConsumer.removeSubscription(subscribedAPI);
-            return Response.ok().build();
-        } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
-        }
-    }
 }
