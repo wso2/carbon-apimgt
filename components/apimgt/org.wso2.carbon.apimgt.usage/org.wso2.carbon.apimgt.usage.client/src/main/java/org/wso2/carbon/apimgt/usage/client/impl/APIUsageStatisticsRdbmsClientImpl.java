@@ -2715,6 +2715,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index++, tenantDomain);
                 statement.setString(index++, appName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    provider = provider + '@' + tenantDomain;
                     statement.setString(index++, provider);
                 }
                 statement.setString(index++, fromDate);
