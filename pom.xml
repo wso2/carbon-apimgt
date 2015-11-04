@@ -717,6 +717,13 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.samples.calculator.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.ws.commons.axiom</groupId>
                 <artifactId>axiom-api</artifactId>
                 <version>${axiom.version}</version>
@@ -814,6 +821,30 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
+                <version>${ganalytics.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-transports-http</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>${jax.ws.rs.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>1.10.19</version>
@@ -841,12 +872,6 @@
                 <groupId>opensaml.wso2</groupId>
                 <artifactId>opensaml2</artifactId>
                 <version>${opensaml2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                <version>2.7.17</version>
             </dependency>
 
             <dependency>
@@ -1004,6 +1029,13 @@
         <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
 
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
+
+        <!-- apache cxf version -->
+        <cxf.version>2.7.2</cxf.version>
+
+        <!-- jaxrs version -->
+        <jax.ws.rs.version>2.0.1</jax.ws.rs.version>
+
     </properties>
     <distributionManagement>
         <repository>
