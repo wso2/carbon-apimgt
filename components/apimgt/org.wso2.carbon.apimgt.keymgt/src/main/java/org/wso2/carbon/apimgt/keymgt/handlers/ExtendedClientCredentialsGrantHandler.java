@@ -69,8 +69,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
         boolean validateResult = super.validateGrant(tokReqMsgCtx);
         User user = tokReqMsgCtx.getAuthorizedUser();
         String tenantDomain = user.getTenantDomain();
-        String username = user.getUserName();
-        username = username + "@" + tenantDomain;
+        String username = user.getUserName(); 
         user.setUserName(username);
         tokReqMsgCtx.setAuthorizedUser(user);
 
