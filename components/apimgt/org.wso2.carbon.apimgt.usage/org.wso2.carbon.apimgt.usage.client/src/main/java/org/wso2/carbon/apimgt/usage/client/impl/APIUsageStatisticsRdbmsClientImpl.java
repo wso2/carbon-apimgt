@@ -964,6 +964,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         Collection<APIResponseTime> responseTimes = getAPIResponseTimeData(
                 APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
         List<API> providerAPIs = getAPIsByProvider(providerName);
+        DecimalFormat format = new DecimalFormat("#.##");
+        List<APIResponseTimeDTO> apiResponseTimeUsage = new ArrayList<APIResponseTimeDTO>();
+
         Map<String, Double> apiCumulativeServiceTimeMap = new HashMap<String, Double>();
         Map<String, Long> apiUsageMap = new TreeMap<String, Long>();
         for (APIResponseTime responseTime : responseTimes) {
@@ -972,7 +975,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         providerAPI.getId().getVersion().equals(responseTime.getApiVersion()) &&
                         providerAPI.getContext().equals(responseTime.getContext())) {
 
-                    String apiName = responseTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
+                    /*String apiName = responseTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
                     Double cumulativeResponseTime = apiCumulativeServiceTimeMap.get(apiName);
 
                     if (cumulativeResponseTime != null) {
@@ -984,12 +987,20 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         apiCumulativeServiceTimeMap
                                 .put(apiName, responseTime.getResponseTime() * responseTime.getResponseCount());
                         apiUsageMap.put(apiName, responseTime.getResponseCount());
-                    }
+                    }*/
+                    APIResponseTimeDTO responseTimeDTO = new APIResponseTimeDTO();
+                    responseTimeDTO.setApiName(responseTime.getApiName());
+
+                    //calculate the average response time
+                    double avgTime = responseTime.getResponseTime() / responseTime.getResponseCount();
+                    //format the time
+                    responseTimeDTO.setServiceTime(Double.parseDouble(format.format(avgTime)));
+                    apiResponseTimeUsage.add(responseTimeDTO);
                 }
             }
         }
 
-        Map<String, APIResponseTimeDTO> responseTimeByAPI = new TreeMap<String, APIResponseTimeDTO>();
+        /*Map<String, APIResponseTimeDTO> responseTimeByAPI = new TreeMap<String, APIResponseTimeDTO>();
         DecimalFormat format = new DecimalFormat("#.##");
         for (String key : apiUsageMap.keySet()) {
             APIResponseTimeDTO responseTimeDTO = new APIResponseTimeDTO();
@@ -999,8 +1010,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             responseTimeByAPI.put(key, responseTimeDTO);
         }
         List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(
-                new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);
-        return usage;
+                new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);*/
+        return apiResponseTimeUsage;
     }
 
     /**
@@ -2336,6 +2347,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      */
     @Override
     public void deployArtifacts(String url, String user, String pass) throws Exception {
+
+        if (url.trim().equals("")) {
+            String message = "Data Analyzer URL is empty. cApp will not be deployed.";
+            log.warn(message);
+            return;
+        }
+
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics_RDBMS.car";
         String cAppPath = System.getProperty("carbon.home") + File.separator + "statistics";
@@ -2555,14 +2573,16 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             //check whether table exist first
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
 
-                if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)) {
+                groupByStmt = "year, month, day";
+
+                /*if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)) {
                     groupByStmt = "year, month, day";
                 } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
                     groupByStmt = "year, month, day, time";
                 } else {
                     throw new APIMgtUsageQueryServiceClientException("Unsupported group by parameter " + groupBy +
                             " for retrieving throttle data of API and app.");
-                }
+                }*/
 
                 query = "SELECT " + groupByStmt + " ," +
                         "SUM(COALESCE(success_request_count,0)) AS success_request_count, " +
@@ -2583,6 +2603,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index++, tenantDomain);
                 statement.setString(index++, apiName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    provider = provider + '@' + tenantDomain;
                     statement.setString(index++, provider);
                 }
                 if (!StringUtils.isEmpty(appName)) {
@@ -2694,6 +2715,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index++, tenantDomain);
                 statement.setString(index++, appName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    provider = provider + '@' + tenantDomain;
                     statement.setString(index++, provider);
                 }
                 statement.setString(index++, fromDate);
@@ -2784,6 +2806,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement = connection.prepareStatement(query);
                 statement.setString(1, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    provider = provider + '@' + tenantDomain;
                     statement.setString(2, provider);
                 }
 
@@ -2870,6 +2893,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 int index = 1;
                 statement.setString(index++, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                    provider = provider + '@' + tenantDomain;
                     statement.setString(index++, provider);
                 }
                 if (apiName != null) {

@@ -91,14 +91,14 @@ public class UsageClient {
         return con.isAnalyticsEnabled();
     }
 
-
     /**
      * Use to get instance of implementation class of the APIUsageStatisticsClient that is defined in the apim-manager.xml
      *
      * @return instance of a APIUsageStatisticsClient
      * @throws APIMgtUsageQueryServiceClientException throws if instantiation problem occur
      */
-    private static APIUsageStatisticsClient getStatisticClient(String user) throws APIMgtUsageQueryServiceClientException {
+    private static APIUsageStatisticsClient getStatisticClient(String user)
+            throws APIMgtUsageQueryServiceClientException {
 
         //read the api-manager.xml and get the Statistics class name
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -108,14 +108,13 @@ public class UsageClient {
         try {
 
             //get the Class from the class name
-            Class statClass=APIUtil.getClassFromName(className);
+            Class statClass = APIUtil.getClassForName(className);
             //use the constructor and pass appropriate args to get a instance
-            if(user!=null) {
+            if (user != null) {
                 usageStatisticsClient = (APIUsageStatisticsClient) statClass.getConstructor(String.class)
                         .newInstance(user);
-            }else{
-                usageStatisticsClient = (APIUsageStatisticsClient) statClass.getConstructor()
-                        .newInstance();
+            } else {
+                usageStatisticsClient = (APIUsageStatisticsClient) statClass.getConstructor().newInstance();
             }
 
         } catch (InstantiationException e) {
@@ -137,7 +136,6 @@ public class UsageClient {
         return usageStatisticsClient;
     }
 
-
     /**
      * Get the Subscriber count and information related to the APIs
      *
@@ -145,8 +143,8 @@ public class UsageClient {
      * @return return list of SubscriberCountByAPIs objects. which contain the list of apis and related subscriber counts
      * @throws APIManagementException throws exception if error occur
      */
-    public static List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser,boolean isAllStatistics)
-            throws APIManagementException{
+    public static List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser, boolean isAllStatistics)
+            throws APIManagementException {
 
         //get the provider
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(loggedUser);
@@ -160,8 +158,8 @@ public class UsageClient {
         List<SubscriberCountByAPIs> list = new ArrayList<SubscriberCountByAPIs>();
         boolean isTenantFlowStarted = false;
         try {
-            providerName = APIUtil.replaceEmailDomain(loggedUser);
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            loggedUser = APIUtil.replaceEmailDomain(loggedUser);
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(loggedUser));
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
                 isTenantFlowStarted = true;
@@ -174,7 +172,7 @@ public class UsageClient {
                 if (providerName.equals("__all_providers__")) {
                     apiSet = apiProvider.getAllAPIs();
                 } else {
-                    apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(providerName));
+                    apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(loggedUser));
                 }
 
                 //iterate over apis
