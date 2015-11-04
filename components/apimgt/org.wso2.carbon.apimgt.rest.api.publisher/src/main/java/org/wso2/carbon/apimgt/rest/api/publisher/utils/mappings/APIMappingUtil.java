@@ -151,7 +151,14 @@ public class APIMappingUtil {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
-        //endpoint configs, business info and thumbnail still missing
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
+        dto.setBusinessInformation(apiBusinessInformationDTO);
+        
+        //todo: thumbnail still missing
         return dto;
     }
 
@@ -251,7 +258,15 @@ public class APIMappingUtil {
             model.setVisibleRoles(visibleTenants);
         }
 
-        //endpoint configs, business info and thumbnail requires mapping
+        APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();
+        if (apiBusinessInformationDTO != null) {
+            model.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
+            model.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
+            model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
+            model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
+        }
+
+        //todo: thumbnail requires mapping
         return model;
 
     }
