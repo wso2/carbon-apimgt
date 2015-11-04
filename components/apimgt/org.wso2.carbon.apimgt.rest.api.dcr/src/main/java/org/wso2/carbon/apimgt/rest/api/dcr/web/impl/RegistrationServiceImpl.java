@@ -45,6 +45,17 @@ public class RegistrationServiceImpl implements RegistrationService {
     @POST
     @Override
     public Response register(RegistrationProfile profile) {
+        /**
+         * sample message to this method
+         * {
+         * "callbackUrl": "www.google.lk",
+         * "clientName": "mdm",
+         * "tokenScope": "Production",
+         * "owner": "admin",
+         * "grantType": "password refresh_token",
+         * "saasApp": true
+         *}
+         */
         Response response;
         try {
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
