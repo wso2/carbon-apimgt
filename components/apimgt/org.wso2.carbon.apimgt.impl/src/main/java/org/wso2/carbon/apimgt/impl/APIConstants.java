@@ -561,7 +561,7 @@ public final class APIConstants {
     public static final QName THROTTLE_ATTRIBUTES_ELEMENT = new QName(THROTTLE_NAMESPACE, "Attributes");
     public static final QName THROTTLE_ATTRIBUTE_ELEMENT = new QName(THROTTLE_NAMESPACE, "Attribute");
     public static final QName THROTTLE_DESCRIPTION_ELEMENT = new QName(THROTTLE_NAMESPACE, "Description");
-    public static final QName THROTTLE_TIER_PLAN_ELEMENT = new QName(THROTTLE_NAMESPACE, "TierPlan");
+    public static final QName THROTTLE_TIER_PLAN_ELEMENT = new QName(THROTTLE_NAMESPACE, THROTTLE_TIER_PLAN_ATTRIBUTE);
     public static final String THROTTLE_ATTRIBUTE_DISPLAY_NAME= "displayName";
 
     public static final String TIER_DESC_NOT_AVAILABLE = "Tire Description is not available";

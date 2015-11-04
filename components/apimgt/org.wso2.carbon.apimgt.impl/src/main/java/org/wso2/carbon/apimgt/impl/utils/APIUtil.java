@@ -4416,10 +4416,10 @@ public final class APIUtil {
             final Map<String, Object> tierAttributes = tier.getTierAttributes();
 
             if (tierAttributes != null) {
-                String isPaidValue = (String) tierAttributes.get(APIConstants.API_TIER_IS_PAID_ATTRIBUTE);
+                String isPaidValue = tier.getTierPlan();
 
-                if (isPaidValue != null) {
-                    isPaid = Boolean.parseBoolean(isPaidValue);
+                if (isPaidValue != null && isPaidValue.equals("COMMERCIAL")) {
+                    isPaid = true;
                 }
             } else {
                 throw new APIManagementException("Tier attributes not specified for tier " + tierName);
