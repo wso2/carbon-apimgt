@@ -16,7 +16,7 @@ import javax.ws.rs.core.Response;
 
 public abstract class SubscriptionsApiService {
     public abstract Response subscriptionsGet(String apiId,String applicationId,String groupId,String accept,String ifNoneMatch);
-    public abstract Response subscriptionsBlockSubscriptionPost(String subscriptionId,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response subscriptionsBlockSubscriptionPost(String subscriptionId,String blockState,String ifMatch,String ifUnmodifiedSince);
     public abstract Response subscriptionsUnblockSubscriptionPost(String subscriptionId,String ifMatch,String ifUnmodifiedSince);
     public abstract Response subscriptionsSubscriptionIdGet(String subscriptionId,String accept,String ifNoneMatch,String ifModifiedSince);
 }

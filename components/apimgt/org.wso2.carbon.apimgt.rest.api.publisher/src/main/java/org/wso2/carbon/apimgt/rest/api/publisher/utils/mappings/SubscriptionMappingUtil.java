@@ -33,13 +33,4 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setTier(subscription.getTier().getName());
         return subscriptionDTO;
     }
-
-    public static SubscribedAPI fromDTOToSubscription(SubscriptionDTO subscription) {
-        SubscribedAPI subscribedAPI = new SubscribedAPI(subscription.getSubscriptionId());
-        subscribedAPI.setSubStatus(subscription.getStatus().toString());
-        subscribedAPI.setTier(new Tier(subscription.getTier()));
-        subscribedAPI.setApplication(new Application(subscription.getApplicationId()));
-        //subscribedAPI.setAPIId(subscription.getApiId()); //todo need to add support in impl
-        return subscribedAPI;
-    }
 }

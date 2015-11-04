@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
@@ -46,21 +47,14 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             String ifNoneMatch) {
         //todo: validation: only one of {application id,api id} should present
         String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions = new HashSet<>();
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             if (!StringUtils.isEmpty(apiId)) {
 
-                /* API api; //todo how can we get this? we cant get this using current username as the provider, may need the admin user of the current tenant
-                if (RestApiUtil.isUUID(apiId)) {
-                    api = apiProvider.getAPIbyUUID(apiId);
-                } else {
-                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-                    api = apiProvider.getAPI(apiIdentifier);
-                }*/
-
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupId);
 
             } else if (!StringUtils.isEmpty(applicationId)) {
@@ -82,15 +76,47 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     @Override
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String ifMatch,
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
             String ifUnmodifiedSince) {
-        return null;
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider;
+        APIConsumer apiConsumer;
+        try {
+            apiProvider = RestApiUtil.getProvider(username);
+            SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
+            subscribedAPI.setSubStatus(blockState);
+            apiProvider.updateSubscription(subscribedAPI);
+
+            //retrieve the updated Subscription
+            apiConsumer = RestApiUtil.getConsumer(username);
+            SubscribedAPI updatedSubscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
+            return Response.ok().entity(subscriptionDTO).build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
     public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
             String ifUnmodifiedSince) {
-        return null;
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider;
+        APIConsumer apiConsumer;
+        try {
+            apiProvider = RestApiUtil.getProvider(username);
+            SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
+            subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
+            apiProvider.updateSubscription(subscribedAPI);
+
+            //retrieve the updated Subscription
+            apiConsumer = RestApiUtil.getConsumer(username);
+            SubscribedAPI updatedSubscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
+            return Response.ok().entity(subscriptionDTO).build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
@@ -111,27 +137,5 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             throw new InternalServerErrorException(e);
         }
     }
-    
-    /*
-    @Override
-    public Response subscriptionsSubscriptionIdPut(String subscriptionId, SubscriptionDTO body, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
 
-        String username = RestApiUtil.getLoggedInUsername();
-        APIProvider apiProvider = null;
-        APIConsumer apiConsumer = null;
-        try {
-            apiProvider = RestApiUtil.getProvider(username);
-            SubscribedAPI subscribedAPI = SubscriptionMappingUtil.fromDTOToSubscription(body);
-            apiProvider.updateSubscription(subscribedAPI);
-
-            //retrieve the updated Subscription
-            apiConsumer = RestApiUtil.getConsumer(username);
-            SubscribedAPI updatedSubscribedAPI = apiConsumer.getSubscriptionByUUID(subscriptionId);
-            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
-            return Response.ok().entity(subscriptionDTO).build();
-        } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
-        }
-    }*/
 }
