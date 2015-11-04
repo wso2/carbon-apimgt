@@ -588,9 +588,6 @@ paths:
         Generate keys for application
       parameters:
         - $ref: '#/parameters/applicationId-Q'
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
         - in: body
           name: body
           description: |
@@ -598,6 +595,9 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - Application (individual)
         - Generate Keys
@@ -607,7 +607,7 @@ paths:
             OK. 
             Keys are generated.
           schema:
-            $ref: '#/definitions/Application'
+            $ref: '#/definitions/ApplicationKey'
           headers:
             Content-Type:
               description: |

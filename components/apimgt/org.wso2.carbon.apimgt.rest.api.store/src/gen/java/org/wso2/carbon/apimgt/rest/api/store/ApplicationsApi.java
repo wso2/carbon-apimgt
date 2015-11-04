@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiParam;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 
 import java.util.List;
@@ -70,7 +71,7 @@ public class ApplicationsApi  {
     @Path("/generate-keys")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = ApplicationDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys for application", response = ApplicationKeyDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nKeys are generated."),
         
@@ -81,12 +82,12 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
 
     public Response applicationsGenerateKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application.",required=true) @QueryParam("applicationId") String applicationId,
-    @ApiParam(value = "Media type of the entity in the body. Default is JSON." ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Application object the keys of which are to be generated" ,required=true ) ApplicationKeyGenerateRequestDTO body,
+    @ApiParam(value = "Media type of the entity in the body. Default is JSON." ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.applicationsGenerateKeysPost(applicationId,contentType,body,ifMatch,ifUnmodifiedSince);
+    return delegate.applicationsGenerateKeysPost(applicationId,body,contentType,ifMatch,ifUnmodifiedSince);
     }
     @GET
     @Path("/{applicationId}")
