@@ -24,9 +24,9 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.publisher.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.TierMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -103,6 +103,11 @@ public class TiersApiServiceImpl extends TiersApiService {
         return Response.created(createdApiUri).entity(createdTierDTO).build();
     }
 
+    @Override public Response tiersUpdatePermissionPost(String tierName, String ifMatch, String ifUnmodifiedSince,
+            TierPermissionDTO permissions) {
+        return null;
+    }
+
     @Override public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
             String ifModifiedSince){
         //backend method requires
@@ -163,12 +168,5 @@ public class TiersApiServiceImpl extends TiersApiService {
         }
         return Response.ok().build();
     }
-
-    @Override
-    public Response tiersTierNameUpdatePermissionPost(String tierName,
-                                                      TierPermissionDTO permissions,
-                                                      String contentType, String ifMatch,
-                                                      String ifUnmodifiedSince) {
-        return Response.ok().build();
-    }
+    
 }

@@ -29,7 +29,7 @@
     <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
     <packaging>war</packaging>
     <name>WSO2 API Manager REST API</name>
-    <description>WSO2 API Manager REST API</description>
+    <description>WSO2 API Manager REST API for API Store</description>
 
 
     <dependencies>
@@ -71,6 +71,10 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.api</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -137,7 +141,7 @@
                 <artifactId>swagger2cxf-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
-                    <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
+                    <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
                 </configuration>
             </plugin>
         </plugins>

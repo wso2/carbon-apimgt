@@ -21,7 +21,7 @@ public class ApplicationKeyDTO  {
   private String consumerSecret = null;
   
   
-  private List<String> supportedGrantTypes = new ArrayList<String>() ;
+  private List<String> supportedGrantTypes = new ArrayList<String>();
   
   
   private String keyState = null;

@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import java.util.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,12 +23,6 @@ public class APIDTO  {
   
   
   private String description = null;
-  
-  public enum TypeEnum {
-     REST,  SOAP, 
-  };
-  
-  private TypeEnum type = null;
   
   @NotNull
   private String context = null;
@@ -57,13 +52,13 @@ public class APIDTO  {
   private Boolean isDefaultVersion = null;
   
   
-  private List<String> transport = new ArrayList<String>() ;
+  private List<String> transport = new ArrayList<String>();
   
   
-  private List<String> tags = new ArrayList<String>() ;
+  private List<String> tags = new ArrayList<String>();
   
   
-  private List<String> tiers = new ArrayList<String>() ;
+  private List<String> tiers = new ArrayList<String>();
   
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
@@ -72,16 +67,16 @@ public class APIDTO  {
   private VisibilityEnum visibility = null;
   
   
-  private List<String> visibleRoles = new ArrayList<String>() ;
+  private List<String> visibleRoles = new ArrayList<String>();
   
   
-  private List<String> visibleTenants = new ArrayList<String>() ;
+  private List<String> visibleTenants = new ArrayList<String>();
   
   
   private String endpointConfig = null;
   
   
-  private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>() ;
+  private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
   
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
@@ -90,7 +85,10 @@ public class APIDTO  {
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
   
   
-  private List<String> subscriptionAvailableTenants = new ArrayList<String>() ;
+  private List<String> subscriptionAvailableTenants = new ArrayList<String>();
+  
+  
+  private APIBusinessInformationDTO businessInformation = null;
 
   
   /**
@@ -127,18 +125,6 @@ public class APIDTO  {
   }
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
   }
 
   
@@ -372,6 +358,18 @@ public class APIDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("businessInformation")
+  public APIBusinessInformationDTO getBusinessInformation() {
+    return businessInformation;
+  }
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -381,7 +379,6 @@ public class APIDTO  {
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  type: ").append(type).append("\n");
     sb.append("  context: ").append(context).append("\n");
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
@@ -401,6 +398,7 @@ public class APIDTO  {
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
+    sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
