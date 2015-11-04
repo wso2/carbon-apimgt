@@ -361,6 +361,22 @@ public class APIMappingUtil {
 
     }
 
+    public static String mapLifecycleStatusToRegistry(String status) {
+        switch (status) {
+        case "PUBLISHED":
+            return "Publish";
+        case "CREATED":
+            return "Demote to Created";
+        case "DEPRECATED":
+            return "Deprecate";
+        case "BLOCKED":
+            return "Block";
+        case "RETIRED":
+            return "Retire";
+        default:
+            return null;
+        }
+    }
 
     public static DocumentDTO fromDocumentationtoDTO(Documentation doc){
         DocumentDTO d = new DocumentDTO();

@@ -113,11 +113,22 @@ public class ApisApiServiceImpl extends ApisApiService {
         }   */
         return Response.created(createdApiUri).entity(createdApiDTO).build();
     }
+
     @Override
-    public Response apisChangeLifecyclePost(String newState,String publishToGateway,String resubscription,String apiId,String ifMatch,String ifUnmodifiedSince){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response apisChangeLifecyclePost(String apiId, String newState, String publishToGateway,
+            String resubscription, String ifMatch, String ifUnmodifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            String registryLCState = APIMappingUtil.mapLifecycleStatusToRegistry(newState);
+            apiProvider.changeLifeCycleStatus(apiIdentifier, registryLCState);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
+    
     @Override
     public Response apisCopyApiPost(String newVersion,String apiId){
         boolean isTenantFlowStarted = false;

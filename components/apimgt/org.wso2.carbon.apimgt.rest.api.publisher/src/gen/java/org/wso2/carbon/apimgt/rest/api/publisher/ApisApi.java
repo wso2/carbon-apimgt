@@ -81,9 +81,9 @@ public class ApisApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
 
     public Response apisChangeLifecyclePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.",required=true) @QueryParam("apiId") String apiId,
-    @ApiParam(value = "New lifecycle state of the API." )@FormParam("newState")  String newState,
-    @ApiParam(value = "" )@FormParam("publishToGateway")  String publishToGateway,
-    @ApiParam(value = "" )@FormParam("resubscription")  String resubscription,
+    @ApiParam(value = "New lifecycle state of the API.", allowableValues="{values=[PUBLISHED, CREATED, DEPRECATED, BLOCKED, RETIRED]}") @QueryParam("newState") String newState,
+    @ApiParam(value = "") @QueryParam("publishToGateway") String publishToGateway,
+    @ApiParam(value = "") @QueryParam("resubscription") String resubscription,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {

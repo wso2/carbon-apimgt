@@ -1451,13 +1451,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Removes a given documentation
-     *
+     * 
      * @param apiId   APIIdentifier
-     * @param docType the type of the documentation
-     * @param docName name of the document
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     *          if failed to remove documentation
+     * @param docId UUID of the doc
+     * @throws APIManagementException if failed to remove documentation
      */
     public void removeDocumentation(APIIdentifier apiId, String docId)
             throws APIManagementException {
