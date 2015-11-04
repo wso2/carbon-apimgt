@@ -25,8 +25,9 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.rest.api.dcr.web.FaultResponse;
+import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.RegistrationService;
+import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.RegistrationProfile;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

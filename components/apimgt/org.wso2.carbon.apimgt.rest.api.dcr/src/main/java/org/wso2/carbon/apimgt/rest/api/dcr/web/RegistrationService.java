@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.dcr.web;
 
-import org.wso2.carbon.apimgt.rest.api.dcr.web.impl.RegistrationProfile;
+import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.RegistrationProfile;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

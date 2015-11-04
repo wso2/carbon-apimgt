@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.dcr.web;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
