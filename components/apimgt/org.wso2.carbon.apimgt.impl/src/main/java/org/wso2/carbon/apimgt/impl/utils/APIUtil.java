@@ -4620,17 +4620,4 @@ public final class APIUtil {
     public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         return Class.forName(className);
     }
-
-    /**
-     * Gets the instance of a class given the class name.
-     * @param className the fully qualified name of the class.
-     * @return an instance of the class with the given name
-     * @throws ClassNotFoundException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     */
-
-    public static Class getClassFromName(String className) throws ClassNotFoundException {
-        return Class.forName(className);
-    }
 }

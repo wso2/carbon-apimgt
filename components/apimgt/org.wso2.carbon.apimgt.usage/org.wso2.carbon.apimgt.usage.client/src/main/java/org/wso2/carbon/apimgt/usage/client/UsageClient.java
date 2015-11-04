@@ -108,7 +108,7 @@ public class UsageClient {
         try {
 
             //get the Class from the class name
-            Class statClass=APIUtil.getClassFromName(className);
+            Class statClass=APIUtil.getClassForName(className);
             //use the constructor and pass appropriate args to get a instance
             if(user!=null) {
                 usageStatisticsClient = (APIUsageStatisticsClient) statClass.getConstructor(String.class)
