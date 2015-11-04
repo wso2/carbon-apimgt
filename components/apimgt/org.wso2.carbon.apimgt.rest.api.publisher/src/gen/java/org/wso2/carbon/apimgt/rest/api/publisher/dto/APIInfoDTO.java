@@ -21,12 +21,6 @@ public class APIInfoDTO  {
   
   private String description = null;
   
-  public enum TypeEnum {
-     REST,  SOAP, 
-  };
-  
-  private TypeEnum type = null;
-  
   
   private String context = null;
   
@@ -79,18 +73,6 @@ public class APIInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -113,9 +95,9 @@ public class APIInfoDTO  {
 
   
   /**
-   * If the provider value is not given user invoking the api will be used as the provider.
+   * If the provider value is not given, the user invoking the API will be used as the provider.
    **/
-  @ApiModelProperty(value = "If the provider value is not given user invoking the api will be used as the provider.")
+  @ApiModelProperty(value = "If the provider value is not given, the user invoking the API will be used as the provider.")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;
@@ -146,7 +128,6 @@ public class APIInfoDTO  {
     sb.append("  id: ").append(id).append("\n");
     sb.append("  name: ").append(name).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  type: ").append(type).append("\n");
     sb.append("  context: ").append(context).append("\n");
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");

@@ -1,13 +1,13 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
+
+import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 
 
@@ -22,7 +22,7 @@ public class TierDTO  {
   private String description = null;
   
   
-  private Map attributes = new HashMap<String, String>() ;
+  private Map<String, String> attributes = new HashMap<String, String>();
   
   
   private BigDecimal requestCount = null;
@@ -62,14 +62,14 @@ public class TierDTO  {
 
   
   /**
-   * custom attributes added to the tier policy
+   * Custom attributes added to the tier policy
    **/
-  @ApiModelProperty(value = "custom attributes added to the tier policy")
+  @ApiModelProperty(value = "Custom attributes added to the tier policy")
   @JsonProperty("attributes")
-  public Map getAttributes() {
+  public Map<String, String> getAttributes() {
     return attributes;
   }
-  public void setAttributes(Map attributes) {
+  public void setAttributes(Map<String, String> attributes) {
     this.attributes = attributes;
   }
 
@@ -113,9 +113,9 @@ public class TierDTO  {
 
   
   /**
-   * By making this attribute to true, you are capabale of sending requests even request count exceeded within a unit time
+   * By making this attribute to true, you are capabale of sending requests \neven if the request count exceeded within a unit time
    **/
-  @ApiModelProperty(value = "By making this attribute to true, you are capabale of sending requests even request count exceeded within a unit time")
+  @ApiModelProperty(value = "By making this attribute to true, you are capabale of sending requests \neven if the request count exceeded within a unit time")
   @JsonProperty("continueOnQuotaReach")
   public Boolean getContinueOnQuotaReach() {
     return continueOnQuotaReach;

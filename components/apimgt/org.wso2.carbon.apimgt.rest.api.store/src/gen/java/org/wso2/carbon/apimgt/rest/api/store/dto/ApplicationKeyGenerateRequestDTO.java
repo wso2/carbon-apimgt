@@ -26,10 +26,10 @@ public class ApplicationKeyGenerateRequestDTO  {
   private String callbackUrl = null;
   
   
-  private List<String> accessAllowDomains = new ArrayList<String>() ;
+  private List<String> accessAllowDomains = new ArrayList<String>();
   
   
-  private List<String> scopes = new ArrayList<String>() ;
+  private List<String> scopes = new ArrayList<String>();
 
   
   /**
