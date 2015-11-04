@@ -43,6 +43,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -171,6 +172,12 @@ public class DASRestClient {
         //doing a post request on the aggregate REST API
         CloseableHttpResponse response = post(json,
                 dasUrl + APIUsageStatisticsClientConstants.DAS_AGGREGATES_SEARCH_REST_API_URL);
+
+        //check the status code of the response
+        if (response.getStatusLine().getStatusCode() == 500) {
+            log.warn("DAS internal Server Error, Table '" + request.getTableName() + "' may not contain any Records.");
+            return new ArrayList<Result<T>>();
+        }
 
         //parse the response back to the java objects
         List<Result<T>> result = parse(response, type);

@@ -2255,6 +2255,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public void deployArtifacts(String url, String user, String pass) throws Exception {
 
+        if (url.trim().equals("")) {
+            String message = "Data Analyzer URL is empty. cApp will not be deployed.";
+            log.warn(message);
+            return;
+        }
+
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics.car";
         String cAppPath = System.getProperty("carbon.home") + File.separator + "statistics";
