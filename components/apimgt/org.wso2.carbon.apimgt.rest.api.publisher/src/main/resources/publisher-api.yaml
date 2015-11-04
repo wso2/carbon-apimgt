@@ -413,14 +413,20 @@ paths:
         - name: newState
           description: |
             New lifecycle state of the API.
+          in: query
           type: string
-          in: formData
+          enum:
+            - PUBLISHED
+            - CREATED
+            - DEPRECATED
+            - BLOCKED
+            - RETIRED
         - name: publishToGateway
           type: string
-          in: formData
+          in: query
         - name: resubscription
           type: string
-          in: formData
+          in: query
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -897,6 +903,14 @@ paths:
     post:
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
+        - name: blockState
+          in: query
+          description: |
+            Subscription block state.
+          type: string
+          enum:
+            - BLOCKED
+            - PROD_ONLY_BLOCKED
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       description: |
