@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.rest.api.dcr.web.impl;
+package org.wso2.carbon.apimgt.rest.api.dcr.web.dto;
 
 /**
  *
