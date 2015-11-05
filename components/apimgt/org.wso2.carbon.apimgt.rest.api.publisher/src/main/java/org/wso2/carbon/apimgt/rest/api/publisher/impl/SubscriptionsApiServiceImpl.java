@@ -43,9 +43,7 @@ import javax.ws.rs.core.Response;
 
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String groupId, String accept,
-            String ifNoneMatch) {
-        //todo: validation: only one of {application id,api id} should present
+    public Response subscriptionsGet(String apiId, String groupId, String accept, String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
@@ -53,14 +51,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             if (!StringUtils.isEmpty(apiId)) {
-
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupId);
-
-            } else if (!StringUtils.isEmpty(applicationId)) {
-                Application application = apiConsumer.getApplicationByUUID(applicationId);
-                subscriptions =
-                        apiConsumer.getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
             }
 
             List<SubscriptionDTO> subscriptionDTOs = new ArrayList<>();

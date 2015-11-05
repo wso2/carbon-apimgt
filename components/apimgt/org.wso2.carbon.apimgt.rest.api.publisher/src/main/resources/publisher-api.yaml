@@ -811,7 +811,6 @@ paths:
         the subscriptions of which are to be returned are passed as parameters.
       parameters:
         - $ref: '#/parameters/apiId-Q'
-        - $ref: '#/parameters/applicationId-Q'
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
@@ -1420,16 +1419,6 @@ parameters:
   applicationId:
     name: applicationId
     in: path
-    description: |
-      **Application Identifier** consisting of the UUID of the Application.
-    required: true
-    type: string
-
-# Application Identifier
-# Specified as part of the query string
-  applicationId-Q:
-    name: applicationId
-    in: query
     description: |
       **Application Identifier** consisting of the UUID of the Application.
     required: true
