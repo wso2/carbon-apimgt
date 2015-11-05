@@ -47,17 +47,17 @@ public class APIDescriptionGenUtil {
         try {
             maxCount = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName
                     (APIConstants
-                            .THROTTLE_CONTROL_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                             .THROTTLE_CONTROL_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT).
                     getFirstChildWithName(APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT);
             timeUnit = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName
                     (APIConstants
-                            .THROTTLE_CONTROL_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                             .THROTTLE_CONTROL_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT).
                     getFirstChildWithName(APIConstants.THROTTLE_UNIT_TIME_ELEMENT);
             //Here we will assume time unit provided as milli second and do calculation to get requests per minute.
             if (maxCount.getText().isEmpty() || timeUnit.getText().isEmpty()) {
                 String msg = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT.toString() + "or"
-                        + APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() + " element data found empty in " +
-                        "the policy.";
+                             + APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() + " element data found empty in " +
+                             "the policy.";
                 log.warn(msg);
                 throw new APIManagementException(msg);
             }
@@ -68,7 +68,7 @@ public class APIDescriptionGenUtil {
             return DESCRIPTION;
         } catch (NullPointerException npe) {
             String msg = "Policy could not be parsed correctly based on http://schemas.xmlsoap.org/ws/2004/09/policy " +
-                    "specification";
+                         "specification";
             log.warn(msg);
             throw new APIManagementException(msg);
         }
