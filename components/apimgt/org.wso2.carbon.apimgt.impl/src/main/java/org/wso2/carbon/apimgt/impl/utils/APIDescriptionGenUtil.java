@@ -17,15 +17,18 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.namespace.QName;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class APIDescriptionGenUtil {
     /**
@@ -68,6 +71,76 @@ public class APIDescriptionGenUtil {
                          "specification";
             log.warn(msg);
             throw new APIManagementException(msg);
+        }
+    }
+
+    /**
+     * This method is used to get Allowed Requests Count for a tier
+     *
+     * @param policy tier policy
+     * @return Allowed Requests Count
+     * @throws APIManagementException if error occurs when processing XML
+     */
+
+    public static long getAllowedRequestCount(OMElement policy) throws APIManagementException {
+        long requestCount = 0;
+        try {
+            OMElement maxCount = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                    getFirstChildWithName(APIConstants.THROTTLE_CONTROL_ELEMENT).
+                    getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                    getFirstChildWithName(APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT);
+
+            if (maxCount.getText().isEmpty()) {
+                String message = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT.toString() + "or" +
+                        APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() +
+                        " element data not found empty in the policy.";
+                log.warn(message);
+                throw new APIManagementException(message);
+            }
+            requestCount = Long.parseLong(maxCount.getText().trim());
+            return requestCount;
+        } catch (OMException e) {
+            String errorMessage = "Policy could not be parsed correctly based on " +
+                    "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
+            log.warn(errorMessage);
+            throw new APIManagementException(errorMessage);
+        } catch (NumberFormatException e) {
+            log.error("Error in retrieving request count in tier xml. " + e);
+            throw new APIManagementException("Error in retrieving request count in tier xml. " + e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to get time duration of a tier
+     *
+     * @param policy tier policy
+     * @return time duration for requests
+     * @throws APIManagementException if error occurs when processing XML
+     */
+    public static long getTimeDuration(OMElement policy) throws APIManagementException {
+        long timeDurationSeconds = 0;
+        try {
+            OMElement duration = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                                getFirstChildWithName(APIConstants.THROTTLE_CONTROL_ELEMENT).
+                                getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                                getFirstChildWithName(APIConstants.THROTTLE_UNIT_TIME_ELEMENT);
+            if (duration.getText().isEmpty()) {
+                String message = APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() +
+                        " element data not found empty in the policy.";
+                log.warn(message);
+                throw new APIManagementException(message);
+            }
+
+            //converting to seconds
+            timeDurationSeconds = TimeUnit.MILLISECONDS.toSeconds(Long.parseLong(duration.getText().trim()));
+            return timeDurationSeconds;
+        } catch (OMException e) {
+            String errorMessage = "Policy could not be parsed correctly based on " + "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
+            log.warn(errorMessage);
+            throw new APIManagementException(errorMessage);
+        } catch (NumberFormatException e) {
+            log.error("Error in retrieving request count in tier xml. " + e);
+            throw new APIManagementException("Error in retrieving request count in tier xml. " + e.getMessage());
         }
     }
 
