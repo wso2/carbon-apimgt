@@ -1005,9 +1005,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             accessTimeDTO.setLastAccessTime(dateFormat.format(lastAccessTime.accessTime));
             accessTimeDTO.setUser(lastAccessTime.username);
             accessTimeByAPI.put(entry.getKey(), accessTimeDTO);
-        }
-        return getLastAccessTimeTopEntries(new ArrayList<APIVersionLastAccessTimeDTO>(accessTimeByAPI.values()), limit);*/
-        return apiVersionLastAccessTimeUsage;
+        }*/
+        return getLastAccessTimeTopEntries(apiVersionLastAccessTimeUsage, limit);
+        //return apiVersionLastAccessTimeUsage;
     }
 
     /**
@@ -2308,4 +2308,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         throw new APIMgtUsageQueryServiceClientException(msg, e);
     }
 
+    private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
+            int limit) {
+        Collections.sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
+            public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
+                // Note that o2 appears before o1
+                // This is because we need to sort in the descending order
+                return o2.getLastAccessTime().compareToIgnoreCase(o1.getLastAccessTime());
+            }
+        });
+        if (usageData.size() > limit) {
+            while (usageData.size() > limit) {
+                usageData.remove(limit);
+            }
+        }
+
+        return usageData;
+    }
 }
