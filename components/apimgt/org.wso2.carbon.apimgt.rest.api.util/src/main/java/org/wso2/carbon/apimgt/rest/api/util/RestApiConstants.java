@@ -48,8 +48,8 @@ public final class RestApiConstants {
                     + "&type=" + TYPE_PARAM;
 
     public static final String APPLICATIONS_GET_PAGINATION_URL =
-            RESOURCE_PATH_APPLICATIONS + "?limit=" + LIMIT_PARAM + "&subscriber=" + SUBSCRIBER_PARAM + "&groupId="
-                    + GROUPID_PARAM;
+            RESOURCE_PATH_APPLICATIONS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&subscriber="
+                    + SUBSCRIBER_PARAM + "&groupId=" + GROUPID_PARAM;
 
     public static final String API_VERSION_PARAM="{version}";
 

@@ -94,15 +94,6 @@ public class RestApiUtil {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     }
 
-    public static String getAPIPaginatedURL(Integer offset, Integer limit, String query, String type) {
-        String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
-        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
-        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
-        paginatedURL = paginatedURL.replace(RestApiConstants.TYPE_PARAM, type);
-        return paginatedURL;
-    }
-
     public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
         Map<String, Integer> result = new HashMap<>();
         if (offset >= size || offset < 0)
@@ -130,6 +121,24 @@ public class RestApiUtil {
             }
         }
         return result;
+    }
+
+    public static String getAPIPaginatedURL(Integer offset, Integer limit, String query, String type) {
+        String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        paginatedURL = paginatedURL.replace(RestApiConstants.TYPE_PARAM, type);
+        return paginatedURL;
+    }
+
+    public static String getApplicationPaginatedURL(Integer offset, Integer limit, String subscriber, String groupId) {
+        String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.SUBSCRIBER_PARAM, subscriber);
+        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
+        return paginatedURL;
     }
 
 }

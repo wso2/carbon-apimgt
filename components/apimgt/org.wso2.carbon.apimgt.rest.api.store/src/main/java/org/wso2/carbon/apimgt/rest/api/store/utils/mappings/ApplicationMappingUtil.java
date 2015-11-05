@@ -23,9 +23,12 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ApplicationMappingUtil {
 
@@ -58,7 +61,8 @@ public class ApplicationMappingUtil {
         return application;
     }
 
-    public static ApplicationListDTO fromApplicationsToDTO (Application[] applications) {
+    public static ApplicationListDTO fromApplicationsToDTO(List<Application> applications, String subscriber,
+            String groupId, int limit, int offset, int size) {
         ApplicationListDTO applicationListDTO = new ApplicationListDTO();
         List<ApplicationInfoDTO> applicationInfoDTOs = applicationListDTO.getList();
         if (applicationInfoDTOs == null) {
@@ -68,7 +72,26 @@ public class ApplicationMappingUtil {
         for (Application application : applications) {
             applicationInfoDTOs.add(fromApplicationToInfoDTO(application));
         }
-        applicationListDTO.setCount(applications.length);
+
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), subscriber, groupId);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getApplicationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), subscriber, groupId);
+        }
+        applicationListDTO.setNext(paginatedNext);
+        applicationListDTO.setPrevious(paginatedPrevious);
+        applicationListDTO.setCount(applications.size());
         return applicationListDTO;
     }
 
