@@ -40,10 +40,12 @@ public class SubscriptionsApi  {
     public Response subscriptionsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.",required=true) @QueryParam("apiId") String apiId,
     @ApiParam(value = "**Application Identifier** consisting of the UUID of the Application.",required=true) @QueryParam("applicationId") String applicationId,
     @ApiParam(value = "Application Group Id") @QueryParam("groupId") String groupId,
+    @ApiParam(value = "Starting point within the complete list of items qualified.", defaultValue="0") @QueryParam("offset") Integer offset,
+    @ApiParam(value = "Maximum size of resource array to return.", defaultValue="25") @QueryParam("limit") Integer limit,
     @ApiParam(value = "Media types acceptable for the response. Default is JSON."  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.subscriptionsGet(apiId,applicationId,groupId,accept,ifNoneMatch);
+    return delegate.subscriptionsGet(apiId,applicationId,groupId,offset,limit,accept,ifNoneMatch);
     }
     @POST
     

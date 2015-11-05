@@ -659,6 +659,8 @@ paths:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
         - $ref: '#/parameters/groupId'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/limit'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:

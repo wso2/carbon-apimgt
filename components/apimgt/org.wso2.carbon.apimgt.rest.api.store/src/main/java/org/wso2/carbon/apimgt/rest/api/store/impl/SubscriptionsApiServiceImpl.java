@@ -44,14 +44,17 @@ import java.util.Set;
 import javax.ws.rs.core.Response;
 
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
+
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String groupId, String accept,
-            String ifNoneMatch) {
+    public Response subscriptionsGet(String apiId, String applicationId, String groupId, Integer offset,
+            Integer limit, String accept, String ifNoneMatch) {
         //todo: validation: only one of {application id,api id} should present
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
         Set<SubscribedAPI> subscriptions = new HashSet<>();
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             if (!StringUtils.isEmpty(apiId)) {
@@ -69,8 +72,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
-                subscriptions =
-                        apiConsumer.getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+                subscriptions = apiConsumer
+                        .getPaginatedSubscribedAPIs(subscriber, application.getName(), offset, offset + limit,
+                                application.getGroupId());
             }
 
             List<SubscriptionDTO> subscriptionDTOs = new ArrayList<>();
