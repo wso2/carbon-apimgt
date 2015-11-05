@@ -146,14 +146,6 @@ public interface APIConsumer extends APIManager {
      */
     SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException;
 
-    /** returns the SubscribedAPI object which is related to the UUID
-     *
-     * @param uuid UUID of Subscription
-     * @return
-     * @throws APIManagementException
-     */
-    SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
-
     /**
      * Returns a set of SubscribedAPI purchased by the given Subscriber
      *

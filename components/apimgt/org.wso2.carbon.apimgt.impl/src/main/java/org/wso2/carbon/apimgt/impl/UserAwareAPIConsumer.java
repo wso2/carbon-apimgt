@@ -54,6 +54,19 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        SubscribedAPI subscribedAPI = super.getSubscriptionByUUID(uuid);
+        if (subscribedAPI.getSubscriber().getName().equals(username)) {
+            checkSubscribePermission();
+            return subscribedAPI;
+        } else {
+            handleException("user " +
+                    username + " is not authorized to view subscription " + subscribedAPI.getUUID());
+            return null;
+        }
+    }
+
+    @Override
     public void removeSubscription(APIIdentifier identifier, String userId,
                                    int applicationId) throws APIManagementException {
         checkSubscribePermission();

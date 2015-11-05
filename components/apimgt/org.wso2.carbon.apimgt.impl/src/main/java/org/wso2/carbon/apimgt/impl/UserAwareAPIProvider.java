@@ -125,6 +125,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         super.copyAllDocumentation(apiId, toVersion);
     }
 
+    @Override
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        checkCreatePermission();
+        return super.getSubscriptionByUUID(uuid);
+    }
+
     public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }

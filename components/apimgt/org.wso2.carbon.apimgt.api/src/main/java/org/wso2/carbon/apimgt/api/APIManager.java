@@ -183,6 +183,14 @@ public interface APIManager {
      */
     Subscriber getSubscriberById(String accessToken) throws APIManagementException;
 
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
+
     /**
      * Creates a new subscriber. The newly created subscriber id will be set in the given object.
      *

@@ -775,6 +775,16 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSortedSet;
     }
 
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getSubscriptionByUUID(uuid);
+    }
+
     protected void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
