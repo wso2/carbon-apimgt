@@ -30,9 +30,13 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
 
 
-
+    /**
+     * @param message cxf message to be authenticated
+     * @return true if authentication was successful else false
+     * @throws APIManagementException when error in authentication process
+     */
     public boolean authenticate(Message message) throws APIManagementException {
-        String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message,PATTERN,
+        String accessToken = RestApiUtil.extractOAuthAccessTokenFromMessage(message, PATTERN,
                 RestApiConstants.AUTH_HEADER_NAME);
         AccessTokenInfo tokenInfo = null;
         try {
@@ -70,11 +74,8 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
     }
 
 
-
-
     /**
-     *
-     * @param message CXF message to be validate
+     * @param message   CXF message to be validate
      * @param tokenInfo Token information associated with incoming request
      * @return return true if we found matching scope in resource and token information
      *         else false(means scope validation failed).
@@ -103,7 +104,8 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
             try {
                 templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
             } catch (URITemplateException e) {
-                log.error("Error while creating URI Template object to validate request. Template pattern: " + templateString);
+                log.error("Error while creating URI Template object to validate request. Template pattern: " +
+                        templateString);
             }
             if (templateToValidate.matches(resource, var)) {
                 for (int i = 0; i < scopes.length; i++) {
