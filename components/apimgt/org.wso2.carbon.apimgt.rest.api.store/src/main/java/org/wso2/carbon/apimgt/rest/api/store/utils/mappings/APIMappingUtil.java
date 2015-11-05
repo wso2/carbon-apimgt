@@ -62,7 +62,7 @@ public class APIMappingUtil {
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
-        dto.setContext(model.getContextTemplate());
+        dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setStatus(model.getStatus().getStatus());
@@ -137,7 +137,7 @@ public class APIMappingUtil {
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
-        apiInfoDTO.setContext(api.getContextTemplate());
+        apiInfoDTO.setContext(api.getContext());
         apiInfoDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
