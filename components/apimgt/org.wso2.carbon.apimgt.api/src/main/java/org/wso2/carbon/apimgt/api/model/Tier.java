@@ -33,6 +33,10 @@ public class Tier implements Serializable, Comparable<Tier>{
     private Map<String,Object> tierAttributes;
 
     private long requestsPerMin = 0;
+    private long requestCount = 0;
+    private long unitTime = 0;
+    private boolean enableUnlimited = false;
+    private String tierPlan;
 
     public Tier(String name) {
         this.name = name;
@@ -79,6 +83,38 @@ public class Tier implements Serializable, Comparable<Tier>{
 
     public void setRequestsPerMin(long requestsPerMin) {
         this.requestsPerMin = requestsPerMin;
+    }
+
+    public long getRequestCount() {
+        return requestCount;
+    }
+
+    public void setRequestCount(long requestCount) {
+        this.requestCount = requestCount;
+    }
+
+    public long getUnitTime() {
+        return unitTime;
+    }
+
+    public void setUnitTime(long unitTime) {
+        this.unitTime = unitTime;
+    }
+
+    public boolean isEnableUnlimited() {
+        return enableUnlimited;
+    }
+
+    public void setEnableUnlimited(boolean enableUnlimited) {
+        this.enableUnlimited = enableUnlimited;
+    }
+
+    public String getTierPlan() {
+        return tierPlan;
+    }
+
+    public void setTierPlan(String tierPlan) {
+        this.tierPlan = tierPlan;
     }
 
     @Override
