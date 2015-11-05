@@ -33,7 +33,11 @@ public final class RestApiConstants {
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
     public static final String TYPE_PARAM = "{type}";
+    public static final String SUBSCRIBER_PARAM = "{subscriber}";
+    public static final String GROUPID_PARAM = "{groupId}";
 
+    public static final int PAGINATION_LIMIT_DEFAULT = 25;
+    public static final int PAGINATION_OFFSET_DEFAULT = 0;
     public static final String PAGINATION_NEXT_OFFSET = "next_offset";
     public static final String PAGINATION_NEXT_LIMIT = "next_limit";
     public static final String PAGINATION_PREVIOUS_OFFSET = "previous_offset";
@@ -42,6 +46,10 @@ public final class RestApiConstants {
     public static final String APIS_GET_PAGINATION_URL =
             RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM
                     + "&type=" + TYPE_PARAM;
+
+    public static final String APPLICATIONS_GET_PAGINATION_URL =
+            RESOURCE_PATH_APPLICATIONS + "?limit=" + LIMIT_PARAM + "&subscriber=" + SUBSCRIBER_PARAM + "&groupId="
+                    + GROUPID_PARAM;
 
     public static final String API_VERSION_PARAM="{version}";
 

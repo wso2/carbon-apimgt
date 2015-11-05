@@ -63,6 +63,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
 
+            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
             //We should send null as the provider, Otherwise serchAPIs will return all APIs of the provider 
             // instead of looking at type and query
             allMatchedApis = apiProvider.searchAPIs(query, type, null);

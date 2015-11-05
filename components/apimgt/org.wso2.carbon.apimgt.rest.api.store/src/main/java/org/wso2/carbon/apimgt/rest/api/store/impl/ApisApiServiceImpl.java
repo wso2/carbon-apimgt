@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
@@ -58,6 +59,9 @@ public class ApisApiServiceImpl extends ApisApiService {
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
+
+            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
             apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, offset + limit, true);
             APIListDTO apiListDTO = new APIListDTO();
