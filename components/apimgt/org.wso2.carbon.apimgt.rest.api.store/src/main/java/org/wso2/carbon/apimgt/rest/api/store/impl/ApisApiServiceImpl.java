@@ -16,11 +16,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
@@ -33,18 +35,21 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.Set;
 
 public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
+    @SuppressWarnings("unchecked")
     public Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch){
-        List<API> apis;
-        APIListDTO apiListDTO;
+        Map<String, Object> apisMap;
         boolean isTenantFlowStarted = false;
 
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             /*String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -54,10 +59,15 @@ public class ApisApiServiceImpl extends ApisApiService {
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
 
-            //We should send null as the provider, Otherwise serchAPIs will return all APIs of the provider 
-            // instead of looking at type and query
-            apis = apiProvider.searchAPIs(query, type, null);
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(apis);
+            apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, offset + limit, true);
+            APIListDTO apiListDTO = new APIListDTO();
+            Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
+            int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
+            if (apisResult != null) {
+                Set<API> apiSet = (Set)apisResult;
+                apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet, query, type, offset, limit, size);
+            }
+
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -70,7 +80,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
-        APIDTO apiToReturn = new APIDTO();
+        APIDTO apiToReturn;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -106,7 +116,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch) {
-        List<DocumentDTO> list = new ArrayList<DocumentDTO>();
+        List<DocumentDTO> list = new ArrayList<>();
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();

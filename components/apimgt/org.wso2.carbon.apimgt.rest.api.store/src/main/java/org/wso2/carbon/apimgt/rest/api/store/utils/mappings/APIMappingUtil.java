@@ -26,10 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class APIMappingUtil {
 
@@ -102,17 +99,38 @@ public class APIMappingUtil {
         return dto;
     }
 
-    public static APIListDTO fromAPIListToDTO (List<API> apiList) {
+    public static APIListDTO fromAPISetToDTO(Set<API> apiSet, String query, String type, int offset, int limit,
+            int size) {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiInfoDTOs == null) {
             apiInfoDTOs = new ArrayList<>();
             apiListDTO.setList(apiInfoDTOs);
         }
-        for (API api : apiList) {
+        for (API api : apiSet) {
             apiInfoDTOs.add(fromAPIToInfoDTO(api));
         }
-        apiListDTO.setCount(apiList.size());
+        apiListDTO.setCount(apiSet.size());
+
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query, type);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query, type);
+        }
+
+        apiListDTO.setNext(paginatedNext);
+        apiListDTO.setPrevious(paginatedPrevious);
         return apiListDTO;
     }
 

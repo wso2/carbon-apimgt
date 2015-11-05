@@ -48,7 +48,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch){
-        List<API> apis;
+        List<API> allMatchedApis;
         APIListDTO apiListDTO;
         boolean isTenantFlowStarted = false;
 
@@ -65,8 +65,16 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //We should send null as the provider, Otherwise serchAPIs will return all APIs of the provider 
             // instead of looking at type and query
-            apis = apiProvider.searchAPIs(query, type, null);
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(apis);
+            allMatchedApis = apiProvider.searchAPIs(query, type, null);
+            List<API> resultApis = new ArrayList<>();
+
+            int start = offset < allMatchedApis.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+            int end = offset + limit - 1 <= allMatchedApis.size() - 1 ? offset + limit -1 : allMatchedApis.size() - 1;
+            for (int i = start; i <= end; i++) {
+                resultApis.add(allMatchedApis.get(i));
+            }
+
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(resultApis, query, type, offset, limit, allMatchedApis.size());
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);

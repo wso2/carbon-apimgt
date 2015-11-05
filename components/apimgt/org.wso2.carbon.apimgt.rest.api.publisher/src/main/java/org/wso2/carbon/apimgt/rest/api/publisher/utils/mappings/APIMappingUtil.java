@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class APIMappingUtil {
@@ -271,7 +272,8 @@ public class APIMappingUtil {
 
     }
 
-    public static APIListDTO fromAPIListToDTO (List<API> apiList) {
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, String query, String type, int offset, int limit,
+            int size) {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiInfoDTOs == null) {
@@ -282,6 +284,26 @@ public class APIMappingUtil {
             apiInfoDTOs.add(fromAPIToInfoDTO(api));
         }
         apiListDTO.setCount(apiList.size());
+
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query, type);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query, type);
+        }
+
+        apiListDTO.setNext(paginatedNext);
+        apiListDTO.setPrevious(paginatedPrevious);
         return apiListDTO;
     }
 

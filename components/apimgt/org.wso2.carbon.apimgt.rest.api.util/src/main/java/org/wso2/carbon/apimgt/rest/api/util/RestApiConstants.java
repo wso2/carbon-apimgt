@@ -16,24 +16,34 @@
 
 package org.wso2.carbon.apimgt.rest.api.util;
 
-/**
- * Created by jo on 9/21/15.
- */
 public final class RestApiConstants {
 
     public static final String APPLICATION_JSON = "application/json";
 
     public static final String API_ID_DELIMITER = "-";
 
+    //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
     public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
     public static final String SERVER_URL = "/applications";
     public static final String SERVER_USER_NAME = "/applications";
     public static final String SERVER_PASSWORD = "/applications";
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
+    public static final String QUERY_PARAM = "{query}";
+    public static final String LIMIT_PARAM = "{limit}";
+    public static final String OFFSET_PARAM = "{offset}";
+    public static final String TYPE_PARAM = "{type}";
+
+    public static final String PAGINATION_NEXT_OFFSET = "next_offset";
+    public static final String PAGINATION_NEXT_LIMIT = "next_limit";
+    public static final String PAGINATION_PREVIOUS_OFFSET = "previous_offset";
+    public static final String PAGINATION_PREVIOUS_LIMIT = "previous_limit";
+
+    public static final String APIS_GET_PAGINATION_URL =
+            RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM
+                    + "&type=" + TYPE_PARAM;
+
     public static final String API_VERSION_PARAM="{version}";
-
-
 
     public static final String STORE_LOGINURL = "StoreURL";
     public static final String ADD_NEW_APPLICATIONURL = "AddNewApplicationURL";
