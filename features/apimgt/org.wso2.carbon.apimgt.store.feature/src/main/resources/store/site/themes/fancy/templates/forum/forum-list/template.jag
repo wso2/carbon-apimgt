@@ -73,7 +73,9 @@ if(inputs.api){
                 <td>
                     <a href = "<%=siteConf.context%>/forum/topic/{{ topicId }}?<%=urlSuffix%>"> <strong> {{subject}} </strong></a >
                     <%if (jagg.getUser()) { %>
-                    <i class = "icon-trash pull-right forum_delete_topic_icon" data-id = "{{ topicId }}" data-subject = "{{ subject }}" />
+                        {{#if_creator topicOwner user}}
+                            <i class = "icon-trash pull-right forum_delete_topic_icon" data-id = "{{ topicId }}" data-subject = "{{ subject }}" />
+                        {{/if_creator}}
                     <%}%>
                     <br/> <%= i18n.localize('forum.by') %> : {{ topicOwner }} 
                 </td>

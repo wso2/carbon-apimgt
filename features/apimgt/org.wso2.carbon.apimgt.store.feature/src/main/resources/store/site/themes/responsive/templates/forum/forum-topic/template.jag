@@ -20,7 +20,9 @@
   
   <h2 id="forum_topic_subject_lable">{{ replies.topic.0.subject}} 
   <%if(jagg.getUser()){%>
-    <small><i class="fa fa-pencil-square-o " id="forum_edit_topic_icon" data-id="{{ topicId }}"></i></small>
+    {{#if_creator replies.topic.0.topicOwner replies.topic.0.user}}
+        <small><i class="fa fa-pencil-square-o " id="forum_edit_topic_icon" data-id="{{ topicId }}"></i></small>
+    {{/if_creator}}
   <%}%>
   </h2>
   <br>
@@ -99,8 +101,10 @@
             <br/>
 
             <%if(jagg.getUser()){%>
-              <span class="glyphicon glyphicon-trash forum_delete_reply_icon" data-id="{{ replyId }}" ></span>
-              <span class="glyphicon glyphicon-edit forum_edit_reply_icon" data-id="{{ replyId }}" ></span>
+              {{#if_creator createdBy user}}
+                <span class="glyphicon glyphicon-trash forum_delete_reply_icon" data-id="{{ replyId }}" ></span>
+                <span class="glyphicon glyphicon-edit forum_edit_reply_icon" data-id="{{ replyId }}" ></span>
+              {{/if_creator}}
             <%}%>
           </td>
           <td id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
