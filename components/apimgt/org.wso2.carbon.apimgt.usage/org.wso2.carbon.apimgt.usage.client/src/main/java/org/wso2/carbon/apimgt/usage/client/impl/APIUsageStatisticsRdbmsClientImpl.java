@@ -1008,10 +1008,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             double responseTime = apiCumulativeServiceTimeMap.get(key) / apiUsageMap.get(key);
             responseTimeDTO.setServiceTime(Double.parseDouble(format.format(responseTime)));
             responseTimeByAPI.put(key, responseTimeDTO);
-        }
-        List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(
-                new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);*/
-        return apiResponseTimeUsage;
+        }*/
+        List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(apiResponseTimeUsage, limit);
+        return usage;
     }
 
     /**

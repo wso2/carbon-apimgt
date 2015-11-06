@@ -88,7 +88,7 @@ public final class APIUsageStatisticsClientConstants {
     
     public static final String USER_ID = "userid";
 
-    public static final String API_PUBLISHER = "APIPUBLISHER";
+    public static final String API_PUBLISHER = "apiPublisher";
 
     public static final String API_PUBLISHER_THROTTLE_TABLE = "apiPublisher";
 
@@ -158,12 +158,14 @@ public final class APIUsageStatisticsClientConstants {
     public static final String AGGREGATE_MAX="MAX";
 
     public static final String ALIAS_COUNT="count";
-    public static final String ALIAS_TOTALSERVICETIME = "totalServiceTime";
-    public static final String ALIAS_TOTALRESPONSECOUNT = "totalResponseCount";
-    public static final String ALIAS_LASTACCESSTIME ="lastAccessTime";
-    public static final String ALIAS_TOTALREQUESTCOUNT ="totalRequestCount";
-    public static final String ALIAS_TOTALFAULTCOUNT="totalFaultCount";
+    public static final String ALIAS_TOTAL_SERVICE_TIME = "totalServiceTime";
+    public static final String ALIAS_TOTAL_RESPONSE_COUNT = "totalResponseCount";
+    public static final String ALIAS_LAST_ACCESS_TIME ="lastAccessTime";
+    public static final String ALIAS_TOTAL_REQUEST_COUNT ="totalRequestCount";
+    public static final String ALIAS_TOTAL_FAULT_COUNT ="totalFaultCount";
     public static final String ALIAS_SUCCESS_REQUEST_COUNT="success_request_count";
     public static final String ALIAS_THROTTLE_OUT_COUNT="throttle_out_count";
+
+    public static final String TENANT_DOMAIN ="tenantDomain";
 
 }
