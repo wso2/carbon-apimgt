@@ -530,9 +530,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public boolean registerNewResource(API api, Map resourceAttributes) throws APIManagementException {
-        //Register new resource means create new API with given Scopes.
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        apiMgtDAO.addAPI(api, CarbonContext.getThreadLocalCarbonContext().getTenantId());
+//        //Register new resource means create new API with given Scopes.
+        //todo commented below code because of blocker due to API publish fail. need to find a better way of doing this
+//        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+//        apiMgtDAO.addAPI(api, CarbonContext.getThreadLocalCarbonContext().getTenantId());
+
         return true;
     }
 
