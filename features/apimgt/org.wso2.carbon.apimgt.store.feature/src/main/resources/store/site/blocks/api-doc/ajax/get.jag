@@ -18,7 +18,7 @@ var log = new Log();
     var carbon = require('carbon');
 
     var uri = request.getRequestURI();
-    var callPath = uri.replace("/store/api-docs", "");
+    var callPath = uri.replace(site.context+"/api-docs", "");
     var url, action;
 
     if (uri != null) {

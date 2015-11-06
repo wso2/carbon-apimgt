@@ -534,6 +534,13 @@ public final class APIConstants {
                                                                       + ".org/products/wso2commons/throttle", "Attributes");
     public static final String THROTTLE_ATTRIBUTE_DISPLAY_NAME= "displayName";
 
+    public static final QName THROTTLE_ATTRIBUTE_ELEMENT = new QName("http://www.wso2.org/products/"
+                                                                    + "wso2commons/throttle", "Attribute");
+    public static final QName THROTTLE_DESCRIPTION_ELEMENT = new QName("http://www.wso2"
+                                                                + ".org/products/wso2commons/throttle", "Description");
+    public static final QName THROTTLE_TIER_PLAN_ELEMENT = new QName("http://www.wso2"
+                                                                    + ".org/products/wso2commons/throttle", "TierPlan");
+
     public static final String TIER_DESC_NOT_AVAILABLE = "Tire Description is not available";
     
     public static final String AUTH_TYPE_DEFAULT = "DEFAULT";

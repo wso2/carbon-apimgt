@@ -6,6 +6,13 @@ Handlebars.registerHelper('html_sanitize', function(context, options) {
   return context;
 });
 
+Handlebars.registerHelper('if_creator', function(creator, user, options) {
+    if(creator != user) {
+        return options.inverse(this);
+    } else {
+        return options.fn(this);
+    }
+});
 // Load forum topics for the given page and the search term.
 function forum_load_topics(page, search) {
     var params = {};
