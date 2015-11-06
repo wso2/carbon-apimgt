@@ -53,7 +53,7 @@ public class ServiceReferenceHolder {
             }
        }
 
-    public boolean isIsGatewayAPIKeyValidationEnabled(){
+    public boolean isGatewayAPIKeyValidationEnabled(){
         return isGatewayAPIKeyValidationEnabled;
     }
 

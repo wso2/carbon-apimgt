@@ -94,7 +94,7 @@ public class APITokenAuthenticator {
 
         String cacheKey = context + ":" + apiVersion;
         APIInfoDTO apiInfoDTO = null;
-        if (ServiceReferenceHolder.getInstance().isIsGatewayAPIKeyValidationEnabled()) {
+        if (ServiceReferenceHolder.getInstance().isGatewayAPIKeyValidationEnabled()) {
             apiInfoDTO = (APIInfoDTO) getResourceCache().get(cacheKey);
         }
 
@@ -109,7 +109,7 @@ public class APITokenAuthenticator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (ServiceReferenceHolder.getInstance().isIsGatewayAPIKeyValidationEnabled()) {
+            if (ServiceReferenceHolder.getInstance().isGatewayAPIKeyValidationEnabled()) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
             //On a cache hit
@@ -142,7 +142,7 @@ public class APITokenAuthenticator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (ServiceReferenceHolder.getInstance().isIsGatewayAPIKeyValidationEnabled()) {
+            if (ServiceReferenceHolder.getInstance().isGatewayAPIKeyValidationEnabled()) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
 
