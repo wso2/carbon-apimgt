@@ -10,8 +10,9 @@ jagg.block("forum/forum-topic", {
 
 		var log = new Log();
 		var uri = request.getRequestURI();
+		var site = require("/site/conf/site.json");
 		
-		var callPath = uri.replace("/store/forum/topic", "");
+		var callPath = uri.replace(site.context+"/forum/topic", "");
 		var topicId;
 		if (uri != null) {
     		var uriMatcher = new URIMatcher(callPath);
