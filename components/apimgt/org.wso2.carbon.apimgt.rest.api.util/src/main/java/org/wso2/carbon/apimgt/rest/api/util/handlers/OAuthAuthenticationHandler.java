@@ -20,28 +20,43 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.RequestHandler;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
+import org.apache.synapse.SynapseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.user.core.service.RealmService;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 
-import javax.ws.rs.core.MediaType;
+
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class will validate incoming requests with OAUth authenticator headers
+ * You can place this handler name in your web application if you need OAuth
+ * based authentication.
+ */
 public class OAuthAuthenticationHandler implements RequestHandler {
 
     private static final Log logger = LogFactory.getLog(OAuthAuthenticationHandler.class);
     private static final String OAUTH_AUTHENTICATOR = "OAuth";
     private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
-    private static final String BEARER_TOKEN_TYPE = "bearer";
-    private static final String RESOURCE_KEY = "resource";
+    private volatile WebAppAuthenticator authenticator;
+
+    /**
+     * This method will initialize Web APP authenticator to validate incoming requests
+     * Here we will get implementation class and create object of it.
+     */
+    public void initializeAuthenticator() {
+        try {
+            //TODO Retrieve this class name from configuration and let it configurable.
+            authenticator = (WebAppAuthenticator) APIUtil.getClassForName(
+                    RestApiConstants.REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME).newInstance();
+        } catch (Exception e) {
+            throw new SynapseException("Error while initializing authenticator of " + "type: ");
+        }
+
+    }
 
     /**
      * authenticate requests received at the REST API endpoint, using HTTP OAuth headers as the authentication
@@ -50,51 +65,25 @@ public class OAuthAuthenticationHandler implements RequestHandler {
     @Override
     public Response handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
-        if (logger.isDebugEnabled()) {
-            logger.debug(String.format("Authenticating request: " + message.getId()));
-        }
-        String authHeader = ((ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS))).get("Authorization")).get(0).toString();
-        Matcher matcher = PATTERN.matcher(authHeader);
-        if (matcher.find()) {
-            authHeader = authHeader.substring(matcher.end());
-            if (authHeader != null) {
-                return this.authenticate(authHeader);
+        if (authenticator == null) {
+            initializeAuthenticator();
+        } else {
+            try {
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Authenticating request: " + message.getId()));
+                }
+                if (authenticator.authenticate(message)) {
+                    return null;
+                } else {
+                    //TODO generate authentication failure response if we get auth failure
+                    //handle oauth failure
+                }
+            } catch (APIManagementException e) {
+                logger.error("Error while authenticating incoming request to API Manager REST API");
             }
         }
         return null;
     }
 
 
-    private Response authenticate(String authHeader) {
-        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
-        AccessTokenInfo tokenInfo = null;
-        try {
-            tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(authHeader);
-        } catch (APIManagementException e) {
-            logger.error("Error while retrieving token information for token: " + authHeader + e.getMessage());
-        }
-        try {
-            // if authenticated
-            if (tokenInfo != null && tokenInfo.isTokenValid()) {
-                // If token is valid then we have to do other validations and set user and tenant to
-                //carbon context. Scope validation should come here.
-                String tenantDomain = MultitenantUtils.getTenantDomain(tokenInfo.getEndUserName());
-                int tenantId;
-                tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-                carbonContext.setTenantDomain(tenantDomain);
-                carbonContext.setTenantId(tenantId);
-                carbonContext.setUsername(tokenInfo.getEndUserName());
-                return null;
-            } else {
-                logger.error(String.format("Authentication failed. Please check your username/password"));
-                return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
-                        "Authentication failed. Please check your username/password").build();
-            }
-        } catch (Exception e) {
-            logger.error("Authentication failed: ", e);
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
-                    "Authentication failed: ").build();
-        }
-    }
 }
