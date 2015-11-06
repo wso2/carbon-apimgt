@@ -18,47 +18,58 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.ws.rs.core.Response;
 
+
+/** This is the service implementation class for Subscriptions
+ * 
+ */
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
+
+    /** Retieves all subscriptions or retrieves subscriptions for a given API Id
+     * 
+     * @param apiId API identifier
+     * @param limit max number of objects returns
+     * @param offset starting index
+     * @param accept accepted media type of the client
+     * @param ifNoneMatch If-None-Match header value
+     * @return Response object containing resulted subscriptions
+     */
     @Override
-    public Response subscriptionsGet(String apiId, String groupId, String accept, String ifNoneMatch) {
+    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept,
+            String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        Subscriber subscriber = new Subscriber(username);
-        Set<SubscribedAPI> subscriptions = new HashSet<>();
         try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            if (!StringUtils.isEmpty(apiId)) {
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            SubscriptionListDTO subscriptionListDTO;
+            if (apiId != null) {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-                subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupId);
+                List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+                subscriptionListDTO = SubscriptionMappingUtil
+                        .fromSubscriptionListToDTO(apiUsages, apiId, limit, offset);
+            } else {
+                UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
+                subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
+                        offset);
             }
-
-            List<SubscriptionDTO> subscriptionDTOs = new ArrayList<>();
-            for (SubscribedAPI subscription : subscriptions) {
-                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
-                subscriptionDTOs.add(subscriptionDTO);
-            }
-            return Response.ok().entity(subscriptionDTOs).build();
-
+            return Response.ok().entity(subscriptionListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }

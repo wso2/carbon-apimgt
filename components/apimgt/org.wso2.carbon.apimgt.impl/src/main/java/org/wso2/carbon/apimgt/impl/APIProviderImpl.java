@@ -296,6 +296,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Returns usage details of a particular API
+     *
+     * @param apiId API identifier
+     * @return UserApplicationAPIUsages for given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to get UserApplicationAPIUsage
+     */
+    public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException {
+        UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProvider(apiId.getProviderName());
+        List<SubscribedAPI> subscribedAPIs = new ArrayList<SubscribedAPI>();
+        for (UserApplicationAPIUsage usage : allApiResult) {
+            for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
+                if (apiSubscription.getApiId().equals(apiId)) {
+                    subscribedAPIs.add(apiSubscription);
+                }
+            }
+        }
+        return subscribedAPIs;
+    }
+
+    /**
      * Shows how a given consumer uses the given API.
      *
      * @param apiIdentifier APIIdentifier
