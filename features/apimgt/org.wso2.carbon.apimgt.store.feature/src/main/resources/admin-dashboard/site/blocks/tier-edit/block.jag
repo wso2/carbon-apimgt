@@ -1,0 +1,7 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("tier-edit", {
+    initializer:function (data) {}
+});
+%>

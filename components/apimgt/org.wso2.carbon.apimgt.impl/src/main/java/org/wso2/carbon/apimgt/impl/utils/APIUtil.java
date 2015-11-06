@@ -1475,6 +1475,10 @@ public final class APIUtil {
                     String desc;
                     try {
                         long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
+                        long requestCount = APIDescriptionGenUtil.getAllowedRequestCount(policy);
+                        long unitTime = APIDescriptionGenUtil.getTimeDuration(policy);
+                        tier.setUnitTime(unitTime);
+                        tier.setRequestCount(requestCount);
                         tier.setRequestsPerMin(requestPerMin);
 
                         if(requestPerMin >= 1){
@@ -1518,6 +1522,54 @@ public final class APIUtil {
             throw new APIManagementException(msg, e);
         }
         return tiers;
+    }
+
+    /**
+     * This method deletes a given tier from tier xml file, for a given tenant
+     *
+     * @param tier     tier to be deleted
+     * @param tenantId id of the tenant
+     * @throws APIManagementException if error occurs while getting registry resource or processing XML
+     */
+    public static void deleteTier(Tier tier, int tenantId) throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                                getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
+                Resource resource = registry.get(APIConstants.API_TIER_LOCATION);
+                String content = new String((byte[]) resource.getContent());
+                OMElement element = AXIOMUtil.stringToOM(content);
+                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
+                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
+                boolean foundTier = false;
+
+                while (policies.hasNext()) {
+                    OMElement policy = (OMElement) policies.next();
+                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
+                    String tierName = tier.getName();
+
+                    if (tierName != null && tierName.equalsIgnoreCase(id.getText())) {
+                        foundTier = true;
+                        policies.remove();
+                        break;
+                    }
+                }
+
+                if (!foundTier) {
+                    throw new APIManagementException("Tier doesn't exist!");
+                }
+                resource.setContent(element.toString());
+                registry.put(APIConstants.API_TIER_LOCATION, resource);
+            }
+        } catch (RegistryException e) {
+            String errorMessage = "Error while retrieving API tiers from registry";
+            log.error(errorMessage, e);
+            throw new APIManagementException(e.getMessage());
+        } catch (XMLStreamException e) {
+            String errorMessage = "Malformed XML found in the API tier policy resource";
+            log.error(errorMessage, e);
+            throw new APIManagementException(e.getMessage());
+        }
     }
 
     /**
@@ -1678,6 +1730,10 @@ public final class APIUtil {
                     String desc;
                     try {
                         long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
+                        long requestCount = APIDescriptionGenUtil.getAllowedRequestCount(policy);
+                        long unitTime = APIDescriptionGenUtil.getTimeDuration(policy);
+                        tier.setUnitTime(unitTime);
+                        tier.setRequestCount(requestCount);
                         tier.setRequestsPerMin(requestPerMin);
 
                         if(requestPerMin >= 1){
@@ -4618,19 +4674,6 @@ public final class APIUtil {
      */
 
     public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        return Class.forName(className);
-    }
-
-    /**
-     * Gets the instance of a class given the class name.
-     * @param className the fully qualified name of the class.
-     * @return an instance of the class with the given name
-     * @throws ClassNotFoundException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     */
-
-    public static Class getClassFromName(String className) throws ClassNotFoundException {
         return Class.forName(className);
     }
 }
