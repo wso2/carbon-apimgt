@@ -731,12 +731,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        /*if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
             query = new StringBuilder(query)
                     .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
                             + '\"').toString();
-        }
+        }*/
 
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query, 3,
@@ -1630,7 +1630,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        StringBuilder query = new StringBuilder(APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + tenantDomain);
+        StringBuilder query = new StringBuilder(
+                APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
 
         //if application or api is no available return empty result
         if (apiName.contains("No APIs Available")) {
@@ -1734,7 +1735,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        StringBuilder query = new StringBuilder(APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + tenantDomain);
+        StringBuilder query = new StringBuilder(
+                APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
 
         //if application or api is no available return empty result
         if (appName.contains("No Apps Available")) {
@@ -1825,7 +1827,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        StringBuilder query = new StringBuilder(APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + tenantDomain);
+        StringBuilder query = new StringBuilder(
+                APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
@@ -1884,7 +1887,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        StringBuilder query = new StringBuilder(APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + tenantDomain);
+        StringBuilder query = new StringBuilder(
+                APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
