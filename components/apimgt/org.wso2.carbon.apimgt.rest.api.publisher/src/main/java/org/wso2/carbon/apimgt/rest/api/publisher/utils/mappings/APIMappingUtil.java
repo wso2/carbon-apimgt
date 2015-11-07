@@ -272,21 +272,37 @@ public class APIMappingUtil {
 
     }
 
-    public static APIListDTO fromAPIListToDTO(List<API> apiList, String query, String type, int offset, int limit,
-            int size) {
+    /** Converts a List object of APIs into a DTO
+     * 
+     * @param apiList List of APIs
+     * @param limit maximum number of APIs returns
+     * @param offset starting index
+     * @param query search condition
+     * @param type value for the search condition
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, String query, String type, Integer offset,
+            Integer limit) {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiInfoDTOs == null) {
             apiInfoDTOs = new ArrayList<>();
             apiListDTO.setList(apiInfoDTOs);
         }
-        for (API api : apiList) {
-            apiInfoDTOs.add(fromAPIToInfoDTO(api));
+
+        //seting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        //add the required range of objects to be returned
+        int start = offset < apiList.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= apiList.size() - 1 ? offset + limit -1 : apiList.size() - 1;
+        for (int i = start; i <= end; i++) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(apiList.get(i)));
         }
-        apiListDTO.setCount(apiList.size());
 
-        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
-
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, apiList.size());
         String paginatedPrevious = "";
         String paginatedNext = "";
 
@@ -304,6 +320,7 @@ public class APIMappingUtil {
 
         apiListDTO.setNext(paginatedNext);
         apiListDTO.setPrevious(paginatedPrevious);
+        apiListDTO.setCount(apiInfoDTOs.size());
         return apiListDTO;
     }
 

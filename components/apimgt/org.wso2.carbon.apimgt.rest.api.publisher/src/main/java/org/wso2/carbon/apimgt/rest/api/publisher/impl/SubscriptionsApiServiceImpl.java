@@ -37,7 +37,7 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 
-/** This is the service implementation class for Subscriptions
+/** This is the service implementation class for Publisher subscriptions related operations
  * 
  */
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {

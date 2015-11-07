@@ -39,11 +39,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/** This is the service implementation class for Store API related operations 
+ *
+ */
 public class ApisApiServiceImpl extends ApisApiService {
 
+    /** Retrieves APIs qualifying under given search condition 
+     *
+     * @param limit maximum number of APIs returns
+     * @param offset starting index
+     * @param query search condition
+     * @param type value for the search condition
+     * @param sort sort parameter
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched APIs for the given search condition
+     */
     @Override
     @SuppressWarnings("unchecked")
-    public Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch){
+    public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
+            String ifNoneMatch) {
         Map<String, Object> apisMap;
         boolean isTenantFlowStarted = false;
 

@@ -43,11 +43,25 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/** This is the service implementation class for Publisher API related operations 
+ * 
+ */
 public class ApisApiServiceImpl extends ApisApiService {
 
+    /** Retrieves APIs qualifying under given search condition 
+     * 
+     * @param limit maximum number of APIs returns
+     * @param offset starting index
+     * @param query search condition
+     * @param type value for the search condition
+     * @param sort sort parameter
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched APIs for the given search condition
+     */
     @Override
-    public Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch){
+    public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
+            String ifNoneMatch) {
         List<API> allMatchedApis;
         APIListDTO apiListDTO;
         boolean isTenantFlowStarted = false;
@@ -63,21 +77,10 @@ public class ApisApiServiceImpl extends ApisApiService {
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
 
-            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
-            //We should send null as the provider, Otherwise serchAPIs will return all APIs of the provider 
+            //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
             allMatchedApis = apiProvider.searchAPIs(query, type, null);
-            List<API> resultApis = new ArrayList<>();
-
-            int start = offset < allMatchedApis.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
-            int end = offset + limit - 1 <= allMatchedApis.size() - 1 ? offset + limit -1 : allMatchedApis.size() - 1;
-            for (int i = start; i <= end; i++) {
-                resultApis.add(allMatchedApis.get(i));
-            }
-
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(resultApis, query, type, offset, limit, allMatchedApis.size());
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, query, type, offset, limit);
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
