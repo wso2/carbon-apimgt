@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Icon;
@@ -773,6 +774,16 @@ public abstract class AbstractAPIManager implements APIManager {
         	}
         }
         return apiSortedSet;
+    }
+
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    public Application getApplicationByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getApplicationByUUID(uuid);
     }
 
     /** returns the SubscribedAPI object which is related to the UUID

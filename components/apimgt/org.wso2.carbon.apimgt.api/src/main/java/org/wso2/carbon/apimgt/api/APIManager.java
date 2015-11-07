@@ -253,6 +253,13 @@ public interface APIManager {
      */
     void cleanup() throws APIManagementException;
 
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid) throws APIManagementException;
 
     /**
      * Check whether an application access token is already persist in database.

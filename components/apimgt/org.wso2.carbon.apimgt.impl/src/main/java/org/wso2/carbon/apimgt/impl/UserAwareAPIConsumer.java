@@ -60,8 +60,9 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
             checkSubscribePermission();
             return subscribedAPI;
         } else {
-            handleException("user " +
-                    username + " is not authorized to view subscription " + subscribedAPI.getUUID());
+            String errorMessage =
+                    "user " + username + " is not authorized to view subscription " + subscribedAPI.getUUID();
+            handleException(errorMessage);
             return null;
         }
     }

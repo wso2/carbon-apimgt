@@ -2753,16 +2753,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getApplicationById(id);
     }
 
-    /**
-     * Returns the corresponding application given the uuid
-     * @param uuid uuid of the Application
-     * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException
-     */
-    public Application getApplicationByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getApplicationByUUID(uuid);
-    }
-
     /** get the status of the Application creation process given the application Id
      *
      * @param applicationId Id of the Application

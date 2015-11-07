@@ -146,6 +146,7 @@ public interface APIConsumer extends APIManager {
      */
     SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException;
 
+
     /**
      * Returns a set of SubscribedAPI purchased by the given Subscriber
      *
@@ -422,14 +423,6 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     Application getApplicationById(int id) throws APIManagementException;
-
-    /**
-     * Returns the corresponding application given the uuid
-     * @param uuid uuid of the Application
-     * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException
-     */
-    Application getApplicationByUUID(String uuid) throws APIManagementException;
  
     /**
      * @param subscriber the subscriber in relation to the identifiers
