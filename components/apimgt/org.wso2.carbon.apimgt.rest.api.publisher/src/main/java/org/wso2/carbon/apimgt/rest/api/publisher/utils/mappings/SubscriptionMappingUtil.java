@@ -59,7 +59,7 @@ public class SubscriptionMappingUtil {
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, String apiId,
-            Integer limit, Integer offset) {
+            Integer limit, Integer offset, String groupId) {
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
         if (subscriptionDTOs == null) {
@@ -90,13 +90,13 @@ public class SubscriptionMappingUtil {
             paginatedPrevious = RestApiUtil
                     .getSubscriptionPaginatedURLForAPIId(
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId);
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId, groupId);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiUtil
                     .getSubscriptionPaginatedURLForAPIId(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId);
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId, groupId);
         }
 
         subscriptionListDTO.setNext(paginatedNext);
@@ -113,11 +113,11 @@ public class SubscriptionMappingUtil {
      * @return a dto containing all subscriptions
      */
     public static SubscriptionListDTO fromUserApplicationAPIUsageArrayToDTO(UserApplicationAPIUsage[] allApiUsage,
-            Integer limit, Integer offset) {
+            Integer limit, Integer offset, String groupId) {
         List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
         for (UserApplicationAPIUsage usage : allApiUsage) {
             Collections.addAll(subscribedAPIs, usage.getApiSubscriptions());
         }
-        return fromSubscriptionListToDTO(subscribedAPIs, "", limit, offset);
+        return fromSubscriptionListToDTO(subscribedAPIs, "", limit, offset, groupId);
     }
 }

@@ -163,13 +163,16 @@ public class RestApiUtil {
      * @param offset starting index
      * @param limit max number of objects returned
      * @param apiId API Identifier
+     * @param groupId groupId of the Application
      * @return constructed paginated url
      */
-    public static String getSubscriptionPaginatedURLForAPIId(Integer offset, Integer limit, String apiId) {
+    public static String getSubscriptionPaginatedURLForAPIId(Integer offset, Integer limit, String apiId,
+            String groupId) {
         String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APIID;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
         return paginatedURL;
     }
 

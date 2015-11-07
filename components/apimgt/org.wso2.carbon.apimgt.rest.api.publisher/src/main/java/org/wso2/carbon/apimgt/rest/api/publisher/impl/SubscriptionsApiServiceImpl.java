@@ -63,11 +63,11 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
                 subscriptionListDTO = SubscriptionMappingUtil
-                        .fromSubscriptionListToDTO(apiUsages, apiId, limit, offset);
+                        .fromSubscriptionListToDTO(apiUsages, apiId, limit, offset, ""); //todo: support groupId
             } else {
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
-                        offset);
+                        offset, ""); //todo: support groupId
             }
             return Response.ok().entity(subscriptionListDTO).build();
         } catch (APIManagementException e) {
