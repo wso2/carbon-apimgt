@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
@@ -54,20 +55,31 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     @Override
     public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept,
             String ifNoneMatch) {
+
+        //pre-processing
+        //setting default limit and offset if they are null
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             SubscriptionListDTO subscriptionListDTO;
             if (apiId != null) {
+                //todo: support groupId
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
-                subscriptionListDTO = SubscriptionMappingUtil
-                        .fromSubscriptionListToDTO(apiUsages, apiId, limit, offset, ""); //todo: support groupId
+                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(apiUsages, limit, offset);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
+                        apiUsages.size());
             } else {
+                //todo: support groupId
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
-                        offset, ""); //todo: support groupId
+                        offset);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, "", "", limit, offset,
+                        allApiUsage.length);
             }
             return Response.ok().entity(subscriptionListDTO).build();
         } catch (APIManagementException e) {

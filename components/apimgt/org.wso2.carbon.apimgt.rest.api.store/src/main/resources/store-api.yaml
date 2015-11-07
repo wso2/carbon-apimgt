@@ -327,7 +327,6 @@ paths:
       description: |
         Get a list of applications
       parameters:
-        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -1058,15 +1057,6 @@ parameters:
     in: query
     description: |
       Application Group Id
-    required: false
-    type: string
-
-# User name of the subscriber 
-  subscriber:
-    name: subscriber
-    in: query
-    description: |
-      Subscriber username
     required: false
     type: string
 

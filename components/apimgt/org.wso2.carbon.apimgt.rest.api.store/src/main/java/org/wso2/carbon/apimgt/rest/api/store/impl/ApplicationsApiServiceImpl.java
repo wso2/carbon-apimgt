@@ -39,15 +39,13 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
+
     @Override
-    public Response applicationsGet(String subscriber, String groupId, Integer limit, Integer offset, String accept,
+    public Response applicationsGet(String groupId, Integer limit, Integer offset, String accept,
             String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
 
@@ -55,26 +53,18 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         if (groupId == null) {
             groupId = "";
         }
-        if (subscriber == null) {
-            subscriber = username;
-        }
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         ApplicationListDTO applicationListDTO;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] allMatchedApps = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
+            Application[] allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
 
-            List<Application> resultApplications = new ArrayList<>();
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
+            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
+                    allMatchedApps.length);
 
-            int start = offset < allMatchedApps.length && offset >= 0 ? offset : Integer.MAX_VALUE;
-            int end = offset + limit - 1 <= allMatchedApps.length - 1 ? offset + limit - 1 : allMatchedApps.length - 1;
-            resultApplications.addAll(Arrays.asList(allMatchedApps).subList(start, end + 1));
-
-            applicationListDTO = ApplicationMappingUtil
-                    .fromApplicationsToDTO(resultApplications, subscriber, groupId, limit, offset,
-                            allMatchedApps.length);
             return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);

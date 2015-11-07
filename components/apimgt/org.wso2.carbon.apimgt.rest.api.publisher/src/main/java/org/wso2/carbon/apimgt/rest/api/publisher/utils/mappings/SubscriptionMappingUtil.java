@@ -50,16 +50,16 @@ public class SubscriptionMappingUtil {
         return subscriptionDTO;
     }
 
+
     /** Converts a List object of SubscribedAPIs into a DTO
-     * 
+     *
      * @param subscriptions a list of SubscribedAPI objects
-     * @param apiId uuid/id of API
      * @param limit max number of objects returned
      * @param offset starting index
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
-    public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, String apiId,
-            Integer limit, Integer offset, String groupId) {
+    public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, int limit,
+            int offset) {
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();
         if (subscriptionDTOs == null) {
@@ -67,19 +67,31 @@ public class SubscriptionMappingUtil {
             subscriptionListDTO.setList(subscriptionDTOs);
         }
 
-        //setting default limit and offset if they are null
-        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
         //identifying the proper start and end indexes
-        int size =subscriptions.size();
+        int size = subscriptions.size();
         int start = offset < size && offset >= 0 ? offset : Integer.MAX_VALUE;
-        int end = offset + limit - 1 <= size - 1 ? offset + limit -1 : size - 1;
+        int end = offset + limit - 1 <= size - 1 ? offset + limit - 1 : size - 1;
 
         for (int i = start; i <= end; i++) {
             SubscribedAPI subscription = subscriptions.get(i);
             subscriptionDTOs.add(fromSubscriptionToDTO(subscription));
         }
+        subscriptionListDTO.setCount(subscriptionDTOs.size());
+        return subscriptionListDTO;
+    }
+
+
+    /** Sets pagination urls for a SubscriptionListDTO object given pagination parameters and url parameters
+     *
+     * @param subscriptionListDTO a SubscriptionListDTO object
+     * @param apiId uuid/id of API
+     * @param groupId group id of the applications to be returned
+     * @param limit max number of objects returned
+     * @param offset starting index
+     * @param size max offset
+     */
+    public static SubscriptionListDTO setPaginationParams(SubscriptionListDTO subscriptionListDTO, String apiId,
+            String groupId, int limit, int offset, int size) {
 
         String paginatedPrevious = "";
         String paginatedNext = "";
@@ -101,7 +113,6 @@ public class SubscriptionMappingUtil {
 
         subscriptionListDTO.setNext(paginatedNext);
         subscriptionListDTO.setPrevious(paginatedPrevious);
-        subscriptionListDTO.setCount(subscriptionDTOs.size());
         return subscriptionListDTO;
     }
 
@@ -113,11 +124,11 @@ public class SubscriptionMappingUtil {
      * @return a dto containing all subscriptions
      */
     public static SubscriptionListDTO fromUserApplicationAPIUsageArrayToDTO(UserApplicationAPIUsage[] allApiUsage,
-            Integer limit, Integer offset, String groupId) {
+            Integer limit, Integer offset) {
         List<SubscribedAPI> subscribedAPIs = new ArrayList<>();
         for (UserApplicationAPIUsage usage : allApiUsage) {
             Collections.addAll(subscribedAPIs, usage.getApiSubscriptions());
         }
-        return fromSubscriptionListToDTO(subscribedAPIs, "", limit, offset, groupId);
+        return fromSubscriptionListToDTO(subscribedAPIs, limit, offset);
     }
 }

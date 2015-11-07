@@ -65,6 +65,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         APIListDTO apiListDTO;
         boolean isTenantFlowStarted = false;
 
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             /*String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -79,7 +83,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
             allMatchedApis = apiProvider.searchAPIs(query, type, null);
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, query, type, offset, limit);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
+            APIMappingUtil.setPaginationParams(apiListDTO, query, type, offset, limit, allMatchedApis.size());
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);

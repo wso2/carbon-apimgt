@@ -99,19 +99,16 @@ public class APIMappingUtil {
         return dto;
     }
 
-    public static APIListDTO fromAPISetToDTO(Set<API> apiSet, String query, String type, int offset, int limit,
-            int size) {
-        APIListDTO apiListDTO = new APIListDTO();
-        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
-        if (apiInfoDTOs == null) {
-            apiInfoDTOs = new ArrayList<>();
-            apiListDTO.setList(apiInfoDTOs);
-        }
-        for (API api : apiSet) {
-            apiInfoDTOs.add(fromAPIToInfoDTO(api));
-        }
-        apiListDTO.setCount(apiSet.size());
-
+    /** Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
+     * 
+     * @param apiListDTO APIListDTO object to which pagination urls need to be set 
+     * @param query query parameter
+     * @param type type parameter
+     * @param offset starting index
+     * @param limit max number of returned objects
+     * @param size max offset
+     */
+    public static void setPaginationParams(APIListDTO apiListDTO, String query, String type, int offset, int limit, int size) {
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
 
         String paginatedPrevious = "";
@@ -131,6 +128,25 @@ public class APIMappingUtil {
 
         apiListDTO.setNext(paginatedNext);
         apiListDTO.setPrevious(paginatedPrevious);
+    }
+
+    /** Converts an API Set object into corresponding REST API DTO
+     * 
+     * @param apiSet Set of API objects
+     * @return APIListDTO object 
+     */
+    public static APIListDTO fromAPISetToDTO(Set<API> apiSet) {
+        APIListDTO apiListDTO = new APIListDTO();
+        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
+        if (apiInfoDTOs == null) {
+            apiInfoDTOs = new ArrayList<>();
+            apiListDTO.setList(apiInfoDTOs);
+        }
+        for (API api : apiSet) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(api));
+        }
+        apiListDTO.setCount(apiSet.size());
+
         return apiListDTO;
     }
 

@@ -149,11 +149,10 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
-    public static String getApplicationPaginatedURL(Integer offset, Integer limit, String subscriber, String groupId) {
+    public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
-        paginatedURL = paginatedURL.replace(RestApiConstants.SUBSCRIBER_PARAM, subscriber);
         paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
         return paginatedURL;
     }

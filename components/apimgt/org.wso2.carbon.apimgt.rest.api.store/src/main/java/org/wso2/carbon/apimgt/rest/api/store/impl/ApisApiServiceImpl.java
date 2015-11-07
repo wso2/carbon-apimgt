@@ -78,13 +78,14 @@ public class ApisApiServiceImpl extends ApisApiService {
             limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
             offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-            apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, offset + limit, true);
+            apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, limit, true);
             APIListDTO apiListDTO = new APIListDTO();
             Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
             int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
             if (apisResult != null) {
                 Set<API> apiSet = (Set)apisResult;
-                apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet, query, type, offset, limit, size);
+                apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet);
+                APIMappingUtil.setPaginationParams(apiListDTO, query, type, offset, limit, size);
             }
 
             return Response.ok().entity(apiListDTO).build();
