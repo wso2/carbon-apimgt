@@ -38,6 +38,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setApplicationId(requestPublisherDTO.getApplicationId());
         setUserAgent(requestPublisherDTO.getUserAgent());
         setTier(requestPublisherDTO.getTier());
+        setContinuedOnThrottleOut(requestPublisherDTO.isContinuedOnThrottleOut());
     }
 
     public static String getStreamDefinition() {
@@ -69,16 +70,18 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                 "          {'name':'applicationName','type':'STRING'}," +
                 "          {'name':'applicationId','type':'STRING'}," +
                 "          {'name':'userAgent','type':'STRING'}," +
-                "          {'name':'tier','type':'STRING'}" +
+                "          {'name':'tier','type':'STRING'}," +
+                "          {'name':'throttledOut','type':'BOOL'}" +
                 "  ]" +
                 "}";
     }
 
     public Object createPayload(){
-        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),getMethod(),
-                            getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),getHostName(),
-                            getApiPublisher(), getApplicationName(), getApplicationId(),getUserAgent(),getTier()};
-        
+        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(), getMethod(),
+                            getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),
+                            getHostName(), getApiPublisher(), getApplicationName(), getApplicationId(), getUserAgent(),
+                            getTier(), isContinuedOnThrottleOut()};
+
     }
 
 }
