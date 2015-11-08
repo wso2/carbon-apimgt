@@ -451,32 +451,6 @@ public class APIMappingUtil {
         }
     }
 
-    public static DocumentDTO fromDocumentationtoDTO(Documentation doc){
-        DocumentDTO d = new DocumentDTO();
-        d.setDocumentId(doc.getId());
-        d.setName(doc.getName());
-        //d.setUrl(doc.getFilePath());
-        d.setSummary(doc.getSummary());
-        d.setType(DocumentDTO.TypeEnum.valueOf(doc.getType().toString()));
-        //d.setUrl(doc.getFilePath());
-        d.setVisibility(DocumentDTO.VisibilityEnum.valueOf(doc.getVisibility().toString()));
-        return d;
-    }
-
-    public static Documentation fromDTOtoDocumentation(DocumentDTO dto){
-        Documentation doc = new Documentation(DocumentationType.valueOf(dto.getType().toString()) ,dto.getName());
-        doc.setSummary(dto.getSummary());
-        String visibility = dto.getVisibility().toString();
-        /*
-        TO-DO following statement will never reach as .tostring will retunr you NPE. Please check logic
-        if (visibility == null){
-            visibility = APIConstants.DOC_API_BASED_VISIBILITY;
-        }*/
-        doc.setVisibility(Documentation.DocumentVisibility.valueOf(visibility));
-        doc.setSourceType(Documentation.DocumentSourceType.INLINE);
-        return doc;
-    }
-
     private static String updateContextWithVersion(String version, String contextVal, String context) {
         // This condition should not be true for any occasion but we keep it so that there are no loopholes in
         // the flow.

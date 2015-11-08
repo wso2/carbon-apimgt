@@ -1400,12 +1400,18 @@ definitions:
           - OTHER
       summary:
         type: string
-      source:
+      sourceType:
         type: string
         enum:
           - INLINE
           - URL
           - FILE
+      sourceUrl:
+        type: string
+      filePath:
+        type: string
+      otherTypeName:
+        type: string
 
 #-----------------------------------------------------
 # The Tier resource

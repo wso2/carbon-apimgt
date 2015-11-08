@@ -162,15 +162,4 @@ public class APIMappingUtil {
         apiInfoDTO.setStatus(api.getStatus().toString());
         return apiInfoDTO;
     }
-
-    public static DocumentDTO fromDocumentationtoDTO(Documentation doc){
-        DocumentDTO d = new DocumentDTO();
-        d.setDocumentId(doc.getId());
-        d.setName(doc.getName());
-        //d.setUrl(doc.getFilePath());
-        d.setSummary(doc.getSummary());
-        d.setType(DocumentDTO.TypeEnum.valueOf(doc.getType().toString()));
-        //d.setUrl(doc.getFilePath());
-        return d;
-    }
 }

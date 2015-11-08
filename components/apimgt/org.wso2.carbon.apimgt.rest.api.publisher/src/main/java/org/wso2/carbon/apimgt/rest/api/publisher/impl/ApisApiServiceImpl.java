@@ -26,6 +26,8 @@ import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
@@ -300,30 +302,39 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
     @Override
     public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch){
-        List<DocumentDTO> list = new ArrayList<DocumentDTO>();
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        if (query == null) {
+            query = "";
+        }
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            List<Documentation> docs = apiProvider.getAllDocumentation(apiIdentifier);
-            for (org.wso2.carbon.apimgt.api.model.Documentation temp : docs) {
-                list.add(APIMappingUtil.fromDocumentationtoDTO(temp));
-            }
+            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
+            DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
+                    offset, limit);
+            DocumentationMappingUtil
+                    .setPaginationParams(documentListDTO, query, apiId, offset, limit, allDocumentation.size());
+            return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
-        return Response.ok().entity(list).build();
     }
 
     @Override
-    public Response apisApiIdDocumentsPost(String apiId,DocumentDTO body,String contentType){
+    public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String contentType) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
+            Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            apiProvider.addDocumentation(apiIdentifier, doc);
-            return Response.status(Response.Status.CREATED).header("Location", "/apis/" + apiId + "/documents/" + doc.getId()).build();
+            apiProvider.addDocumentation(apiIdentifier, documentation);
+            return Response.status(Response.Status.CREATED)
+                    .header("Location", "/apis/" + apiId + "/documents/" + documentation.getId()).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
@@ -331,12 +342,13 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
-        Documentation doc;
+        Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            doc = apiProvider.getDocumentation(documentId);
-            if(null != doc){
-                return Response.ok().entity(doc).build();
+            documentation = apiProvider.getDocumentation(documentId);
+            if(null != documentation){
+                DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+                return Response.ok().entity(documentDTO).build();
             }
             else{
                 throw new NotFoundException();
@@ -350,11 +362,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            Documentation doc = APIMappingUtil.fromDTOtoDocumentation(body);
+            Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            apiProvider.updateDocumentation(apiIdentifier, doc);
-            return Response.ok().entity(APIMappingUtil.fromDocumentationtoDTO(doc)).build();
+            apiProvider.updateDocumentation(apiIdentifier, documentation);
+            //retrieve the updated documentation
+            documentation = apiProvider.getDocumentation(documentId);
+            return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(documentation)).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }

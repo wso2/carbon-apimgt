@@ -30,4 +30,8 @@ public class BadRequestException extends WebApplicationException {
         super(Response.Status.BAD_REQUEST);
         list = l;
     }
+
+    public BadRequestException(){
+        super(Response.Status.BAD_REQUEST);
+    }
 }

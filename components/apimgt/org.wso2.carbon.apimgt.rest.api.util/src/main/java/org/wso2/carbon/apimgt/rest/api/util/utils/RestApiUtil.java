@@ -140,6 +140,14 @@ public class RestApiUtil {
         return result;
     }
 
+    /** Returns the paginated url for APIs API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param query search query value
+     * @param type type of API attribute fir search to be performed
+     * @return constructed paginated url
+     */
     public static String getAPIPaginatedURL(Integer offset, Integer limit, String query, String type) {
         String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
@@ -149,6 +157,13 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for Applications API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param groupId groupId of the Application
+     * @return constructed paginated url
+     */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
@@ -188,6 +203,22 @@ public class RestApiUtil {
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APPLICATIONID_PARAM, applicationId);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for documentations
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param query document search query
+     * @return constructed paginated url
+     */
+    public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String query, String apiId) {
+        String paginatedURL = RestApiConstants.DOCUMENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
         return paginatedURL;
     }
 

@@ -27,6 +27,8 @@ import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
@@ -62,6 +64,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         Map<String, Object> apisMap;
         boolean isTenantFlowStarted = false;
 
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -74,9 +80,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
-
-            limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
-            offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
             apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, limit, true);
             APIListDTO apiListDTO = new APIListDTO();
@@ -135,29 +138,43 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch) {
-        List<DocumentDTO> list = new ArrayList<>();
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
+            String ifNoneMatch) {
+
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        if (query == null) {
+            query = "";
+        }
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            List<Documentation> docs = apiProvider.getAllDocumentation(APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain));
-            for (Documentation temp : docs) {
-                list.add(APIMappingUtil.fromDocumentationtoDTO(temp));
-            }
+            List<Documentation> documentationList =
+                    apiConsumer
+                            .getAllDocumentation(APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain));
+            DocumentListDTO documentListDTO = DocumentationMappingUtil
+                    .fromDocumentationListToDTO(documentationList, offset, limit);
+            DocumentationMappingUtil
+                    .setPaginationParams(documentListDTO, query, apiId, offset, limit, documentationList.size());
+            return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
-        return Response.ok().entity(list).build();
     }
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
-        Documentation doc;
+        Documentation documentation;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            doc = apiProvider.getDocumentation(documentId);
-            if(null != doc){
-                return Response.ok().entity(doc).build();
+            String username = RestApiUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            documentation = apiConsumer.getDocumentation(documentId);
+            if(null != documentation){
+                DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+                return Response.ok().entity(documentDTO).build();
             }
             else{
                 throw new NotFoundException();

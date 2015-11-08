@@ -22,13 +22,6 @@ public final class RestApiConstants {
 
     public static final String API_ID_DELIMITER = "-";
 
-    //todo better to take from cxf level
-    public static final String RESOURCE_PATH_APIS = "/apis";
-    public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
-    public static final String SERVER_URL = "/applications";
-    public static final String SERVER_USER_NAME = "/applications";
-    public static final String SERVER_PASSWORD = "/applications";
-    public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
     public static final String QUERY_PARAM = "{query}";
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
@@ -37,6 +30,16 @@ public final class RestApiConstants {
     public static final String GROUPID_PARAM = "{groupId}";
     public static final String APIID_PARAM = "{apiId}";
     public static final String APPLICATIONID_PARAM = "{applicationId}";
+    public static final String API_VERSION_PARAM="{version}";
+
+    //todo better to take from cxf level
+    public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_APPLICATIONS = "/applications";
+    public static final String SERVER_URL = "/applications";
+    public static final String SERVER_USER_NAME = "/applications";
+    public static final String SERVER_PASSWORD = "/applications";
+    public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
+    public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String REST_API_STORE_CONTEXT="store_rest_api";
     public static final String REST_API_STORE_VERSION="v1";
     public static final String REST_API_PUBLISHER_VERSION="v1";
@@ -68,5 +71,7 @@ public final class RestApiConstants {
             RESOURCE_PATH_SUBSCRIPTIONS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&applicationId="
                     + APPLICATIONID_PARAM;
 
-    public static final String API_VERSION_PARAM="{version}";
+    public static final String DOCUMENTS_GET_PAGINATION_URL =
+            RESOURCE_PATH_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM  + "&query=" + QUERY_PARAM;
+
 }
