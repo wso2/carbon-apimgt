@@ -26,7 +26,7 @@ i18n.init(request,localeResourcesBasePath);
                     "name":"layout/extended",
                     "inputs":{
                         "middle":{
-                            "name":"tier-edit"
+                            "name":"tier/edit"
                         }
                     }
                 }

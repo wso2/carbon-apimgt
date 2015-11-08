@@ -26,6 +26,7 @@ public class RequestPublisherDTO extends PublisherDTO {
     private String userAgent;
 
     private String tier;
+    private boolean continuedOnThrottleOut;
 
     public int getRequestCount(){
         return requestCount;
@@ -55,5 +56,11 @@ public class RequestPublisherDTO extends PublisherDTO {
         this.tier=tier;
     }
 
+    public boolean isContinuedOnThrottleOut() {
+        return continuedOnThrottleOut;
+    }
 
+    public void setContinuedOnThrottleOut(boolean continuedOnThrottleOut) {
+        this.continuedOnThrottleOut = continuedOnThrottleOut;
+    }
 }
