@@ -79,7 +79,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected Registry registry;
     protected UserRegistry configRegistry;
     protected ApiMgtDAO apiMgtDAO;
-    protected int tenantId;
+    protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
     protected String username;
 

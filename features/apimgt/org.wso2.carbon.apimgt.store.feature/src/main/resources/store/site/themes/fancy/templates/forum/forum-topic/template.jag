@@ -21,7 +21,9 @@
 <script id="fourm_topic_title_template" type="text/x-handlebars-template">
   
   <%if(jagg.getUser()){%>
-    <i id="forum_edit_topic_icon" class="icon-edit pull-right" data-id="{{ topicId }}"></i>
+    {{#if_creator replies.topic.0.topicOwner replies.topic.0.user}}
+      <i id="forum_edit_topic_icon" class="icon-edit pull-right" data-id="{{ topicId }}"></i>
+    {{/if_creator}}
   <%}%>
 
   <h2 id="forum_topic_subject_lable">{{ replies.topic.0.subject}}</h2>
@@ -106,8 +108,10 @@
             <br/>
 
             <%if(jagg.getUser()){%>
-              <i class="icon-trash forum_delete_reply_icon" data-id="{{ replyId }}" />
-              <i class="icon-edit forum_edit_reply_icon" data-id="{{ replyId }}" />
+              {{#if_creator createdBy user}}
+                <i class="icon-trash forum_delete_reply_icon" data-id="{{ replyId }}" />
+                <i class="icon-edit forum_edit_reply_icon" data-id="{{ replyId }}" />
+              {{/if_creator}}
             <%}%>
           </td>
           <td id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">

@@ -1694,7 +1694,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
+                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED) 
+                                || status.equals(APIConstants.DEPRECATED)) {
                             API resultAPI;
                             if (limitAttributes) {
                                 resultAPI = APIUtil.getAPI(artifact);
@@ -1706,7 +1707,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             }
                         }
                     } else {
-                        if (status.equals(APIConstants.PUBLISHED)) {
+                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED)) {
                             API resultAPI;
                             if (limitAttributes) {
                                 resultAPI = APIUtil.getAPI(artifact);
