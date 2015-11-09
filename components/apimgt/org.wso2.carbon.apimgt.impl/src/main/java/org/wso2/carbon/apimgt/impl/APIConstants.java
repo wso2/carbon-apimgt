@@ -67,10 +67,18 @@ public final class APIConstants {
     
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
-    
+
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
+
     public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
+
     public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
+
+    public static final String DEFAULT_API_TIER_FILE_NAME = "/tiers/default-tiers.xml";
+
+    public static final String DEFAULT_APP_TIER_FILE_NAME = "/tiers/default-app-tiers.xml";
+
+    public static final String DEFAULT_RES_TIER_FILE_NAME = "/tiers/default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 

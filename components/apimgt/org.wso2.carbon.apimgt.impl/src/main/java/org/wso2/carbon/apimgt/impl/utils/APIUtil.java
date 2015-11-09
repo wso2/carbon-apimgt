@@ -2468,9 +2468,9 @@ public final class APIUtil {
 
     public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
 
-        loadTenantAPIPolicy( tenantID, APIConstants.API_TIER_LOCATION, "/tiers/default-tiers.xml");
-        loadTenantAPIPolicy( tenantID, APIConstants.APP_TIER_LOCATION, "/tiers/default-app-tiers.xml");
-        loadTenantAPIPolicy( tenantID, APIConstants.RES_TIER_LOCATION, "/tiers/default-res-tiers.xml");
+        loadTenantAPIPolicy(tenantID, APIConstants.API_TIER_LOCATION, APIConstants.DEFAULT_API_TIER_FILE_NAME);
+        loadTenantAPIPolicy(tenantID, APIConstants.APP_TIER_LOCATION, APIConstants.DEFAULT_APP_TIER_FILE_NAME);
+        loadTenantAPIPolicy(tenantID, APIConstants.RES_TIER_LOCATION, APIConstants.DEFAULT_RES_TIER_FILE_NAME);
     }
 
     /**
