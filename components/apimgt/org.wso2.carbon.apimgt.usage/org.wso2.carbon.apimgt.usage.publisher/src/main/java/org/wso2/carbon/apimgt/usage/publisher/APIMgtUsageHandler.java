@@ -155,7 +155,8 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setMethod(method);
             requestPublisherDTO.setRequestTime(currentTime);
             requestPublisherDTO.setUsername(username);
-            requestPublisherDTO.setTenantDomain(userTenantDomain);
+            requestPublisherDTO.setTenantDomain((MultitenantUtils.getTenantDomain(
+                    (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER))));
             requestPublisherDTO.setHostName(hostName);
             requestPublisherDTO.setApiPublisher(apiPublisher);
             requestPublisherDTO.setApplicationName(applicationName);
