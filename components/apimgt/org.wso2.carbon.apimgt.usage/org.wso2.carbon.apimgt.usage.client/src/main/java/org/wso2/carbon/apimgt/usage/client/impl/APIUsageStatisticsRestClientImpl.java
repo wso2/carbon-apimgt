@@ -1107,8 +1107,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * search and return the resource path related data
      *
      * @param providerName API provider user name
-     * @param fromDate  starting date of the results
-     * @param toDate    ending date of the results
+     * @param fromDate     starting date of the results
+     * @param toDate       ending date of the results
      * @return a collection containing the API usage data of resource path
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -1235,8 +1235,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * search and return the destination related data
      *
      * @param providerName API provider user name
-     * @param fromDate  starting date of the results
-     * @param toDate    ending date of the results
+     * @param fromDate     starting date of the results
+     * @param toDate       ending date of the results
      * @return a collection containing the API usage data of destination
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -1378,9 +1378,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the usage data for a given API across all versions
      *
      * @param providerName API provider user name
-     * @param fromDate  starting date of the results
-     * @param toDate    ending date of the results
-     * @param limit     limit of the results
+     * @param fromDate     starting date of the results
+     * @param toDate       ending date of the results
+     * @param limit        limit of the results
      * @return a collection containing the API usage data
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying
      */
@@ -1529,8 +1529,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * This method gets the fault usage data
      *
      * @param providerName API provider user name
-     * @param fromDate  starting date of the results
-     * @param toDate    ending date of the results
+     * @param fromDate     starting date of the results
+     * @param toDate       ending date of the results
      * @return a List of APIResponseFaultCount objects, possibly empty
      * @throws APIMgtUsageQueryServiceClientException
      */
@@ -1702,7 +1702,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
         APIThrottlingOverTimeDTO usage;
 
-        List<Result<APIsForThrottleStatsValue>> soretedResult=getThrottleDataOfAPIAndApplicationSortedData(obj);
+        List<Result<APIsForThrottleStatsValue>> soretedResult = getThrottleDataOfAPIAndApplicationSortedData(obj);
 
         for (Result<APIsForThrottleStatsValue> result : soretedResult) {
             APIsForThrottleStatsValue v = result.getValues();
@@ -1751,8 +1751,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //lucene query with time ranges
         try {
             query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + ':' + appName + " AND "
-                            + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
-                            .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']');
+                    + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
+                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -2300,6 +2300,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         throw new APIMgtUsageQueryServiceClientException(msg, e);
     }
 
+    /**
+     * sort the last access time data by last access time
+     *
+     * @param usageData list of data to sort
+     * @param limit     limit value
+     * @return
+     */
     private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
             int limit) {
         Collections.sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
@@ -2318,6 +2325,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return usageData;
     }
 
+    /**
+     * sort the response time data by the service time
+     *
+     * @param usageData response time data to sort
+     * @param limit     value to limit the data
+     * @return
+     */
     private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<APIResponseTimeDTO>() {
             public int compare(APIResponseTimeDTO o1, APIResponseTimeDTO o2) {
@@ -2334,15 +2348,21 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return usageData;
     }
 
-    private List<Result<APIsForThrottleStatsValue>> getThrottleDataOfAPIAndApplicationSortedData(List<Result<APIsForThrottleStatsValue>> usageData) {
+    /**
+     * Sorting the throttle data by time
+     *
+     * @param usageData list to sort
+     * @return
+     */
+    private List<Result<APIsForThrottleStatsValue>> getThrottleDataOfAPIAndApplicationSortedData(
+            List<Result<APIsForThrottleStatsValue>> usageData) {
         Collections.sort(usageData, new Comparator<Result<APIsForThrottleStatsValue>>() {
             public int compare(Result<APIsForThrottleStatsValue> o1, Result<APIsForThrottleStatsValue> o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
                 return (int) (o2.getValues().getMax_request_time() - o1.getValues().getMax_request_time());
             }
-        }
-        );
+        });
 
         return usageData;
     }
