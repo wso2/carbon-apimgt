@@ -116,6 +116,15 @@ public interface APIManager {
     Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
 
     /**
+     * Returns the swagger v2.0 definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
+
+    /**
      * Checks whether the given document already exists for the given api
      *
      * @param identifier API Identifier

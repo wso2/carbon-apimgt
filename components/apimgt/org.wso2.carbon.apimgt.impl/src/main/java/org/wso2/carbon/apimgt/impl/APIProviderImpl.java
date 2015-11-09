@@ -138,8 +138,6 @@ import java.util.regex.Pattern;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
-    // API definitions from swagger v2.0
-    static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -2699,11 +2697,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
 
         return apiMgtDAO.getConsumerKeys(apiIdentifier);
-    }
-
-    @Override
-    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
-        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
     }
 
     @Override

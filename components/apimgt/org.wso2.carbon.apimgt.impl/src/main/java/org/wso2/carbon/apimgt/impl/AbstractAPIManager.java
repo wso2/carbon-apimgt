@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -34,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -82,6 +84,9 @@ public abstract class AbstractAPIManager implements APIManager {
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
     protected String username;
+
+    // API definitions from swagger v2.0
+    protected static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public AbstractAPIManager() throws APIManagementException {
     }
@@ -455,6 +460,17 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get versions for API: " + apiName, e);
         }
         return versionSet;
+    }
+
+    /** Returns the swagger 2.0 definition of the given API
+     * 
+     * @param apiId id of the APIIdentifier
+     * @return An String containing the swagger 2.0 definition
+     * @throws APIManagementException
+     */
+    @Override
+    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
     }
 
     public String addIcon(String resourcePath, Icon icon) throws APIManagementException {
