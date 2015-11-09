@@ -434,23 +434,6 @@ public class APIMappingUtil {
 
     }
 
-    public static String mapLifecycleStatusToRegistry(String status) {
-        switch (status) {
-        case "PUBLISHED":
-            return "Publish";
-        case "CREATED":
-            return "Demote to Created";
-        case "DEPRECATED":
-            return "Deprecate";
-        case "BLOCKED":
-            return "Block";
-        case "RETIRED":
-            return "Retire";
-        default:
-            return null;
-        }
-    }
-
     private static String updateContextWithVersion(String version, String contextVal, String context) {
         // This condition should not be true for any occasion but we keep it so that there are no loopholes in
         // the flow.

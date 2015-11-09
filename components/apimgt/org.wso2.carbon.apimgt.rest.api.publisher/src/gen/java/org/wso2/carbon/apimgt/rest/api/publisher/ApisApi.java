@@ -81,13 +81,12 @@ public class ApisApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
 
     public Response apisChangeLifecyclePost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.",required=true) @QueryParam("apiId") String apiId,
-    @ApiParam(value = "New lifecycle state of the API.", allowableValues="{values=[PUBLISHED, CREATED, DEPRECATED, BLOCKED, RETIRED]}") @QueryParam("newState") String newState,
-    @ApiParam(value = "") @QueryParam("publishToGateway") String publishToGateway,
-    @ApiParam(value = "") @QueryParam("resubscription") String resubscription,
+    @ApiParam(value = "The action to demote or promote the state of the API.\n\nSupported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]", allowableValues="{values=[Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire]}") @QueryParam("action") String action,
+    @ApiParam(value = "You can specify additional boolean attributes by using an **\"attribute:\"** modifier.\n\nEg: \"Deprecate Old Versions:true\" will deprecate older versions of a particular API when it is promoted to \nPublished state from Created state. Multiple attributes can be given in \"attribute1:true, attribute2:false\"\nformat.\n\nSupported attributes are as follows.\n1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.\n2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.") @QueryParam("lifecycleAttributes") String lifecycleAttributes,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.apisChangeLifecyclePost(apiId,newState,publishToGateway,resubscription,ifMatch,ifUnmodifiedSince);
+    return delegate.apisChangeLifecyclePost(apiId,action,lifecycleAttributes,ifMatch,ifUnmodifiedSince);
     }
     @POST
     @Path("/copy-api")

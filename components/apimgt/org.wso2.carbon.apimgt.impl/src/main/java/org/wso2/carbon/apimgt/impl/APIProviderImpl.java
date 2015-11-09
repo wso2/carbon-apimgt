@@ -2738,17 +2738,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
         Boolean success = false;
         try {
-            if (checkItemValue) {
-                apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-            } else {
-                apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+            if (apiArtifact != null) {
+                if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                    apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                    apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                }
+                success = true;
             }
-            success = true;
         } catch (GovernanceException e) {
             handleException("Error while setting registry lifecycle checklist items for the API: " +
                     apiIdentifier.getApiName(), e);
         }
         return success;
+    }
+
+    /**
+     * This method is to set a lifecycle check list item given the APIIdentifier and the checklist item name.
+     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay 
+     * silent and return false. Otherwise, the checklist item will be updated and returns true.
+     *
+     * @param apiIdentifier APIIdentifier
+     * @param checkItemName Name of the checklist item
+     * @param checkItemValue Value to be set to the checklist item
+     * @return boolean value representing success not not
+     * @throws APIManagementException
+     */
+    @Override
+    public boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName,
+            boolean checkItemValue)
+            throws APIManagementException {
+        Map<String, Object> lifeCycleData = getAPILifeCycleData(apiIdentifier);
+        if (lifeCycleData != null && lifeCycleData.get(APIConstants.LC_CHECK_ITEMS) != null && lifeCycleData
+                .get(APIConstants.LC_CHECK_ITEMS) instanceof ArrayList) {
+            List checkListItems = (ArrayList) lifeCycleData.get(APIConstants.LC_CHECK_ITEMS);
+            for (Object item : checkListItems) {
+                if (item instanceof CheckListItem) {
+                    CheckListItem checkListItem = (CheckListItem) item;
+                    int index = Integer.valueOf(checkListItem.getOrder());
+                    if (checkListItem.getName().equals(checkItemName)) {
+                        changeAPILCCheckListItems(apiIdentifier, index, checkItemValue);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override

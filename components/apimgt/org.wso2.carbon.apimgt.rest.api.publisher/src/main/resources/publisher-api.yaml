@@ -410,21 +410,36 @@ paths:
       description: |
         Change the lifecycle of an API
       parameters:
-        - name: newState
+        - name: action
           description: |
-            New lifecycle state of the API.
+            The action to demote or promote the state of the API.
+
+            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
+
           in: query
           type: string
           enum:
-            - PUBLISHED
-            - CREATED
-            - DEPRECATED
-            - BLOCKED
-            - RETIRED
-        - name: publishToGateway
-          type: string
-          in: query
-        - name: resubscription
+            - Publish
+            - Deploy as a Prototype
+            - Demote to Created
+            - Demote to Prototyped
+            - Block
+            - Deprecate
+            - Re-Publish
+            - Retire
+        - name: lifecycleAttributes
+          description: |
+
+            You can specify additional boolean attributes by using an **"attribute:"** modifier.
+
+            Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API when it is promoted to 
+            Published state from Created state. Multiple attributes can be given in "attribute1:true, attribute2:false"
+            format.
+
+            Supported attributes are as follows.
+            1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.
+            2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
+
           type: string
           in: query
         - $ref: '#/parameters/apiId-Q'

@@ -41,7 +41,6 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 /** This is the service implementation class for Publisher API related operations 
@@ -134,15 +133,39 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.created(createdApiUri).entity(createdApiDTO).build();
     }
 
-    @Override
-    public Response apisChangeLifecyclePost(String apiId, String newState, String publishToGateway,
-            String resubscription, String ifMatch, String ifUnmodifiedSince) {
+    /**
+     * Changes lifecycle state of an API
+     *  
+     * @param apiId API identifier
+     * @param action 
+     * @param lifecycleAttributes
+     * @param ifMatch
+     * @param ifUnmodifiedSince
+     * @return
+     */
+    @Override 
+    public Response apisChangeLifecyclePost(String apiId, String action, String lifecycleAttributes,
+            String ifMatch, String ifUnmodifiedSince) {
+
+        //pre-processing
+        String[] checkListItems = lifecycleAttributes != null ? lifecycleAttributes.split(",") : new String[0];
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            String registryLCState = APIMappingUtil.mapLifecycleStatusToRegistry(newState);
-            apiProvider.changeLifeCycleStatus(apiIdentifier, registryLCState);
+
+            //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
+            for (String checkListItem : checkListItems) {
+                String[] attributeValPair = checkListItem.split(":");
+                if (attributeValPair.length == 2) {
+                    String checkListItemName = attributeValPair[0].trim();
+                    boolean checkListItemValue = Boolean.valueOf(attributeValPair[1].trim());
+                    apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
+                }
+            }
+
+            apiProvider.changeLifeCycleStatus(apiIdentifier, action);
             return Response.ok().build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -150,7 +173,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
     
     @Override
-    public Response apisCopyApiPost(String newVersion,String apiId){
+    public Response apisCopyApiPost(String apiId, String newVersion){
         boolean isTenantFlowStarted = false;
         URI newVersionedApiUri = null;
         APIDTO newVersionedApi = null;

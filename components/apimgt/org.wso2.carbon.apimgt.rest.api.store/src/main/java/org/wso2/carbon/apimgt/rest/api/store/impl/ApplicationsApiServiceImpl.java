@@ -60,7 +60,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application[] allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
-
+            //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
                     allMatchedApps.length);
