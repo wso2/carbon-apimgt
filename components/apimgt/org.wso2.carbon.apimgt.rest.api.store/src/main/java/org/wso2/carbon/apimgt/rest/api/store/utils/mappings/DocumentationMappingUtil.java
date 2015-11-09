@@ -17,7 +17,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;

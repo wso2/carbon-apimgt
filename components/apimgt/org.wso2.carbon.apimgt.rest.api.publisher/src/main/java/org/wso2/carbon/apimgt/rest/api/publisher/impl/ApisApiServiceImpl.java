@@ -138,17 +138,17 @@ public class ApisApiServiceImpl extends ApisApiService {
      *  
      * @param apiId API identifier
      * @param action 
-     * @param lifecycleAttributes
+     * @param lifecycleChecklist
      * @param ifMatch
      * @param ifUnmodifiedSince
      * @return
      */
     @Override 
-    public Response apisChangeLifecyclePost(String apiId, String action, String lifecycleAttributes,
+    public Response apisChangeLifecyclePost(String apiId, String action, String lifecycleChecklist,
             String ifMatch, String ifUnmodifiedSince) {
 
         //pre-processing
-        String[] checkListItems = lifecycleAttributes != null ? lifecycleAttributes.split(",") : new String[0];
+        String[] checkListItems = lifecycleChecklist != null ? lifecycleChecklist.split(",") : new String[0];
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();

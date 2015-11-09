@@ -128,7 +128,7 @@ public class APIMappingUtil {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
         }
 
-        //do we need to put validity checks? - specific_tenants
+        //todo: do we need to put validity checks? - specific_tenants
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
@@ -153,13 +153,12 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
-        //dto.setType("");   //how to get type?
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
-        //do we need to put validity checks? - restricted
+        //todo: do we need to put validity checks? - restricted
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
-        //do we need to put validity checks? - controlled
+        //todo: do we need to put validity checks? - controlled
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
@@ -193,7 +192,7 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
 
-        // This is to support the new Pluggable version strategy
+        // This is to support the pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
         context = checkAndSetVersionParam(context);
         model.setContextTemplate(context);
@@ -228,7 +227,7 @@ public class APIMappingUtil {
             model.setSubscriptionAvailability(mapSubscriptionAvailabilityFromDTOtoAPI(dto.getSubscriptionAvailability()));
         }
 
-        //do we need to put validity checks? - specific_tenants
+        //todo :do we need to put validity checks? - specific_tenants
         if (dto.getSubscriptionAvailableTenants() != null) {
             model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
         }
@@ -259,7 +258,6 @@ public class APIMappingUtil {
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
-        //dto.setType("");   //how to get type?
         model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');

@@ -19,7 +19,7 @@ import javax.ws.rs.core.Response;
 public abstract class ApisApiService {
     public abstract Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch);
     public abstract Response apisPost(APIDTO body,String contentType);
-    public abstract Response apisChangeLifecyclePost(String apiId,String action,String lifecycleAttributes,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response apisChangeLifecyclePost(String apiId,String action,String lifecycleChecklist,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisCopyApiPost(String apiId,String newVersion);
     public abstract Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
