@@ -49,7 +49,7 @@
     "tierAddTitle":"Add Tier",
     "tierEditTitle":"Edit Tier",
     "requestCount":"Request Count",
-    "unitTime":"Unit Time (Seconds)",
+    "unitTime":"Unit Time (Milliseconds)",
     "displayName":"Display Name",
     "enableUnlimited":"Enable Unlimited",
     "stopOnQuotaReach":"Stop On Quota Reach",
@@ -60,5 +60,6 @@
     "actions":"Actions",
     "saveTier":"Save",
     "cancelTier":"Cancel",
-    "errorMsgRequired":"Required"
+    "errorMsgRequired":"Required",
+    "errorMessageInvalid":"Invalid"
 }

@@ -231,6 +231,12 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.tier.cache.stub</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -805,12 +811,6 @@
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
                 <version>${carbon.kernel.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
-                <version>${ganalytics.version}</version>
             </dependency>
 
             <dependency>

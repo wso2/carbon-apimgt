@@ -2196,7 +2196,7 @@ public class ApiMgtDAO {
                 }
                 subscribedAPI.setApplication(application);
 
-                int subscriptionId = result.getInt(APIConstants.SUBSCRIPTION_FIELD_SUBSCRIPTION_ID);
+                int subscriptionId = result.getInt("SUBS_ID");
                 Set<APIKey> apiKeys = getAPIKeysBySubscription(subscriptionId);
                 for (APIKey key : apiKeys) {
                     subscribedAPI.addKey(key);

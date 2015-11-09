@@ -111,17 +111,17 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
                 tenantDomain = temp.substring(0, temp.indexOf("/"));
             }
-            
+
             if (apiPublisher == null) {
                 apiPublisher = getAPIProviderFromRESTAPI(api_version);
             }
-            
+
             if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
                 apiPublisher = apiPublisher + "@" + tenantDomain;
-            } 
-            
+            }
+
             int index = api_version.indexOf("--");
-            
+
             if (index != -1) {
                 api_version = api_version.substring(index + 2);
             }
@@ -139,6 +139,12 @@ public class APIMgtUsageHandler extends AbstractHandler {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(userTenantDomain);
 
+            Object throttleOutProperty = mc.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY);
+            boolean throttleOutHappened = false;
+            if (throttleOutProperty != null && throttleOutProperty instanceof Boolean) {
+                throttleOutHappened = (Boolean) throttleOutProperty;
+            }
+
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setConsumerKey(consumerKey);
             requestPublisherDTO.setContext(context);
@@ -149,13 +155,15 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setMethod(method);
             requestPublisherDTO.setRequestTime(currentTime);
             requestPublisherDTO.setUsername(username);
-            requestPublisherDTO.setTenantDomain(userTenantDomain);
+            requestPublisherDTO.setTenantDomain((MultitenantUtils.getTenantDomain(
+                    (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER))));
             requestPublisherDTO.setHostName(hostName);
             requestPublisherDTO.setApiPublisher(apiPublisher);
             requestPublisherDTO.setApplicationName(applicationName);
             requestPublisherDTO.setApplicationId(applicationId);
             requestPublisherDTO.setUserAgent(userAgent);
             requestPublisherDTO.setTier(tier);
+            requestPublisherDTO.setContinuedOnThrottleOut(throttleOutHappened);
 
             publisher.publishEvent(requestPublisherDTO);
             //We check if usage metering is enabled for billing purpose
