@@ -26,8 +26,11 @@ public class ApplicationKeyDTO  {
   
   private String keyState = null;
   
+  public enum KeyTypeEnum {
+     PRODUCTION,  SANDBOX, 
+  };
   
-  private String clientName = null;
+  private KeyTypeEnum keyType = null;
   
   
   private TokenDTO token = null;
@@ -86,15 +89,15 @@ public class ApplicationKeyDTO  {
 
   
   /**
-   * Application client representation
+   * Key type
    **/
-  @ApiModelProperty(value = "Application client representation")
-  @JsonProperty("clientName")
-  public String getClientName() {
-    return clientName;
+  @ApiModelProperty(value = "Key type")
+  @JsonProperty("keyType")
+  public KeyTypeEnum getKeyType() {
+    return keyType;
   }
-  public void setClientName(String clientName) {
-    this.clientName = clientName;
+  public void setKeyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
   }
 
   
@@ -121,7 +124,7 @@ public class ApplicationKeyDTO  {
     sb.append("  consumerSecret: ").append(consumerSecret).append("\n");
     sb.append("  supportedGrantTypes: ").append(supportedGrantTypes).append("\n");
     sb.append("  keyState: ").append(keyState).append("\n");
-    sb.append("  clientName: ").append(clientName).append("\n");
+    sb.append("  keyType: ").append(keyType).append("\n");
     sb.append("  token: ").append(token).append("\n");
     sb.append("}\n");
     return sb.toString();

@@ -98,8 +98,6 @@ var addAnalyticsConfig = function (configData) {
         stub.configureAnalyzing(analyzingConfigData);
         stub.configureRestAPI(restAPIConfigData);
         var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
-        log.info(configReaderService.getRequestStreamName());
-        log.info(configReaderService.getResponseStreamName());
         configReaderService.setAnalyticsEnabled(true);
         configReaderService.setBamServerUrlGroups(configData.eventReceiverURL);
         configReaderService.setBamServerUser(configData.eventReceiverUsername);

@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
 
 import java.util.List;
 
@@ -25,21 +26,21 @@ public class TagsApi  {
 
     @GET
     
-    
-    
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of predefined sequences", response = Void.class)
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of predefined sequences", response = TagListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. tag list is returned."),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nTag list is returned."),
         
-        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource."),
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. \nEmpty body because the client has already the latest version of the requested resource."),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist."),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
-    public Response tagsGet(@ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "** Search condition **.\n\n\nIf no advanced attribute modifier is found search will match the given query string against Tag Name.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nEg. \"apiName:phoneVerification\" will match if the API Name is phoneVerification.\n\n\nSupported attribute modifiers are [ **apiName,version**  ]\n") @QueryParam("query") String query)
+    public Response tagsGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON."  , defaultValue="JSON")@HeaderParam("Accept") String accept,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec."  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "**Search condition**.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nSupported attribute modifiers are [**apiName,version**]\n\n\nEg. \"apiName:phoneVerification\" will match if the API Name is\nphoneVerification.\n\n\nIf no attribute modifier is found search will match the given query string against Tag Name.") @QueryParam("query") String query)
     {
     return delegate.tagsGet(accept,ifNoneMatch,query);
     }

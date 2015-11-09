@@ -65,8 +65,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -180,7 +178,7 @@ public class ApiMgtDAO {
 
         //get the tenant id for the corresponding domain
         String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = IdentityTenantUtil.getTenantIdOfUser(loginUserName);
+        int tenantId = APIUtil.getTenantId(loginUserName);
 
         if (log.isDebugEnabled()) {
             log.debug("Searching for: " + identifier.getAPIIdentifier() + ", User: " + tenantAwareUserId +
@@ -440,7 +438,7 @@ public class ApiMgtDAO {
         String loginUserName = getLoginUserName(userId);
 
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = IdentityTenantUtil.getTenantIdOfUser(loginUserName);
+        int tenantId = APIUtil.getTenantId(loginUserName);
         List<APIInfoDTO> apiInfoDTOList = new ArrayList<APIInfoDTO>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -568,8 +566,7 @@ public class ApiMgtDAO {
                                         String statusEnum)
             throws APIManagementException {
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        int tenantId = 0;
-        IdentityTenantUtil.getTenantIdOfUser(userId);
+        int tenantId = APIUtil.getTenantId(userId);
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
@@ -1692,7 +1689,7 @@ public class ApiMgtDAO {
         ResultSet result = null;
 
         int tenantId;
-        tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriberName);
+        tenantId = APIUtil.getTenantId(subscriberName);
 
         String sqlQuery = "SELECT " +
                           "   SUBSCRIBER_ID, " +
@@ -1850,7 +1847,7 @@ public class ApiMgtDAO {
             }
 
             ps = connection.prepareStatement(sqlQuery);
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             ps.setInt(1, tenantId);
             ps.setString(2, applicationName);
 
@@ -1945,7 +1942,7 @@ public class ApiMgtDAO {
 
             ps = connection.prepareStatement(sqlQuery);
             ps.setString(1, applicationName);
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             ps.setInt(2, tenantId);
             ps.setString(3, appIdentifier);
             result = ps.executeQuery();
@@ -2013,7 +2010,7 @@ public class ApiMgtDAO {
                     "AND LOWER(SUB.USER_ID) = LOWER(?)))" ;
         try {
             connection = APIMgtDBUtil.getConnection();
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             if (groupingId != null && !groupingId.equals("null") && !groupingId.equals("")) {
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseWithGroupIdorceCaseInsensitiveComp;
@@ -2145,7 +2142,7 @@ public class ApiMgtDAO {
             }
 
             ps = connection.prepareStatement(sqlQuery);
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             ps.setInt(1, tenantId);
             if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
                 ps.setString(2, groupingId);
@@ -2199,7 +2196,7 @@ public class ApiMgtDAO {
                 }
                 subscribedAPI.setApplication(application);
 
-                int subscriptionId = result.getInt(APIConstants.SUBSCRIPTION_FIELD_SUBSCRIPTION_ID);
+                int subscriptionId = result.getInt("SUBS_ID");
                 Set<APIKey> apiKeys = getAPIKeysBySubscription(subscriptionId);
                 for (APIKey key : apiKeys) {
                     subscribedAPI.addKey(key);
@@ -3647,6 +3644,51 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * This method is used to update the subscription
+     * 
+     * @param subscribedAPI subscribedAPI object that represents the new subscription detals
+     * @throws APIManagementException if failed to update subscription
+     */
+    public void updateSubscription(SubscribedAPI subscribedAPI) throws APIManagementException {
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            //This query to update the AM_SUBSCRIPTION table
+            String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, UPDATED_BY = ?, UPDATED_TIME = ? " +
+                    "WHERE UUID = ?";
+
+            //Updating data to the AM_SUBSCRIPTION table
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, subscribedAPI.getSubStatus());
+            //TODO Need to find logged in user who does this update.
+            ps.setString(2, null);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            ps.setString(4, subscribedAPI.getUUID());
+            ps.execute();
+
+            // finally commit transaction
+            conn.commit();
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the update subscription ", e);
+                }
+            }
+            handleException("Failed to update subscription data ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, null);
+        }
+    }
+
     public void updateSubscriptionStatus(int subscriptionId, String status) throws APIManagementException{
 
         Connection conn = null;
@@ -3740,7 +3782,7 @@ public class ApiMgtDAO {
                 }
             }
         } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
 
     }
@@ -3821,7 +3863,7 @@ public class ApiMgtDAO {
             throw new APIManagementException("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
                     " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
         } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
 
     }
@@ -4105,7 +4147,7 @@ public class ApiMgtDAO {
             ps.setString(3, apiIdentifier.getVersion());
             ps.setString(4, loginUserName);
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(loginUserName);
+            tenantId = APIUtil.getTenantId(loginUserName);
             ps.setInt(5, tenantId);
 
             rs = ps.executeQuery();
@@ -4452,7 +4494,7 @@ public class ApiMgtDAO {
 
         try {
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
             if (subscriber == null) {
@@ -4548,7 +4590,7 @@ public class ApiMgtDAO {
         try {
             int tenantId;
             int rateId = -1;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
             if (subscriber == null) {
@@ -4634,7 +4676,7 @@ public class ApiMgtDAO {
         int userRating=0;
         try {
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
             if (subscriber == null) {
@@ -4797,7 +4839,7 @@ public class ApiMgtDAO {
         int applicationId = 0;
         try {
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
 
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
@@ -5859,7 +5901,7 @@ public class ApiMgtDAO {
 
         int tenantId;
         int apiId = -1;
-        tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+        tenantId = APIUtil.getTenantId(userId);
 
         if (oldStatus == null && !newStatus.equals(APIStatus.CREATED)) {
             String msg = "Invalid old and new state combination";
@@ -6646,6 +6688,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     "APP.SUBSCRIBER_ID,"+
                     "APP.APPLICATION_STATUS, " +
                     "SUB.USER_ID, " +
+                    "APP.GROUP_ID," +
                     "APP.UUID " +
                     "FROM " +
                     "AM_SUBSCRIBER SUB," +
@@ -6658,7 +6701,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             rs = prepStmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String applicationName = rs.getString("NAME");
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -6671,10 +6714,10 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                break;
             }
 
         } catch (SQLException e) {
@@ -6710,6 +6753,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     "APP.DESCRIPTION, " +
                     "APP.SUBSCRIBER_ID,"+
                     "APP.APPLICATION_STATUS, " +
+                    "APP.GROUP_ID, " +
                     "APP.UUID," +
                     "SUB.USER_ID " +
                     "FROM " +
@@ -6723,7 +6767,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             rs = prepStmt.executeQuery();
 
-            while (rs.next()) {
+            if (rs.next()) {
                 String applicationName = rs.getString("NAME");
                 String subscriberId = rs.getString("SUBSCRIBER_ID");
                 String subscriberName = rs.getString("USER_ID");
@@ -6736,10 +6780,15 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setStatus(rs.getString("APPLICATION_STATUS"));
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
                 application.setUUID(rs.getString("UUID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
-                break;
+
+                Set<APIKey> keys = getApplicationKeys(subscriber.getName() , application.getId());
+                for (APIKey key : keys) {
+                    application.addKey(key);
+                }
             }
 
         } catch (SQLException e) {

@@ -67,10 +67,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.bam.toolbox.deployer.stub</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -103,7 +99,6 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${carbon.apimgt.version}</bundleDef>
-                                <!--bundleDef>org.wso2.carbon:org.wso2.carbon.bam.toolbox.deployer.stub:4.2.0</bundleDef-->
                             </bundles>
                             <importFeatures>
                                 <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>

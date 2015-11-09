@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -312,8 +313,6 @@ public final class APIConstants {
     public static final String LC_CHECK_ITEM_VALUE="value:";
     public static final String LC_CHECK_ITEM_ORDER="order:";
 
-
-
     public static class TokenStatus {
         public static final String ACTIVE = "ACTIVE";
         public static final String BLOCKED = "BLOCKED";
@@ -480,17 +479,49 @@ public final class APIConstants {
 
     public static final QName POLICY_ELEMENT = new QName("http://schemas.xmlsoap.org/ws/2004/09/policy",
                       "Policy");
-    public static final QName ASSERTION_ELEMENT = new QName("http://www.wso2.org/products/wso2commons/throttle",
-            "MediatorThrottleAssertion");
-    public static final QName THROTTLE_ID_ELEMENT = new QName("http://www.wso2.org/products/wso2commons/throttle",
-            "ID");
-    public static final QName THROTTLE_ID_DISPLAY_NAME_ELEMENT = new QName("http://www.wso2.org/products/wso2commons/throttle",
-            "displayName");
+
+    public static final String THROTTLE_NAMESPACE = "http://www.wso2.org/products/wso2commons/throttle";
+
+    public static final QName ASSERTION_ELEMENT = new QName(THROTTLE_NAMESPACE, "MediatorThrottleAssertion");
+    public static final QName THROTTLE_ID_ELEMENT = new QName(THROTTLE_NAMESPACE,"ID");
+    public static final QName THROTTLE_ID_DISPLAY_NAME_ELEMENT = new QName(THROTTLE_NAMESPACE, "displayName");
     public static final String TIER_DESCRIPTION_PREFIX = "tier.desc.";
-    
+
+    public static final String THROTTLE_TIER_DESCRIPTION_ATTRIBUTE = "Description";
+    public static final String THROTTLE_TIER_PLAN_ATTRIBUTE = "BillingPlan";
+    public static final String THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE = "StopOnQuotaReach";
+
     public static final String TIER_MANAGEMENT = "TierManagement.";
     public static final String ENABLE_UNLIMITED_TIER = TIER_MANAGEMENT + "EnableUnlimitedTier";
-    
+    public static final String THROTTLE_POLICY_TEMPLATE =
+            "<wsp:Policy xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\" xmlns:throttle=\"http://www.wso2" +
+                ".org/products/wso2commons/throttle\">" +
+                "<throttle:ID throttle:type=\"ROLE\">%s</throttle:ID>" +
+                "<wsp:Policy>" +
+                    "<throttle:Control>" +
+                        "<wsp:Policy>" +
+                            "<throttle:MaximumCount>%d</throttle:MaximumCount>" +
+                            "<throttle:UnitTime>%d</throttle:UnitTime>" +
+                            "<wsp:Policy>" +
+                                "<throttle:Attributes>%s</throttle:Attributes>" +
+                            "</wsp:Policy>" +
+                        "</wsp:Policy>" +
+                    "</throttle:Control>" +
+                "</wsp:Policy>" +
+            "</wsp:Policy>";
+
+    public static final String THROTTLE_POLICY_ATTRIBUTE_TEMPLATE =
+            "<throttle:%s xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">%s</throttle:%s>";
+
+    // This property is used to indicate whether a throttle out event has happened
+    // There is a property added to the message context when such an event happens.
+    public static final String API_USAGE_THROTTLE_OUT_PROPERTY_KEY = "isThrottleOutIgnored";
+
+    public static final String THROTTLE_OUT_REASON_KEY = "THROTTLED_OUT_REASON";
+
+// The following properties describes the reason for the throttle out.
+    public static final String THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED = "HARD_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_SOFT_LIMIT_EXCEEDED = "SOFT_LIMIT_EXCEEDED";
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
@@ -526,14 +557,13 @@ public final class APIConstants {
     public static final int AM_CREATOR_APIMGT_EXECUTION_ID = 200;
     public static final int AM_CREATOR_GOVERNANCE_EXECUTION_ID = 201;
     public static final int AM_PUBLISHER_APIMGT_EXECUTION_ID = 202;
-    public static final QName THROTTLE_CONTROL_ELEMENT = new QName("http://www.wso2.org/products/wso2commons/throttle",
-                        "Control");
-    public static final QName THROTTLE_MAXIMUM_COUNT_ELEMENT = new QName("http://www.wso2"
-            +".org/products/wso2commons/throttle", "MaximumCount");
-    public static final QName THROTTLE_UNIT_TIME_ELEMENT = new QName("http://www.wso2"
-                                                                     + ".org/products/wso2commons/throttle", "UnitTime");
-    public static final QName THROTTLE_ATTRIBUTES_ELEMENT = new QName("http://www.wso2"
-                                                                      + ".org/products/wso2commons/throttle", "Attributes");
+    public static final QName THROTTLE_CONTROL_ELEMENT = new QName(THROTTLE_NAMESPACE, "Control");
+    public static final QName THROTTLE_MAXIMUM_COUNT_ELEMENT = new QName(THROTTLE_NAMESPACE, "MaximumCount");
+    public static final QName THROTTLE_UNIT_TIME_ELEMENT = new QName(THROTTLE_NAMESPACE, "UnitTime");
+    public static final QName THROTTLE_ATTRIBUTES_ELEMENT = new QName(THROTTLE_NAMESPACE, "Attributes");
+    public static final QName THROTTLE_ATTRIBUTE_ELEMENT = new QName(THROTTLE_NAMESPACE, "Attribute");
+    public static final QName THROTTLE_DESCRIPTION_ELEMENT = new QName(THROTTLE_NAMESPACE, "Description");
+    public static final QName THROTTLE_TIER_PLAN_ELEMENT = new QName(THROTTLE_NAMESPACE, THROTTLE_TIER_PLAN_ATTRIBUTE);
     public static final String THROTTLE_ATTRIBUTE_DISPLAY_NAME= "displayName";
 
     public static final String TIER_DESC_NOT_AVAILABLE = "Tire Description is not available";
@@ -587,7 +617,9 @@ public final class APIConstants {
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
 
     //URI Authentication Schemes
-    public static final Set<String> SUPPORTED_METHODS = new HashSet<String>((Arrays.asList(new String[] {"get","put","post","delete","head","options"})));
+    public static final Set<String> SUPPORTED_METHODS =
+            Collections.unmodifiableSet(new HashSet<String>(
+                    (Arrays.asList(new String[]{"get","put","post","delete","head","options"}))));
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
@@ -719,7 +751,7 @@ public final class APIConstants {
 
     public static final String RECENTLY_ADDED_API_CACHE_NAME = "RECENTLY_ADDED_API";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = API_STORE + "EnableRecentlyAddedAPICache";
-    public static String VELOCITY_LOGGER = "VelocityLogger";
+    public static final String VELOCITY_LOGGER = "VelocityLogger";
 
 
     public static class DigestAuthConstants {
@@ -796,7 +828,7 @@ public final class APIConstants {
         public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
     }
 
-    public static String CORS_SEQUENCE_NAME = "_cors_request_handler_";
+    public static final String CORS_SEQUENCE_NAME = "_cors_request_handler_";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";

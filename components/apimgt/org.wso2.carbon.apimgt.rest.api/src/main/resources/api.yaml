@@ -1,69 +1,125 @@
 swagger: '2.0'
+######################################################
+# Prolog
+######################################################
 info:
-  version: 0.9.0
-  title: WSO2 API Manager
-  description: >
-    This document describe a ** RESTFul API ** for wso2 **API Manager**.
+  version: "0.9.0"
+  title: "WSO2 API Manager"
+  description: |
+    This document specifies a **RESTful API** for WSO2 **API Manager**.
+    
+    You can find the source of this API definition 
+    [here](https://github.com/hevayo/restful-apim). 
+    It was written with [swagger 2](http://swagger.io/).
 
-
-    You can find the source of this API definition at
-    [here](https://github.com/hevayo/restful-apim). It was written with [swagger
-    2](http://swagger.io/).
   contact:
-    name: WSO2
-    url: 'http://wso2.com/products/api-manager/'
-    email: architecture@wso2.com
-  license:
-    name: Apache 2.0
-    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
-consumes:
-  - application/json
-produces:
-  - application/json
-schemes:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license: 
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# Specifying the fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes: 
   - https
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+#
+# ??? Decision was to use semantic versioning (major.minor.patch)
+# ??? For comprehensibility we should add "v" on front of the digits.
+# 
+# ??? We decided to add a tenent_id to the base path.
+# ??? What is the stucture of a tenent_id? Where schould be add it?
+basePath: /publisher/v1.0.0
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes: 
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request. 
+# The actual media type returned will be specfied in the Content-Type header field 
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces: 
+  - application/json
+
+######################################################
+# The "API Collection" resource APIs
+######################################################
 paths:
   /apis:
+
+#-----------------------------------------------------
+# Retrieving the list of all APIs qualifying under a given search condition  
+#-----------------------------------------------------
     get:
-      description: Get a list of available APIs qualifying under a given search condition.
+      summary: |
+        Retrieving APIs
+      description: |
+        Get a list of available APIs qualifying under a given search condition.
       parameters:
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
-        - name: query
+        - $ref : "#/parameters/limit"
+        - $ref : "#/parameters/offset"
+        - name : query
           in: query
-          description: >
-            ** Search condition **.
+          description: |
+            **Search condition**.
 
+            You can search in attributes by using an **"attribute:"** modifier.
 
-            If no advanced attribute modifier is found search will match the
+            Eg. "provider:wso2" will match an API if the provider of the API is wso2.
+
+            Supported attribute modifiers are [**version, context, status,
+            description, subcontext, doc, provider, tag **]
+
+            If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
-
-
-            You can search in attributes by using **"attribute:"** modifier.
-
-
-            Eg. "provider:wso2" will match if the API provider is wso2.
-
-
-            Supported attribute modifiers are [ **version, context, status,
-            description, subcontext, doc, provider, tag **  ]
           type: string
         - name: type
           in: query
-          description: ' prototype / production '
+          description: |
+            List prototype or production APIs.
           type: string
           enum:
             - PRODUCTION
             - PROTOTYPE
+# ??? Provide list of attributes we support for sorting
         - name: sort
           in: query
           type: string
-          description: ' List supported sorting attributes '
-        - $ref: '#/parameters/Accept'
-        - $ref: '#/parameters/If-None-Match'
+          description: | 
+            ** Sort expression **
+
+            A *sort expression* consists of a sequence of names of API 
+            properties concatenated by a '+' or '-' (indicating ascending or 
+            decending order) separated by a comma. The sequence of names 
+            corresponds to a conjunction. 
+        - $ref : "#/parameters/Accept"
+        - $ref : "#/parameters/If-None-Match"
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API Collection
+#        - Retrieve
       responses:
-        '200':
-          description: OK. List of APIs is returned.
+        200:
+          description: OK. List of qualifying APIs is returned.
           schema:
             $ref: '#/definitions/APIList'
           headers:
@@ -79,6 +135,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Create a new API 
+#-----------------------------------------------------
     post:
       description: Create a new API
       parameters:
@@ -89,6 +149,10 @@ paths:
           schema:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API Collection
+#        - Create
       responses:
         '201':
           description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
@@ -112,7 +176,15 @@ paths:
           description: Unsupported Media Type. The entity of the request was in a not supported format.
           schema:
             $ref: '#/definitions/Error'
-  '/apis/{apiId}':
+
+######################################################
+# The "Individual API" resource APIs
+######################################################
+  /apis/{apiId}:
+
+#-----------------------------------------------------
+# Retrieve the details of an API definition
+#-----------------------------------------------------
     get:
       description: Get details of an API
       parameters:
@@ -120,6 +192,10 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Retrieve
       responses:
         '200':
           description: OK Requested API is returned
@@ -145,6 +221,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update the definition of an API
+#-----------------------------------------------------
     put:
       description: Update an existing API
       parameters:
@@ -158,6 +238,10 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Update
       responses:
         '200':
           description: OK. Successful response with updated API object
@@ -192,12 +276,20 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete the definition of an API
+#-----------------------------------------------------
     delete:
       description: Delete an existing API
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Delete
       responses:
         '200':
           description: OK. Resource successfully deleted.
@@ -213,7 +305,15 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Copy API" Processing Function resource API
+######################################################
   /apis/copy-api:
+
+#-----------------------------------------------------
+# Create a new API based on an already existing one
+#-----------------------------------------------------
     post:
       parameters:
         - name: newVersion
@@ -222,6 +322,10 @@ paths:
           in: query
         - $ref: '#/parameters/apiId-Q'
       description: Create a new API by copying an existing API
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Copy
       responses:
         '201':
           description: Created. Successful response with the newly created API as entity in the body. Location header contains URL of newly created API.
@@ -237,7 +341,15 @@ paths:
           description: Not Found. API to copy does not exist.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Change Lifecycle" Processing Function resource API
+######################################################
   /apis/change-lifecycle:
+
+#-----------------------------------------------------
+# Change the lifecycle of an API
+#-----------------------------------------------------
     post:
       description: Change the lifecycle of an API
       parameters:
@@ -254,6 +366,10 @@ paths:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Change Lifecycle
       responses:
         '200':
           description: OK. Lifecycle changed successfully.
@@ -276,23 +392,40 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
-  '/apis/{apiId}/documents':
+
+######################################################
+# The "Document Collection" resource APIs
+######################################################
+  /apis/{apiId}/documents:
+
+#-----------------------------------------------------
+# Retrieve the documents associated with an API that qualify under a search condition
+#-----------------------------------------------------
     get:
       description: Get a list of documents belonging to an API.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+#
+# ????? We need to specify the search condition  ?????
         - name: query
           in: query
           description: Search condition.
           type: string
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Retrieve Documents
       responses:
         '200':
           description: OK. Document list is returned.
           schema:
+#
+# ????? For consistency reasons:  ?????
+# ????? Define a "Document List" object  ?????
             title: DocumentList
             properties:
               count:
@@ -324,6 +457,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Add a document to a certain API
+#-----------------------------------------------------
     post:
       description: Add a new document to an API
       parameters:
@@ -335,6 +472,10 @@ paths:
           schema:
             $ref: '#/definitions/Document'
         - $ref: '#/parameters/Content-Type'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Add Document
       responses:
         '201':
           description: Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document.
@@ -356,7 +497,15 @@ paths:
             $ref: '#/definitions/Error'
         '415':
           description: Unsupported media type. The entity of the request was in a not supported format.
+
+######################################################
+# The "Individual Document" resource APIs
+######################################################
   '/apis/{apiId}/documents/{documentId}':
+
+#-----------------------------------------------------
+# Retrieve a particular document of a certain API
+#-----------------------------------------------------
     get:
       description: Get a particular document associated with an API.
       parameters:
@@ -370,6 +519,10 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Retrieve Document
       responses:
         '200':
           description: OK. Document returned.
@@ -395,6 +548,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update a particular document of a certain API
+#-----------------------------------------------------
     put:
       description: Update document details.
       parameters:
@@ -414,6 +571,10 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Update Document
       responses:
         '200':
           description: OK. Document updated
@@ -444,6 +605,10 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete a particular document of a certain API
+#-----------------------------------------------------
     delete:
       description: Delete a document of an API
       parameters:
@@ -456,6 +621,10 @@ paths:
           format: integer
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - API (individual)
+#        - Delete Document
       responses:
         '200':
           description: OK. Resource successfully deleted.
@@ -467,7 +636,15 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Application Collection" resource APIs
+######################################################
   /applications:
+
+#-----------------------------------------------------
+# Retrieve a list of all applications of a certain subscriber
+#-----------------------------------------------------
     get:
       description: Get a list of applications
       parameters:
@@ -477,24 +654,15 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Application Collection
+#        - Retrieve
       responses:
         '200':
           description: OK. Application list returned.
           schema:
-            title: ApplicationList
-            properties:
-              count:
-                type: string
-              next:
-                type: string
-                description: Link to next page. Empty if no more applications are to be returned.
-              previous:
-                type: string
-                description: Link to previous page. Empty if current page is first page.
-              list:
-                type: array
-                items:
-                  $ref: '#/definitions/Application'
+            $ref: '#/definitions/ApplicationList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -512,6 +680,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Create a new application
+#-----------------------------------------------------
     post:
       description: Create a new application
       parameters:
@@ -522,6 +694,10 @@ paths:
           schema:
             $ref: '#/definitions/Application'
         - $ref: '#/parameters/Content-Type'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Application (individual)
+#        - Create
       responses:
         '201':
           description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
@@ -545,7 +721,15 @@ paths:
           description: Unsupported media type. The entity of the request was in a not supported format.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Individual Application" resource APIs
+######################################################
   '/applications/{applicationId}':
+
+#-----------------------------------------------------
+# Retrieve the details about a certain application
+#-----------------------------------------------------
     get:
       description: Get application details
       parameters:
@@ -553,6 +737,10 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Application (individual)
+#        - Retrieve
       responses:
         '200':
           description: OK. Application returned.
@@ -578,6 +766,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update a certain application
+#-----------------------------------------------------
     put:
       description: Update application details
       parameters:
@@ -591,6 +783,10 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Application (individual)
+#        - Update
       responses:
         '200':
           description: OK. Application updated.
@@ -621,12 +817,20 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete a certain application
+#-----------------------------------------------------
     delete:
       description: Remove an application
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Application (individual)
+#        - Delete
       responses:
         '200':
           description: OK. Resource successfully deleted.
@@ -640,7 +844,15 @@ paths:
             $ref: '#/definitions/Error'
     parameters:
       - $ref: '#/parameters/applicationId'
+
+######################################################
+# The "Generate Keys" Processing Function resource API
+######################################################
   '/applications/{applicationId}/generate-keys':
+
+#-----------------------------------------------------
+# Generate keys for an application
+#-----------------------------------------------------
     post:
       description: Generate keys for application
       parameters:
@@ -654,11 +866,15 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Application (individual)
+#        - Generate Keys
       responses:
         '200':
           description: OK. Specified Production or Sandbox keys generated.
           schema:
-            $ref: '#/definitions/ApplicationKey'
+            $ref: '#/definitions/Application'
           headers:
             Location:
               description: The URL of the newly created resource.
@@ -684,7 +900,15 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Subscription Collection" resource APIs
+######################################################
   /subscriptions:
+
+#-----------------------------------------------------
+# Retrieve all subscriptions of a certain API and application
+#-----------------------------------------------------
     get:
       description: Get subscription list
       parameters:
@@ -699,6 +923,10 @@ paths:
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Subscription Collection
+#        - Retrieve
       responses:
         '200':
           description: OK. Subscription list returned.
@@ -730,6 +958,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Create a new subscription
+#-----------------------------------------------------
     post:
       description: Add a new subscription
       parameters:
@@ -740,6 +972,10 @@ paths:
           schema:
             $ref: '#/definitions/Subscription'
         - $ref: '#/parameters/Content-Type'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Subscription (individual)
+#        - Create
       responses:
         '201':
           description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
@@ -761,7 +997,15 @@ paths:
             $ref: '#/definitions/Error'
         '415':
           description: Unsupported media type. The entity of the request was in a not supported format.
+
+######################################################
+# The "Individual Subscription" resource APIs
+######################################################
   '/subscriptions/{subscriptionId}':
+
+#-----------------------------------------------------
+# Retrieve a certain subscription
+#-----------------------------------------------------
     get:
       description: Get subscription details
       parameters:
@@ -769,6 +1013,10 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Subscription (individual)
+#        - Retrieve
       responses:
         '200':
           description: OK. Subscription returned
@@ -794,12 +1042,65 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+#-----------------------------------------------------
+# Update a certain subscription
+#-----------------------------------------------------
+    put:
+      description: Update subscription details
+      parameters:
+        - $ref: '#/parameters/subscriptionId'
+        - in: body
+          name: body
+          description: Subscription object that needs to be updated
+          required: true
+          schema:
+            $ref: '#/definitions/Subscription'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      responses:
+        '200':
+          description: OK. Subscription updated
+          schema:
+            $ref: '#/definitions/Subscription'
+            Location:
+              description: The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: 'Entity Tag of the response resource. Used by caches, or in conditional request'
+              type: string
+            Last-Modified:
+              description: 'Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.'
+              type: string
+        '400':
+          description: Bad Request. Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: Not Found. The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        '412':
+          description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete a certain subscription
+#-----------------------------------------------------
     delete:
       description: Remove subscription
       parameters:
         - $ref: '#/parameters/subscriptionId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Subscription (individual)
+#        - Delete
       responses:
         '200':
           description: OK. Resource successfully deleted.
@@ -811,13 +1112,25 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Block Subscription" Processing Function resource API
+######################################################
   /block-subscription:
+
+#-----------------------------------------------------
+# Block a certain subscription
+#-----------------------------------------------------
     post:
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       description: Block a subscription.
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Subscription (individual)
+#        - Block
       responses:
         '200':
           description: OK. Subscription was blocked successfully.
@@ -840,12 +1153,24 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Tier Collection" resource APIs
+######################################################
   /tiers:
+
+#-----------------------------------------------------
+# Retrieve the list of all available tiers
+#-----------------------------------------------------
     get:
       description: Get available tiers
       parameters:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Tier Collection
+#        - Retrieve
       responses:
         '200':
           description: OK. List of tiers returned.
@@ -866,6 +1191,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Create a new tier
+#-----------------------------------------------------
     post:
       description: Add a new tier
       parameters:
@@ -876,6 +1205,10 @@ paths:
           schema:
             $ref: '#/definitions/Tier'
         - $ref: '#/parameters/Content-Type'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Tier (individual)
+#        - Create
       responses:
         '201':
           description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
@@ -897,14 +1230,26 @@ paths:
             $ref: '#/definitions/Error'
         '415':
           description: Unsupported media type. The entity of the request was in a not supported format.
+
+######################################################
+# The "Individual Tier" resource APIs
+######################################################
   '/tiers/{tierName}':
+
+#-----------------------------------------------------
+# Retrieve a certain tier
+#-----------------------------------------------------
     get:
-      description: Get subscription details
+      description: Get tier details
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Tier (individual)
+#        - Retrieve
       responses:
         '200':
           description: OK. tier returned
@@ -930,6 +1275,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update a certain tier
+#-----------------------------------------------------
     put:
       description: Update tier details
       parameters:
@@ -943,6 +1292,10 @@ paths:
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Tier (individual)
+#        - Update
       responses:
         '200':
           description: OK. Subscription updated.
@@ -973,12 +1326,20 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Delete a certain tier
+#-----------------------------------------------------
     delete:
       description: Remove a tier
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Tier (individual)
+#        - Delete
       responses:
         '200':
           description: OK. Resource successfully deleted.
@@ -990,7 +1351,15 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Update Permission" Processing Function resource API
+######################################################
   '/tiers/{tierName}/update-permission':
+
+#-----------------------------------------------------
+# Update the permission of a certain tier
+#-----------------------------------------------------
     post:
       parameters:
         - $ref: '#/parameters/tierName'
@@ -1002,6 +1371,10 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       description: Update tier permission
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Tier (individual)
+#        - Update Permission
       responses:
         '200':
           description: OK. Successfully updated tier permissions
@@ -1038,35 +1411,42 @@ paths:
           description: Precondition Failed. The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Tag Collection" resource API
+######################################################
   /tags:
+
+#-----------------------------------------------------
+# Retrieve the list of tags qualifying under a search condition
+#-----------------------------------------------------
     get:
-      description: Get a list of predefined sequences
+      description: Get a list of tags
       parameters:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - name: query
           in: query
           description: >
-            ** Search condition **.
-
-
-
-            If no advanced attribute modifier is found search will match the
-            given query string against Tag Name.
-
+            **Search condition**.
 
 
             You can search in attributes by using **"attribute:"** modifier.
 
+
+            Supported attribute modifiers are [**apiName,version**]
 
 
             Eg. "apiName:phoneVerification" will match if the API Name is
             phoneVerification.
 
 
-
-            Supported attribute modifiers are [ **apiName,version**  ]
+            If no attribute modifier is found search will match the given query string against Tag Name.
           type: string
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Tag Collection
+#        - Retrieve
       responses:
         '200':
           description: OK. tag list is returned.
@@ -1096,9 +1476,26 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Environment Collection" resource API
+######################################################
   /environments:
+
+#-----------------------------------------------------
+# Retrieve the list of environments configured for a certain API
+#-----------------------------------------------------
     get:
       description: Get a list of gateway environments configured previously
+      parameters:
+        - in: query
+          name: apiId
+          description: Will return environment list for the provided API
+          type: string
+# Tags can be used to filter APIs in the online documentation
+#      tags:
+#        - Environment Collection
+#        - Retrieve
       responses:
         '200':
           description: OK. environment list is returned.
@@ -1128,6 +1525,10 @@ paths:
           description: Not Acceptable. The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# Parameters
+######################################################
 parameters:
   apiId:
     name: apiId
@@ -1221,12 +1622,16 @@ parameters:
     in: header
     description: Validator for conditional requests; based on Last Modified header.
     type: string
+
+######################################################
+# Definitions
+######################################################
 definitions:
   APIList:
     title: APIList
     properties:
       count:
-        type: string
+        type: integer
       next:
         type: string
         description: Link for next page. Empty if no more APIs to be returned.
@@ -1330,43 +1735,8 @@ definitions:
         type: array
         items:
           type: string
-      endpoint:
-        properties:
-          type:
-            type: string
-            enum:
-              - http
-              - address
-              - wsdl
-              - failover
-              - load_balanced
-          config:
-            properties:
-              algorithm:
-                type: string
-              failoverState:
-                type: boolean
-              algorithmClassName:
-                type: string
-              sessionManagement:
-                type: string
-                enum:
-                  - Transport
-                  - SOAP
-                  - ClientID
-                  - None
-              sessionTimeout:
-                type: integer
-              endpointSecured:
-                type: boolean
-              username:
-                type: string
-              password:
-                type: string
-          endpoints:
-            type: array
-            items:
-              $ref: '#/definitions/Endpoint'
+      endpointConfig:
+        type: string
       sequences:
         type: array
         items:
@@ -1391,6 +1761,21 @@ definitions:
             type: string
           technicalOwnerEmail:
             type: string
+  ApplicationList:
+    title: ApplicationList
+    properties:
+      count:
+        type: integer
+      next:
+        type: string
+        description: Link for next page. Empty if no more APIs to be returned.
+      previous:
+        type: string
+        description: Link for previous page. Empty if current page is first page.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationInfo'
   Application:
     title: Application
     required:
@@ -1418,6 +1803,23 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/ApplicationKey'
+  ApplicationInfo:
+    title: Application info object with basic application details
+    properties:
+      applicationId:
+        type: string
+      name:
+        type: string
+      subscriber:
+        type: string
+      throttlingTier:
+        type: string
+      callbackUrl:
+        type: string
+      description:
+        type: string
+      groupId:
+        type: string
   Document:
     title: Document
     required:
@@ -1501,6 +1903,12 @@ definitions:
         type: string
       status:
         type: string
+        enum:
+          - BLOCKED
+          - PROD_ONLY_BLOCKED
+          - UNBLOCKED
+          - ON_HOLD
+          - REJECTED
   Sequence:
     title: Sequence
     required:
@@ -1584,55 +1992,6 @@ definitions:
       https:
         type: string
         description: HTTPS environment URL
-  Endpoint:
-    title: Endpoint
-    required:
-      - type
-      - url
-    properties:
-      type:
-        type: string
-        enum:
-          - Production
-          - Sandbox
-          - ProductionFailOver
-          - SandboxFailOver
-      url:
-        type: string
-      config:
-        properties:
-          suspendState:
-            properties:
-              errorCodes:
-                type: array
-                items:
-                  type: string
-              initialDuration:
-                type: integer
-              maxDuration:
-                type: integer
-              factor:
-                type: integer
-          timeoutState:
-            properties:
-              errorCodes:
-                type: array
-                items:
-                  type: string
-              retriesBeforeSuspension:
-                type: integer
-              retryDelay:
-                type: integer
-          connectionTimeout:
-            properties:
-              action:
-                type: string
-                enum:
-                  - ExecuteFaultSequence
-                  - DiscardMessage
-                  - NeverTimeOut
-              duration:
-                type: integer
   Token :
     title: Token details for invoking APIs
     properties:
@@ -1671,16 +2030,19 @@ definitions:
       keyState:
         type: string
         description: State of the key generation of the application
-      clientName:
-        description: Application client representation
+      keyType:
+        description: Key type
         type: string
+        enum:
+          - PRODUCTION
+          - SANDBOX
       token:
         description: Token details object
         $ref: '#/definitions/Token'
   ApplicationKeyGenerateRequest :
     title: Application key generation request object
     properties:
-      tokenType:
+      keyType:
         type: string
         enum:
           - PRODUCTION

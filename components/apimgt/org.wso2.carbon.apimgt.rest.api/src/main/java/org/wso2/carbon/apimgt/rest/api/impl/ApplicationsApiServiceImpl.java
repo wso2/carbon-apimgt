@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -31,6 +32,7 @@ import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.utils.mappings.ApplicationKeyMappingUtil;
@@ -56,15 +58,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         if (subscriber == null) {
             subscriber = username;
         }
-
-        List<ApplicationDTO> applicationDTOList = new ArrayList<>();
+        ApplicationListDTO applicationListDTO;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application[] applications = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
-            for (Application application : applications) {
-                applicationDTOList.add(ApplicationMappingUtil.fromApplicationtoDTO(application));
-            }
-            return Response.ok().entity(applicationDTOList).build();
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications);
+            return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
@@ -154,15 +153,27 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
             Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
-                    username, application.getName(), body.getTokenType().toString(), body.getCallbackUrl(),
+                    username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
                     accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
                     jsonParams);
+            ApplicationKeyDTO applicationKeyDTO =
+                    ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
 
-            ApplicationKeyDTO applicationKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails);
+            //get the updated application again
+            application = apiConsumer.getApplicationByUUID(applicationId);
             ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-            List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
-            applicationKeyDTOs.add(applicationKeyDTO);
-            applicationDTO.setKeys(applicationKeyDTOs);
+
+            boolean alreadyContainsKey = false;
+            for (APIKey apiKey : application.getKeys()) {
+                String keyType = apiKey.getType();
+                if (keyType != null && keyType.equals(applicationKeyDTO.getKeyType().toString())) {
+                    alreadyContainsKey = true;
+                    break;
+                }
+            }
+            if (!alreadyContainsKey) {
+                applicationDTO.getKeys().add(applicationKeyDTO);
+            }
             return Response.ok().entity(applicationDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);

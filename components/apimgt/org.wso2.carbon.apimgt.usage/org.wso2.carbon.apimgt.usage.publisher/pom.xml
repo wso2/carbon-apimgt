@@ -50,10 +50,6 @@
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.wso2.carbon.deployment</groupId>
-            <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
-        </dependency-->
     </dependencies>
 
     <build>

@@ -37,9 +37,9 @@ public class EnvironmentsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported") })
 
-    public Response environmentsGet()
+    public Response environmentsGet(@ApiParam(value = "Will return environment list for the provided API") @QueryParam("apiId") String apiId)
     {
-    return delegate.environmentsGet();
+    return delegate.environmentsGet(apiId);
     }
 }
 

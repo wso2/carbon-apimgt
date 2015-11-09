@@ -189,7 +189,7 @@ var saveDoc=function(){
         return;
     } else if (sourceType == 'url' && !validInputUrl(docUrlDiv)) {
         return;
-    }else if($('#saveDocBtn').val() != "Update" && sourceType == 'file' && !validInput(fileDiv, 'This field is required.', isFilePathEmpty)) {
+    }else if(sourceType == 'file' && !validInput(fileDiv, 'This field is required.', isFilePathEmpty)) {
         return;
     }else if(docType.toLowerCase() == 'other' && !validInput($('#specifyBox'),'This field is required.', isOtherTypeNameEmpty) && docName!="Swagger API Definition"){
         return;
@@ -306,7 +306,12 @@ var validInput = function(divId, message, condition) {
     if (condition) {
         divId.addClass('error');
         if (!divId.next().hasClass('error')) {
-            divId.parent().append('<label class="error">' + message + '</label>');
+            divId.parent().append('<label class="error" id="error_label">' + message + '</label>');
+            setTimeout(function() {
+                $("#error_label").fadeOut("fast", function() {
+                    $(this).remove();
+                });
+            }, 1000);
         } else {
             divId.next().show();
             divId.next().text(message);

@@ -78,6 +78,9 @@ public class APIDTO  {
   private List<String> visibleTenants = new ArrayList<String>() ;
   
   
+  private String endpointConfig = null;
+  
+  
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>() ;
   
   public enum SubscriptionAvailabilityEnum {
@@ -324,6 +327,18 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("endpointConfig")
+  public String getEndpointConfig() {
+    return endpointConfig;
+  }
+  public void setEndpointConfig(String endpointConfig) {
+    this.endpointConfig = endpointConfig;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("sequences")
   public List<SequenceDTO> getSequences() {
     return sequences;
@@ -382,6 +397,7 @@ public class APIDTO  {
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
+    sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");

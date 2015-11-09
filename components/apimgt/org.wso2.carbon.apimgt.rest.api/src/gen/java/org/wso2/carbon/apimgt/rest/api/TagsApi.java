@@ -27,7 +27,7 @@ public class TagsApi  {
     
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of predefined sequences", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of tags", response = Void.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. tag list is returned."),
         
@@ -39,7 +39,7 @@ public class TagsApi  {
 
     public Response tagsGet(@ApiParam(value = "Media types acceptable for the response. Should denote XML or JSON, default is JSON."  )@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "** Search condition **.\n\n\nIf no advanced attribute modifier is found search will match the given query string against Tag Name.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nEg. \"apiName:phoneVerification\" will match if the API Name is phoneVerification.\n\n\nSupported attribute modifiers are [ **apiName,version**  ]\n") @QueryParam("query") String query)
+    @ApiParam(value = "**Search condition**.\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\nSupported attribute modifiers are [**apiName,version**]\n\nEg. \"apiName:phoneVerification\" will match if the API Name is phoneVerification.\n\nIf no attribute modifier is found search will match the given query string against Tag Name.\n") @QueryParam("query") String query)
     {
     return delegate.tagsGet(accept,ifNoneMatch,query);
     }

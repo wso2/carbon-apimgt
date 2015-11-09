@@ -1,0 +1,19 @@
+<%
+var log = new Log();
+
+var saveTier = function () {
+    try {
+        //code to save tier
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while saving tier (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+%>

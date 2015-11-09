@@ -19,6 +19,11 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
+import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.http.HttpHeaders;
+import org.apache.poi.ss.formula.functions.T;
+import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -244,6 +249,8 @@ public final class APIUtil {
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
+            //set uuid
+            api.setUUID(artifact.getId());
             // set url
             api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
             api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
@@ -610,6 +617,8 @@ public final class APIUtil {
             if (apiId == -1) {
                 return null;
             }
+            //set uuid
+            api.setUUID(artifact.getId());
             api.setRating(getAverageRating(apiId));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
@@ -784,8 +793,7 @@ public final class APIUtil {
 
             // This is to support the pluggable version strategy.
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context"); // TODO: check whether this is
-            // correct
+            artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
 
             StringBuilder tiersBuilder = new StringBuilder();
             for (Tier tier : api.getAvailableTiers()) {
@@ -885,7 +893,7 @@ public final class APIUtil {
             }
 
             documentation.setSourceType(docSourceType);
-            if (artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE).equals("URL")) {
+            if ("URL".equals(artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE))) {
                 documentation.setSourceUrl(artifact.getAttribute(APIConstants.DOC_SOURCE_URL));
             }
 
@@ -945,7 +953,7 @@ public final class APIUtil {
             }
 
             documentation.setSourceType(docSourceType);
-            if (artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE).equals("URL")) {
+            if ("URL".equals(artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE))) {
                 documentation.setSourceUrl(artifact.getAttribute(APIConstants.DOC_SOURCE_URL));
             }
 
@@ -997,7 +1005,7 @@ public final class APIUtil {
      */
     public static String prependWebContextRoot(String postfixUrl) {
         String webContext = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
-        if (webContext != null && !webContext.equals("/")) {
+        if (webContext != null && !"/".equals(webContext)) {
             postfixUrl = webContext + postfixUrl;
         }
         return postfixUrl;
@@ -1032,7 +1040,8 @@ public final class APIUtil {
     //remove getSwagger12DefinitionFilePath once getSwagger20DefinitionFilePath operates
     public static String getSwagger12DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
         String resourcePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                apiName +"-"  + apiVersion + "-" + apiProvider + RegistryConstants.PATH_SEPARATOR + APIConstants.API_DOC_1_2_LOCATION;
+                apiName + '-'  + apiVersion + '-' + apiProvider + RegistryConstants.PATH_SEPARATOR +
+                              APIConstants.API_DOC_1_2_LOCATION;
 
         return resourcePath;
     }
@@ -1237,12 +1246,13 @@ public final class APIUtil {
 
         try {
             String wsdlResourcePath = APIConstants.API_WSDL_RESOURCE_LOCATION + api.getId().getProviderName() +
-                    "--" + api.getId().getApiName() + api.getId().getVersion()+".wsdl";
-            String absoluteWSDLResourcePath = RegistryUtils.getAbsolutePath(
-                    RegistryContext.getBaseInstance(), RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) +
-                    wsdlResourcePath;
+                                      "--" + api.getId().getApiName() + api.getId().getVersion() + ".wsdl";
 
-            APIMWSDLReader wsdlreader = new APIMWSDLReader(api.getWsdlUrl());
+            String absoluteWSDLResourcePath =
+                    RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
+                                                  RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH) + wsdlResourcePath;
+
+            APIMWSDLReader wsdlReader = new APIMWSDLReader(api.getWsdlUrl());
             OMElement wsdlContentEle;
             String wsdRegistryPath;
 
@@ -1260,10 +1270,10 @@ public final class APIUtil {
             Resource wsdlResource = registry.newResource();
             if (!api.getWsdlUrl().matches(wsdRegistryPath)) {
                 if (isWSDL2Document(api.getWsdlUrl())) {
-                    wsdlContentEle = wsdlreader.readAndCleanWsdl2(api);
+                    wsdlContentEle = wsdlReader.readAndCleanWsdl2(api);
                     wsdlResource.setContent(wsdlContentEle.toString());
                 } else {
-                    wsdlContentEle = wsdlreader.readAndCleanWsdl(api);
+                    wsdlContentEle = wsdlReader.readAndCleanWsdl(api);
                     wsdlResource.setContent(wsdlContentEle.toString());
                 }
 
@@ -1433,258 +1443,6 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of API availability tiers as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getTiers() throws APIManagementException {
-        Map<String, Tier> tiers = new TreeMap<String, Tier>();
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    String displayName=null;
-
-                    if(id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT)!=null){
-                        displayName=id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT);
-                    }
-
-                    if(displayName==null){
-                        displayName=id.getText();
-                    }
-
-                    Tier tier = new Tier(id.getText());
-                    tier.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
-                    tier.setDisplayName(displayName);
-                    // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
-
-                    String desc;
-                    try {
-                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
-                        tier.setRequestsPerMin(requestPerMin);
-
-                        if(requestPerMin >= 1){
-                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
-                        }   else    {
-                            desc = DESCRIPTION;
-                        }
-                    } catch (APIManagementException ex) {
-                        desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
-                    }
-
-                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
-                    if(tierAttributes!=null && tierAttributes.size()!=0){
-                        tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
-                    }
-
-                    tier.setDescription(desc);
-
-                    if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
-                        tiers.put(tier.getName(), tier);
-                    }
-                }
-            }
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
-                Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
-                tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
-                tier.setDisplayName(APIConstants.UNLIMITED_TIER);
-                tier.setRequestsPerMin(Long.MAX_VALUE);
-                tiers.put(tier.getName(), tier);
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-        return tiers;
-    }
-
-    /**
-     * Returns a map of API availability tiers as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getAppTiers() throws APIManagementException {
-        Map<String, Tier> tiers = new TreeMap<String, Tier>();
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.APP_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.APP_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    String displayName=null;
-
-                    if(id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT)!=null){
-                        displayName=id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT);
-                    }
-
-                    if(displayName==null){
-                        displayName=id.getText();
-                    }
-
-                    Tier tier = new Tier(id.getText());
-                    tier.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
-                    tier.setDisplayName(displayName);
-                    // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
-
-                    String desc;
-                    try {
-                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
-                        tier.setRequestsPerMin(requestPerMin);
-
-                        if(requestPerMin >= 1){
-                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
-                        }   else    {
-                            desc = DESCRIPTION;
-                        }
-                    } catch (APIManagementException ex) {
-                        desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
-                    }
-
-                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
-                    if(tierAttributes!=null && tierAttributes.size()!=0){
-                        tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
-                    }
-
-                    tier.setDescription(desc);
-
-                    if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
-                        tiers.put(tier.getName(), tier);
-                    }
-                }
-            }
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
-                Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
-                tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
-                tier.setDisplayName(APIConstants.UNLIMITED_TIER);
-                tier.setRequestsPerMin(Long.MAX_VALUE);
-                tiers.put(tier.getName(), tier);
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-        return tiers;
-    }
-
-    /**
-     * Returns a map of API availability tiers as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getResTiers() throws APIManagementException {
-        Map<String, Tier> tiers = new TreeMap<String, Tier>();
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.RES_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.RES_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    String displayName=null;
-
-                    if(id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT)!=null){
-                        displayName=id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT);
-                    }
-
-                    if(displayName==null){
-                        displayName=id.getText();
-                    }
-
-                    Tier tier = new Tier(id.getText());
-                    tier.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
-                    tier.setDisplayName(displayName);
-                    // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
-
-                    String desc;
-                    try {
-                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
-                        tier.setRequestsPerMin(requestPerMin);
-
-                        if(requestPerMin >= 1){
-                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
-                        }   else    {
-                            desc = DESCRIPTION;
-                        }
-                    } catch (APIManagementException ex) {
-                        desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
-                    }
-
-                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
-                    if(tierAttributes!=null && tierAttributes.size()!=0){
-                        tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
-                    }
-
-                    tier.setDescription(desc);
-
-                    if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
-                        tiers.put(tier.getName(), tier);
-                    }
-                }
-            }
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
-                Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
-                tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
-                tier.setDisplayName(APIConstants.UNLIMITED_TIER);
-                tier.setRequestsPerMin(Long.MAX_VALUE);
-                tiers.put(tier.getName(), tier);
-            }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-        return tiers;
-    }
-
-    /**
      * Sorts the list of tiers according to the number of requests allowed per minute in each tier in descending order.
      * @param tiers - The list of tiers to be sorted
      * @return - The sorted list.
@@ -1748,8 +1506,8 @@ public final class APIUtil {
                         OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
                         if (password != null) {
-                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "."
-                                    + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name; //Set store login password
+//                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "."
+//                                    + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name; //Set store login password
                             String value = password.getText();
 
                             store.setPassword(replaceSystemProperty(value));
@@ -1798,13 +1556,36 @@ public final class APIUtil {
      */
     public static APIStore getExternalAPIStore(String apiStoreName, int tenantId) throws APIManagementException {
         Set<APIStore> externalAPIStoresConfig = APIUtil.getExternalStores(tenantId);
-        APIStore apiStore = null;
         for (APIStore apiStoreConfig : externalAPIStoresConfig) {
             if (apiStoreConfig.getName().equals(apiStoreName)) {
-                apiStore = apiStoreConfig;
+                return apiStoreConfig;
             }
         }
-        return apiStore;
+        return null;
+    }
+
+    /**
+     * Returns a map of API availability tiers as defined in the underlying governance
+     * registry.
+     *
+     * @return a Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getTiers() throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+
+            return getTiers(registry, APIConstants.API_TIER_LOCATION);
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving API tiers from registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the API tier policy resource";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
     }
 
     /**
@@ -1815,64 +1596,11 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getTiers(int tenantId) throws APIManagementException {
-        Map<String, Tier> tiers = new TreeMap<String, Tier>();
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.API_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    String displayName=null;
-                    if(id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT)!=null){
-                    displayName=id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT);
-                    }
-                    if(displayName==null){
-                    displayName=id.getText();
-                    }
-                    Tier tier = new Tier(id.getText());
-                    tier.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
-                    tier.setDisplayName(displayName);
-                    // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
-                    String desc;
-                    try {
-                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
-                        tier.setRequestsPerMin(requestPerMin);
 
-                        if(requestPerMin >= 1){
-                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
-                        }
-                        else{
-                            desc = DESCRIPTION;
-                        }
-                    } catch (APIManagementException ex) {
-                        desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
-                    }
-                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
-                    if(tierAttributes!=null && tierAttributes.size()!=0){
-                    tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
-                    }
-                    tier.setDescription(desc);
-                    if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
-                        tiers.put(tier.getName(), tier);
-                    }
-                }
-            }
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
-                Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
-                tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
-                tier.setDisplayName(APIConstants.UNLIMITED_TIER);
-                tier.setRequestsPerMin(Long.MAX_VALUE);
-                tiers.put(tier.getName(), tier);
-            }
+            return getTiers(registry, APIConstants.API_TIER_LOCATION);
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -1882,75 +1610,45 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
-        return tiers;
     }
 
     /**
-     * Returns a map of APP availability tiers of the tenant as defined in the underlying governance
+     * Returns a map of API availability tiers as defined in the underlying governance
+     * registry.
+     *
+     * @return a Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getAppTiers() throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+
+            return getTiers(registry,APIConstants.APP_TIER_LOCATION);
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving API tiers from registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the API tier policy resource";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAppTiers(int tenantId) throws APIManagementException {
-        Map<String, Tier> tiers = new TreeMap<String, Tier>();
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.APP_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.APP_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    String displayName=null;
-                    if(id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT)!=null){
-                        displayName=id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT);
-                    }
-                    if(displayName==null){
-                        displayName=id.getText();
-                    }
-                    Tier tier = new Tier(id.getText());
-                    tier.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
-                    tier.setDisplayName(displayName);
-                    // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
-                    String desc;
-                    try {
-                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
-                        tier.setRequestsPerMin(requestPerMin);
 
-                        if(requestPerMin >= 1){
-                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
-                        }
-                        else{
-                            desc = DESCRIPTION;
-                        }
-                    } catch (APIManagementException ex) {
-                        desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
-                    }
-                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
-                    if(tierAttributes!=null && tierAttributes.size()!=0){
-                        tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
-                    }
-                    tier.setDescription(desc);
-                    if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
-                        tiers.put(tier.getName(), tier);
-                    }
-                }
-            }
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
-                Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
-                tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
-                tier.setDisplayName(APIConstants.UNLIMITED_TIER);
-                tier.setRequestsPerMin(Long.MAX_VALUE);
-                tiers.put(tier.getName(), tier);
-            }
+            return getTiers(registry,APIConstants.APP_TIER_LOCATION);
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -1960,75 +1658,45 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
-        return tiers;
     }
 
     /**
-     * Returns a map of APP availability tiers of the tenant as defined in the underlying governance
+     * Returns a map of API availability tiers as defined in the underlying governance
+     * registry.
+     *
+     * @return a Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getResTiers() throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+
+            return getTiers(registry,APIConstants.RES_TIER_LOCATION);
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving API tiers from registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the API tier policy resource";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getResTiers(int tenantId) throws APIManagementException {
-        Map<String, Tier> tiers = new TreeMap<String, Tier>();
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
-            if (registry.resourceExists(APIConstants.RES_TIER_LOCATION)) {
-                Resource resource = registry.get(APIConstants.RES_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                OMElement element = AXIOMUtil.stringToOM(content);
-                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
-                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
-                while (policies.hasNext()) {
-                    OMElement policy = (OMElement) policies.next();
-                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    String displayName=null;
-                    if(id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT)!=null){
-                        displayName=id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT);
-                    }
-                    if(displayName==null){
-                        displayName=id.getText();
-                    }
-                    Tier tier = new Tier(id.getText());
-                    tier.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
-                    tier.setDisplayName(displayName);
-                    // String desc = resource.getProperty(APIConstants.TIER_DESCRIPTION_PREFIX + id.getText());
-                    String desc;
-                    try {
-                        long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
-                        tier.setRequestsPerMin(requestPerMin);
 
-                        if(requestPerMin >= 1){
-                            desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
-                        }
-                        else{
-                            desc = DESCRIPTION;
-                        }
-                    } catch (APIManagementException ex) {
-                        desc = APIConstants.TIER_DESC_NOT_AVAILABLE;
-                    }
-                    Map<String,Object> tierAttributes=APIDescriptionGenUtil.getTierAttributes(policy);
-                    if(tierAttributes!=null && tierAttributes.size()!=0){
-                        tier.setTierAttributes(APIDescriptionGenUtil.getTierAttributes(policy));
-                    }
-                    tier.setDescription(desc);
-                    if (!tier.getName().equalsIgnoreCase("Unauthenticated")) {
-                        tiers.put(tier.getName(), tier);
-                    }
-                }
-            }
-
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
-                Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
-                tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
-                tier.setDisplayName(APIConstants.UNLIMITED_TIER);
-                tier.setRequestsPerMin(Long.MAX_VALUE);
-                tiers.put(tier.getName(), tier);
-            }
+            return getTiers(registry,APIConstants.RES_TIER_LOCATION);
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -2038,7 +1706,157 @@ public final class APIUtil {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
+    }
+
+    private static Map<String, Tier> getTiers(Registry registry,String tierLocation)
+            throws RegistryException, XMLStreamException, APIManagementException {
+        // We use a treeMap here to keep the order
+        Map<String, Tier> tiers = new TreeMap<String, Tier>();
+
+        if (registry.resourceExists(tierLocation)) {
+            Resource resource = registry.get(tierLocation);
+            String content = new String((byte[]) resource.getContent());
+
+            OMElement element = AXIOMUtil.stringToOM(content);
+            OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
+            Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
+
+            while (policies.hasNext()) {
+                OMElement policy = (OMElement) policies.next();
+                OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
+
+                String tierName = id.getText();
+                if (APIConstants.UNAUTHENTICATED_TIER.equalsIgnoreCase(tierName)) {
+                    continue;
+                }
+                // Constructing the tier object
+                Tier tier = new Tier(tierName);
+                tier.setPolicyContent(policy.toString().getBytes());
+
+                if (id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT) != null) {
+                    tier.setDisplayName(id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT));
+                } else {
+                    tier.setDisplayName(tierName);
+                }
+
+                try {
+                    long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
+                    tier.setRequestsPerMin(requestPerMin);
+
+                    long requestCount = APIDescriptionGenUtil.getAllowedRequestCount(policy);
+                    tier.setRequestCount(requestCount);
+
+                    long unitTime = APIDescriptionGenUtil.getTimeDuration(policy);
+                    tier.setUnitTime(unitTime);
+
+                } catch (APIManagementException ex) {
+                    // If there is any issue in getting the request counts or the time duration, that means this tier
+                    // information can not be used for throttling. Hence we log this exception and continue the flow
+                    // to the next tier.
+                    log.warn("Unable to get the request count/time duration information for : " + tier.getName());
+                    continue;
+                }
+
+                // Get all the attributes of the tier.
+                Map<String, Object> tierAttributes = APIDescriptionGenUtil.getTierAttributes(policy);
+                if (!tierAttributes.isEmpty()) {
+                    // The description, billing plan and the stop on quota reach properties are also stored as attributes
+                    // of the tier attributes. Hence we extract them from the above attributes map.
+                    Iterator<Entry<String, Object>> attributeIterator = tierAttributes.entrySet().iterator();
+                    while (attributeIterator.hasNext()) {
+                        Entry<String, Object> entry = attributeIterator.next();
+
+                        if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equals(entry.getKey())) {
+                            if (entry.getValue() instanceof String) {
+                                tier.setDescription((String) entry.getValue());
+
+                                // We remove the attribute from the map
+                                attributeIterator.remove();
+                                continue;
+                            }
+                        }
+                        if (APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE.equals(entry.getKey())) {
+                            if (entry.getValue() instanceof String) {
+                                tier.setTierPlan((String) entry.getValue());
+
+                                // We remove the attribute from the map
+                                attributeIterator.remove();
+                                continue;
+                            }
+                        }
+                        if (APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE.equals(entry.getKey())) {
+                            if (entry.getValue() instanceof String) {
+                                tier.setStopOnQuotaReached(Boolean.parseBoolean((String) entry.getValue()));
+
+                                // We remove the attribute from the map
+                                attributeIterator.remove();
+                                // We do not need a continue since this is the last statement.
+                            }
+                        }
+                    }
+                    tier.setTierAttributes(tierAttributes);
+                }
+                tiers.put(tierName, tier);
+            }
+        }
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        if (Boolean.parseBoolean(config.getFirstProperty(APIConstants.ENABLE_UNLIMITED_TIER))) {
+            Tier tier = new Tier(APIConstants.UNLIMITED_TIER);
+            tier.setDescription(APIConstants.UNLIMITED_TIER_DESC);
+            tier.setDisplayName(APIConstants.UNLIMITED_TIER);
+            tier.setRequestsPerMin(Long.MAX_VALUE);
+            tiers.put(tier.getName(), tier);
+        }
+
         return tiers;
+    }
+
+    /**
+     * This method deletes a given tier from tier xml file, for a given tenant
+     *
+     * @param tier tier to be deleted
+     * @param tenantId id of the tenant
+     * @throws APIManagementException if error occurs while getting registry resource or processing XML
+     */
+    public static void deleteTier(Tier tier, int tenantId)throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                                getGovernanceSystemRegistry(tenantId);
+            if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
+                Resource resource = registry.get(APIConstants.API_TIER_LOCATION);
+                String content = new String((byte[]) resource.getContent());
+                OMElement element = AXIOMUtil.stringToOM(content);
+                OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
+                Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
+                boolean foundTier = false;
+
+                while (policies.hasNext()) {
+                    OMElement policy = (OMElement) policies.next();
+                    OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
+                    String tierName = tier.getName();
+                    if(tierName != null && tierName.equalsIgnoreCase(id.getText())){
+                        foundTier = true;
+                        policies.remove();
+                        break;
+                    }
+                }
+                if(!foundTier){
+                    throw new APIManagementException("Tier doesn't exist!");
+                }
+                resource.setContent(element.toString());
+                registry.put(APIConstants.API_TIER_LOCATION, resource);
+            }
+        } catch (RegistryException e) {
+            String errorMessage = "Error while retrieving API tiers from registry";
+            log.error(errorMessage, e);
+            throw new APIManagementException(e.getMessage());
+        } catch (XMLStreamException e) {
+            String errorMessage = "Malformed XML found in the API tier policy resource";
+            log.error(errorMessage, e);
+            throw new APIManagementException(e.getMessage());
+        }
     }
 
     /**
@@ -2184,8 +2002,7 @@ public final class APIUtil {
         Options options = client.getOptions();
         options.setManageSession(true);
         options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
-        LoggedUserInfo userInfo = stub.getUserInfo();
-        return userInfo;
+        return stub.getUserInfo();
     }
 
     /**
@@ -2266,6 +2083,8 @@ public final class APIUtil {
                api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
                //set last access time
                api.setLastUpdated(registry.get(artifactPath).getLastModified());
+               //set uuid
+               api.setUUID(artifact.getId());
                // set url
                api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
                api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
@@ -2420,7 +2239,7 @@ public final class APIUtil {
         String userStore;
          if(userId != null) {
             String[] strArr = userId.split("/");
-            if (strArr != null && strArr.length > 1) {
+            if (strArr.length > 1) {
                 userStore = strArr[0];
                 Map<String, String> availableDomainMappings = getAvailableUserStoreDomainMappings();
                 if (availableDomainMappings != null &&
@@ -2443,7 +2262,7 @@ public final class APIUtil {
         String userId = null;
         String decodedKey = new String(Base64.decodeBase64(apiKey.getBytes(Charset.defaultCharset())), Charset.defaultCharset());
         String[] tmpArr = decodedKey.split(":");
-        if (tmpArr != null && tmpArr.length == 2) { //tmpArr[0]= userStoreDomain & tmpArr[1] = userId
+        if (tmpArr.length == 2) { //tmpArr[0]= userStoreDomain & tmpArr[1] = userId
             userId = tmpArr[1];
         }
         return userId;
@@ -2647,6 +2466,13 @@ public final class APIUtil {
         }
     }
 
+    public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
+
+        loadTenantAPIPolicy( tenantID, APIConstants.API_TIER_LOCATION, "/tiers/default-tiers.xml");
+        loadTenantAPIPolicy( tenantID, APIConstants.APP_TIER_LOCATION, "/tiers/default-app-tiers.xml");
+        loadTenantAPIPolicy( tenantID, APIConstants.RES_TIER_LOCATION, "/tiers/default-res-tiers.xml");
+    }
+
     /**
      * Load the throttling policy  to the registry for tenants
      *
@@ -2654,30 +2480,13 @@ public final class APIUtil {
      * @param tenantID
      * @throws APIManagementException
      */
-
-    public static void loadTenantAPIPolicy(String tenant, int tenantID)
-                                                                       throws APIManagementException {
-
-        loadTenantAPIPolicy(tenant,tenantID,APIConstants.API_TIER_LOCATION,"/tiers/default-tiers.xml");
-        loadTenantAPIPolicy(tenant,tenantID,APIConstants.APP_TIER_LOCATION,"/tiers/default-app-tiers.xml");
-        loadTenantAPIPolicy(tenant,tenantID,APIConstants.RES_TIER_LOCATION,"/tiers/default-res-tiers.xml");
-    }
-
-    /**
-     *  Load the throttling policy  to the registry for tenants for individual level
-     *
-     * @param tenant
-     * @param tenantID
-     * @throws APIManagementException
-     */
-    private static void loadTenantAPIPolicy(String tenant, int tenantID,String location,String fileName)
+    private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
             throws APIManagementException {
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
-            String API_TIER_LOCATION=APIConstants.API_APPLICATION_DATA_LOCATION + "/api-tiers.xml";
             if (govRegistry.resourceExists(location)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Tier policies already uploaded to the tenant's registry space");
@@ -2699,6 +2508,7 @@ public final class APIUtil {
             throw new APIManagementException("Error while reading policy file content", e);
         }
     }
+
     /**
      * Load the External API Store Configuration  to the registry
      *
@@ -3422,19 +3232,13 @@ public final class APIUtil {
                 }
                 exists=false;
             }
-
         }
         return inputStores;
-
-
     }
 
     public static boolean isAPIsPublishToExternalAPIStores(int tenantId)
             throws APIManagementException {
-
         return getExternalStores(tenantId).size() != 0;
-
-
     }
 
     public static boolean isAPIGatewayKeyCacheEnabled() {
@@ -3511,7 +3315,6 @@ public final class APIUtil {
             return null;
 
         }
-
     }
 
     /**
@@ -3615,7 +3418,6 @@ public final class APIUtil {
             APIResource apiResource = new APIResource((String) entry.getKey(), description, (List<Operation>) entry.getValue());
             apis.add(apiResource);
         }
-
         APIDefinition apidefinition = new APIDefinition(version, APIConstants.SWAGGER_VERSION, endpointsSet[0], apiContext, apis);
 
         Gson gson = new Gson();
@@ -3642,7 +3444,6 @@ public final class APIUtil {
             int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
             return tenantId;
         } catch (UserStoreException e) {
-
             log.error(e);
         }
 
@@ -3664,7 +3465,6 @@ public final class APIUtil {
         }
 
         return userNameWithTenantPrefix;
-
     }
 
     /**
@@ -3755,9 +3555,7 @@ public final class APIUtil {
      * @return
      */
     public static String getSequenceExtensionName(API api) {
-
         return api.getId().getProviderName() + "--" + api.getId().getApiName() + ":v" + api.getId().getVersion();
-
     }
 
     /**
@@ -3907,6 +3705,8 @@ public final class APIUtil {
              String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
              String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
              api = new API(new APIIdentifier(providerName, apiName, apiVersion));
+             //set uuid
+             api.setUUID(artifact.getId());
              api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
              api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
              api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
@@ -4054,9 +3854,7 @@ public final class APIUtil {
             }
             if (sysProp.equals("carbon.home") && propValue != null
                     && propValue.equals(".")) {
-
                 text = new File(".").getAbsolutePath() + File.separator + text;
-
             }
         }
         return text;
@@ -4087,7 +3885,6 @@ public final class APIUtil {
             fields.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "*");
 
             //PaginationContext.init(0, 10000, "ASC", APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, Integer.MAX_VALUE);
-
             SolrDocumentList documentList = client.query(searchTerm, tenantID, fields);
 
             org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
@@ -4138,15 +3935,15 @@ public final class APIUtil {
                             }
 
                             if (isAuthorized) {
-                                   Resource resource = registry.get(apiPath);
-                                   String apiArtifactId = resource.getUUID();
-                                   if (apiArtifactId != null) {
-                                       GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                                       api = APIUtil.getAPI(apiArtifact, registry);
-                                       apiSortedList.add(api);
-                                   } else {
-                                       throw new GovernanceException("artifact id is null of " + apiPath);
-                                   }
+                                Resource resource = registry.get(apiPath);
+                                String apiArtifactId = resource.getUUID();
+                                if (apiArtifactId != null) {
+                                    GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
+                                    api = APIUtil.getAPI(apiArtifact, registry);
+                                    apiSortedList.add(api);
+                                } else {
+                                    throw new GovernanceException("artifact id is null of " + apiPath);
+                                }
                             }
                         }
                     }
@@ -4170,80 +3967,72 @@ public final class APIUtil {
     public static Map<String,Object>  searchAPIsByURLPattern(Registry registry,String searchTerm,int start,int end) throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         List<API> apiList = new ArrayList<API>();
-        final String searchValue=searchTerm.trim();
-        Map<String,Object> result=new HashMap<String, Object>();
-        int totalLength=0;
+        final String searchValue = searchTerm.trim();
+        Map<String, Object> result = new HashMap<String, Object>();
+        int totalLength = 0;
         String criteria;
         Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         GenericArtifact[] genericArtifacts = new GenericArtifact[0];
         GenericArtifactManager artifactManager = null;
         try {
-        artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-        PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
-        if (artifactManager != null) {
-        for(int i=0;i<20;i++){ //This need to fix in future.We don't have a way to get max value of "url_template" entry stores in registry,unless we search in each API
-            criteria=APIConstants.API_URI_PATTERN+i;
-            listMap.put(criteria, new ArrayList<String>() {{
-                add(searchValue);
-            }});
-            genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager.findGenericArtifacts(listMap));
-
-        }
-
-        if (genericArtifacts == null || genericArtifacts.length == 0) {
-
-            result.put("apis",apiSet);
-            result.put("length",0);
-            return result;
-        }
-        totalLength = genericArtifacts.length;
-        StringBuilder apiNames=new StringBuilder();
-        for (GenericArtifact artifact : genericArtifacts) {
-            if(apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME))<0){
-            String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-            if (isAllowDisplayAPIsWithMultipleStatus()) {
-                if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
-                    API api=APIUtil.getAPI(artifact, registry);
-                    if (api != null) {
-                        apiList.add(api);
-                        apiNames.append(api.getId().getApiName());
-                    }
+            artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
+            if (artifactManager != null) {
+                for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
+                    // "url_template" entry stores in registry,unless we search in each API
+                    criteria = APIConstants.API_URI_PATTERN + i;
+                    listMap.put(criteria, new ArrayList<String>() {{
+                        add(searchValue);
+                    }});
+                    genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager
+                            .findGenericArtifacts(listMap));
                 }
-            } else {
-                if (status.equals(APIConstants.PUBLISHED)) {
-                    API api=APIUtil.getAPI(artifact, registry);
-                    if (api != null) {
-                        apiList.add(api);
-                        apiNames.append(api.getId().getApiName());
+                if (genericArtifacts == null || genericArtifacts.length == 0) {
+                    result.put("apis", apiSet);
+                    result.put("length", 0);
+                    return result;
+                }
+                totalLength = genericArtifacts.length;
+                StringBuilder apiNames = new StringBuilder();
+                for (GenericArtifact artifact : genericArtifacts) {
+                    if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
+                        String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+                        if (isAllowDisplayAPIsWithMultipleStatus()) {
+                            if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
+                                API api = APIUtil.getAPI(artifact, registry);
+                                if (api != null) {
+                                    apiList.add(api);
+                                    apiNames.append(api.getId().getApiName());
+                                }
+                            }
+                        } else {
+                            if (status.equals(APIConstants.PUBLISHED)) {
+                                API api = APIUtil.getAPI(artifact, registry);
+                                if (api != null) {
+                                    apiList.add(api);
+                                    apiNames.append(api.getId().getApiName());
+                                }
+                            }
+                        }
                     }
+                    totalLength = apiList.size();
+                }
+                if (totalLength <= ((start + end) - 1)) {
+                    end = totalLength;
+                }
+                for (int i = start; i < end; i++) {
+                    apiSet.add(apiList.get(i));
                 }
             }
-            }
-            totalLength=apiList.size();
-
-        }
-        if(totalLength<=((start+end)-1)){
-            end=totalLength;
-        }
-        for(int i=start;i<end;i++){
-            apiSet.add(apiList.get(i));
-
-
-        }
-
-        }
         } catch (APIManagementException e) {
             handleException("Failed to search APIs with input url-pattern", e);
         } catch (GovernanceException e) {
             handleException("Failed to search APIs with input url-pattern", e);
         }
-        result.put("apis",apiSet);
-        result.put("length",totalLength);
+        result.put("apis", apiSet);
+        result.put("length", totalLength);
         return result;
-
     }
-
-
 
     /**
      * This method will check the validity of given url. WSDL url should be
@@ -4271,7 +4060,6 @@ public final class APIUtil {
             log.debug("WSDL url validation failed. Provided wsdl url is not valid url: " + wsdlURL);
         }
         return false;
-
     }
 
     /**
@@ -4300,17 +4088,14 @@ public final class APIUtil {
                     currentLoadingTenants.add(tenantDomain);
                     ctx.getThreadPool().execute(new Runnable() {
                         public void run() {
-                            Thread.currentThread()
-                                  .setName("APIMHostObjectUtils-loadTenantConfig-thread");
+                            Thread.currentThread().setName("APIMHostObjectUtils-loadTenantConfig-thread");
                             try {
                                 PrivilegedCarbonContext.startTenantFlow();
-                                ConfigurationContext ctx =
-                                        ServiceReferenceHolder.getContextService()
-                                                              .getServerConfigContext();
+                                ConfigurationContext ctx = ServiceReferenceHolder.getContextService()
+                                        .getServerConfigContext();
                                 TenantAxisUtils.getTenantAxisConfiguration(finalTenantDomain, ctx);
                             } catch (Exception e) {
-                                log.error("Error while creating axis configuration for tenant " +
-                                          finalTenantDomain, e);
+                                log.error("Error while creating axis configuration for tenant " + finalTenantDomain, e);
                             } finally {
                                 //only after the tenant is loaded completely, the tenant domain is removed from the set
                                 currentLoadingTenants.remove(finalTenantDomain);
@@ -4361,22 +4146,20 @@ public final class APIUtil {
         }
 
         String[] headers = authHeader.split(APIConstants.OAUTH_HEADER_SPLITTER);
-        if (headers != null) {
-            for (int i = 0; i < headers.length; i++) {
-                String[] elements = headers[i].split(APIConstants.CONSUMER_KEY_SEGMENT_DELIMITER);
-                if (elements != null && elements.length > 1) {
-                    int j = 0;
-                    boolean isConsumerKeyHeaderAvailable = false;
-                    for (String element : elements) {
-                        if (!"".equals(element.trim())) {
-                            if (APIConstants.CONSUMER_KEY_SEGMENT.equals(elements[j].trim())) {
-                                isConsumerKeyHeaderAvailable = true;
-                            } else if (isConsumerKeyHeaderAvailable) {
-                                return removeLeadingAndTrailing(elements[j].trim());
-                            }
+        for (String header : headers) {
+            String[] elements = header.split(APIConstants.CONSUMER_KEY_SEGMENT_DELIMITER);
+            if (elements.length > 1) {
+                int j = 0;
+                boolean isConsumerKeyHeaderAvailable = false;
+                for (String element : elements) {
+                    if (!"".equals(element.trim())) {
+                        if (APIConstants.CONSUMER_KEY_SEGMENT.equals(elements[j].trim())) {
+                            isConsumerKeyHeaderAvailable = true;
+                        } else if (isConsumerKeyHeaderAvailable) {
+                            return removeLeadingAndTrailing(elements[j].trim());
                         }
-                        j++;
                     }
+                    j++;
                 }
             }
         }
@@ -4421,23 +4204,23 @@ public final class APIUtil {
      * @return a Map of domain names for tenant
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, String> getDomainMappings(String tenantDomain, String appType) throws APIManagementException {
+    public static Map<String, String> getDomainMappings(String tenantDomain, String appType)
+            throws APIManagementException {
         Map<String, String> domains = new HashMap<String, String>();
         String resourcePath;
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
-            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>",tenantDomain);
+            resourcePath = APIConstants.API_DOMAIN_MAPPINGS.replace("<tenant-id>", tenantDomain);
             if (registry.resourceExists(resourcePath)) {
                 Resource resource = registry.get(resourcePath);
                 String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                 JSONParser parser = new JSONParser();
                 JSONObject mappings = (JSONObject) parser.parse(content);
-                if(mappings.get(appType) != null) {
+                if (mappings.get(appType) != null) {
                     mappings = (JSONObject) mappings.get(appType);
-                    Iterator entries = mappings.entrySet().iterator();
-                    while (entries.hasNext()) {
-                        Entry thisEntry = (Entry) entries.next();
+                    for (Object o : mappings.entrySet()) {
+                        Entry thisEntry = (Entry) o;
                         String key = (String) thisEntry.getKey();
                         String value = (String) thisEntry.getValue();
                         domains.put(key, value);
@@ -4549,7 +4332,7 @@ public final class APIUtil {
         Set<String> apiEnvironments = api.getEnvironments();
         if (apiEnvironments != null) {
             for (String environmentName : apiEnvironments) {
-                publishedEnvironments.append(environmentName + ",");
+                publishedEnvironments.append(environmentName).append(',');
             }
 
             if(apiEnvironments.isEmpty()) {
@@ -4562,7 +4345,7 @@ public final class APIUtil {
         }
         return publishedEnvironments.toString();
     }
-  /**
+    /**
      * Given the apps and the application name to check for, it will check if the application already exists.
      * 
      * @param apps The collection of applications
@@ -4590,9 +4373,7 @@ public final class APIUtil {
     public static String getGroupingExtractorImplementation() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-
-        String gropingExtractorClass = config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
-        return gropingExtractorClass;
+        return config.getFirstProperty(APIConstants.API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
     }
     /**
      * This method will update the permission cache of the tenant which is related to the given usename
@@ -4663,19 +4444,13 @@ public final class APIUtil {
         return null;
     }
 
-    /**
-    * Check whether input array is a string array
-    *
-    * @param args Object array
-    * @return whether provided array is a String array
-    */
-    public static boolean isStringArray(Object[] args) {
+     public static boolean isStringArray(Object[] args) {
         int argsCount = args.length;
-        for (int i = 0; i < argsCount; i++) {
-            if (!(args[i] instanceof String)) {
-                return false;
-            }
-        }
+         for (Object arg : args) {
+             if (!(arg instanceof String)) {
+                 return false;
+             }
+         }
         return true;
     }
 
@@ -4692,8 +4467,7 @@ public final class APIUtil {
     */
     public static String convertToString(Object obj) {
         Gson gson = new Gson();
-        String json = gson.toJson(obj);
-        return json;
+        return gson.toJson(obj);
     }
 
 
@@ -4704,14 +4478,14 @@ public final class APIUtil {
         return artifactPath + RegistryConstants.PATH_SEPARATOR + pathFlow + RegistryConstants.PATH_SEPARATOR;
     }
 
-    private static String getAPIMonetizationCategory(Set<Tier> tiers, String tenantDomain) throws APIManagementException{
+    private static String getAPIMonetizationCategory(Set<Tier> tiers, String tenantDomain)
+            throws APIManagementException {
         boolean isPaidFound = false;
         boolean isFreeFound = false;
         for (Tier tier : tiers) {
             if (isTierPaid(tier.getName(), tenantDomain)) {
                 isPaidFound = true;
-            }
-            else {
+            } else {
                 isFreeFound = true;
 
                 if (isPaidFound) {
@@ -4722,11 +4496,9 @@ public final class APIUtil {
 
         if (!isPaidFound) {
             return APIConstants.API_CATEGORY_FREE;
-        }
-        else if (!isFreeFound) {
+        } else if (!isFreeFound) {
             return APIConstants.API_CATEGORY_PAID;
-        }
-        else {
+        } else {
             return APIConstants.API_CATEGORY_FREEMIUM;
         }
     }
@@ -4746,10 +4518,10 @@ public final class APIUtil {
             final Map<String, Object> tierAttributes = tier.getTierAttributes();
 
             if (tierAttributes != null) {
-                String isPaidValue = (String) tierAttributes.get(APIConstants.API_TIER_IS_PAID_ATTRIBUTE);
+                String isPaidValue = tier.getTierPlan();
 
-                if (isPaidValue != null) {
-                    isPaid = Boolean.parseBoolean(isPaidValue);
+                if (isPaidValue != null && isPaidValue.equals("COMMERCIAL")) {
+                    isPaid = true;
                 }
             } else {
                 throw new APIManagementException("Tier attributes not specified for tier " + tierName);
@@ -4757,8 +4529,6 @@ public final class APIUtil {
         } else {
             throw new APIManagementException("Tier " + tierName + "cannot be found");
         }
-
-
         return isPaid;
     }
 
@@ -4908,8 +4678,7 @@ public final class APIUtil {
         }
         HttpParams params = new BasicHttpParams();
         ThreadSafeClientConnManager tcm = new ThreadSafeClientConnManager(registry);
-        HttpClient client = new DefaultHttpClient(tcm, params);
-        return client;
+        return new DefaultHttpClient(tcm, params);
 
     }
 
@@ -4949,19 +4718,6 @@ public final class APIUtil {
      */
 
     public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        return Class.forName(className);
-    }
-
-    /**
-     * Gets the instance of a class given the class name.
-     * @param className the fully qualified name of the class.
-     * @return an instance of the class with the given name
-     * @throws ClassNotFoundException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     */
-
-    public static Class getClassFromName(String className) throws ClassNotFoundException {
         return Class.forName(className);
     }
 }

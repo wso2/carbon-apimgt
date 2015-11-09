@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
+import java.util.*;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,6 +34,9 @@ public class ApplicationDTO  {
   
   
   private String groupId = null;
+  
+  
+  private List<ApplicationKeyDTO> keys = new ArrayList<ApplicationKeyDTO>();
 
   
   /**
@@ -119,6 +124,18 @@ public class ApplicationDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("keys")
+  public List<ApplicationKeyDTO> getKeys() {
+    return keys;
+  }
+  public void setKeys(List<ApplicationKeyDTO> keys) {
+    this.keys = keys;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -132,6 +149,7 @@ public class ApplicationDTO  {
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
+    sb.append("  keys: ").append(keys).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

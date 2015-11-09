@@ -275,7 +275,7 @@ var statsEnabled = isDataPublishingEnabled();
                             });
 
                             paths.on("click", function(d){
-                            document.location.href="/publisher/info?name="+api_name+"&version="+d.data.version+"&provider="+provider+"/";
+                            document.location.href=jagg.site.context+"/info?name="+api_name+"&version="+d.data.version+"&provider="+provider;
                             });
 
 

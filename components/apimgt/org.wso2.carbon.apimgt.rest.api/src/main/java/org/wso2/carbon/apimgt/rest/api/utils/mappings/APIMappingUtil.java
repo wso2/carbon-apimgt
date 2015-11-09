@@ -27,10 +27,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.dto.SequenceDTO;
+import org.wso2.carbon.apimgt.rest.api.dto.*;
 import org.wso2.carbon.apimgt.rest.api.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,8 +40,9 @@ import java.util.Set;
 
 public class APIMappingUtil {
 
-    public static APIIdentifier getAPIIdentifier(String apiId){
+    public static APIIdentifier getAPIIdentifierFromApiId(String apiId){
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
+        // apiId format: provider-apiName-version
         String providerName = apiIdDetails[0];
         String apiName = apiIdDetails[1];
         String version = apiIdDetails[2];
@@ -49,24 +50,37 @@ public class APIMappingUtil {
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }
 
+    public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        APIIdentifier apiIdentifier;
+        if (RestApiUtil.isUUID(apiId)) {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            apiIdentifier = apiProvider.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
+        } else {
+            apiIdentifier = getAPIIdentifierFromApiId(apiId);
+        }
+        return  apiIdentifier;
+    }
+
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getProvider();
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
-        dto.setProvider(model.getId().getProviderName());
+        String providerName = model.getId().getProviderName();
+        dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
-        dto.setContext(model.getContext());
+        dto.setContext(model.getContextTemplate());
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setResponseCaching(model.getResponseCache());
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
-
-        List<SequenceDTO> sequences = null;
+        dto.setEndpointConfig(model.getEndpointConfig());
+        List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
         if (inSequenceName != null && !inSequenceName.isEmpty()) {
@@ -145,15 +159,30 @@ public class APIMappingUtil {
 
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
-        APIIdentifier apiId = new APIIdentifier(dto.getProvider(), dto.getName(), dto.getVersion());
+        String provider = dto.getProvider();
+        String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
+        APIIdentifier apiId = new APIIdentifier(providerEmailDomainReplaced, dto.getName(), dto.getVersion());
         org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
 
-        //if not supertenant append /t/wso2.com/ to context
-        model.setContext(dto.getContext());  //context should change if tenant
-        model.setContextTemplate(dto.getContext());
-        model.setDescription(dto.getDescription());
+        String context = dto.getContext();
+        final String originalContext = context;
+        context = context.startsWith("/") ? context : ("/" + context);
+        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+            //Create tenant aware context for API
+            context = "/t/" + providerDomain + context;
+        }
 
-        model.setStatus(APIStatus.CREATED);
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        context = checkAndSetVersionParam(context);
+        model.setContextTemplate(context);
+
+        context = updateContextWithVersion(dto.getVersion(), originalContext, context);
+        model.setContext(context);
+        model.setDescription(dto.getDescription());
+        model.setEndpointConfig(dto.getEndpointConfig());
+        model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
 
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
@@ -225,6 +254,52 @@ public class APIMappingUtil {
         //endpoint configs, business info and thumbnail requires mapping
         return model;
 
+    }
+
+    public static APIListDTO fromAPIListToDTO (List<API> apiList) {
+        APIListDTO apiListDTO = new APIListDTO();
+        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
+        if (apiInfoDTOs == null) {
+            apiInfoDTOs = new ArrayList<>();
+            apiListDTO.setList(apiInfoDTOs);
+        }
+        for (API api : apiList) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(api));
+        }
+        apiListDTO.setCount(apiList.size());
+        return apiListDTO;
+    }
+
+    public static APIInfoDTO fromAPIToInfoDTO(API api) {
+        APIInfoDTO apiInfoDTO = new APIInfoDTO();
+        apiInfoDTO.setDescription(api.getDescription());
+        apiInfoDTO.setContext(api.getContextTemplate());
+        apiInfoDTO.setId(api.getUUID());
+        APIIdentifier apiId = api.getId();
+        apiInfoDTO.setName(apiId.getApiName());
+        apiInfoDTO.setVersion(apiId.getVersion());
+        apiInfoDTO.setProvider(apiId.getProviderName());
+        apiInfoDTO.setStatus(api.getStatus().toString());
+        apiInfoDTO.setType(null); //todo
+        return apiInfoDTO;
+    }
+
+    private static APIStatus mapStatusFromDTOToAPI(String apiStatus) {
+        // switch case statements are not working as APIStatus.<STATUS>.toString() or APIStatus.<STATUS>.getStatus()
+        //  is not a constant
+        if (apiStatus.equals(APIStatus.BLOCKED.toString())) {
+            return APIStatus.BLOCKED;
+        } else if (apiStatus.equals(APIStatus.CREATED.toString())) {
+            return APIStatus.CREATED;
+        } else if (apiStatus.equals(APIStatus.PUBLISHED.toString())) {
+            return APIStatus.PUBLISHED;
+        } else if (apiStatus.equals(APIStatus.DEPRECATED.toString())) {
+            return APIStatus.DEPRECATED;
+        } else if (apiStatus.equals(APIStatus.PROTOTYPED.toString())) {
+            return APIStatus.PROTOTYPED;
+        } else {
+            return null; // how to handle this?
+        }
     }
 
     private static String mapVisibilityFromDTOtoAPI(APIDTO.VisibilityEnum visibility) {
@@ -312,5 +387,30 @@ public class APIMappingUtil {
         doc.setVisibility(Documentation.DocumentVisibility.valueOf(visibility));
         doc.setSourceType(Documentation.DocumentSourceType.INLINE);
         return doc;
+    }
+
+    private static String updateContextWithVersion(String version, String contextVal, String context) {
+        // This condition should not be true for any occasion but we keep it so that there are no loopholes in
+        // the flow.
+        if (version == null) {
+            // context template patterns - /{version}/foo or /foo/{version}
+            // if the version is null, then we remove the /{version} part from the context
+            context = contextVal.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }else{
+            context = context.replace(RestApiConstants.API_VERSION_PARAM, version);
+        }
+        return context;
+    }
+
+    private static String checkAndSetVersionParam(String context) {
+        // This is to support the new Pluggable version strategy
+        // if the context does not contain any {version} segment, we use the default version strategy.
+        if(!context.contains(RestApiConstants.API_VERSION_PARAM)){
+            if(!context.endsWith("/")){
+                context = context + "/";
+            }
+            context = context + RestApiConstants.API_VERSION_PARAM;
+        }
+        return context;
     }
 }

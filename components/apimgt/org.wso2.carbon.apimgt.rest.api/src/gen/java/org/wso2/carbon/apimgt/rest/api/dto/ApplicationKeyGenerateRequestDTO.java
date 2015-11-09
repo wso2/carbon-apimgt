@@ -13,11 +13,11 @@ import javax.validation.constraints.NotNull;
 public class ApplicationKeyGenerateRequestDTO  {
   
   
-  public enum TokenTypeEnum {
+  public enum KeyTypeEnum {
      PRODUCTION,  SANDBOX, 
   };
   
-  private TokenTypeEnum tokenType = null;
+  private KeyTypeEnum keyType = null;
   
   
   private String validityTime = null;
@@ -35,12 +35,12 @@ public class ApplicationKeyGenerateRequestDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("tokenType")
-  public TokenTypeEnum getTokenType() {
-    return tokenType;
+  @JsonProperty("keyType")
+  public KeyTypeEnum getKeyType() {
+    return keyType;
   }
-  public void setTokenType(TokenTypeEnum tokenType) {
-    this.tokenType = tokenType;
+  public void setKeyType(KeyTypeEnum keyType) {
+    this.keyType = keyType;
   }
 
   
@@ -101,7 +101,7 @@ public class ApplicationKeyGenerateRequestDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApplicationKeyGenerateRequestDTO {\n");
     
-    sb.append("  tokenType: ").append(tokenType).append("\n");
+    sb.append("  keyType: ").append(keyType).append("\n");
     sb.append("  validityTime: ").append(validityTime).append("\n");
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  accessAllowDomains: ").append(accessAllowDomains).append("\n");

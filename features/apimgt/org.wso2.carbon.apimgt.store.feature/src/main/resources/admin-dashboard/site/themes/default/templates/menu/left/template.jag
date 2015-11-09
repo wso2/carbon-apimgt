@@ -35,6 +35,8 @@
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("themeUpload") %></a></li>
         <li <%if (reqUrl.match("analytics")){%>class="active"<% } %>><a href="<%= jagg.url("/analytics") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("analytics") %></a></li>
+        <li <%if (reqUrl.match("tier-manage")){%>class="active"<% } %>><a href="<%= partWithContext %>/tier-manage"
+        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("tierManagement") %></a></li>
      </ul>
 </div>
 

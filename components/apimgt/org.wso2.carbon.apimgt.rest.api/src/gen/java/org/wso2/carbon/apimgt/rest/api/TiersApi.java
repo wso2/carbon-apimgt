@@ -63,7 +63,7 @@ public class TiersApi  {
     @Path("/{tierName}")
     
     
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get subscription details", response = TierDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get tier details", response = TierDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. tier returned"),
         

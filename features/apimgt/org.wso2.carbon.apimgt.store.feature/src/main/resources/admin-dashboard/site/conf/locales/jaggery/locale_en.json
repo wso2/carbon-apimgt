@@ -9,7 +9,7 @@
     "myTasks":"Approval Tasks",
     "subscriptionCreation": "Subscriptions Creation",
     "userCreation": "User Creation",
-    "appCreation": "Application Creation",    
+    "appCreation": "Application Creation",
     "appRegistration": "Application Registration",
     "themeupload":"Upload Tenant Theme",
 
@@ -42,5 +42,24 @@
     "more":"More >>",
     "analytics":"Configure Analytics",
     "themeUpload": "Upload Tenant Theme",
-    "settings":"Settings"
+    "settings":"Settings",
+
+    "tierManagement":"Throttling Tiers",
+    "tierName":"Name",
+    "tierAddTitle":"Add Tier",
+    "tierEditTitle":"Edit Tier",
+    "requestCount":"Request Count",
+    "unitTime":"Unit Time (Milliseconds)",
+    "displayName":"Display Name",
+    "enableUnlimited":"Enable Unlimited",
+    "stopOnQuotaReach":"Stop On Quota Reach",
+    "defaultAttributes":"Default Attributes",
+    "description":"Description",
+    "tierPlan":"Billing Plan",
+    "customAttributes":"Custom Attributes",
+    "actions":"Actions",
+    "saveTier":"Save",
+    "cancelTier":"Cancel",
+    "errorMsgRequired":"Required",
+    "errorMessageInvalid":"Invalid"
 }

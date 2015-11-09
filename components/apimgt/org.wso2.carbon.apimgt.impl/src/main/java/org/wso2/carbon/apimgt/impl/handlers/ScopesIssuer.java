@@ -28,10 +28,7 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ScopesIssuer {
 
@@ -40,6 +37,7 @@ public class ScopesIssuer {
     private static final String DEFAULT_SCOPE_NAME = "default";
 
     private List<String> scopeSkipList = new ArrayList<String>();
+    private List<String> restAPIScopesList = new ArrayList<String>();
 
     /**
      * Singleton of ScopeIssuer.*
@@ -64,7 +62,12 @@ public class ScopesIssuer {
     public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx) {
         String[] requestedScopes = tokReqMsgCtx.getScope();
         String[] defaultScope = new String[]{DEFAULT_SCOPE_NAME};
-
+        //TODO - remove this once scope list retrieve from configuration file.
+        Map<String, String> restAPIScopes = new HashMap<String, String>();
+        restAPIScopes.put("API_PUBLISHER_SCOPE", "admin");
+        restAPIScopes.put("API_SUBSCRIBER_SCOPE", "subscriber");
+        restAPIScopes.put("API_CREATOR_SCOPE", "admin");
+        restAPIScopes.put("API_ADMINISTRATIVE_SCOPE", "admin");
         //If no scopes were requested.
         if (requestedScopes == null || requestedScopes.length == 0) {
             tokReqMsgCtx.setScope(defaultScope);
@@ -80,7 +83,10 @@ public class ScopesIssuer {
             ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
             //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
-
+            //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
+            //in memory and add it to each and every request coming.
+            //TODO this need to load from configuration file or some other way.
+            appScopes.putAll(restAPIScopes);
             //If no scopes can be found in the context of the application
             if (appScopes.isEmpty()) {
                 if (log.isDebugEnabled()) {

@@ -30,11 +30,4 @@ public class TierMappingUtil {
         //dto.setAttributes(tier.getTierAttributes()); backend returns <String,object> by APIDescriptionGenUtil:no use
         return dto;
     }
-
-    public static Tier fromDTOtoTier(TierDTO dto){
-        Tier tier = new Tier(dto.getName());
-        tier.setDescription(dto.getDescription());
-        //tier.setTierAttributes(dto.getAttributes());
-        return tier;
-    }
 }

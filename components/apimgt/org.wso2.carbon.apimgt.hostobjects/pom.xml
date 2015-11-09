@@ -60,10 +60,6 @@
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-        <!--dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
-        </dependency-->
         <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.user.registration.stub</artifactId>
@@ -75,6 +71,11 @@
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ndatasource.core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.identity</groupId>
+            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
         </dependency>
     </dependencies>
 
@@ -103,6 +104,7 @@
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
+                            org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>

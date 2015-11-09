@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.utils.mappings;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.dto.ApplicationKeyDTO;
@@ -32,7 +34,7 @@ import java.util.Map;
 public class ApplicationKeyMappingUtil {
 
     @SuppressWarnings("unchecked")
-    public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails) {
+    public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
         ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
         applicationKeyDTO.setConsumerKey((String) keyDetails.get(APIConstants.FrontEndParameterNames.CONSUMER_KEY));
         applicationKeyDTO
@@ -42,7 +44,7 @@ public class ApplicationKeyMappingUtil {
             String appDetailsString = (String) keyDetails.get(ApplicationConstants.OAUTH_APP_DETAILS);
             JSONObject appDetailsJsonObj = (JSONObject) new JSONParser().parse(appDetailsString);
             if (appDetailsJsonObj != null) {
-                applicationKeyDTO.setClientName((String) appDetailsJsonObj.get(ApplicationConstants.OAUTH_CLIENT_NAME));
+                applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(applicationKeyType));
                 String supportedGrantTypes =  (String) appDetailsJsonObj.get(ApplicationConstants.OAUTH_CLIENT_GRANT);
                 if (supportedGrantTypes != null) {
                     applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(supportedGrantTypes.split(" ")));
@@ -64,6 +66,26 @@ public class ApplicationKeyMappingUtil {
         } catch (ParseException e) {
             throw new InternalServerErrorException(e);
         }
+        return applicationKeyDTO;
+    }
+
+    public static ApplicationKeyDTO fromApplicationKeyToDTO(APIKey apiKey) {
+        ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+        applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(apiKey.getType()));
+        applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
+        applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
+        applicationKeyDTO.setKeyState(apiKey.getState());
+        applicationKeyDTO.setSupportedGrantTypes(null); //todo not supported by impl yet
+
+        TokenDTO tokenDTO = new TokenDTO();
+        tokenDTO.setTokenState(null); //todo not supported by impl yet
+        tokenDTO.setRefreshToken(null); //todo not supported by impl yet
+        if (apiKey.getTokenScope() != null) {
+            tokenDTO.setTokenScopes(Arrays.asList(apiKey.getTokenScope().split(" ")));
+        }
+        tokenDTO.setAccessToken(apiKey.getAccessToken());
+        tokenDTO.setValidityTime(apiKey.getValidityPeriod());
+        applicationKeyDTO.setToken(tokenDTO);
         return applicationKeyDTO;
     }
 
