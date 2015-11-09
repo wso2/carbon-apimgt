@@ -245,30 +245,9 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getAppApiCallType(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
-            throws APIManagementException {
-
-        return null;
-    }
-
-    public static NativeArray jsFunction_getPerAppAPIFaultCount(Context cx, Scriptable thisObj,
-                                                                Object[] args, Function funObj)
-            throws APIManagementException {
-
-        return null;
-    }
-
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
                                                              Object[] args, Function funObj)
             throws APIManagementException {
-        return null;
-    }
-
-    public static NativeArray jsFunction_getTopAppUsers(Context cx, Scriptable thisObj,
-                                                        Object[] args, Function funObj)
-            throws APIManagementException {
-
         return null;
     }
 

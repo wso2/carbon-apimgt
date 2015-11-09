@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.usage.client.impl;
 
-import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -86,7 +85,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private APIProvider apiProviderImpl;
     private APIConsumer apiConsumerImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
-    private final Gson gson = new Gson();
 
     public APIUsageStatisticsRdbmsClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
@@ -1008,10 +1006,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             double responseTime = apiCumulativeServiceTimeMap.get(key) / apiUsageMap.get(key);
             responseTimeDTO.setServiceTime(Double.parseDouble(format.format(responseTime)));
             responseTimeByAPI.put(key, responseTimeDTO);
-        }
-        List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(
-                new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);*/
-        return apiResponseTimeUsage;
+        }*/
+        List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(apiResponseTimeUsage, limit);
+        return usage;
     }
 
     /**
