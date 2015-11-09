@@ -75,15 +75,13 @@ public class APIDescriptionGenUtil {
     }
 
     /**
-     * This method is used to get Allowed Requests Count for a tier
+     * This method is used to get Allowed Requests count for a tier
      *
      * @param policy tier policy
      * @return Allowed Requests Count
      * @throws APIManagementException if error occurs when processing XML
      */
-
     public static long getAllowedRequestCount(OMElement policy) throws APIManagementException {
-        long requestCount = 0;
         try {
             OMElement maxCount = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).
                     getFirstChildWithName(APIConstants.THROTTLE_CONTROL_ELEMENT).
@@ -91,56 +89,21 @@ public class APIDescriptionGenUtil {
                     getFirstChildWithName(APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT);
 
             if (maxCount.getText().isEmpty()) {
-                String message = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT.toString() + "or" +
-                        APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() +
-                        " element data not found empty in the policy.";
+                String message = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT.getLocalPart()
+                                 + " element data not found empty in the policy.";
                 log.warn(message);
                 throw new APIManagementException(message);
             }
-            requestCount = Long.parseLong(maxCount.getText().trim());
-            return requestCount;
+            return Long.parseLong(maxCount.getText().trim());
         } catch (OMException e) {
-            String errorMessage = "Policy could not be parsed correctly based on " +
+            //We capture the runtime exception here.
+            String errorMessage = "Policy could not be parsed correctly based on " + 
                     "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
             log.warn(errorMessage);
             throw new APIManagementException(errorMessage);
         } catch (NumberFormatException e) {
             log.error("Error in retrieving request count in tier xml. " + e);
-            throw new APIManagementException("Error in retrieving request count in tier xml. " + e.getMessage());
-        }
-    }
-
-    /**
-     * This method is used to get time duration of a tier
-     *
-     * @param policy tier policy
-     * @return time duration for requests
-     * @throws APIManagementException if error occurs when processing XML
-     */
-    public static long getTimeDuration(OMElement policy) throws APIManagementException {
-        long timeDurationSeconds = 0;
-        try {
-            OMElement duration = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).
-                                getFirstChildWithName(APIConstants.THROTTLE_CONTROL_ELEMENT).
-                                getFirstChildWithName(APIConstants.POLICY_ELEMENT).
-                                getFirstChildWithName(APIConstants.THROTTLE_UNIT_TIME_ELEMENT);
-            if (duration.getText().isEmpty()) {
-                String message = APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() +
-                        " element data not found empty in the policy.";
-                log.warn(message);
-                throw new APIManagementException(message);
-            }
-
-            //converting to seconds
-            timeDurationSeconds = TimeUnit.MILLISECONDS.toSeconds(Long.parseLong(duration.getText().trim()));
-            return timeDurationSeconds;
-        } catch (OMException e) {
-            String errorMessage = "Policy could not be parsed correctly based on " + "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
-            log.warn(errorMessage);
-            throw new APIManagementException(errorMessage);
-        } catch (NumberFormatException e) {
-            log.error("Error in retrieving request count in tier xml. " + e);
-            throw new APIManagementException("Error in retrieving request count in tier xml. " + e.getMessage());
+            throw new APIManagementException("Error in retrieving request count in tier xml. " + e.getMessage(), e);
         }
     }
 
@@ -150,35 +113,31 @@ public class APIDescriptionGenUtil {
      * @return Attributes map
      * @throws APIManagementException
      */
-    public static Map<String, Object> getTierAttributes(OMElement policy)
-            throws APIManagementException {
+    public static Map<String, Object> getTierAttributes(OMElement policy) throws APIManagementException {
         Map<String, Object> attributesMap = new HashMap<String, Object>();
         OMElement attributes = null;
 
         try {
-            OMElement tier=policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName
-                    (APIConstants
-                             .THROTTLE_CONTROL_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT);
-            if(tier!=null){
-                attributes = tier.
-                        getFirstChildWithName(APIConstants.THROTTLE_ATTRIBUTES_ELEMENT);
+            OMElement tier = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).getFirstChildWithName
+                    (APIConstants.THROTTLE_CONTROL_ELEMENT).getFirstChildWithName(APIConstants.POLICY_ELEMENT)
+                    .getFirstChildWithName(APIConstants.POLICY_ELEMENT);
+            if (tier != null) {
+                attributes = tier.getFirstChildWithName(APIConstants.THROTTLE_ATTRIBUTES_ELEMENT);
             }
             if (attributes == null) {
                 return attributesMap;
             } else {
-                for (Iterator childElements = attributes.getChildElements(); childElements
-                        .hasNext(); ) {
+                for (Iterator childElements = attributes.getChildElements(); childElements.hasNext(); ) {
                     OMElement element = (OMElement) childElements.next();
-                    String displayName = element.getAttributeValue(new QName(APIConstants.THROTTLE_ATTRIBUTE_DISPLAY_NAME));
+                    String displayName = element.getAttributeValue(
+                            new QName(APIConstants.THROTTLE_ATTRIBUTE_DISPLAY_NAME));
                     String localName = element.getLocalName();
-                    String attrName = (displayName != null ? displayName : localName); //If displayName not defined,use the attribute name
+                    String attrName = (displayName != null ? displayName : localName); //If displayName not defined,
+                    // use the attribute name
                     String attrValue = element.getText();
                     attributesMap.put(attrName, attrValue);
                 }
-
-
             }
-
         } catch (NullPointerException npe) {
             String msg = "Policy could not be parsed correctly based on http://schemas.xmlsoap.org/ws/2004/09/policy " +
                          "specification";
@@ -188,6 +147,13 @@ public class APIDescriptionGenUtil {
         return attributesMap;
     }
 
+    /**
+     * This method gives the allowed request count for a minute
+     *
+     * @param policy The tier level policy
+     * @return The request count for a minute((maxCount * 60000)/timeDuration)
+     * @throws APIManagementException if policy or parsing error occurs
+     */
     public static long getAllowedCountPerMinute(OMElement policy) throws APIManagementException {
         //Here as the method is about extracting some info from the policy. And it's not concern on compliance to
         // specification. So it just extract the required element.
@@ -219,6 +185,41 @@ public class APIDescriptionGenUtil {
                     "specification";
             log.warn(msg);
             throw new APIManagementException(msg);
+        }
+    }
+
+    /**
+     * This method is used to get time duration of a tier
+     *
+     * @param policy tier policy
+     * @return time duration for requests
+     * @throws APIManagementException if error occurs when processing XML
+     */
+    public static long getTimeDuration(OMElement policy) throws APIManagementException {
+        try {
+            OMElement duration = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                    getFirstChildWithName(APIConstants.THROTTLE_CONTROL_ELEMENT).
+                    getFirstChildWithName(APIConstants.POLICY_ELEMENT).
+                    getFirstChildWithName(APIConstants.THROTTLE_UNIT_TIME_ELEMENT);
+
+            if (duration.getText().isEmpty()) {
+                String message = APIConstants.THROTTLE_UNIT_TIME_ELEMENT.getLocalPart() +
+                                 " element data not found empty in the policy.";
+                log.warn(message);
+                throw new APIManagementException(message);
+            }
+            // We return the milliseconds value as it is.
+            // Reason - We need the ability to do fine grained throttling configurations.
+            return Long.parseLong(duration.getText().trim());
+        } catch (OMException e) {
+            String errorMessage = "Policy could not be parsed correctly based on " +
+                                  "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
+            log.warn(errorMessage);
+            throw new APIManagementException(errorMessage);
+        } catch (NumberFormatException e) {
+            String message = "Error in retrieving time duration from the tiers xml";
+            log.error(message, e);
+            throw new APIManagementException(message, e);
         }
     }
 }

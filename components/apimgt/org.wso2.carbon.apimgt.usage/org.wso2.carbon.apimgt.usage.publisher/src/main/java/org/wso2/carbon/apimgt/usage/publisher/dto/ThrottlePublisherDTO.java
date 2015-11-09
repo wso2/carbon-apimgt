@@ -27,6 +27,7 @@ public class ThrottlePublisherDTO {
     private String applicationName;
     private String applicationId;
     private long throttledTime; //The timestamp which throttle out event triggers
+    private String throttledOutReason;
 
     private String username;
 
@@ -109,5 +110,13 @@ public class ThrottlePublisherDTO {
 
     public String getApplicationId() {
         return applicationId;
+    }
+
+    public String getThrottledOutReason() {
+        return throttledOutReason;
+    }
+
+    public void setThrottledOutReason(String throttledOutReason) {
+        this.throttledOutReason = throttledOutReason;
     }
 }

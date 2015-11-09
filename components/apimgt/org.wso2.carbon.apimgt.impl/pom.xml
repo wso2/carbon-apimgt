@@ -176,9 +176,10 @@
             <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.user.mgt.stub</artifactId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.tier.cache.stub</artifactId>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>
@@ -295,6 +296,7 @@
                             org.wso2.carbon.apimgt.keymgt.stub.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.statsupdate.stub.*,
                             org.wso2.carbon.apimgt.gateway.stub.*,
+                            org.wso2.carbon.apimgt.tier.cache.stub.*,
                             org.wso2.carbon.apimgt.gateway.dto.stub.*,
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",

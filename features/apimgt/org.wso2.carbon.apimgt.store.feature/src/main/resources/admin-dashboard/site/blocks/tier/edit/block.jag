@@ -1,0 +1,26 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("tier/edit", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+            return {
+
+            }
+        },
+
+        getOutputs:function (inputs) {
+            // We check whether the tiers are present in the session. If they are not, then
+            var tiers = session.get("tiers");
+            if(!tiers){
+                var result;
+                result = jagg.module("tier").getAllTiers();
+                tiers = result.tiers;
+
+                // we put results to the session.
+                session.put("tiers", tiers);
+            }
+        }
+});
+%>
