@@ -18,15 +18,23 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class APIMappingUtil {
 
@@ -44,8 +52,8 @@ public class APIMappingUtil {
             throws APIManagementException {
         APIIdentifier apiIdentifier;
         if (RestApiUtil.isUUID(apiId)) {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiIdentifier = apiProvider.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            apiIdentifier = apiConsumer.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
         } else {
             apiIdentifier = getAPIIdentifierFromApiId(apiId);
         }
@@ -54,7 +62,7 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
@@ -70,7 +78,7 @@ public class APIMappingUtil {
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition;
 
-        apiSwaggerDefinition = apiProvider.getSwagger20Definition(model.getId());
+        apiSwaggerDefinition = apiConsumer.getSwagger20Definition(model.getId());
 
         dto.setApiDefinition(apiSwaggerDefinition);
 

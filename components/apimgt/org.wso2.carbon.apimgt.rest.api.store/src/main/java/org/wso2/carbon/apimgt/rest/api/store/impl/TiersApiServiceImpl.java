@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
@@ -49,8 +49,8 @@ public class TiersApiServiceImpl extends TiersApiService {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            Set<Tier> tiers = apiProvider.getTiers() ;
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            Set<Tier> tiers = apiConsumer.getTiers() ;
 
             for (Tier tier : tiers) {
                 tierDTOs.add(TierMappingUtil.fromTiertoDTO(tier));

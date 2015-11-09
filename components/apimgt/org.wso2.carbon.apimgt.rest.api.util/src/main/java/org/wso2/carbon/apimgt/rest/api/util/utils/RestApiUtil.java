@@ -103,6 +103,16 @@ public class RestApiUtil {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 
+    /** Returns an APIConsumer which is corresponding to the current logged in user taken from the carbon context
+     * 
+     * @return an APIConsumer which is corresponding to the current logged in user
+     * @throws APIManagementException
+     */
+    public static APIConsumer getLoggedInUserConsumer() throws APIManagementException {
+        String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return APIManagerFactory.getInstance().getAPIConsumer(loggedInUser);
+    }
+
     public static String getLoggedInUsername() {
         return CarbonContext.getThreadLocalCarbonContext().getUsername();
     }

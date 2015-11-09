@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -36,7 +35,6 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,7 +103,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
         APIDTO apiToReturn;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -116,10 +114,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             } */
             API api;
             if (RestApiUtil.isUUID(apiId)) {
-                api = apiProvider.getAPIbyUUID(apiId);
+                api = apiConsumer.getAPIbyUUID(apiId);
             } else {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-                api = apiProvider.getAPI(apiIdentifier);
+                api = apiConsumer.getAPI(apiIdentifier);
             }
 
             if (api != null) {
