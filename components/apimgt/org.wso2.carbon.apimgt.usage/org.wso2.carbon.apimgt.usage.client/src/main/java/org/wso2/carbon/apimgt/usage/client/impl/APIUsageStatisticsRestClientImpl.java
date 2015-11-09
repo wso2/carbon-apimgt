@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.usage.client.impl;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import org.apache.axiom.om.OMElement;
