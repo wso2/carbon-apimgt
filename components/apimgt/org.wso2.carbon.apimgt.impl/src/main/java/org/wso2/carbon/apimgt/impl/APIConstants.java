@@ -404,6 +404,9 @@ public final class APIConstants {
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
     public static final String API_STORE_URL = "APIStore."+"URL";
+    public static final String API_STORE_SERVER_URL = "APIStore."+"ServerURL";
+    public static final String API_STORE_USERNAME = "APIStore."+"Username";
+    public static final String API_STORE_PASSWORD = "APIStore."+"Password";
     public static final String API_STORE_DISPLAY_ALL_APIS = API_STORE + "DisplayAllAPIs";
     public static final String API_STORE_DISPLAY_MULTIPLE_VERSIONS = API_STORE + "DisplayMultipleVersions";
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
@@ -419,6 +422,9 @@ public final class APIConstants {
     public static final String API_PUBLISHER = "APIPublisher.";
     public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";
     public static final String API_PUBLISHER_URL = "APIPublisher."+"URL";
+    public static final String API_PUBLISHER_SERVER_URL = "APIPublisher."+"ServerURL";
+    public static final String API_PUBLISHER_USERNAME = "APIPublisher."+"Username";
+    public static final String API_PUBLISHER_PASSWORD = "APIPublisher."+"Password";
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS= "APIPublisher."+"EnableAPIDocVisibilityLevels";
 
     public static final String WSO2_API_STORE_TYPE = "wso2";

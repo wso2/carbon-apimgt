@@ -50,46 +50,76 @@ public class TierCacheInvalidationClient {
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
     Map<String, Environment> environments;
+    
+    String storeServerURL;
+    
+    String storeUserName;
+    
+    String storePassword;
+    
+    String publisherServerURL;
+    
+    String publisherUserName;
+    
+    String publisherPassword;
 
     public TierCacheInvalidationClient() throws APIManagementException {
         APIManagerConfiguration config =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                                         ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                                               .getAPIManagerConfiguration();
         environments = config.getApiGatewayEnvironments();
+        storeServerURL = config.getFirstProperty(APIConstants.API_STORE_SERVER_URL);
+        storeUserName = config.getFirstProperty(APIConstants.API_STORE_USERNAME);
+        storePassword = config.getFirstProperty(APIConstants.API_STORE_PASSWORD);
+
+        publisherServerURL = config.getFirstProperty(APIConstants.API_PUBLISHER_SERVER_URL);
+        publisherUserName = config.getFirstProperty(APIConstants.API_PUBLISHER_USERNAME);
+        publisherPassword = config.getFirstProperty(APIConstants.API_PUBLISHER_PASSWORD);
     }
 
-    public void clearCaches(String tenantDomain){
-        String gatewayServerURL;
+    public void clearCaches(String tenantDomain) {
+        String cookie;
 
-        if(environments == null || environments.isEmpty()){
-            if(log.isDebugEnabled()){
+        // Clear Store Cache
+        try {
+            cookie = login(storeServerURL, storeUserName, storePassword);
+            clearCache(tenantDomain, storeServerURL, cookie);
+        } catch (AxisFault axisFault) {
+            log.error("Error while initializing the OAuth admin service stub in Store for tenant : " + tenantDomain,
+                      axisFault);
+        } catch (RemoteException e) {
+            log.error("Error while invalidating the tier cache in Store for tenant : " + tenantDomain, e);
+        }
+
+        // Clear Publisher Cache
+        try {
+            cookie = login(storeServerURL, storeUserName, storePassword);
+            clearCache(tenantDomain, storeServerURL, cookie);
+        } catch (AxisFault axisFault) {
+            log.error("Error while initializing the OAuth admin service stub in Publisher for tenant : " + tenantDomain,
+                      axisFault);
+        } catch (RemoteException e) {
+            log.error("Error while invalidating the tier cache in Publisher for tenant : " + tenantDomain, e);
+        }
+
+        // Clear Gateway Caches
+        if (environments == null || environments.isEmpty()) {
+            if (log.isDebugEnabled()) {
                 log.debug("Unable to find the list of gateway environments");
             }
             return;
         }
-
+        String gatewayServerURL;
         for (Map.Entry<String, Environment> entry : environments.entrySet()) {
-            gatewayServerURL = entry.getValue().getServerURL();
-
-            TierCacheServiceStub tierCacheServiceStub;
+            Environment environment = entry.getValue();
+            gatewayServerURL = environment.getServerURL();
             try {
-                String cookie = login(entry.getValue());
-                ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-                tierCacheServiceStub = new TierCacheServiceStub(ctx, gatewayServerURL + "TierCacheService");
-                ServiceClient client = tierCacheServiceStub._getServiceClient();
-                Options options = client.getOptions();
-                options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
-                options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
-                options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
-                options.setManageSession(true);
-                options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
-
+                cookie = login(gatewayServerURL, environment.getUserName(), environment.getPassword());
+                clearCache(tenantDomain, gatewayServerURL, cookie);
             } catch (AxisFault axisFault) {
-               log.error("Error while initializing the OAuth admin service stub for gateway environment : " +
-                         entry.getValue().getName() + " for tenant : " + tenantDomain, axisFault);
+                log.error("Error while initializing the OAuth admin service stub for gateway environment : " +
+                          entry.getValue().getName() + " for tenant : " + tenantDomain, axisFault);
                 continue;
-            }
-            try {
-                tierCacheServiceStub.invalidateCache(tenantDomain);
             } catch (RemoteException e) {
                 log.error("Error while invalidating the tier cache for gateway environment : " +
                           entry.getValue().getName() + " for tenant : " + tenantDomain, e);
@@ -97,20 +127,32 @@ public class TierCacheInvalidationClient {
         }
     }
 
-    private String login(Environment environment) throws AxisFault {
-        String user = environment.getUserName();
-        String password = environment.getPassword();
-        String serverURL = environment.getServerURL();
+    public void clearCache(String tenantDomain, String serverURL, String cookie) throws AxisFault, RemoteException {
+        TierCacheServiceStub tierCacheServiceStub;
 
-        if (serverURL == null || user == null || password == null) {
-            throw new AxisFault("Required API gateway admin configuration unspecified");
+        ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
+        tierCacheServiceStub = new TierCacheServiceStub(ctx, serverURL + "TierCacheService");
+        ServiceClient client = tierCacheServiceStub._getServiceClient();
+        Options options = client.getOptions();
+        options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
+        options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
+        options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
+        options.setManageSession(true);
+        options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
+
+        tierCacheServiceStub.invalidateCache(tenantDomain);
+    }
+
+    private String login(String serverURL, String userName, String password) throws AxisFault {
+        if (serverURL == null || userName == null || password == null) {
+            throw new AxisFault("Required admin configuration unspecified");
         }
 
         String host;
         try {
             host = new URL(serverURL).getHost();
         } catch (MalformedURLException e) {
-            throw new AxisFault("API gateway URL is malformed", e);
+            throw new AxisFault("Server URL is malformed", e);
         }
 
         AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
@@ -118,14 +160,14 @@ public class TierCacheInvalidationClient {
         Options options = client.getOptions();
         options.setManageSession(true);
         try {
-            authAdminStub.login(user, password, host);
+            authAdminStub.login(userName, password, host);
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
             return (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         } catch (RemoteException e) {
             throw new AxisFault("Error while contacting the authentication admin services", e);
         } catch (LoginAuthenticationExceptionException e) {
-            throw new AxisFault("Error while authenticating against the API gateway admin", e);
+            throw new AxisFault("Error while authenticating ", e);
         }
     }
 

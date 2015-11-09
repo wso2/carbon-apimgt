@@ -32,7 +32,7 @@
                     continue;
                 } else {
                     requestCount = tier.getRequestCount();
-                    unitTime = tier.getUnitTime();
+                    unitTime = (tier.getUnitTime()/1000).toString();
                 }
                 tierPlan = tier.getTierPlan() == null ? "" : tier.getTierPlan();
                 description = tier.getDescription() == null ? "" : tier.getDescription();
