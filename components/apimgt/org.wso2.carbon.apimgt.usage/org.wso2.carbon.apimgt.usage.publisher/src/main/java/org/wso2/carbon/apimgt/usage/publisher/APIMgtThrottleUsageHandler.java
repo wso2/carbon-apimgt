@@ -106,7 +106,8 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
                 throttlePublisherDTO.setAccessToken(authContext.getApiKey());
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
-                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(username));
+                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
+                        (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER)));
                 throttlePublisherDTO.setApiname((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API));
                 throttlePublisherDTO.setVersion((String) messageContext.getProperty(
