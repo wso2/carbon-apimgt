@@ -76,7 +76,7 @@
                             <execution forEvent="Demote to Created"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Demote to Prototyped"
+                            <execution forEvent="Deploy as a Prototype"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
 
