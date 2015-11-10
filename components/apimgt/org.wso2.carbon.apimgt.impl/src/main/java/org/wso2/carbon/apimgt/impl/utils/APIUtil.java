@@ -1625,7 +1625,7 @@ public final class APIUtil {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
 
-            return getTiers(registry,APIConstants.APP_TIER_LOCATION);
+            return getTiers(registry, APIConstants.APP_TIER_LOCATION);
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -1649,7 +1649,7 @@ public final class APIUtil {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
 
-            return getTiers(registry,APIConstants.APP_TIER_LOCATION);
+            return getTiers(registry, APIConstants.APP_TIER_LOCATION);
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -1673,7 +1673,7 @@ public final class APIUtil {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry();
 
-            return getTiers(registry,APIConstants.RES_TIER_LOCATION);
+            return getTiers(registry, APIConstants.RES_TIER_LOCATION);
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -1697,7 +1697,7 @@ public final class APIUtil {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
 
-            return getTiers(registry,APIConstants.RES_TIER_LOCATION);
+            return getTiers(registry, APIConstants.RES_TIER_LOCATION);
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);

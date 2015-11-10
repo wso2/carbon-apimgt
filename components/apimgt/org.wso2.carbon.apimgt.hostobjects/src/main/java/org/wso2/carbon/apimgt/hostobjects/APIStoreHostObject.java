@@ -4122,8 +4122,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 NativeObject row = new NativeObject();
                 row.put("tierName", row, tier.getName());
                 row.put("tierDisplayName", row, tier.getDisplayName());
-                row.put("tierDescription", row,
-                        tier.getDescription() != null ? tier.getDescription() : "");
+                row.put("tierDescription", row, tier.getDescription() != null ? tier.getDescription() : "");
                 row.put("defaultTier", row, i == 0);
                 myn.put(i, myn, row);
                 i++;

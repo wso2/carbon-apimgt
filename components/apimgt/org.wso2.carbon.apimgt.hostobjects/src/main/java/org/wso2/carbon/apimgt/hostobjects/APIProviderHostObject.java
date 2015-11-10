@@ -2543,7 +2543,8 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getResourceTiers(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
+    public static NativeArray jsFunction_getResourceTiers(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) {
         NativeArray myn = new NativeArray(1);
         APIProvider apiProvider = getAPIProvider(thisObj);
         try {
@@ -2555,8 +2556,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     NativeObject row = new NativeObject();
                     row.put("tierName", row, tier.getName());
                     row.put("tierDisplayName", row, tier.getDisplayName());
-                    row.put("tierDescription", row,
-                            tier.getDescription() != null ? tier.getDescription() : "");
+                    row.put("tierDescription", row, tier.getDescription() != null ? tier.getDescription() : "");
                     row.put("defaultTier", row, i == 0);
                     myn.put(i, myn, row);
                     i++;
