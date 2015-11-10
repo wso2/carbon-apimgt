@@ -83,7 +83,7 @@
                         </data>
                     </datamodel>
                     <transition event="Block" target="Blocked"/>
-                    <transition event="Demote to Prototyped" target="Prototyped"/>
+                    <transition event="Deploy as a Prototype" target="Prototyped"/>
                     <transition event="Demote to Created" target="Created"/>
                     <transition event="Deprecate" target="Deprecated"/>
                     <transition event="Publish" target="Published"/>
