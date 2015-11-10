@@ -84,7 +84,6 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         boolean authorized = false;
         String basePath = (String) message.get(Message.BASE_PATH);
         String path = (String) message.get(Message.PATH_INFO);
-        String httpVerb = (String) message.get("org.apache.cxf.request.method");
         String resource = path.substring(basePath.length() - 1);
         String[] scopes = tokenInfo.getScopes();
         Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
@@ -107,7 +106,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 log.error("Error while creating URI Template object to validate request. Template pattern: " +
                         templateString);
             }
-            if (templateToValidate.matches(resource, var)) {
+            if (templateToValidate!= null && templateToValidate.matches(resource, var) && scopes!=null) {
                 for (int i = 0; i < scopes.length; i++) {
                     Scope scp = ((URITemplate) template).getScope();
                     if (scp != null) {
