@@ -74,11 +74,11 @@ public final class APIConstants {
 
     public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
 
-    public static final String DEFAULT_API_TIER_FILE_NAME = "/tiers/default-tiers.xml";
+    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
 
-    public static final String DEFAULT_APP_TIER_FILE_NAME = "/tiers/default-app-tiers.xml";
+    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
 
-    public static final String DEFAULT_RES_TIER_FILE_NAME = "/tiers/default-res-tiers.xml";
+    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 

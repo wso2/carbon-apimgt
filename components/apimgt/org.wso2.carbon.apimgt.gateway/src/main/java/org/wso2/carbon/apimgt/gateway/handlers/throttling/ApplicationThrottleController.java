@@ -68,11 +68,11 @@ public class ApplicationThrottleController {
 
         //Object entryValue = synCtx.getEntry(APPLICATION_THROTTLE_POLICY_KEY);
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        RealmService realmService = (RealmService)carbonContext.getOSGiService(RealmService.class, null);
+        RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
-        String subscriber=authContext.getSubscriber();
-        String tenantDomain=MultitenantUtils.getTenantDomain(subscriber);
+        String subscriber = authContext.getSubscriber();
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
         int tenantId;
         try {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
@@ -81,7 +81,7 @@ public class ApplicationThrottleController {
             return null;
         }
 
-        Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY,tenantId);
+        Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY, tenantId);
         if (entryValue == null || !(entryValue instanceof OMElement)) {
             handleException("Unable to load throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
             return null;
@@ -108,9 +108,9 @@ public class ApplicationThrottleController {
         throw new SynapseException(msg, e);
     }
     
-    private static OMNode lookup(String key,int tenantId){
+    private static OMNode lookup(String key, int tenantId) {
         try {
-            Resource resource = getResource(key,tenantId);
+            Resource resource = getResource(key, tenantId);
 
             if (resource instanceof Collection || resource == null) {
                 return null;
@@ -200,7 +200,7 @@ public class ApplicationThrottleController {
         return null;
     }
 
-    private static Resource getResource(String path,int tenantId) {
+    private static Resource getResource(String path, int tenantId) {
 
         RegistryService registryService = RegistryServiceHolder.getInstance().getRegistryService();
 

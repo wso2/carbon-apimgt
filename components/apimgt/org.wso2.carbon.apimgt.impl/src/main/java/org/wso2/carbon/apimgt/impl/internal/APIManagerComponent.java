@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -383,9 +384,19 @@ public class APIManagerComponent {
 
     private void addTierPolicies() throws APIManagementException {
 
-        addTierPolicy(APIConstants.API_TIER_LOCATION, APIConstants.DEFAULT_API_TIER_FILE_NAME);
-        addTierPolicy(APIConstants.APP_TIER_LOCATION, APIConstants.DEFAULT_APP_TIER_FILE_NAME);
-        addTierPolicy(APIConstants.RES_TIER_LOCATION, APIConstants.DEFAULT_RES_TIER_FILE_NAME);
+        String apiTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
+        String appTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
+        String resTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
+
+        addTierPolicy(APIConstants.API_TIER_LOCATION, apiTierFilePath);
+        addTierPolicy(APIConstants.APP_TIER_LOCATION, appTierFilePath);
+        addTierPolicy(APIConstants.RES_TIER_LOCATION, resTierFilePath);
 
     }
 
@@ -399,7 +410,7 @@ public class APIManagerComponent {
             }
 
             log.debug("Adding API tier policies to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream(defaultTierFileName);
+            InputStream inputStream = FileUtils.openInputStream(new File(defaultTierFileName));
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setContent(data);

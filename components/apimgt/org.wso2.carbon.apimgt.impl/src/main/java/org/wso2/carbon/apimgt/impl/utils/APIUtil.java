@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
 import org.apache.axis2.util.JavaUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.poi.ss.formula.functions.T;
@@ -2468,9 +2469,19 @@ public final class APIUtil {
 
     public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
 
-        loadTenantAPIPolicy(tenantID, APIConstants.API_TIER_LOCATION, APIConstants.DEFAULT_API_TIER_FILE_NAME);
-        loadTenantAPIPolicy(tenantID, APIConstants.APP_TIER_LOCATION, APIConstants.DEFAULT_APP_TIER_FILE_NAME);
-        loadTenantAPIPolicy(tenantID, APIConstants.RES_TIER_LOCATION, APIConstants.DEFAULT_RES_TIER_FILE_NAME);
+        String apiTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
+        String appTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
+        String resTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
+
+        loadTenantAPIPolicy(tenantID, APIConstants.API_TIER_LOCATION, apiTierFilePath);
+        loadTenantAPIPolicy(tenantID, APIConstants.APP_TIER_LOCATION, appTierFilePath);
+        loadTenantAPIPolicy(tenantID, APIConstants.RES_TIER_LOCATION, resTierFilePath);
     }
 
     /**
@@ -2496,7 +2507,7 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding API tier policies to the tenant's registry");
             }
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream(fileName);
+            InputStream inputStream = FileUtils.openInputStream(new File(fileName));
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
