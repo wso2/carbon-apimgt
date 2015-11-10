@@ -150,7 +150,6 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
-        checkPublishPermission();
         return super.getAPILifeCycleData(apiId);
     }
 }
