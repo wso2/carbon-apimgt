@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl;
 
 
 import javax.ws.rs.core.Response;
@@ -50,8 +51,9 @@ public class OAuthAuthenticationHandler implements RequestHandler {
     public void initializeAuthenticator() {
         try {
             //TODO Retrieve this class name from configuration and let it configurable.
-            authenticator = (WebAppAuthenticator) APIUtil.getClassForName(
-                    RestApiConstants.REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME).newInstance();
+          //  authenticator = (WebAppAuthenticator) APIUtil.getClassForName(
+              //      RestApiConstants.REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME).newInstance();
+            authenticator = new WebAppAuthenticatorImpl();
         } catch (Exception e) {
             throw new SynapseException("Error while initializing authenticator of " + "type: ");
         }
