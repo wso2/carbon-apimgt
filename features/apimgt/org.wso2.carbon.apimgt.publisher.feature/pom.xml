@@ -59,11 +59,6 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.samples.calculator.feature</artifactId>
-            <type>zip</type>
-        </dependency>
     </dependencies>
 
     <build>
@@ -104,9 +99,6 @@
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.throttle.core:${carbon.throttle.module.version}</importBundleDef>
                             </importBundles>
-                            <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.samples.calculator.feature:${carbon.apimgt.version}</includedFeatureDef>
-                            </includedFeatures>
                         </configuration>
                     </execution>
                 </executions>
