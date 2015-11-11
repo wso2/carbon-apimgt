@@ -1033,6 +1033,8 @@ paths:
       description: |
         Get available tiers
       parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -1044,9 +1046,7 @@ paths:
             OK. 
             List of tiers returned.
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Tier'
+            $ref: '#/definitions/TierList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -1798,14 +1798,44 @@ definitions:
           - API_LEVEL
 
 #-----------------------------------------------------
+# The Tier List resource
+#-----------------------------------------------------
+  TierList:
+    title: Tier List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Tiers returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified. 
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified. 
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Tier'
+
+#-----------------------------------------------------
 # The Tier resource
 #-----------------------------------------------------
   Tier:
     title: Tier
     required:
       - name
+      - tierPlan
+      - requestCount
+      - unitTime
     properties:
       name:
+        type: string
+      displayName:
         type: string
       description:
         type: string
@@ -1818,16 +1848,21 @@ definitions:
       requestCount:
         description: |
           Maximum number of requests which can be sent within a provided unit time
-        type: number
+        type: integer
+        format: int64
       unitTime:
-        type: number
-      billingPlan:
+        type: integer
+        format: int64
+      tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
         type: string
-      continueOnQuotaReach:
+        enum: 
+          - FREE
+          - COMMERCIAL
+      stopOnQuotaReach:
         description: |
-          By making this attribute to true, you are capabale of sending requests 
+          By making this attribute to false, you are capabale of sending requests 
           even if the request count exceeded within a unit time
         type: boolean
 
@@ -1836,9 +1871,15 @@ definitions:
 #-----------------------------------------------------
   TierPermission:
     title: tierPermission
+    required:
+      - permissionType
+      - roles
     properties:
-      enableAccess:
+      permissionType:
         type: string
+        enum:
+          - allow
+          - deny
       roles:
         type: array
         items:

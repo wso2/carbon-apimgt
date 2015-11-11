@@ -6,8 +6,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.TiersApiServiceFactor
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class TiersApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get available tiers", response = TierDTO.class, responseContainer = "List")
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get available tiers", response = TierListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nList of tiers returned."),
         
@@ -37,10 +38,12 @@ public class TiersApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. \nThe requested media type is not supported") })
 
-    public Response tiersGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON."  , defaultValue="JSON")@HeaderParam("Accept") String accept,
+    public Response tiersGet(@ApiParam(value = "Maximum size of resource array to return.", defaultValue="25") @QueryParam("limit") Integer limit,
+    @ApiParam(value = "Starting point within the complete list of items qualified.", defaultValue="0") @QueryParam("offset") Integer offset,
+    @ApiParam(value = "Media types acceptable for the response. Default is JSON."  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.tiersGet(accept,ifNoneMatch);
+    return delegate.tiersGet(limit,offset,accept,ifNoneMatch);
     }
     @POST
     

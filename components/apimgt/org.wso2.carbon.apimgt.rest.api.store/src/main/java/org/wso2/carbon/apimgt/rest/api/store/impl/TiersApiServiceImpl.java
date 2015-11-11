@@ -21,56 +21,76 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
-import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TierMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/** This is the service implementation class for Store tier related operations
+ *
+ */
 public class TiersApiServiceImpl extends TiersApiService {
+
+    /** Retrieves all the Tiers
+     *
+     * @param limit max number of objects returns
+     * @param offset starting index
+     * @param accept accepted media type of the client
+     * @param ifNoneMatch If-None-Match header value
+     * @return Response object containing resulted tiers
+     */
     @Override
-    public Response tiersGet(String accept,String ifNoneMatch){
-        boolean isTenantFlowStarted = false;
-        List<TierDTO> tierDTOs = new ArrayList<>();
+    public Response tiersGet(Integer limit, Integer offset, String accept, String ifNoneMatch) {
+        //pre-processing
+        //setting default limit and offset if they are null
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
-            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            Set<Tier> tiers = apiConsumer.getTiers() ;
+            Set<Tier> tiers = apiConsumer.getTiers();
+            List<Tier> tierList = new ArrayList<>();
 
             for (Tier tier : tiers) {
-                tierDTOs.add(TierMappingUtil.fromTiertoDTO(tier));
+                tierList.add(tier);
             }
-
+            TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, limit, offset);
+            TierMappingUtil.setPaginationParams(tierListDTO, limit, offset, tierList.size());
+            return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
-        return Response.ok().entity(tierDTOs).build();
     }
 
+    /** Returns the matched tier to the given name
+     * 
+     * @param tierName name of the tier
+     * @param accept accepted media type of the client
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return TierDTO matched to the given tier name
+     */
     @Override
     public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
-            String ifModifiedSince){
-        //backend method requires
-        return Response.ok().entity(null).build();
+            String ifModifiedSince) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        try {
+            Tier tier = APIUtil.getTierFromCache(tierName, tenantDomain);
+            if (tier != null) {
+                return Response.ok().entity(TierMappingUtil.fromTiertoDTO(tier)).build();
+            } else {
+                throw new NotFoundException();
+            }
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
-
 }
