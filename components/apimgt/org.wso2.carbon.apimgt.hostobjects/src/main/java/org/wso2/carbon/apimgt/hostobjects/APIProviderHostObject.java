@@ -4683,6 +4683,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("name", row, environment.getName());
                 row.put("description", row, environment.getDescription());
                 row.put("type", row, environment.getType());
+                row.put("serverURL", row, environment.getServerURL());
+                row.put("apiConsole", row, environment.isShowInConsole());
                 myn.put(i, myn, row);
                 i++;
             }

@@ -1,4 +1,4 @@
-function APISamples(defaultTier) {
+function APISamples(defaultTier, gatewayURL) {
     this.sample1_swagger = "{\"paths\":{\"/add\":{\"get\":{\"summary\":\"add x and y\", " +
     "\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\", " +
     "\"produces\":\"application/json\",\"parameters\":[{\"name\":\"x\",\"required\":true, " +
@@ -19,11 +19,10 @@ function APISamples(defaultTier) {
     "\"required\":true,\"type\":\"string\",\"in\": \"query\"}],\"responses\":{\"200\":{}}}}}, " +
     "\"swagger\":\"2.0\",\"info\":{\"title\": \"Calculator\",\"description\": " +
     "\"Simple calculator API to perform addition, subtraction, multiplication and division.\", " +
-    "\"version\":\"1.0\"},\"basePath\":\"/calc/1.0\",\"host\":\"localhost:8243\"}";
+    "\"version\":\"1.0\"},\"basePath\":\"/calc/1.0\",\"host\":\"" + gatewayURL + "\"}";
 }
 
-
-APISamples.prototype.deploySample1 = function (defaultTier) {
+APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
     var addAPIUrl = "/site/blocks/item-design/ajax/add.jag";
     var addAPIData = {action: 'sampleDesign', name: 'CalculatorAPI', provider: username,
         version: '1.0', description: 'Simple calculator API to perform addition, subtraction, ' +
@@ -44,26 +43,44 @@ APISamples.prototype.deploySample1 = function (defaultTier) {
     $(".modal-body").html("Sample API is Deploying");
     $(".modal").css({width: 550});
 
+    var _this = this;
     //add the sample api
     jagg.post(addAPIUrl, addAPIData,
         function (apiAddResult) {
             if (!apiAddResult.error) {
                 var urlDesign = '/site/blocks/item-design/ajax/add.jag';
-                jagg.post(urlDesign, {action: "implement", name: "CalculatorAPI", version: "1.0",
-                provider: username,  implementation_methods: "endpoint", endpoint_type: "http",
-                endpoint_config: '{"production_endpoints":{"url": ' +
-                '"http://localhost:9763/apimgt-calculator-api/api","config":null}, ' +
-                '"sandbox_endpoints":{"url":"http://localhost:9763/apimgt-calculator-api/api", ' +
-                '"config":null}, "endpoint_type":"http"}', production_endpoints:
-                "http://localhost:9763/apimgt-calculator-api/api", sandbox_endpoints:
-                "http://localhost:9763/apimgt-calculator-api/api", endpointType: "nonsecured",
-                swagger: this.sample1_swagger},
+                var prodEndpoint = gatewayURL + "/am/sample/calculator/v1/api";
+                var sandboxEndpoint = gatewayURL + "/am/sample/calculator/v1/api";
+                var implementation = {
+                    action: "implement",
+                    name: "CalculatorAPI",
+                    version: "1.0",
+                    provider: username,
+                    implementation_methods: "endpoint",
+                    endpoint_type: "http",
+                    endpoint_config: "{" +
+                    "\"production_endpoints\": {" +
+                            "\"url\": \"" + prodEndpoint + "\"," +
+                            "\"config\": null" +
+                        "}," +
+                        "\"sandbox_endpoints\": {" +
+                            "\"url\": \"" + sandboxEndpoint + "\"," +
+                            "\"config\": null" +
+                        "}," +
+                        "\"endpoint_type\": \"http\" " +
+                    "}",
+                    production_endpoints: prodEndpoint,
+                    sandbox_endpoints: sandboxEndpoint,
+                    endpointType: "nonsecured",
+                    swagger: _this.sample1_swagger
+                };
+                jagg.post(urlDesign, implementation,
                     function (result) {
                         jagg.post(urlDesign, {action: "manage", name: "CalculatorAPI",
                             provider: username, version: "1.0", default_version_checked: " ",
                             tier: defaultTier, tiersCollection: defaultTier,
                             transport_http: "http", transport_https: "https",
-                            swagger: this.sample1_swagger},
+                            swagger: _this.sample1_swagger},
                             function (result) {
                                 if (isPublishPermitted) {
                                     var urlPublished = "/site/blocks/life-cycles/ajax/life-cycles.jag";
@@ -104,7 +121,7 @@ APISamples.prototype.deploySample1 = function (defaultTier) {
         }, 'json');
 };
 
-var deploySampleApi = function (defaultTier) {
-    var deployer = new APISamples(defaultTier);
-    deployer.deploySample1(defaultTier);
+var deploySampleApi = function (defaultTier, gatewayURL) {
+    var deployer = new APISamples(defaultTier, gatewayURL);
+    deployer.deploySample(defaultTier, gatewayURL);
 };
