@@ -52,7 +52,8 @@ public class CalculatorService {
         Response response;
         double answer;
         if (y == 0) {
-            response = Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE).entity("{\"error\":\"Can't divide by 0 (zero)\"}").build();
+            response = Response.status(Response.Status.BAD_REQUEST).type(MediaType.APPLICATION_JSON_TYPE)
+                    .entity("{\"error\":\"Can't divide by 0 (zero)\"}").build();
         } else {
             answer = x / y;
             return Response.ok("{\"answer\": \"" + answer + "\"}", MediaType.APPLICATION_JSON).build();
