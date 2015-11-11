@@ -21,7 +21,7 @@
             var tierPlan = tier.getTierPlan() == null ? "" : tier.getTierPlan();
             var description = tier.getDescription() == null ? "" : tier.getDescription();
             var stopOnQuotaReached = tier.isStopOnQuotaReached();
-            var unitTime = tier.getUnitTime() == null ? "" : tier.getUnitTime();
+            var unitTime = tier.getUnitTime() == null ? "" : (tier.getUnitTime()/1000).toString();
             var requestCount = tier.getRequestCount() == null ? "" : tier.getRequestCount();
             var customAttributes = tier.getTierAttributes();
             var customAttributeList = {};

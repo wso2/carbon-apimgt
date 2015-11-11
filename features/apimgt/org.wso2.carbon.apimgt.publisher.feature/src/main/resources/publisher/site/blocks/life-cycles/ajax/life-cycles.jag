@@ -32,6 +32,8 @@ if(jagg.isCSRFTokenValid())
             status = "Block";
         } else if (status == "RETIRED") {
             status = "Retire";
+        } else if (status == "PROTOTYPED") {
+            status = "Deploy as a Prototype";
         }
         apiData.status =  status;              
 

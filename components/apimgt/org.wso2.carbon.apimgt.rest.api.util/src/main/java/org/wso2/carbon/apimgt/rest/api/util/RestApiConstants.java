@@ -47,7 +47,7 @@ public final class RestApiConstants {
     public static final String REST_API_PUBLISHER_VERSION="v1";
     public static final String REST_API_PUBLISHER_CONTEXT="publisher_rest_api";
     public static final String REST_API_PROVIDER = "admin";
-    public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "WebAppAuthenticator";
+    public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
 
     public static final int PAGINATION_LIMIT_DEFAULT = 25;
