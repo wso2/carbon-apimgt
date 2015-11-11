@@ -99,7 +99,7 @@ public class TierMappingUtil {
     /**
      * Converts a Tier object into TierDTO
      *
-     * @param tier SubscribedAPI object
+     * @param tier Tier object
      * @return TierDTO corresponds to Tier object
      */
     public static TierDTO fromTiertoDTO(Tier tier) {
