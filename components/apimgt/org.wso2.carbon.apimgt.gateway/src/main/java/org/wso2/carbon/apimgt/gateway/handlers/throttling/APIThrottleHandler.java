@@ -817,6 +817,7 @@ public class APIThrottleHandler extends AbstractHandler {
                         throttle = ThrottleFactory.createMediatorThrottle(
                                 PolicyEngine.getPolicy(policyOMElement));
 
+                        //load the resource level tiers
                         Object resEntryValue = synCtx.getEntry(RESOURCE_THROTTLE_POLICY_KEY);
                         if (resEntryValue == null || !(resEntryValue instanceof OMElement)) {
                             handleException(
@@ -824,10 +825,12 @@ public class APIThrottleHandler extends AbstractHandler {
                             return;
                         }
 
+                        //create throttle for the resource level
                         Throttle resThrottle = ThrottleFactory
                                 .createMediatorThrottle(PolicyEngine.getPolicy((OMElement) resEntryValue));
-                        ThrottleContext throttleContext = resThrottle.getThrottleContext(
-                                ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+                        //get the throttle Context for the resource level
+                        ThrottleContext throttleContext = resThrottle
+                                .getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
 
                         if (throttleContext != null) {
                             ThrottleConfiguration throttleConfiguration = throttleContext.getThrottleConfiguration();

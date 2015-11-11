@@ -71,9 +71,14 @@ public class ApplicationThrottleController {
         RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
 
         AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
+        //extract the subscriber username from the auth Context
         String subscriber = authContext.getSubscriber();
+
+        //get the tenant Domain from the subscriber
         String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
         int tenantId;
+
+        //get the tenant domain id from the tenant domain name
         try {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
