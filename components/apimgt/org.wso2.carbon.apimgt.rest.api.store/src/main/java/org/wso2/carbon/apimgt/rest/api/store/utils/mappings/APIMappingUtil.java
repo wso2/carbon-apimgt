@@ -18,17 +18,22 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class APIMappingUtil {
@@ -47,8 +52,8 @@ public class APIMappingUtil {
             throws APIManagementException {
         APIIdentifier apiIdentifier;
         if (RestApiUtil.isUUID(apiId)) {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiIdentifier = apiProvider.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            apiIdentifier = apiConsumer.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
         } else {
             apiIdentifier = getAPIIdentifierFromApiId(apiId);
         }
@@ -57,7 +62,7 @@ public class APIMappingUtil {
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
 
-        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
@@ -65,7 +70,7 @@ public class APIMappingUtil {
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
-        dto.setContext(model.getContextTemplate());
+        dto.setContext(model.getContext());
         dto.setDescription(model.getDescription());
         dto.setIsDefaultVersion(model.isDefaultVersion());
         dto.setStatus(model.getStatus().getStatus());
@@ -73,7 +78,7 @@ public class APIMappingUtil {
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition;
 
-        apiSwaggerDefinition = apiProvider.getSwagger20Definition(model.getId());
+        apiSwaggerDefinition = apiConsumer.getSwagger20Definition(model.getId());
 
         dto.setApiDefinition(apiSwaggerDefinition);
 
@@ -91,28 +96,72 @@ public class APIMappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
 
-        //business info and thumbnail still missing
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
+        dto.setBusinessInformation(apiBusinessInformationDTO);
+
+        //todo: thumbnail still missing
         return dto;
     }
 
-    public static APIListDTO fromAPIListToDTO (List<API> apiList) {
+    /** Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
+     * 
+     * @param apiListDTO APIListDTO object to which pagination urls need to be set 
+     * @param query query parameter
+     * @param type type parameter
+     * @param offset starting index
+     * @param limit max number of returned objects
+     * @param size max offset
+     */
+    public static void setPaginationParams(APIListDTO apiListDTO, String query, String type, int offset, int limit, int size) {
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query, type);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query, type);
+        }
+
+        apiListDTO.setNext(paginatedNext);
+        apiListDTO.setPrevious(paginatedPrevious);
+    }
+
+    /** Converts an API Set object into corresponding REST API DTO
+     * 
+     * @param apiSet Set of API objects
+     * @return APIListDTO object 
+     */
+    public static APIListDTO fromAPISetToDTO(Set<API> apiSet) {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiInfoDTOs == null) {
             apiInfoDTOs = new ArrayList<>();
             apiListDTO.setList(apiInfoDTOs);
         }
-        for (API api : apiList) {
+        for (API api : apiSet) {
             apiInfoDTOs.add(fromAPIToInfoDTO(api));
         }
-        apiListDTO.setCount(apiList.size());
+        apiListDTO.setCount(apiSet.size());
+
         return apiListDTO;
     }
 
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
-        apiInfoDTO.setContext(api.getContextTemplate());
+        apiInfoDTO.setContext(api.getContext());
         apiInfoDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
@@ -120,16 +169,5 @@ public class APIMappingUtil {
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setStatus(api.getStatus().toString());
         return apiInfoDTO;
-    }
-
-    public static DocumentDTO fromDocumentationtoDTO(Documentation doc){
-        DocumentDTO d = new DocumentDTO();
-        d.setDocumentId(doc.getId());
-        d.setName(doc.getName());
-        //d.setUrl(doc.getFilePath());
-        d.setSummary(doc.getSummary());
-        d.setType(DocumentDTO.TypeEnum.valueOf(doc.getType().toString()));
-        //d.setUrl(doc.getFilePath());
-        return d;
     }
 }

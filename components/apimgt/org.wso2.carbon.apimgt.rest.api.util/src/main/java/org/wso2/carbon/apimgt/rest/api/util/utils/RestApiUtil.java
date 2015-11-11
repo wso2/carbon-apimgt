@@ -25,7 +25,13 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -36,7 +42,14 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 import org.wso2.carbon.context.CarbonContext;
 
 import javax.validation.ConstraintViolation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,12 +104,159 @@ public class RestApiUtil {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
 
+    /** Returns an APIConsumer which is corresponding to the current logged in user taken from the carbon context
+     * 
+     * @return an APIConsumer which is corresponding to the current logged in user
+     * @throws APIManagementException
+     */
+    public static APIConsumer getLoggedInUserConsumer() throws APIManagementException {
+        String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        return APIManagerFactory.getInstance().getAPIConsumer(loggedInUser);
+    }
+
     public static String getLoggedInUsername() {
         return CarbonContext.getThreadLocalCarbonContext().getUsername();
     }
 
     public static String getLoggedInUserTenantDomain() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
+        Map<String, Integer> result = new HashMap<>();
+        if (offset >= size || offset < 0)
+            return result;
+
+        int start = offset;
+        int end = offset + limit - 1;
+
+        int nextStart = end + 1;
+        if (nextStart < size) {
+            result.put(RestApiConstants.PAGINATION_NEXT_OFFSET, nextStart);
+            result.put(RestApiConstants.PAGINATION_NEXT_LIMIT, limit);
+        }
+
+        int previousEnd = start - 1;
+        int previousStart = previousEnd - limit + 1;
+
+        if (previousEnd >= 0) {
+            if (previousStart < 0) {
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, 0);
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, previousEnd + 1);
+            } else {
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, previousStart);
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, limit);
+            }
+        }
+        return result;
+    }
+
+    /** Returns the paginated url for APIs API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param query search query value
+     * @param type type of API attribute fir search to be performed
+     * @return constructed paginated url
+     */
+    public static String getAPIPaginatedURL(Integer offset, Integer limit, String query, String type) {
+        String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        paginatedURL = paginatedURL.replace(RestApiConstants.TYPE_PARAM, type);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for Applications API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param groupId groupId of the Application
+     * @return constructed paginated url
+     */
+    public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
+        String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for subscriptions for a particular API identifier
+     * 
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param apiId API Identifier
+     * @param groupId groupId of the Application
+     * @return constructed paginated url
+     */
+    public static String getSubscriptionPaginatedURLForAPIId(Integer offset, Integer limit, String apiId,
+            String groupId) {
+        String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APIID;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.GROUPID_PARAM, groupId);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for subscriptions for a particular application
+     * 
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param applicationId application id
+     * @return constructed paginated url
+     */
+    public static String getSubscriptionPaginatedURLForApplicationId(Integer offset, Integer limit,
+            String applicationId) {
+        String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APPLICATIONID;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APPLICATIONID_PARAM, applicationId);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for documentations
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @param query document search query
+     * @return constructed paginated url
+     */
+    public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String query, String apiId) {
+        String paginatedURL = RestApiConstants.DOCUMENTS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
+        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for tiers
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getTiersPaginatedURL(Integer offset, Integer limit) {
+        String paginatedURL = RestApiConstants.TIERS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
+    /** Returns the paginated url for tags
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getTagsPaginatedURL(Integer offset, Integer limit) {
+        String paginatedURL = RestApiConstants.TAGS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
     }
 
     /**

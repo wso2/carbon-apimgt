@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
@@ -38,48 +39,53 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.ws.rs.core.Response;
 
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
+
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String groupId, String accept,
-            String ifNoneMatch) {
+    public Response subscriptionsGet(String apiId, String applicationId, String groupId, Integer offset,
+            Integer limit, String accept, String ifNoneMatch) {
         //todo: validation: only one of {application id,api id} should present
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
-        Set<SubscribedAPI> subscriptions = new HashSet<>();
+        Set<SubscribedAPI> subscriptions;
+        List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
+
+        //pre-processing
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        if (groupId == null) {
+            groupId = "";
+        }
+
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
             if (!StringUtils.isEmpty(apiId)) {
-
-                /* API api; //todo how can we get this? we cant get this using current username as the provider, may need the admin user of the current tenant
-                if (RestApiUtil.isUUID(apiId)) {
-                    api = apiProvider.getAPIbyUUID(apiId);
-                } else {
-                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-                    api = apiProvider.getAPI(apiIdentifier);
-                }*/
-
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupId);
-
+                subscribedAPIList.addAll(subscriptions);
+                //todo: sort by application name
+                subscriptionListDTO = SubscriptionMappingUtil
+                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
+                SubscriptionMappingUtil.setPaginationParamsForAPIId(subscriptionListDTO, apiId, groupId, limit, offset,
+                        subscriptions.size());
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
-                subscriptions =
-                        apiConsumer.getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+                subscriptions = apiConsumer
+                        .getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+                subscribedAPIList.addAll(subscriptions);
+                //todo: sort by api
+                subscriptionListDTO = SubscriptionMappingUtil
+                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
+                SubscriptionMappingUtil.setPaginationParamsForApplicationId(subscriptionListDTO, applicationId, limit,
+                        offset, subscriptions.size());
             }
-
-            List<SubscriptionDTO> subscriptionDTOs = new ArrayList<>();
-            for (SubscribedAPI subscription : subscriptions) {
-                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
-                subscriptionDTOs.add(subscriptionDTO);
-            }
-            return Response.ok().entity(subscriptionDTOs).build();
-
+            return Response.ok().entity(subscriptionListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }

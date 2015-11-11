@@ -1,6 +1,6 @@
-package org.wso2.carbon.apimgt.rest.api.store.dto;
+package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.TagDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import java.util.*;
 
 import io.swagger.annotations.*;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class TagListDTO  {
+public class TierListDTO  {
   
   
   
@@ -24,13 +24,13 @@ public class TagListDTO  {
   private String previous = null;
   
   
-  private List<TagDTO> list = new ArrayList<TagDTO>();
+  private List<TierDTO> list = new ArrayList<TierDTO>();
 
   
   /**
-   * Number of Tags returned.
+   * Number of Tiers returned.
    **/
-  @ApiModelProperty(value = "Number of Tags returned.")
+  @ApiModelProperty(value = "Number of Tiers returned.")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -70,10 +70,10 @@ public class TagListDTO  {
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("list")
-  public List<TagDTO> getList() {
+  public List<TierDTO> getList() {
     return list;
   }
-  public void setList(List<TagDTO> list) {
+  public void setList(List<TierDTO> list) {
     this.list = list;
   }
 
@@ -82,7 +82,7 @@ public class TagListDTO  {
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
-    sb.append("class TagListDTO {\n");
+    sb.append("class TierListDTO {\n");
     
     sb.append("  count: ").append(count).append("\n");
     sb.append("  next: ").append(next).append("\n");

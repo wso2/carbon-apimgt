@@ -18,15 +18,20 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
@@ -34,11 +39,13 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
+
     @Override
-    public Response applicationsGet(String subscriber, String groupId, Integer limit, Integer offset, String accept,
+    public Response applicationsGet(String groupId, Integer limit, Integer offset, String accept,
             String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
 
@@ -46,14 +53,18 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         if (groupId == null) {
             groupId = "";
         }
-        if (subscriber == null) {
-            subscriber = username;
-        }
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
         ApplicationListDTO applicationListDTO;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] applications = apiConsumer.getApplications(new Subscriber(subscriber), groupId);
-            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(applications);
+            Application[] allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+            //allMatchedApps are already sorted to application name
+            applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
+            ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
+                    allMatchedApps.length);
+
             return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -83,9 +94,31 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     @Override
-    public Response applicationsGenerateKeysPost(String applicationId, String contentType,
-            ApplicationKeyGenerateRequestDTO body, String ifMatch, String ifUnmodifiedSince) {
-        return null;
+    @SuppressWarnings("unchecked")
+    public Response applicationsGenerateKeysPost(String applicationId, ApplicationKeyGenerateRequestDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince) {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
+            JSONObject jsonParamObj = new JSONObject();
+            jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+            String jsonParams = jsonParamObj.toString();
+            String tokenScopes = StringUtils.join(body.getScopes(), " ");
+
+            Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
+                    username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
+                    accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
+                    jsonParams);
+            ApplicationKeyDTO applicationKeyDTO =
+                    ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+
+            return Response.ok().entity(applicationKeyDTO).build();
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
@@ -134,48 +167,4 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         }
     }
 
-    /*
-    @Override
-    @SuppressWarnings("unchecked")
-    public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
-            ApplicationKeyGenerateRequestDTO body, String contentType, String ifMatch, String ifUnmodifiedSince) {
-
-        String username = RestApiUtil.getLoggedInUsername();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
-            String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
-            JSONObject jsonParamObj = new JSONObject();
-            jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
-            String jsonParams = jsonParamObj.toString();
-            String tokenScopes = StringUtils.join(body.getScopes(), " ");
-
-            Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
-                    username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
-                    accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                    jsonParams);
-            ApplicationKeyDTO applicationKeyDTO =
-                    ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
-
-            //get the updated application again
-            application = apiConsumer.getApplicationByUUID(applicationId);
-            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-
-            boolean alreadyContainsKey = false;
-            for (APIKey apiKey : application.getKeys()) {
-                String keyType = apiKey.getType();
-                if (keyType != null && keyType.equals(applicationKeyDTO.getKeyType().toString())) {
-                    alreadyContainsKey = true;
-                    break;
-                }
-            }
-            if (!alreadyContainsKey) {
-                applicationDTO.getKeys().add(applicationKeyDTO);
-            }
-            return Response.ok().entity(applicationDTO).build();
-        } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
-        }
-    }
-    */
 }

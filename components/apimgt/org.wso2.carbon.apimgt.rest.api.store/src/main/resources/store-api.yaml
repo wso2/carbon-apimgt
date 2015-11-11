@@ -327,7 +327,6 @@ paths:
       description: |
         Get a list of applications
       parameters:
-        - $ref: '#/parameters/subscriber'
         - $ref: '#/parameters/groupId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -588,9 +587,6 @@ paths:
         Generate keys for application
       parameters:
         - $ref: '#/parameters/applicationId-Q'
-        - $ref: '#/parameters/Content-Type'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
         - in: body
           name: body
           description: |
@@ -598,6 +594,9 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
+        - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
       tags:
         - Application (individual)
         - Generate Keys
@@ -607,7 +606,7 @@ paths:
             OK. 
             Keys are generated.
           schema:
-            $ref: '#/definitions/Application'
+            $ref: '#/definitions/ApplicationKey'
           headers:
             Content-Type:
               description: |
@@ -659,6 +658,8 @@ paths:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/applicationId-Q'
         - $ref: '#/parameters/groupId'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/limit'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -831,6 +832,8 @@ paths:
       description: |
         Get available tiers
       parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -844,7 +847,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: '#/definitions/Tier'
+            $ref: '#/definitions/TierList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -935,6 +938,8 @@ paths:
       description: |
         Get a list of predefined sequences
       parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - name: query
@@ -1056,15 +1061,6 @@ parameters:
     in: query
     description: |
       Application Group Id
-    required: false
-    type: string
-
-# User name of the subscriber 
-  subscriber:
-    name: subscriber
-    in: query
-    description: |
-      Subscriber username
     required: false
     type: string
 
@@ -1408,12 +1404,43 @@ definitions:
           - OTHER
       summary:
         type: string
-      source:
+      sourceType:
         type: string
         enum:
           - INLINE
           - URL
           - FILE
+      sourceUrl:
+        type: string
+      filePath:
+        type: string
+      otherTypeName:
+        type: string
+
+#-----------------------------------------------------
+# The Tier List resource
+#-----------------------------------------------------
+  TierList:
+    title: Tier List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Tiers returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified. 
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified. 
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Tier'
 
 #-----------------------------------------------------
 # The Tier resource
@@ -1422,8 +1449,13 @@ definitions:
     title: Tier
     required:
       - name
+      - tierPlan
+      - requestCount
+      - unitTime
     properties:
       name:
+        type: string
+      displayName:
         type: string
       description:
         type: string
@@ -1436,16 +1468,21 @@ definitions:
       requestCount:
         description: |
           Maximum number of requests which can be sent within a provided unit time
-        type: number
+        type: integer
+        format: int64
       unitTime:
-        type: number
-      billingPlan:
+        type: integer
+        format: int64
+      tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
         type: string
-      continueOnQuotaReach:
+        enum: 
+          - FREE
+          - COMMERCIAL
+      stopOnQuotaReach:
         description: |
-          By making this attribute to true, you are capabale of sending requests 
+          If this attribute is set to false, you are capabale of sending requests 
           even if the request count exceeded within a unit time
         type: boolean
 
@@ -1522,6 +1559,16 @@ definitions:
         type: integer
         description: |
           Number of Tags returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified. 
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified. 
+          Empty if current subset is the first subset returned.
       list:
         type: array
         items:

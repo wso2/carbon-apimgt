@@ -116,6 +116,15 @@ public interface APIManager {
     Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
 
     /**
+     * Returns the swagger v2.0 definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
+
+    /**
      * Checks whether the given document already exists for the given api
      *
      * @param identifier API Identifier
@@ -183,6 +192,14 @@ public interface APIManager {
      */
     Subscriber getSubscriberById(String accessToken) throws APIManagementException;
 
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
+
     /**
      * Creates a new subscriber. The newly created subscriber id will be set in the given object.
      *
@@ -245,6 +262,13 @@ public interface APIManager {
      */
     void cleanup() throws APIManagementException;
 
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid) throws APIManagementException;
 
     /**
      * Check whether an application access token is already persist in database.

@@ -1842,16 +1842,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getSubscriptionById(subscriptionId);
     }
 
-    /** returns the SubscribedAPI object which is related to the UUID
-     *
-     * @param uuid UUID of Subscription
-     * @return
-     * @throws APIManagementException
-     */
-    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getSubscriptionByUUID(uuid);
-    }
-
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException {
         return getSubscribedAPIs(subscriber, null);
     }
@@ -2769,16 +2759,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     public Application getApplicationById(int id) throws APIManagementException {
         return apiMgtDAO.getApplicationById(id);
-    }
-
-    /**
-     * Returns the corresponding application given the uuid
-     * @param uuid uuid of the Application
-     * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException
-     */
-    public Application getApplicationByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getApplicationByUUID(uuid);
     }
 
     /** get the status of the Application creation process given the application Id

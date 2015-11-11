@@ -13,28 +13,31 @@ import javax.validation.constraints.NotNull;
 public class TierPermissionDTO  {
   
   
+  public enum PermissionTypeEnum {
+     allow,  deny, 
+  };
+  @NotNull
+  private PermissionTypeEnum permissionType = null;
   
-  private String enableAccess = null;
-  
-  
+  @NotNull
   private List<String> roles = new ArrayList<String>();
 
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("enableAccess")
-  public String getEnableAccess() {
-    return enableAccess;
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("permissionType")
+  public PermissionTypeEnum getPermissionType() {
+    return permissionType;
   }
-  public void setEnableAccess(String enableAccess) {
-    this.enableAccess = enableAccess;
+  public void setPermissionType(PermissionTypeEnum permissionType) {
+    this.permissionType = permissionType;
   }
 
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("roles")
   public List<String> getRoles() {
     return roles;
@@ -50,7 +53,7 @@ public class TierPermissionDTO  {
     StringBuilder sb = new StringBuilder();
     sb.append("class TierPermissionDTO {\n");
     
-    sb.append("  enableAccess: ").append(enableAccess).append("\n");
+    sb.append("  permissionType: ").append(permissionType).append("\n");
     sb.append("  roles: ").append(roles).append("\n");
     sb.append("}\n");
     return sb.toString();

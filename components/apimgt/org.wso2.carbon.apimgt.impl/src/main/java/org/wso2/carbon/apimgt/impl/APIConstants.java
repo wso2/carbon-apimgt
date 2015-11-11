@@ -308,6 +308,7 @@ public final class APIConstants {
     public static final String LC_PROPERTY_PERMISSION_SUFFIX=".item.permission";
     public static final String LC_PROPERTY_ITEM_SUFFIX=".item";
     public static final String LC_STATUS="status:";
+    public static final String LC_CHECK_ITEMS="items";
     public static final String LC_CHECK_ITEM_NAME="name:";
     public static final String LC_CHECK_ITEM_VALUE="value:";
     public static final String LC_CHECK_ITEM_ORDER="order:";
