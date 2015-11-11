@@ -90,7 +90,7 @@ public class SubscriptionMappingUtil {
      * @param offset starting index
      * @param size max offset
      */
-    public static SubscriptionListDTO setPaginationParams(SubscriptionListDTO subscriptionListDTO, String apiId,
+    public static void setPaginationParams(SubscriptionListDTO subscriptionListDTO, String apiId,
             String groupId, int limit, int offset, int size) {
 
         String paginatedPrevious = "";
@@ -113,7 +113,6 @@ public class SubscriptionMappingUtil {
 
         subscriptionListDTO.setNext(paginatedNext);
         subscriptionListDTO.setPrevious(paginatedPrevious);
-        return subscriptionListDTO;
     }
 
     /** Converts a UserApplicationAPIUsage[] array to a corresponding SubscriptionListDTO

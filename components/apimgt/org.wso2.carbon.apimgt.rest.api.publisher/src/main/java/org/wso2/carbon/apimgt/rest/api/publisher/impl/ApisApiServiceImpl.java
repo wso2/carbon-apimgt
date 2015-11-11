@@ -137,11 +137,11 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Changes lifecycle state of an API
      *  
      * @param apiId API identifier
-     * @param action 
-     * @param lifecycleChecklist
-     * @param ifMatch
-     * @param ifUnmodifiedSince
-     * @return
+     * @param action Action to promote or demote the API state
+     * @param lifecycleChecklist a checklist specifing additional boolean parameters
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if successful
      */
     @Override 
     public Response apisChangeLifecyclePost(String apiId, String action, String lifecycleChecklist,

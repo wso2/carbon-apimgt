@@ -58,10 +58,8 @@ public class TiersApiServiceImpl extends TiersApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             Set<Tier> tiers = apiConsumer.getTiers();
             List<Tier> tierList = new ArrayList<>();
-
-            for (Tier tier : tiers) {
-                tierList.add(tier);
-            }
+            if (tiers != null)
+                tierList.addAll(tiers);
             TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, limit, offset);
             TierMappingUtil.setPaginationParams(tierListDTO, limit, offset, tierList.size());
             return Response.ok().entity(tierListDTO).build();
