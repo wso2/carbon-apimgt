@@ -33,6 +33,11 @@ public class Tier implements Serializable, Comparable<Tier>{
     private Map<String,Object> tierAttributes;
 
     private long requestsPerMin = 0;
+    private long requestCount = 0;
+    private long unitTime = 0;
+    private String tierPlan;
+    // The default value would be "true" since the default behavior is to stop when the quota is reached
+    private boolean stopOnQuotaReached = true;
 
     public Tier(String name) {
         this.name = name;
@@ -79,6 +84,38 @@ public class Tier implements Serializable, Comparable<Tier>{
 
     public void setRequestsPerMin(long requestsPerMin) {
         this.requestsPerMin = requestsPerMin;
+    }
+
+    public long getRequestCount() {
+        return requestCount;
+    }
+
+    public void setRequestCount(long requestCount) {
+        this.requestCount = requestCount;
+    }
+
+    public long getUnitTime() {
+        return unitTime;
+    }
+
+    public void setUnitTime(long unitTime) {
+        this.unitTime = unitTime;
+    }
+
+    public String getTierPlan() {
+        return tierPlan;
+    }
+
+    public void setTierPlan(String tierPlan) {
+        this.tierPlan = tierPlan;
+    }
+
+    public boolean isStopOnQuotaReached() {
+        return stopOnQuotaReached;
+    }
+
+    public void setStopOnQuotaReached(boolean stopOnQuotaReached) {
+        this.stopOnQuotaReached = stopOnQuotaReached;
     }
 
     @Override

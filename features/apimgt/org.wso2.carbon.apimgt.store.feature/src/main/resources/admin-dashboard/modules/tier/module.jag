@@ -1,0 +1,16 @@
+<%
+jagg.module("tier", {
+
+	addTier:function () {
+        return jagg.require(jagg.getModulesDir() + "tier/tier-edit.jag").addTier.apply(this, arguments);
+    },
+
+    deleteTier:function () {
+        return jagg.require(jagg.getModulesDir() + "tier/tier-manage.jag").deleteTier.apply(this, arguments);
+    },
+
+    getAllTiers:function () {
+        return jagg.require(jagg.getModulesDir() + "tier/tier-manage.jag").getAllTiers.apply(this, arguments);
+    }
+});
+%>

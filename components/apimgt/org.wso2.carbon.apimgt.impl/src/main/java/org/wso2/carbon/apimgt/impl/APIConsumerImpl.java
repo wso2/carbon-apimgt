@@ -1639,6 +1639,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     criteria=APIConstants.API_OVERVIEW_CONTEXT;
                 }else if (searchType.equalsIgnoreCase("Description")) {
                     criteria=APIConstants.API_OVERVIEW_DESCRIPTION;
+                } else if (searchType.equalsIgnoreCase("Tag")) {
+                    criteria = APIConstants.API_TAGS;
                 }
 
                 //Create the search attribute map for PUBLISHED APIs
@@ -1694,7 +1696,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
+                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED) 
+                                || status.equals(APIConstants.DEPRECATED)) {
                             API resultAPI;
                             if (limitAttributes) {
                                 resultAPI = APIUtil.getAPI(artifact);
@@ -1706,7 +1709,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             }
                         }
                     } else {
-                        if (status.equals(APIConstants.PUBLISHED)) {
+                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED)) {
                             API resultAPI;
                             if (limitAttributes) {
                                 resultAPI = APIUtil.getAPI(artifact);
@@ -2009,16 +2012,21 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
-        API api = getAPI(identifier);
+
         boolean isTenantFlowStarted = false;
 
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            PrivilegedCarbonContext.startTenantFlow();
-            isTenantFlowStarted = true;
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
+        String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
+                                                                replaceEmailDomainBack(identifier.getProviderName()));
 
         try {
+            if (providerTenantDomain != null &&
+                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(providerTenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(providerTenantDomain, true);
+                isTenantFlowStarted = true;
+            }
+
+            API api = getAPI(identifier);
             WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
@@ -2995,8 +3003,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public API getAPIInfo(APIIdentifier identifier)
             throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
-        try {
 
+        boolean tenantFlowStarted = false;
+
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            tenantFlowStarted = true;
 
             Registry registry = getRegistry(identifier, apiPath);
             Resource apiResource = registry.get(apiPath);
@@ -3010,6 +3026,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
             return null;
+        } finally{
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
 
     }

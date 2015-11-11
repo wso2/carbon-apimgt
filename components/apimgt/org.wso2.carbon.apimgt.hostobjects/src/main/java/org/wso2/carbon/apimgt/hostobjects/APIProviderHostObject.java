@@ -988,9 +988,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
-        } else {
-            visibility = APIConstants.API_GLOBAL_VISIBILITY;
-        }
+        } 
 
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
             sandboxUrl = null;
@@ -3372,56 +3370,6 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
         return myn;
-    }
-
-
-    public static NativeArray jsFunction_getAPIUsageByUser(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
-            throws APIManagementException {
-        /*String list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if(!HostObjectUtils.isUsageDataSourceSpecified()){
-            return myn;
-        }
-        if (args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-
-        try {
-            APIUsageStatisticsRdbmsClientImpl client =
-                    new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIUsageByUser(providerName,fromDate,toDate);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIUsageByUserDTO usage = (APIUsageByUserDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("version", row, usage.getVersion());
-                row.put("userId", row, usage.getUserID());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;*/
-        return null;
     }
 
     public static NativeArray jsFunction_getProviderAPIVersionUserUsage(Context cx,

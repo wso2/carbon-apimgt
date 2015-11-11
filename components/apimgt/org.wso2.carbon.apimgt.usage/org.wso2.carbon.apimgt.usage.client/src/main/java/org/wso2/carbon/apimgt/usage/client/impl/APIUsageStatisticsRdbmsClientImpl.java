@@ -19,7 +19,6 @@
 
 package org.wso2.carbon.apimgt.usage.client.impl;
 
-import com.google.gson.Gson;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
@@ -86,7 +85,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private APIProvider apiProviderImpl;
     private APIConsumer apiConsumerImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
-    private final Gson gson = new Gson();
 
     public APIUsageStatisticsRdbmsClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
@@ -1008,10 +1006,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             double responseTime = apiCumulativeServiceTimeMap.get(key) / apiUsageMap.get(key);
             responseTimeDTO.setServiceTime(Double.parseDouble(format.format(responseTime)));
             responseTimeByAPI.put(key, responseTimeDTO);
-        }
-        List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(
-                new ArrayList<APIResponseTimeDTO>(responseTimeByAPI.values()), limit);*/
-        return apiResponseTimeUsage;
+        }*/
+        List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(apiResponseTimeUsage, limit);
+        return usage;
     }
 
     /**
@@ -2186,16 +2183,40 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     public boolean isTableExist(String tableName, Connection connection) throws SQLException {
-        //This return all tables,use this because it is not db specific, Passing table name doesn't
-        //work with every database
-        ResultSet tables = connection.getMetaData().getTables(null, null, "%", null);
-        while (tables.next()) {
-            if (tables.getString(3).equalsIgnoreCase(tableName)) {
-                return true;
+        final String checkTableSQLQuery = "SELECT DISTINCT 1 FROM " + tableName;
+        Statement statement = null;
+        ResultSet rs = null;
+        try {
+            statement = connection.createStatement();
+            rs = statement.executeQuery(checkTableSQLQuery);
+            return true;
+        } catch (SQLException e) {
+            // SQL error related to table not exist is db specific
+            // error is logged and continues.
+            log.error("Error occurred while checking existence of the table:" + tableName, e);
+            return false;
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    // this is logged and the process is continued because the
+                    // query has executed
+                    log.error("Error occurred while closing the result set from JDBC database.", e);
+                }
             }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    // this is logged and the process is continued because the
+                    // query has executed
+                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+                }
+            }
+            // connection object will not be closed as it should be handled by
+            // the parent method.
         }
-        tables.close();
-        return false;
     }
 
     private List<API> getAPIsByProvider(String providerId) throws APIMgtUsageQueryServiceClientException {

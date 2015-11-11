@@ -76,14 +76,14 @@
                             <execution forEvent="Demote to Created"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
-                            <execution forEvent="Demote to Prototyped"
+                            <execution forEvent="Deploy as a Prototype"
                                        class="org.wso2.carbon.apimgt.impl.executors.APIExecutor">
                             </execution>
 
                         </data>
                     </datamodel>
                     <transition event="Block" target="Blocked"/>
-                    <transition event="Demote to Prototyped" target="Prototyped"/>
+                    <transition event="Deploy as a Prototype" target="Prototyped"/>
                     <transition event="Demote to Created" target="Created"/>
                     <transition event="Deprecate" target="Deprecated"/>
                     <transition event="Publish" target="Published"/>

@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.core.internal;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 public class ServiceReferenceHolder {
@@ -23,6 +25,7 @@ public class ServiceReferenceHolder {
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfigurationService amConfigurationService;
+    private boolean isGatewayAPIKeyValidationEnabled;
 
     private ServiceReferenceHolder() {
 
@@ -38,6 +41,20 @@ public class ServiceReferenceHolder {
 
     public void setAPIManagerConfigurationService(APIManagerConfigurationService amConfigurationService) {
         this.amConfigurationService = amConfigurationService;
+        setAPIGatewayKeyCacheStatus(amConfigurationService.getAPIManagerConfiguration());
+    }
+
+    public void  setAPIGatewayKeyCacheStatus(APIManagerConfiguration config) {
+        try {
+                String serviceURL = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
+                isGatewayAPIKeyValidationEnabled = Boolean.parseBoolean(serviceURL);
+            } catch (Exception e) {
+                isGatewayAPIKeyValidationEnabled = false;
+            }
+       }
+
+    public boolean isGatewayAPIKeyValidationEnabled(){
+        return isGatewayAPIKeyValidationEnabled;
     }
 
 }

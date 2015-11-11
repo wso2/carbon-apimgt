@@ -16,7 +16,7 @@
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -26,70 +26,41 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>org.wso2.carbon.apimgt.rest.api</artifactId>
     <packaging>war</packaging>
     <name>WSO2 API Manager REST API</name>
     <description>WSO2 API Manager REST API</description>
-    <properties>
-        <jackson.version>1.8.6</jackson.version>
-    </properties>
 
-	<repositories>
-		<repository>
-			<id>wso2</id>
-			<name>WSO2 Repository</name>
-			<url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-			<releases>
-				<enabled>true</enabled>
-				<updatePolicy>daily</updatePolicy>
-				<checksumPolicy>ignore</checksumPolicy>
-			</releases>
-		</repository>
-    </repositories>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-            <version>2.7.17</version>
         </dependency>
-        <!--dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-rs-client</artifactId>
-            <version>2.6.1</version>
-            <scope>provided</scope>
-        </dependency-->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-core-asl</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-jaxrs</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>4.1.6.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jaxrs</artifactId>
-            <version>1.5.2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -108,44 +79,38 @@
         </dependency>
 
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
+            <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
-            <version>4.2.0</version>
             <scope>provided</scope>
         </dependency>
 
     </dependencies>
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <configuration>
-                        <source>1.7</source>
-                        <target>1.7</target>
-                    </configuration>
-                </plugin>
-				<plugin>
-					<artifactId>maven-war-plugin</artifactId>
-					<version>2.2</version>
-					<configuration>
-						<webResources>
-							<resource>
-								<!-- this is relative to the pom.xml directory -->
-								<directory>src/main/webapp</directory>
-							</resource>
-						</webResources>
-						<warName>api#am#v1</warName>
-					</configuration>
-				</plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webResources>
+                        <resource>
+                            <!-- this is relative to the pom.xml directory -->
+                            <directory>src/main/webapp</directory>
+                        </resource>
+                    </webResources>
+                    <warName>api#am#v1</warName>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9.1</version>
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -161,8 +126,8 @@
                     </execution>
                 </executions>
             </plugin>
-			<!-- following plugin can be found at https://github.com/hevayo/swagger2cxf-maven-plugin 
-				 it will be put in to wso2 repo after design review -->
+            <!-- following plugin can be found at https://github.com/hevayo/swagger2cxf-maven-plugin
+                 it will be put in to wso2 repo after design review -->
             <plugin>
                 <groupId>org.wso2.maven.plugins</groupId>
                 <artifactId>swagger2cxf-maven-plugin</artifactId>
