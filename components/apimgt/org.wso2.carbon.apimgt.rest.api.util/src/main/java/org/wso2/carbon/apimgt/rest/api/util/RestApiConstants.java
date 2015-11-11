@@ -40,6 +40,7 @@ public final class RestApiConstants {
     public static final String SERVER_PASSWORD = "/applications";
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
     public static final String RESOURCE_PATH_TIERS = "/tiers";
+    public static final String RESOURCE_PATH_TAGS = "/tags";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
     public static final String REST_API_STORE_CONTEXT="store_rest_api";
     public static final String REST_API_STORE_VERSION="v1";
@@ -78,4 +79,6 @@ public final class RestApiConstants {
     public static final String TIERS_GET_PAGINATION_URL =
             RESOURCE_PATH_TIERS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
+    public static final String TAGS_GET_PAGINATION_URL =
+            RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 }

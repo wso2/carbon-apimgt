@@ -245,6 +245,19 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for tags
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getTagsPaginatedURL(Integer offset, Integer limit) {
+        String paginatedURL = RestApiConstants.TAGS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
     /**
      * Following 3 methods are temporary added to rest API Util
      * Ideally they should move to DCR, RR and Introspection API implementation

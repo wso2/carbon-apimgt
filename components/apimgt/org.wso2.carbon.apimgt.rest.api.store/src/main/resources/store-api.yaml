@@ -938,6 +938,8 @@ paths:
       description: |
         Get a list of predefined sequences
       parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - name: query
@@ -1557,6 +1559,16 @@ definitions:
         type: integer
         description: |
           Number of Tags returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified. 
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified. 
+          Empty if current subset is the first subset returned.
       list:
         type: array
         items:
