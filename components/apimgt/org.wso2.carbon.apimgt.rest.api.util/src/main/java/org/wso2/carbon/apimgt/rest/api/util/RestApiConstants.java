@@ -81,4 +81,10 @@ public final class RestApiConstants {
 
     public static final String TAGS_GET_PAGINATION_URL =
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+
+
+    //default error messages
+    public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "You are not authorized to access the resource.";
+    public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Requested resource not found.";
+
 }

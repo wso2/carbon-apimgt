@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
@@ -150,9 +151,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            List<Documentation> documentationList =
-                    apiConsumer
-                            .getAllDocumentation(APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain));
+
+            //this will fail if user doesn't have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
             DocumentationMappingUtil
@@ -169,6 +172,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            RestAPIStoreUtils.checkUserAccessAllowedToAPI(apiId);
             documentation = apiConsumer.getDocumentation(documentId);
             if(null != documentation){
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);

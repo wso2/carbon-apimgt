@@ -25,8 +25,6 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -37,7 +35,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -66,11 +63,11 @@ public class APIMappingUtil {
     public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
         APIIdentifier apiIdentifier;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         if (RestApiUtil.isUUID(apiId)) {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiIdentifier = apiProvider.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiProvider.getAPIInfoByUUID(apiId, requestedTenantDomain).getId();
         } else {
-            apiIdentifier = getAPIIdentifierFromApiId(apiId);
+            apiIdentifier = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
         }
         return  apiIdentifier;
     }

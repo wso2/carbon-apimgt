@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -89,4 +90,17 @@ public class RestAPIStoreUtils {
         return false;
     }
 
+    /**
+     * check whether the specified API exists and the current logged in user has access to it
+     *
+     * @param apiId API identifier
+     * @throws APIManagementException
+     */
+    public static void checkUserAccessAllowedToAPI(String apiId) throws APIManagementException {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        //this is just to check whether the user has access to the api or the api exists. When it tries to retrieve 
+        // the resource from the registry, it will fail with AuthorizationFailedException if user does not have enough
+        // privileges.
+        APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+    }
 }

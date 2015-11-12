@@ -126,7 +126,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
                 return Response.ok().entity(applicationKeyDTO).build();
             } else {
-                throw new ForbiddenException("You don't have access to the application");
+                throw new ForbiddenException(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -144,7 +144,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                 return Response.ok().entity(applicationDTO).build();
             } else {
-                throw new ForbiddenException("You don't have access to the application");
+                throw new ForbiddenException(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -175,7 +175,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
                 return Response.ok().entity(updatedApplicationDTO).build();
             } else {
-                throw new ForbiddenException("You don't have access to the application");
+                throw new ForbiddenException(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -194,7 +194,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 apiConsumer.removeApplication(application);
                 return Response.ok().build();
             } else {
-                throw new ForbiddenException("You don't have access to the application");
+                throw new ForbiddenException(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);

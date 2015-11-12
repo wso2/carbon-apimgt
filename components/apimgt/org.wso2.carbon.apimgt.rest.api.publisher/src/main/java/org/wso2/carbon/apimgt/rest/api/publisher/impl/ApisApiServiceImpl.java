@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
@@ -336,7 +337,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
             List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
             DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
                     offset, limit);
@@ -354,7 +358,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
             apiProvider.addDocumentation(apiIdentifier, documentation);
             return Response.status(Response.Status.CREATED)
                     .header("Location", "/apis/" + apiId + "/documents/" + documentation.getId()).build();
@@ -367,6 +374,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
         Documentation documentation;
         try {
+            RestApiPublisherUtils.checkUserAccessAllowedForAPI(apiId);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             documentation = apiProvider.getDocumentation(documentId);
             if(null != documentation){
@@ -387,7 +395,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
             apiProvider.updateDocumentation(apiIdentifier, documentation);
             //retrieve the updated documentation
             documentation = apiProvider.getDocumentation(documentId);
@@ -402,13 +413,16 @@ public class ApisApiServiceImpl extends ApisApiService {
         Documentation doc;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
             doc = apiProvider.getDocumentation(documentId);
             if(null == doc){
                 throw new NotFoundException();
             }
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
             apiProvider.removeDocumentation(apiIdentifier, documentId);
             return Response.ok().build();
 

@@ -51,11 +51,11 @@ public class APIMappingUtil {
     public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
         APIIdentifier apiIdentifier;
+        APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         if (RestApiUtil.isUUID(apiId)) {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            apiIdentifier = apiConsumer.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getAPIInfoByUUID(apiId, requestedTenantDomain).getId();
         } else {
-            apiIdentifier = getAPIIdentifierFromApiId(apiId);
+            apiIdentifier = apiConsumer.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
         }
         return  apiIdentifier;
     }
