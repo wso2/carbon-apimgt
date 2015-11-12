@@ -899,7 +899,7 @@
     </dependencyManagement>
 
     <properties>
-        <project.scm.id>my-scm-server</project.scm.id>
+        <project.scm.id>scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
         <carbon.apimgt.version>4.3.0-SNAPSHOT</carbon.apimgt.version>
