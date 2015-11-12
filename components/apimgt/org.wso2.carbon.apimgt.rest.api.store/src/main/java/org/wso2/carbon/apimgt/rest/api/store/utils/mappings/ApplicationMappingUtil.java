@@ -51,14 +51,16 @@ public class ApplicationMappingUtil {
         return applicationDTO;
     }
 
-    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO) {
-        Subscriber subscriber = new Subscriber(applicationDTO.getSubscriber());
+    public static Application fromDTOtoApplication (ApplicationDTO applicationDTO, String username) {
+        //subscriber field of the body is not honored
+        Subscriber subscriber = new Subscriber(username);
         Application application = new Application(applicationDTO.getName(), subscriber);
         application.setTier(applicationDTO.getThrottlingTier());
         application.setDescription(applicationDTO.getDescription());
         application.setCallbackUrl(applicationDTO.getCallbackUrl());
         application.setUUID(applicationDTO.getApplicationId());
-        application.setGroupId(applicationDTO.getGroupId());
+        //groupId is not honored for now. Later we can improve by checking admin privileges of the user.
+        //application.setGroupId(applicationDTO.getGroupId());
         return application;
     }
 

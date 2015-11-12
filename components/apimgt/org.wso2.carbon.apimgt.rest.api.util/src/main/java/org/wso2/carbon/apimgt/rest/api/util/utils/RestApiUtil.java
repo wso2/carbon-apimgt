@@ -81,6 +81,17 @@ public class RestApiUtil {
         return errorDTO;
     }
 
+    /**
+     * Returns a generic errorDTO
+     * @param message specifies the error message
+     * @return A generic errorDTO with the specified details
+     */
+    public static ErrorDTO getErrorDTO(String message){
+        ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setMessage(message);
+        return errorDTO;
+    }
+
     public static boolean isUUID(String apiId) {
         try {
             UUID.fromString(apiId);

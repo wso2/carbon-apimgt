@@ -31,8 +31,10 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -49,10 +51,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
 
-        //pre-processing
-        if (groupId == null) {
-            groupId = "";
-        }
+        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
+        // As a improvement, we can check admin privileges of the user and honor groupId.
+        groupId = RestAPIStoreUtils.getLoggedInUserGroupIds();
+
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
@@ -77,7 +79,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String subscriber = body.getSubscriber();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = ApplicationMappingUtil.fromDTOtoApplication(body);
+            //subscriber field of the body is not honored. It is taken from the context
+            Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
+
+            //setting the proper groupId. This is not honored for now.
+            // Later we can honor it by checking admin privileges of the user.
+            String groupId = RestAPIStoreUtils.getLoggedInUserGroupIds();
+            application.setGroupId(groupId);
             int applicationId = apiConsumer.addApplication(application, subscriber);
 
             //retrieves the created application and send as the response
@@ -102,20 +110,24 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
-            JSONObject jsonParamObj = new JSONObject();
-            jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
-            String jsonParams = jsonParamObj.toString();
-            String tokenScopes = StringUtils.join(body.getScopes(), " ");
+            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+                String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
+                JSONObject jsonParamObj = new JSONObject();
+                jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+                String jsonParams = jsonParamObj.toString();
+                String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
-            Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
-                    username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
-                    accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
-                    jsonParams);
-            ApplicationKeyDTO applicationKeyDTO =
-                    ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
+                Map<String, Object> keyDetails = apiConsumer.requestApprovalForApplicationRegistration(
+                        username, application.getName(), body.getKeyType().toString(), body.getCallbackUrl(),
+                        accessAllowDomainsArray, body.getValidityTime(), tokenScopes, application.getGroupId(),
+                        jsonParams);
+                ApplicationKeyDTO applicationKeyDTO =
+                        ApplicationKeyMappingUtil.fromApplicationKeyToDTO(keyDetails, body.getKeyType().toString());
 
-            return Response.ok().entity(applicationKeyDTO).build();
+                return Response.ok().entity(applicationKeyDTO).build();
+            } else {
+                throw new ForbiddenException("You don't have access to the application");
+            }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
@@ -128,8 +140,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
-            return Response.ok().entity(applicationDTO).build();
+            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+                ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
+                return Response.ok().entity(applicationDTO).build();
+            } else {
+                throw new ForbiddenException("You don't have access to the application");
+            }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
@@ -139,29 +155,47 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String contentType, 
             String ifMatch, String ifUnmodifiedSince) {
         String username = RestApiUtil.getLoggedInUsername();
-        Application application = ApplicationMappingUtil.fromDTOtoApplication(body);
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            apiConsumer.updateApplication(application);
+            Application oldApplication = apiConsumer.getApplicationByUUID(applicationId);
+            //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
+            Application application = ApplicationMappingUtil
+                    .fromDTOtoApplication(body, oldApplication.getSubscriber().getName());
+            //groupId of the request body is not honored for now.
+            // Later we can improve by checking admin privileges of the user.
+            String groupId = RestAPIStoreUtils.getLoggedInUserGroupIds();
+            application.setGroupId(groupId);
+            //we do not honor the application id which is sent via the request body
+            application.setUUID(applicationId);
+            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+                apiConsumer.updateApplication(application);
 
-            //retrieves the updated application and send as the response
-            Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
-            ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
-            return Response.ok().entity(updatedApplicationDTO).build();
+                //retrieves the updated application and send as the response
+                Application updatedApplication = apiConsumer.getApplicationByUUID(applicationId);
+                ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
+                return Response.ok().entity(updatedApplicationDTO).build();
+            } else {
+                throw new ForbiddenException("You don't have access to the application");
+            }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch,
             String ifUnmodifiedSince) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = new Application(applicationId);
-            apiConsumer.removeApplication(application);
-            return Response.ok().build();
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+                apiConsumer.removeApplication(application);
+                return Response.ok().build();
+            } else {
+                throw new ForbiddenException("You don't have access to the application");
+            }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
