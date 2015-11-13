@@ -135,7 +135,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private long tagCacheValidityTime;
     private long lastUpdatedTime;
     private Object tagCacheMutex = new Object();
-    private LRUCache<String,GenericArtifactManager> genericArtifactCache = new LRUCache<String,GenericArtifactManager>(5);
     private Set<API> recentlyAddedAPI;
     private APIMRegistryService apimRegistryService;
 
@@ -1639,6 +1638,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     criteria=APIConstants.API_OVERVIEW_CONTEXT;
                 }else if (searchType.equalsIgnoreCase("Description")) {
                     criteria=APIConstants.API_OVERVIEW_DESCRIPTION;
+                } else if (searchType.equalsIgnoreCase("Tag")) {
+                    criteria = APIConstants.API_TAGS;
                 }
 
                 //Create the search attribute map for PUBLISHED APIs
@@ -1694,7 +1695,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
+                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED) 
+                                || status.equals(APIConstants.DEPRECATED)) {
                             API resultAPI;
                             if (limitAttributes) {
                                 resultAPI = APIUtil.getAPI(artifact);
@@ -1706,7 +1708,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             }
                         }
                     } else {
-                        if (status.equals(APIConstants.PUBLISHED)) {
+                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED)) {
                             API resultAPI;
                             if (limitAttributes) {
                                 resultAPI = APIUtil.getAPI(artifact);
@@ -1837,16 +1839,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      */
     public SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException {
         return apiMgtDAO.getSubscriptionById(subscriptionId);
-    }
-
-    /** returns the SubscribedAPI object which is related to the UUID
-     *
-     * @param uuid UUID of Subscription
-     * @return
-     * @throws APIManagementException
-     */
-    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getSubscriptionByUUID(uuid);
     }
 
     public Set<SubscribedAPI> getSubscribedAPIs(Subscriber subscriber) throws APIManagementException {
@@ -2009,16 +2001,21 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public void removeSubscription(APIIdentifier identifier, String userId, int applicationId)
             throws APIManagementException {
-        API api = getAPI(identifier);
+
         boolean isTenantFlowStarted = false;
 
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            PrivilegedCarbonContext.startTenantFlow();
-            isTenantFlowStarted = true;
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
+        String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
+                                                                replaceEmailDomainBack(identifier.getProviderName()));
 
         try {
+            if (providerTenantDomain != null &&
+                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(providerTenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(providerTenantDomain, true);
+                isTenantFlowStarted = true;
+            }
+
+            API api = getAPI(identifier);
             WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
@@ -2763,16 +2760,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return apiMgtDAO.getApplicationById(id);
     }
 
-    /**
-     * Returns the corresponding application given the uuid
-     * @param uuid uuid of the Application
-     * @return it will return Application corresponds to the uuid provided.
-     * @throws APIManagementException
-     */
-    public Application getApplicationByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getApplicationByUUID(uuid);
-    }
-
     /** get the status of the Application creation process given the application Id
      *
      * @param applicationId Id of the Application
@@ -2990,72 +2977,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     		return !(this.tenantDomain.equals(tenantDomain));
     	}
     	return true;
-    }
-
-    public API getAPIInfo(APIIdentifier identifier)
-            throws APIManagementException {
-        String apiPath = APIUtil.getAPIPath(identifier);
-        try {
-
-
-            Registry registry = getRegistry(identifier, apiPath);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : "+ apiPath);
-            }
-            GenericArtifactManager artifactManager = getGenericArtifactManager(identifier, registry);
-            GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return APIUtil.getAPIInformation(apiArtifact, registry);
-        } catch (RegistryException e) {
-            handleException("Failed to get API from : " + apiPath, e);
-            return null;
-        }
-
-    }
-
-    private GenericArtifactManager getGenericArtifactManager(APIIdentifier identifier, Registry registry)
-            throws APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-        GenericArtifactManager manager = genericArtifactCache.get(tenantDomain);
-        if (manager != null) {
-            return manager;
-        }
-        manager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-        genericArtifactCache.put(tenantDomain, manager);
-        return manager;
-    }
-
-
-    private Registry getRegistry(APIIdentifier identifier, String apiPath)
-            throws APIManagementException {
-        Registry passRegistry;
-        try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(id);
-                passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(id);
-            } else {
-                if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    // explicitly load the tenant's registry
-                    APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
-                    passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
-                            identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
-                } else {
-                    passRegistry = this.registry;
-                }
-            }
-        } catch (RegistryException e) {
-            handleException("Failed to get API from registry on path of : " +apiPath, e);
-            return null;
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Failed to get API from registry on path of : "+ apiPath, e);
-            return null;
-        }
-        return passRegistry;
     }
 
 	@Override

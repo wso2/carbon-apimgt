@@ -65,8 +65,6 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
-import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -180,7 +178,7 @@ public class ApiMgtDAO {
 
         //get the tenant id for the corresponding domain
         String tenantAwareUserId = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = IdentityTenantUtil.getTenantIdOfUser(loginUserName);
+        int tenantId = APIUtil.getTenantId(loginUserName);
 
         if (log.isDebugEnabled()) {
             log.debug("Searching for: " + identifier.getAPIIdentifier() + ", User: " + tenantAwareUserId +
@@ -440,7 +438,7 @@ public class ApiMgtDAO {
         String loginUserName = getLoginUserName(userId);
 
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(loginUserName);
-        int tenantId = IdentityTenantUtil.getTenantIdOfUser(loginUserName);
+        int tenantId = APIUtil.getTenantId(loginUserName);
         List<APIInfoDTO> apiInfoDTOList = new ArrayList<APIInfoDTO>();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -568,8 +566,7 @@ public class ApiMgtDAO {
                                         String statusEnum)
             throws APIManagementException {
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(userId);
-        int tenantId = 0;
-        IdentityTenantUtil.getTenantIdOfUser(userId);
+        int tenantId = APIUtil.getTenantId(userId);
 
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
@@ -1692,7 +1689,7 @@ public class ApiMgtDAO {
         ResultSet result = null;
 
         int tenantId;
-        tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriberName);
+        tenantId = APIUtil.getTenantId(subscriberName);
 
         String sqlQuery = "SELECT " +
                           "   SUBSCRIBER_ID, " +
@@ -1850,7 +1847,7 @@ public class ApiMgtDAO {
             }
 
             ps = connection.prepareStatement(sqlQuery);
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             ps.setInt(1, tenantId);
             ps.setString(2, applicationName);
 
@@ -1945,7 +1942,7 @@ public class ApiMgtDAO {
 
             ps = connection.prepareStatement(sqlQuery);
             ps.setString(1, applicationName);
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             ps.setInt(2, tenantId);
             ps.setString(3, appIdentifier);
             result = ps.executeQuery();
@@ -2013,7 +2010,7 @@ public class ApiMgtDAO {
                     "AND LOWER(SUB.USER_ID) = LOWER(?)))" ;
         try {
             connection = APIMgtDBUtil.getConnection();
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             if (groupingId != null && !groupingId.equals("null") && !groupingId.equals("")) {
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery += whereClauseWithGroupIdorceCaseInsensitiveComp;
@@ -2145,7 +2142,7 @@ public class ApiMgtDAO {
             }
 
             ps = connection.prepareStatement(sqlQuery);
-            int tenantId = IdentityTenantUtil.getTenantIdOfUser(subscriber.getName());
+            int tenantId = APIUtil.getTenantId(subscriber.getName());
             ps.setInt(1, tenantId);
             if(groupingId != null && !groupingId.equals("null") && !groupingId.isEmpty()){
                 ps.setString(2, groupingId);
@@ -2199,7 +2196,7 @@ public class ApiMgtDAO {
                 }
                 subscribedAPI.setApplication(application);
 
-                int subscriptionId = result.getInt(APIConstants.SUBSCRIPTION_FIELD_SUBSCRIPTION_ID);
+                int subscriptionId = result.getInt("SUBS_ID");
                 Set<APIKey> apiKeys = getAPIKeysBySubscription(subscriptionId);
                 for (APIKey key : apiKeys) {
                     subscribedAPI.addKey(key);
@@ -3785,7 +3782,7 @@ public class ApiMgtDAO {
                 }
             }
         } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
 
     }
@@ -3804,6 +3801,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
             prepStmt.setString(1, consumerKey);
             prepStmt.execute();
@@ -3866,7 +3864,7 @@ public class ApiMgtDAO {
             throw new APIManagementException("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
                     " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
         } finally {
-            IdentityDatabaseUtil.closeAllConnections(connection, null, prepStmt);
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
 
     }
@@ -3974,6 +3972,7 @@ public class ApiMgtDAO {
 
             try {
                 connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, APIUtil.encryptToken(consumerKey));
                 ps.setInt(2, application.getId());
@@ -4023,7 +4022,7 @@ public class ApiMgtDAO {
                     "VALUES (?,?,?,?,?)";
             try {
                 connection = APIMgtDBUtil.getConnection();
-
+                connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setInt(1, applicationId);
                 ps.setString(2, APIUtil.encryptToken(consumerKey));
@@ -4150,7 +4149,7 @@ public class ApiMgtDAO {
             ps.setString(3, apiIdentifier.getVersion());
             ps.setString(4, loginUserName);
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(loginUserName);
+            tenantId = APIUtil.getTenantId(loginUserName);
             ps.setInt(5, tenantId);
 
             rs = ps.executeQuery();
@@ -4193,7 +4192,10 @@ public class ApiMgtDAO {
                               "   API.API_VERSION AS API_VERSION, " +
                               "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
                               "   SUB.USER_ID AS USER_ID, " +
-                              "   APP.NAME AS APPNAME " +
+                              "   APP.NAME AS APPNAME, " +
+                              "   SUBS.UUID AS SUB_UUID, " +
+                              "   SUBS.TIER_ID AS SUB_TIER_ID, " +
+                              "   APP.UUID AS APP_UUID " +
                               "FROM " +
                               "   AM_SUBSCRIPTION SUBS, " +
                               "   AM_APPLICATION APP, " +
@@ -4238,6 +4240,10 @@ public class ApiMgtDAO {
                                                       result.getString("API_NAME"), result.getString("API_VERSION"));
                 SubscribedAPI apiSubscription=new SubscribedAPI(new Subscriber(userId),apiId);
                 apiSubscription.setSubStatus(subStatus);
+                apiSubscription.setUUID(result.getString("SUB_UUID"));
+                apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
+                Application applicationObj = new Application(result.getString("APP_UUID"));
+                apiSubscription.setApplication(applicationObj);
                 usage.addApiSubscriptions(apiSubscription);
 
             }
@@ -4497,7 +4503,7 @@ public class ApiMgtDAO {
 
         try {
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
             if (subscriber == null) {
@@ -4593,7 +4599,7 @@ public class ApiMgtDAO {
         try {
             int tenantId;
             int rateId = -1;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
             if (subscriber == null) {
@@ -4679,7 +4685,7 @@ public class ApiMgtDAO {
         int userRating=0;
         try {
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
             if (subscriber == null) {
@@ -4842,7 +4848,7 @@ public class ApiMgtDAO {
         int applicationId = 0;
         try {
             int tenantId;
-            tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+            tenantId = APIUtil.getTenantId(userId);
 
             //Get subscriber Id
             Subscriber subscriber = getSubscriber(userId, tenantId, conn);
@@ -5724,6 +5730,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             String deleteKeyMappingQuery = "DELETE " +
                     "FROM" +
                     "   AM_APPLICATION_KEY_MAPPING " +
@@ -5755,6 +5762,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             String deleteRegistrationEntry = "DELETE " +
                     "FROM" +
                     "   AM_APPLICATION_KEY_MAPPING  " +
@@ -5904,7 +5912,7 @@ public class ApiMgtDAO {
 
         int tenantId;
         int apiId = -1;
-        tenantId = IdentityTenantUtil.getTenantIdOfUser(userId);
+        tenantId = APIUtil.getTenantId(userId);
 
         if (oldStatus == null && !newStatus.equals(APIStatus.CREATED)) {
             String msg = "Invalid old and new state combination";
@@ -7005,6 +7013,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(deleteApplicationKeyQuery);
             prepStmt.setString(1, consumerKey);
             prepStmt.execute();

@@ -225,10 +225,10 @@ if(jagg.isCSRFTokenValid())
             apiData.responseCache = request.getParameter("responseCache","UTF-8");
             apiData.subscriptionAvailability = request.getParameter("subscriptions");
             apiData.subscriptionTenants = request.getParameter("tenants","UTF-8");
-            apiData.bizOwner = request.getParameter("bizOwner");
-		    apiData.bizOwnerMail = request.getParameter("bizOwnerMail");
-		    apiData.techOwner = request.getParameter("techOwner");
-		    apiData.techOwnerMail = request.getParameter("techOwnerMail");
+            apiData.bizOwner = request.getParameter("bizOwner", "UTF-8");
+            apiData.bizOwnerMail = request.getParameter("bizOwnerMail", "UTF-8");
+            apiData.techOwner = request.getParameter("techOwner", "UTF-8");
+            apiData.techOwnerMail = request.getParameter("techOwnerMail", "UTF-8");
 
             apiData.responseCache = request.getParameter("responseCache","UTF-8");
             apiData.cacheTimeout= request.getParameter("cacheTimeout","UTF-8");

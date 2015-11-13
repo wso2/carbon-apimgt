@@ -93,6 +93,16 @@ public interface APIProvider extends APIManager {
     UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerId) throws APIManagementException;
 
     /**
+     * Returns usage details of a particular published by a provider
+     *
+     * @param apiId API identifier
+     * @return UserApplicationAPIUsages for given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to get UserApplicationAPIUsage
+     */
+    List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException;
+
+    /**
      * Shows how a given consumer uses the given API.
      *
      * @param apiIdentifier APIIdentifier
@@ -423,15 +433,6 @@ public interface APIProvider extends APIManager {
      */
     String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException;
 
-    /**
-     * Returns the swagger v2.0 definition as a string
-     *
-     * @param apiId id of the APIIdentifier
-     * @return swagger string
-     * @throws APIManagementException
-     */
-    String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
-
 
     /**
      * This method updates Swagger 2.0 resources in the registry
@@ -455,7 +456,7 @@ public interface APIProvider extends APIManager {
     /**
      * This method is to change registry lifecycle states for an API artifact
      *
-     * @param  APIIdentifier apiIdentifier
+     * @param  apiIdentifier apiIdentifier
      * @param  action  Action which need to execute from registry lifecycle
      *
      * */
@@ -464,13 +465,27 @@ public interface APIProvider extends APIManager {
     /**
     * This method is to set checklist item values for a particular life-cycle state of an API
     *
-    * @param  APIIdentifier apiIdentifier
+    * @param  apiIdentifier apiIdentifier
     * @param  checkItem  Order of the checklist item
     * @param  checkItemValue Value of the checklist item
     *
     * */
-     boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem,boolean checkItemValue)
-             throws APIManagementException;
+    boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
+            throws APIManagementException;
+
+    /** 
+     * This method is to set a lifecycle check list item given the APIIdentifier and the checklist item name.
+     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay 
+     * silent and return false. Otherwise, the checklist item will be updated and returns true.
+     * 
+     * @param apiIdentifier APIIdentifier
+     * @param checkItemName Name of the checklist item
+     * @param checkItemValue Value to be set to the checklist item
+     * @return boolean value representing success not not
+     * @throws APIManagementException
+     */
+    boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName, boolean checkItemValue)
+            throws APIManagementException;
 
      /**
      * This method returns the lifecycle data for an API including current state,next states.

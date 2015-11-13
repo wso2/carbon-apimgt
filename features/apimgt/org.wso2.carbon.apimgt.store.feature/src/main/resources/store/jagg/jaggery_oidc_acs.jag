@@ -28,7 +28,7 @@
 
     if (requestedURI == null) {
         log.error("requestedURI value is invalid.");
-        requestedURI = "/store";
+        requestedURI = site.context;
     }
 
     // Check OIDC signature valid and set session as a authenticated if success

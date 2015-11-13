@@ -25,7 +25,7 @@ var resourceIdentifier = site.forum.resourceIdentifier;
 var tenantDomain = "carbon.super";
 
 var uri = request.getRequestURI();
-var callPath = uri.replace("/store/forum/api", "");
+var callPath = uri.replace(site.context+"/forum/api", "");
 var action;
 
 

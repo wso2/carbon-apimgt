@@ -410,17 +410,38 @@ paths:
       description: |
         Change the lifecycle of an API
       parameters:
-        - name: newState
+        - name: action
           description: |
-            New lifecycle state of the API.
+            The action to demote or promote the state of the API.
+
+            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
+
+          in: query
           type: string
-          in: formData
-        - name: publishToGateway
+          enum:
+            - Publish
+            - Deploy as a Prototype
+            - Demote to Created
+            - Demote to Prototyped
+            - Block
+            - Deprecate
+            - Re-Publish
+            - Retire
+        - name: lifecycleChecklist
+          description: |
+
+            You can specify additional checklist items by using an **"attribute:"** modifier.
+
+            Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API when it is promoted to 
+            Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false"
+            format.
+
+            Supported checklist items are as follows.
+            1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.
+            2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
+
           type: string
-          in: formData
-        - name: resubscription
-          type: string
-          in: formData
+          in: query
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -805,8 +826,8 @@ paths:
         the subscriptions of which are to be returned are passed as parameters.
       parameters:
         - $ref: '#/parameters/apiId-Q'
-        - $ref: '#/parameters/applicationId-Q'
-        - $ref: '#/parameters/groupId'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -897,6 +918,14 @@ paths:
     post:
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
+        - name: blockState
+          in: query
+          description: |
+            Subscription block state.
+          type: string
+          enum:
+            - BLOCKED
+            - PROD_ONLY_BLOCKED
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       description: |
@@ -1004,6 +1033,8 @@ paths:
       description: |
         Get available tiers
       parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -1015,9 +1046,7 @@ paths:
             OK. 
             List of tiers returned.
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Tier'
+            $ref: '#/definitions/TierList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -1411,25 +1440,6 @@ parameters:
     required: true
     type: string
 
-# Application Identifier
-# Specified as part of the query string
-  applicationId-Q:
-    name: applicationId
-    in: query
-    description: |
-      **Application Identifier** consisting of the UUID of the Application.
-    required: true
-    type: string
-
-# Group Identifier of the application
-  groupId:
-    name: groupId
-    in: query
-    description: |
-      Application Group Id
-    required: false
-    type: string
-
 # Subscription Identifier
 # Specified as part of the path expression
   subscriptionId:
@@ -1768,12 +1778,18 @@ definitions:
           - OTHER
       summary:
         type: string
-      source:
+      sourceType:
         type: string
         enum:
           - INLINE
           - URL
           - FILE
+      sourceUrl:
+        type: string
+      filePath:
+        type: string
+      otherTypeName:
+        type: string
       visibility:
         type: string
         enum:
@@ -1782,14 +1798,44 @@ definitions:
           - API_LEVEL
 
 #-----------------------------------------------------
+# The Tier List resource
+#-----------------------------------------------------
+  TierList:
+    title: Tier List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Tiers returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified. 
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified. 
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Tier'
+
+#-----------------------------------------------------
 # The Tier resource
 #-----------------------------------------------------
   Tier:
     title: Tier
     required:
       - name
+      - tierPlan
+      - requestCount
+      - unitTime
     properties:
       name:
+        type: string
+      displayName:
         type: string
       description:
         type: string
@@ -1802,16 +1848,21 @@ definitions:
       requestCount:
         description: |
           Maximum number of requests which can be sent within a provided unit time
-        type: number
+        type: integer
+        format: int64
       unitTime:
-        type: number
-      billingPlan:
+        type: integer
+        format: int64
+      tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
         type: string
-      continueOnQuotaReach:
+        enum: 
+          - FREE
+          - COMMERCIAL
+      stopOnQuotaReach:
         description: |
-          By making this attribute to true, you are capabale of sending requests 
+          By making this attribute to false, you are capabale of sending requests 
           even if the request count exceeded within a unit time
         type: boolean
 
@@ -1820,9 +1871,15 @@ definitions:
 #-----------------------------------------------------
   TierPermission:
     title: tierPermission
+    required:
+      - permissionType
+      - roles
     properties:
-      enableAccess:
+      permissionType:
         type: string
+        enum:
+          - allow
+          - deny
       roles:
         type: array
         items:

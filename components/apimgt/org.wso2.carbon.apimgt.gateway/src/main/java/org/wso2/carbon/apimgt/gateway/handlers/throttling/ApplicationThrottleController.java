@@ -17,8 +17,11 @@ import org.apache.synapse.commons.throttle.core.ThrottleException;
 import org.apache.synapse.commons.throttle.core.ThrottleFactory;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.util.SynapseBinaryDataSource;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.registry.RegistryExtension;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Collection;
@@ -27,7 +30,9 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
-
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.activation.DataHandler;
 import javax.xml.stream.XMLInputFactory;
@@ -38,7 +43,7 @@ import java.io.IOException;
 
 public class ApplicationThrottleController {
     
-    public static final String APPLICATION_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/tiers.xml";
+    public static final String APPLICATION_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/app-tiers.xml";
 
     public static final String APP_THROTTLE_CONTEXT_PREFIX = "APP_THROTTLE_CONTEXT_";
 
@@ -62,7 +67,26 @@ public class ApplicationThrottleController {
     private static ThrottleContext createThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder, String applicationId){
 
         //Object entryValue = synCtx.getEntry(APPLICATION_THROTTLE_POLICY_KEY);
-        Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY);
+        PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
+        RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
+
+        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(synCtx);
+        //extract the subscriber username from the auth Context
+        String subscriber = authContext.getSubscriber();
+
+        //get the tenant Domain from the subscriber
+        String tenantDomain = MultitenantUtils.getTenantDomain(subscriber);
+        int tenantId;
+
+        //get the tenant domain id from the tenant domain name
+        try {
+            tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Unable to Find the tenant ID using tenant: " + tenantDomain);
+            return null;
+        }
+
+        Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY, tenantId);
         if (entryValue == null || !(entryValue instanceof OMElement)) {
             handleException("Unable to load throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
             return null;
@@ -89,9 +113,9 @@ public class ApplicationThrottleController {
         throw new SynapseException(msg, e);
     }
     
-    private static OMNode lookup(String key){
+    private static OMNode lookup(String key, int tenantId) {
         try {
-            Resource resource = getResource(key);
+            Resource resource = getResource(key, tenantId);
 
             if (resource instanceof Collection || resource == null) {
                 return null;
@@ -122,7 +146,7 @@ public class ApplicationThrottleController {
                 // a more general exception(e.g. a Runtime exception if the XML doc has an
                 // external DTD deceleration and if not connected to internet) which in case
                 // just log for debugging
-                log.error("Error while reading the resource '" + key + "'", e);
+                log.error("Error while reading the resource '" + key + '\'', e);
             } finally {
                 try {
                     resource.discard();
@@ -181,13 +205,13 @@ public class ApplicationThrottleController {
         return null;
     }
 
-    private static Resource getResource(String path) {
+    private static Resource getResource(String path, int tenantId) {
 
         RegistryService registryService = RegistryServiceHolder.getInstance().getRegistryService();
 
         Registry registry = null;
         try {
-            registry = registryService.getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+            registry = registryService.getGovernanceSystemRegistry(tenantId);
         } catch (RegistryException e) {
             log.error("Error while fetching Governance Registry of Super Tenant");
             return null;

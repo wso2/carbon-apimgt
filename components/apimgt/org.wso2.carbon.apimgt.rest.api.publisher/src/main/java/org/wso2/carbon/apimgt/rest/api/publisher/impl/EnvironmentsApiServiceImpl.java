@@ -22,14 +22,22 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.EnvironmentsApiService;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.EnvironmentMappingUtils;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
+/** This is the service implementation class for gateway environment related operations
+ *
+ */
 public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
+
+    /** Get all gateway environments or applied gateway environments for a given API specified by id
+     * 
+     * @param apiId id of the API
+     * @return Response object containing resulted gateway environments
+     */
     @Override
     public Response environmentsGet(String apiId) {
 
@@ -38,14 +46,12 @@ public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                         .getAPIManagerConfiguration();
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
-        List <EnvironmentDTO> environmentDTOs = new ArrayList<>();
         if (environments != null) {
-            for (Environment environment : environments.values()) {
-                EnvironmentDTO environmentDTO = EnvironmentMappingUtils.fromEnvironmentToDTO(environment);
-                environmentDTOs.add(environmentDTO);
-            }
+            EnvironmentListDTO environmentListDTO = EnvironmentMappingUtils.fromEnvironmentCollectionToDTO(
+                    environments.values());
+            return Response.ok().entity(environmentListDTO).build();
+        } else {
+            return Response.noContent().build();
         }
-
-        return Response.ok().entity(environmentDTOs).build();
     }
 }

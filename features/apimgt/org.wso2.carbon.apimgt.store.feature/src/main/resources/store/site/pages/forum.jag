@@ -10,7 +10,7 @@ var log = new Log();
 
 // routing logic
 var uri = request.getRequestURI();
-var callPath=uri.replace("/store","");
+var callPath=uri.replace(site.context,"");
 
 var action = "list"; // default action list the topics
 if(uri != null) {

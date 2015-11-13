@@ -28,7 +28,11 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
@@ -38,48 +42,63 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.ws.rs.core.Response;
 
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
+
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String groupId, String accept,
-            String ifNoneMatch) {
-        //todo: validation: only one of {application id,api id} should present
+    public Response subscriptionsGet(String apiId, String applicationId, String groupId, Integer offset,
+            Integer limit, String accept, String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         Subscriber subscriber = new Subscriber(username);
-        Set<SubscribedAPI> subscriptions = new HashSet<>();
+        Set<SubscribedAPI> subscriptions;
+        List<SubscribedAPI> subscribedAPIList = new ArrayList<>();
+
+        //pre-processing
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
+        // As a improvement, we can check admin privileges of the user and honor groupId.
+        groupId = RestAPIStoreUtils.getLoggedInUserGroupIds();
+
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            SubscriptionListDTO subscriptionListDTO;
             if (!StringUtils.isEmpty(apiId)) {
-
-                /* API api; //todo how can we get this? we cant get this using current username as the provider, may need the admin user of the current tenant
-                if (RestApiUtil.isUUID(apiId)) {
-                    api = apiProvider.getAPIbyUUID(apiId);
-                } else {
-                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-                    api = apiProvider.getAPI(apiIdentifier);
-                }*/
-
+                // this will fail if user does not have permission to access the API
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 subscriptions = apiConsumer.getSubscribedIdentifiers(subscriber, apiIdentifier, groupId);
-
+                subscribedAPIList.addAll(subscriptions);
+                //todo: sort by application name
+                subscriptionListDTO = SubscriptionMappingUtil
+                        .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
+                SubscriptionMappingUtil.setPaginationParamsForAPIId(subscriptionListDTO, apiId, groupId, limit, offset,
+                        subscriptions.size());
+                return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
-                subscriptions =
-                        apiConsumer.getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    subscriptions = apiConsumer
+                            .getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+                    subscribedAPIList.addAll(subscriptions);
+                    //todo: sort by api
+                    subscriptionListDTO = SubscriptionMappingUtil
+                            .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
+                    SubscriptionMappingUtil
+                            .setPaginationParamsForApplicationId(subscriptionListDTO, applicationId, limit,
+                                    offset, subscriptions.size());
+                    return Response.ok().entity(subscriptionListDTO).build();
+                } else {
+                    throw new ForbiddenException(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
+                }
+            } else {
+                //neither apiId nor applicationId is given
+                throw new BadRequestException();
             }
-
-            List<SubscriptionDTO> subscriptionDTOs = new ArrayList<>();
-            for (SubscribedAPI subscription : subscriptions) {
-                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscription);
-                subscriptionDTOs.add(subscriptionDTO);
-            }
-            return Response.ok().entity(subscriptionDTOs).build();
-
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }

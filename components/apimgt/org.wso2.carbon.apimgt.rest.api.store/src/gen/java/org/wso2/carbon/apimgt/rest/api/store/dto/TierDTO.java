@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import java.util.Map;
-import java.math.BigDecimal;
 import java.util.*;
 
 import io.swagger.annotations.*;
@@ -19,22 +18,28 @@ public class TierDTO  {
   private String name = null;
   
   
+  private String displayName = null;
+  
+  
   private String description = null;
   
   
   private Map<String, String> attributes = new HashMap<String, String>();
   
+  @NotNull
+  private Long requestCount = null;
   
-  private BigDecimal requestCount = null;
+  @NotNull
+  private Long unitTime = null;
+  
+  public enum TierPlanEnum {
+     FREE,  COMMERCIAL, 
+  };
+  @NotNull
+  private TierPlanEnum tierPlan = null;
   
   
-  private BigDecimal unitTime = null;
-  
-  
-  private String billingPlan = null;
-  
-  
-  private Boolean continueOnQuotaReach = null;
+  private Boolean stopOnQuotaReach = null;
 
   
   /**
@@ -46,6 +51,18 @@ public class TierDTO  {
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("displayName")
+  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   
@@ -77,24 +94,24 @@ public class TierDTO  {
   /**
    * Maximum number of requests which can be sent within a provided unit time
    **/
-  @ApiModelProperty(value = "Maximum number of requests which can be sent within a provided unit time")
+  @ApiModelProperty(required = true, value = "Maximum number of requests which can be sent within a provided unit time")
   @JsonProperty("requestCount")
-  public BigDecimal getRequestCount() {
+  public Long getRequestCount() {
     return requestCount;
   }
-  public void setRequestCount(BigDecimal requestCount) {
+  public void setRequestCount(Long requestCount) {
     this.requestCount = requestCount;
   }
 
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("unitTime")
-  public BigDecimal getUnitTime() {
+  public Long getUnitTime() {
     return unitTime;
   }
-  public void setUnitTime(BigDecimal unitTime) {
+  public void setUnitTime(Long unitTime) {
     this.unitTime = unitTime;
   }
 
@@ -102,26 +119,26 @@ public class TierDTO  {
   /**
    * This attribute declares whether this tier is available under commercial or free
    **/
-  @ApiModelProperty(value = "This attribute declares whether this tier is available under commercial or free")
-  @JsonProperty("billingPlan")
-  public String getBillingPlan() {
-    return billingPlan;
+  @ApiModelProperty(required = true, value = "This attribute declares whether this tier is available under commercial or free")
+  @JsonProperty("tierPlan")
+  public TierPlanEnum getTierPlan() {
+    return tierPlan;
   }
-  public void setBillingPlan(String billingPlan) {
-    this.billingPlan = billingPlan;
+  public void setTierPlan(TierPlanEnum tierPlan) {
+    this.tierPlan = tierPlan;
   }
 
   
   /**
-   * By making this attribute to true, you are capabale of sending requests \neven if the request count exceeded within a unit time
+   * If this attribute is set to false, you are capabale of sending requests \neven if the request count exceeded within a unit time
    **/
-  @ApiModelProperty(value = "By making this attribute to true, you are capabale of sending requests \neven if the request count exceeded within a unit time")
-  @JsonProperty("continueOnQuotaReach")
-  public Boolean getContinueOnQuotaReach() {
-    return continueOnQuotaReach;
+  @ApiModelProperty(value = "If this attribute is set to false, you are capabale of sending requests \neven if the request count exceeded within a unit time")
+  @JsonProperty("stopOnQuotaReach")
+  public Boolean getStopOnQuotaReach() {
+    return stopOnQuotaReach;
   }
-  public void setContinueOnQuotaReach(Boolean continueOnQuotaReach) {
-    this.continueOnQuotaReach = continueOnQuotaReach;
+  public void setStopOnQuotaReach(Boolean stopOnQuotaReach) {
+    this.stopOnQuotaReach = stopOnQuotaReach;
   }
 
   
@@ -132,12 +149,13 @@ public class TierDTO  {
     sb.append("class TierDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
+    sb.append("  displayName: ").append(displayName).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  attributes: ").append(attributes).append("\n");
     sb.append("  requestCount: ").append(requestCount).append("\n");
     sb.append("  unitTime: ").append(unitTime).append("\n");
-    sb.append("  billingPlan: ").append(billingPlan).append("\n");
-    sb.append("  continueOnQuotaReach: ").append(continueOnQuotaReach).append("\n");
+    sb.append("  tierPlan: ").append(tierPlan).append("\n");
+    sb.append("  stopOnQuotaReach: ").append(stopOnQuotaReach).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

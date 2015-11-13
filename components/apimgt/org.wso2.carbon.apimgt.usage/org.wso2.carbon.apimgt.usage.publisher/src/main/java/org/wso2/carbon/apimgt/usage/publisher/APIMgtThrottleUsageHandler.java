@@ -22,6 +22,7 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
@@ -95,11 +96,18 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
                     (messageContext);
             if (authContext != null) {
                 long currentTime = System.currentTimeMillis();
+                String throttleOutReason = APIConstants.THROTTLE_OUT_REASON_SOFT_LIMIT_EXCEEDED;
+
+                if(messageContext.getProperty(APIConstants.THROTTLE_OUT_REASON_KEY) != null){
+                    throttleOutReason = (String) messageContext.getProperty(APIConstants.THROTTLE_OUT_REASON_KEY);
+                }
+
                 ThrottlePublisherDTO throttlePublisherDTO = new ThrottlePublisherDTO();
                 throttlePublisherDTO.setAccessToken(authContext.getApiKey());
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
-                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(username));
+                throttlePublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
+                        (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER)));
                 throttlePublisherDTO.setApiname((String) messageContext.getProperty(
                         APIMgtGatewayConstants.API));
                 throttlePublisherDTO.setVersion((String) messageContext.getProperty(
@@ -113,6 +121,7 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
                 throttlePublisherDTO.setApplicationId((String) messageContext.getProperty(
                         APIMgtGatewayConstants.APPLICATION_ID));
                 throttlePublisherDTO.setThrottledTime(currentTime);
+                throttlePublisherDTO.setThrottledOutReason(throttleOutReason);
                 publisher.publishEvent(throttlePublisherDTO);
 
 

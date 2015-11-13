@@ -28,7 +28,7 @@ var tenantDomain = "carbon.super";
 var date = new Date();
 
 var uri = request.getRequestURI();
-var callPath = uri.replace("/store/forum/api", "");
+var callPath = uri.replace(site.context+"/forum/api", "");
 var action;
 
 if (uri != null) {
@@ -129,7 +129,9 @@ if(validation_errors != true){
                 "date": getDate(item.getCreatedDate()),
                 "replyId": item.getReplyId(),
                 "createdBy": item.getCreatedBy(),
-                "timeStamp": getTime(item.getTimestamp())
+                "timeStamp": getTime(item.getTimestamp()),
+                "topicOwner" : topicWithReplies.getTopicOwner(),
+                "user" : username
             });
 
         }
@@ -323,7 +325,8 @@ if(validation_errors != true){
                 "description": item.getDescription(),
                 "topicOwner": item.getTopicOwner(),
                 "topicId": item.getTopicId(),
-                "replyCount": replyCount.toString()
+                "replyCount": replyCount.toString(),
+                "user" : username
 
             });
 

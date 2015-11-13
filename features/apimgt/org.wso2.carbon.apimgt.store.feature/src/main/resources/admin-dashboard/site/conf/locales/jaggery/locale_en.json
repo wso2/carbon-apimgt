@@ -60,5 +60,6 @@
     "actions":"Actions",
     "saveTier":"Save",
     "cancelTier":"Cancel",
-    "errorMsgRequired":"Required"
+    "errorMsgRequired":"Required",
+    "errorMessageInvalid":"Invalid"
 }

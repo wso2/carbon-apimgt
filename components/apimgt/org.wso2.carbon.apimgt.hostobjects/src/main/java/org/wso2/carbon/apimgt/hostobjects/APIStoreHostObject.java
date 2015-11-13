@@ -245,30 +245,9 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getAppApiCallType(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
-            throws APIManagementException {
-
-        return null;
-    }
-
-    public static NativeArray jsFunction_getPerAppAPIFaultCount(Context cx, Scriptable thisObj,
-                                                                Object[] args, Function funObj)
-            throws APIManagementException {
-
-        return null;
-    }
-
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
                                                              Object[] args, Function funObj)
             throws APIManagementException {
-        return null;
-    }
-
-    public static NativeArray jsFunction_getTopAppUsers(Context cx, Scriptable thisObj,
-                                                        Object[] args, Function funObj)
-            throws APIManagementException {
-
         return null;
     }
 
@@ -4114,6 +4093,36 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("tierDisplayName", row, tier.getDisplayName());
                 row.put("tierDescription", row,
                         tier.getDescription() != null ? tier.getDescription() : "");
+                row.put("defaultTier", row, i == 0);
+                myn.put(i, myn, row);
+                i++;
+            }
+
+        } catch (Exception e) {
+            log.error("Error while getting available tiers", e);
+        }
+        return myn;
+    }
+
+    public static NativeArray jsFunction_getAppTiers(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
+        NativeArray myn = new NativeArray(0);
+        APIConsumer apiConsumer = getAPIConsumer(thisObj);
+        Set<Tier> tiers;
+        try {
+            //If tenant domain is present in url we will use it to get available tiers
+            if (args.length > 0 && args[0] != null) {
+                tiers = apiConsumer.getAppTiers((String) args[0]);
+            } else {
+                tiers = apiConsumer.getAppTiers();
+            }
+
+            List<Tier> tierList = APIUtil.sortTiers(tiers);
+            int i = 0;
+            for (Tier tier : tierList) {
+                NativeObject row = new NativeObject();
+                row.put("tierName", row, tier.getName());
+                row.put("tierDisplayName", row, tier.getDisplayName());
+                row.put("tierDescription", row, tier.getDescription() != null ? tier.getDescription() : "");
                 row.put("defaultTier", row, i == 0);
                 myn.put(i, myn, row);
                 i++;

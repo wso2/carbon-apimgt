@@ -87,10 +87,12 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -209,6 +211,10 @@ public class APIProviderHostObject extends ScriptableObject {
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             PermissionUpdateUtil.updatePermissionTree(tenantId);
+            
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();            
+            CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(tenantId), 
+                                                          CommonUtil.getRootSystemRegistry(tenantId));
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
@@ -988,9 +994,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
-        } else {
-            visibility = APIConstants.API_GLOBAL_VISIBILITY;
-        }
+        } 
 
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
             sandboxUrl = null;
@@ -2545,6 +2549,31 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static NativeArray jsFunction_getResourceTiers(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) {
+        NativeArray myn = new NativeArray(1);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        try {
+            Set<Tier> tiers = apiProvider.getResTiers();
+            List<Tier> tierList = APIUtil.sortTiers(tiers);
+            int i = 0;
+            if (tiers != null) {
+                for (Tier tier : tierList) {
+                    NativeObject row = new NativeObject();
+                    row.put("tierName", row, tier.getName());
+                    row.put("tierDisplayName", row, tier.getDisplayName());
+                    row.put("tierDescription", row, tier.getDescription() != null ? tier.getDescription() : "");
+                    row.put("defaultTier", row, i == 0);
+                    myn.put(i, myn, row);
+                    i++;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error while getting available tiers", e);
+        }
+        return myn;
+    }
+
     public static NativeArray jsFunction_getSubscriberCountByAPIVersions(Context cx,
                                                                          Scriptable thisObj,
                                                                          Object[] args,
@@ -3372,56 +3401,6 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         }
         return myn;
-    }
-
-
-    public static NativeArray jsFunction_getAPIUsageByUser(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
-            throws APIManagementException {
-        /*String list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if(!HostObjectUtils.isUsageDataSourceSpecified()){
-            return myn;
-        }
-        if (args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-
-        try {
-            APIUsageStatisticsRdbmsClientImpl client =
-                    new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIUsageByUser(providerName,fromDate,toDate);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIUsageByUserDTO usage = (APIUsageByUserDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("version", row, usage.getVersion());
-                row.put("userId", row, usage.getUserID());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;*/
-        return null;
     }
 
     public static NativeArray jsFunction_getProviderAPIVersionUserUsage(Context cx,
@@ -4735,6 +4714,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("name", row, environment.getName());
                 row.put("description", row, environment.getDescription());
                 row.put("type", row, environment.getType());
+                row.put("serverURL", row, environment.getServerURL());
+                row.put("apiConsole", row, environment.isShowInConsole());
                 myn.put(i, myn, row);
                 i++;
             }

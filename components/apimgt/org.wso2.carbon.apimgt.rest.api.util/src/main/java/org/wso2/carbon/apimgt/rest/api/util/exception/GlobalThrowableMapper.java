@@ -16,9 +16,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.ResourceNotFoundException;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
@@ -60,6 +64,22 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
         if (e instanceof ConstraintViolationException) {
             return ((ConstraintViolationException) e).getResponse();
+        }
+
+        if(e instanceof ForbiddenException){
+            return ((ForbiddenException) e).getResponse();
+        }
+
+        if(e instanceof InternalServerErrorException){
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof AuthorizationFailedException) {
+                ForbiddenException forbiddenException = new ForbiddenException(
+                        RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
+                return forbiddenException.getResponse();
+            } else if (rootCause instanceof ResourceNotFoundException) {
+                NotFoundException notFoundException = new NotFoundException();
+                return notFoundException.getResponse();
+            }
         }
 
         //unknown exception log and return

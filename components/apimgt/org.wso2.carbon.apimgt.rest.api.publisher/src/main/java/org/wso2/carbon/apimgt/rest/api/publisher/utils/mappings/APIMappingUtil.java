@@ -22,12 +22,21 @@ import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -36,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class APIMappingUtil {
@@ -53,11 +63,11 @@ public class APIMappingUtil {
     public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
         APIIdentifier apiIdentifier;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         if (RestApiUtil.isUUID(apiId)) {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            apiIdentifier = apiProvider.getAPIInformationByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiProvider.getAPIInfoByUUID(apiId, requestedTenantDomain).getId();
         } else {
-            apiIdentifier = getAPIIdentifierFromApiId(apiId);
+            apiIdentifier = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
         }
         return  apiIdentifier;
     }
@@ -115,7 +125,7 @@ public class APIMappingUtil {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
         }
 
-        //do we need to put validity checks? - specific_tenants
+        //todo: do we need to put validity checks? - specific_tenants
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
@@ -140,18 +150,24 @@ public class APIMappingUtil {
         dto.setTiers(tiersToReturn);
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
-        //dto.setType("");   //how to get type?
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
-        //do we need to put validity checks? - restricted
+        //todo: do we need to put validity checks? - restricted
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
-        //do we need to put validity checks? - controlled
+        //todo: do we need to put validity checks? - controlled
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
-        //endpoint configs, business info and thumbnail still missing
+        APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
+        apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
+        apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
+        apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
+        apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
+        dto.setBusinessInformation(apiBusinessInformationDTO);
+        
+        //todo: thumbnail still missing
         return dto;
     }
 
@@ -173,7 +189,7 @@ public class APIMappingUtil {
             context = "/t/" + providerDomain + context;
         }
 
-        // This is to support the new Pluggable version strategy
+        // This is to support the pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
         context = checkAndSetVersionParam(context);
         model.setContextTemplate(context);
@@ -208,7 +224,7 @@ public class APIMappingUtil {
             model.setSubscriptionAvailability(mapSubscriptionAvailabilityFromDTOtoAPI(dto.getSubscriptionAvailability()));
         }
 
-        //do we need to put validity checks? - specific_tenants
+        //todo :do we need to put validity checks? - specific_tenants
         if (dto.getSubscriptionAvailableTenants() != null) {
             model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
         }
@@ -239,7 +255,6 @@ public class APIMappingUtil {
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
-        //dto.setType("");   //how to get type?
         model.setVisibility(mapVisibilityFromDTOtoAPI(dto.getVisibility()));
         if (dto.getVisibleRoles() != null) {
             String visibleRoles = StringUtils.join(dto.getVisibleRoles(), ',');
@@ -251,23 +266,76 @@ public class APIMappingUtil {
             model.setVisibleRoles(visibleTenants);
         }
 
-        //endpoint configs, business info and thumbnail requires mapping
+        APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();
+        if (apiBusinessInformationDTO != null) {
+            model.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());
+            model.setBusinessOwnerEmail(apiBusinessInformationDTO.getBusinessOwnerEmail());
+            model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
+            model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
+        }
+
+        //todo: thumbnail requires mapping
         return model;
 
     }
 
-    public static APIListDTO fromAPIListToDTO (List<API> apiList) {
+    /** Converts a List object of APIs into a DTO
+     *
+     * @param apiList List of APIs
+     * @param limit maximum number of APIs returns
+     * @param offset starting index
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, int offset, int limit) {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
         if (apiInfoDTOs == null) {
             apiInfoDTOs = new ArrayList<>();
             apiListDTO.setList(apiInfoDTOs);
         }
-        for (API api : apiList) {
-            apiInfoDTOs.add(fromAPIToInfoDTO(api));
+
+        //add the required range of objects to be returned
+        int start = offset < apiList.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= apiList.size() - 1 ? offset + limit - 1 : apiList.size() - 1;
+        for (int i = start; i <= end; i++) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(apiList.get(i)));
         }
-        apiListDTO.setCount(apiList.size());
+        apiListDTO.setCount(apiInfoDTOs.size());
         return apiListDTO;
+    }
+
+    /** Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
+     *
+     * @param apiListDTO a APIListDTO object
+     * @param query search condition
+     * @param type value for the search condition
+     * @param limit max number of objects returned
+     * @param offset starting index
+     * @param size max offset
+     *
+     */
+    public static void setPaginationParams(APIListDTO apiListDTO, String query, String type, int offset,
+            int limit, int size) {
+
+        //acquiring pagination parameters and setting pagination urls
+        Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
+        String paginatedPrevious = "";
+        String paginatedNext = "";
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
+            paginatedPrevious = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query, type);
+        }
+
+        if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
+            paginatedNext = RestApiUtil
+                    .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query, type);
+        }
+
+        apiListDTO.setNext(paginatedNext);
+        apiListDTO.setPrevious(paginatedPrevious);
     }
 
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
@@ -359,33 +427,6 @@ public class APIMappingUtil {
                 return null; // how to handle this? 500 or 400
         }
 
-    }
-
-
-    public static DocumentDTO fromDocumentationtoDTO(Documentation doc){
-        DocumentDTO d = new DocumentDTO();
-        d.setDocumentId(doc.getId());
-        d.setName(doc.getName());
-        //d.setUrl(doc.getFilePath());
-        d.setSummary(doc.getSummary());
-        d.setType(DocumentDTO.TypeEnum.valueOf(doc.getType().toString()));
-        //d.setUrl(doc.getFilePath());
-        d.setVisibility(DocumentDTO.VisibilityEnum.valueOf(doc.getVisibility().toString()));
-        return d;
-    }
-
-    public static Documentation fromDTOtoDocumentation(DocumentDTO dto){
-        Documentation doc = new Documentation(DocumentationType.valueOf(dto.getType().toString()) ,dto.getName());
-        doc.setSummary(dto.getSummary());
-        String visibility = dto.getVisibility().toString();
-        /*
-        TO-DO following statement will never reach as .tostring will retunr you NPE. Please check logic
-        if (visibility == null){
-            visibility = APIConstants.DOC_API_BASED_VISIBILITY;
-        }*/
-        doc.setVisibility(Documentation.DocumentVisibility.valueOf(visibility));
-        doc.setSourceType(Documentation.DocumentSourceType.INLINE);
-        return doc;
     }
 
     private static String updateContextWithVersion(String version, String contextVal, String context) {
