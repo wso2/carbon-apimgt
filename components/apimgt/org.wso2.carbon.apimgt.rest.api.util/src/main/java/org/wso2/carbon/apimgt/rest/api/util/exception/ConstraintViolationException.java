@@ -38,5 +38,5 @@ public class ConstraintViolationException extends WebApplicationException {
                     + ": " + violation.getMessage());
         }
     }
-    
+
 }

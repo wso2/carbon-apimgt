@@ -26,7 +26,7 @@ public class BadRequestException extends WebApplicationException {
 
     List<ErrorListItemDTO> list;
 
-    public BadRequestException(List<ErrorListItemDTO> l){
+    public BadRequestException(List<ErrorListItemDTO> l) {
         super(Response.Status.BAD_REQUEST);
         list = l;
     }

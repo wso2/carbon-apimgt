@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.util.handlers;
+package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 /*
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -19,9 +19,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
-import org.apache.cxf.jaxrs.ext.RequestHandler;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.EntitlementServiceClient;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -33,15 +34,22 @@ import javax.ws.rs.core.Response;
 //import org.wso2.carbon.identity.entitlement.proxy.PEPProxy;
 
 
-public class XACMLAuthenticationHandler implements RequestHandler {
+public class XACMLAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
-    private static final Log logger = LogFactory.getLog(XACMLAuthenticationHandler.class);
+    private static final Log logger = LogFactory.getLog(XACMLAuthenticationInterceptor.class);
+    public XACMLAuthenticationInterceptor() {
+        //We will use PRE_INVOKE phase as we need to process message before hit actual service
+        super(Phase.PRE_INVOKE);
+    }
+    public void handleMessage(Message outMessage) {
+        handleRequest(outMessage, null);
+    }
+
 
     /**
      * isUserPermitted requests received at the ml endpoint, using HTTP basic-auth headers as the authentication
      * mechanism. This method returns a null value which indicates that the request to be processed.
      */
-    @Override
     public Response handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
         if (logger.isDebugEnabled()) {

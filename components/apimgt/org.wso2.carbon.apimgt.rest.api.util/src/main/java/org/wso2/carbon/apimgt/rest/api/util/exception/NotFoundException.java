@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 
 public class NotFoundException extends WebApplicationException {
 
-    public NotFoundException(){
+    public NotFoundException() {
         super(Response.Status.NOT_FOUND);
     }
 

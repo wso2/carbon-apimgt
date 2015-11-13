@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.util.handlers;
+package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 /*
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -17,17 +17,19 @@ package org.wso2.carbon.apimgt.rest.api.util.handlers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.jaxrs.ext.RequestHandler;
+import org.apache.cxf.jaxrs.impl.MetadataMap;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
-import org.apache.synapse.SynapseException;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ErrorDetail;
 import org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl;
 
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.regex.Pattern;
 
@@ -36,26 +38,47 @@ import java.util.regex.Pattern;
  * You can place this handler name in your web application if you need OAuth
  * based authentication.
  */
-public class OAuthAuthenticationHandler implements RequestHandler {
+public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
-    private static final Log logger = LogFactory.getLog(OAuthAuthenticationHandler.class);
+    private static final Log logger = LogFactory.getLog(OAuthAuthenticationInterceptor.class);
     private static final String OAUTH_AUTHENTICATOR = "OAuth";
     private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
     private volatile WebAppAuthenticator authenticator;
 
+    public OAuthAuthenticationInterceptor() {
+        //We will use PRE_INVOKE phase as we need to process message before hit actual service
+        super(Phase.PRE_INVOKE);
+    }
+    public void handleMessage(Message inMessage) {
+        if(handleRequest(inMessage, null)){
+
+        }
+        else{
+        ErrorDTO errorDetail = new ErrorDTO();
+        errorDetail.setCode((long)401);
+        errorDetail.setDescription("Unauthenticated request");
+            Response response = Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorDetail)
+                    .build();
+        inMessage.getExchange().put(Response.class, response);
+        }
+    }
+
+
     /**
      * This method will initialize Web APP authenticator to validate incoming requests
      * Here we will get implementation class and create object of it.
      */
-    public void initializeAuthenticator() {
+    public void initializeAuthenticator() throws APIManagementException {
         try {
             //TODO Retrieve this class name from configuration and let it configurable.
-          //  authenticator = (WebAppAuthenticator) APIUtil.getClassForName(
-              //      RestApiConstants.REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME).newInstance();
+            //  authenticator = (WebAppAuthenticator) APIUtil.getClassForName(
+            //      RestApiConstants.REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME).newInstance();
             authenticator = new WebAppAuthenticatorImpl();
         } catch (Exception e) {
-            throw new SynapseException("Error while initializing authenticator of " + "type: ");
+            throw new APIManagementException("Error while initializing authenticator of " + "type: ",e);
         }
 
     }
@@ -64,18 +87,21 @@ public class OAuthAuthenticationHandler implements RequestHandler {
      * authenticate requests received at the REST API endpoint, using HTTP OAuth headers as the authentication
      * mechanism. This method returns a null value which indicates that the request to be processed.
      */
-    @Override
-    public Response handleRequest(Message message, ClassResourceInfo resourceInfo) {
+    public boolean handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
         if (authenticator == null) {
-            initializeAuthenticator();
+            try {
+                initializeAuthenticator();
+            } catch (APIManagementException e) {
+                logger.error(e.getMessage());
+            }
         } else {
             try {
                 if (logger.isDebugEnabled()) {
                     logger.debug(String.format("Authenticating request: " + message.getId()));
                 }
                 if (authenticator.authenticate(message)) {
-                    return null;
+                    return true;
                 } else {
                     //TODO generate authentication failure response if we get auth failure
                     //handle oauth failure
@@ -84,7 +110,7 @@ public class OAuthAuthenticationHandler implements RequestHandler {
                 logger.error("Error while authenticating incoming request to API Manager REST API");
             }
         }
-        return null;
+        return false;
     }
 
 

@@ -31,11 +31,11 @@ public final class RestApiConstants {
     public static final String SERVER_USER_NAME = "/applications";
     public static final String SERVER_PASSWORD = "/applications";
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
-    public static final String API_VERSION_PARAM="{version}";
-    public static final String REST_API_STORE_CONTEXT="store_rest_api";
-    public static final String REST_API_STORE_VERSION="v1";
-    public static final String REST_API_PUBLISHER_VERSION="v1";
-    public static final String REST_API_PUBLISHER_CONTEXT="publisher_rest_api";
+    public static final String API_VERSION_PARAM = "{version}";
+    public static final String REST_API_STORE_CONTEXT = "store_rest_api";
+    public static final String REST_API_STORE_VERSION = "v1";
+    public static final String REST_API_PUBLISHER_VERSION = "v1";
+    public static final String REST_API_PUBLISHER_CONTEXT = "publisher_rest_api";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
     public static final String AUTH_HEADER_NAME = "Authorization";
