@@ -90,41 +90,7 @@ public class TierCacheInvalidationClient {
         } catch (RemoteException e) {
             log.error("Error while invalidating the tier cache in Store for tenant : " + tenantDomain, e);
         }
-
-        // Clear Publisher Cache
-        try {
-            cookie = login(storeServerURL, storeUserName, storePassword);
-            clearCache(tenantDomain, storeServerURL, cookie);
-        } catch (AxisFault axisFault) {
-            log.error("Error while initializing the OAuth admin service stub in Publisher for tenant : " + tenantDomain,
-                      axisFault);
-        } catch (RemoteException e) {
-            log.error("Error while invalidating the tier cache in Publisher for tenant : " + tenantDomain, e);
-        }
-
-        // Clear Gateway Caches
-        if (environments == null || environments.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Unable to find the list of gateway environments");
-            }
-            return;
-        }
-        String gatewayServerURL;
-        for (Map.Entry<String, Environment> entry : environments.entrySet()) {
-            Environment environment = entry.getValue();
-            gatewayServerURL = environment.getServerURL();
-            try {
-                cookie = login(gatewayServerURL, environment.getUserName(), environment.getPassword());
-                clearCache(tenantDomain, gatewayServerURL, cookie);
-            } catch (AxisFault axisFault) {
-                log.error("Error while initializing the OAuth admin service stub for gateway environment : " +
-                          entry.getValue().getName() + " for tenant : " + tenantDomain, axisFault);
-                continue;
-            } catch (RemoteException e) {
-                log.error("Error while invalidating the tier cache for gateway environment : " +
-                          entry.getValue().getName() + " for tenant : " + tenantDomain, e);
-            }
-        }
+        
     }
 
     public void clearCache(String tenantDomain, String serverURL, String cookie) throws AxisFault, RemoteException {
