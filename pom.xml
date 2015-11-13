@@ -516,6 +516,13 @@
                 <version>${carbon.governance.version}</version>
             </dependency>
 
+	    <dependency>
+                <groupId>org.wso2.carbon.governance</groupId>
+                <artifactId>org.wso2.carbon.governance.lcm</artifactId>
+                <version>${carbon.governance.version}</version>
+            </dependency>
+
+
             <dependency>
                 <groupId>org.wso2.carbon.governance</groupId>
                 <artifactId>org.wso2.carbon.governance.custom.lifecycles.checklist</artifactId>
