@@ -2900,7 +2900,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return false;
     }
-
     @Override
     /*
     * This method returns the lifecycle data for an API including current state,next states.

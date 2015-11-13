@@ -87,10 +87,12 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -209,6 +211,10 @@ public class APIProviderHostObject extends ScriptableObject {
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             PermissionUpdateUtil.updatePermissionTree(tenantId);
+            
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();            
+            CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(tenantId), 
+                                                          CommonUtil.getRootSystemRegistry(tenantId));
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {

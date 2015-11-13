@@ -29,7 +29,51 @@ include("/jagg/jagg.jag");
                 }
             }
             print(obj);
+        } else if (action == "getAllTiers" ) {
+            mod = jagg.module("tier");
+            result = mod.getAllTiers();
+	    var tierArray = result.tiers.toArray();
+	    var tierListSize  = result.tiers.size();
+	    var count = 0;
+
+	    var tiersList = [];
+	    for(j = 0; j < tierListSize; j++) {
+			var tierObj = {};
+			var tier = tierArray[j];
+		        var tierDisplayName = tier.getDisplayName();
+		        var tierName = tier.getName();
+		        var requestCount, unitTime, description, tierPlan, stopOnQuotaReach;
+		        var displayStatus = "No";
+		        if("Unlimited".equalsIgnoreCase(tierName)){
+		            continue;
+		        } else {
+		            requestCount = tier.getRequestCount();
+		            unitTime = tier.getUnitTime();
+		        }
+		        tierPlan = tier.getTierPlan() == null ? "" : tier.getTierPlan();
+		        description = tier.getDescription() == null ? "" : tier.getDescription();
+
+		        stopOnQuotaReach = tier.isStopOnQuotaReached();
+		        if("true".equalsIgnoreCase(stopOnQuotaReach)){
+		            displayStatus = "Yes";
+		        }
+			tierObj.tierDisplayName=tierDisplayName;
+			tierObj.tierName=tierName
+			tiersList.push(tierObj);
+		}
+            if (result.error) {
+                obj = {
+                    error:true,
+                    message:msg.error.backendError(action) + ". Reason : " + result.message
+                };
+            } else {
+                obj = {
+                    error:false,
+                    response:tiersList
+                }
+            }
+            print(obj);
         }
-    }
+    } 
  }());  
 %>
