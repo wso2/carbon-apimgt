@@ -346,6 +346,38 @@ public interface APIManager {
     Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
 
     /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getAppTiers() throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getAppTiers(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getResTiers() throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getResTiers(String tenantDomain) throws APIManagementException;
+
+    /**
      * Returns a list of domain name mappings store / gateway.
      *
      * @return Set<Tier>
