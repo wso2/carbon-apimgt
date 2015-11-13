@@ -52,6 +52,10 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
         boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
 
+        /*setting global analytic enabled status. Which use at by the by bam mediator in
+        synapse to enable or disable destination based stat publishing*/
+        mc.setProperty("isStatEnabled", enabled);
+
         boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                 isSkipEventReceiverConnection();
 
