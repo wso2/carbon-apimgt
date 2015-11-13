@@ -99,6 +99,7 @@ public class APIThrottleHandler extends AbstractHandler {
     private RoleBasedAccessRateController applicationRoleBasedAccessController;
 
     public static final String RESOURCE_THROTTLE_KEY = "resource_throttle_context";
+    public static final String RESOURCE_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/res-tiers.xml";
 
     private Map<String, Boolean> continueOnLimitReachedMap;
 
@@ -662,6 +663,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 }
                 // If this is a clustered env.
                 //check for configuration role of the caller
+                config=context.getThrottleConfiguration();
                 String consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
                 if (isClusteringEnable) {
                     context.setConfigurationContext(cc);
@@ -815,8 +817,20 @@ public class APIThrottleHandler extends AbstractHandler {
                         throttle = ThrottleFactory.createMediatorThrottle(
                                 PolicyEngine.getPolicy(policyOMElement));
 
-                        ThrottleContext throttleContext = throttle.getThrottleContext(
-                                ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
+                        //load the resource level tiers
+                        Object resEntryValue = synCtx.getEntry(RESOURCE_THROTTLE_POLICY_KEY);
+                        if (resEntryValue == null || !(resEntryValue instanceof OMElement)) {
+                            handleException(
+                                    "Unable to load throttling policy using key: " + RESOURCE_THROTTLE_POLICY_KEY);
+                            return;
+                        }
+
+                        //create throttle for the resource level
+                        Throttle resThrottle = ThrottleFactory
+                                .createMediatorThrottle(PolicyEngine.getPolicy((OMElement) resEntryValue));
+                        //get the throttle Context for the resource level
+                        ThrottleContext throttleContext = resThrottle
+                                .getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
 
                         if (throttleContext != null) {
                             ThrottleConfiguration throttleConfiguration = throttleContext.getThrottleConfiguration();
