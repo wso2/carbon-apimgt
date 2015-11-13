@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -45,6 +47,8 @@ import java.util.Set;
  */
 public class ApisApiServiceImpl extends ApisApiService {
 
+    private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+
     /** Retrieves APIs qualifying under given search condition 
      *
      * @param limit maximum number of APIs returns
@@ -61,7 +65,6 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
             String ifNoneMatch) {
         Map<String, Object> apisMap;
-        boolean isTenantFlowStarted = false;
 
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -71,14 +74,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            /*String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-               // isTenantFlowStarted = true;
-               // PrivilegedCarbonContext.startTenantFlow();
-               // PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-               // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }*/
 
             apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, limit, true);
             APIListDTO apiListDTO = new APIListDTO();
@@ -92,27 +87,27 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving APIs";
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } /*finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }     */
+        }
     }
 
+    /**
+     * Get API of given ID
+     *
+     * @param apiId  API ID
+     * @param accept accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return API of the given ID
+     */
     @Override
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
         APIDTO apiToReturn;
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            } */
+
             API api;
             if (RestApiUtil.isUUID(apiId)) {
                 api = apiConsumer.getAPIbyUUID(apiId);
@@ -124,15 +119,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (api != null) {
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             } else {
+                String errorMessage =  apiId + " does not exist";
+                log.error(errorMessage);
                 throw new NotFoundException();
             }
         } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API : " + apiId;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } /*finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }   */
+        }
         return Response.ok().entity(apiToReturn).build();
     }
 
