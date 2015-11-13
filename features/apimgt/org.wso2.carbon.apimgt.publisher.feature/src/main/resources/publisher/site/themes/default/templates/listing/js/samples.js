@@ -1,5 +1,5 @@
 function APISamples(defaultTier, gatewayURL) {
-    this.sample1_swagger = "{\"paths\":{\"/add\":{\"get\":{\"summary\":\"add x and y\", " +
+    this.sample_swagger = "{\"paths\":{\"/add\":{\"get\":{\"summary\":\"add x and y\", " +
     "\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\", " +
     "\"produces\":\"application/json\",\"parameters\":[{\"name\":\"x\",\"required\":true, " +
     "\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\": " +
@@ -27,7 +27,7 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
     var addAPIData = {action: 'sampleDesign', name: 'CalculatorAPI', provider: username,
         version: '1.0', description: 'Simple calculator API to perform addition, subtraction, ' +
         'multiplication and division.', tags: 'calculator', visibility: 'public', context: 'calc',
-        swagger: this.sample1_swagger, apiThumb: '/site/themes/default/images/calculatorAPI.png'};
+        swagger: this.sample_swagger, apiThumb: '/site/themes/default/images/calculatorAPI.png'};
 
     jagg.message({
         content:"" ,
@@ -72,7 +72,7 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                     production_endpoints: prodEndpoint,
                     sandbox_endpoints: sandboxEndpoint,
                     endpointType: "nonsecured",
-                    swagger: _this.sample1_swagger
+                    swagger: _this.sample_swagger
                 };
                 jagg.post(urlDesign, implementation,
                     function (result) {
@@ -80,7 +80,7 @@ APISamples.prototype.deploySample = function (defaultTier, gatewayURL) {
                             provider: username, version: "1.0", default_version_checked: " ",
                             tier: defaultTier, tiersCollection: defaultTier,
                             transport_http: "http", transport_https: "https",
-                            swagger: _this.sample1_swagger},
+                            swagger: _this.sample_swagger},
                             function (result) {
                                 if (isPublishPermitted) {
                                     var urlPublished = "/site/blocks/life-cycles/ajax/life-cycles.jag";
