@@ -23,6 +23,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -30,21 +31,25 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 @Constraint(validatedBy = ParameterEqualityValidator.class)
-@Target({ METHOD, CONSTRUCTOR, ANNOTATION_TYPE })
+@Target({METHOD, CONSTRUCTOR, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface ValidateParamEquality {
 
     public static final String DEFAULT_ERROR_MESSAGE = "Specified objects are not equal.";
+
     String message() default DEFAULT_ERROR_MESSAGE;
 
-    Class<?>[] groups() default { };
+    Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default { };
-    
+    Class<? extends Payload>[] payload() default {};
+
     int index0();
+
     String index0Field() default "";
+
     int index1();
+
     String index1Field() default "";
 
     /**
@@ -53,8 +58,7 @@ public @interface ValidateParamEquality {
     @Target({METHOD, CONSTRUCTOR, ANNOTATION_TYPE})
     @Retention(RUNTIME)
     @Documented
-    @interface List
-    {
+    @interface List {
         ValidateParamEquality[] value();
     }
 }

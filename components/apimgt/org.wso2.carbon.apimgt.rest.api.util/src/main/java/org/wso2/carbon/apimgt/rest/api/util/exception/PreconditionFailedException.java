@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 
 public class PreconditionFailedException extends WebApplicationException {
 
-    public PreconditionFailedException(){
+    public PreconditionFailedException() {
         super(Response.Status.PRECONDITION_FAILED);
     }
 }

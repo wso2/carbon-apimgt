@@ -35,5 +35,4 @@ public class EntitlementClientConstants {
     public static final String POLICY_PATH = "policyPath";
 
 
-
 }
