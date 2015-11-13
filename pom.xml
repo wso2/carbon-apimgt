@@ -323,6 +323,13 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.samples.calculator</artifactId>
+                <type>war</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>commons-lang.wso2</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
@@ -712,13 +719,6 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.startup.publisher.feature</artifactId>
-                <version>${carbon.apimgt.version}</version>
-                <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.samples.calculator.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
             </dependency>
