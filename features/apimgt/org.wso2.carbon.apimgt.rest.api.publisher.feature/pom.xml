@@ -38,8 +38,8 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
             <type>war</type>
-            <version>4.3.1-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
             <artifactId>axis2</artifactId>
