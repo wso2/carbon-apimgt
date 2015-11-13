@@ -1642,7 +1642,7 @@ public final class APIUtil {
                 } else {
                     tier.setDisplayName(tierName);
                 }
-
+                String desc;
                 try {
                     long requestPerMin = APIDescriptionGenUtil.getAllowedCountPerMinute(policy);
                     tier.setRequestsPerMin(requestPerMin);
@@ -1652,6 +1652,13 @@ public final class APIUtil {
 
                     long unitTime = APIDescriptionGenUtil.getTimeDuration(policy);
                     tier.setUnitTime(unitTime);
+                    
+                    if (requestPerMin >= 1) {
+                        desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
+                    } else {
+                        desc = DESCRIPTION;
+                    }
+                    tier.setDescription(desc);
 
                 } catch (APIManagementException ex) {
                     // If there is any issue in getting the request counts or the time duration, that means this tier
@@ -1660,6 +1667,7 @@ public final class APIUtil {
                     log.warn("Unable to get the request count/time duration information for : " + tier.getName());
                     continue;
                 }
+           
 
                 // Get all the attributes of the tier.
                 Map<String, Object> tierAttributes = APIDescriptionGenUtil.getTierAttributes(policy);
