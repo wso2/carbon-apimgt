@@ -16,35 +16,61 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-
+/** This is the service implementation class for Store API related operations 
+ *
+ */
 public class ApisApiServiceImpl extends ApisApiService {
 
+    /** Retrieves APIs qualifying under given search condition 
+     *
+     * @param limit maximum number of APIs returns
+     * @param offset starting index
+     * @param query search condition
+     * @param type value for the search condition
+     * @param sort sort parameter
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched APIs for the given search condition
+     */
     @Override
-    public Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch){
-        List<API> apis;
-        APIListDTO apiListDTO;
+    @SuppressWarnings("unchecked")
+    public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
+            String ifNoneMatch) {
+        Map<String, Object> apisMap;
         boolean isTenantFlowStarted = false;
 
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             /*String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -54,10 +80,16 @@ public class ApisApiServiceImpl extends ApisApiService {
                // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
             }*/
 
-            //We should send null as the provider, Otherwise serchAPIs will return all APIs of the provider 
-            // instead of looking at type and query
-            apis = apiProvider.searchAPIs(query, type, null);
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(apis);
+            apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, limit, true);
+            APIListDTO apiListDTO = new APIListDTO();
+            Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
+            int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
+            if (apisResult != null) {
+                Set<API> apiSet = (Set)apisResult;
+                apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet);
+                APIMappingUtil.setPaginationParams(apiListDTO, query, type, offset, limit, size);
+            }
+
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -70,9 +102,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
-        APIDTO apiToReturn = new APIDTO();
+        APIDTO apiToReturn;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
             /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -83,10 +115,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             } */
             API api;
             if (RestApiUtil.isUUID(apiId)) {
-                api = apiProvider.getAPIbyUUID(apiId);
+                api = apiConsumer.getAPIbyUUID(apiId);
             } else {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-                api = apiProvider.getAPI(apiIdentifier);
+                api = apiConsumer.getAPI(apiIdentifier);
             }
 
             if (api != null) {
@@ -105,29 +137,46 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch) {
-        List<DocumentDTO> list = new ArrayList<DocumentDTO>();
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
+            String ifNoneMatch) {
+
+        //pre-processing
+        //setting default limit and offset values if they are not set
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        if (query == null) {
+            query = "";
+        }
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            List<Documentation> docs = apiProvider.getAllDocumentation(APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain));
-            for (Documentation temp : docs) {
-                list.add(APIMappingUtil.fromDocumentationtoDTO(temp));
-            }
+
+            //this will fail if user doesn't have access to the API or the API does not exist
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier);
+            DocumentListDTO documentListDTO = DocumentationMappingUtil
+                    .fromDocumentationListToDTO(documentationList, offset, limit);
+            DocumentationMappingUtil
+                    .setPaginationParams(documentListDTO, query, apiId, offset, limit, documentationList.size());
+            return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
-        return Response.ok().entity(list).build();
     }
 
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
-        Documentation doc;
+        Documentation documentation;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            doc = apiProvider.getDocumentation(documentId);
-            if(null != doc){
-                return Response.ok().entity(doc).build();
+            String username = RestApiUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            RestAPIStoreUtils.checkUserAccessAllowedToAPI(apiId);
+            documentation = apiConsumer.getDocumentation(documentId);
+            if(null != documentation){
+                DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+                return Response.ok().entity(documentDTO).build();
             }
             else{
                 throw new NotFoundException();

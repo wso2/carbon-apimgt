@@ -16,22 +16,18 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
-public class BadRequestException extends WebApplicationException {
+/**
+ * Exception class that is corresponding to 401 Forbidden response
+ */
+public class ForbiddenException extends WebApplicationException {
 
-    List<ErrorListItemDTO> list;
-
-    public BadRequestException(List<ErrorListItemDTO> l){
-        super(Response.Status.BAD_REQUEST);
-        list = l;
+    public ForbiddenException(String message){
+        super(Response.status(Response.Status.FORBIDDEN).entity(RestApiUtil.getErrorDTO(message)).build());
     }
 
-    public BadRequestException(){
-        super(Response.Status.BAD_REQUEST);
-    }
 }

@@ -4192,7 +4192,10 @@ public class ApiMgtDAO {
                               "   API.API_VERSION AS API_VERSION, " +
                               "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
                               "   SUB.USER_ID AS USER_ID, " +
-                              "   APP.NAME AS APPNAME " +
+                              "   APP.NAME AS APPNAME, " +
+                              "   SUBS.UUID AS SUB_UUID, " +
+                              "   SUBS.TIER_ID AS SUB_TIER_ID, " +
+                              "   APP.UUID AS APP_UUID " +
                               "FROM " +
                               "   AM_SUBSCRIPTION SUBS, " +
                               "   AM_APPLICATION APP, " +
@@ -4237,6 +4240,10 @@ public class ApiMgtDAO {
                                                       result.getString("API_NAME"), result.getString("API_VERSION"));
                 SubscribedAPI apiSubscription=new SubscribedAPI(new Subscriber(userId),apiId);
                 apiSubscription.setSubStatus(subStatus);
+                apiSubscription.setUUID(result.getString("SUB_UUID"));
+                apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
+                Application applicationObj = new Application(result.getString("APP_UUID"));
+                apiSubscription.setApplication(applicationObj);
                 usage.addApiSubscriptions(apiSubscription);
 
             }

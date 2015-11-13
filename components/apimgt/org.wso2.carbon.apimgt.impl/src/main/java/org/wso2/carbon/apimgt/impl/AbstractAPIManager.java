@@ -21,11 +21,14 @@ package org.wso2.carbon.apimgt.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
+import org.wso2.carbon.apimgt.api.ResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Icon;
@@ -33,11 +36,14 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.utils.TierNameComparator;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -81,6 +87,11 @@ public abstract class AbstractAPIManager implements APIManager {
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
     protected String username;
+    private LRUCache<String, GenericArtifactManager> genericArtifactCache = new LRUCache<String, GenericArtifactManager>(
+            5);
+
+    // API definitions from swagger v2.0
+    protected static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public AbstractAPIManager() throws APIManagementException {
     }
@@ -346,8 +357,14 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
-            return APIUtil.getAPIForPublishing(apiArtifact, registry);
-
+            if (apiArtifact != null) {
+                return APIUtil.getAPIForPublishing(apiArtifact, registry);
+            } else {
+                String errorMessage =
+                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                log.error(errorMessage);
+                throw new ResourceNotFoundException(errorMessage);
+            }
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
             return null;
@@ -361,7 +378,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIInformationByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getAPIInfoByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Registry registry;
             if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -388,8 +405,8 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 String errorMessage =
                         "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                handleException(errorMessage);
-                return null;
+                log.error(errorMessage);
+                throw new ResourceNotFoundException(errorMessage);
             }
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
@@ -398,6 +415,94 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get API", e);
             return null;
         }
+    }
+
+    /**
+     * Get minimal details of API by API identifier
+     *
+     * @param identifier APIIdentifier object
+     * @return API of the provided APIIdentifier
+     * @throws APIManagementException
+     */
+    public API getAPIInfo(APIIdentifier identifier)
+            throws APIManagementException {
+        String apiPath = APIUtil.getAPIPath(identifier);
+
+        boolean tenantFlowStarted = false;
+
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            tenantFlowStarted = true;
+
+            Registry registry = getRegistry(identifier, apiPath);
+            Resource apiResource = registry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            if (artifactId == null) {
+                throw new APIManagementException("artifact id is null for : " + apiPath);
+            }
+            GenericArtifactManager artifactManager = getGenericArtifactManager(identifier, registry);
+            GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+            return APIUtil.getAPIInformation(apiArtifact, registry);
+        } catch (RegistryException e) {
+            handleException("Failed to get API from : " + apiPath, e);
+            return null;
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+    }
+
+    private GenericArtifactManager getGenericArtifactManager(APIIdentifier identifier, Registry registry)
+            throws APIManagementException {
+
+        String tenantDomain = MultitenantUtils
+                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        GenericArtifactManager manager = genericArtifactCache.get(tenantDomain);
+        if (manager != null) {
+            return manager;
+        }
+        manager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+        genericArtifactCache.put(tenantDomain, manager);
+        return manager;
+    }
+
+    private Registry getRegistry(APIIdentifier identifier, String apiPath)
+            throws APIManagementException {
+        Registry passRegistry;
+        try {
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                // explicitly load the tenant's registry
+                APIUtil.loadTenantRegistry(id);
+                passRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+                        .getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !this.tenantDomain
+                        .equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    // explicitly load the tenant's registry
+                    APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                    passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                            identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    passRegistry = this.registry;
+                }
+            }
+        } catch (RegistryException e) {
+            handleException("Failed to get API from registry on path of : " + apiPath, e);
+            return null;
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Failed to get API from registry on path of : " + apiPath, e);
+            return null;
+        }
+        return passRegistry;
     }
 
     public API getAPI(String apiPath) throws APIManagementException {
@@ -454,6 +559,17 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get versions for API: " + apiName, e);
         }
         return versionSet;
+    }
+
+    /** Returns the swagger 2.0 definition of the given API
+     * 
+     * @param apiId id of the APIIdentifier
+     * @return An String containing the swagger 2.0 definition
+     * @throws APIManagementException
+     */
+    @Override
+    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
     }
 
     public String addIcon(String resourcePath, Icon icon) throws APIManagementException {
@@ -773,6 +889,26 @@ public abstract class AbstractAPIManager implements APIManager {
         	}
         }
         return apiSortedSet;
+    }
+
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    public Application getApplicationByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getApplicationByUUID(uuid);
+    }
+
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getSubscriptionByUUID(uuid);
     }
 
     protected void handleException(String msg, Exception e) throws APIManagementException {

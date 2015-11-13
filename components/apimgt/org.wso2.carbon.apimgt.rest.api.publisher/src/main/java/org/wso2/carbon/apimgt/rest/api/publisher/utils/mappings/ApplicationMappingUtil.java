@@ -17,13 +17,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationListDTO;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ApplicationMappingUtil {
 
