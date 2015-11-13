@@ -111,7 +111,6 @@
         <dependency>
             <groupId>net.sf.ehcache.wso2</groupId>
             <artifactId>ehcache</artifactId>
-            <version>1.5.0.wso2v3</version>
         </dependency>
     </dependencies>
 
