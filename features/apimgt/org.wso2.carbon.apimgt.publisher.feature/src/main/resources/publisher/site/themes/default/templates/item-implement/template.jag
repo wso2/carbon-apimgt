@@ -14,7 +14,7 @@
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 %>
 <script type="text/javascript">
-    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'OPTIONS'];
+    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("none")%>", "text":"<%=i18n.localize("none")%>"} ,
       { "value": "<%=i18n.localize("application")%>", "text":"<%=i18n.localize("application")%>"},

@@ -248,6 +248,18 @@
             <field type="text">
                 <name>Mediation Script4</name>
             </field>
+            <field type="text">
+                <name>URL Pattern5</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb5</name>
+            </field>
+            <field type="text">
+                <name>Auth Type5</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script5</name>
+            </field>
         </table>
 </content>
 

@@ -14,6 +14,7 @@ function loadTiers(row) {
                       $('.postThrottlingTier',row).html('');
                       $('.putThrottlingTier',row).html('');
                       $('.deleteThrottlingTier',row).html('');
+                      $('.patchThrottlingTier',row).html('');
                       $('.optionsThrottlingTier',row).html('');
 
                       TIERS = result.tiers;
@@ -26,6 +27,7 @@ function loadTiers(row) {
                           $('.putThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
                           $('.postThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
                           $('.deleteThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
+                          $('.patchThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
                           $('.optionsThrottlingTier',row).append($('<option value="'+result.tiers[k].tierName+'" title="'+result.tiers[k].tierDescription+'">'+result.tiers[k].tierDisplayName+'</option>'));
                       }
 
