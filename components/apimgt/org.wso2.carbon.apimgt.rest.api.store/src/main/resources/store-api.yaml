@@ -1326,6 +1326,8 @@ definitions:
         type: string
       description:
         type: string
+      status:
+        type: string
       groupId:
         type: string
       keys:
@@ -1347,9 +1349,9 @@ definitions:
         type: string
       throttlingTier:
         type: string
-      callbackUrl:
-        type: string
       description:
+        type: string
+      status:
         type: string
       groupId:
         type: string

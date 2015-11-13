@@ -69,7 +69,7 @@ public class RestAPIStoreUtils {
      * @param application Application object
      * @return true if current logged in consumer has access to the specified application
      */
-    public static boolean isUserAccessAllowedToApplication(Application application) {
+    public static boolean isUserAccessAllowedForApplication(Application application) {
         String username = RestApiUtil.getLoggedInUsername();
 
         //if groupId is null or empty, it is not a shared app 
@@ -80,7 +80,7 @@ public class RestAPIStoreUtils {
             }
         } else {
             String userGroupIds = RestAPIStoreUtils.getLoggedInUserGroupIds();
-            //if the application is a shared one, application's group id and the user's group id should be same //todo check this
+            //if the application is a shared one, application's group id and the user's group id should be same
             if (application.getGroupId().equals(userGroupIds)) {
                 return true;
             }

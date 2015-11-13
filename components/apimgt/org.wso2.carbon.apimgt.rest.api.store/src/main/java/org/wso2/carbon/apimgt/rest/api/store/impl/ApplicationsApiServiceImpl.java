@@ -110,7 +110,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
                 JSONObject jsonParamObj = new JSONObject();
                 jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
@@ -140,7 +140,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                 return Response.ok().entity(applicationDTO).build();
             } else {
@@ -167,7 +167,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             application.setGroupId(groupId);
             //we do not honor the application id which is sent via the request body
             application.setUUID(applicationId);
-            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 apiConsumer.updateApplication(application);
 
                 //retrieves the updated application and send as the response
@@ -190,7 +190,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            if (RestAPIStoreUtils.isUserAccessAllowedToApplication(application)) {
+            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 apiConsumer.removeApplication(application);
                 return Response.ok().build();
             } else {

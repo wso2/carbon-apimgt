@@ -40,6 +40,7 @@ public class ApplicationMappingUtil {
         applicationDTO.setDescription(application.getDescription());
         applicationDTO.setCallbackUrl(application.getCallbackUrl());
         applicationDTO.setName(application.getName());
+        applicationDTO.setStatus(application.getStatus());
         applicationDTO.setGroupId(application.getGroupId());
         applicationDTO.setSubscriber(application.getSubscriber().getName());
         List<ApplicationKeyDTO> applicationKeyDTOs = new ArrayList<>();
@@ -126,7 +127,7 @@ public class ApplicationMappingUtil {
         applicationInfoDTO.setApplicationId(application.getUUID());
         applicationInfoDTO.setThrottlingTier(application.getTier());
         applicationInfoDTO.setDescription(application.getDescription());
-        applicationInfoDTO.setCallbackUrl(application.getCallbackUrl());
+        applicationInfoDTO.setStatus(application.getStatus());
         applicationInfoDTO.setName(application.getName());
         applicationInfoDTO.setGroupId(application.getGroupId());
         applicationInfoDTO.setSubscriber(application.getSubscriber().getName());

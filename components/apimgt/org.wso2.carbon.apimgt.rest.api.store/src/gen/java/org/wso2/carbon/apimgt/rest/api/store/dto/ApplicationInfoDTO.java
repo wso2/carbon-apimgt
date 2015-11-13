@@ -25,10 +25,10 @@ public class ApplicationInfoDTO  {
   private String throttlingTier = null;
   
   
-  private String callbackUrl = null;
-  
-  
   private String description = null;
+  
+  
+  private String status = null;
   
   
   private String groupId = null;
@@ -85,24 +85,24 @@ public class ApplicationInfoDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("callbackUrl")
-  public String getCallbackUrl() {
-    return callbackUrl;
-  }
-  public void setCallbackUrl(String callbackUrl) {
-    this.callbackUrl = callbackUrl;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("description")
   public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
+  }
+  public void setStatus(String status) {
+    this.status = status;
   }
 
   
@@ -128,8 +128,8 @@ public class ApplicationInfoDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  subscriber: ").append(subscriber).append("\n");
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
-    sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  status: ").append(status).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
     sb.append("}\n");
     return sb.toString();
