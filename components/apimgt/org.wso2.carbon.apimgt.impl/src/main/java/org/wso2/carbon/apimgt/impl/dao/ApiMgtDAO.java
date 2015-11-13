@@ -3801,6 +3801,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
             prepStmt.setString(1, consumerKey);
             prepStmt.execute();
@@ -3971,6 +3972,7 @@ public class ApiMgtDAO {
 
             try {
                 connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, APIUtil.encryptToken(consumerKey));
                 ps.setInt(2, application.getId());
@@ -4020,7 +4022,7 @@ public class ApiMgtDAO {
                     "VALUES (?,?,?,?,?)";
             try {
                 connection = APIMgtDBUtil.getConnection();
-
+                connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setInt(1, applicationId);
                 ps.setString(2, APIUtil.encryptToken(consumerKey));
@@ -5728,6 +5730,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             String deleteKeyMappingQuery = "DELETE " +
                     "FROM" +
                     "   AM_APPLICATION_KEY_MAPPING " +
@@ -5759,6 +5762,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             String deleteRegistrationEntry = "DELETE " +
                     "FROM" +
                     "   AM_APPLICATION_KEY_MAPPING  " +
@@ -7009,6 +7013,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(deleteApplicationKeyQuery);
             prepStmt.setString(1, consumerKey);
             prepStmt.execute();

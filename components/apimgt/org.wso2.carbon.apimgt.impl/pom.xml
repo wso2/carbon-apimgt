@@ -7,14 +7,12 @@
 	under the License is distributed on an "AS IS" BASIS, # WITHOUT WARRANTIES
 	OR CONDITIONS OF ANY KIND, either express or implied. # See the License for
 	the specific language governing permissions and # limitations under the License. -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -196,22 +194,18 @@
                         <configuration>
                             <tasks>
                                 <path id="h2.classpath">
-                                    <path refid="maven.compile.classpath"/>
+                                    <path refid="maven.compile.classpath" />
                                 </path>
-                                <echo message="########### Create Test Database ##############"/>
-                                <sql
-                                        driver="org.h2.Driver"
-                                        url="jdbc:h2:${basedir}/target/repository/database/WSO2AM_DB"
-                                        userid="wso2carbon" password="wso2carbon" autocommit="true"
-                                        onerror="continue">
+                                <echo message="########### Create Test Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/target/repository/database/WSO2AM_DB" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
                                     <classpath>
-                                        <path refid="h2.classpath"/>
+                                        <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2.sql"/>
-                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql"/>
+                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2.sql" />
+                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql" />
 
                                 </sql>
-                                <echo message="##################### END ########################"/>
+                                <echo message="##################### END ########################" />
                             </tasks>
                         </configuration>
                     </execution>
