@@ -123,6 +123,9 @@ jagg.module("api", {
     },
     isScopeExist:function(){
 	return jagg.require(jagg.getModulesDir() + "api/add.jag").isScopeExist.apply(this, arguments);
+    },
+    getGatewayURL:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getGatewayURL.apply(this, arguments);
     }
 });
 %>
