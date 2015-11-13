@@ -2842,19 +2842,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
         boolean success = false;
         try {
-            if (checkItemValue) {
-                apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-            } else {
-                apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+            if (apiArtifact != null) {
+                if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                    apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                    apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                }
+                success = true;
             }
-            success = true;
         } catch (GovernanceException e) {
             handleException("Error while setting registry lifecycle checklist items for the API: " +
                     apiIdentifier.getApiName(), e);
         }
         return success;
     }
-
     @Override
     /*
     * This method returns the lifecycle data for an API including current state,next states.
