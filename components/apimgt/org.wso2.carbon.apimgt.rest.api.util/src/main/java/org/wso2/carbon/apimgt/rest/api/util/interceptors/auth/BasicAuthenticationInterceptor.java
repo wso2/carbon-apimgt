@@ -41,7 +41,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     public BasicAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
-        super(Phase.POST_INVOKE);
+        super(Phase.PRE_INVOKE);
     }
     public void handleMessage(Message outMessage) {
         handleRequest(outMessage, null);
