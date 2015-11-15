@@ -24,7 +24,8 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
-import org.wso2.carbon.apimgt.api.ResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -360,10 +361,9 @@ public abstract class AbstractAPIManager implements APIManager {
             if (apiArtifact != null) {
                 return APIUtil.getAPIForPublishing(apiArtifact, registry);
             } else {
-                String errorMessage =
-                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                log.error(errorMessage);
-                throw new ResourceNotFoundException(errorMessage);
+                handleResourceNotFoundException(
+                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
+                return null;
             }
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
@@ -403,10 +403,9 @@ public abstract class AbstractAPIManager implements APIManager {
             if (apiArtifact != null) {
                 return APIUtil.getAPIInformation(apiArtifact, registry);
             } else {
-                String errorMessage =
-                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                log.error(errorMessage);
-                throw new ResourceNotFoundException(errorMessage);
+                handleResourceNotFoundException(
+                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
+                return null;
             }
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
@@ -439,14 +438,19 @@ public abstract class AbstractAPIManager implements APIManager {
             tenantFlowStarted = true;
 
             Registry registry = getRegistry(identifier, apiPath);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
+            if (registry != null) {
+                Resource apiResource = registry.get(apiPath);
+                String artifactId = apiResource.getUUID();
+                if (artifactId == null) {
+                    throw new APIManagementException("artifact id is null for : " + apiPath);
+                }
+                GenericArtifactManager artifactManager = getGenericArtifactManager(identifier, registry);
+                GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+                return APIUtil.getAPIInformation(apiArtifact, registry);
+            } else {
+                handleException("Failed to get registry from api identifier: " + identifier.toString());
+                return null;
             }
-            GenericArtifactManager artifactManager = getGenericArtifactManager(identifier, registry);
-            GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return APIUtil.getAPIInformation(apiArtifact, registry);
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
             return null;
@@ -904,7 +908,7 @@ public abstract class AbstractAPIManager implements APIManager {
     /** returns the SubscribedAPI object which is related to the UUID
      *
      * @param uuid UUID of Subscription
-     * @return
+     * @return SubscribedAPI object which is related to the UUID
      * @throws APIManagementException
      */
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
@@ -921,6 +925,15 @@ public abstract class AbstractAPIManager implements APIManager {
         throw new APIManagementException(msg);
     }
 
+    protected void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
+        log.error(msg);
+        throw new APIMgtResourceAlreadyExistsException(msg);
+    }
+
+    protected void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
+        log.error(msg);
+        throw new APIMgtResourceNotFoundException(msg);
+    }
 
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
         return apiMgtDAO.isAccessTokenExists(accessToken);
