@@ -18,12 +18,16 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.utils;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -39,7 +43,13 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
+import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 
 import javax.validation.ConstraintViolation;
 import java.util.ArrayList;
@@ -83,15 +93,26 @@ public class RestApiUtil {
 
     /**
      * Returns a generic errorDTO
+     * 
      * @param message specifies the error message
      * @return A generic errorDTO with the specified details
      */
-    public static ErrorDTO getErrorDTO(String message){
+    public static ErrorDTO getErrorDTO(String message, Long code, String description){
         ErrorDTO errorDTO = new ErrorDTO();
+        errorDTO.setCode(code);
+        errorDTO.setMoreInfo("");
         errorDTO.setMessage(message);
+        errorDTO.setDescription(description);
         return errorDTO;
     }
 
+    /**
+     * Check whether the specified apiId is of type UUID
+     * 
+     * @param apiId api identifier
+     * @return true if apiId is of type UUID, false otherwise
+     */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static boolean isUUID(String apiId) {
         try {
             UUID.fromString(apiId);
@@ -131,6 +152,113 @@ public class RestApiUtil {
 
     public static String getLoggedInUserTenantDomain() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    /**
+     * Returns a new NotFoundException
+     * 
+     * @param resource Resource type
+     * @param id identifier of the resource
+     * @return a new NotFoundException with the specified details as a response DTO
+     */
+    public static NotFoundException getNewNotFoundException(String resource, String id) {
+        String description;
+        if (!StringUtils.isEmpty(id)) {
+            description = "Required " + resource + " with Id " + id + " not found";
+        } else {
+            description = "Required " + resource + " not found";
+        }
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
+        return new NotFoundException(errorDTO);
+    }
+
+    /**
+     * Returns a new ForbiddenException
+     * 
+     * @param resource Resource type
+     * @param id identifier of the resource
+     * @return a new ForbiddenException with the specified details as a response DTO
+     */
+    public static ForbiddenException getNewForbiddenException(String resource, String id) {
+        String description;
+        if (!StringUtils.isEmpty(id)) {
+            description = "You don't have permission to access the " + resource + " with Id " + id;
+        } else {
+            description = "You don't have permission to access the " + resource;
+        }
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, description);
+        return new ForbiddenException(errorDTO);
+    }
+
+    /**
+     * Returns a new BadRequestException
+     * 
+     * @param description description of the exception
+     * @return a new BadRequestException with the specified details as a response DTO
+     */
+    public static BadRequestException getNewBadRequestException(String description) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
+        return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Returns a new ConflictException
+     * 
+     * @param description description of the exception
+     * @return a new ConflictException with the specified details as a response DTO
+     */
+    public static ConflictException getNewConflictException(String description) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_CONFLCIT_MESSAGE_DEFAULT, 409l, description);
+        return new ConflictException(errorDTO);
+    }
+
+    /**
+     * Check if the specified throwable e is due to an authorization failure
+     * @param e throwable to check
+     * @return true if the specified throwable e is due to an authorization failure, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToAuthorizationFailure(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof AuthorizationFailedException;
+    }
+
+    /**
+     * Check if the specified throwable e is happened as the required resource cannot be found
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the required resource cannot be found, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToResourceNotFound(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof APIMgtResourceNotFoundException
+                || rootCause instanceof ResourceNotFoundException;
+    }
+
+    /**
+     * Check if the specified throwable e is happened as the updated/new resource conflicting with an already existing
+     * resource
+     * 
+     * @param e throwable to check
+     * @return true if the specified throwable e is happened as the updated/new resource conflicting with an already
+     *   existing resource, false otherwise
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean isDueToResourceAlreadyExists(Throwable e) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause instanceof APIMgtResourceAlreadyExistsException;
+    }
+
+    /**
+     * Attempts to find the actual cause of the throwable 'e'
+     * 
+     * @param e throwable
+     * @return the root cause of 'e' if the root cause exists, otherwise returns 'e' itself
+     */
+    private static Throwable getPossibleErrorCause (Throwable e) {
+        Throwable rootCause = ExceptionUtils.getRootCause(e);
+        rootCause = rootCause == null ? e : rootCause;
+        return rootCause;
     }
 
     public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
