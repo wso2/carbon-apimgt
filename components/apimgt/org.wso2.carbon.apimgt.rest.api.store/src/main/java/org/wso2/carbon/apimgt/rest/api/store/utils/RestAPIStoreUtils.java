@@ -19,16 +19,20 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 /**
@@ -64,7 +68,7 @@ public class RestAPIStoreUtils {
     }
 
     /** 
-     * check whether current logged in consumer has access to the specified application
+     * check whether current logged in user has access to the specified application
      * 
      * @param application Application object
      * @return true if current logged in consumer has access to the specified application
@@ -72,16 +76,49 @@ public class RestAPIStoreUtils {
     public static boolean isUserAccessAllowedForApplication(Application application) {
         String username = RestApiUtil.getLoggedInUsername();
 
-        //if groupId is null or empty, it is not a shared app 
-        if (StringUtils.isEmpty(application.getGroupId())) {
-            //if the application is not shared, its subscriber and the current logged in user must be same
-            if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
-                return true;
+        if (application != null) {
+            //if groupId is null or empty, it is not a shared app 
+            if (StringUtils.isEmpty(application.getGroupId())) {
+                //if the application is not shared, its subscriber and the current logged in user must be same
+                if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
+                    return true;
+                }
+            } else {
+                String userGroupIds = RestAPIStoreUtils.getLoggedInUserGroupIds();
+                //if the application is a shared one, application's group id and the user's group id should be same
+                if (application.getGroupId().equals(userGroupIds)) {
+                    return true;
+                }
             }
-        } else {
-            String userGroupIds = RestAPIStoreUtils.getLoggedInUserGroupIds();
-            //if the application is a shared one, application's group id and the user's group id should be same
-            if (application.getGroupId().equals(userGroupIds)) {
+        }
+
+        //user don't have access
+        return false;
+    }
+
+    /**
+     * check whether current logged in user has access to the specified subscription
+     *
+     * @param subscribedAPI SubscribedAPI object
+     * @return true if current logged in user has access to the specified subscription
+     */
+    public static boolean isUserAccessAllowedForSubscription(SubscribedAPI subscribedAPI)
+            throws APIManagementException {
+        String username = RestApiUtil.getLoggedInUsername();
+        Application application = subscribedAPI.getApplication();
+        APIIdentifier apiIdentifier = subscribedAPI.getApiId();
+        if (apiIdentifier != null && application != null) {
+            try {
+                if (!isUserAccessAllowedForAPI(apiIdentifier.toString())) {
+                    return false;
+                }
+            } catch (APIManagementException e) {
+                String message =
+                        "Failed to retrieve the API " + apiIdentifier.toString() + " to check user " + username
+                                + " has access to the subscription " + subscribedAPI.getUUID();
+                throw new APIManagementException(message, e);
+            }
+            if (isUserAccessAllowedForApplication(application)) {
                 return true;
             }
         }
@@ -96,11 +133,27 @@ public class RestAPIStoreUtils {
      * @param apiId API identifier
      * @throws APIManagementException
      */
-    public static void checkUserAccessAllowedToAPI(String apiId) throws APIManagementException {
+    public static boolean isUserAccessAllowedForAPI(String apiId) throws APIManagementException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String username = RestApiUtil.getLoggedInUsername();
         //this is just to check whether the user has access to the api or the api exists. When it tries to retrieve 
         // the resource from the registry, it will fail with AuthorizationFailedException if user does not have enough
         // privileges.
-        APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+        try {
+            APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                String message =
+                        "user " + username + " failed to access the API " + apiId + " due to an authorization failure";
+                log.info(message);
+                return false;
+            } else {
+                //This is an unexpected failure
+                String message =
+                        "Failed to retrieve the API " + apiId + " to check user " + username + " has access to the API";
+                throw new APIManagementException(message, e);
+            }
+        }
+        return true;
     }
 }

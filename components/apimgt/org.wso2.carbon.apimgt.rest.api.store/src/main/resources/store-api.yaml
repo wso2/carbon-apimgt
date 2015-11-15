@@ -414,6 +414,12 @@ paths:
             Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
+        409:
+          description: |
+            Conflict. 
+            Application already exists.
+          schema:
+            $ref: '#/definitions/Error'
         415:
           description: |
             Unsupported media type. 
@@ -652,7 +658,7 @@ paths:
     get:
       description: |
         Get subscription list.
-        The API Identifier and corresponding Application Identifier
+        The API Identifier or Application Identifier
         the subscriptions of which are to be returned are passed as parameters.
       parameters:
         - $ref: '#/parameters/apiId-Q'
@@ -1307,9 +1313,7 @@ definitions:
   Application:
     title: Application
     required:
-      - applicationId
       - name
-      - subscriber
       - throttlingTier
     properties:
       applicationId:
