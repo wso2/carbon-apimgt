@@ -67,8 +67,15 @@ public interface APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getAPIInformationByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getAPIInfoByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
 
+    /** 
+     * Get minimal details of API by API identifier
+     * @param identifier APIIdentifier object
+     * @return API of the provided APIIdentifier
+     * @throws APIManagementException
+     */
+    API getAPIInfo(APIIdentifier identifier) throws APIManagementException;
     /**
      * Returns details of an API
      *
@@ -114,6 +121,15 @@ public interface APIManager {
      * @throws APIManagementException if failed to get version for api
      */
     Set<String> getAPIVersions(String providerName, String apiName) throws APIManagementException;
+
+    /**
+     * Returns the swagger v2.0 definition as a string
+     *
+     * @param apiId id of the APIIdentifier
+     * @return swagger string
+     * @throws APIManagementException
+     */
+    String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException;
 
     /**
      * Checks whether the given document already exists for the given api
@@ -183,6 +199,14 @@ public interface APIManager {
      */
     Subscriber getSubscriberById(String accessToken) throws APIManagementException;
 
+    /** returns the SubscribedAPI object which is related to the UUID
+     *
+     * @param uuid UUID of Subscription
+     * @return
+     * @throws APIManagementException
+     */
+    SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
+
     /**
      * Creates a new subscriber. The newly created subscriber id will be set in the given object.
      *
@@ -245,6 +269,13 @@ public interface APIManager {
      */
     void cleanup() throws APIManagementException;
 
+    /**
+     * Returns the corresponding application given the uuid
+     * @param uuid uuid of the Application
+     * @return it will return Application corresponds to the uuid provided.
+     * @throws APIManagementException
+     */
+    Application getApplicationByUUID(String uuid) throws APIManagementException;
 
     /**
      * Check whether an application access token is already persist in database.
@@ -313,6 +344,38 @@ public interface APIManager {
      * @throws APIManagementException if failed to get the predefined tiers
      */
     Set<Tier> getTiers(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getAppTiers() throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getAppTiers(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getResTiers() throws APIManagementException;
+
+    /**
+     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
+     *
+     * @return Set<Tier>
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getResTiers(String tenantDomain) throws APIManagementException;
 
     /**
      * Returns a list of domain name mappings store / gateway.

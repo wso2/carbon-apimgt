@@ -15,11 +15,12 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.util.interceptors;
+package org.wso2.carbon.apimgt.rest.api.util.interceptors.validation;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.lifecycle.ResourceProvider;
@@ -31,6 +32,7 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ConstraintViolationException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.ValidationException;
@@ -41,12 +43,12 @@ import javax.validation.executable.ExecutableValidator;
 public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
     private Log log = LogFactory.getLog(getClass());
     private Validator validator = null; //validator interface is thread-safe
-    
+
     public ValidationInInterceptor() {
         super(Phase.PRE_INVOKE);
         ValidatorFactory defaultFactory = Validation.buildDefaultValidatorFactory();
         validator = defaultFactory.getValidator();
-        if (validator == null){
+        if (validator == null) {
             log.warn("Bean Validation provider could not be found, no validation will be performed");
         } else {
             log.info("Validation In-Interceptor initialized successfully");

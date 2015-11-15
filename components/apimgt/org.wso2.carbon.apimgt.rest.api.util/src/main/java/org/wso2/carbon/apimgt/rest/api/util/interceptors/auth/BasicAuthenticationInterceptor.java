@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.util.handlers;
+package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 /*
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -19,9 +19,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
-import org.apache.cxf.jaxrs.ext.RequestHandler;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
+import org.apache.cxf.phase.AbstractPhaseInterceptor;
+import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -34,18 +35,21 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-public class BasicAuthenticationHandler implements RequestHandler {
+public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
-    private static final Log logger = LogFactory.getLog(BasicAuthenticationHandler.class);
+    private static final Log logger = LogFactory.getLog(BasicAuthenticationInterceptor.class);
 
-    /**
-     * authenticate requests received at the ml endpoint, using HTTP basic-auth headers as the authentication
-     * mechanism. This method returns a null value which indicates that the request to be processed. 
-     */
-    @Override
+    public BasicAuthenticationInterceptor() {
+        //We will use PRE_INVOKE phase as we need to process message before hit actual service
+        super(Phase.POST_INVOKE);
+    }
+    public void handleMessage(Message outMessage) {
+        handleRequest(outMessage, null);
+    }
+
     public Response handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
-        if(logger.isDebugEnabled()) {
+        if (logger.isDebugEnabled()) {
             logger.debug(String.format("Authenticating request: " + message.getId()));
         }
 
@@ -84,14 +88,14 @@ public class BasicAuthenticationHandler implements RequestHandler {
     /**
      * authenticate with the user credentials.
      *
-     * @param certObject   Certificate object of the request
-     * @param username     Username
-     * @param password     Password
-     * @return             Response, if unauthorized. Null, if Authorized.
+     * @param certObject Certificate object of the request
+     * @param username   Username
+     * @param password   Password
+     * @return Response, if unauthorized. Null, if Authorized.
      */
-    private Response authenticate(Object certObject, String username, String password){
+    private Response authenticate(Object certObject, String username, String password) {
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
-        RealmService realmService = (RealmService)carbonContext.getOSGiService(RealmService.class, null);
+        RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
         RegistryService registryService = (RegistryService) carbonContext.getOSGiService(RegistryService.class, null);
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         int tenantId;

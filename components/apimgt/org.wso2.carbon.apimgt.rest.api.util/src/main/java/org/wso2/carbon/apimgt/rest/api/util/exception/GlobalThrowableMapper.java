@@ -16,22 +16,26 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.ResourceNotFoundException;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
-public class GlobalThrowableMapper implements ExceptionMapper<Throwable>{
+public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
     private static final Log log = LogFactory.getLog(GlobalThrowableMapper.class);
 
     private ErrorDTO e500 = new ErrorDTO();
     private ErrorDTO e404 = new ErrorDTO();
 
-    GlobalThrowableMapper(){
+    GlobalThrowableMapper() {
         e500.setCode(new Long(500));
         e500.setMessage("Internal server error please contact administrator.");
 
@@ -42,24 +46,40 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable>{
     @Override
     public Response toResponse(Throwable e) {
 
-        if(e instanceof ClientErrorException){
+        if (e instanceof ClientErrorException) {
             return ((ClientErrorException) e).getResponse();
         }
 
-        if(e instanceof NotFoundException){
+        if (e instanceof NotFoundException) {
             return ((NotFoundException) e).getResponse();
         }
 
-        if(e instanceof PreconditionFailedException){
+        if (e instanceof PreconditionFailedException) {
             return ((PreconditionFailedException) e).getResponse();
         }
 
-        if(e instanceof BadRequestException){
+        if (e instanceof BadRequestException) {
             return ((BadRequestException) e).getResponse();
         }
 
-        if(e instanceof ConstraintViolationException){
+        if (e instanceof ConstraintViolationException) {
             return ((ConstraintViolationException) e).getResponse();
+        }
+
+        if(e instanceof ForbiddenException){
+            return ((ForbiddenException) e).getResponse();
+        }
+
+        if(e instanceof InternalServerErrorException){
+            Throwable rootCause = ExceptionUtils.getRootCause(e);
+            if (rootCause instanceof AuthorizationFailedException) {
+                ForbiddenException forbiddenException = new ForbiddenException(
+                        RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
+                return forbiddenException.getResponse();
+            } else if (rootCause instanceof ResourceNotFoundException) {
+                NotFoundException notFoundException = new NotFoundException();
+                return notFoundException.getResponse();
+            }
         }
 
         //unknown exception log and return

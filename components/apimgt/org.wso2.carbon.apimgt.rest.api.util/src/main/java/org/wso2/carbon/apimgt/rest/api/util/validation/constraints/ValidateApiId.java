@@ -18,18 +18,20 @@
 package org.wso2.carbon.apimgt.rest.api.util.validation.constraints;
 
 import org.wso2.carbon.apimgt.rest.api.util.validation.ApiIdValidator;
+
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
-@Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
+@Target({FIELD, METHOD, PARAMETER, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 @Constraint(validatedBy = ApiIdValidator.class)
 @Documented
@@ -40,8 +42,8 @@ public @interface ValidateApiId {
 
     String message() default DEFAULT_ERROR_MESSAGE;
 
-    Class<?>[] groups() default { };
+    Class<?>[] groups() default {};
 
-    Class<? extends Payload>[] payload() default { };
+    Class<? extends Payload>[] payload() default {};
 
 }

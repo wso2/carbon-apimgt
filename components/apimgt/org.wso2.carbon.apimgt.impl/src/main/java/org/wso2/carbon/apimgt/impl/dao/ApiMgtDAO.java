@@ -3801,6 +3801,7 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
             prepStmt.setString(1, consumerKey);
             prepStmt.execute();
@@ -3971,6 +3972,7 @@ public class ApiMgtDAO {
 
             try {
                 connection = APIMgtDBUtil.getConnection();
+                connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setString(1, APIUtil.encryptToken(consumerKey));
                 ps.setInt(2, application.getId());
@@ -4020,7 +4022,7 @@ public class ApiMgtDAO {
                     "VALUES (?,?,?,?,?)";
             try {
                 connection = APIMgtDBUtil.getConnection();
-
+                connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setInt(1, applicationId);
                 ps.setString(2, APIUtil.encryptToken(consumerKey));
@@ -4190,7 +4192,10 @@ public class ApiMgtDAO {
                               "   API.API_VERSION AS API_VERSION, " +
                               "   SUBS.LAST_ACCESSED AS LAST_ACCESSED, " +
                               "   SUB.USER_ID AS USER_ID, " +
-                              "   APP.NAME AS APPNAME " +
+                              "   APP.NAME AS APPNAME, " +
+                              "   SUBS.UUID AS SUB_UUID, " +
+                              "   SUBS.TIER_ID AS SUB_TIER_ID, " +
+                              "   APP.UUID AS APP_UUID " +
                               "FROM " +
                               "   AM_SUBSCRIPTION SUBS, " +
                               "   AM_APPLICATION APP, " +
@@ -4235,6 +4240,10 @@ public class ApiMgtDAO {
                                                       result.getString("API_NAME"), result.getString("API_VERSION"));
                 SubscribedAPI apiSubscription=new SubscribedAPI(new Subscriber(userId),apiId);
                 apiSubscription.setSubStatus(subStatus);
+                apiSubscription.setUUID(result.getString("SUB_UUID"));
+                apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
+                Application applicationObj = new Application(result.getString("APP_UUID"));
+                apiSubscription.setApplication(applicationObj);
                 usage.addApiSubscriptions(apiSubscription);
 
             }
@@ -5721,6 +5730,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             String deleteKeyMappingQuery = "DELETE " +
                     "FROM" +
                     "   AM_APPLICATION_KEY_MAPPING " +
@@ -5752,6 +5762,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             String deleteRegistrationEntry = "DELETE " +
                     "FROM" +
                     "   AM_APPLICATION_KEY_MAPPING  " +
@@ -7002,6 +7013,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             prepStmt = connection.prepareStatement(deleteApplicationKeyQuery);
             prepStmt.setString(1, consumerKey);
             prepStmt.execute();

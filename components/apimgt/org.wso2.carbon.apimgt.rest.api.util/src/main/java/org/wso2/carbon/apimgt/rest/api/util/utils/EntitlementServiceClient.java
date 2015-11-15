@@ -41,6 +41,7 @@ public class EntitlementServiceClient {
 
     /**
      * This method will initiate entitlement service client which calls PDP
+     *
      * @throws Exception whenever if failed to initiate client properly.
      */
     public EntitlementServiceClient() throws Exception {

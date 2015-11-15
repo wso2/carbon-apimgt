@@ -7,7 +7,6 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 
 public interface WebAppAuthenticator {
     /**
-     *
      * @param message cxf message to be authenticated
      * @return true if authentication was successful else false
      * @throws APIManagementException when error in authentication process

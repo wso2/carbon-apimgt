@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>4.3.0-SNAPSHOT</version>
+    <version>4.3.1-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -323,6 +322,27 @@
             </dependency>
 
             <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.samples.calculator</artifactId>
+                <type>war</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
+                <type>war</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+                <type>war</type>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>commons-lang.wso2</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>${commons-lang.version}</version>
@@ -515,6 +535,13 @@
                 <artifactId>org.wso2.carbon.governance.api</artifactId>
                 <version>${carbon.governance.version}</version>
             </dependency>
+
+	    <dependency>
+                <groupId>org.wso2.carbon.governance</groupId>
+                <artifactId>org.wso2.carbon.governance.lcm</artifactId>
+                <version>${carbon.governance.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>org.wso2.carbon.governance</groupId>
@@ -814,6 +841,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>1.10.19</version>
@@ -841,12 +874,6 @@
                 <groupId>opensaml.wso2</groupId>
                 <artifactId>opensaml2</artifactId>
                 <version>${opensaml2.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-                <version>2.7.17</version>
             </dependency>
 
             <dependency>
@@ -902,7 +929,7 @@
         <project.scm.id>scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
-        <carbon.apimgt.version>4.3.0-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>4.3.1-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[4.3.0, 4.4.0)</carbon.apimgt.imp.pkg.version>
 
         <!-- Carbon kernel version -->
@@ -1004,6 +1031,10 @@
         <imp.pkg.version.org.wso2.carbon.user.api>[1.0.1, 1.2.0)</imp.pkg.version.org.wso2.carbon.user.api>
 
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
+
+        <!-- apache cxf version -->
+        <cxf.version>2.7.18</cxf.version>
+
     </properties>
 </project>
 

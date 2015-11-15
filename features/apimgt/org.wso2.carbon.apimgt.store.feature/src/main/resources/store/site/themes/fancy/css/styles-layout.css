@@ -1297,6 +1297,15 @@ div.api-info div.tabs-section{
     list-style:none;
 }
 
+#tenent_list
+{ width:900px }
+
+.tenent-thumb
+{ margin: 0.79% 0.79% !important; /* re-declare thumb border styles since it is overidden by styles-layout */ border: 1px solid #DDDDDD; border-radius: 4px 4px 4px 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055); display: block; line-height: 20px; padding: 8px 4px 4px 4px; transition: all 0.2s ease-in-out 0s; }
+
+.tenent-thumb h3
+{ margin:0px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width:200px; }
+
 .processingWrapper{
    padding:20px;
 }
