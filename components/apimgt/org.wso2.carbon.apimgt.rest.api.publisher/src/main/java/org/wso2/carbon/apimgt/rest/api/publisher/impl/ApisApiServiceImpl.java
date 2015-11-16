@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -49,6 +51,8 @@ import java.util.List;
  */
 public class ApisApiServiceImpl extends ApisApiService {
 
+    private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
+
     /** Retrieves APIs qualifying under given search condition 
      * 
      * @param limit maximum number of APIs returns
@@ -65,7 +69,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             String ifNoneMatch) {
         List<API> allMatchedApis;
         APIListDTO apiListDTO;
-        boolean isTenantFlowStarted = false;
 
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -73,14 +76,6 @@ public class ApisApiServiceImpl extends ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            /*String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-               // isTenantFlowStarted = true;
-               // PrivilegedCarbonContext.startTenantFlow();
-               // PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-               // PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }*/
 
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
@@ -89,28 +84,28 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIMappingUtil.setPaginationParams(apiListDTO, query, type, offset, limit, allMatchedApis.size());
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving APIs";
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } /*finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }     */
+        }
     }
+
+    /**
+     * Create new API
+     *
+     * @param body DTO model of new API to be created
+     * @param contentType content type of the payload
+     * @return created API
+     */
     @Override
     public Response apisPost(APIDTO body,String contentType){
 
-        boolean isTenantFlowStarted = false;
         URI createdApiUri = null;
         APIDTO  createdApiDTO = null;
         try {
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-           /* if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }*/
+
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
             APIIdentifier createdApiId = apiToAdd.getId();
@@ -123,14 +118,17 @@ public class ApisApiServiceImpl extends ApisApiService {
             //how to add thumbnail
             //publish to external stores
         } catch (APIManagementException e) {
+            String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
+                                  body.getName() + "-" + body.getVersion();
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } catch (URISyntaxException e) {
+        }
+        catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
+                                  body.getName() + "-" + body.getVersion();
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } /*finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }   */
+        }
         return Response.created(createdApiUri).entity(createdApiDTO).build();
     }
 
@@ -172,10 +170,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             throw new InternalServerErrorException(e);
         }
     }
-    
+
+    /**
+     * Copy API and create a new version of the API
+     *
+     * @param apiId API Identifier
+     * @param newVersion new version of the API to be created
+     * @return API new version
+     */
     @Override
     public Response apisCopyApiPost(String apiId, String newVersion){
-        boolean isTenantFlowStarted = false;
         URI newVersionedApiUri = null;
         APIDTO newVersionedApi = null;
 
@@ -183,14 +187,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-           /* String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }*/
 
             API api = apiProvider.getAPI(apiIdentifier);
             if (api != null) {
@@ -204,36 +200,43 @@ public class ApisApiServiceImpl extends ApisApiService {
                         new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiIdentifier.getProviderName() + "-" +
                                 apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
             } else {
+                String errorMessage = apiId + " does not exist";
+                log.error(errorMessage);
                 throw new NotFoundException();
             }
 
         } catch (APIManagementException e) {
+            String errorMessage = "Error while copying API : " + apiId;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         } catch (DuplicateAPIException e) {
+            String errorMessage = "Requested new version " + newVersion + "of API " + apiId + "already exist";
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving API location of " + apiId;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
 
         return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
     }
+
+    /**
+     * Get API of given ID
+     *
+     * @param apiId  API ID
+     * @param accept accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return API of the given ID
+     */
     @Override
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
         APIDTO apiToReturn;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            } */
+
             API api;
             if (RestApiUtil.isUUID(apiId)) {
                 api = apiProvider.getAPIbyUUID(apiId);
@@ -245,21 +248,31 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (api != null) {
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             } else {
+                String errorMessage =  apiId + " does not exist";
+                log.error(errorMessage);
                 throw new NotFoundException();
             }
         } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API : " + apiId;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } /*finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }   */
+        }
         return Response.ok().entity(apiToReturn).build();
     }
+
+    /**
+     * Update API of given ID
+     *
+     * @param apiId API ID
+     * @param body  Updated API details
+     * @param contentType Request content type
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return Updated API
+     */
     @Override
     public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
 
-        boolean isTenantFlowStarted = false;
         APIDTO updatedApiDTO = null;
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -271,43 +284,36 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setProvider(apiIdentifier.getProviderName());
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body);
 
-            /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }*/
             apiProvider.updateAPI(apiToUpdate);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
         } catch (APIManagementException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating API : " + apiId;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } /*finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }   */
+        }
         return Response.ok().entity(updatedApiDTO).build();
     }
+
+    /**
+     * Delete API
+     *
+     * @param apiId API Id
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return Status of API Deletion
+     */
     @Override
     public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince){
-        boolean isTenantFlowStarted = false;
         try{
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            /*String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }*/
+
             apiProvider.deleteAPI(apiIdentifier);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
@@ -316,12 +322,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
         } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting API : " + apiId;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } /*finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }   */
+        }
         return Response.ok().build();
     }
     @Override
