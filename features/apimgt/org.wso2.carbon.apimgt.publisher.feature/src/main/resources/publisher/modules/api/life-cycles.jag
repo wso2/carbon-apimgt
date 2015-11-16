@@ -100,12 +100,18 @@ var getAPILCData = function(api) {
     return lcJSON;
 }
 
-var setCheckListItemVal=function(apiData,checkListItemOrder,checkListItemVal){ 
+var setCheckListItemVal = function(apiData, checkListItemOrder, checkListItemVal){ 
     var provider=APIUtil.replaceEmailDomain(apiData.provider);
     var apiIdentifier = APIIdentifier(provider, apiData.name, apiData.version);
-    return APIManagerFactory.getInstance().getAPIProvider(user).changeAPILCCheckListItems(apiIdentifier,
+    try {
+
+        return APIManagerFactory.getInstance().getAPIProvider(user).changeAPILCCheckListItems(apiIdentifier,
                                  parseInt(checkListItemOrder),checkListItemVal);
 
+     } catch (e) {
+        log.error(e.message);
+        return false;
+    }
 }
 
 
