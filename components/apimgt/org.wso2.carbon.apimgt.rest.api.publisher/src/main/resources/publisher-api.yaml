@@ -54,6 +54,23 @@ consumes:
 produces: 
   - application/json
 
+
+x-wso2-security:
+  apim:
+    x-wso2-scopes:
+      - description: ""
+        roles: publisher
+        name: API_PUBLISHER_SCOPE
+        key: API_PUBLISHER_SCOPE
+      - description: ""
+        roles: creator
+        name: API_CREATOR_SCOPE
+        key: API_CREATOR_SCOPE
+      - description: ""
+        roles: admin
+        name: API_ADMINISTRATIVE_SCOPE
+        key: API_ADMINISTRATIVE_SCOPE
+
 ######################################################
 # The "API Collection" resource APIs
 ######################################################
@@ -142,6 +159,7 @@ paths:
 # Create a new API 
 #-----------------------------------------------------
     post:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Create a new API
       parameters:
@@ -251,6 +269,7 @@ paths:
 # Update the definition of an API
 #-----------------------------------------------------
     put:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Update an existing API
       parameters:
@@ -322,6 +341,7 @@ paths:
 # Delete the definition of an API
 #-----------------------------------------------------
     delete:
+      x-scope: API_CREATOR_SCOPE
       description: | 
         Delete an existing API
       parameters:
@@ -364,6 +384,7 @@ paths:
 # Create a new API based on an already existing one
 #-----------------------------------------------------
     post:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Create a new API by copying an existing API
       parameters:
@@ -407,6 +428,7 @@ paths:
 # Change the lifecycle of an API
 #-----------------------------------------------------
     post:
+      x-scope: API_PUBLISHER_SCOPE
       description: |
         Change the lifecycle of an API
       parameters:
@@ -547,6 +569,7 @@ paths:
 # Add a document to a certain API
 #-----------------------------------------------------
     post:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Add a new document to an API
       parameters:
@@ -658,6 +681,7 @@ paths:
 # Update a particular document of a certain API
 #-----------------------------------------------------
     put:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Update document details.
       parameters:
@@ -725,6 +749,7 @@ paths:
 # Delete a particular document of a certain API
 #-----------------------------------------------------
     delete:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Delete a document of an API
       parameters:
@@ -916,6 +941,7 @@ paths:
 # Block a certain subscription
 #-----------------------------------------------------
     post:
+      x-scope: API_PUBLISHER_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - name: blockState
@@ -977,6 +1003,7 @@ paths:
 # Unblock a certain subscription
 #-----------------------------------------------------
     post:
+      x-scope: API_PUBLISHER_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - $ref: '#/parameters/If-Match'
@@ -1071,6 +1098,7 @@ paths:
 # Create a new tier
 #-----------------------------------------------------
     post:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Add a new tier
       parameters:
@@ -1180,6 +1208,7 @@ paths:
 # Update a certain tier
 #-----------------------------------------------------
     put:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Update tier details
       parameters:
@@ -1246,6 +1275,7 @@ paths:
 # Delete a certain tier
 #-----------------------------------------------------
     delete:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Remove a tier
       parameters:
@@ -1282,6 +1312,7 @@ paths:
 # Update the permission of a certain tier
 #-----------------------------------------------------
     post:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Update tier permission
       parameters:
