@@ -693,12 +693,12 @@ var getThemeFile = function (path) {
         return true;
     };
 
-    var getTenantDomain = function(){
-        var user = jagg.getUser(),username;
-        if(user!=null){
-            username=user.username;
+    var getTenantDomain = function() {
+        var user = jagg.getUser(), username;
+        if(user != null) {
+            username = user.username;
         	var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-           	var domainName =MultitenantUtils.getTenantDomain(username);
+           	var domainName = MultitenantUtils.getTenantDomain(username);
            	return domainName;
         }
     };
