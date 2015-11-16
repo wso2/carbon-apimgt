@@ -41,13 +41,27 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     public BasicAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
-        super(Phase.POST_INVOKE);
+        super(Phase.PRE_INVOKE);
     }
-    public void handleMessage(Message outMessage) {
-        handleRequest(outMessage, null);
+    public void handleMessage(Message inMessage) {
+        if(handleRequest(inMessage, null)){
+            if(logger.isDebugEnabled()) {
+                logger.debug("User logged into Web app using Basic Authentication");
+            }
+        }
+        else{
+            ErrorDTO errorDetail = new ErrorDTO();
+            errorDetail.setCode((long)401);
+            errorDetail.setDescription("Unauthenticated request");
+            Response response = Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .entity(errorDetail)
+                    .build();
+            inMessage.getExchange().put(Response.class, response);
+        }
     }
 
-    public Response handleRequest(Message message, ClassResourceInfo resourceInfo) {
+    public boolean handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Authenticating request: " + message.getId()));
@@ -57,8 +71,8 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
         if (policy == null) {
             // if auth header is missing, terminates with 401 Unauthorized response
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
-                    "Authentication failed: Basic authentication header is missing").build();
+            logger.error("Authentication failed: Basic authentication header is missing");
+            return false;
         }
         
         /*
@@ -73,13 +87,11 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         String password = StringUtils.trim(policy.getPassword());
 
         if (StringUtils.isEmpty(username)) {
-            ErrorDTO errorDTO = RestApiUtil.getAuthenticationErrorDTO("Username cannot be null/empty.");
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(errorDTO)
-                    .build();
+            logger.error("Username cannot be null/empty.");
+            return false;
         } else if (StringUtils.isEmpty(password) && certObject == null) {
-            ErrorDTO errorDTO = RestApiUtil.getAuthenticationErrorDTO("Password cannot be null/empty.");
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(errorDTO)
-                    .build();
+            logger.error("Password cannot be null/empty.");
+            return false;
         }
 
         return authenticate(certObject, username, password);
@@ -93,7 +105,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * @param password   Password
      * @return Response, if unauthorized. Null, if Authorized.
      */
-    private Response authenticate(Object certObject, String username, String password) {
+    private boolean authenticate(Object certObject, String username, String password) {
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
         RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
         RegistryService registryService = (RegistryService) carbonContext.getOSGiService(RegistryService.class, null);
@@ -106,8 +118,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 userRealm = AnonymousSessionUtil.getRealmByTenantDomain(registryService, realmService, tenantDomain);
                 if (userRealm == null) {
                     logger.error("Invalid domain or unactivated tenant login");
-                    return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
-                            "Tenant not found").build();
+                    return false;
                 }
             }
             String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
@@ -117,16 +128,14 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(username);
-                return null;
+                return true;
             } else {
                 logger.error(String.format("Authentication failed. Please check your username/password"));
-                return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
-                        "Authentication failed. Please check your username/password").build();
+                return false;
             }
         } catch (Exception e) {
             logger.error("Authentication failed: ", e);
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
-                    "Authentication failed: ").build();
+            return false;
         }
     }
 }
