@@ -863,7 +863,6 @@ public final class APIConstants {
     public static final String ENVIRONMENTS_NONE = "none";
     public static final String SWAGGER_BASEPATH = "basePath";
     public static final String SWAGGER_OPERATIONS = "operations";
-    //public static final String METHOD_PATCH = "PATCH";
     public static final String SWAGGER_SCOPE = "scope";
     public static final String SWAGGER_AUTH_TYPE = "auth_type";
     public static final String API_THROTTLING_TIER = "throttling_tier";
