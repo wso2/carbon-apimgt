@@ -18,6 +18,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -45,6 +47,8 @@ import java.util.Set;
  */
 public class TiersApiServiceImpl extends TiersApiService {
 
+    private static final Log log = LogFactory.getLog(TiersApiServiceImpl.class);
+
     /** Retrieves all the Tiers
      *
      * @param limit max number of objects returns
@@ -70,6 +74,8 @@ public class TiersApiServiceImpl extends TiersApiService {
             TierMappingUtil.setPaginationParams(tierListDTO, limit, offset, tierList.size());
             return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving tiers";
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         }
     }
@@ -94,6 +100,8 @@ public class TiersApiServiceImpl extends TiersApiService {
             TierDTO addedTierDTO = TierMappingUtil.fromTiertoDTO(addedTier);
             return Response.created(createdTierUri).entity(addedTierDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
+            String errorMessage = "Error while adding tier " + body.getName();
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         }
     }
@@ -170,6 +178,8 @@ public class TiersApiServiceImpl extends TiersApiService {
             TierDTO updatedTierDTO = TierMappingUtil.fromTiertoDTO(updatedTier);
             return Response.ok().entity(updatedTierDTO).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while updating tier " + tierName;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         }
     }
@@ -194,6 +204,8 @@ public class TiersApiServiceImpl extends TiersApiService {
                 throw new NotFoundException();
             }
         } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting tier " + tierName;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         }
     }

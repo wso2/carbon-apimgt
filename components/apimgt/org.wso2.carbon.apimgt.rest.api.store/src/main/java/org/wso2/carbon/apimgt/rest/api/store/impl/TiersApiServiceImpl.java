@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -39,6 +41,8 @@ import java.util.Set;
  *
  */
 public class TiersApiServiceImpl extends TiersApiService {
+
+    private static final Log log = LogFactory.getLog(TiersApiServiceImpl.class);
 
     /** Retrieves all the Tiers
      *
@@ -64,6 +68,8 @@ public class TiersApiServiceImpl extends TiersApiService {
             TierMappingUtil.setPaginationParams(tierListDTO, limit, offset, tierList.size());
             return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving tiers";
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
         }
     }
