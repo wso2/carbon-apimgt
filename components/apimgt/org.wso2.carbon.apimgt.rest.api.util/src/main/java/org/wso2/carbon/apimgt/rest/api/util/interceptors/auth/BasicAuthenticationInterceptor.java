@@ -41,10 +41,19 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     public BasicAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
-        super(Phase.POST_INVOKE);
+        super(Phase.PRE_INVOKE);
     }
-    public void handleMessage(Message outMessage) {
-        handleRequest(outMessage, null);
+    public void handleMessage(Message inMessage) {
+        if (handleRequest(inMessage, null) != null){
+            ErrorDTO errorDetail = new ErrorDTO();
+            errorDetail.setCode((long)401);
+            errorDetail.setDescription("Unauthenticated request");
+            Response response = Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorDetail)
+                    .build();
+            inMessage.getExchange().put(Response.class, response);
+        };
     }
 
     public Response handleRequest(Message message, ClassResourceInfo resourceInfo) {

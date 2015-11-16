@@ -70,6 +70,10 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
             return ((ForbiddenException) e).getResponse();
         }
 
+        if(e instanceof UnauthorizedException){
+            return ((UnauthorizedException) e).getResponse();
+        }
+
         if(e instanceof InternalServerErrorException){
             Throwable rootCause = ExceptionUtils.getRootCause(e);
             if (rootCause instanceof AuthorizationFailedException) {

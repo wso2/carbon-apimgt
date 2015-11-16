@@ -54,6 +54,14 @@ consumes:
 produces: 
   - application/json
 
+x-wso2-security:
+  apim:
+    x-wso2-scopes:
+      - description: ""
+        roles: subscriber
+        name: API_SUBSCRIBER_SCOPE
+        key: API_SUBSCRIBER_SCOPE
+
 ######################################################
 # The "API Collection" resource APIs
 ######################################################
@@ -324,6 +332,7 @@ paths:
 # Retrieve a list of all applications of a certain subscriber
 #-----------------------------------------------------
     get:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Get a list of applications
       parameters:
@@ -373,6 +382,7 @@ paths:
 # Create a new application
 #-----------------------------------------------------
     post:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Create a new application.
       parameters:
@@ -430,6 +440,7 @@ paths:
 # Retrieve the details about a certain application
 #-----------------------------------------------------
     get:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Get application details
       parameters:
@@ -482,6 +493,7 @@ paths:
 # Update a certain application
 #-----------------------------------------------------
     put:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Update application details
       parameters:
@@ -547,6 +559,7 @@ paths:
 # Delete a certain application
 #-----------------------------------------------------
     delete:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Remove an application
       parameters:
@@ -583,6 +596,7 @@ paths:
 # Generate keys for an application
 #-----------------------------------------------------
     post:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Generate keys for application
       parameters:
@@ -650,6 +664,7 @@ paths:
 # Retrieve all subscriptions of a certain API and application
 #-----------------------------------------------------
     get:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Get subscription list.
         The API Identifier and corresponding Application Identifier
@@ -696,6 +711,7 @@ paths:
 # Create a new subscription
 #-----------------------------------------------------
     post:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Add a new subscription
       parameters:
@@ -751,6 +767,7 @@ paths:
 # Retrieve a certain subscription
 #-----------------------------------------------------
     get:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Get subscription details
       parameters:
@@ -793,6 +810,7 @@ paths:
 # Delete a certain subscription
 #-----------------------------------------------------
     delete:
+      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Remove subscription
       parameters:
@@ -847,7 +865,7 @@ paths:
           schema:
             type: array
             items:
-            $ref: '#/definitions/TierList'
+              $ref: '#/definitions/TierList'
           headers:
             Content-Type:
               description: The content type of the body.
