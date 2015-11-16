@@ -23,6 +23,7 @@ import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.balana.XACMLConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.EntitlementServiceClient;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -50,35 +51,39 @@ public class XACMLAuthenticationInterceptor extends AbstractPhaseInterceptor {
      * isUserPermitted requests received at the ml endpoint, using HTTP basic-auth headers as the authentication
      * mechanism. This method returns a null value which indicates that the request to be processed.
      */
-    public Response handleRequest(Message message, ClassResourceInfo resourceInfo) {
+    public boolean handleRequest(Message message, ClassResourceInfo resourceInfo) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(String.format("Authenticating request: " + message.getId()));
         }
         AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
         if (policy == null) {
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(
-                    "Authentication failed: Basic authentication header is missing").build();
+            logger.error("Authentication failed: Basic authentication header is missing");
+            return false;
         }
         Object certObject = null;
         String username = StringUtils.trim(policy.getUserName());
         if (StringUtils.isEmpty(username)) {
-            ErrorDTO errorDTO = RestApiUtil.getAuthenticationErrorDTO("Username cannot be null/empty.");
-            return Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON).entity(errorDTO)
-                    .build();
+            logger.error("Username cannot be null/empty.");
+            return false;
         }
         return isUserPermitted(username, (String) message.get(Message.REQUEST_URI),
                 (String) message.get(Message.HTTP_REQUEST_METHOD), null);
     }
 
 
-    private Response isUserPermitted(String userName, String resource, String httpMethod, String[] arr) {
+    private boolean isUserPermitted(String userName, String resource, String httpMethod, String[] arr) {
         try {
+            String status;
             EntitlementServiceClient client = new EntitlementServiceClient();
-            client.validateAction(userName, resource, httpMethod, arr);
+            status = client.validateAction(userName, resource, httpMethod, arr);
+            //TODO this permit need to be replaced with XACML constant for permitted.
+            if(status.equalsIgnoreCase("Permit")){
+                return true;
+            }
         } catch (Exception e) {
             logger.error("Error while validating XACML request" + e);
         }
-        return null;
+        return false;
     }
 }
