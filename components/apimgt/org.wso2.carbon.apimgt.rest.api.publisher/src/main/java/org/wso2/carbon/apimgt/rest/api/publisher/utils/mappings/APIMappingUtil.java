@@ -96,7 +96,7 @@ public class APIMappingUtil {
         if (inSequenceName != null && !inSequenceName.isEmpty()) {
             SequenceDTO inSequence = new SequenceDTO();
             inSequence.setName(inSequenceName);
-            inSequence.setType("IN");
+            inSequence.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             sequences.add(inSequence);
         }
 
@@ -104,7 +104,7 @@ public class APIMappingUtil {
         if (outSequenceName != null && !outSequenceName.isEmpty()) {
             SequenceDTO outSequence = new SequenceDTO();
             outSequence.setName(outSequenceName);
-            outSequence.setType("OUT");
+            outSequence.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
             sequences.add(outSequence);
         }
 
@@ -112,7 +112,7 @@ public class APIMappingUtil {
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
             SequenceDTO faultSequence = new SequenceDTO();
             faultSequence.setName(faultSequenceName);
-            faultSequence.setType("FAULT");
+            faultSequence.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             sequences.add(faultSequence);
         }
 

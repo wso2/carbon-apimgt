@@ -86,7 +86,7 @@ public class APIMappingUtil {
         if (inSequenceName != null && !inSequenceName.isEmpty()) {
             SequenceDTO inSequence = new SequenceDTO();
             inSequence.setName(inSequenceName);
-            inSequence.setType("IN");
+            inSequence.setType(APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
             sequences.add(inSequence);
         }
 
