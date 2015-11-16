@@ -33,6 +33,9 @@ public class ApplicationDTO  {
   private String description = null;
   
   
+  private String status = null;
+  
+  
   private String groupId = null;
   
   
@@ -115,6 +118,18 @@ public class ApplicationDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
+  }
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("groupId")
   public String getGroupId() {
     return groupId;
@@ -148,6 +163,7 @@ public class ApplicationDTO  {
     sb.append("  throttlingTier: ").append(throttlingTier).append("\n");
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  status: ").append(status).append("\n");
     sb.append("  groupId: ").append(groupId).append("\n");
     sb.append("  keys: ").append(keys).append("\n");
     sb.append("}\n");

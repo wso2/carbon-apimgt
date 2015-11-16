@@ -1,6 +1,6 @@
 <% jagg.template("overview", function(inputs, outputs, jagg) { %>
 <% var api=outputs.api; var createPermitted=outputs.isCreatePermitted;%>
-<%var tenant= tenantDomain;%>
+<% var tenant = tenantDomain; %>
 <%  if(api.endpointConfig){
     var endpoint_config = parse(api.endpointConfig); 
   } %>

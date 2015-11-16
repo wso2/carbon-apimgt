@@ -17,10 +17,34 @@ if(jagg.isCSRFTokenValid())
     if (action === "updateStatus" && request.getMethod() == 'POST') {
         mod = jagg.module("api");
         var apiData = {};
-        apiData.provider= request.getParameter("provider","UTF-8");
-        apiData.apiName = request.getParameter("name","UTF-8");
+        apiData.provider= request.getParameter("provider");
+        apiData.apiName = request.getParameter("name");
         apiData.version = request.getParameter("version");
-        // Need a mapping to map the state to the LC transition event
+        apiData.name =  apiData.apiName;
+
+        var deprecateOldVersions = request.getParameter("deprecateOldVersions");
+        var requireResubscription = request.getParameter("requireResubscription");
+        var isTrueSet;
+
+        var olderVersionExists = mod.isAPIOlderVersionExist(apiData);
+        var apiInfo = mod.getAPI(apiData);
+        //checklist items only in create state
+        if(!olderVersionExists.error && olderVersionExists.exist && apiInfo.api.status == 'CREATED') {
+            if(deprecateOldVersions != null && 
+                (deprecateOldVersions.toLowerCase() == "true" || deprecateOldVersions.toLowerCase() == "false")) {           
+                isTrueSet = (deprecateOldVersions.toLowerCase() === 'true');
+                mod.setCheckListItemVal(apiData, "0", isTrueSet);
+            }
+
+            if(requireResubscription != null && 
+                (requireResubscription.toLowerCase() == "true" || requireResubscription.toLowerCase() == "false")) {           
+                isTrueSet = (requireResubscription.toLowerCase() === 'true');
+                mod.setCheckListItemVal(apiData, "1", isTrueSet);
+            }
+        }
+        
+        
+        // Need a mapping to map the state to the LC transition event. This is added to provide backward compatibility
         var status = request.getParameter("status");
         if(status == "PUBLISHED") {
             status = "Publish";

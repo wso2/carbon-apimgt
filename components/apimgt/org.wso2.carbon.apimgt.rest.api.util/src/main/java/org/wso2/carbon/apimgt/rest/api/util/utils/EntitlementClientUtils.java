@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.util.utils;
 
 import java.io.*;
 import java.util.Properties;
+
 import org.wso2.carbon.apimgt.rest.api.util.*;
 
 /**
@@ -92,9 +93,9 @@ public class EntitlementClientUtils {
 
     public static String getServerPassword() {
         String ret;
-        if (configProperties != null){
+        if (configProperties != null) {
             ret = configProperties.getProperty(RestApiConstants.SERVER_PASSWORD);
-            if(ret !=null){
+            if (ret != null) {
                 return ret;
             }
         }

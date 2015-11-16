@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>4.3.0-SNAPSHOT</version>
+        <version>4.3.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -129,16 +129,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-			<!-- following plugin can be found at https://github.com/hevayo/swagger2cxf-maven-plugin 
-				 it will be put in to wso2 repo after design review -->
-            <plugin>
-                <groupId>org.wso2.maven.plugins</groupId>
-                <artifactId>swagger2cxf-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <configuration>
-                    <inputSpec>${project.basedir}/src/main/resources/store-api.yaml</inputSpec>
-                </configuration>
             </plugin>
         </plugins>
     </build>

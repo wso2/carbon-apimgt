@@ -67,8 +67,18 @@ public final class APIConstants {
     
     //registry location of API
     public static final String API_LOCATION = API_APPLICATION_DATA_LOCATION + "/provider";
-    
+
     public static final String API_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/tiers.xml";
+
+    public static final String APP_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/app-tiers.xml";
+
+    public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
+
+    public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
+
+    public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
+
+    public static final String DEFAULT_RES_TIER_FILE_NAME = "default-res-tiers.xml";
 
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
 
@@ -308,6 +318,7 @@ public final class APIConstants {
     public static final String LC_PROPERTY_PERMISSION_SUFFIX=".item.permission";
     public static final String LC_PROPERTY_ITEM_SUFFIX=".item";
     public static final String LC_STATUS="status:";
+    public static final String LC_CHECK_ITEMS="items";
     public static final String LC_CHECK_ITEM_NAME="name:";
     public static final String LC_CHECK_ITEM_VALUE="value:";
     public static final String LC_CHECK_ITEM_ORDER="order:";

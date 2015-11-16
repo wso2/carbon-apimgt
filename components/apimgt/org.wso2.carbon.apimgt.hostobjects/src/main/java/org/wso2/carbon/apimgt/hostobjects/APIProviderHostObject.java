@@ -87,10 +87,12 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
+
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -209,6 +211,10 @@ public class APIProviderHostObject extends ScriptableObject {
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             PermissionUpdateUtil.updatePermissionTree(tenantId);
+            
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();            
+            CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(tenantId), 
+                                                          CommonUtil.getRootSystemRegistry(tenantId));
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
@@ -2543,6 +2549,31 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
+    public static NativeArray jsFunction_getResourceTiers(Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) {
+        NativeArray myn = new NativeArray(1);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+        try {
+            Set<Tier> tiers = apiProvider.getResTiers();
+            List<Tier> tierList = APIUtil.sortTiers(tiers);
+            int i = 0;
+            if (tiers != null) {
+                for (Tier tier : tierList) {
+                    NativeObject row = new NativeObject();
+                    row.put("tierName", row, tier.getName());
+                    row.put("tierDisplayName", row, tier.getDisplayName());
+                    row.put("tierDescription", row, tier.getDescription() != null ? tier.getDescription() : "");
+                    row.put("defaultTier", row, i == 0);
+                    myn.put(i, myn, row);
+                    i++;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error while getting available tiers", e);
+        }
+        return myn;
+    }
+
     public static NativeArray jsFunction_getSubscriberCountByAPIVersions(Context cx,
                                                                          Scriptable thisObj,
                                                                          Object[] args,
@@ -4683,6 +4714,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("name", row, environment.getName());
                 row.put("description", row, environment.getDescription());
                 row.put("type", row, environment.getType());
+                row.put("serverURL", row, environment.getServerURL());
+                row.put("apiConsole", row, environment.isShowInConsole());
                 myn.put(i, myn, row);
                 i++;
             }

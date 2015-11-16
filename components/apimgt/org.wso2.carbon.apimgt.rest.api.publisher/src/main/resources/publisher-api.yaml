@@ -54,6 +54,23 @@ consumes:
 produces: 
   - application/json
 
+
+x-wso2-security:
+  apim:
+    x-wso2-scopes:
+      - description: ""
+        roles: publisher
+        name: API_PUBLISHER_SCOPE
+        key: API_PUBLISHER_SCOPE
+      - description: ""
+        roles: creator
+        name: API_CREATOR_SCOPE
+        key: API_CREATOR_SCOPE
+      - description: ""
+        roles: admin
+        name: API_ADMINISTRATIVE_SCOPE
+        key: API_ADMINISTRATIVE_SCOPE
+
 ######################################################
 # The "API Collection" resource APIs
 ######################################################
@@ -142,6 +159,7 @@ paths:
 # Create a new API 
 #-----------------------------------------------------
     post:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Create a new API
       parameters:
@@ -251,6 +269,7 @@ paths:
 # Update the definition of an API
 #-----------------------------------------------------
     put:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Update an existing API
       parameters:
@@ -322,6 +341,7 @@ paths:
 # Delete the definition of an API
 #-----------------------------------------------------
     delete:
+      x-scope: API_CREATOR_SCOPE
       description: | 
         Delete an existing API
       parameters:
@@ -364,6 +384,7 @@ paths:
 # Create a new API based on an already existing one
 #-----------------------------------------------------
     post:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Create a new API by copying an existing API
       parameters:
@@ -407,20 +428,42 @@ paths:
 # Change the lifecycle of an API
 #-----------------------------------------------------
     post:
+      x-scope: API_PUBLISHER_SCOPE
       description: |
         Change the lifecycle of an API
       parameters:
-        - name: newState
+        - name: action
           description: |
-            New lifecycle state of the API.
+            The action to demote or promote the state of the API.
+
+            Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]
+
+          in: query
           type: string
-          in: formData
-        - name: publishToGateway
+          enum:
+            - Publish
+            - Deploy as a Prototype
+            - Demote to Created
+            - Demote to Prototyped
+            - Block
+            - Deprecate
+            - Re-Publish
+            - Retire
+        - name: lifecycleChecklist
+          description: |
+
+            You can specify additional checklist items by using an **"attribute:"** modifier.
+
+            Eg: "Deprecate Old Versions:true" will deprecate older versions of a particular API when it is promoted to 
+            Published state from Created state. Multiple checklist items can be given in "attribute1:true, attribute2:false"
+            format.
+
+            Supported checklist items are as follows.
+            1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.
+            2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
+
           type: string
-          in: formData
-        - name: resubscription
-          type: string
-          in: formData
+          in: query
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -526,6 +569,7 @@ paths:
 # Add a document to a certain API
 #-----------------------------------------------------
     post:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Add a new document to an API
       parameters:
@@ -637,6 +681,7 @@ paths:
 # Update a particular document of a certain API
 #-----------------------------------------------------
     put:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Update document details.
       parameters:
@@ -704,6 +749,7 @@ paths:
 # Delete a particular document of a certain API
 #-----------------------------------------------------
     delete:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Delete a document of an API
       parameters:
@@ -805,8 +851,8 @@ paths:
         the subscriptions of which are to be returned are passed as parameters.
       parameters:
         - $ref: '#/parameters/apiId-Q'
-        - $ref: '#/parameters/applicationId-Q'
-        - $ref: '#/parameters/groupId'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -895,8 +941,17 @@ paths:
 # Block a certain subscription
 #-----------------------------------------------------
     post:
+      x-scope: API_PUBLISHER_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
+        - name: blockState
+          in: query
+          description: |
+            Subscription block state.
+          type: string
+          enum:
+            - BLOCKED
+            - PROD_ONLY_BLOCKED
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       description: |
@@ -948,6 +1003,7 @@ paths:
 # Unblock a certain subscription
 #-----------------------------------------------------
     post:
+      x-scope: API_PUBLISHER_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - $ref: '#/parameters/If-Match'
@@ -1004,6 +1060,8 @@ paths:
       description: |
         Get available tiers
       parameters:
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -1015,9 +1073,7 @@ paths:
             OK. 
             List of tiers returned.
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Tier'
+            $ref: '#/definitions/TierList'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -1042,6 +1098,7 @@ paths:
 # Create a new tier
 #-----------------------------------------------------
     post:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Add a new tier
       parameters:
@@ -1151,6 +1208,7 @@ paths:
 # Update a certain tier
 #-----------------------------------------------------
     put:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Update tier details
       parameters:
@@ -1217,6 +1275,7 @@ paths:
 # Delete a certain tier
 #-----------------------------------------------------
     delete:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Remove a tier
       parameters:
@@ -1253,6 +1312,7 @@ paths:
 # Update the permission of a certain tier
 #-----------------------------------------------------
     post:
+      x-scope: API_ADMINISTRATIVE_SCOPE
       description: |
         Update tier permission
       parameters:
@@ -1409,25 +1469,6 @@ parameters:
     description: |
       **Application Identifier** consisting of the UUID of the Application.
     required: true
-    type: string
-
-# Application Identifier
-# Specified as part of the query string
-  applicationId-Q:
-    name: applicationId
-    in: query
-    description: |
-      **Application Identifier** consisting of the UUID of the Application.
-    required: true
-    type: string
-
-# Group Identifier of the application
-  groupId:
-    name: groupId
-    in: query
-    description: |
-      Application Group Id
-    required: false
     type: string
 
 # Subscription Identifier
@@ -1768,12 +1809,18 @@ definitions:
           - OTHER
       summary:
         type: string
-      source:
+      sourceType:
         type: string
         enum:
           - INLINE
           - URL
           - FILE
+      sourceUrl:
+        type: string
+      filePath:
+        type: string
+      otherTypeName:
+        type: string
       visibility:
         type: string
         enum:
@@ -1782,14 +1829,44 @@ definitions:
           - API_LEVEL
 
 #-----------------------------------------------------
+# The Tier List resource
+#-----------------------------------------------------
+  TierList:
+    title: Tier List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of Tiers returned.
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified. 
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified. 
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Tier'
+
+#-----------------------------------------------------
 # The Tier resource
 #-----------------------------------------------------
   Tier:
     title: Tier
     required:
       - name
+      - tierPlan
+      - requestCount
+      - unitTime
     properties:
       name:
+        type: string
+      displayName:
         type: string
       description:
         type: string
@@ -1802,16 +1879,21 @@ definitions:
       requestCount:
         description: |
           Maximum number of requests which can be sent within a provided unit time
-        type: number
+        type: integer
+        format: int64
       unitTime:
-        type: number
-      billingPlan:
+        type: integer
+        format: int64
+      tierPlan:
         description: |
           This attribute declares whether this tier is available under commercial or free
         type: string
-      continueOnQuotaReach:
+        enum: 
+          - FREE
+          - COMMERCIAL
+      stopOnQuotaReach:
         description: |
-          By making this attribute to true, you are capabale of sending requests 
+          By making this attribute to false, you are capabale of sending requests 
           even if the request count exceeded within a unit time
         type: boolean
 
@@ -1820,9 +1902,15 @@ definitions:
 #-----------------------------------------------------
   TierPermission:
     title: tierPermission
+    required:
+      - permissionType
+      - roles
     properties:
-      enableAccess:
+      permissionType:
         type: string
+        enum:
+          - allow
+          - deny
       roles:
         type: array
         items:

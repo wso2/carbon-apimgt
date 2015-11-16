@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
@@ -37,8 +37,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             String ifModifiedSince) {
         String username = RestApiUtil.getLoggedInUsername();
         try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+            Application application = apiProvider.getApplicationByUUID(applicationId);
             ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
             return Response.ok().entity(applicationDTO).build();
         } catch (APIManagementException e) {

@@ -135,8 +135,6 @@ import java.util.regex.Pattern;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
-    // API definitions from swagger v2.0
-    static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -290,6 +288,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerName) throws APIManagementException {
         return apiMgtDAO.getAllAPIUsageByProvider(providerName);
+    }
+
+    /**
+     * Returns usage details of a particular API
+     *
+     * @param apiId API identifier
+     * @return UserApplicationAPIUsages for given provider
+     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     *          If failed to get UserApplicationAPIUsage
+     */
+    public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException {
+        UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProvider(apiId.getProviderName());
+        List<SubscribedAPI> subscribedAPIs = new ArrayList<SubscribedAPI>();
+        for (UserApplicationAPIUsage usage : allApiResult) {
+            for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
+                if (apiSubscription.getApiId().equals(apiId)) {
+                    subscribedAPIs.add(apiSubscription);
+                }
+            }
+        }
+        return subscribedAPIs;
     }
 
     /**
@@ -1566,13 +1585,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Removes a given documentation
-     *
+     * 
      * @param apiId   APIIdentifier
-     * @param docType the type of the documentation
-     * @param docName name of the document
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     *          if failed to remove documentation
+     * @param docId UUID of the doc
+     * @throws APIManagementException if failed to remove documentation
      */
     public void removeDocumentation(APIIdentifier apiId, String docId)
             throws APIManagementException {
@@ -2799,11 +2815,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
-        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
-    }
-
-    @Override
     public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -2842,12 +2853,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
         boolean success = false;
         try {
-            if (checkItemValue) {
-                apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-            } else {
-                apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+            if (apiArtifact != null) {
+                if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                    apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                    apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                }
+                success = true;
             }
-            success = true;
         } catch (GovernanceException e) {
             handleException("Error while setting registry lifecycle checklist items for the API: " +
                     apiIdentifier.getApiName(), e);
@@ -2855,6 +2868,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return success;
     }
 
+    /**
+     * This method is to set a lifecycle check list item given the APIIdentifier and the checklist item name.
+     * If the given item not in the allowed lifecycle check items list or item is already checked, this will stay 
+     * silent and return false. Otherwise, the checklist item will be updated and returns true.
+     *
+     * @param apiIdentifier APIIdentifier
+     * @param checkItemName Name of the checklist item
+     * @param checkItemValue Value to be set to the checklist item
+     * @return boolean value representing success not not
+     * @throws APIManagementException
+     */
+    @Override
+    public boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName,
+            boolean checkItemValue)
+            throws APIManagementException {
+        Map<String, Object> lifeCycleData = getAPILifeCycleData(apiIdentifier);
+        if (lifeCycleData != null && lifeCycleData.get(APIConstants.LC_CHECK_ITEMS) != null && lifeCycleData
+                .get(APIConstants.LC_CHECK_ITEMS) instanceof ArrayList) {
+            List checkListItems = (ArrayList) lifeCycleData.get(APIConstants.LC_CHECK_ITEMS);
+            for (Object item : checkListItems) {
+                if (item instanceof CheckListItem) {
+                    CheckListItem checkListItem = (CheckListItem) item;
+                    int index = Integer.valueOf(checkListItem.getOrder());
+                    if (checkListItem.getName().equals(checkItemName)) {
+                        changeAPILCCheckListItems(apiIdentifier, index, checkItemValue);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
     @Override
     /*
     * This method returns the lifecycle data for an API including current state,next states.

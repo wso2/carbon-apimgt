@@ -27,11 +27,20 @@ public class DocumentDTO  {
   
   private String summary = null;
   
-  public enum SourceEnum {
+  public enum SourceTypeEnum {
      INLINE,  URL,  FILE, 
   };
   
-  private SourceEnum source = null;
+  private SourceTypeEnum sourceType = null;
+  
+  
+  private String sourceUrl = null;
+  
+  
+  private String filePath = null;
+  
+  
+  private String otherTypeName = null;
   
   public enum VisibilityEnum {
      OWNER_ONLY,  PRIVATE,  API_LEVEL, 
@@ -91,12 +100,48 @@ public class DocumentDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("source")
-  public SourceEnum getSource() {
-    return source;
+  @JsonProperty("sourceType")
+  public SourceTypeEnum getSourceType() {
+    return sourceType;
   }
-  public void setSource(SourceEnum source) {
-    this.source = source;
+  public void setSourceType(SourceTypeEnum sourceType) {
+    this.sourceType = sourceType;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("sourceUrl")
+  public String getSourceUrl() {
+    return sourceUrl;
+  }
+  public void setSourceUrl(String sourceUrl) {
+    this.sourceUrl = sourceUrl;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("filePath")
+  public String getFilePath() {
+    return filePath;
+  }
+  public void setFilePath(String filePath) {
+    this.filePath = filePath;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("otherTypeName")
+  public String getOtherTypeName() {
+    return otherTypeName;
+  }
+  public void setOtherTypeName(String otherTypeName) {
+    this.otherTypeName = otherTypeName;
   }
 
   
@@ -122,7 +167,10 @@ public class DocumentDTO  {
     sb.append("  name: ").append(name).append("\n");
     sb.append("  type: ").append(type).append("\n");
     sb.append("  summary: ").append(summary).append("\n");
-    sb.append("  source: ").append(source).append("\n");
+    sb.append("  sourceType: ").append(sourceType).append("\n");
+    sb.append("  sourceUrl: ").append(sourceUrl).append("\n");
+    sb.append("  filePath: ").append(filePath).append("\n");
+    sb.append("  otherTypeName: ").append(otherTypeName).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("}\n");
     return sb.toString();

@@ -1,5 +1,4 @@
 /*
- *
  *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,18 +17,23 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.TierMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.CarbonContext;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -38,135 +42,172 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/** This is the service implementation class for Publisher tier related operations
+ *
+ */
 public class TiersApiServiceImpl extends TiersApiService {
+
+    private static final Log log = LogFactory.getLog(TiersApiServiceImpl.class);
+
+    /** Retrieves all the Tiers
+     *
+     * @param limit max number of objects returns
+     * @param offset starting index
+     * @param accept accepted media type of the client
+     * @param ifNoneMatch If-None-Match header value
+     * @return Response object containing resulted tiers
+     */
     @Override
-    public Response tiersGet(String accept,String ifNoneMatch){
-        boolean isTenantFlowStarted = false;
-        List<TierDTO> tierDTOs = new ArrayList<>();
+    public Response tiersGet(Integer limit, Integer offset, String accept, String ifNoneMatch) {
+
+        //pre-processing
+        //setting default limit and offset if they are null
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
-            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            Set<Tier> tiers = apiProvider.getTiers() ;
-
-            for (Tier tier : tiers) {
-                tierDTOs.add(TierMappingUtil.fromTiertoDTO(tier));
-            }
-
+            Set<Tier> tiers = apiProvider.getTiers();
+            List<Tier> tierList = new ArrayList<>();
+            if (tiers != null)
+                tierList.addAll(tiers);
+            TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, limit, offset);
+            TierMappingUtil.setPaginationParams(tierListDTO, limit, offset, tierList.size());
+            return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving tiers";
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
-        return Response.ok().entity(tierDTOs).build();
     }
 
-    @Override public Response tiersPost(TierDTO body, String contentType) {
-        boolean isTenantFlowStarted = false;
-        URI createdApiUri = null;
-        TierDTO  createdTierDTO = null;
+    /** Adds a new Tier 
+     * 
+     * @param body TierDTO specifying the new Tier to be added
+     * @param contentType Content-Type header value
+     * @return newly added Tier object
+     */
+    @Override
+    public Response tiersPost(TierDTO body, String contentType) {
+        URI createdTierUri;
         try {
-            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            Tier newTier = TierMappingUtil.fromDTOtoTier(body);
+            apiProvider.addTier(newTier);
 
-            apiProvider.addTier(TierMappingUtil.fromDTOtoTier(body));
-
-            //apiProvider.getTier(name) is required
-            //assign it to createdTierDTO
-
-            createdApiUri = new URI(body.getName());
-
-        } catch (APIManagementException e) {
+            createdTierUri = new URI(RestApiConstants.RESOURCE_PATH_TIERS + "/" + body.getName());
+            Tier addedTier = APIUtil.getTierFromCache(body.getName(), tenantDomain);
+            TierDTO addedTierDTO = TierMappingUtil.fromTiertoDTO(addedTier);
+            return Response.created(createdTierUri).entity(addedTierDTO).build();
+        } catch (APIManagementException | URISyntaxException e) {
+            String errorMessage = "Error while adding tier " + body.getName();
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } catch (URISyntaxException e) {
-            throw new InternalServerErrorException(e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
-        return Response.created(createdApiUri).entity(createdTierDTO).build();
     }
 
-    @Override public Response tiersUpdatePermissionPost(String tierName, String ifMatch, String ifUnmodifiedSince,
+    /** Updates permission of a tier specified by name
+     * 
+     * @param tierName name of the tier
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @param permissions 
+     * @return 200 OK response if successfully updated permission
+     */
+    @Override 
+    public Response tiersUpdatePermissionPost(String tierName, String ifMatch, String ifUnmodifiedSince,
             TierPermissionDTO permissions) {
-        return null;
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            if (permissions.getRoles().size() > 0 ) {
+                String roles = StringUtils.join(permissions.getRoles(), ",");
+                String permissionType = permissions.getPermissionType().toString();
+                apiProvider.updateTierPermissions(tierName, permissionType, roles);
+                return Response.ok().build();
+            } else {
+                throw new BadRequestException();
+            }
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
-    @Override public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
-            String ifModifiedSince){
-        //backend method requires
-        return Response.ok().entity(null).build();
+    /** Returns the matched tier to the given name
+     *
+     * @param tierName name of the tier
+     * @param accept accepted media type of the client
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return TierDTO matched to the given tier name
+     */
+    @Override
+    public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        try {
+            Tier tier = APIUtil.getTierFromCache(tierName, tenantDomain);
+            if (tier != null) {
+                return Response.ok().entity(TierMappingUtil.fromTiertoDTO(tier)).build();
+            } else {
+                throw new NotFoundException();
+            }
+        } catch (APIManagementException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
-    @Override public Response tiersTierNamePut(String tierName, TierDTO body, String contentType, String ifMatch,
+    /** Updates an existing Tier 
+     * 
+     * @param tierName name of the tier to be updated
+     * @param body TierDTO object as the new tier
+     * @param contentType Content-Type header value
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated tier object
+     */
+    @Override 
+    public Response tiersTierNamePut(String tierName, TierDTO body, String contentType, String ifMatch,
             String ifUnmodifiedSince) {
-        boolean isTenantFlowStarted = false;
-        TierDTO  updatedTierDTO = null;
         try {
-            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            Tier tierToUpdate = TierMappingUtil.fromDTOtoTier(body);
+            apiProvider.updateTier(tierToUpdate);
 
-            apiProvider.updateTier(TierMappingUtil.fromDTOtoTier(body));
-
-            //apiProvider.getTier(name) is required
-            //assign it to updatedTierDTO
-
+            Tier updatedTier = APIUtil.getTierFromCache(body.getName(), tenantDomain);
+            TierDTO updatedTierDTO = TierMappingUtil.fromTiertoDTO(updatedTier);
+            return Response.ok().entity(updatedTierDTO).build();
         } catch (APIManagementException e) {
+            String errorMessage = "Error while updating tier " + tierName;
+            log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
-        return Response.ok().entity(updatedTierDTO).build();
     }
 
-    @Override public Response tiersTierNameDelete(String tierName, String ifMatch, String ifUnmodifiedSince){
-        boolean isTenantFlowStarted = false;
+    /** Deletes a tier specified by the name
+     * 
+     * @param tierName name of the tier to be deleted
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if successful
+     */
+    @Override 
+    public Response tiersTierNameDelete(String tierName, String ifMatch, String ifUnmodifiedSince){
         try {
-            String tenantDomain =  CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
-            }
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            //getTierbyname
-            apiProvider.removeTier(new Tier("sample"));//can we have a remove tier by name method?
-
-        } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            Tier tier = APIUtil.getTierFromCache(tierName, tenantDomain);
+            if (tier != null) {
+                apiProvider.removeTier(tier);
+                return Response.ok().build();
+            } else {
+                throw new NotFoundException();
             }
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting tier " + tierName;
+            log.error(errorMessage, e);
+            throw new InternalServerErrorException(e);
         }
-        return Response.ok().build();
     }
     
 }
