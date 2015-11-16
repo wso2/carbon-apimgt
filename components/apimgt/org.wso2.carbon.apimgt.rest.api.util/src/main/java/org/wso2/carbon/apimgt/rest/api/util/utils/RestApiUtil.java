@@ -27,6 +27,7 @@ import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -54,7 +55,6 @@ import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 
 import javax.validation.ConstraintViolation;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -167,9 +167,9 @@ public class RestApiUtil {
     public static NotFoundException getNewNotFoundException(String resource, String id) {
         String description;
         if (!StringUtils.isEmpty(id)) {
-            description = "Required " + resource + " with Id " + id + " not found";
+            description = "Requested " + resource + " with Id " + id + " not found";
         } else {
-            description = "Required " + resource + " not found";
+            description = "Requested " + resource + " not found";
         }
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
         return new NotFoundException(errorDTO);
@@ -189,6 +189,17 @@ public class RestApiUtil {
         } else {
             description = "You don't have permission to access the " + resource;
         }
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, description);
+        return new ForbiddenException(errorDTO);
+    }
+
+    /**
+     * Returns a new ForbiddenException
+     *
+     * @param description description of the failure
+     * @return a new ForbiddenException with the specified details as a response DTO
+     */
+    public static ForbiddenException getNewForbiddenException(String description) {
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, description);
         return new ForbiddenException(errorDTO);
     }
@@ -223,7 +234,8 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean isDueToAuthorizationFailure(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof AuthorizationFailedException;
+        return rootCause instanceof AuthorizationFailedException
+                || rootCause instanceof APIMgtAuthorizationFailedException;
     }
 
     /**
