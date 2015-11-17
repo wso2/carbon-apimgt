@@ -11,15 +11,23 @@ function getProviderAPIVersionUsage(providerName, apiName, server) {
 
     try {
 
-        usage = apiProvider.getProviderAPIVersionUsage(providerName, apiName, server);
+        usage = usageClient.getUsageByAPIVersions(providerName, apiName, null, null);
         if (log.isDebugEnabled()) {
-            log.debug("getProviderAPIVersionUsage for : " + server);
+            log.debug("getProviderAPIVersionUsage for : " + apiName);
         }
 
-        return {
-            error:false,
-            usage:usage
-        };
+        if (usage == null) {
+            return {
+                error:true
+            };
+
+        } else {
+            usage=JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
     } catch (e) {
         log.error(e.message);
         return {
@@ -87,7 +95,7 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getProviderAPIUserUsage(providerName, apiName, server);
+        usage = usageClient.getUsageBySubscribers(providerName, apiName, 10);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIUserUsage for : " + server);
         }
@@ -97,7 +105,7 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -297,7 +305,7 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
     var usage = [];
     var usageout = [];
     try {
-        usage = apiProvider.getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl);
+        usage = usageClient.getUsageBySubscribers(providerName,apiName,version,10);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIVersionUserUsage for : " + providerName);
         }
@@ -307,6 +315,7 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
             };
 
         } else {
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage

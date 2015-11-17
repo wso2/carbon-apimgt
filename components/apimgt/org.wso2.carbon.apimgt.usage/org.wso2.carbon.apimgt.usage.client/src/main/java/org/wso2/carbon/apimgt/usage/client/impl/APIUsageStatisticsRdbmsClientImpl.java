@@ -1242,15 +1242,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.context) && api.getId().getApiName().equals(apiName)) {
-                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.username);
+                if (api.getContext().equals(usageEntry.getContext()) && api.getId().getApiName().equals(apiName)) {
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usageEntry.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
                     } else {
                         usageDTO = new PerUserAPIUsageDTO();
-                        usageDTO.setUsername(usageEntry.username);
-                        usageDTO.setCount(usageEntry.requestCount);
-                        usageByUsername.put(usageEntry.username, usageDTO);
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
                     }
                     break;
                 }
@@ -1366,18 +1366,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.context) &&
+                if (api.getContext().equals(usageEntry.getContext()) &&
                         api.getId().getApiName().equals(apiName) &&
                         api.getId().getVersion().equals(apiVersion) &&
-                        apiVersion.equals(usageEntry.apiVersion)) {
-                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.username);
+                        apiVersion.equals(usageEntry.getApiVersion())) {
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usageEntry.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
                     } else {
                         usageDTO = new PerUserAPIUsageDTO();
-                        usageDTO.setUsername(usageEntry.username);
-                        usageDTO.setCount(usageEntry.requestCount);
-                        usageByUsername.put(usageEntry.username, usageDTO);
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
                     }
                     break;
                 }
@@ -2962,21 +2962,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     log.error("Error occurred while closing the JDBC database connection.", e);
                 }
             }
-        }
-    }
-
-    private static class APIUsageByUser {
-
-        private String context;
-        private String username;
-        private long requestCount;
-        private String apiVersion;
-
-        public APIUsageByUser(String context, String username, long requestCount, String apiVersion) {
-            this.context = context;
-            this.username = username;
-            this.requestCount = requestCount;
-            this.apiVersion = apiVersion;
         }
     }
 
