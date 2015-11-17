@@ -115,7 +115,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
                 api = apiConsumer.getAPI(apiIdentifier);
             }
-
+            //todo
             if (api != null) {
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             } else {
@@ -124,16 +124,35 @@ public class ApisApiServiceImpl extends ApisApiService {
                 throw new NotFoundException();
             }
         } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else { //todo: format
             String errorMessage = "Error while retrieving API : " + apiId;
             log.error(errorMessage, e);
             throw new InternalServerErrorException(e);
+            }
         }
         return Response.ok().entity(apiToReturn).build();
     }
 
+    /**
+     *  Returns all the documents of the given API identifier that matches to the search condition
+     *  
+     * @param apiId API identifier
+     * @param limit max number of records returned
+     * @param offset starting index
+     * @param query document search condition
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched documents as a list if DocumentDTOs
+     */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
             String ifNoneMatch) {
+
+        //todo : implement document search. Search conditions can be found at store-api.yaml
 
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -150,17 +169,34 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user doesn't have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
             DocumentationMappingUtil
                     .setPaginationParams(documentListDTO, query, apiId, offset, limit, documentationList.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                handleException("Error while getting API " + apiId, e);
+                return null;
+            }
         }
     }
 
+    /**
+     * Returns a specific document by identifier that is belong to the given API identifier
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifer
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return returns the matched document
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
             String ifModifiedSince) {
@@ -168,20 +204,30 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            if (RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId)) {
-                documentation = apiConsumer.getDocumentation(documentId);
-                if (null != documentation) {
-                    DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
-                    return Response.ok().entity(documentDTO).build();
-                } else {
-                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
-                }
-            } else {
+            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
             }
+
+            documentation = apiConsumer.getDocumentation(documentId);
+            if (null != documentation) {
+                DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+                return Response.ok().entity(documentDTO).build();
+            } else {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+            }
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                handleException("Error while getting API " + apiId, e);
+                return null;
+            }
         }
+    }
+
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
     }
 
 }
