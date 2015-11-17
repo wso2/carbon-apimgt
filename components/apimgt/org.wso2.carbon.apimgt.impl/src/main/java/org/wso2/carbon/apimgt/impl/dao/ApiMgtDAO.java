@@ -7940,7 +7940,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            ps.setInt(2, appID);
+            ps.setString(2, String.valueOf(appID));
             rs = ps.executeQuery();
 
             // returns only one row
