@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -88,8 +87,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
+            return null;
         }
     }
 
@@ -115,23 +114,17 @@ public class ApisApiServiceImpl extends ApisApiService {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
                 api = apiConsumer.getAPI(apiIdentifier);
             }
-            //todo
-            if (api != null) {
-                apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-            } else {
-                String errorMessage =  apiId + " does not exist";
-                log.error(errorMessage);
-                throw new NotFoundException();
-            }
+            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
+
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
-            } else { //todo: format
-            String errorMessage = "Error while retrieving API : " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+                return null;
             }
         }
         return Response.ok().entity(apiToReturn).build();
