@@ -942,6 +942,7 @@ public final class APIUtil {
                 type = DocumentationType.OTHER;
             }
             documentation = new Documentation(type, artifact.getAttribute(APIConstants.DOC_NAME));
+            documentation.setId(artifact.getId());
             documentation.setSummary(artifact.getAttribute(APIConstants.DOC_SUMMARY));
 
             Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
