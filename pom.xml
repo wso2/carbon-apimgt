@@ -446,11 +446,6 @@
                 <artifactId>org.wso2.carbon.tenant.usage.agent</artifactId>
                 <version>${carbon.multitenancy.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.usage.agent</artifactId>
-                <version>2.1.2</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
@@ -741,18 +736,6 @@
                 <artifactId>org.wso2.carbon.apimgt.startup.publisher.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-api</artifactId>
-                <version>${axiom.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.ws.commons.axiom</groupId>
-                <artifactId>axiom-impl</artifactId>
-                <version>${axiom.version}</version>
             </dependency>
 
             <dependency>
