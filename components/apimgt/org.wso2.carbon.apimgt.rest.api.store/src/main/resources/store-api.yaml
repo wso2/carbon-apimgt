@@ -218,13 +218,19 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
-#
-# ????? We need to specify the search condition  ?????
-#
         - name: query
           in: query
           description: |
             Search condition.
+
+            You can search in attributes by using an **"attribute:"** modifier.
+
+            Eg. "name:Readme" will match a document if the name of the document is 'Readme'.
+
+            Supported attribute modifiers are [**name, summary, type **]
+
+            If no advanced attribute modifier has been specified, search will match the
+            given query string against document Name.
           type: string
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
@@ -960,7 +966,7 @@ paths:
 #-----------------------------------------------------
     get:
       description: |
-        Get a list of predefined sequences
+        Get a list of tags that are already added to APIs
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'

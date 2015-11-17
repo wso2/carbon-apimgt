@@ -164,7 +164,7 @@ public class RestApiUtil {
      * @param id identifier of the resource
      * @return a new NotFoundException with the specified details as a response DTO
      */
-    public static NotFoundException getNewNotFoundException(String resource, String id) {
+    public static NotFoundException buildNotFoundException(String resource, String id) {
         String description;
         if (!StringUtils.isEmpty(id)) {
             description = "Requested " + resource + " with Id " + id + " not found";
@@ -182,7 +182,7 @@ public class RestApiUtil {
      * @param id identifier of the resource
      * @return a new ForbiddenException with the specified details as a response DTO
      */
-    public static ForbiddenException getNewForbiddenException(String resource, String id) {
+    public static ForbiddenException buildForbiddenException(String resource, String id) {
         String description;
         if (!StringUtils.isEmpty(id)) {
             description = "You don't have permission to access the " + resource + " with Id " + id;
@@ -199,7 +199,7 @@ public class RestApiUtil {
      * @param description description of the failure
      * @return a new ForbiddenException with the specified details as a response DTO
      */
-    public static ForbiddenException getNewForbiddenException(String description) {
+    public static ForbiddenException buildForbiddenException(String description) {
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, description);
         return new ForbiddenException(errorDTO);
     }
@@ -210,7 +210,7 @@ public class RestApiUtil {
      * @param description description of the exception
      * @return a new BadRequestException with the specified details as a response DTO
      */
-    public static BadRequestException getNewBadRequestException(String description) {
+    public static BadRequestException buildBadRequestException(String description) {
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
         return new BadRequestException(errorDTO);
     }
@@ -221,7 +221,7 @@ public class RestApiUtil {
      * @param description description of the exception
      * @return a new ConflictException with the specified details as a response DTO
      */
-    public static ConflictException getNewConflictException(String description) {
+    public static ConflictException buildConflictException(String description) {
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_CONFLCIT_MESSAGE_DEFAULT, 409l, description);
         return new ConflictException(errorDTO);
     }

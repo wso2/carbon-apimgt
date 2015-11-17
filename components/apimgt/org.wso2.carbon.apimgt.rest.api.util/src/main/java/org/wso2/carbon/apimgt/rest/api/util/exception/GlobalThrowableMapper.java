@@ -76,11 +76,11 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
         if (e instanceof InternalServerErrorException) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 ForbiddenException forbiddenException = RestApiUtil
-                        .getNewForbiddenException(RestApiConstants.RESOURCE, "");
+                        .buildForbiddenException(RestApiConstants.RESOURCE, "");
                 return forbiddenException.getResponse();
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 NotFoundException notFoundException = RestApiUtil
-                        .getNewNotFoundException(RestApiConstants.RESOURCE, "");
+                        .buildNotFoundException(RestApiConstants.RESOURCE, "");
                 return notFoundException.getResponse();
             }
         }*/

@@ -130,18 +130,18 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                         return Response.ok().entity(subscriptionListDTO).build();
                     } else {
                         throw RestApiUtil
-                                .getNewForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                                .buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                     }
                 } else {
-                    throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
                 //neither apiId nor applicationId is given
-                throw RestApiUtil.getNewBadRequestException("Either applicationId or apiId should be available");
+                throw RestApiUtil.buildBadRequestException("Either applicationId or apiId should be available");
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 handleException("Error while getting subscriptions of the user " + username, e);
                 return null;
@@ -168,19 +168,19 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             //check whether user is permitted to access the API. If the API does not exist, 
             // this will throw a APIMgtResourceNotFoundException
             if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiId())) {
-                throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_API, body.getApiId());
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, body.getApiId());
             }
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(body.getApiId(), tenantDomain);
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
                 //required application not found
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
             }
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 //application access failure occurred
-                throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
             }
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
@@ -200,15 +200,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         } catch (APIMgtAuthorizationFailedException e) {
             //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
             // the message of the exception e
-            throw RestApiUtil.getNewForbiddenException(e.getMessage());
+            throw RestApiUtil.buildForbiddenException(e.getMessage());
         } catch (SubscriptionAlreadyExistingException e) {
-            throw RestApiUtil.getNewConflictException(
+            throw RestApiUtil.buildConflictException(
                     "Specified subscription already exists for API " + body.getApiId() + " for application " + body
                             .getApplicationId());
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 //this happens when the specified API identifier does not exist
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_API, body.getApiId());
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, body.getApiId());
             } else {
                 //unhandled exception
                 handleException("Error while adding the subscription API:" + body.getApiId() + ", application:" + body
@@ -240,10 +240,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                     SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
                     return Response.ok().entity(subscriptionDTO).build();
                 } else {
-                    throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
                 }
             } else {
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
             }
         } catch (APIManagementException e) {
             handleException("Error while getting subscription with id " + subscriptionId, e);
@@ -270,10 +270,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForSubscription(subscribedAPI)) {
                     apiConsumer.removeSubscription(subscribedAPI);
                 } else {
-                    throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
                 }
             } else {
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
             }
             return Response.ok().build();
         } catch (APIManagementException e) {

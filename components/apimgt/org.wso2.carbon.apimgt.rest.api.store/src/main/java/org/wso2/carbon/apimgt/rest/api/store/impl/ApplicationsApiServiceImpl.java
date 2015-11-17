@@ -122,7 +122,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
                 //todo: should we add debug/info logs
-                throw RestApiUtil.getNewConflictException("An application already exists with name " + body.getName());
+                throw RestApiUtil.buildConflictException("An application already exists with name " + body.getName());
             } else {
                 handleException("Error while adding a new application for the user " + username, e);
                 return null;
@@ -167,10 +167,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     return Response.ok().entity(applicationKeyDTO).build();
                 } else {
                     //todo: should we add debug/info logs
-                    throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
             }
         } catch (APIManagementException e) {
             handleException("Error while generating keys for application " + applicationId, e);
@@ -200,10 +200,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     return Response.ok().entity(applicationDTO).build();
                 } else {
                     //todo: should we add debug/info logs
-                    throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
             }
         } catch (APIManagementException e) {
             handleException("Error while retrieving application " + applicationId, e);
@@ -247,10 +247,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     return Response.ok().entity(updatedApplicationDTO).build();
                 } else {
                     //todo: should we add debug/info logs
-                    throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
             }
         } catch (APIManagementException e) {
             handleException("Error while updating application " + applicationId, e);
@@ -280,10 +280,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     return Response.ok().build();
                 } else {
                     //todo: should we add debug/info logs
-                    throw RestApiUtil.getNewForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
-                throw RestApiUtil.getNewNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
             }
         } catch (APIManagementException e) {
             handleException("Error while deleting application " + applicationId, e);

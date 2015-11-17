@@ -162,19 +162,22 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
         Documentation documentation;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            RestAPIStoreUtils.checkUserAccessAllowedToAPI(apiId);
-            documentation = apiConsumer.getDocumentation(documentId);
-            if(null != documentation){
-                DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
-                return Response.ok().entity(documentDTO).build();
-            }
-            else{
-                throw new NotFoundException();
+            if (RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId)) {
+                documentation = apiConsumer.getDocumentation(documentId);
+                if (null != documentation) {
+                    DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+                    return Response.ok().entity(documentDTO).build();
+                } else {
+                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+                }
+            } else {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
             }
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
