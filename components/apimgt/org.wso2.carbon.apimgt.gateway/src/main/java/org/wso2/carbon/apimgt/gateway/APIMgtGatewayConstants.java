@@ -44,6 +44,7 @@ public class APIMgtGatewayConstants {
     public static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
     public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
     public static final String AUTHORIZED_USER = "AuthorizedUser";
+    public static final String SCOPES = "Scopes";
 
 }
 

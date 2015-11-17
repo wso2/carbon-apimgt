@@ -28,7 +28,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
     <version>0.9.0-SNAPSHOT</version>
     <name>WSO2 Carbon API Manager- Dynamic Client Registration Web Service</name>
