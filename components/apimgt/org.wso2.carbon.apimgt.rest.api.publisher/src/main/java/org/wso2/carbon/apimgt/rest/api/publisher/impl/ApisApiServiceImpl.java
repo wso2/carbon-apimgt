@@ -236,10 +236,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         APIDTO apiToReturn;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             API api;
             if (RestApiUtil.isUUID(apiId)) {
-                api = apiProvider.getAPIbyUUID(apiId);
+                api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
             } else {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
                 api = apiProvider.getAPI(apiIdentifier);
@@ -380,7 +380,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             RestApiPublisherUtils.checkUserAccessAllowedForAPI(apiId);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            documentation = apiProvider.getDocumentation(documentId);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
             if(null != documentation){
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();
@@ -405,7 +406,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             apiProvider.updateDocumentation(apiIdentifier, documentation);
             //retrieve the updated documentation
-            documentation = apiProvider.getDocumentation(documentId);
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
             return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(documentation)).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
@@ -422,7 +423,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
-            doc = apiProvider.getDocumentation(documentId);
+            doc = apiProvider.getDocumentation(documentId, tenantDomain);
             if(null == doc){
                 throw new NotFoundException();
             }

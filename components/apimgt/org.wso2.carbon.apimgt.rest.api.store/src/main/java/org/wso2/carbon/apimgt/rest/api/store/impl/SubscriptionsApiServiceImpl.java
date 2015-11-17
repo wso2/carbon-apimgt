@@ -172,7 +172,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             //check whether user is permitted to access the API. If the API does not exist, 
             // this will throw a APIMgtResourceNotFoundException
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiId())) {
+            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiId(), tenantDomain)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, body.getApiId());
             }
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(body.getApiId(), tenantDomain);

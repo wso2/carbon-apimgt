@@ -119,7 +119,9 @@ public class RestAPIStoreUtils {
         APIIdentifier apiIdentifier = subscribedAPI.getApiId();
         if (apiIdentifier != null && application != null) {
             try {
-                if (!isUserAccessAllowedForAPI(apiIdentifier.toString())) {
+                String tenantDomain = MultitenantUtils
+                        .getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                if (!isUserAccessAllowedForAPI(apiIdentifier.toString(), tenantDomain)) {
                     return false;
                 }
             } catch (APIManagementException e) {
@@ -146,8 +148,7 @@ public class RestAPIStoreUtils {
      * @param apiId API identifier
      * @throws APIManagementException
      */
-    public static boolean isUserAccessAllowedForAPI(String apiId) throws APIManagementException {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+    public static boolean isUserAccessAllowedForAPI(String apiId, String tenantDomain) throws APIManagementException {
         String username = RestApiUtil.getLoggedInUsername();
         //this is just to check whether the user has access to the api or the api exists. 
         try {

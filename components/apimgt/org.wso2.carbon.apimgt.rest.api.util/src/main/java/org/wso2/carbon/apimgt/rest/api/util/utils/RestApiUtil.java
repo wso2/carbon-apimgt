@@ -158,6 +158,16 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns the requested tenant from the CXF message context
+     * 
+     * @return requested tenant domain for the resource
+     */
+    public static String getRequestedTenantDomain() {
+        //todo: implement
+        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    /**
      * Returns a new NotFoundException
      * 
      * @param resource Resource type

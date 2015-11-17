@@ -72,10 +72,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
-            apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, limit, true);
+            apisMap = apiConsumer.searchPaginatedAPIs(query, type, requestedTenantDomain, offset, limit, true);
             APIListDTO apiListDTO = new APIListDTO();
             Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
             int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
@@ -107,10 +107,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         APIDTO apiToReturn;
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
             API api;
             if (RestApiUtil.isUUID(apiId)) {
-                api = apiConsumer.getAPIbyUUID(apiId);
+                api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
             } else {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
                 api = apiConsumer.getAPI(apiIdentifier);
@@ -164,10 +164,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
 
             //this will fail if user doesn't have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
             List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
@@ -204,11 +204,13 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId)) {
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
+
+            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId, requestedTenantDomain)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
             }
 
-            documentation = apiConsumer.getDocumentation(documentId);
+            documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
             if (null != documentation) {
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();
