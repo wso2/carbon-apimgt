@@ -318,6 +318,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceSystemRegistry(id);
+                APIUtil.loadTenantRegistry(id);
             } else {
                 if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                     registry = ServiceReferenceHolder.getInstance().
