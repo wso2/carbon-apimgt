@@ -85,6 +85,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private APIProvider apiProviderImpl;
     private APIConsumer apiConsumerImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
+    private final String clientType = "RDBMS";
+
 
     public APIUsageStatisticsRdbmsClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
@@ -3034,4 +3036,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     }
 
+    /**
+     * return a string to indicate type of statistics client
+     *
+     * @return String
+     */
+    public String getClientType() {
+        return clientType;
+    }
 }

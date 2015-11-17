@@ -66,10 +66,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.*;
@@ -84,6 +80,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private APIProvider apiProviderImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRestClientImpl.class);
     private DASRestClient restClient;
+    private final String clientType = "REST";
 
     /**
      * Create a rest client instance.
@@ -2294,9 +2291,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * Returns a sorted list of PerUserAPIUsageDTO objects related to a particular API. The returned
-     * list will only have at most limit + 1 entries. This method does not differentiate between
-     * API versions.
+     * return list of api usage for a particular api accross all versions
      *
      * @param providerName API provider name
      * @param apiName      Name of the API
@@ -2329,6 +2324,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
+    /**
+     * return list of api usage for a particular api and version
+     *
+     * @param providerName API provider name
+     * @param apiName      Name of the API
+     * @param limit        Number of sorted entries to return
+     * @return a List of PerUserAPIUsageDTO objects - Possibly empty
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
+     */
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
@@ -2341,6 +2345,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         api.getId().getApiName().equals(apiName) &&
                         api.getId().getVersion().equals(apiVersion) &&
                         apiVersion.equals(usageEntry.getApiVersion())) {
+
                     PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
                         usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
@@ -2367,7 +2372,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             query += " AND " + APIUsageStatisticsClientConstants.VERSION + ":\"" + apiVersion + "\"";
         }
 
-        //creating request bean
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query, 3,
                 APIUsageStatisticsClientConstants.API_VERSION_USERID_CONTEXT_FACET,
@@ -2409,8 +2413,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             UsageOfAPIValues v = result.getValues();
 
             usage = new APIUsageByUser();
-//            usage.setAccessTime(v.getLastAccessTime());
-//            usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setUsername(v.getColumnNames().get(2));
             usage.setContext(v.getColumnNames().get(3));
@@ -2421,6 +2423,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return apiUsage;
 
     }
+
     /**
      * Use to handle exception of common type in single step
      *
@@ -2498,5 +2501,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         });
 
         return usageData;
+    }
+
+    /**
+     * return a string to indicate type of statistics client
+     *
+     * @return String
+     */
+    public String getClientType() {
+        return clientType;
     }
 }
