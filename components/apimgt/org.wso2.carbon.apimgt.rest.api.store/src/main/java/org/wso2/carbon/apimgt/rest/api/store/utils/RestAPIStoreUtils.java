@@ -138,17 +138,18 @@ public class RestAPIStoreUtils {
     }
 
     /**
-     * check whether the specified API exists and the current logged in user has access to it
-     *
+     * Check whether the specified API exists and the current logged in user has access to it.
+     * 
+     * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user 
+     * does not have enough privileges. If the API does not exist, this will throw a APIMgtResourceNotFoundException
+     * 
      * @param apiId API identifier
      * @throws APIManagementException
      */
     public static boolean isUserAccessAllowedForAPI(String apiId) throws APIManagementException {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         String username = RestApiUtil.getLoggedInUsername();
-        //this is just to check whether the user has access to the api or the api exists. When it tries to retrieve 
-        // the resource from the registry, it will fail with AuthorizationFailedException if user does not have enough
-        // privileges.
+        //this is just to check whether the user has access to the api or the api exists. 
         try {
             APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
         } catch (APIManagementException e) {

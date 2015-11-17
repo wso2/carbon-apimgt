@@ -103,38 +103,41 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                         return o1.getApplication().getName().compareTo(o2.getApplication().getName());
                     }
                 });
+
                 subscriptionListDTO = SubscriptionMappingUtil
                         .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
                 SubscriptionMappingUtil.setPaginationParamsForAPIId(subscriptionListDTO, apiId, groupId, limit, offset,
                         subscriptions.size());
+
                 return Response.ok().entity(subscriptionListDTO).build();
             } else if (!StringUtils.isEmpty(applicationId)) {
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
-                if (application != null) {
-                    if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                        subscriptions = apiConsumer
-                                .getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
-                        subscribedAPIList.addAll(subscriptions);
-                        //sort by api
-                        Collections.sort(subscribedAPIList, new Comparator<SubscribedAPI>() {
-                            @Override
-                            public int compare(SubscribedAPI o1, SubscribedAPI o2) {
-                                return o1.getApiId().getApiName().compareTo(o2.getApiId().getApiName());
-                            }
-                        });
-                        subscriptionListDTO = SubscriptionMappingUtil
-                                .fromSubscriptionListToDTO(subscribedAPIList, limit, offset);
-                        SubscriptionMappingUtil
-                                .setPaginationParamsForApplicationId(subscriptionListDTO, applicationId, limit,
-                                        offset, subscriptions.size());
-                        return Response.ok().entity(subscriptionListDTO).build();
-                    } else {
-                        throw RestApiUtil
-                                .buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
-                    }
-                } else {
+
+                if (application == null) {
                     throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
+
+                if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                }
+
+                subscriptions = apiConsumer.getSubscribedAPIs(subscriber, application.getName(),
+                        application.getGroupId());
+                subscribedAPIList.addAll(subscriptions);
+                //sort by api
+                Collections.sort(subscribedAPIList, new Comparator<SubscribedAPI>() {
+                    @Override
+                    public int compare(SubscribedAPI o1, SubscribedAPI o2) {
+                        return o1.getApiId().getApiName().compareTo(o2.getApiId().getApiName());
+                    }
+                });
+                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(subscribedAPIList, limit,
+                        offset);
+                SubscriptionMappingUtil.setPaginationParamsForApplicationId(subscriptionListDTO, applicationId, limit,
+                        offset, subscriptions.size());
+
+                return Response.ok().entity(subscriptionListDTO).build();
+
             } else {
                 //neither apiId nor applicationId is given
                 throw RestApiUtil.buildBadRequestException("Either applicationId or apiId should be available");
@@ -142,6 +145,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 handleException("Error while getting subscriptions of the user " + username, e);
                 return null;
