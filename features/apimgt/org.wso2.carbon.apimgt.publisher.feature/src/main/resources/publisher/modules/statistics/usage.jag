@@ -9,6 +9,13 @@ var gson=com.google.gson.Gson();
 function getProviderAPIVersionUsage(providerName, apiName, server) {
     var usage = [];
 
+    if(usageClient == null){
+        return {
+            error:false,
+            usage:[]
+        };
+    }
+
     try {
 
         usage = usageClient.getUsageByAPIVersions(providerName, apiName, null, null);
@@ -18,7 +25,8 @@ function getProviderAPIVersionUsage(providerName, apiName, server) {
 
         if (usage == null) {
             return {
-                error:true
+                error:false,
+                usage:[]
             };
 
         } else {
@@ -94,6 +102,14 @@ function getProviderAPIUsage(providerName,from,to, server) {
 function getProviderAPIUserUsage(providerName, apiName, server) {
     var usage = [];
     var usageout = [];
+
+    if(usageClient == null){
+        return {
+            error:false,
+            usage:[]
+        };
+    }
+
     try {
         usage = usageClient.getUsageBySubscribers(providerName, apiName, 10);
         if (log.isDebugEnabled()) {
@@ -101,7 +117,8 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
         }
         if (usage == null) {
             return {
-                error:true
+                error:false,
+                usage:[]
             };
 
         } else {
@@ -304,6 +321,14 @@ function getSubscriberCountByAPIs(providerName, isAllStatistics) {
 function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) {
     var usage = [];
     var usageout = [];
+
+    if(usageClient == null){
+        return {
+            error:false,
+            usage:[]
+        };
+    }
+
     try {
         usage = usageClient.getUsageBySubscribers(providerName,apiName,version,10);
         if (log.isDebugEnabled()) {
@@ -311,9 +336,9 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
         }
         if (usage == null) {
             return {
-                error:true
+                error:false,
+                usage:[]
             };
-
         } else {
             usage=JSON.parse(gson.toJson(usage));
             return {
