@@ -3391,7 +3391,7 @@ public final class APIUtil {
                     Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
                             APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(queryParam);
-                } else {/* For POST and PUT Parameter name - Payload*/
+                } else {/* For POST, PUT and PATCH Parameter name - Payload*/
                     Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
                             APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(payLoadParam);
@@ -3415,7 +3415,7 @@ public final class APIUtil {
                     Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
                             APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(queryParam);
-                } else {/* For POST and PUT Parameter name - Payload*/
+                } else {/* For POST,PUT and PATCH Parameter name - Payload*/
                     Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
                             APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(payLoadParam);

@@ -1,5 +1,5 @@
 
-var HTTP_VERBS = [ "GET", "POST", "PUT", "DELETE", "OPTIONS"];
+var HTTP_VERBS = [ "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"];
 
 var SCOPES = [];
 

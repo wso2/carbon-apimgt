@@ -42,9 +42,9 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
                                                   var methods = templatesList[i][1].split(",");
                                                   var authTypes = templatesList[i][2].split(",");
                                                   var throttlingTiers = templatesList[i][3].split(",");
-                                                  var getVal,putVal,postVal,deleteVal,optionVal,method;
-                                                  var getThrottlingTier,postThrottlingTier,deleteThrottlingTier,optionsThrottlingTier,putThrottlingTier;
-                                                  var getAuthVal,putAuthVal,postAuthVal,deleteAuthVal,optionAuthVal,method;
+                                                  var getVal,putVal,postVal,deleteVal,patchVal,optionVal,method;
+                                                  var getThrottlingTier,postThrottlingTier,deleteThrottlingTier,optionsThrottlingTier,putThrottlingTier,patchThrottlingTier;
+                                                  var getAuthVal,putAuthVal,postAuthVal,deleteAuthVal,patchAuthVal,optionAuthVal,method;
 
                                                 for(var n=0;n <methods.length ;n++) {
                                                   method=methods[n];
@@ -64,11 +64,15 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
 
                                                   if(method=="DELETE"){deleteVal=true;deleteAuthVal=authTypes[n];
                                                   deleteThrottlingTier=throttlingTiers[n];
-                                                   }
+                                                  }
+
+                                                  if(method=="PATCH"){patchVal=true;patchAuthVal=authTypes[n];
+                                                  patchThrottlingTier=throttlingTiers[n];
+                                                  }
 
                                                   if(method=="OPTIONS"){optionVal=true;optionAuthVal=authTypes[n];
                                                   optionsThrottlingTier=throttlingTiers[n];
-                                                                                      }
+                                                  }
 
                                                   }
                                                   %>
@@ -111,16 +115,24 @@ var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemp
                                         for(var k = 0 ; k < tiersList.length ; k++){
                                         var l =  tiersList.length - k -1;
                                         %>
+                                        <%if(tiersList[l].tierName==patchThrottlingTier){%><br><%="PATCH " + tiersList[l].tierDescription%></br>
+                                        <% }}
+                                        %>
+
+                                        <%
+                                        for(var k = 0 ; k < tiersList.length ; k++){
+                                        var l =  tiersList.length - k -1;
+                                        %>
                                         <%if(tiersList[l].tierName==optionsThrottlingTier){%><br><%="OPTIONS " + tiersList[l].tierDescription%></br>
                                         <% }}
                                         %>
                                     </td>
 
-                                    <% getVal=putVal=postVal=deleteVal=optionVal=""; %>
+                                    <% getVal=putVal=postVal=deleteVal=patchVal=optionVal=""; %>
 
 
-                                <% getAuthVal=putAuthVal=postAuthVal=deleteAuthVal=optionAuthVal=""; %>
-                                <% getThrottlingTier=postThrottlingTier=deleteThrottlingTier=optionsThrottlingTier=putThrottlingTier=""; %>
+                                <% getAuthVal=putAuthVal=postAuthVal=deleteAuthVal=patchAuthVal=optionAuthVal=""; %>
+                                <% getThrottlingTier=postThrottlingTier=deleteThrottlingTier=optionsThrottlingTier=putThrottlingTier=patchThrottlingTier=""; %>
                             </tr>
                             <%
                             }}%>

@@ -635,7 +635,7 @@ public final class APIConstants {
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
-                    (Arrays.asList(new String[]{"get","put","post","delete","head","options"}))));
+                    (Arrays.asList(new String[]{"get","put","post","delete","patch","head","options"}))));
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
@@ -692,7 +692,7 @@ public final class APIConstants {
     	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
     	
     	public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,OPTIONS";
+    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,PATCH,OPTIONS";
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
@@ -833,6 +833,7 @@ public final class APIConstants {
         POST,
         PUT,
         DELETE,
+        PATCH,
         HEAD,
         OPTIONS
     }
@@ -873,7 +874,6 @@ public final class APIConstants {
     public static final String ENVIRONMENTS_NONE = "none";
     public static final String SWAGGER_BASEPATH = "basePath";
     public static final String SWAGGER_OPERATIONS = "operations";
-    public static final String METHOD_PATCH = "PATCH";
     public static final String SWAGGER_SCOPE = "scope";
     public static final String SWAGGER_AUTH_TYPE = "auth_type";
     public static final String API_THROTTLING_TIER = "throttling_tier";
