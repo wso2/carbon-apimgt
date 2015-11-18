@@ -210,7 +210,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBLE_ROLES ="overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS ="overview_visibleTenants";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
-    public static final String API_TAGS = "tags";
+    public static final String API_OVERVIEW_TAG = "tags";
+    public static final String API_TAG = "Tag";
     public static final String API_STATUS = "STATUS";
     public static final String API_URI_PATTERN ="URITemplate_urlPattern";
     public static final String API_URI_HTTP_METHOD ="URITemplate_httpVerb";
