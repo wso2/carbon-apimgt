@@ -19,6 +19,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
+import org.apache.cxf.jaxrs.impl.tl.ThreadLocalHttpHeaders;
+import org.apache.cxf.jaxrs.impl.tl.ThreadLocalMessageContext;
+import org.apache.cxf.jaxrs.impl.tl.ThreadLocalProtocolHeaders;
+import org.apache.cxf.jaxrs.impl.tl.ThreadLocalProviders;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
@@ -34,17 +38,25 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(BasicAuthenticationInterceptor.class);
-
     public BasicAuthenticationInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }
     public void handleMessage(Message inMessage) {
         if(handleRequest(inMessage, null)){
+            /*String requestedTenant = ((ArrayList) ((TreeMap) (inMessage.get(Message.PROTOCOL_HEADERS))).get("X-WSO2_Tenant")).get(0).toString();
+            if(requestedTenant!=null){
+                RestApiUtil.setThreadLocalRequestedTenant(requestedTenant);
+            }
+            else {
+                RestApiUtil.unsetThreadLocalRequestedTenant();
+            }*/
             if(logger.isDebugEnabled()) {
                 logger.debug("User logged into Web app using Basic Authentication");
             }
@@ -125,6 +137,7 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
             // if authenticated
             if (certObject != null || userRealm.getUserStoreManager().authenticate(tenantAwareUsername, password)) {
                 // set the correct tenant info for downstream code.
+                RestApiUtil.setThreadLocalRequestedTenant(username);
                 carbonContext.setTenantDomain(tenantDomain);
                 carbonContext.setTenantId(tenantId);
                 carbonContext.setUsername(username);

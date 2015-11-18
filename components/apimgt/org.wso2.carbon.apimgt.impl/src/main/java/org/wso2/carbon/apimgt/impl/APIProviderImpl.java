@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -102,6 +103,7 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -385,11 +387,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // We do the tier cache cleanup here.
-        // Note that this call happens to gateway node in a distributed setup.
+        // We do the tier cache cleanup here.        
         try {
+            // Note that this call happens to store node in a distributed setup.
             TierCacheInvalidationClient tierCacheInvalidationClient = new TierCacheInvalidationClient();
             tierCacheInvalidationClient.clearCaches(tenantDomain);
+
+            // Clear registry cache. Note that this call happens to gateway node in a distributed setup.
+            RegistryCacheInvalidationClient registryCacheInvalidationClient = new RegistryCacheInvalidationClient();
+            registryCacheInvalidationClient.clearTiersResourceCache(tenantDomain);
         } catch (APIManagementException e) {
             // This means that there is an exception when trying to clear the cache.
             // But we should not break the flow in such scenarios.

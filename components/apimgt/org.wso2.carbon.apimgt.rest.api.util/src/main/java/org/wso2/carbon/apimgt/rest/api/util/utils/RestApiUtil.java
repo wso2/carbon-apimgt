@@ -71,6 +71,19 @@ public class RestApiUtil {
     private static final Log log = LogFactory.getLog(RestApiUtil.class);
     private static Set<URITemplate> storeResourceMappings;
     private static Set<URITemplate> publisherResourceMappings;
+    public static final ThreadLocal userThreadLocal = new ThreadLocal();
+
+    public static void setThreadLocalRequestedTenant(String user) {
+        userThreadLocal.set(user);
+    }
+
+    public static void unsetThreadLocalRequestedTenant() {
+        userThreadLocal.remove();
+    }
+
+    public static String getThreadLocalRequestedTenant() {
+        return (String)userThreadLocal.get();
+    }
 
     public static APIProvider getLoggedInUserProvider() throws APIManagementException {
         String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
