@@ -23,9 +23,11 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -39,12 +41,12 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorExcepti
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Set;
 
 /** This is the service implementation class for Publisher API related operations 
  * 
@@ -100,12 +102,59 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisPost(APIDTO body,String contentType){
 
-        URI createdApiUri = null;
-        APIDTO  createdApiDTO = null;
+        URI createdApiUri;
+        APIDTO  createdApiDTO;
         try {
-            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String username = RestApiUtil.getLoggedInUsername();
 
+            //todo: this can be moved to validation layer
+            if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Error occurred while adding the API. A duplicate API context already exists for " + body
+                                .getContext());
+            }
+
+            List<String> tiersFromDTO = body.getTiers();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                throw RestApiUtil.buildBadRequestException("No tier defined for the API");
+            }
+
+            //check whether the added API's tiers are all valid
+            List<String> tierNames = body.getTiers();
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            for (String tierName : tierNames) {
+                boolean isTierValid = false;
+                for (Tier definedTier : definedTiers) {
+                    if (tierName.equals(definedTier.getName())) {
+                        isTierValid = true;
+                        break;
+                    }
+                }
+
+                if (!isTierValid) {
+                    throw RestApiUtil.buildBadRequestException("Specified tier " + tierName + " does not exist");
+                }
+            }
+
+            API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, username);
+
+            if (apiProvider.isAPIAvailable(apiToAdd.getId())) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Error occurred while adding the API. A duplicate API already exists for " + apiToAdd.getId()
+                                .getApiName() + "-" + apiToAdd.getId().getVersion());
+            }
+
+            //Overriding some properties:
+            //only allow CREATED as the stating state for the new api
+            apiToAdd.setStatus(APIStatus.CREATED);
+
+            //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
+            //  the owner as a different user
+            apiToAdd.setApiOwner(username);
+
+
+            //adding the api
             apiProvider.addAPI(apiToAdd);
             apiProvider.saveSwagger20Definition(apiToAdd.getId(), body.getApiDefinition());
             APIIdentifier createdApiId = apiToAdd.getId();
@@ -282,7 +331,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
             body.setProvider(apiIdentifier.getProviderName());
-            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body);
+            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, username);
 
             apiProvider.updateAPI(apiToUpdate);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
@@ -434,5 +483,10 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
+    }
+
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
     }
 }
