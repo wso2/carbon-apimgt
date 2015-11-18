@@ -55,13 +55,13 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
     }
     public void handleMessage(Message inMessage) {
         if(handleRequest(inMessage, null)){
-            String requestedTenant = ((ArrayList) ((TreeMap) (inMessage.get(Message.PROTOCOL_HEADERS))).get("X-WSO2_Tenant")).get(0).toString();
+            /*String requestedTenant = ((ArrayList) ((TreeMap) (inMessage.get(Message.PROTOCOL_HEADERS))).get("X-WSO2_Tenant")).get(0).toString();
             if(requestedTenant!=null){
                 RestApiUtil.setThreadLocalRequestedTenant(requestedTenant);
             }
             else {
                 RestApiUtil.unsetThreadLocalRequestedTenant();
-            }
+            }*/
             if(logger.isDebugEnabled()) {
                 logger.debug("User logged into Web app using Basic Authentication");
             }
