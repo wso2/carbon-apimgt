@@ -79,6 +79,7 @@ paths:
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
+        - $ref : '#/parameters/requestedTenant'
         - name : query
           in: query
           description: |
@@ -162,6 +163,7 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/requestedTenant'
       tags:
         - API (individual)
         - Retrieve
@@ -218,6 +220,7 @@ paths:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/requestedTenant'
         - name: query
           in: query
           description: |
@@ -284,6 +287,7 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1029,6 +1033,17 @@ paths:
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
+
+# Requested Tenant domain
+# Specified as a header parameter
+  requestedTenant:
+    name: X-WSO2-Tenant
+    in: header
+    description: |
+      For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be 
+        retirieved from.
+    required: false
+    type: string
 
 # API Identifier
 # Specified as part of the path expression

@@ -61,8 +61,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
-            String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String type,
+            String sort, String accept, String ifNoneMatch) {
         Map<String, Object> apisMap;
 
         //pre-processing
@@ -71,7 +71,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
             apisMap = apiConsumer.searchPaginatedAPIs(query, type, requestedTenantDomain, offset, limit, true);
@@ -102,11 +102,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return API of the given ID
      */
     @Override
-    public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            String xWSO2Tenant) {
         APIDTO apiToReturn;
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             API api;
             if (RestApiUtil.isUUID(apiId)) {
                 api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
@@ -142,8 +143,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return matched documents as a list if DocumentDTOs
      */
     @Override
-    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
-            String ifNoneMatch) {
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
+            String query, String accept, String ifNoneMatch) {
 
         //todo : implement document search. Search conditions can be found at store-api.yaml
 
@@ -157,7 +158,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
             //this will fail if user doesn't have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
@@ -191,13 +192,13 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return returns the matched document
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
+            String accept, String ifNoneMatch, String ifModifiedSince) {
         Documentation documentation;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId, requestedTenantDomain)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);

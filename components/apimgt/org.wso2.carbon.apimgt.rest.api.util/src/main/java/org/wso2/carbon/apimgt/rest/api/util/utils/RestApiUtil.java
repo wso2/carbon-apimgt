@@ -171,13 +171,16 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns the requested tenant from the CXF message context
+     * Returns the requested tenant according to the input x-tenant-header
      * 
-     * @return requested tenant domain for the resource
+     * @return requested tenant domain
      */
-    public static String getRequestedTenantDomain() {
-        //todo: implement
-        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    public static String getRequestedTenantDomain(String xTenantHeader) {
+        if (StringUtils.isEmpty(xTenantHeader)) {
+            return getLoggedInUserTenantDomain();
+        } else {
+            return xTenantHeader;
+        }
     }
 
     /**
