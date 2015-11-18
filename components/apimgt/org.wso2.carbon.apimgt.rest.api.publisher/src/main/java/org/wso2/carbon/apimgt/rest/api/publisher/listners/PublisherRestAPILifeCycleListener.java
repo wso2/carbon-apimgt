@@ -24,11 +24,6 @@ import org.apache.catalina.core.StandardContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -37,6 +32,11 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 @SuppressWarnings("unused")
+/**
+ * This class is here to add any task that need to perform during app startup
+ * this class contextInitialized method should be used to register resources
+ * dynamically at server start up,
+ */
 public class PublisherRestAPILifeCycleListener implements ServletContextListener {
 
     private static final Log log =
