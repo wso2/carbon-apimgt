@@ -37,61 +37,99 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.tier.cache.stub.TierCacheServiceStub;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.registry.cache.stub.RegistryCacheInvalidationServiceStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.apimgt.registry.cache.stub.RegistryCacheInvalidationServiceAPIManagementExceptionException;
 
-public class TierCacheInvalidationClient {
-    private static final Log log = LogFactory.getLog(TierCacheInvalidationClient.class);
+/**
+ * This is the client implementation of RegistryCacheInvalidationService
+ *
+ */
+public class RegistryCacheInvalidationClient {
+    private static final Log log = LogFactory.getLog(RegistryCacheInvalidationClient.class);
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
-    
-    String storeServerURL;
-    
-    String storeUserName;
-    
-    String storePassword;
 
-    public TierCacheInvalidationClient() throws APIManagementException {
+    Map<String, Environment> environments;
+    
+
+    public RegistryCacheInvalidationClient() throws APIManagementException {
         APIManagerConfiguration config =
                                          ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                                                                .getAPIManagerConfiguration();
-        storeServerURL = config.getFirstProperty(APIConstants.API_STORE_SERVER_URL);
-        storeUserName = config.getFirstProperty(APIConstants.API_STORE_USERNAME);
-        storePassword = config.getFirstProperty(APIConstants.API_STORE_PASSWORD);
+        environments = config.getApiGatewayEnvironments();
     }
 
-    public void clearCaches(String tenantDomain) {
+    
+    /**
+     * Invalidates the registry cache for tiers.xml of given tenant domain
+     * @param tenantDomain
+     * @throws APIManagementException
+     */
+    public void clearTiersResourceCache(String tenantDomain) throws APIManagementException {
         String cookie;
 
-        // Clear Store Cache
+        // Clear Gateway Cache
         try {
-            cookie = login(storeServerURL, storeUserName, storePassword);
-            clearCache(tenantDomain, storeServerURL, cookie);
+            String gatewayServerURL;
+            for (Map.Entry<String, Environment> entry : environments.entrySet()) {
+                Environment environment = entry.getValue();
+                gatewayServerURL = environment.getServerURL();
+                cookie = login(gatewayServerURL, environment.getUserName(), environment.getPassword());
+                clearCache(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH 
+                           + APIConstants.API_TIER_LOCATION, tenantDomain, gatewayServerURL, cookie);                
+            }
         } catch (AxisFault axisFault) {
             log.error("Error while initializing the OAuth admin service stub in Store for tenant : " + tenantDomain,
                       axisFault);
         } catch (RemoteException e) {
-            log.error("Error while invalidating the tier cache in Store for tenant : " + tenantDomain, e);
+            log.error("Error while invalidating the tiers.xml cache in gateway for tenant : " + tenantDomain, e);
         }
         
     }
-
-    public void clearCache(String tenantDomain, String serverURL, String cookie) throws AxisFault, RemoteException {
-        TierCacheServiceStub tierCacheServiceStub;
+    
+    /**
+     * Invalidates registry cache of the resource in the given path in given server
+     * @param path registry path of the resource
+     * @param tenantDomain
+     * @param serverURL
+     * @param cookie
+     * @throws AxisFault
+     * @throws RemoteException
+     * @throws APIManagementException
+     */
+    public void clearCache(String path, String tenantDomain, String serverURL, String cookie) 
+            throws AxisFault, RemoteException, APIManagementException {
+        RegistryCacheInvalidationServiceStub registryCacheServiceStub;
 
         ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-        tierCacheServiceStub = new TierCacheServiceStub(ctx, serverURL + "TierCacheService");
-        ServiceClient client = tierCacheServiceStub._getServiceClient();
+        registryCacheServiceStub = 
+                new RegistryCacheInvalidationServiceStub(ctx, serverURL + "RegistryCacheInvalidationService");
+        ServiceClient client = registryCacheServiceStub._getServiceClient();
         Options options = client.getOptions();
         options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
         options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
         options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
         options.setManageSession(true);
         options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
-
-        tierCacheServiceStub.invalidateCache(tenantDomain);
+        
+        try {
+            registryCacheServiceStub.invalidateCache(path, tenantDomain);      
+        } catch (RegistryCacheInvalidationServiceAPIManagementExceptionException e) {
+            APIUtil.handleException(e.getMessage(), e);
+        }
     }
 
+    /**
+     * Login with given credentials and returns cookie
+     * @param serverURL
+     * @param userName
+     * @param password
+     * @return
+     * @throws AxisFault
+     */
     private String login(String serverURL, String userName, String password) throws AxisFault {
         if (serverURL == null || userName == null || password == null) {
             throw new AxisFault("Required admin configuration unspecified");
