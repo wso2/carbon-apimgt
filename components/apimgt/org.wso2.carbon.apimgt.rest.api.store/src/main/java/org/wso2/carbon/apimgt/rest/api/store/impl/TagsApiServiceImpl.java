@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
@@ -38,6 +40,8 @@ import javax.ws.rs.core.Response;
  */
 public class TagsApiServiceImpl extends TagsApiService {
 
+    private static final Log log = LogFactory.getLog(TagsApiService.class);
+
     /** Retrieves all tags
      *
      * @param limit max number of objects returns
@@ -49,6 +53,8 @@ public class TagsApiServiceImpl extends TagsApiService {
      */
     @Override
     public Response tagsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String query) {
+
+        // todo: implement tag search
 
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -67,7 +73,13 @@ public class TagsApiServiceImpl extends TagsApiService {
             TagMappingUtil.setPaginationParams(tagListDTO, limit, offset, tagList.size());
             return Response.ok().entity(tagListDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            handleException("Error while retrieving tags", e);
+            return null;
         }
+    }
+
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
     }
 }

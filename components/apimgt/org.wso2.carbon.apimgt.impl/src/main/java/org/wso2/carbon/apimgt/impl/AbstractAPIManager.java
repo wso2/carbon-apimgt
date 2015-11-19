@@ -24,7 +24,8 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
-import org.wso2.carbon.apimgt.api.ResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -349,25 +350,45 @@ public abstract class AbstractAPIManager implements APIManager {
      * Get API by registry artifact id
      *
      * @param uuid  Registry artifact id
+     * @param requestedTenantDomain tenantDomain for the registry
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIbyUUID(String uuid) throws APIManagementException {
+    public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
-            //registry of the current logged in user has been directly used
+            Registry registry;
+            if (requestedTenantDomain != null && !requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                registry = ServiceReferenceHolder.getInstance().
+                        getRegistryService().getGovernanceSystemRegistry(id);
+            } else {
+                if (this.tenantDomain != null && !this.tenantDomain
+                        .equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                    // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
+                    registry = ServiceReferenceHolder.getInstance().
+                            getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                } else {
+                    // both requested tenant and logged in user's tenant are carbon.super
+                    registry = this.registry;
+                }
+            }
+
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
                 return APIUtil.getAPIForPublishing(apiArtifact, registry);
             } else {
-                String errorMessage =
-                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                log.error(errorMessage);
-                throw new ResourceNotFoundException(errorMessage);
+                handleResourceNotFoundException(
+                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
+                return null;
             }
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Failed to get API", e);
+            return null;
         }
         return null;
     }
@@ -382,7 +403,8 @@ public abstract class AbstractAPIManager implements APIManager {
     public API getAPIInfoByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Registry registry;
-            if (!requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (requestedTenantDomain != null && !requestedTenantDomain.equals(
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(requestedTenantDomain);
                 registry = ServiceReferenceHolder.getInstance().
@@ -404,10 +426,9 @@ public abstract class AbstractAPIManager implements APIManager {
             if (apiArtifact != null) {
                 return APIUtil.getAPIInformation(apiArtifact, registry);
             } else {
-                String errorMessage =
-                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
-                log.error(errorMessage);
-                throw new ResourceNotFoundException(errorMessage);
+                handleResourceNotFoundException(
+                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
+                return null;
             }
         } catch (RegistryException e) {
             handleException("Failed to get API", e);
@@ -440,14 +461,19 @@ public abstract class AbstractAPIManager implements APIManager {
             tenantFlowStarted = true;
 
             Registry registry = getRegistry(identifier, apiPath);
-            Resource apiResource = registry.get(apiPath);
-            String artifactId = apiResource.getUUID();
-            if (artifactId == null) {
-                throw new APIManagementException("artifact id is null for : " + apiPath);
+            if (registry != null) {
+                Resource apiResource = registry.get(apiPath);
+                String artifactId = apiResource.getUUID();
+                if (artifactId == null) {
+                    throw new APIManagementException("artifact id is null for : " + apiPath);
+                }
+                GenericArtifactManager artifactManager = getGenericArtifactManager(identifier, registry);
+                GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
+                return APIUtil.getAPIInformation(apiArtifact, registry);
+            } else {
+                handleException("Failed to get registry from api identifier: " + identifier.toString());
+                return null;
             }
-            GenericArtifactManager artifactManager = getGenericArtifactManager(identifier, registry);
-            GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return APIUtil.getAPIInformation(apiArtifact, registry);
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
             return null;
@@ -737,16 +763,39 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentation;
     }
 
-    public Documentation getDocumentation(String docId) throws APIManagementException {
+    /**
+     * Get a documentation by artifact Id
+     * 
+     * @param docId artifact id of the document
+     * @param requestedTenantDomain tenant domain of the registry where the artifact is located
+     * @return Document object which represents the artifact id
+     * @throws APIManagementException
+     */
+    public Documentation getDocumentation(String docId, String requestedTenantDomain) throws APIManagementException {
         Documentation documentation = null;
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                            APIConstants.DOCUMENTATION_KEY);
         try {
+            Registry registryType;
+            boolean isTenantMode = (requestedTenantDomain != null);
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(
+                    requestedTenantDomain))) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(requestedTenantDomain);
+                registryType = ServiceReferenceHolder.getInstance().
+                        getRegistryService()
+                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registryType,
+                    APIConstants.DOCUMENTATION_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
-            if(null != artifact) {
+            if (null != artifact) {
                 documentation = APIUtil.getDocumentation(artifact);
             }
         } catch (RegistryException e) {
+            handleException("Failed to get documentation details", e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
             handleException("Failed to get documentation details", e);
         }
         return documentation;
@@ -905,7 +954,7 @@ public abstract class AbstractAPIManager implements APIManager {
     /** returns the SubscribedAPI object which is related to the UUID
      *
      * @param uuid UUID of Subscription
-     * @return
+     * @return SubscribedAPI object which is related to the UUID
      * @throws APIManagementException
      */
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
@@ -922,6 +971,15 @@ public abstract class AbstractAPIManager implements APIManager {
         throw new APIManagementException(msg);
     }
 
+    protected void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
+        log.error(msg);
+        throw new APIMgtResourceAlreadyExistsException(msg);
+    }
+
+    protected void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
+        log.error(msg);
+        throw new APIMgtResourceNotFoundException(msg);
+    }
 
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
         return apiMgtDAO.isAccessTokenExists(accessToken);
