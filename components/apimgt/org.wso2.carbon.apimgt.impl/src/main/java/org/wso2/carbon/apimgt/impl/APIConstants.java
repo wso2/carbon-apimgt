@@ -368,6 +368,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
