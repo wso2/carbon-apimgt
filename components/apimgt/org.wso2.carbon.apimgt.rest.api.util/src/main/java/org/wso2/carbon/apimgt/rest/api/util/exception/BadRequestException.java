@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 
 import javax.ws.rs.WebApplicationException;
@@ -29,6 +30,10 @@ public class BadRequestException extends WebApplicationException {
     public BadRequestException(List<ErrorListItemDTO> l) {
         super(Response.Status.BAD_REQUEST);
         list = l;
+    }
+
+    public BadRequestException(ErrorDTO errorDTO){
+        super(Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build());
     }
 
     public BadRequestException(){

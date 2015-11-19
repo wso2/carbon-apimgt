@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.WebApplicationException;
@@ -26,8 +27,12 @@ import javax.ws.rs.core.Response;
  */
 public class ForbiddenException extends WebApplicationException {
 
-    public ForbiddenException(String message){
-        super(Response.status(Response.Status.FORBIDDEN).entity(RestApiUtil.getErrorDTO(message)).build());
+    public ForbiddenException(){
+        super(Response.status(Response.Status.FORBIDDEN).build());
+    }
+
+    public ForbiddenException(ErrorDTO errorDTO){
+        super(Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build());
     }
 
 }
