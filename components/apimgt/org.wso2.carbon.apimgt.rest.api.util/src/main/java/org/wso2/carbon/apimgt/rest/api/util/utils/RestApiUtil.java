@@ -31,13 +31,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -473,6 +467,30 @@ public class RestApiUtil {
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         return paginatedURL;
+    }
+
+    /**
+     * Checks whether the list of tiers are valid given the all valid tiers
+     * 
+     * @param allTiers All defined tiers
+     * @param currentTiers tiers to check if they are a subset of defined tiers
+     * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
+     */
+    public static List<String> getInvalidTierNames(Set<Tier> allTiers, List<String> currentTiers) {
+        List<String> invalidTiers = new ArrayList<>();
+        for (String tierName : currentTiers) {
+            boolean isTierValid = false;
+            for (Tier definedTier : allTiers) {
+                if (tierName.equals(definedTier.getName())) {
+                    isTierValid = true;
+                    break;
+                }
+            }
+            if (!isTierValid) {
+                invalidTiers.add(tierName);
+            }
+        }
+        return invalidTiers;
     }
 
     /**

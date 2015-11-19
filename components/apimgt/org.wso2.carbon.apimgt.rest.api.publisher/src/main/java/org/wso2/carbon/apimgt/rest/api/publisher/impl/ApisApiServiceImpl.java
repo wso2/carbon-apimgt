@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -139,20 +140,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //check whether the added API's tiers are all valid
-            List<String> tierNames = body.getTiers();
             Set<Tier> definedTiers = apiProvider.getTiers();
-            for (String tierName : tierNames) {
-                boolean isTierValid = false;
-                for (Tier definedTier : definedTiers) {
-                    if (tierName.equals(definedTier.getName())) {
-                        isTierValid = true;
-                        break;
-                    }
-                }
-
-                if (!isTierValid) {
-                    throw RestApiUtil.buildBadRequestException("Specified tier " + tierName + " does not exist");
-                }
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (invalidTiers.size() > 0) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid");
             }
 
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, username);
