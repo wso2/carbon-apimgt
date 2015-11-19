@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -74,7 +75,23 @@ public class ApisApiServiceImpl extends ApisApiService {
             String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
-            apisMap = apiConsumer.searchPaginatedAPIs(query, type, requestedTenantDomain, offset, limit, true);
+            //if query parameter is not specified, This will search by name
+            String searchType = "Name";
+            String searchContent = "*";
+            if (query != null) {
+                String[] querySplit = query.split(":");
+                if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
+                        .isNotBlank(querySplit[1])) {
+                    searchType = querySplit[0];
+                    searchContent = querySplit[1];
+                } else if (querySplit.length == 1) {
+                    searchContent = query;
+                } else {
+                    throw RestApiUtil.buildBadRequestException("Provided query parameter is invalid");
+                }
+            }
+
+            apisMap = apiConsumer.searchPaginatedAPIs(searchContent, searchType, requestedTenantDomain, offset, limit, true);
             APIListDTO apiListDTO = new APIListDTO();
             Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
             int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
