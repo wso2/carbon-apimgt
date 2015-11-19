@@ -102,8 +102,8 @@ public class APIDescriptionGenUtil {
             log.warn(errorMessage);
             throw new APIManagementException(errorMessage);
         } catch (NumberFormatException e) {
-            log.error("Error in retrieving request count in tier xml. " + e);
-            throw new APIManagementException("Error in retrieving request count in tier xml. " + e.getMessage(), e);
+            log.error("Error in retrieving request count in tier xml.", e);
+            throw new APIManagementException("Error in retrieving request count in tier xml." + e.getMessage());
         }
     }
 
@@ -138,11 +138,11 @@ public class APIDescriptionGenUtil {
                     attributesMap.put(attrName, attrValue);
                 }
             }
-        } catch (NullPointerException npe) {
-            String msg = "Policy could not be parsed correctly based on http://schemas.xmlsoap.org/ws/2004/09/policy " +
-                         "specification";
-            log.warn(msg);
-            throw new APIManagementException(msg);
+        } catch (NullPointerException e) {
+            String errorMessage = "Policy could not be parsed correctly based on " +
+                    "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
+            log.warn(errorMessage, e);
+            throw new APIManagementException(errorMessage + e.getMessage());
         }
         return attributesMap;
     }
