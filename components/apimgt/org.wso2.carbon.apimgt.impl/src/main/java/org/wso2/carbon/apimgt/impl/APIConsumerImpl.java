@@ -29,6 +29,7 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -45,7 +46,6 @@ import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -63,7 +63,6 @@ import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -1539,9 +1538,22 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end, boolean isLazyLoad)
             throws APIManagementException {
         Map<String,Object> result = new HashMap<String,Object>();
+        boolean isTenantFlowStarted = false;
         try {
-            Registry userRegistry;
             boolean isTenantMode=(requestedTenantDomain != null);
+            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
+            } else {
+                requestedTenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
+
+            }
+
+            Registry userRegistry;
             int tenantIDLocal = 0;
             String userNameLocal = this.username;
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
@@ -1575,6 +1587,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         } catch (Exception e) {
             handleException("Failed to Search APIs", e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return result;
     }
@@ -1638,8 +1654,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     criteria=APIConstants.API_OVERVIEW_CONTEXT;
                 }else if (searchType.equalsIgnoreCase("Description")) {
                     criteria=APIConstants.API_OVERVIEW_DESCRIPTION;
-                } else if (searchType.equalsIgnoreCase("Tag")) {
-                    criteria = APIConstants.API_TAGS;
+                } else if (searchType.equalsIgnoreCase(APIConstants.API_TAG)) {
+                    criteria = APIConstants.API_OVERVIEW_TAG;
                 }
 
                 //Create the search attribute map for PUBLISHED APIs
@@ -2158,7 +2174,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         
         if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
-            handleException("A duplicate application already exists by the name - " + application.getName());
+            handleResourceAlreadyExistsException(
+                    "A duplicate application already exists by the name - " + application.getName());
         }
         
         int applicationId = apiMgtDAO.addApplication(application, userId);

@@ -27,6 +27,7 @@
     "post" : "POST" ,
     "delete" : "DELETE" ,
     "put" : "PUT" ,
+    "patch" : "PATCH" ,
     "options" : "OPTIONS" ,
     "application" : "Application" ,
     "applicationUser" : "Application User" ,

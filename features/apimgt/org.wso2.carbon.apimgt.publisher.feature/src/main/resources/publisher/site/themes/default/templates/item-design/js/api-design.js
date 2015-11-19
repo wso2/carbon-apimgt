@@ -164,7 +164,7 @@ function APIDesigner(){
     		        var method = $(this).val();               
                     var tempPara = parameters.concat();                
                          
-                    if(method.toUpperCase() == "POST" || method.toUpperCase() == "PUT") {
+                    if(method.toUpperCase() == "POST" || method.toUpperCase() == "PUT" || method.toUpperCase() == "PATCH") {
                         tempPara.push({
                             "name" : "Payload",
                             "description": "Request Body",

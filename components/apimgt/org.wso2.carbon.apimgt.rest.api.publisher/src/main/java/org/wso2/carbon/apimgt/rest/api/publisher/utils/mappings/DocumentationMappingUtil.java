@@ -29,13 +29,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/** This class is responsible for mapping APIM core documentation related objects into REST API documentation
- *  related DTOs 
- *
+/**
+ * This class is responsible for mapping APIM core documentation related objects into REST API documentation
+ * related DTOs
  */
 public class DocumentationMappingUtil {
 
-    /** Converts a APIM core Document object into corresponding REST API Document DTO object
+    /**
+     * Converts a APIM core Document object into corresponding REST API Document DTO object
      *
      * @param documentation Documentation object
      * @return a new DocumentDTO object corresponding to given Documentation object
@@ -56,7 +57,8 @@ public class DocumentationMappingUtil {
         return documentDTO;
     }
 
-    /** Converts a REST API Document DTO object into corresponding APIM core Document object
+    /**
+     * Converts a REST API Document DTO object into corresponding APIM core Document object
      *
      * @param documentDTO DocumentDTO object
      * @return a new Documentation object corresponding to given DocumentDTO object
@@ -105,7 +107,8 @@ public class DocumentationMappingUtil {
         return documentListDTO;
     }
 
-    /** Sets pagination urls for a DocumentListDTO object given pagination parameters and url parameters
+    /**
+     * Sets pagination urls for a DocumentListDTO object given pagination parameters and url parameters
      *
      * @param documentListDTO a DocumentListDTO object
      * @param query search condition

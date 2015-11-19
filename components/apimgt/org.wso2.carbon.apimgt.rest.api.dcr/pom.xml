@@ -28,7 +28,6 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
     <version>0.9.0-SNAPSHOT</version>
     <name>WSO2 Carbon API Manager- Dynamic Client Registration Web Service</name>
@@ -41,7 +40,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <warName>${project.artifactId}</warName>
+                    <warName>client-registration#v1</warName>
                 </configuration>
             </plugin>
         </plugins>
@@ -91,6 +90,11 @@
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.entitlement.stub</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.util</artifactId>
         </dependency>
     </dependencies>
 </project>

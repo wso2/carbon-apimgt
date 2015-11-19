@@ -59,6 +59,8 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. \nInvalid request or validation error"),
         
+        @io.swagger.annotations.ApiResponse(code = 409, message = "Conflict. \nApplication already exists."),
+        
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. \nThe entity of the request was in a not supported format.") })
 
     public Response applicationsPost(@ApiParam(value = "Application object that is to be created." ,required=true ) ApplicationDTO body,

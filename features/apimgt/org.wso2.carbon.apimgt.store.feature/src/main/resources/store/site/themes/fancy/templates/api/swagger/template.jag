@@ -50,7 +50,7 @@ var api = outputs.api;%>
       window.swaggerUi = new SwaggerUi({
       url:  "<%=swaggerAPI%>",
       dom_id: "swagger-ui-container",
-      supportedSubmitMethods: ['get', 'post', 'put', 'delete','head'],
+      supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
       onComplete: function(swaggerApi, swaggerUi){
         console.log("Loaded SwaggerUI");
       },

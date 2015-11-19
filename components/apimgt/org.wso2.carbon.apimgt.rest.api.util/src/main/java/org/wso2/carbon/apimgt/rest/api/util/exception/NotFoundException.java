@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
@@ -25,4 +27,7 @@ public class NotFoundException extends WebApplicationException {
         super(Response.Status.NOT_FOUND);
     }
 
+    public NotFoundException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build());
+    }
 }

@@ -28,7 +28,7 @@ public class TagsApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of predefined sequences", response = TagListDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of tags that are already added to APIs", response = TagListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nTag list is returned."),
         

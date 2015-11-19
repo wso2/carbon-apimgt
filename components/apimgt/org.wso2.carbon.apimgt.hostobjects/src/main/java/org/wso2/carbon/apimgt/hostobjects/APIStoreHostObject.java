@@ -995,7 +995,7 @@ public class APIStoreHostObject extends ScriptableObject {
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             boolean isTenantFlowStarted = false;
             try {
-                if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                /*if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -1005,7 +1005,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
-                }
+                }*/
                 if (searchValue.contains(":")) {
                     if (searchValue.split(":").length > 1) {
                         searchType = searchValue.split(":")[0];
@@ -1037,11 +1037,11 @@ public class APIStoreHostObject extends ScriptableObject {
             } catch (Exception e) {
                 log.error("Error while searching APIs by type", e);
                 return resultObj;
-            } finally {
+            }/* finally {
                 if (isTenantFlowStarted) {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
-            }
+            }*/
 
             if (noSearchTerm) {
                 throw new APIManagementException("Search term is missing. Try again with valid search query.");
