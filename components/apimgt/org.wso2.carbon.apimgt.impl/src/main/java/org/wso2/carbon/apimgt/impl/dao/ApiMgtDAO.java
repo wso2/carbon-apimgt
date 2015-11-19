@@ -6191,7 +6191,6 @@ public class ApiMgtDAO {
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {
-                        //log.error("Error while adding subscription" + e.getMessage(), e);
                         //Not handled as an error because same subscription can be there in many previous versions. 
                         //Ex: if previous version was created by another older version and if the subscriptions are
                         //Forwarded, then the third one will get same subscription from previous two versions.
