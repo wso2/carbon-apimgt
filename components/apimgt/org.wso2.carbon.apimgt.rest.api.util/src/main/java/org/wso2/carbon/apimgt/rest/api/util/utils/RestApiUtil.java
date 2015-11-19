@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
@@ -52,6 +53,7 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.ConstraintViolation;
 import java.io.IOException;
@@ -302,6 +304,27 @@ public class RestApiUtil {
         return rootCause;
     }
 
+    /**
+     * Checks whether the specified tenant domain is available
+     * 
+     * @param tenantDomain tenant domain
+     * @return true if tenant domain available
+     * @throws UserStoreException
+     */
+    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+        return tenantId != -1;
+    }
+
+    /**
+     * Returns the next/previous offset/limit parameters properly when current offset, limit and size parameters are specified
+     *
+     * @param offset current starting index
+     * @param limit current max records
+     * @param size maximum index possible
+     * @return the next/previous offset/limit parameters as a hash-map
+     */
     public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
         Map<String, Integer> result = new HashMap<>();
         if (offset >= size || offset < 0)

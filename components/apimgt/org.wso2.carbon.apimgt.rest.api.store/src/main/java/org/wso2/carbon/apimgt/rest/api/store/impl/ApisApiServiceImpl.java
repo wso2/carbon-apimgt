@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -70,10 +71,15 @@ public class ApisApiServiceImpl extends ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain " + xWSO2Tenant + " is invalid");
+            }
 
             //if query parameter is not specified, This will search by name
             String searchType = "Name";
@@ -87,7 +93,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 } else if (querySplit.length == 1) {
                     searchContent = query;
                 } else {
-                    throw RestApiUtil.buildBadRequestException("Provided query parameter is invalid");
+                    throw RestApiUtil.buildBadRequestException("Provided query parameter " + query + " is invalid");
                 }
             }
 
@@ -105,8 +111,11 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
             handleException(errorMessage, e);
-            return null;
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     /**
@@ -122,9 +131,14 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
             String xWSO2Tenant) {
         APIDTO apiToReturn;
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain " + xWSO2Tenant + " is invalid");
+            }
+
             API api;
             if (RestApiUtil.isUUID(apiId)) {
                 api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
@@ -133,7 +147,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 api = apiConsumer.getAPI(apiIdentifier);
             }
             apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-
+            return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
@@ -142,10 +156,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 handleException(errorMessage, e);
-                return null;
             }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
         }
-        return Response.ok().entity(apiToReturn).build();
+        return null;
     }
 
     /**
@@ -172,10 +188,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         if (query == null) {
             query = "";
         }
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain " + xWSO2Tenant + " is invalid");
+            }
 
             //this will fail if user doesn't have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
@@ -193,9 +213,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 handleException("Error while getting API " + apiId, e);
-                return null;
             }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     /**
@@ -212,10 +235,14 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
             String accept, String ifNoneMatch, String ifModifiedSince) {
         Documentation documentation;
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain " + xWSO2Tenant + " is invalid");
+            }
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId, requestedTenantDomain)) {
                 throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
@@ -233,9 +260,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 handleException("Error while getting API " + apiId, e);
-                return null;
             }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     private void handleException(String msg, Throwable t) throws InternalServerErrorException {

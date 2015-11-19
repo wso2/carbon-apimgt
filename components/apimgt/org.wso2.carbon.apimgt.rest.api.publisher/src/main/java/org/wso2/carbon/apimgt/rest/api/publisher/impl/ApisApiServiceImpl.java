@@ -93,7 +93,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 } else if (querySplit.length == 1) {
                     searchContent = query; 
                 } else {
-                    throw RestApiUtil.buildBadRequestException("Provided query parameter is invalid");
+                    throw RestApiUtil.buildBadRequestException("Provided query parameter " + query + " is invalid");
                 }
             }
 
