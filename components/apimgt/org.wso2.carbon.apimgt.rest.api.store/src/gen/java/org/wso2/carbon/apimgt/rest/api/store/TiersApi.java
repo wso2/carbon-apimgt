@@ -29,7 +29,7 @@ public class TiersApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get available tiers", response = TierListDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Get available tiers", response = TierListDTO.class, responseContainer = "List")
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nList of tiers returned."),
         

@@ -17,17 +17,19 @@
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
-public class NotFoundException extends WebApplicationException {
+public class ConflictException extends WebApplicationException {
 
-    public NotFoundException() {
-        super(Response.Status.NOT_FOUND);
+    public ConflictException(ErrorDTO errorDTO){
+        super(Response.status(Response.Status.CONFLICT).entity(errorDTO).build());
     }
 
-    public NotFoundException(ErrorDTO errorDTO) {
-        super(Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build());
+    public ConflictException(){
+        super(Response.Status.CONFLICT);
     }
 }

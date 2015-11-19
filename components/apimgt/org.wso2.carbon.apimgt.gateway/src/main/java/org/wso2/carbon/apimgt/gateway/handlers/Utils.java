@@ -63,7 +63,7 @@ public class Utils {
         messageContext.setTo(null);        
         axis2MC.removeProperty("NO_ENTITY_BODY");
         String method = (String) axis2MC.getProperty(Constants.Configuration.HTTP_METHOD);
-        if (method.matches("^(?!.*(POST|PUT)).*$")) {
+        if (method.matches("^(?!.*(POST|PUT|PATCH)).*$")) {
             // If the request was not an entity enclosing request, send a XML response back
             axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/xml");
         }

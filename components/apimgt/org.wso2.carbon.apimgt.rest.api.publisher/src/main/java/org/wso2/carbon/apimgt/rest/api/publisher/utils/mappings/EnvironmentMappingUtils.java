@@ -27,13 +27,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/** This class is responsible for mapping APIM core environment related objects into REST API environment related DTOs 
- *
+/**
+ * This class is responsible for mapping APIM core environment related objects into REST API environment related DTOs
  */
 public class EnvironmentMappingUtils {
 
-    /** Converts an Environment object into EnvironmentDTO
-     * 
+    /**
+     * Converts an Environment object into EnvironmentDTO
+     *
      * @param environment Environment object
      * @return EnvironmentDTO object corresponding to the given Environment object
      */
@@ -56,8 +57,9 @@ public class EnvironmentMappingUtils {
         return environmentDTO;
     }
 
-    /** Converts a List object of SubscribedAPIs into a DTO
-     * 
+    /**
+     * Converts a List object of SubscribedAPIs into a DTO
+     *
      * @param environmentCollection a collection of Environment objects
      * @return EnvironmentListDTO object containing EnvironmentDTOs
      */
@@ -76,21 +78,23 @@ public class EnvironmentMappingUtils {
         return environmentListDTO;
     }
 
-    /** Check whether given url is a HTTP url
-     * 
+    /**
+     * Check whether given url is a HTTP url
+     *
      * @param url url to check
      * @return true if the given url is HTTP, false otherwise
      */
-    private static boolean isHttpURL (String url) {
+    private static boolean isHttpURL(String url) {
         return url.matches("^http://.*");
     }
 
-    /** Check whether given url is a HTTPS url
+    /**
+     * Check whether given url is a HTTPS url
      *
      * @param url url to check
      * @return true if the given url is HTTPS, false otherwise
      */
-    private static boolean isHttpsURL (String url) {
+    private static boolean isHttpsURL(String url) {
         return url.matches("^https://.*");
     }
 

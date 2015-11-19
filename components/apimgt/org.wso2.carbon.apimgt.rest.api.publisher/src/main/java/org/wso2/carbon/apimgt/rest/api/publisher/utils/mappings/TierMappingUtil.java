@@ -29,15 +29,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** This class is responsible for mapping APIM core tier related objects into REST API Tier related DTOs 
- *
+/**
+ * This class is responsible for mapping APIM core tier related objects into REST API Tier related DTOs
  */
 public class TierMappingUtil {
 
-    /** Converts a List object of Tiers into a DTO
+    /**
+     * Converts a List object of Tiers into a DTO
      *
-     * @param tiers a list of Tier objects
-     * @param limit max number of objects returned
+     * @param tiers  a list of Tier objects
+     * @param limit  max number of objects returned
      * @param offset starting index
      * @return TierListDTO object containing TierDTOs
      */
@@ -63,12 +64,13 @@ public class TierMappingUtil {
         return tierListDTO;
     }
 
-    /** Sets pagination urls for a TierListDTO object given pagination parameters and url parameters
+    /**
+     * Sets pagination urls for a TierListDTO object given pagination parameters and url parameters
      *
      * @param tierListDTO a TierListDTO object
-     * @param limit max number of objects returned
-     * @param offset starting index
-     * @param size max offset
+     * @param limit       max number of objects returned
+     * @param offset      starting index
+     * @param size        max offset
      */
     public static void setPaginationParams(TierListDTO tierListDTO, int limit, int offset, int size) {
 
@@ -94,12 +96,13 @@ public class TierMappingUtil {
         tierListDTO.setPrevious(paginatedPrevious);
     }
 
-    /** Converts a Tier object into TierDTO
+    /**
+     * Converts a Tier object into TierDTO
      *
      * @param tier Tier object
      * @return TierDTO corresponds to Tier object
      */
-    public static TierDTO fromTiertoDTO(Tier tier){
+    public static TierDTO fromTiertoDTO(Tier tier) {
         TierDTO dto = new TierDTO();
         dto.setName(tier.getName());
         dto.setDisplayName(tier.getDisplayName());
@@ -120,12 +123,13 @@ public class TierMappingUtil {
         return dto;
     }
 
-    /** Converts a TierDTO object into Tier in APIM core
+    /**
+     * Converts a TierDTO object into Tier in APIM core
      *
      * @param dto TierDTO object
      * @return Tier corresponds to TierDTO object
      */
-    public static Tier fromDTOtoTier(TierDTO dto){
+    public static Tier fromDTOtoTier(TierDTO dto) {
         Tier tier = new Tier(dto.getName());
         tier.setDisplayName(dto.getDisplayName());
         tier.setDescription(dto.getDescription() != null ? dto.getDescription() : "");

@@ -437,7 +437,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 
 	private Set<URITemplate> getURITemplates(String endpoint, String authType) {
 		Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-		String[] httpVerbs = { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
+		String[] httpVerbs = { "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" };
 		
 		if (authType.equals(APIConstants.AUTH_NO_AUTHENTICATION)) {
 			for (int i = 0; i < 5; i++) {
