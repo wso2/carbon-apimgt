@@ -124,7 +124,6 @@
         <dependency>
             <groupId>org.wso2.uri.template</groupId>
             <artifactId>wso2-uri-templates</artifactId>
-            <version>1.6.5</version>
             <scope>provided</scope>
         </dependency>
 
