@@ -342,6 +342,12 @@ public class APIMappingUtil {
         apiListDTO.setPrevious(paginatedPrevious);
     }
 
+    /**
+     * Creates a minimal DTO representation of an API object
+     * 
+     * @param api API object
+     * @return a minimal representation DTO
+     */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
@@ -350,7 +356,8 @@ public class APIMappingUtil {
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
-        apiInfoDTO.setProvider(apiId.getProviderName());
+        String providerName = api.getId().getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setStatus(api.getStatus().toString());
         return apiInfoDTO;
     }
