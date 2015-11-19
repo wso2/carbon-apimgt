@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -48,14 +49,15 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
-/** This is the service implementation class for Publisher API related operations 
- * 
+/**
+ * This is the service implementation class for Publisher API related operations
  */
 public class ApisApiServiceImpl extends ApisApiService {
 
     private static final Log log = LogFactory.getLog(ApisApiServiceImpl.class);
 
-    /** Retrieves APIs qualifying under given search condition 
+    /** 
+     * Retrieves APIs qualifying under given search condition 
      * 
      * @param limit maximum number of APIs returns
      * @param offset starting index
@@ -79,17 +81,33 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
+            //if query parameter is not specified, This will search by name
+            String searchType = "Name";
+            String searchContent = "";
+            if (query != null) {
+                String[] querySplit = query.split(":");
+                if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
+                        .isNotBlank(querySplit[1])) {
+                    searchType = querySplit[0];
+                    searchContent = querySplit[1];
+                } else if (querySplit.length == 1) {
+                    searchContent = query; 
+                } else {
+                    throw RestApiUtil.buildBadRequestException("Provided query parameter is invalid");
+                }
+            }
+
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
-            allMatchedApis = apiProvider.searchAPIs(query, type, null);
+            allMatchedApis = apiProvider.searchAPIs(searchContent, searchType, null);
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
             APIMappingUtil.setPaginationParams(apiListDTO, query, type, offset, limit, allMatchedApis.size());
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     /**
@@ -166,19 +184,18 @@ public class ApisApiServiceImpl extends ApisApiService {
                    createdApiId.getProviderName() + "-" + createdApiId.getApiName() + "-" + createdApiId.getVersion());
             //how to add thumbnail
             //publish to external stores
+            return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
                                   body.getName() + "-" + body.getVersion();
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
         catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
                                   body.getName() + "-" + body.getVersion();
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
-        return Response.created(createdApiUri).entity(createdApiDTO).build();
+        return null;
     }
 
     /**
@@ -248,27 +265,22 @@ public class ApisApiServiceImpl extends ApisApiService {
                 newVersionedApiUri =
                         new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiIdentifier.getProviderName() + "-" +
                                 apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
+                return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
             } else {
-                String errorMessage = apiId + " does not exist";
-                log.error(errorMessage);
-                throw new NotFoundException();
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             }
 
         } catch (APIManagementException e) {
             String errorMessage = "Error while copying API : " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         } catch (DuplicateAPIException e) {
             String errorMessage = "Requested new version " + newVersion + "of API " + apiId + "already exist";
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
-
-        return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
+        return null;
     }
 
     /**
@@ -296,6 +308,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             if (api != null) {
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api);
+                return Response.ok().entity(apiToReturn).build();
             } else {
                 String errorMessage =  apiId + " does not exist";
                 log.error(errorMessage);
@@ -303,10 +316,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API : " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
-        return Response.ok().entity(apiToReturn).build();
+        return null;
     }
 
     /**
@@ -335,16 +347,12 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             apiProvider.updateAPI(apiToUpdate);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
-        } catch (APIManagementException e) {
+            return Response.ok().entity(updatedApiDTO).build();
+        } catch (APIManagementException | FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
-        } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating API : " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
-        return Response.ok().entity(updatedApiDTO).build();
+        return null;
     }
 
     /**
@@ -365,17 +373,14 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             apiProvider.deleteAPI(apiIdentifier);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-
-            if (apiId != null) {
-                keyManager.deleteRegisteredResourceByAPIId(apiId);
-            }
-
+            
+            keyManager.deleteRegisteredResourceByAPIId(apiId);
+            return Response.ok().build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting API : " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
-        return Response.ok().build();
+        return null;
     }
     @Override
     public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch){
