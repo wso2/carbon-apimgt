@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -48,6 +50,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -94,7 +97,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 } else if (querySplit.length == 1) {
                     searchContent = query; 
                 } else {
-                    throw RestApiUtil.buildBadRequestException("Provided query parameter " + query + " is invalid");
+                    throw RestApiUtil.buildBadRequestException("Provided query parameter '" + query + "' is invalid");
                 }
             }
 
@@ -209,6 +212,14 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
+            if (!ArrayUtils.contains(nextAllowedStates, action)) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
+                                .toString(nextAllowedStates));
+            }
+
             //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
             for (String checkListItem : checkListItems) {
                 String[] attributeValPair = checkListItem.split(":");
@@ -222,8 +233,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiProvider.changeLifeCycleStatus(apiIdentifier, action);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            handleException("Error while updating lifecycle of API " + apiId, e);
         }
+        return null;
     }
 
     /**
