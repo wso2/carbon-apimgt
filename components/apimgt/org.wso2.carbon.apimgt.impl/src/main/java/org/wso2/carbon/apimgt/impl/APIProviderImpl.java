@@ -1033,8 +1033,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             if (oldAPI.getId().getApiName().equals(name) &&
                                     versionComparator.compare(oldAPI, api) < 0 &&
                                     (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
+                              /*  changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
                                         currentUser, publishToGateway);
+                                        */
+                                changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
                             }
                         }
                     }
