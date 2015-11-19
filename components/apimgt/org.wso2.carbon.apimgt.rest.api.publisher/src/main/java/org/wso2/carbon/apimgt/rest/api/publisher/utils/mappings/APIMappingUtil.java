@@ -90,6 +90,7 @@ public class APIMappingUtil {
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
         dto.setEndpointConfig(model.getEndpointConfig());
+        dto.setThumbnailUrl(model.getThumbnailUrl());
         List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
@@ -166,7 +167,6 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
 
-        //todo: thumbnail still missing
         return dto;
     }
 
@@ -200,7 +200,7 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
-
+        model.setThumbnailUrl(dto.getThumbnailUrl());
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -279,7 +279,6 @@ public class APIMappingUtil {
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
 
-        //todo: thumbnail requires mapping
         return model;
 
     }
