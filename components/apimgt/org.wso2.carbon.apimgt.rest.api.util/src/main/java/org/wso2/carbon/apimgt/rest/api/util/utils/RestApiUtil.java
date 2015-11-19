@@ -293,6 +293,19 @@ public class RestApiUtil {
     }
 
     /**
+     * Check if the message of the root cause message of 'e' matches with the specified message
+     * 
+     * @param e throwable to check
+     * @param message error message
+     * @return true if the message of the root cause of 'e' matches with 'message'
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean rootCauseMessageMatches (Throwable e, String message) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause.getMessage().matches(".*" + message + ".*");
+    }
+
+    /**
      * Attempts to find the actual cause of the throwable 'e'
      * 
      * @param e throwable

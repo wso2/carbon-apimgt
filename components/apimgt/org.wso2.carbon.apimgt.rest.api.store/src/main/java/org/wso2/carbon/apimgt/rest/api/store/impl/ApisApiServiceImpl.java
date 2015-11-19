@@ -73,6 +73,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        APIListDTO apiListDTO = new APIListDTO();
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
@@ -97,8 +98,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
-            apisMap = apiConsumer.searchPaginatedAPIs(searchContent, searchType, requestedTenantDomain, offset, limit, true);
-            APIListDTO apiListDTO = new APIListDTO();
+            apisMap = apiConsumer
+                    .searchPaginatedAPIs(searchContent, searchType, requestedTenantDomain, offset, limit, true);
             Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
             int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
             if (apisResult != null) {
@@ -109,8 +110,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving APIs";
-            handleException(errorMessage, e);
+            if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
+                //this is not an error of the user as he does not know the total number of apis available. Thus sends 
+                //  an empty response
+                //todo : is this ok? need to add logs?
+                apiListDTO.setCount(0);
+                apiListDTO.setNext("");
+                apiListDTO.setPrevious("");
+                return Response.ok().entity(apiListDTO).build();
+            } else {
+                String errorMessage = "Error while retrieving APIs";
+                handleException(errorMessage, e);
+            }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             handleException(errorMessage, e);
