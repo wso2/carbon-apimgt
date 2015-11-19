@@ -87,6 +87,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
     private final String clientType = "RDBMS";
 
+    /**
+     * default constructor
+     */
+    public APIUsageStatisticsRdbmsClientImpl() {
+
+    }
 
     public APIUsageStatisticsRdbmsClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
@@ -1236,6 +1242,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1316,6 +1323,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return new ArrayList<String>(apisList);
     }
 
+    @Override
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1360,6 +1368,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return faultyCount;
     }
 
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
@@ -3041,6 +3050,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      *
      * @return String
      */
+    @Override
     public String getClientType() {
         return clientType;
     }

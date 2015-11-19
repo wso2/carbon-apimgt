@@ -2299,6 +2299,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
         Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null);
@@ -2333,6 +2334,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
@@ -2508,6 +2510,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      *
      * @return String
      */
+    @Override
     public String getClientType() {
         return clientType;
     }
