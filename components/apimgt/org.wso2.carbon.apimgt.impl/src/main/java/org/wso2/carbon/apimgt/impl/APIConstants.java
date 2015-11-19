@@ -924,5 +924,7 @@ public final class APIConstants {
     public static enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
     }
+    
+    public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
 
 }
