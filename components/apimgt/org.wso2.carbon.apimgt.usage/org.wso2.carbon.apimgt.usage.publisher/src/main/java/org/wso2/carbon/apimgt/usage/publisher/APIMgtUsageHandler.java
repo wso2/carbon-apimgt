@@ -30,11 +30,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.usage.agent.beans.APIManagerRequestStats;
-import org.wso2.carbon.usage.agent.util.PublisherUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -169,7 +167,9 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setContinuedOnThrottleOut(throttleOutHappened);
 
             publisher.publishEvent(requestPublisherDTO);
-            //We check if usage metering is enabled for billing purpose
+
+            //Metering related publishing is no longer used.
+            /*//We check if usage metering is enabled for billing purpose
             if (DataPublisherUtil.isEnabledMetering()) {
                 //If usage metering enabled create new usage stat object and publish to bam
                 APIManagerRequestStats stats = new APIManagerRequestStats();
@@ -184,7 +184,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                     }
                     log.error("Error occurred while publishing request statistics. Full stacktrace available in debug logs. " + e.getMessage());
                 }
-            }
+            }*/
 
         } catch (Throwable e) {
             log.error("Cannot publish event. " + e.getMessage(), e);
