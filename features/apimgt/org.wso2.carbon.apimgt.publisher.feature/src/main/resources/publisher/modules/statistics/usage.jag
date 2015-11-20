@@ -9,17 +9,33 @@ var gson=com.google.gson.Gson();
 function getProviderAPIVersionUsage(providerName, apiName, server) {
     var usage = [];
 
-    try {
-
-        usage = apiProvider.getProviderAPIVersionUsage(providerName, apiName, server);
-        if (log.isDebugEnabled()) {
-            log.debug("getProviderAPIVersionUsage for : " + server);
-        }
-
+    if(usageClient == null){
         return {
             error:false,
-            usage:usage
+            usage:[]
         };
+    }
+
+    try {
+
+        usage = usageClient.getUsageByAPIVersions(providerName, apiName, null, null);
+        if (log.isDebugEnabled()) {
+            log.debug("getProviderAPIVersionUsage for : " + apiName);
+        }
+
+        if (usage == null) {
+            return {
+                error:false,
+                usage:[]
+            };
+
+        } else {
+            usage=JSON.parse(gson.toJson(usage));
+            return {
+                error:false,
+                usage:usage
+            };
+        }
     } catch (e) {
         log.error(e.message);
         return {
@@ -86,18 +102,27 @@ function getProviderAPIUsage(providerName,from,to, server) {
 function getProviderAPIUserUsage(providerName, apiName, server) {
     var usage = [];
     var usageout = [];
+
+    if(usageClient == null){
+        return {
+            error:false,
+            usage:[]
+        };
+    }
+
     try {
-        usage = apiProvider.getProviderAPIUserUsage(providerName, apiName, server);
+        usage = usageClient.getUsageBySubscribers(providerName, apiName, 10);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIUserUsage for : " + server);
         }
         if (usage == null) {
             return {
-                error:true
+                error:false,
+                usage:[]
             };
 
         } else {
-
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -296,17 +321,26 @@ function getSubscriberCountByAPIs(providerName, isAllStatistics) {
 function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) {
     var usage = [];
     var usageout = [];
+
+    if(usageClient == null){
+        return {
+            error:false,
+            usage:[]
+        };
+    }
+
     try {
-        usage = apiProvider.getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl);
+        usage = usageClient.getUsageBySubscribers(providerName,apiName,version,10);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIVersionUserUsage for : " + providerName);
         }
         if (usage == null) {
             return {
-                error:true
+                error:false,
+                usage:[]
             };
-
         } else {
+            usage=JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage

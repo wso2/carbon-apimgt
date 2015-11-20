@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -46,7 +48,9 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -93,7 +97,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 } else if (querySplit.length == 1) {
                     searchContent = query; 
                 } else {
-                    throw RestApiUtil.buildBadRequestException("Provided query parameter is invalid");
+                    throw RestApiUtil.buildBadRequestException("Provided query parameter '" + query + "' is invalid");
                 }
             }
 
@@ -139,20 +143,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //check whether the added API's tiers are all valid
-            List<String> tierNames = body.getTiers();
             Set<Tier> definedTiers = apiProvider.getTiers();
-            for (String tierName : tierNames) {
-                boolean isTierValid = false;
-                for (Tier definedTier : definedTiers) {
-                    if (tierName.equals(definedTier.getName())) {
-                        isTierValid = true;
-                        break;
-                    }
-                }
-
-                if (!isTierValid) {
-                    throw RestApiUtil.buildBadRequestException("Specified tier " + tierName + " does not exist");
-                }
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (invalidTiers.size() > 0) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid");
             }
 
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, username);
@@ -180,10 +175,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             API createdApi = apiProvider.getAPI(createdApiId);
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
-            createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" +
-                   createdApiId.getProviderName() + "-" + createdApiId.getApiName() + "-" + createdApiId.getVersion());
-            //how to add thumbnail
-            //publish to external stores
+            createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding new API : " + body.getProvider() + "-" +
@@ -220,6 +212,14 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
+            Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
+            String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
+            if (!ArrayUtils.contains(nextAllowedStates, action)) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Action '" + action + "' is not allowed. Allowed actions are " + Arrays
+                                .toString(nextAllowedStates));
+            }
+
             //check and set lifecycle check list items including "Deprecate Old Versions" and "Require Re-Subscription".
             for (String checkListItem : checkListItems) {
                 String[] attributeValPair = checkListItem.split(":");
@@ -233,8 +233,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiProvider.changeLifeCycleStatus(apiIdentifier, action);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            handleException("Error while updating lifecycle of API " + apiId, e);
         }
+        return null;
     }
 
     /**
@@ -246,36 +247,39 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisCopyApiPost(String apiId, String newVersion){
-        URI newVersionedApiUri = null;
-        APIDTO newVersionedApi = null;
+        URI newVersionedApiUri;
+        APIDTO newVersionedApi;
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
-            API api = apiProvider.getAPI(apiIdentifier);
-            if (api != null) {
-                apiProvider.createNewAPIVersion(api, newVersion);
-                //get newly created API to return as response
-                APIIdentifier apiNewVersionedIdentifier =
-                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
-                newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
-                //This URI used to set the location header of the POST response
-                newVersionedApiUri =
-                        new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiIdentifier.getProviderName() + "-" +
-                                apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
-                return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
-            } else {
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+
+            //creates the new version
+            apiProvider.createNewAPIVersion(api, newVersion);
+
+            //get newly created API to return as response
+            APIIdentifier apiNewVersionedIdentifier =
+                new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
+            newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
+            //This URI used to set the location header of the POST response
+            newVersionedApiUri =
+                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+
+            return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
+
+        } catch (APIManagementException | DuplicateAPIException e) {
+            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
+                throw RestApiUtil.buildConflictException(errorMessage);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while copying API : " + apiId;
+                handleException(errorMessage, e);
             }
-
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while copying API : " + apiId;
-            handleException(errorMessage, e);
-        } catch (DuplicateAPIException e) {
-            String errorMessage = "Requested new version " + newVersion + "of API " + apiId + "already exist";
-            handleException(errorMessage, e);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
             handleException(errorMessage, e);
@@ -296,27 +300,18 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
         APIDTO apiToReturn;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            API api;
-            if (RestApiUtil.isUUID(apiId)) {
-                api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            } else {
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-                api = apiProvider.getAPI(apiIdentifier);
-            }
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
 
-            if (api != null) {
-                apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-                return Response.ok().entity(apiToReturn).build();
-            } else {
-                String errorMessage =  apiId + " does not exist";
-                log.error(errorMessage);
-                throw new NotFoundException();
-            }
+            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
+            return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API : " + apiId;
-            handleException(errorMessage, e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+            }
         }
         return null;
     }
@@ -334,7 +329,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
 
-        APIDTO updatedApiDTO = null;
+        APIDTO updatedApiDTO;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -377,8 +372,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting API : " + apiId;
-            handleException(errorMessage, e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                handleException(errorMessage, e);
+            }
         }
         return null;
     }
@@ -406,8 +405,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .setPaginationParams(documentListDTO, query, apiId, offset, limit, allDocumentation.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String msg = "Error while retrieving documents of API " + apiId;
+                handleException(msg, e);
+            }
         }
+        return null;
     }
 
     @Override
@@ -436,16 +441,22 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             documentation = apiProvider.getDocumentation(documentId, tenantDomain);
-            if(null != documentation){
-                DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
-                return Response.ok().entity(documentDTO).build();
+
+            if (documentation == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
             }
-            else{
-                throw new NotFoundException();
-            }
+
+            DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+            return Response.ok().entity(documentDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+            }
         }
+        return null;
     }
 
     @Override
@@ -469,7 +480,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
-        Documentation doc;
+        Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -477,17 +488,23 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
-            doc = apiProvider.getDocumentation(documentId, tenantDomain);
-            if(null == doc){
-                throw new NotFoundException();
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
             }
 
             apiProvider.removeDocumentation(apiIdentifier, documentId);
             return Response.ok().build();
 
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+            }
         }
+        return null;
     }
 
     private void handleException(String msg, Throwable t) throws InternalServerErrorException {
