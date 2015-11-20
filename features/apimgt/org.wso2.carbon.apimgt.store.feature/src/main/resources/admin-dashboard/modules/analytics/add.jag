@@ -133,6 +133,12 @@ var addAnalyticsConfig = function (configData) {
 
 var addDatasourceConfig = function (configData) {
 
+    if (!org.wso2.carbon.apimgt.usage.client.UsageClient.getStatClientType().equals("RDBMS")) {
+        return {
+            error: false
+        };
+    }
+
     try {
         var carbon = require('carbon');
         var process = require('process');
