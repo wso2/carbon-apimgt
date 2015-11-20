@@ -92,8 +92,6 @@ public final class APIConstants {
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
 
-    public static final String API_TIER_IS_PAID_ATTRIBUTE = "IsPaid";
-
     public static final String API_CATEGORY_FREE = "Free";
 
     public static final String API_CATEGORY_FREEMIUM = "Freemium";
@@ -506,8 +504,10 @@ public final class APIConstants {
     public static final String TIER_DESCRIPTION_PREFIX = "tier.desc.";
 
     public static final String THROTTLE_TIER_DESCRIPTION_ATTRIBUTE = "Description";
-    public static final String THROTTLE_TIER_PLAN_ATTRIBUTE = "BillingPlan";
-    public static final String THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE = "StopOnQuotaReach";
+
+    //"Billing plan" and "Stop on quota reach" are considered as x-wso2 type attributes
+    public static final String THROTTLE_TIER_PLAN_ATTRIBUTE = "x-wso2-BillingPlan";
+    public static final String THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE = "x-wso2-StopOnQuotaReach";
 
     public static final String TIER_MANAGEMENT = "TierManagement.";
     public static final String ENABLE_UNLIMITED_TIER = TIER_MANAGEMENT + "EnableUnlimitedTier";

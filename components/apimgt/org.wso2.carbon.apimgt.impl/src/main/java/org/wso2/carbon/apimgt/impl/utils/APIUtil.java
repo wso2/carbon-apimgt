@@ -4543,8 +4543,6 @@ public final class APIUtil {
                 if (isPaidValue != null && isPaidValue.equals("COMMERCIAL")) {
                     isPaid = true;
                 }
-            } else {
-                throw new APIManagementException("Tier attributes not specified for tier " + tierName);
             }
         } else {
             throw new APIManagementException("Tier " + tierName + "cannot be found");
