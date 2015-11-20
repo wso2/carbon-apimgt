@@ -125,10 +125,29 @@ var log = new Log();
 
         jsonObj.basePath = api.context;
 
-	//assign default value to host with first environment address
-	if (urlArr.length > 0 ) {
-	        jsonObj.host = urlArr[0].trim().replace(accessProtocol+"//","");
-	}
+        var domains = jagg.module("domains").getDomainMappings(String(tenantDomain)).domains;
+        log.info(tenantDomain);
+    	//populate custom url if exists
+        if(domains != null){
+            for (var key in domains) {
+                var re = /\/$/g
+                jsonObj.host = domains[key].replace(re, "");
+                //remove tenant context
+                jsonObj.basePath = jsonObj.basePath.replace("/t/"+String(tenantDomain),"");
+            }        
+        }
+    	else if (urlArr.length > 0 ) { //assign default value to host with first environment address
+    	    jsonObj.host = urlArr[0].trim().replace(accessProtocol+"//","");
+    	}
+
+        //handle schems IMPORTANT: order of https and http is important to make sure https is targeted first.
+        jsonObj.schemes = []
+        if(api.transports.search("https") != -1){
+            jsonObj.schemes.push("https");
+        }
+        if(api.transports.search("http") != -1){
+            jsonObj.schemes.push("http");
+        }
 
 
         var paths = {}; //fix for /*, {url-template}*
