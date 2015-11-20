@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.token;
 
-import org.apache.axiom.util.base64.Base64Utils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -46,7 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * By default the following properties are encoded to each authenticated API request:
  * subscriber, applicationName, apiContext, version, tier, and endUserName
  * Additional properties can be encoded by engaging the ClaimsRetrieverImplClass callback-handler.
- * The JWT header and body are base64 encoded separately and concatenated with a dot.
+ * The JWT header and body are base64Url encoded separately and concatenated with a dot.
  * Finally the token is signed using SHA256 with RSA algorithm.
  */
 public abstract class AbstractJWTGenerator implements TokenGenerator {
@@ -58,6 +58,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
 
     private static final String NONE = "NONE";
+
+    private static final Base64 base64Url = new Base64(0, null, true);
 
     private static volatile long ttl = -1L;
 
@@ -134,18 +136,18 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         /*//add cert thumbprint to header
      String headerWithCertThumb = addCertToHeader(endUserName);*/
 
-        String base64EncodedHeader = "";
+        String base64UrlEncodedHeader = "";
         if (jwtHeader != null) {
-            base64EncodedHeader = Base64Utils.encode(jwtHeader.getBytes());
+            base64UrlEncodedHeader = new String(base64Url.encode(jwtHeader.getBytes()));
         }
-        String base64EncodedBody = "";
+        String base64UrlEncodedBody = "";
         String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version,accessToken);
         if (jwtBody != null) {
-            base64EncodedBody = Base64Utils.encode(jwtBody.getBytes());
+            base64UrlEncodedBody = new String(base64Url.encode(jwtBody.getBytes()));
         }
 
         if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
-            String assertion = base64EncodedHeader + "." + base64EncodedBody;
+            String assertion = base64UrlEncodedHeader + "." + base64UrlEncodedBody;
 
             //get the assertion signed
             byte[] signedAssertion = signJWT(assertion, keyValidationInfoDTO.getEndUserName());
@@ -153,11 +155,11 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             if (log.isDebugEnabled()) {
                 log.debug("signed assertion value : " + new String(signedAssertion));
             }
-            String base64EncodedAssertion = Base64Utils.encode(signedAssertion);
+            String base64UrlEncodedAssertion = new String(base64Url.encode(signedAssertion));
 
-            return base64EncodedHeader + "." + base64EncodedBody + "." + base64EncodedAssertion;
+            return base64UrlEncodedHeader + "." + base64UrlEncodedBody + "." + base64UrlEncodedAssertion;
         } else {
-            return base64EncodedHeader + "." + base64EncodedBody + ".";
+            return base64UrlEncodedHeader + "." + base64UrlEncodedBody + ".";
         }
     }
 
@@ -358,8 +360,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             byte[] digestInBytes = digestValue.digest();
 
             String publicCertThumbprint = hexify(digestInBytes);
-            String base64EncodedThumbPrint = Base64Utils.encode(publicCertThumbprint.getBytes());
-            //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64EncodedThumbPrint);
+            String base64UrlEncodedThumbPrint = new String(base64Url.encode(publicCertThumbprint.getBytes()));
+            //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64UrlEncodedThumbPrint);
             //headerWithCertThumb = headerWithCertThumb.replaceAll("\\[2\\]", signatureAlgorithm);
             //return headerWithCertThumb;
 
@@ -373,7 +375,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             jwtHeader.append("\",");
 
             jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64EncodedThumbPrint);
+            jwtHeader.append(base64UrlEncodedThumbPrint);
             jwtHeader.append("\"");
 
             jwtHeader.append("}");
