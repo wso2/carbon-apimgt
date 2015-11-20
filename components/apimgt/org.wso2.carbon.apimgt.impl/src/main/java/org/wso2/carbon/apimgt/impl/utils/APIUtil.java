@@ -4729,6 +4729,34 @@ public final class APIUtil {
     }
 
     /**
+     * Returns the Scopes associated roles defined in APIM configuration
+     *
+     * @return A Map with the scope names and the associated roles
+     */
+    public static Map<String, String> getRestAPIScopes() {
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        HashMap<String, String> scopesMap = new HashMap<String, String>();
+        List<String> scopeNamesList = apiManagerConfiguration
+                .getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_NAME);
+        List<String> rolesList = apiManagerConfiguration.getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_ROLES);
+
+        if (scopeNamesList != null && rolesList != null) {
+            if (scopeNamesList.size() != rolesList.size()) {
+                String errorMsg = "Provided Scopes for REST API are invalid."
+                        + " Every 'Scope' should include 'Name' and 'Roles' elements";
+                log.error(errorMsg);
+                return new HashMap<String, String>();
+            }
+
+            for (int i = 0; i < scopeNamesList.size(); i++) {
+                scopesMap.put(scopeNamesList.get(i), rolesList.get(i));
+            }
+        }
+        return scopesMap;
+    }
+
+    /**
      * Gets the  class given the class name.
      * @param className the fully qualified name of the class.
      * @return an instance of the class with the given name
