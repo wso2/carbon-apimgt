@@ -21,17 +21,17 @@ package org.wso2.carbon.apimgt.api;
 /**
  * This is the custom exception class to be thrown when required resource is not found.
  */
-public class ResourceNotFoundException extends APIManagementException {
+public class APIMgtResourceNotFoundException extends APIManagementException {
 
-    public ResourceNotFoundException(String msg) {
+    public APIMgtResourceNotFoundException(String msg) {
         super(msg);
     }
 
-    public ResourceNotFoundException(String msg, Throwable e) {
+    public APIMgtResourceNotFoundException(String msg, Throwable e) {
         super(msg, e);
     }
 
-    public ResourceNotFoundException(Throwable throwable) {
+    public APIMgtResourceNotFoundException(Throwable throwable) {
         super(throwable);
     }
 }

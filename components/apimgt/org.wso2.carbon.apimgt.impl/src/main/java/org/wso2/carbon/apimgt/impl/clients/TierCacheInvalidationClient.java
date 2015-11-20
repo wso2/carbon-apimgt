@@ -18,10 +18,14 @@
 
 package org.wso2.carbon.apimgt.impl.clients;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.rmi.RemoteException;
+import java.util.Map;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.client.Stub;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.ConfigurationContextFactory;
 import org.apache.axis2.context.ServiceContext;
@@ -36,45 +40,24 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.tier.cache.stub.TierCacheServiceStub;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
-import org.wso2.carbon.context.CarbonContext;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class TierCacheInvalidationClient {
     private static final Log log = LogFactory.getLog(TierCacheInvalidationClient.class);
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
-
-    Map<String, Environment> environments;
     
     String storeServerURL;
     
     String storeUserName;
     
     String storePassword;
-    
-    String publisherServerURL;
-    
-    String publisherUserName;
-    
-    String publisherPassword;
 
     public TierCacheInvalidationClient() throws APIManagementException {
         APIManagerConfiguration config =
                                          ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                                                                .getAPIManagerConfiguration();
-        environments = config.getApiGatewayEnvironments();
         storeServerURL = config.getFirstProperty(APIConstants.API_STORE_SERVER_URL);
         storeUserName = config.getFirstProperty(APIConstants.API_STORE_USERNAME);
         storePassword = config.getFirstProperty(APIConstants.API_STORE_PASSWORD);
-
-        publisherServerURL = config.getFirstProperty(APIConstants.API_PUBLISHER_SERVER_URL);
-        publisherUserName = config.getFirstProperty(APIConstants.API_PUBLISHER_USERNAME);
-        publisherPassword = config.getFirstProperty(APIConstants.API_PUBLISHER_PASSWORD);
     }
 
     public void clearCaches(String tenantDomain) {

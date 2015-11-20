@@ -20,6 +20,14 @@ public final class RestApiConstants {
 
     public static final String APPLICATION_JSON = "application/json";
 
+    public static final String RESOURCE = "resource";
+    public static final String RESOURCE_API = "API";
+    public static final String RESOURCE_APPLICATION = "application";
+    public static final String RESOURCE_SUBSCRIPTION = "subscription";
+    public static final String RESOURCE_DOCUMENTATION = "documentation";
+    public static final String RESOURCE_TIER = "tier";
+    public static final String RESOURCE_TAG = "tag";
+
     public static final String API_ID_DELIMITER = "-";
 
     public static final String QUERY_PARAM = "{query}";
@@ -84,7 +92,8 @@ public final class RestApiConstants {
 
 
     //default error messages
-    public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "You are not authorized to access the resource.";
-    public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Requested resource not found.";
-
+    public static final String STATUS_FORBIDDEN_MESSAGE_DEFAULT = "Forbidden";
+    public static final String STATUS_NOT_FOUND_MESSAGE_DEFAULT = "Not Found";
+    public static final String STATUS_BAD_REQUEST_MESSAGE_DEFAULT = "Bad Request";
+    public static final String STATUS_CONFLCIT_MESSAGE_DEFAULT = "Resource Already Exists";
 }

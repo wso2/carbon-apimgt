@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -102,6 +103,7 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -385,11 +387,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // We do the tier cache cleanup here.
-        // Note that this call happens to gateway node in a distributed setup.
+        // We do the tier cache cleanup here.        
         try {
+            // Note that this call happens to store node in a distributed setup.
             TierCacheInvalidationClient tierCacheInvalidationClient = new TierCacheInvalidationClient();
             tierCacheInvalidationClient.clearCaches(tenantDomain);
+
+            // Clear registry cache. Note that this call happens to gateway node in a distributed setup.
+            RegistryCacheInvalidationClient registryCacheInvalidationClient = new RegistryCacheInvalidationClient();
+            registryCacheInvalidationClient.clearTiersResourceCache(tenantDomain);
         } catch (APIManagementException e) {
             // This means that there is an exception when trying to clear the cache.
             // But we should not break the flow in such scenarios.
@@ -1027,8 +1033,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             if (oldAPI.getId().getApiName().equals(name) &&
                                     versionComparator.compare(oldAPI, api) < 0 &&
                                     (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
-                                changeAPIStatus(oldAPI, APIStatus.DEPRECATED,
-                                        currentUser, publishToGateway);
+                                changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
                             }
                         }
                     }
@@ -2740,8 +2745,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     clusteringAgent.sendMessage(new StatUpdateClusterMessage(updatedStatus,receiverUrl,user,password), true);
                 } catch (ClusteringFault clusteringFault) {
                     //error is only logged because initially gateway has modified the status
-                    log.error("Failed to send cluster message to Publisher/Store domain " +
-                            "and update stats publishing status.");
+                    String errorMessage = "Failed to send cluster message to Publisher/Store domain and " +
+                            "update stats publishing status.";
+                    log.error(errorMessage, clusteringFault);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Successfully updated Stats publishing status to : " + updatedStatus);
@@ -2764,28 +2770,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 try {
                     //get the stub and the call the admin service with the credentials
                     GatewayStatsUpdateServiceStub stub =
-                            new GatewayStatsUpdateServiceStub(gatewayServiceUrl + "GatewayStatsUpdateService");
+                            new GatewayStatsUpdateServiceStub(gatewayServiceUrl + APIConstants.GATEWAY_STATS_SERVICE);
                     ServiceClient gatewayServiceClient = stub._getServiceClient();
                     CarbonUtils.setBasicAccessSecurityHeaders(gatewayUserName, gatewayPassword, gatewayServiceClient);
                     stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
                 } catch (AxisFault e) {
                     //error is only logged because the process should be executed in all gateway environments
-                    log.error("Error in calling Stats update web service in Gateway Environment." + e.getMessage());
+                    log.error("Error in calling Stats update web service in Gateway Environment.", e);
                 } catch (RemoteException e) {
                     //error is only logged because the change is affected in gateway environments,
                     // and the process should be executed in all environments and domains
-                    log.error("Error in updating Stats publish status in Gataways. " + e.getMessage());
+                    log.error("Error in updating Stats publish status in Gateways.", e);
                 } catch (GatewayStatsUpdateServiceAPIManagementExceptionException e) {
                     //error is only logged because the process should continue in other gateways
-                    log.error("Error in Stat Update web service call to Gateway. " + e.getMessage());
+                    log.error("Error in Stat Update web service call to Gateway.", e);
                 } catch (GatewayStatsUpdateServiceClusteringFaultException e) {
                     //error is only logged because the status should be updated in other gateways
-                    log.error("Failed to send cluster message to Gateway domain and update stats publishing status. "
-                            + e.getMessage());
+                    log.error("Failed to send cluster message in Gateway domain to update stats publishing status.", e);
                 } catch (GatewayStatsUpdateServiceExceptionException e) {
                     //error is only logged because the process should continue in other gateways
                     log.error("Error occurred while updating EventingConfiguration, " +
-                            "it contains a dirty value about Stat publishing." + e.getMessage());
+                            "it contains a dirty value about Stat publishing.", e);
                 }
             }
         } else {

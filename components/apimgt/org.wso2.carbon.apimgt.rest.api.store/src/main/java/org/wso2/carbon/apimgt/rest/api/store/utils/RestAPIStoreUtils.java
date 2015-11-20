@@ -24,12 +24,26 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  *  This class contains REST API Store related utility operations
@@ -64,7 +78,7 @@ public class RestAPIStoreUtils {
     }
 
     /** 
-     * check whether current logged in consumer has access to the specified application
+     * check whether current logged in user has access to the specified application
      * 
      * @param application Application object
      * @return true if current logged in consumer has access to the specified application
@@ -72,16 +86,51 @@ public class RestAPIStoreUtils {
     public static boolean isUserAccessAllowedForApplication(Application application) {
         String username = RestApiUtil.getLoggedInUsername();
 
-        //if groupId is null or empty, it is not a shared app 
-        if (StringUtils.isEmpty(application.getGroupId())) {
-            //if the application is not shared, its subscriber and the current logged in user must be same
-            if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
-                return true;
+        if (application != null) {
+            //if groupId is null or empty, it is not a shared app 
+            if (StringUtils.isEmpty(application.getGroupId())) {
+                //if the application is not shared, its subscriber and the current logged in user must be same
+                if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
+                    return true;
+                }
+            } else {
+                String userGroupIds = RestAPIStoreUtils.getLoggedInUserGroupIds();
+                //if the application is a shared one, application's group id and the user's group id should be same
+                if (application.getGroupId().equals(userGroupIds)) {
+                    return true;
+                }
             }
-        } else {
-            String userGroupIds = RestAPIStoreUtils.getLoggedInUserGroupIds();
-            //if the application is a shared one, application's group id and the user's group id should be same
-            if (application.getGroupId().equals(userGroupIds)) {
+        }
+
+        //user don't have access
+        return false;
+    }
+
+    /**
+     * check whether current logged in user has access to the specified subscription
+     *
+     * @param subscribedAPI SubscribedAPI object
+     * @return true if current logged in user has access to the specified subscription
+     */
+    public static boolean isUserAccessAllowedForSubscription(SubscribedAPI subscribedAPI)
+            throws APIManagementException {
+        String username = RestApiUtil.getLoggedInUsername();
+        Application application = subscribedAPI.getApplication();
+        APIIdentifier apiIdentifier = subscribedAPI.getApiId();
+        if (apiIdentifier != null && application != null) {
+            try {
+                String tenantDomain = MultitenantUtils
+                        .getTenantDomain(APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                if (!isUserAccessAllowedForAPI(apiIdentifier.toString(), tenantDomain)) {
+                    return false;
+                }
+            } catch (APIManagementException e) {
+                String message =
+                        "Failed to retrieve the API " + apiIdentifier.toString() + " to check user " + username
+                                + " has access to the subscription " + subscribedAPI.getUUID();
+                throw new APIManagementException(message, e);
+            }
+            if (isUserAccessAllowedForApplication(application)) {
                 return true;
             }
         }
@@ -91,16 +140,99 @@ public class RestAPIStoreUtils {
     }
 
     /**
-     * check whether the specified API exists and the current logged in user has access to it
-     *
+     * Check whether the specified API exists and the current logged in user has access to it.
+     * 
+     * When it tries to retrieve the resource from the registry, it will fail with AuthorizationFailedException if user 
+     * does not have enough privileges. If the API does not exist, this will throw a APIMgtResourceNotFoundException
+     * 
      * @param apiId API identifier
      * @throws APIManagementException
      */
-    public static void checkUserAccessAllowedToAPI(String apiId) throws APIManagementException {
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        //this is just to check whether the user has access to the api or the api exists. When it tries to retrieve 
-        // the resource from the registry, it will fail with AuthorizationFailedException if user does not have enough
-        // privileges.
-        APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+    public static boolean isUserAccessAllowedForAPI(String apiId, String tenantDomain) throws APIManagementException {
+        String username = RestApiUtil.getLoggedInUsername();
+        //this is just to check whether the user has access to the api or the api exists. 
+        try {
+            APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                String message =
+                        "user " + username + " failed to access the API " + apiId + " due to an authorization failure";
+                log.info(message);
+                return false;
+            } else {
+                //This is an unexpected failure
+                String message =
+                        "Failed to retrieve the API " + apiId + " to check user " + username + " has access to the API";
+                throw new APIManagementException(message, e);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if the specified subscription is allowed for the logged in user
+     * 
+     * @param apiIdentifier API identifier
+     * @param tier the subscribing tier of the API
+     * @throws APIManagementException if the subscription allow check was failed. If the user is not allowed to add the
+     *  subscription, this will throw an instance of APIMgtAuthorizationFailedException with the reason as the message
+     */
+    public static void checkSubscriptionAllowed(APIIdentifier apiIdentifier, String tier)
+            throws APIManagementException {
+
+        String username = RestApiUtil.getLoggedInUsername();
+        String userTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        String providerName = apiIdentifier.getProviderName();
+        String apiTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+
+        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+        API api = apiConsumer.getAPI(apiIdentifier);
+        Set<Tier> tiers = api.getAvailableTiers();
+
+        //check whether the specified tier is within the allowed tiers for the API
+        Iterator<Tier> iterator = tiers.iterator();
+        boolean isTierAllowed = false;
+        List<String> allowedTierList = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Tier t = iterator.next();
+            if (t.getName() != null && (t.getName()).equals(tier)) {
+                isTierAllowed = true;
+            }
+            allowedTierList.add(t.getName());
+        }
+        if (!isTierAllowed) {
+            String msg = "Tier " + tier + " is not allowed for API " + apiIdentifier.getApiName() + "-" + apiIdentifier
+                    .getVersion() + ". Only " + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed." ;
+            throw new APIMgtAuthorizationFailedException(msg);
+        }
+        if (apiConsumer.isTierDeneid(tier)) {
+            throw new APIMgtAuthorizationFailedException("Tier " + tier + " is not allowed for user " + username);
+        }
+
+        //Tenant based validation for subscription
+        boolean subscriptionAllowed = false;
+        if (!userTenantDomain.equals(apiTenantDomain)) {
+            String subscriptionAvailability = api.getSubscriptionAvailability();
+            if (APIConstants.SUBSCRIPTION_TO_ALL_TENANTS.equals(subscriptionAvailability)) {
+                subscriptionAllowed = true;
+            } else if (APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS.equals(subscriptionAvailability)) {
+                String subscriptionAllowedTenants = api.getSubscriptionAvailableTenants();
+                String allowedTenants[];
+                if (subscriptionAllowedTenants != null) {
+                    allowedTenants = subscriptionAllowedTenants.split(",");
+                    for (String tenant : allowedTenants) {
+                        if (tenant != null && userTenantDomain.equals(tenant.trim())) {
+                            subscriptionAllowed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            subscriptionAllowed = true;
+        }
+        if (!subscriptionAllowed) {
+            throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + userTenantDomain);
+        }
     }
 }

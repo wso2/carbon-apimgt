@@ -210,7 +210,8 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBLE_ROLES ="overview_visibleRoles";
     public static final String API_OVERVIEW_VISIBLE_TENANTS ="overview_visibleTenants";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
-    public static final String API_TAGS = "tags";
+    public static final String API_OVERVIEW_TAG = "tags";
+    public static final String API_TAG = "Tag";
     public static final String API_STATUS = "STATUS";
     public static final String API_URI_PATTERN ="URITemplate_urlPattern";
     public static final String API_URI_HTTP_METHOD ="URITemplate_httpVerb";
@@ -367,6 +368,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
     public static final String API_KEY_VALIDATOR_URL = API_KEY_VALIDATOR + "ServerURL";
@@ -635,7 +637,7 @@ public final class APIConstants {
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
-                    (Arrays.asList(new String[]{"get","put","post","delete","head","options"}))));
+                    (Arrays.asList(new String[]{"get","put","post","delete","patch","head","options"}))));
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";
@@ -692,7 +694,7 @@ public final class APIConstants {
     	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
     	
     	public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,OPTIONS";
+    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,PATCH,OPTIONS";
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
@@ -833,6 +835,7 @@ public final class APIConstants {
         POST,
         PUT,
         DELETE,
+        PATCH,
         HEAD,
         OPTIONS
     }
@@ -873,7 +876,6 @@ public final class APIConstants {
     public static final String ENVIRONMENTS_NONE = "none";
     public static final String SWAGGER_BASEPATH = "basePath";
     public static final String SWAGGER_OPERATIONS = "operations";
-    public static final String METHOD_PATCH = "PATCH";
     public static final String SWAGGER_SCOPE = "scope";
     public static final String SWAGGER_AUTH_TYPE = "auth_type";
     public static final String API_THROTTLING_TIER = "throttling_tier";
@@ -922,5 +924,7 @@ public final class APIConstants {
     public static enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
     }
+    
+    public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
 
 }

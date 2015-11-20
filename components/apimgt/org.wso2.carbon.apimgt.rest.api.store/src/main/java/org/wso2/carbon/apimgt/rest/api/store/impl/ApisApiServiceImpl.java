@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -33,7 +34,6 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -62,8 +62,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
-            String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String type,
+            String sort, String accept, String ifNoneMatch) {
         Map<String, Object> apisMap;
 
         //pre-processing
@@ -72,10 +72,26 @@ public class ApisApiServiceImpl extends ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             String username = RestApiUtil.getLoggedInUsername();
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
-            apisMap = apiConsumer.searchPaginatedAPIs(query, type, tenantDomain, offset, limit, true);
+            //if query parameter is not specified, This will search by name
+            String searchType = "Name";
+            String searchContent = "*";
+            if (query != null) {
+                String[] querySplit = query.split(":");
+                if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
+                        .isNotBlank(querySplit[1])) {
+                    searchType = querySplit[0];
+                    searchContent = querySplit[1];
+                } else if (querySplit.length == 1) {
+                    searchContent = query;
+                } else {
+                    throw RestApiUtil.buildBadRequestException("Provided query parameter is invalid");
+                }
+            }
+
+            apisMap = apiConsumer.searchPaginatedAPIs(searchContent, searchType, requestedTenantDomain, offset, limit, true);
             APIListDTO apiListDTO = new APIListDTO();
             Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
             int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
@@ -88,8 +104,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
+            return null;
         }
     }
 
@@ -103,37 +119,51 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return API of the given ID
      */
     @Override
-    public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apisApiIdGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            String xWSO2Tenant) {
         APIDTO apiToReturn;
         try {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
             API api;
             if (RestApiUtil.isUUID(apiId)) {
-                api = apiConsumer.getAPIbyUUID(apiId);
+                api = apiConsumer.getAPIbyUUID(apiId, requestedTenantDomain);
             } else {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
                 api = apiConsumer.getAPI(apiIdentifier);
             }
+            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
 
-            if (api != null) {
-                apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-            } else {
-                String errorMessage =  apiId + " does not exist";
-                log.error(errorMessage);
-                throw new NotFoundException();
-            }
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API : " + apiId;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+                return null;
+            }
         }
         return Response.ok().entity(apiToReturn).build();
     }
 
+    /**
+     *  Returns all the documents of the given API identifier that matches to the search condition
+     *  
+     * @param apiId API identifier
+     * @param limit max number of records returned
+     * @param offset starting index
+     * @param query document search condition
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched documents as a list if DocumentDTOs
+     */
     @Override
-    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
-            String ifNoneMatch) {
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
+            String query, String accept, String ifNoneMatch) {
+
+        //todo : implement document search. Search conditions can be found at store-api.yaml
 
         //pre-processing
         //setting default limit and offset values if they are not set
@@ -145,40 +175,72 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
 
             //this will fail if user doesn't have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
-            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier);
+            List<Documentation> documentationList = apiConsumer.getAllDocumentation(apiIdentifier, username);
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
             DocumentationMappingUtil
                     .setPaginationParams(documentListDTO, query, apiId, offset, limit, documentationList.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                handleException("Error while getting API " + apiId, e);
+                return null;
+            }
         }
     }
 
+    /**
+     * Returns a specific document by identifier that is belong to the given API identifier
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifer
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return returns the matched document
+     */
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String xWSO2Tenant,
+            String accept, String ifNoneMatch, String ifModifiedSince) {
         Documentation documentation;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            RestAPIStoreUtils.checkUserAccessAllowedToAPI(apiId);
-            documentation = apiConsumer.getDocumentation(documentId);
-            if(null != documentation){
+            String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+
+            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId, requestedTenantDomain)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            }
+
+            documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
+            if (null != documentation) {
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();
-            }
-            else{
-                throw new NotFoundException();
+            } else {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
             }
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                handleException("Error while getting API " + apiId, e);
+                return null;
+            }
         }
+    }
+
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
     }
 
 }

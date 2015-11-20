@@ -162,6 +162,9 @@ function sendReceive (httpMethod,data,url){
         case    "PUT":
             response = put(url,stringify(data),headers,type);
             break;
+        case    "PATCH":
+            response = patch(url,stringify(data),headers,type);
+            break;
         case    "DELETE":
             response = del(url,stringify(data),headers,type);
             break;

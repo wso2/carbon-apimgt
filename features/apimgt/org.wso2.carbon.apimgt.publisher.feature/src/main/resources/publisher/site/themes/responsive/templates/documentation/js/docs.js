@@ -163,6 +163,26 @@ var clearDocs = function () {
 
 };
 
+var submitDoc = function() {
+    $('#addNewDoc').ajaxSubmit({
+        success:function (result) {
+            if (!result.error) {
+                $.cookie("tab", "docsLink");
+                clearDocs();
+            } else {
+                if (result.message == "AuthenticateError") {
+                    jagg.showLogin();
+                } else {
+                    jagg.message({content:result.message,type:"error"});
+                }
+            }
+        },
+        error:function(jqXHR, textStatus, errorThrown){
+            jagg.message({content:(JSON.parse(jqXHR.responseText)).message,type:"error"});
+        }
+    });
+}
+
 var saveDoc=function(){
     var sourceType = getRadioValue($('input[name=optionsRadios1]:radio:checked'));
     var docId = $("#docName");
@@ -251,24 +271,23 @@ var saveDoc=function(){
             $('<input>').attr('type', 'hidden')
                 .attr('name', 'newType').attr('value', $('#specifyBox').val()).prependTo('#addNewDoc');
         }
-
-        $('#addNewDoc').ajaxSubmit({
-            success:function (result) {
-                if (!result.error) {
-                    $.cookie("tab", "docsLink");
-                    clearDocs();
-                } else {
-                    if (result.message == "AuthenticateError") {
-                        jagg.showLogin();
-                    } else {
-                        jagg.message({content:result.message,type:"error"});
+        if($('#saveDocBtn').val() == "Update"){
+            var fileNameToBeUpload = getFileName($("#docLocation").val());
+            if(getFileName($("#docLocation").val()) == $("#fileNameDiv").html()){
+                jagg.message({
+                    content:"There is a file named "+fileNameToBeUpload+" with the same name. You are going to" +
+                    " overwrite existing file. Are you sure you want to overwrite existing file" ,
+                    type:"confirm",
+                    title:"File already exists..!",
+                    anotherDialog:true,
+                    okCallback:function(){
+                        submitDoc();
                     }
-                }
-            },
-            error:function(jqXHR, textStatus, errorThrown){
-                jagg.message({content:(JSON.parse(jqXHR.responseText)).message,type:"error"});
+                });
+                return false;
             }
-        });
+        }
+        submitDoc();
     }
 };
 
@@ -384,6 +403,16 @@ var getExtension = function(baseFileName) {
     }
 
 };
+
+var getFileName = function(baseFileName) {
+    var baseNameComponents = baseFileName.split('\\');
+    if(baseNameComponents.length > 1) {
+        var fileName = baseNameComponents[baseNameComponents.length - 1];
+        return fileName;
+    } else {
+        return null;
+    }
+}
 
 var getMimeType = function(extension) {
     var type=CONTENT_MAP[extension];

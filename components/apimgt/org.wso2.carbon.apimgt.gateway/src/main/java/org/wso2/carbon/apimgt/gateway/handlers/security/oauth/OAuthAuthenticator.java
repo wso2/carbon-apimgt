@@ -177,6 +177,8 @@ public class OAuthAuthenticator implements Authenticator {
 
             synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
             synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
+            synCtx.setProperty(APIMgtGatewayConstants.SCOPES, info.getScopes() == null ? null : info.getScopes()
+                                                                                                    .toString());
         }
 
         if (info.isAuthorized()) {
