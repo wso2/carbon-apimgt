@@ -1654,8 +1654,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     criteria=APIConstants.API_OVERVIEW_CONTEXT;
                 }else if (searchType.equalsIgnoreCase("Description")) {
                     criteria=APIConstants.API_OVERVIEW_DESCRIPTION;
-                } else if (searchType.equalsIgnoreCase("Tag")) {
-                    criteria = APIConstants.API_TAGS;
+                } else if (searchType.equalsIgnoreCase(APIConstants.API_TAG)) {
+                    criteria = APIConstants.API_OVERVIEW_TAG;
                 }
 
                 //Create the search attribute map for PUBLISHED APIs

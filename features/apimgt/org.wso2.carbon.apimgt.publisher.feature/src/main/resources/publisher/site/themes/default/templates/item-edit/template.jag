@@ -478,6 +478,12 @@ API Definition for Swagger will not be overriden with the changes you will do to
 
                                 <li>
                                     <label class="checkbox">
+                                    <input type="checkbox" value="PATCH" class="http_verb_select" > &nbsp; PATCH
+                                    </label>
+                                </li>
+
+                                <li>
+                                    <label class="checkbox">
                                     <input type="checkbox" value="OPTIONS" class="http_verb_select" > &nbsp; OPTIONS
                                     </label>
                                 </li>

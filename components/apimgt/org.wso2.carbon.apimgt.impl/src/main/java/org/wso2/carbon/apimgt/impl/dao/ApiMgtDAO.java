@@ -6191,7 +6191,10 @@ public class ApiMgtDAO {
                         // catching the exception because when copy the api without the option "require re-subscription"
                         // need to go forward rather throwing the exception
                     } catch (SubscriptionAlreadyExistingException e) {
-                        log.error("Error while adding subscription" + e.getMessage(), e);
+                        //Not handled as an error because same subscription can be there in many previous versions. 
+                        //Ex: if previous version was created by another older version and if the subscriptions are
+                        //Forwarded, then the third one will get same subscription from previous two versions.
+                        log.info("Subscription already exists: " + e.getMessage());
                     }
                 }
             }
@@ -7980,10 +7983,20 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 " ASUB.APPLICATION_ID=? AND" +
                 " AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID AND" +
                 " AW.WF_TYPE=?";
+        
+        String postgreSQL =  "SELECT AW.WF_EXTERNAL_REFERENCE FROM" +
+                " AM_WORKFLOWS AW, AM_SUBSCRIPTION ASUB  WHERE" +
+                " ASUB.API_ID=? AND" +
+                " ASUB.APPLICATION_ID=? AND" +
+                " AW.WF_REFERENCE::integer=ASUB.SUBSCRIPTION_ID AND" +
+                " AW.WF_TYPE=?";
 
         try {
             apiID = getAPIID(identifier, conn);
             conn = APIMgtDBUtil.getConnection();
+            if (conn.getMetaData().getDriverName().contains("PostgreSQL")) {
+                sqlQuery = postgreSQL;
+            }
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, apiID);
             ps.setInt(2, appID);

@@ -115,32 +115,31 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                     for (Object operation : operations) {
                         JSONObject jsonObjectOperation = (JSONObject) operation;
                         String httpVerb = (String) jsonObjectOperation.get(APIConstants.SWAGGER_HTTP_METHOD);
-                        /* Right Now PATCH is not supported. Need to remove this check when PATCH is supported*/
-                        if (!APIConstants.METHOD_PATCH.equals(httpVerb)) {
-                            URITemplate template = new URITemplate();
-                            Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON),
-                                    (String) jsonObjectOperation.get(APIConstants.SWAGGER_SCOPE));
 
-                            String authType = (String) jsonObjectOperation.get(APIConstants.SWAGGER_AUTH_TYPE);
-                            if (authType != null) {
-                                if (authType.equals("Application & Application User")) {
-                                    authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                                }
-                                if (authType.equals("Application User")) {
-                                    authType = "Application_User";
-                                }
-                            } else {
-                                authType = APIConstants.AUTH_NO_AUTHENTICATION;
+                        URITemplate template = new URITemplate();
+                        Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON),
+                                (String) jsonObjectOperation.get(APIConstants.SWAGGER_SCOPE));
+
+                        String authType = (String) jsonObjectOperation.get(APIConstants.SWAGGER_AUTH_TYPE);
+                        if (authType != null) {
+                            if (authType.equals("Application & Application User")) {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
-                            template.setThrottlingTier((String) jsonObjectOperation.get(APIConstants.API_THROTTLING_TIER));
-                            template.setMediationScript((String) jsonObjectOperation.get(APIConstants.API_MEDIATION_SCRIPT));
-                            template.setUriTemplate(uriTempVal);
-                            template.setHTTPVerb(httpVerb);
-                            template.setAuthType(authType);
-                            template.setScope(scope);
-
-                            uriTemplates.add(template);
+                            if (authType.equals("Application User")) {
+                                authType = "Application_User";
+                            }
+                        } else {
+                            authType = APIConstants.AUTH_NO_AUTHENTICATION;
                         }
+                        template.setThrottlingTier((String) jsonObjectOperation.get(APIConstants.API_THROTTLING_TIER));
+                        template.setMediationScript((String) jsonObjectOperation.get(APIConstants.API_MEDIATION_SCRIPT));
+                        template.setUriTemplate(uriTempVal);
+                        template.setHTTPVerb(httpVerb);
+                        template.setAuthType(authType);
+                        template.setScope(scope);
+
+                        uriTemplates.add(template);
+
                     }
 
                     subResCount++;
