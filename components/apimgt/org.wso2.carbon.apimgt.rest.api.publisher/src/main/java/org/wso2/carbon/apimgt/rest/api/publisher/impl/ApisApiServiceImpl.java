@@ -303,17 +303,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
 
-            if (api != null) {
-                apiToReturn = APIMappingUtil.fromAPItoDTO(api);
-                return Response.ok().entity(apiToReturn).build();
-            } else {
-                String errorMessage =  apiId + " does not exist";
-                log.error(errorMessage);
-                throw new NotFoundException();
-            }
+            apiToReturn = APIMappingUtil.fromAPItoDTO(api);
+            return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API : " + apiId;
-            handleException(errorMessage, e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+            }
         }
         return null;
     }
@@ -331,7 +329,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
 
-        APIDTO updatedApiDTO = null;
+        APIDTO updatedApiDTO;
         try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
@@ -374,8 +372,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while deleting API : " + apiId;
-            handleException(errorMessage, e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while deleting API : " + apiId;
+                handleException(errorMessage, e);
+            }
         }
         return null;
     }
@@ -403,8 +405,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .setPaginationParams(documentListDTO, query, apiId, offset, limit, allDocumentation.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String msg = "Error while retrieving documents of API " + apiId;
+                handleException(msg, e);
+            }
         }
+        return null;
     }
 
     @Override
