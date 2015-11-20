@@ -34,6 +34,7 @@
     <bean id="ValidationInInterceptor" class="org.wso2.carbon.apimgt.rest.api.util.interceptors.validation.ValidationInInterceptor"/>
     <cxf:bus>
         <cxf:inInterceptors>
+            <ref bean="AuthenticationInterceptor"/>
             <ref bean="ValidationInInterceptor"/>
         </cxf:inInterceptors>
     </cxf:bus>

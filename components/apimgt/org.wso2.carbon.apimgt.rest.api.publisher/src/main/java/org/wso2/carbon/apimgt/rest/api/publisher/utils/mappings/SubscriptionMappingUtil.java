@@ -30,13 +30,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/** This class is responsible for mapping APIM core subscription related objects into REST API subscription related DTOs 
- * 
+/**
+ * This class is responsible for mapping APIM core subscription related objects into REST API subscription related DTOs
  */
 public class SubscriptionMappingUtil {
 
-    /** Converts a SubscribedAPI object into SubscriptionDTO
-     * 
+    /**
+     * Converts a SubscribedAPI object into SubscriptionDTO
+     *
      * @param subscription SubscribedAPI object
      * @return SubscriptionDTO corresponds to SubscribedAPI object
      */
@@ -50,12 +51,12 @@ public class SubscriptionMappingUtil {
         return subscriptionDTO;
     }
 
-
-    /** Converts a List object of SubscribedAPIs into a DTO
+    /**
+     * Converts a List object of SubscribedAPIs into a DTO
      *
      * @param subscriptions a list of SubscribedAPI objects
-     * @param limit max number of objects returned
-     * @param offset starting index
+     * @param limit         max number of objects returned
+     * @param offset        starting index
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, int limit,
@@ -80,15 +81,15 @@ public class SubscriptionMappingUtil {
         return subscriptionListDTO;
     }
 
-
-    /** Sets pagination urls for a SubscriptionListDTO object given pagination parameters and url parameters
+    /**
+     * Sets pagination urls for a SubscriptionListDTO object given pagination parameters and url parameters
      *
      * @param subscriptionListDTO a SubscriptionListDTO object
-     * @param apiId uuid/id of API
-     * @param groupId group id of the applications to be returned
-     * @param limit max number of objects returned
-     * @param offset starting index
-     * @param size max offset
+     * @param apiId               uuid/id of API
+     * @param groupId             group id of the applications to be returned
+     * @param limit               max number of objects returned
+     * @param offset              starting index
+     * @param size                max offset
      */
     public static void setPaginationParams(SubscriptionListDTO subscriptionListDTO, String apiId,
             String groupId, int limit, int offset, int size) {
@@ -115,11 +116,12 @@ public class SubscriptionMappingUtil {
         subscriptionListDTO.setPrevious(paginatedPrevious);
     }
 
-    /** Converts a UserApplicationAPIUsage[] array to a corresponding SubscriptionListDTO
-     * 
+    /**
+     * Converts a UserApplicationAPIUsage[] array to a corresponding SubscriptionListDTO
+     *
      * @param allApiUsage array of UserApplicationAPIUsage
-     * @param limit max number of objects returned
-     * @param offset starting index
+     * @param limit       max number of objects returned
+     * @param offset      starting index
      * @return a dto containing all subscriptions
      */
     public static SubscriptionListDTO fromUserApplicationAPIUsageArrayToDTO(UserApplicationAPIUsage[] allApiUsage,

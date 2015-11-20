@@ -37,8 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-/** This is the service implementation class for Store tier related operations
- *
+/** 
+ * This is the service implementation class for Store tier related operations
  */
 public class TiersApiServiceImpl extends TiersApiService {
 
@@ -91,10 +91,16 @@ public class TiersApiServiceImpl extends TiersApiService {
             if (tier != null) {
                 return Response.ok().entity(TierMappingUtil.fromTiertoDTO(tier)).build();
             } else {
-                throw new NotFoundException();
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
             }
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            handleException("Error while retrieving the tier with name " + tierName, e);
+            return null;
         }
+    }
+
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
     }
 }

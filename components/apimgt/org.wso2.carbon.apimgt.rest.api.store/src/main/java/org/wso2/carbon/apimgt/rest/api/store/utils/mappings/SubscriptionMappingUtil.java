@@ -18,7 +18,12 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -46,6 +51,27 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setTier(subscription.getTier().getName());
         return subscriptionDTO;
+    }
+
+    /** 
+     * Converts a SubscriptionDTO object into SubscribedAPI
+     * 
+     * @param subscriptionDTO SubscriptionDTO object
+     * @param username usename of the logged in user
+     * @param requestedTenantDomain tenant domain that the API (uuid) of the subscription belongs to
+     * @return SubscribedAPI object that corresponds to the SubscriptionDTO
+     * @throws APIManagementException
+     */
+    public static SubscribedAPI fromDTOToSubscription(SubscriptionDTO subscriptionDTO, String username,
+            String requestedTenantDomain) throws APIManagementException {
+
+        APIIdentifier apiIdentifier = APIMappingUtil
+                .getAPIIdentifierFromApiIdOrUUID(subscriptionDTO.getApiId(), requestedTenantDomain);
+        Subscriber subscriber = new Subscriber(username);
+        SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
+        subscribedAPI.setTier(new Tier(subscriptionDTO.getTier()));
+        subscribedAPI.setApplication(new Application(subscriptionDTO.getApplicationId()));
+        return subscribedAPI;
     }
 
     /** Converts a List object of SubscribedAPIs into a DTO

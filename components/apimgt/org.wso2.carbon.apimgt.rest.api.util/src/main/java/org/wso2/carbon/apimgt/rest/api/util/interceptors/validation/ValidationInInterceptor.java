@@ -51,7 +51,7 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
         if (validator == null) {
             log.warn("Bean Validation provider could not be found, no validation will be performed");
         } else {
-            log.info("Validation In-Interceptor initialized successfully");
+            log.debug("Validation In-Interceptor initialized successfully");
         }
     }
 
