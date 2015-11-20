@@ -27,8 +27,9 @@ if(jagg.isCSRFTokenValid())
         var isTrueSet;
 
         var olderVersionExists = mod.isAPIOlderVersionExist(apiData);
-        
-        if(!olderVersionExists.error && olderVersionExists.exist) {
+        var apiInfo = mod.getAPI(apiData);
+        //checklist items only in create state
+        if(!olderVersionExists.error && olderVersionExists.exist && apiInfo.api.status == 'CREATED') {
             if(deprecateOldVersions != null && 
                 (deprecateOldVersions.toLowerCase() == "true" || deprecateOldVersions.toLowerCase() == "false")) {           
                 isTrueSet = (deprecateOldVersions.toLowerCase() === 'true');

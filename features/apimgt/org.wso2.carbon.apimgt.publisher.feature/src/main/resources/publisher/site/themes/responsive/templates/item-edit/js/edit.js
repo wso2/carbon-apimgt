@@ -285,6 +285,16 @@ var createHiddenForm = function(){
             if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
             <!--Throttling-fix-->
         }
+        if($('.resource-patch',tr).is(':checked')){
+            if(resourceMethodValues == ""){resourceMethodValues += "PATCH"}else{resourceMethodValues += ",PATCH"}
+            var selectedValue = $('.patchAuthType',tr).val();
+            if(resourceMethodAuthValues == ""){resourceMethodAuthValues += selectedValue }else{resourceMethodAuthValues += ","+selectedValue}
+            <!--Throttling-fix-->
+            var selectedValueThrottling = $('.patchThrottlingTier',tr).val();
+            console.log(selectedValueThrottling);
+            if(resourceThrottlingTierValues == ""){resourceThrottlingTierValues += selectedValueThrottling }else{resourceThrottlingTierValues += ","+selectedValueThrottling}
+            <!--Throttling-fix-->
+        }
         if($('.resource-options',tr).is(':checked')){
             if(resourceMethodValues == ""){resourceMethodValues += "OPTIONS"}else{resourceMethodValues += ",OPTIONS"}
             var selectedValue = $('.optionsAuthType',tr).val();

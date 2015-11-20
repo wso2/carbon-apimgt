@@ -14,13 +14,13 @@ import javax.validation.constraints.NotNull;
 public class ApplicationDTO  {
   
   
-  @NotNull
+  
   private String applicationId = null;
   
   @NotNull
   private String name = null;
   
-  @NotNull
+  
   private String subscriber = null;
   
   @NotNull
@@ -44,7 +44,7 @@ public class ApplicationDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("applicationId")
   public String getApplicationId() {
     return applicationId;
@@ -69,7 +69,7 @@ public class ApplicationDTO  {
   /**
    * If subscriber is not given user invoking the API will be taken as the subscriber.
    **/
-  @ApiModelProperty(required = true, value = "If subscriber is not given user invoking the API will be taken as the subscriber.")
+  @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber.")
   @JsonProperty("subscriber")
   public String getSubscriber() {
     return subscriber;

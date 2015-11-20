@@ -1,11 +1,11 @@
 <%
 var i18n = require("i18n");
-var localeResourcesBasePath="/site/conf/locales/jaggery/";
+var localeResourcesBasePath = "/site/conf/locales/jaggery/";
 var tenantDomain = jagg.getTenantDomain();
 var site = require("/site/conf/site.json");
-i18n.init(request,localeResourcesBasePath);
+i18n.init(request, localeResourcesBasePath);
 jagg.block("api/api-info", {
-    initialize:function (data) {
+    initialize: function (data) {
         user = jagg.getUser();
 
         if ((!session.get("hasTriedSSO") || Boolean(user)) && site.ssoConfiguration.enabled == "true" && site.ssoConfiguration.passive == "true") {
@@ -15,27 +15,29 @@ jagg.block("api/api-info", {
         session.put("hasTriedSSO", false);
     },
 
-    getInputs:function () {
+    getInputs: function () {
         return {
-            "api":null
+            "api": null
         }
     },
 
-    getOutputs:function (inputs) {
+    getOutputs: function (inputs) {
 
-        var applications, application, i, j, lenI, lenJ, subscriptions,isRatingActivated, subscription, username, result,deniedTiers,
+        var applications, application, i, j, lenI, lenJ, subscriptions, isRatingActivated, subscription, username, result, deniedTiers,
                 list = [],
                 api = inputs.api,
                 uriTemplates = inputs.uriTemplates,
                 swaggerString = inputs.swaggerString,
-                selectedAPI=null,
+                selectedAPI = null,
                 user = jagg.getUser();
-        var showConsole=true;
+        var showConsole = true;
         var isAdvertiseOnly;
-        if(api){
-        isAdvertiseOnly= (api.isAdvertiseOnly == null)? false :api.isAdvertiseOnly ;
+        if (api) {
+            isAdvertiseOnly = (api.isAdvertiseOnly == null) ? false : api.isAdvertiseOnly;
         }
-        if(swaggerString=="noPermissions"){showConsole=false;}
+        if (swaggerString == "noPermissions") {
+            showConsole = false;
+        }
 
         result = jagg.module("rating").isRatingActivated();
         isRatingActivated = result.allow;
@@ -47,9 +49,10 @@ jagg.block("api/api-info", {
 
             result = jagg.module("subscription").getAPISubscriptions(api, username);
             subscriptions = result.subscriptions;
-            if(applications!=null){
+            if (applications != null) {
                 lenI = applications.length;
-            }if(subscriptions!=null){
+            }
+            if (subscriptions != null) {
                 lenJ = subscriptions.length;
             }
             Label1:
@@ -67,133 +70,134 @@ jagg.block("api/api-info", {
             deniedTiers = result.tiers;
 
         }
-        if(!isAdvertiseOnly){
-            if(tenantDomain == "carbon.super"){
-                if(showConsole){
+        if (!isAdvertiseOnly) {
+            if (tenantDomain == "carbon.super" || tenantDomain == null) {
+                if (showConsole) {
                     return {
-                        "api":api,
-                        "deniedTiers":deniedTiers,
-                        "applications":list,
-                        "user":user,
-                        "uriTemplates":uriTemplates,
-                        "isRatingActivated":isRatingActivated,
-                        "tabs":{
-                            "tabs":[
+                        "api": api,
+                        "deniedTiers": deniedTiers,
+                        "applications": list,
+                        "user": user,
+                        "uriTemplates": uriTemplates,
+                        "isRatingActivated": isRatingActivated,
+                        "tabs": {
+                            "tabs": [
                                 {
-                                    "title":i18n.localize("overview.title"),
-                                    "body":[
+                                    "title": i18n.localize("overview.title"),
+                                    "body": [
                                         {
-                                            "name":"api/overview",
-                                            "inputs":{
-                                                "api":api,
-                                                "user":user
+                                            "name": "api/overview",
+                                            "inputs": {
+                                                "api": api,
+                                                "user": user
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("documentation.title"),
-                                    "body":[
+                                    "title": i18n.localize("documentation.title"),
+                                    "body": [
                                         {
-                                            "name":"api/documentation",
+                                            "name": "api/documentation",
                                             "inputs": {
-                                                "api":api
+                                                "api": api
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("apiconsole.title"),
-                                    "body":[
+                                    "title": i18n.localize("apiconsole.title"),
+                                    "body": [
                                         {
-                                            "name":"api/swagger",
+                                            "name": "api/swagger",
                                             "inputs": {
-                                                "api":api,
-                                                "subscriptions":subscriptions
+                                                "api": api,
+                                                "subscriptions": subscriptions
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("throttling.title"),
-                                    "body":[
+                                    "title": i18n.localize("throttling.title"),
+                                    "body": [
                                         {
-                                            "name":"api/throttling",
+                                            "name": "api/throttling",
                                             "inputs": {
-                                                "api":api,
-                                                "uriTemplates":uriTemplates
+                                                "api": api,
+                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("forum"),
-                                    "body":[
+                                    "title": i18n.localize("forum"),
+                                    "body": [
                                         {
-                                            "name":"forum/forum-list",
+                                            "name": "forum/forum-list",
                                             "inputs": {
-                                                "api":api,
-                                                "uriTemplates":uriTemplates
+                                                "api": api,
+                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
                                 }
                             ]
                         }
-                    };}
-                else{
+                    };
+                }
+                else {
                     return {
-                        "api":api,
-                        "deniedTiers":deniedTiers,
-                        "applications":list,
-                        "user":user,
-                        "uriTemplates":uriTemplates,
-                        "isRatingActivated":isRatingActivated,
-                        "tabs":{
-                            "tabs":[
+                        "api": api,
+                        "deniedTiers": deniedTiers,
+                        "applications": list,
+                        "user": user,
+                        "uriTemplates": uriTemplates,
+                        "isRatingActivated": isRatingActivated,
+                        "tabs": {
+                            "tabs": [
                                 {
-                                    "title":i18n.localize("overview.title"),
-                                    "body":[
+                                    "title": i18n.localize("overview.title"),
+                                    "body": [
                                         {
-                                            "name":"api/overview",
-                                            "inputs":{
-                                                "api":api,
-                                                "user":user
+                                            "name": "api/overview",
+                                            "inputs": {
+                                                "api": api,
+                                                "user": user
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("documentation.title"),
-                                    "body":[
+                                    "title": i18n.localize("documentation.title"),
+                                    "body": [
                                         {
-                                            "name":"api/documentation",
+                                            "name": "api/documentation",
                                             "inputs": {
-                                                "api":api
+                                                "api": api
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("throttling.title"),
-                                    "body":[
+                                    "title": i18n.localize("throttling.title"),
+                                    "body": [
                                         {
-                                            "name":"api/throttling",
+                                            "name": "api/throttling",
                                             "inputs": {
-                                                "api":api,
-                                                "uriTemplates":uriTemplates
+                                                "api": api,
+                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("forum"),
-                                    "body":[
+                                    "title": i18n.localize("forum"),
+                                    "body": [
                                         {
-                                            "name":"forum/forum-list",
+                                            "name": "forum/forum-list",
                                             "inputs": {
-                                                "api":api,
-                                                "uriTemplates":uriTemplates
+                                                "api": api,
+                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
@@ -203,108 +207,109 @@ jagg.block("api/api-info", {
                     };
 
                 }
-            }else{
-                if(showConsole){
+            } else {
+                if (showConsole) {
                     return {
-                        "api":api,
-                        "deniedTiers":deniedTiers,
-                        "applications":list,
-                        "user":user,
-                        "uriTemplates":uriTemplates,
-                        "isRatingActivated":isRatingActivated,
-                        "tabs":{
-                            "tabs":[
+                        "api": api,
+                        "deniedTiers": deniedTiers,
+                        "applications": list,
+                        "user": user,
+                        "uriTemplates": uriTemplates,
+                        "isRatingActivated": isRatingActivated,
+                        "tabs": {
+                            "tabs": [
                                 {
-                                    "title":i18n.localize("overview.title"),
-                                    "body":[
+                                    "title": i18n.localize("overview.title"),
+                                    "body": [
                                         {
-                                            "name":"api/overview",
-                                            "inputs":{
-                                                "api":api,
-                                                "user":user
+                                            "name": "api/overview",
+                                            "inputs": {
+                                                "api": api,
+                                                "user": user
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("documentation.title"),
-                                    "body":[
+                                    "title": i18n.localize("documentation.title"),
+                                    "body": [
                                         {
-                                            "name":"api/documentation",
+                                            "name": "api/documentation",
                                             "inputs": {
-                                                "api":api
+                                                "api": api
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("apiconsole.title"),
-                                    "body":[
+                                    "title": i18n.localize("apiconsole.title"),
+                                    "body": [
                                         {
-                                            "name":"api/swagger",
+                                            "name": "api/swagger",
                                             "inputs": {
-                                                "api":api,
-                                                "subscriptions":subscriptions
+                                                "api": api,
+                                                "subscriptions": subscriptions
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("throttling.title"),
-                                    "body":[
+                                    "title": i18n.localize("throttling.title"),
+                                    "body": [
                                         {
-                                            "name":"api/throttling",
+                                            "name": "api/throttling",
                                             "inputs": {
-                                                "api":api,
-                                                "uriTemplates":uriTemplates
+                                                "api": api,
+                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
                                 }
                             ]
                         }
-                    };}
-                else{
+                    };
+                }
+                else {
                     return {
-                        "api":api,
-                        "deniedTiers":deniedTiers,
-                        "applications":list,
-                        "user":user,
-                        "uriTemplates":uriTemplates,
-                        "isRatingActivated":isRatingActivated,
-                        "tabs":{
-                            "tabs":[
+                        "api": api,
+                        "deniedTiers": deniedTiers,
+                        "applications": list,
+                        "user": user,
+                        "uriTemplates": uriTemplates,
+                        "isRatingActivated": isRatingActivated,
+                        "tabs": {
+                            "tabs": [
                                 {
-                                    "title":i18n.localize("overview.title"),
-                                    "body":[
+                                    "title": i18n.localize("overview.title"),
+                                    "body": [
                                         {
-                                            "name":"api/overview",
-                                            "inputs":{
-                                                "api":api,
-                                                "user":user
+                                            "name": "api/overview",
+                                            "inputs": {
+                                                "api": api,
+                                                "user": user
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("documentation.title"),
-                                    "body":[
+                                    "title": i18n.localize("documentation.title"),
+                                    "body": [
                                         {
-                                            "name":"api/documentation",
+                                            "name": "api/documentation",
                                             "inputs": {
-                                                "api":api
+                                                "api": api
                                             }
                                         }
                                     ]
                                 },
                                 {
-                                    "title":i18n.localize("throttling.title"),
-                                    "body":[
+                                    "title": i18n.localize("throttling.title"),
+                                    "body": [
                                         {
-                                            "name":"api/throttling",
+                                            "name": "api/throttling",
                                             "inputs": {
-                                                "api":api,
-                                                "uriTemplates":uriTemplates
+                                                "api": api,
+                                                "uriTemplates": uriTemplates
                                             }
                                         }
                                     ]
@@ -316,24 +321,24 @@ jagg.block("api/api-info", {
                 }
 
             }
-        }else{
+        } else {
             return {
-                "api":api,
-                "deniedTiers":deniedTiers,
-                "applications":list,
-                "user":user,
-                "uriTemplates":uriTemplates,
-                "isRatingActivated":isRatingActivated,
-                "tabs":{
-                    "tabs":[
+                "api": api,
+                "deniedTiers": deniedTiers,
+                "applications": list,
+                "user": user,
+                "uriTemplates": uriTemplates,
+                "isRatingActivated": isRatingActivated,
+                "tabs": {
+                    "tabs": [
                         {
-                            "title":i18n.localize("overview.title"),
-                            "body":[
+                            "title": i18n.localize("overview.title"),
+                            "body": [
                                 {
-                                    "name":"api/overview",
-                                    "inputs":{
-                                        "api":api,
-                                        "user":user
+                                    "name": "api/overview",
+                                    "inputs": {
+                                        "api": api,
+                                        "user": user
                                     }
                                 }
                             ]
@@ -344,13 +349,13 @@ jagg.block("api/api-info", {
         }
     },
 
-    getStaticBlocks:function () {
+    getStaticBlocks: function () {
         return [
             "ui/tab"
         ];
     },
 
-    getOutputBlocks:function () {
+    getOutputBlocks: function () {
         return [
             ["tabs", "tabs", "body"]
         ];

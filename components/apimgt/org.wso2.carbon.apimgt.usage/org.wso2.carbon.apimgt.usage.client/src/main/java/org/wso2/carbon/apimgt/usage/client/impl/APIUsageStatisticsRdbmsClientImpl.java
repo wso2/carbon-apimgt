@@ -85,6 +85,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private APIProvider apiProviderImpl;
     private APIConsumer apiConsumerImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
+    private final String clientType = "RDBMS";
+
+    /**
+     * default constructor
+     */
+    public APIUsageStatisticsRdbmsClientImpl() {
+
+    }
 
     public APIUsageStatisticsRdbmsClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
@@ -1234,6 +1242,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1242,15 +1251,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.context) && api.getId().getApiName().equals(apiName)) {
-                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.username);
+                if (api.getContext().equals(usageEntry.getContext()) && api.getId().getApiName().equals(apiName)) {
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usageEntry.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
                     } else {
                         usageDTO = new PerUserAPIUsageDTO();
-                        usageDTO.setUsername(usageEntry.username);
-                        usageDTO.setCount(usageEntry.requestCount);
-                        usageByUsername.put(usageEntry.username, usageDTO);
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
                     }
                     break;
                 }
@@ -1314,6 +1323,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return new ArrayList<String>(apisList);
     }
 
+    @Override
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1358,6 +1368,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return faultyCount;
     }
 
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
@@ -1366,18 +1377,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.context) &&
+                if (api.getContext().equals(usageEntry.getContext()) &&
                         api.getId().getApiName().equals(apiName) &&
                         api.getId().getVersion().equals(apiVersion) &&
-                        apiVersion.equals(usageEntry.apiVersion)) {
-                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.username);
+                        apiVersion.equals(usageEntry.getApiVersion())) {
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usageEntry.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
                     } else {
                         usageDTO = new PerUserAPIUsageDTO();
-                        usageDTO.setUsername(usageEntry.username);
-                        usageDTO.setCount(usageEntry.requestCount);
-                        usageByUsername.put(usageEntry.username, usageDTO);
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
                     }
                     break;
                 }
@@ -2965,21 +2976,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    private static class APIUsageByUser {
-
-        private String context;
-        private String username;
-        private long requestCount;
-        private String apiVersion;
-
-        public APIUsageByUser(String context, String username, long requestCount, String apiVersion) {
-            this.context = context;
-            this.username = username;
-            this.requestCount = requestCount;
-            this.apiVersion = apiVersion;
-        }
-    }
-
     private static class APIVersionUsageByUserMonth {
 
         private String context;
@@ -3049,4 +3045,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     }
 
+    /**
+     * return a string to indicate type of statistics client
+     *
+     * @return String
+     */
+    @Override
+    public String getClientType() {
+        return clientType;
+    }
 }

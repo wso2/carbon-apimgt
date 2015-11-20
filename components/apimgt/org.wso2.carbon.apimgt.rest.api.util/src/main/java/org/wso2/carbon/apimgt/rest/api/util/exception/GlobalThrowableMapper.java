@@ -16,13 +16,12 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.ResourceNotFoundException;
+import org.codehaus.jackson.JsonParseException;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
@@ -33,14 +32,10 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
     private static final Log log = LogFactory.getLog(GlobalThrowableMapper.class);
 
     private ErrorDTO e500 = new ErrorDTO();
-    private ErrorDTO e404 = new ErrorDTO();
 
     GlobalThrowableMapper() {
-        e500.setCode(new Long(500));
-        e500.setMessage("Internal server error please contact administrator.");
-
-        e404.setCode(new Long(404));
-        e404.setMessage("Resource not found.");
+        e500.setCode((long) 500);
+        e500.setMessage("Internal server error. Please contact administrator.");
     }
 
     @Override
@@ -66,24 +61,22 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
             return ((ConstraintViolationException) e).getResponse();
         }
 
-        if(e instanceof ForbiddenException){
+        if (e instanceof ForbiddenException) {
             return ((ForbiddenException) e).getResponse();
         }
 
-        if(e instanceof InternalServerErrorException){
-            Throwable rootCause = ExceptionUtils.getRootCause(e);
-            if (rootCause instanceof AuthorizationFailedException) {
-                ForbiddenException forbiddenException = new ForbiddenException(
-                        RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT);
-                return forbiddenException.getResponse();
-            } else if (rootCause instanceof ResourceNotFoundException) {
-                NotFoundException notFoundException = new NotFoundException();
-                return notFoundException.getResponse();
-            }
+        if (e instanceof ConflictException) {
+            return ((ConflictException) e).getResponse();
+        }
+
+        if (e instanceof JsonParseException) {
+            //noinspection ThrowableResultOfMethodCallIgnored
+            return RestApiUtil.buildBadRequestException("Malformed request body.").getResponse();
         }
 
         //unknown exception log and return
         log.error("An Unknown exception has been captured by global exception mapper.", e);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Content-Type", "application/json").entity(e500).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Content-Type", "application/json")
+                .entity(e500).build();
     }
 }

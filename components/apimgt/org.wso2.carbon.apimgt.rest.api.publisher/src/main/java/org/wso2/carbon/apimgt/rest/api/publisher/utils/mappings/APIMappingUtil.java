@@ -50,7 +50,7 @@ import java.util.Set;
 
 public class APIMappingUtil {
 
-    public static APIIdentifier getAPIIdentifierFromApiId(String apiId){
+    public static APIIdentifier getAPIIdentifierFromApiId(String apiId) {
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
         // apiId format: provider-apiName-version
         String providerName = apiIdDetails[0];
@@ -60,6 +60,14 @@ public class APIMappingUtil {
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }
 
+    /**
+     * Returns the APIIdentifier given the uuid or the id in {provider}-{api}-{version} format
+     *
+     * @param apiId uuid or the id in {provider}-{api}-{version} format
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIIdentifier which represents the given id
+     * @throws APIManagementException
+     */
     public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
         APIIdentifier apiIdentifier;
@@ -69,7 +77,28 @@ public class APIMappingUtil {
         } else {
             apiIdentifier = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
         }
-        return  apiIdentifier;
+        return apiIdentifier;
+    }
+
+    /**
+     * Returns the API given the uuid or the id in {provider}-{api}-{version} format
+     * 
+     * @param apiId uuid or the id in {provider}-{api}-{version} format
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        API api;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        if (RestApiUtil.isUUID(apiId)) {
+            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+        } else {
+            APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
+            api = apiProvider.getAPI(apiIdentifier);
+        }
+        return api;
     }
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
@@ -90,6 +119,7 @@ public class APIMappingUtil {
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
         dto.setEndpointConfig(model.getEndpointConfig());
+        dto.setThumbnailUrl(model.getThumbnailUrl());
         List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
@@ -125,7 +155,6 @@ public class APIMappingUtil {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
         }
 
-        //todo: do we need to put validity checks? - specific_tenants
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
@@ -138,12 +167,12 @@ public class APIMappingUtil {
         dto.setApiDefinition(apiSwaggerDefinition);
 
         Set<String> apiTags = model.getTags();
-        List<String> tagsToReturn = new ArrayList();
+        List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
         dto.setTags(tagsToReturn);
 
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
-        List<String> tiersToReturn = new ArrayList();
+        List<String> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
             tiersToReturn.add(tier.getName());
         }
@@ -151,11 +180,11 @@ public class APIMappingUtil {
 
         dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
-        //todo: do we need to put validity checks? - restricted
+
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
-        //todo: do we need to put validity checks? - controlled
+
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
@@ -166,19 +195,20 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
-        
-        //todo: thumbnail still missing
+
         return dto;
     }
 
-    public static API fromDTOtoAPI(APIDTO dto) throws APIManagementException {
+    public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
 
         APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
-        String provider = dto.getProvider();
         String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
+
+        // The provider name that is coming from the body is not honored for now.
+        // Later we can use it by checking admin privileges of the user.
         APIIdentifier apiId = new APIIdentifier(providerEmailDomainReplaced, dto.getName(), dto.getVersion());
-        org.wso2.carbon.apimgt.api.model.API model = new org.wso2.carbon.apimgt.api.model.API(apiId);
+        API model = new API(apiId);
 
         String context = dto.getContext();
         final String originalContext = context;
@@ -199,10 +229,14 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
-
+        //model.setThumbnailUrl(dto.getThumbnailUrl()); //todo if this is not a usual reg path, this breaks copying the api
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
-        model.setCacheTimeout(dto.getCacheTimeout());
+        if (dto.getCacheTimeout() != null) {
+            model.setCacheTimeout(dto.getCacheTimeout());
+        } else {
+            model.setCacheTimeout(APIConstants.API_RESPONSE_CACHE_TIMEOUT);
+        }
         model.setDestinationStatsEnabled(dto.getDestinationStatsEnabled());
 
         if (dto.getSequences() != null) {
@@ -221,10 +255,10 @@ public class APIMappingUtil {
         }
 
         if (dto.getSubscriptionAvailability() != null) {
-            model.setSubscriptionAvailability(mapSubscriptionAvailabilityFromDTOtoAPI(dto.getSubscriptionAvailability()));
+            model.setSubscriptionAvailability(
+                    mapSubscriptionAvailabilityFromDTOtoAPI(dto.getSubscriptionAvailability()));
         }
 
-        //todo :do we need to put validity checks? - specific_tenants
         if (dto.getSubscriptionAvailableTenants() != null) {
             model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
         }
@@ -242,11 +276,11 @@ public class APIMappingUtil {
         }
 
         if (dto.getTags() != null) {
-            Set<String> apiTags = new HashSet<String>(dto.getTags());
+            Set<String> apiTags = new HashSet<>(dto.getTags());
             model.addTags(apiTags);
         }
 
-        Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = new HashSet<>();
+        Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getTiers();
         for (String tier : tiersFromDTO) {
             apiTiers.add(new Tier(tier));
@@ -274,7 +308,6 @@ public class APIMappingUtil {
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
 
-        //todo: thumbnail requires mapping
         return model;
 
     }
@@ -338,6 +371,12 @@ public class APIMappingUtil {
         apiListDTO.setPrevious(paginatedPrevious);
     }
 
+    /**
+     * Creates a minimal DTO representation of an API object
+     * 
+     * @param api API object
+     * @return a minimal representation DTO
+     */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
@@ -346,7 +385,8 @@ public class APIMappingUtil {
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
-        apiInfoDTO.setProvider(apiId.getProviderName());
+        String providerName = api.getId().getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setStatus(api.getStatus().toString());
         return apiInfoDTO;
     }
@@ -383,6 +423,7 @@ public class APIMappingUtil {
                 return null; // how to handle this?
         }
     }
+
     private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY :
@@ -436,7 +477,7 @@ public class APIMappingUtil {
             // context template patterns - /{version}/foo or /foo/{version}
             // if the version is null, then we remove the /{version} part from the context
             context = contextVal.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
-        }else{
+        } else {
             context = context.replace(RestApiConstants.API_VERSION_PARAM, version);
         }
         return context;
@@ -445,8 +486,8 @@ public class APIMappingUtil {
     private static String checkAndSetVersionParam(String context) {
         // This is to support the new Pluggable version strategy
         // if the context does not contain any {version} segment, we use the default version strategy.
-        if(!context.contains(RestApiConstants.API_VERSION_PARAM)){
-            if(!context.endsWith("/")){
+        if (!context.contains(RestApiConstants.API_VERSION_PARAM)) {
+            if (!context.endsWith("/")) {
                 context = context + "/";
             }
             context = context + RestApiConstants.API_VERSION_PARAM;

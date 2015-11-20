@@ -204,6 +204,7 @@
     "post" : "POST" ,
     "delete" : "DELETE" ,
     "put" : "PUT" ,
+    "patch" : "PATCH" ,
     "validityTime":"Token valid period",
     "options":"OPTIONS",
     "throttlingLimit":"Throttling Limit",
