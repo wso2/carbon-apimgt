@@ -51,6 +51,9 @@ public class APIDTO  {
   private List<String> tiers = new ArrayList<String>();
   
   
+  private String thumbnailUrl = null;
+  
+  
   private APIBusinessInformationDTO businessInformation = null;
 
   
@@ -204,6 +207,18 @@ public class APIDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
+  @JsonProperty("thumbnailUrl")
+  public String getThumbnailUrl() {
+    return thumbnailUrl;
+  }
+  public void setThumbnailUrl(String thumbnailUrl) {
+    this.thumbnailUrl = thumbnailUrl;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
   @JsonProperty("businessInformation")
   public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
@@ -231,6 +246,7 @@ public class APIDTO  {
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
+    sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("}\n");
     return sb.toString();

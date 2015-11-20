@@ -18,20 +18,37 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 
+/**
+ * This is the service implementation class for Store application related operations
+ */
 public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
+    private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+
+    /**
+     * Get an application by Id
+     *
+     * @param applicationId application identifier
+     * @param accept accepted media type of the client
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return response containing the required application object
+     */
     @Override
     public Response applicationsApplicationIdGet(String applicationId, String accept, String ifNoneMatch,
             String ifModifiedSince) {
@@ -39,11 +56,21 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
             Application application = apiProvider.getApplicationByUUID(applicationId);
+
+            if (application == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+            }
+
             ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
             return Response.ok().entity(applicationDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            handleException("Error while retrieving application " + applicationId, e);
+            return null;
         }
     }
 
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
+    }
 }

@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.JsonParseException;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -31,14 +32,10 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
     private static final Log log = LogFactory.getLog(GlobalThrowableMapper.class);
 
     private ErrorDTO e500 = new ErrorDTO();
-    private ErrorDTO e404 = new ErrorDTO();
 
     GlobalThrowableMapper() {
-        e500.setCode(new Long(500));
-        e500.setMessage("Internal server error please contact administrator.");
-
-        e404.setCode(new Long(404));
-        e404.setMessage("Resource not found.");
+        e500.setCode((long) 500);
+        e500.setMessage("Internal server error. Please contact administrator.");
     }
 
     @Override
@@ -72,18 +69,10 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
             return ((ConflictException) e).getResponse();
         }
 
-        /*
-        if (e instanceof InternalServerErrorException) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                ForbiddenException forbiddenException = RestApiUtil
-                        .buildForbiddenException(RestApiConstants.RESOURCE, "");
-                return forbiddenException.getResponse();
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                NotFoundException notFoundException = RestApiUtil
-                        .buildNotFoundException(RestApiConstants.RESOURCE, "");
-                return notFoundException.getResponse();
-            }
-        }*/
+        if (e instanceof JsonParseException) {
+            //noinspection ThrowableResultOfMethodCallIgnored
+            return RestApiUtil.buildBadRequestException("Malformed request body.").getResponse();
+        }
 
         //unknown exception log and return
         log.error("An Unknown exception has been captured by global exception mapper.", e);
