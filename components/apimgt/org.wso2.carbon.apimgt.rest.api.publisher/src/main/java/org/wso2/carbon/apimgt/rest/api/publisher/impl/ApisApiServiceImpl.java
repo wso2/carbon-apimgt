@@ -247,36 +247,39 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisCopyApiPost(String apiId, String newVersion){
-        URI newVersionedApiUri = null;
-        APIDTO newVersionedApi = null;
+        URI newVersionedApiUri;
+        APIDTO newVersionedApi;
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
-            API api = apiProvider.getAPI(apiIdentifier);
-            if (api != null) {
-                apiProvider.createNewAPIVersion(api, newVersion);
-                //get newly created API to return as response
-                APIIdentifier apiNewVersionedIdentifier =
-                    new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
-                newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
-                //This URI used to set the location header of the POST response
-                newVersionedApiUri =
-                        new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiIdentifier.getProviderName() + "-" +
-                                apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
-                return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
-            } else {
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = api.getId();
+
+            //creates the new version
+            apiProvider.createNewAPIVersion(api, newVersion);
+
+            //get newly created API to return as response
+            APIIdentifier apiNewVersionedIdentifier =
+                new APIIdentifier(apiIdentifier.getProviderName(), apiIdentifier.getApiName(), newVersion);
+            newVersionedApi = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiNewVersionedIdentifier));
+            //This URI used to set the location header of the POST response
+            newVersionedApiUri =
+                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+
+            return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
+
+        } catch (APIManagementException | DuplicateAPIException e) {
+            if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
+                String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
+                throw RestApiUtil.buildConflictException(errorMessage);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while copying API : " + apiId;
+                handleException(errorMessage, e);
             }
-
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while copying API : " + apiId;
-            handleException(errorMessage, e);
-        } catch (DuplicateAPIException e) {
-            String errorMessage = "Requested new version " + newVersion + "of API " + apiId + "already exist";
-            handleException(errorMessage, e);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + apiId;
             handleException(errorMessage, e);
@@ -297,15 +300,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdGet(String apiId,String accept,String ifNoneMatch,String ifModifiedSince){
         APIDTO apiToReturn;
         try {
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            API api;
-            if (RestApiUtil.isUUID(apiId)) {
-                api = apiProvider.getAPIbyUUID(apiId, tenantDomain);
-            } else {
-                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiId(apiId);
-                api = apiProvider.getAPI(apiIdentifier);
-            }
+            API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
 
             if (api != null) {
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api);

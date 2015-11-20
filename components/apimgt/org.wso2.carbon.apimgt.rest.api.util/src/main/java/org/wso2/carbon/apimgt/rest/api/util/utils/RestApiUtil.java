@@ -283,7 +283,7 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean isDueToResourceAlreadyExists(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtResourceAlreadyExistsException;
+        return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
     }
 
     /**
