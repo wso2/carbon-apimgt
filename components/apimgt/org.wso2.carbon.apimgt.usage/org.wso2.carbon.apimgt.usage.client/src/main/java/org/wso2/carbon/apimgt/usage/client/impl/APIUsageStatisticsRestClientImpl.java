@@ -1640,17 +1640,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + provider);
+            provider = APIUtil.getUserNameWithTenantSuffix(provider);
+            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
         }
 
         //set the application name
         if (!StringUtils.isEmpty(appName)) {
-            query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + ':' + appName);
+            query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + ":\"" + appName + "\"");
         }
 
         //lucene query with time ranges
         try {
-            query.append(" AND " + APIUsageStatisticsClientConstants.API + ':' + apiName + " AND "
+            query.append(" AND " + APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"" + " AND "
                     + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
                     .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']');
         } catch (ParseException e) {
@@ -1745,12 +1746,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + provider);
+            provider = APIUtil.getUserNameWithTenantSuffix(provider);
+            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
         }
 
         //lucene query with time ranges
         try {
-            query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + ':' + appName + " AND "
+            query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + ":\"" + appName + "\"" + " AND "
                     + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
                     .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']');
         } catch (ParseException e) {
@@ -1832,7 +1834,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + provider);
+            provider = APIUtil.getUserNameWithTenantSuffix(provider);
+            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
         }
 
         //creating request bean
@@ -1892,7 +1895,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + provider);
+            provider = APIUtil.getUserNameWithTenantSuffix(provider);
+            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
         }
 
         //set the query to find specific api
@@ -1900,7 +1904,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (apiName.contains("No APIs Available")) {
                 return new ArrayList<String>();
             }
-            query.append(" AND " + APIUsageStatisticsClientConstants.API + ':' + apiName);
+            query.append(" AND " + APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"");
         }
 
         //creating request bean

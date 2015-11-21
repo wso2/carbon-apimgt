@@ -53,11 +53,8 @@ var log = new Log();
 
             mod = jagg.module("statistics");
             provider = jagg.getUser().username;
-            if (currentLocation.indexOf("all-statistics") >= 0) {
-                result = mod.getThrottleDataOfAPIAndApplication(apiName,allProviders,appName,fromDate,toDate);
-            } else {
-                result = mod.getThrottleDataOfAPIAndApplication(apiName,provider,appName,fromDate,toDate);
-            }
+
+            result = mod.getThrottleDataOfAPIAndApplication(apiName,provider,appName,fromDate,toDate);
             if (result.error == "true") {
                 obj = {
                     error: result.error,
@@ -88,7 +85,6 @@ var log = new Log();
         } else if (action === "getAPIsForThrottleStats") {
 
             mod = jagg.module("statistics");
-            provider = jagg.getUser().username;
             result = mod.getAPIsForThrottleStats(provider,apiName);
 
             if (result.error == "true") {

@@ -85,8 +85,7 @@ public class APIManagerInterceptorOps {
 			return true;
 		} else {
 			throw new APIFaultException(apiKeyValidationDTO.getValidationStatus(),
-			                            "Access failure for API: " + context + ", version: " +
-			                                    version + " with key: " + accessToken);
+					"Access failure for API: " + context + ", version: ");
 		}
 	}
 
