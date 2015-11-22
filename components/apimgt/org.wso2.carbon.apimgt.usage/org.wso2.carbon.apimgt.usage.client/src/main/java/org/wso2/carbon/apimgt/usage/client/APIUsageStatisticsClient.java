@@ -20,25 +20,15 @@ package org.wso2.carbon.apimgt.usage.client;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
-import org.wso2.carbon.apimgt.usage.client.pojo.SubscriberCountByAPIs;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -523,5 +513,33 @@ public abstract class APIUsageStatisticsClient {
      */
     public abstract void deployArtifacts(String url, String user, String pass) throws Exception;
 
+    /**
+     * return list of api usage for a particular api accross all versions
+     *
+     * @param providerName API provider name
+     * @param apiName      Name of the API
+     * @param limit        Number of sorted entries to return
+     * @return a List of PerUserAPIUsageDTO objects - Possibly empty
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
+     */
+    public abstract List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
+            throws APIMgtUsageQueryServiceClientException;
 
+    /**
+     * return list of api usage for a particular api and version
+     *
+     * @param providerName API provider name
+     * @param apiName      Name of the API
+     * @param limit        Number of sorted entries to return
+     * @return a List of PerUserAPIUsageDTO objects - Possibly empty
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
+     */
+    public abstract List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName,
+            String apiVersion, int limit) throws APIMgtUsageQueryServiceClientException;
+
+    /**
+     * return a string to indicate type of statistics client
+     * @return String
+     */
+    public abstract String getClientType();
 }

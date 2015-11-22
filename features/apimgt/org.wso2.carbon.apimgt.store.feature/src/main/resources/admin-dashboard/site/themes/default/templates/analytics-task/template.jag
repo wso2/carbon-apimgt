@@ -133,6 +133,8 @@ var datasourceData = outputs.datasourceData;
                 </td>
                 <td/>
             </tr>
+
+        <% if (org.wso2.carbon.apimgt.usage.client.UsageClient.getStatClientType().equals("RDBMS")) {%>
             <tr>
                 <td colspan="4">
                     <legend>Statistics Summary Datasource</legend>
@@ -515,6 +517,8 @@ var datasourceData = outputs.datasourceData;
                     </div>
                 </td>
             </tr>
+        <%}%>
+
             </table>
             </fieldset>
             <div class="analytics-form-actions" id="saveButtons" style="display:inline">
@@ -569,49 +573,51 @@ if(enableAnalytics){
     document.getElementById("eventAnalyserUsername").value = "<%=analyticsData.analytics.eventAnalyserUsername%>";
     document.getElementById("eventAnalyserPassword").value = "<%=analyticsData.analytics.eventAnalyserPassword%>";
 
-    <% if(datasourceData.dataSource != null){ %>
-            document.getElementById("statDsURL").value = "<%=datasourceData.dataSource.statDsURL%>";
-            document.getElementById("statDsDriver").value = "<%=datasourceData.dataSource.statDsDriver%>";
-            document.getElementById("statDsUsername").value = "<%=datasourceData.dataSource.statDsUsername%>";
-            document.getElementById("statDsPassword").value = "<%=datasourceData.dataSource.statDsPassword%>";
-            document.getElementById("statDsDefAutoCommit").value = "<%=datasourceData.dataSource.statDsDefaultAutoCommit%>";
-            document.getElementById("statDsDefReadOnly").value = "<%=datasourceData.dataSource.statDsDefaultReadOnly%>";
-            document.getElementById("statDsDefTrans").value = "<%=datasourceData.dataSource.statDsDefaultTransactionIsolation%>";
-            document.getElementById("statDsDefCatalog").value = "<%=datasourceData.dataSource.statDsDefaultCatalog%>";
-            document.getElementById("statDsMaxActive").value = "<%=datasourceData.dataSource.statDsMaxActive%>";
-            document.getElementById("statDsMaxIdle").value = "<%=datasourceData.dataSource.statDsMaxIdle%>";
-            document.getElementById("statDsMinIdle").value = "<%=datasourceData.dataSource.statDsMinIdle%>";
-            document.getElementById("statDsInitialSize").value = "<%=datasourceData.dataSource.statDsInitialSize%>";
-            document.getElementById("statDsMaxWait").value = "<%=datasourceData.dataSource.statDsMaxWait%>";
-            document.getElementById("statDsTestOnBorrow").value = "<%=datasourceData.dataSource.statDsTestOnBorrow%>";
-            document.getElementById("statDsTestOnReturn").value = "<%=datasourceData.dataSource.statDsTestOnReturn%>";
-            document.getElementById("statDsTestWhileIdle").value = "<%=datasourceData.dataSource.statDsTestWhileIdle%>";
-            document.getElementById("statDsValidationQuery").value = "<%=datasourceData.dataSource.statDsValidationQuery%>";
-            document.getElementById("statDsValidationClass").value = "<%=datasourceData.dataSource.statDsValidationClass%>";
-            document.getElementById("statDsTimeEviction").value = "<%=datasourceData.dataSource.statDsTimeBetweenEvictionRunsMillis%>";
-            document.getElementById("statDsNoOfTestsEviction").value = "<%=datasourceData.dataSource.statDsNumTestsPerEvictionRun%>";
-            document.getElementById("statDsMinEvictableIdleTime").value = "<%=datasourceData.dataSource.statDsMinEvictableIdleTimeMillis%>";
-            document.getElementById("statDsAccessToConnAllowed").value = "<%=datasourceData.dataSource.statDsAccessToUnderlyingConnectionAllowed%>";
-            document.getElementById("statDsRemoveAbandoned").value = "<%=datasourceData.dataSource.statDsRemoveAbandoned%>";
-            document.getElementById("statDsRemoveAbandonedTimeout").value = "<%=datasourceData.dataSource.statDsRemoveAbandonedTimeout%>";
-            document.getElementById("statDsLogAbandoned").value = "<%=datasourceData.dataSource.statDsLogAbandoned%>";
-            document.getElementById("statDsConnProperties").value = "<%=datasourceData.dataSource.statDsConnectionProperties%>";
-            document.getElementById("statDsInitSql").value = "<%=datasourceData.dataSource.statDsInitSQL%>";
-            document.getElementById("statDsJDBCInterceptors").value = "<%=datasourceData.dataSource.statDsJdbcInterceptors%>";
-            document.getElementById("statDsValidationInterval").value = "<%=datasourceData.dataSource.statDsValidationInterval%>";
-            document.getElementById("statDsFairQueue").value = "<%=datasourceData.dataSource.statDsFairQueue%>";
-            document.getElementById("statDsJMXEnabled").value = "<%=datasourceData.dataSource.statDsJMXEnabled%>";
-            document.getElementById("statDsAbandonWhenPrecFull").value = "<%=datasourceData.dataSource.statDsAbandonWhenPercentageFull%>";
-            document.getElementById("statDsMaxAge").value = "<%=datasourceData.dataSource.statDsMaxAge%>";
-            document.getElementById("statDsUseEquals").value = "<%=datasourceData.dataSource.statDsUseEquals%>";
-            document.getElementById("statDsSuspectTimeout").value = "<%=datasourceData.dataSource.statDsSuspectTimeout%>";
-            document.getElementById("statDsAlternateUsernameAllowed").value = "<%=datasourceData.dataSource.statDsAlternateUsernameAllowed%>";
-            document.getElementById("statDsValidationQueryTimeout").value = "<%=datasourceData.dataSource.statDsValidationQueryTimeout%>";
-    <% } else {%>
-            document.getElementById("statDsURL").value = "jdbc:h2:../wso2bam-2.5.0/repository/database/WSO2AM_STATS_DB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE";
-            document.getElementById("statDsDriver").value = "org.h2.Driver";
-            document.getElementById("statDsUsername").value = "wso2carbon";
-            document.getElementById("statDsPassword").value = "wso2carbon";
+    <% if (org.wso2.carbon.apimgt.usage.client.UsageClient.getStatClientType().equals("RDBMS")) {%>
+        <% if(datasourceData.dataSource != null){ %>
+                document.getElementById("statDsURL").value = "<%=datasourceData.dataSource.statDsURL%>";
+                document.getElementById("statDsDriver").value = "<%=datasourceData.dataSource.statDsDriver%>";
+                document.getElementById("statDsUsername").value = "<%=datasourceData.dataSource.statDsUsername%>";
+                document.getElementById("statDsPassword").value = "<%=datasourceData.dataSource.statDsPassword%>";
+                document.getElementById("statDsDefAutoCommit").value = "<%=datasourceData.dataSource.statDsDefaultAutoCommit%>";
+                document.getElementById("statDsDefReadOnly").value = "<%=datasourceData.dataSource.statDsDefaultReadOnly%>";
+                document.getElementById("statDsDefTrans").value = "<%=datasourceData.dataSource.statDsDefaultTransactionIsolation%>";
+                document.getElementById("statDsDefCatalog").value = "<%=datasourceData.dataSource.statDsDefaultCatalog%>";
+                document.getElementById("statDsMaxActive").value = "<%=datasourceData.dataSource.statDsMaxActive%>";
+                document.getElementById("statDsMaxIdle").value = "<%=datasourceData.dataSource.statDsMaxIdle%>";
+                document.getElementById("statDsMinIdle").value = "<%=datasourceData.dataSource.statDsMinIdle%>";
+                document.getElementById("statDsInitialSize").value = "<%=datasourceData.dataSource.statDsInitialSize%>";
+                document.getElementById("statDsMaxWait").value = "<%=datasourceData.dataSource.statDsMaxWait%>";
+                document.getElementById("statDsTestOnBorrow").value = "<%=datasourceData.dataSource.statDsTestOnBorrow%>";
+                document.getElementById("statDsTestOnReturn").value = "<%=datasourceData.dataSource.statDsTestOnReturn%>";
+                document.getElementById("statDsTestWhileIdle").value = "<%=datasourceData.dataSource.statDsTestWhileIdle%>";
+                document.getElementById("statDsValidationQuery").value = "<%=datasourceData.dataSource.statDsValidationQuery%>";
+                document.getElementById("statDsValidationClass").value = "<%=datasourceData.dataSource.statDsValidationClass%>";
+                document.getElementById("statDsTimeEviction").value = "<%=datasourceData.dataSource.statDsTimeBetweenEvictionRunsMillis%>";
+                document.getElementById("statDsNoOfTestsEviction").value = "<%=datasourceData.dataSource.statDsNumTestsPerEvictionRun%>";
+                document.getElementById("statDsMinEvictableIdleTime").value = "<%=datasourceData.dataSource.statDsMinEvictableIdleTimeMillis%>";
+                document.getElementById("statDsAccessToConnAllowed").value = "<%=datasourceData.dataSource.statDsAccessToUnderlyingConnectionAllowed%>";
+                document.getElementById("statDsRemoveAbandoned").value = "<%=datasourceData.dataSource.statDsRemoveAbandoned%>";
+                document.getElementById("statDsRemoveAbandonedTimeout").value = "<%=datasourceData.dataSource.statDsRemoveAbandonedTimeout%>";
+                document.getElementById("statDsLogAbandoned").value = "<%=datasourceData.dataSource.statDsLogAbandoned%>";
+                document.getElementById("statDsConnProperties").value = "<%=datasourceData.dataSource.statDsConnectionProperties%>";
+                document.getElementById("statDsInitSql").value = "<%=datasourceData.dataSource.statDsInitSQL%>";
+                document.getElementById("statDsJDBCInterceptors").value = "<%=datasourceData.dataSource.statDsJdbcInterceptors%>";
+                document.getElementById("statDsValidationInterval").value = "<%=datasourceData.dataSource.statDsValidationInterval%>";
+                document.getElementById("statDsFairQueue").value = "<%=datasourceData.dataSource.statDsFairQueue%>";
+                document.getElementById("statDsJMXEnabled").value = "<%=datasourceData.dataSource.statDsJMXEnabled%>";
+                document.getElementById("statDsAbandonWhenPrecFull").value = "<%=datasourceData.dataSource.statDsAbandonWhenPercentageFull%>";
+                document.getElementById("statDsMaxAge").value = "<%=datasourceData.dataSource.statDsMaxAge%>";
+                document.getElementById("statDsUseEquals").value = "<%=datasourceData.dataSource.statDsUseEquals%>";
+                document.getElementById("statDsSuspectTimeout").value = "<%=datasourceData.dataSource.statDsSuspectTimeout%>";
+                document.getElementById("statDsAlternateUsernameAllowed").value = "<%=datasourceData.dataSource.statDsAlternateUsernameAllowed%>";
+                document.getElementById("statDsValidationQueryTimeout").value = "<%=datasourceData.dataSource.statDsValidationQueryTimeout%>";
+        <% } else {%>
+                document.getElementById("statDsURL").value = "jdbc:h2:../wso2das-2.5.0/repository/database/WSO2AM_STATS_DB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE";
+                document.getElementById("statDsDriver").value = "org.h2.Driver";
+                document.getElementById("statDsUsername").value = "wso2carbon";
+                document.getElementById("statDsPassword").value = "wso2carbon";
+        <%}%>
     <%}%>
     }});
 </script>
