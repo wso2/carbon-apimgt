@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -43,6 +44,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -132,7 +134,37 @@ public class APIExecutor implements Execution {
                 deprecateOldVersions = apiArtifact.isLCItemChecked(0, APIConstants.API_LIFE_CYCLE);
                 makeKeysForwardCompatible = !(apiArtifact.isLCItemChecked(1, APIConstants.API_LIFE_CYCLE));
             }
-            executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, deprecateOldVersions, makeKeysForwardCompatible);
+            
+            //executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, deprecateOldVersions, makeKeysForwardCompatible);
+            
+            //push the state change to gateway
+            Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api.getId(), newStatus);       
+            //update api related information for state change
+            executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
+            
+            if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
+                    && newStatus.equals(APIStatus.PUBLISHED)) {
+                if (makeKeysForwardCompatible) {
+                    apiProvider.makeAPIKeysForwardCompatible(api);
+                }                
+                if(deprecateOldVersions) {
+                    String provider = APIUtil.replaceEmailDomain(api.getId().getProviderName());
+
+                    List<API> apiList = apiProvider.getAPIsByProvider(provider);
+                    APIVersionComparator versionComparator = new APIVersionComparator();
+                    for (API oldAPI : apiList) {
+                        if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
+                                versionComparator.compare(oldAPI, api) < 0 &&
+                                (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
+                            apiProvider.changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
+                            
+                        }
+                    }            
+                }            
+            }
+            
+            
+            
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
 
@@ -149,4 +181,6 @@ public class APIExecutor implements Execution {
         }
         return executed;
     }
+    
+   
 }
