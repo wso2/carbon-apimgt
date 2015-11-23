@@ -20,6 +20,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -41,11 +42,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -82,13 +83,17 @@ public class ApisApiServiceImpl extends ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        query = query == null ? "" : query;
+        type = type == null ? "" : type;
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //if query parameter is not specified, This will search by name
             String searchType = "Name";
             String searchContent = "";
-            if (query != null) {
+            if (!StringUtils.isBlank(query)) {
                 String[] querySplit = query.split(":");
                 if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
                         .isNotBlank(querySplit[1])) {
@@ -338,7 +343,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
             body.setProvider(apiIdentifier.getProviderName());
-            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, username);
+            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
 
             apiProvider.updateAPI(apiToUpdate);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
@@ -426,8 +431,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
             apiProvider.addDocumentation(apiIdentifier, documentation);
-            return Response.status(Response.Status.CREATED)
-                    .header("Location", "/apis/" + apiId + "/documents/" + documentation.getId()).build();
+            String newDocumentId = documentation.getId();
+
+            //retrieve the newly added document
+            documentation = apiProvider.getDocumentation(newDocumentId, tenantDomain);
+            DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+            return Response.status(Response.Status.CREATED).header("Location",
+                    "/apis/" + apiId + "/documents/" + documentation.getId()).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
@@ -504,6 +514,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                 handleException(errorMessage, e);
             }
         }
+        return null;
+    }
+
+    @Override 
+    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
+            InputStream fileDetail, Attachment attachment, String contentType, String ifMatch,
+            String ifUnmodifiedSince) {
         return null;
     }
 

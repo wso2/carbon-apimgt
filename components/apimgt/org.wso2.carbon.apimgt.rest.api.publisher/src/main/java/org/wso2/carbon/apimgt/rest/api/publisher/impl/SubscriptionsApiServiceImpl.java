@@ -67,14 +67,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             SubscriptionListDTO subscriptionListDTO;
             if (apiId != null) {
-                //todo: support groupId
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(apiUsages, limit, offset);
                 SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
                         apiUsages.size());
             } else {
-                //todo: support groupId
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
                         offset);
