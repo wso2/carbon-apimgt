@@ -224,7 +224,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     }
 
     /**
-     * Gets a subscription bu identifier
+     * Gets a subscription by identifier
      *
      * @param subscriptionId  subscription identifier
      * @param accept          Accept header value

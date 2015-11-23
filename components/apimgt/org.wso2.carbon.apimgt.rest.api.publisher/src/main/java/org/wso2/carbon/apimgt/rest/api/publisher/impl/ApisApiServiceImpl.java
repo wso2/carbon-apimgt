@@ -386,8 +386,21 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
         return null;
     }
+
+    /**
+     *  Returns all the documents of the given API identifier that matches to the search condition
+     *
+     * @param apiId API identifier
+     * @param limit max number of records returned
+     * @param offset starting index
+     * @param query document search condition
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched documents as a list if DocumentDTOs
+     */
     @Override
-    public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch){
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
+            String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -420,6 +433,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Add a documentation to an API
+     * 
+     * @param apiId api identifier
+     * @param body Documentation DTO as request body
+     * @param contentType Content-Type header
+     * @return created document DTO as response
+     */
     @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String contentType) {
         try {
@@ -443,6 +464,16 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Returns a specific document by identifier that is belong to the given API identifier
+     *
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return returns the matched document
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
         Documentation documentation;
@@ -469,6 +500,17 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Updates an existing document of an API
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param body updated document DTO
+     * @param contentType Content-Type header
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated document DTO as response
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
         try {
@@ -488,6 +530,15 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Deletes an existing document of an API
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if deleted successfully
+     */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
         Documentation documentation;

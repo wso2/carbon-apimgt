@@ -236,7 +236,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Returns a specific document by identifier that is belong to the given API identifier
      * 
      * @param apiId API identifier
-     * @param documentId document identifer
+     * @param documentId document identifier
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
