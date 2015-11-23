@@ -1129,7 +1129,6 @@ public final class APIUtil {
                     break;
                 case FILE: {
                     sourceType = Documentation.DocumentSourceType.FILE;
-                    setFilePermission(documentation.getFilePath());
                 }
                 break;
                 default:
@@ -2051,7 +2050,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
 
-    private static void setFilePermission(String filePath) throws APIManagementException {
+    public static void setFilePermission(String filePath) throws APIManagementException {
         try {
             filePath = filePath.replaceFirst("/registry/resource/", "");
             org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().

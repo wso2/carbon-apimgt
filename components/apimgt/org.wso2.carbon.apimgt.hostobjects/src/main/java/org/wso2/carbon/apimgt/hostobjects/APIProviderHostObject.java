@@ -3092,8 +3092,11 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-            	String contentType = (String) args[10];
-                Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
+                String contentType = (String) args[10];
+                apiProvider
+                        .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
+                                contentType);
+                /*Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
                 
                 String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
                 String fname = fileHostObject.getName();
@@ -3107,6 +3110,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
                                                api.getVisibility(), visibleRoles,filePath);
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
+                APIUtil.setFilePermission(filePath);*/
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
