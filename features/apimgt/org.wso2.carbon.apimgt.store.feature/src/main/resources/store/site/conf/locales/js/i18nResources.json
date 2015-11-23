@@ -16,12 +16,12 @@
         "no": "No",
         "OK": "OK",
         "charsLeft": "Characters left: ",
-		"replyAdded": "Reply Successfully Added",
-		"callBackHelpMsg": "This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize. <strong> query component:</strong> “response_type=code&client_id=<consumer_key>&scope=PRODUCTION&redirect_uri=<application_callback_url>” and <strong>headers:</strong> Content-Type:application/x-www-form-urlencoded",
-		"tokenHelpMsg" : "The period after which the token will expire after generation. A negative value ensures that the token never expires.",
+        "replyAdded": "Reply Successfully Added",
+        "callBackHelpMsg": "This parameter can be used in the authorization code grant type when invoking an API. For example, assume that both the client and the API Gateway are run on the same server and the Authorization API URL is https://localhost:8243/authorize. <strong> query component:</strong> “response_type=code&client_id=<consumer_key>&scope=PRODUCTION&redirect_uri=<application_callback_url>” and <strong>headers:</strong> Content-Type:application/x-www-form-urlencoded",
+        "tokenHelpMsg" : "The period after which the token will expire after generation. A negative value ensures that the token never expires.",
         "curlHelpMsg" : "CURL command created from the access tokens to send the request.",
         "domainUpdateHelp":"Specify list of domains that are permitted to send requests to the gateway through this application.",
-       "cancelSubs":"Cancel Subscription"
+        "cancelSubs":"Cancel Subscription"
 
     },
     "confirm": {
@@ -31,8 +31,8 @@
         "deleteSubsMsg2": " APIs. " ,
         "deleteMsgPostfix": "? This will cancel all the existing subscriptions and keys associated with the application. " ,
         "unsubscribeMsg": "Are you sure you want to unsubscribe from ",
-		"deleteMsgForForumTopic": "Do you want to remove the topic ",
-		"deleteMsgForForumReply": "Do you want to remove this reply ?"
+        "deleteMsgForForumTopic": "Do you want to remove the topic ",
+        "deleteMsgForForumReply": "Do you want to remove this reply ?"
 
     },
     "titles":{
