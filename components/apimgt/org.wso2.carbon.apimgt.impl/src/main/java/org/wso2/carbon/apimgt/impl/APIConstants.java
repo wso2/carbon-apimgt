@@ -896,6 +896,7 @@ public final class APIConstants {
     public static final String API_DATA_PROVIDER = "provider";
     public static final String API_DATA_VERSION = "version";
     public static final String API_DATA_DESCRIPTION = "description";
+    public static final String API_DATA_BUSINESS_OWNER = "businessOwner";
     public static final String API_DATA_RATES = "rates";
     public static final String API_DATA_ENDPOINT = "endpoint";
     public static final String API_DATA_THUMB_URL= "thumbnailurl";

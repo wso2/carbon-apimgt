@@ -328,7 +328,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdPut(String apiId,APIDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
-
         APIDTO updatedApiDTO;
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -360,7 +359,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDelete(String apiId,String ifMatch,String ifUnmodifiedSince){
-        try{
+        try {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);

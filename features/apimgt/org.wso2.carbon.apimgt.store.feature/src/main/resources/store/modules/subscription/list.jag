@@ -17,7 +17,6 @@ var getAllSubscriptions = function (username, selectedAppName, startSubIndex, en
         log.error(e);
         return {
             error:e,
-            message:e.message.split(":")[1],
             result:null
         };
     }
@@ -66,7 +65,6 @@ var getAPISubscriptionsForApplication = function (username, appName) {
         log.error(e.message);
         return {
             error : e,
-            message : e.message.split(":")[1],
             subscriptions:null
         };
     }

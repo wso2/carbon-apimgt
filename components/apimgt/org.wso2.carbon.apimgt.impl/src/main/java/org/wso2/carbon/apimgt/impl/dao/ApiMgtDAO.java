@@ -5068,19 +5068,18 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         int appId = 0;
 
-        String sqlQuery = "SELECT " +
-                "   APP.APPLICATION_ID " +
-                "FROM " +
-                "   AM_APPLICATION APP," +
-                "   AM_SUBSCRIBER SUB " +
-                "WHERE " +
-                "   APP.NAME= ?" +
-                "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+        String sqlQuery = "SELECT "
+                          + "   APP.APPLICATION_ID "
+                          + "FROM "
+                          + "   AM_APPLICATION APP,"
+                          + "   AM_SUBSCRIBER SUB "
+                          + "WHERE "
+                          + "   APP.NAME = ?"
+                          + "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
         String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))";
         String whereClauseWithGroupIdCaseInsensitive =
-                " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " + "AND LOWER(SUB.USER_ID) = " +
-                        "LOWER(?)))";
+                " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " + "AND LOWER(SUB.USER_ID) = LOWER(?)))";
         String whereClause = " AND SUB.USER_ID = ? ";
         String whereClauseCaseInsensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
 
@@ -5113,7 +5112,7 @@ public class ApiMgtDAO {
 
             resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 appId = resultSet.getInt("APPLICATION_ID");
             }
 
