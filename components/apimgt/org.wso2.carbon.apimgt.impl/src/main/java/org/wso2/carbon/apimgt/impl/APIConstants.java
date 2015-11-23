@@ -74,6 +74,8 @@ public final class APIConstants {
 
     public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
 
+    public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
+
     public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
 
     public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
