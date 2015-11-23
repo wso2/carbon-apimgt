@@ -21,7 +21,7 @@
         "tokenHelpMsg" : "The period after which the token will expire after generation. A negative value ensures that the token never expires.",
         "curlHelpMsg" : "CURL command created from the access tokens to send the request.",
         "domainUpdateHelp":"Specify list of domains that are permitted to send requests to the gateway through this application.",
-       "cancelSubs":"Cancel Subscription"
+        "cancelSubs":"Cancel Subscription"
 
     },
     "confirm": {
@@ -31,8 +31,8 @@
         "deleteSubsMsg2": " APIs. " ,
         "deleteMsgPostfix": "? This will cancel all the existing subscriptions and keys associated with the application. " ,
         "unsubscribeMsg": "Are you sure you want to unsubscribe from ",
-		"deleteMsgForForumTopic": "Do you want to remove the topic ",
-		"deleteMsgForForumReply": "Do you want to remove this reply ?"
+        "deleteMsgForForumTopic": "Do you want to remove the topic ",
+        "deleteMsgForForumReply": "Do you want to remove this reply ?"
 
     },
     "titles":{
