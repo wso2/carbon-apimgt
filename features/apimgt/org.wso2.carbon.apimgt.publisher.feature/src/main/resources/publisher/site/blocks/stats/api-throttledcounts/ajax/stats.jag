@@ -52,7 +52,6 @@ var log = new Log();
         if (action === "getThrottleDataOfAPIAndApplication") {     
 
             mod = jagg.module("statistics");
-            provider = jagg.getUser().username;
 
             result = mod.getThrottleDataOfAPIAndApplication(apiName,provider,appName,fromDate,toDate);
             if (result.error == "true") {

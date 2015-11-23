@@ -967,7 +967,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     accessTimeDTO.setApiName(apiName);
                     accessTimeDTO.setApiVersion(accessTime.getApiVersion());
                     accessTimeDTO.setUser(accessTime.getUsername());
-                    accessTimeDTO.setLastAccessTime(accessTime.getAccessTime() + "");
+                    accessTimeDTO.setLastAccessTime(accessTime.getAccessTime());
                     apiVersionLastAccessTimeUsage.add(accessTimeDTO);
                 }
             }
@@ -2455,7 +2455,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
-                return o2.getLastAccessTime().compareToIgnoreCase(o1.getLastAccessTime());
+                return (int) (o2.getLastAccessTime() - o1.getLastAccessTime());
             }
         });
         if (usageData.size() > limit) {
