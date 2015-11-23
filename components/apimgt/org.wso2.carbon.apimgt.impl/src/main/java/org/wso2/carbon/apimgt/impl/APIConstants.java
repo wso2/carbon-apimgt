@@ -808,7 +808,7 @@ public final class APIConstants {
 
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     public static final String HTTP_PROXY_PORT = "http.proxyPort";
-
+    
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -913,6 +913,11 @@ public final class APIConstants {
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
+    
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final int HTTPS_PROTOCOL_PORT = 443;
+    public static final int HTTP_PROTOCOL_PORT = 80;
+    
 
     public static final long MAX_FILE_SIZE = 1024L;
 

@@ -32,6 +32,7 @@ import org.wso2.securevault.SecretResolverFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -356,8 +357,17 @@ public class APIManagerConfiguration {
         try {
             keyManagerURL = new URL(configuration.get(APIConstants.KEYMANAGER_SERVERURL).get(0));
             String hostname = keyManagerURL.getHost();
+            
             int port = keyManagerURL.getPort();
+            if (port == -1) {
+                if (APIConstants.HTTPS_PROTOCOL.equals(keyManagerURL.getProtocol())) {
+                    port = APIConstants.HTTPS_PROTOCOL_PORT;
+                } else {
+                    port = APIConstants.HTTP_PROTOCOL_PORT;
+                }
+            }           
             System.setProperty(APIConstants.KEYMANAGER_PORT, String.valueOf(port));
+            
             if (hostname.equals(System.getProperty(APIConstants.CARBON_LOCALIP))) {
                 System.setProperty(APIConstants.KEYMANAGER_HOSTNAME, "localhost");
             } else {
