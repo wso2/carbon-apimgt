@@ -4752,8 +4752,13 @@ public final class APIUtil {
      * @return true if its valid url else fale
      */
     public static boolean isValidURL(String url) {
+        
+        if(url == null) {
+            return false;
+        }
+        
         String regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";        
-        Pattern p = Pattern.compile(regex);  
+        Pattern p = Pattern.compile(regex);         
         Matcher m = p.matcher(url); 
        
         return m.matches();
