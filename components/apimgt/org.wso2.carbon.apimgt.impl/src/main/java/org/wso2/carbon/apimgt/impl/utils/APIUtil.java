@@ -4487,11 +4487,9 @@ public final class APIUtil {
             if (tierAttributes != null) {
                 String isPaidValue = tier.getTierPlan();
 
-                if (isPaidValue != null && isPaidValue.equals("COMMERCIAL")) {
+                if (isPaidValue != null && APIConstants.COMMERCIAL_TIER_PLAN.equals(isPaidValue)) {
                     isPaid = true;
                 }
-            } else {
-                throw new APIManagementException("Tier attributes not specified for tier " + tierName);
             }
         } else {
             throw new APIManagementException("Tier " + tierName + "cannot be found");

@@ -60,6 +60,14 @@ public class APIMappingUtil {
         return new APIIdentifier(providerNameEmailReplaced, apiName, version);
     }
 
+    /**
+     * Returns the APIIdentifier given the uuid or the id in {provider}-{api}-{version} format
+     *
+     * @param apiId uuid or the id in {provider}-{api}-{version} format
+     * @param requestedTenantDomain tenant domain of the API
+     * @return APIIdentifier which represents the given id
+     * @throws APIManagementException
+     */
     public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
         APIIdentifier apiIdentifier;
@@ -70,6 +78,27 @@ public class APIMappingUtil {
             apiIdentifier = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
         }
         return apiIdentifier;
+    }
+
+    /**
+     * Returns the API given the uuid or the id in {provider}-{api}-{version} format
+     * 
+     * @param apiId uuid or the id in {provider}-{api}-{version} format
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        API api;
+        APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+        if (RestApiUtil.isUUID(apiId)) {
+            api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
+        } else {
+            APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
+            api = apiProvider.getAPI(apiIdentifier);
+        }
+        return api;
     }
 
     public static APIDTO fromAPItoDTO(API model) throws APIManagementException {
@@ -90,6 +119,7 @@ public class APIMappingUtil {
         dto.setCacheTimeout(model.getCacheTimeout());
         dto.setDestinationStatsEnabled(model.getDestinationStatsEnabled());
         dto.setEndpointConfig(model.getEndpointConfig());
+        dto.setThumbnailUrl(model.getThumbnailUrl());
         List<SequenceDTO> sequences = new ArrayList<>();
 
         String inSequenceName = model.getInSequence();
@@ -166,7 +196,6 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
 
-        //todo: thumbnail still missing
         return dto;
     }
 
@@ -200,7 +229,7 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
-
+        //model.setThumbnailUrl(dto.getThumbnailUrl()); //todo if this is not a usual reg path, this breaks copying the api
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -279,7 +308,6 @@ public class APIMappingUtil {
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
 
-        //todo: thumbnail requires mapping
         return model;
 
     }
@@ -343,6 +371,12 @@ public class APIMappingUtil {
         apiListDTO.setPrevious(paginatedPrevious);
     }
 
+    /**
+     * Creates a minimal DTO representation of an API object
+     * 
+     * @param api API object
+     * @return a minimal representation DTO
+     */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
@@ -351,7 +385,8 @@ public class APIMappingUtil {
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());
         apiInfoDTO.setVersion(apiId.getVersion());
-        apiInfoDTO.setProvider(apiId.getProviderName());
+        String providerName = api.getId().getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setStatus(api.getStatus().toString());
         return apiInfoDTO;
     }

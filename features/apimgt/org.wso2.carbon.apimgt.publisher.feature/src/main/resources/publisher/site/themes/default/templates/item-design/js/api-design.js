@@ -920,21 +920,21 @@ function getContextValue() {
     updateContextPattern();
 }
 
-function updateContextPattern(){
+function updateContextPattern() {
     var context = $('#context').val();
     var version = $('#version').val();
 
-    if(context != ""){
-        if(context.indexOf("{version}") < 0){
+    if (context != "") {
+        if (context.indexOf("{version}") < 0) {
             context = context + '/';
             context = context + "{version}";
         }
         $('#resource_url_pattern_refix').text(context);
-    }else{
+    } else {
         $('#resource_url_pattern_refix').text("/{context}/{version}/");
     }
 
-    if(version){
+    if (version) {
         context = context.replace("{version}",version);
         $('#resource_url_pattern_refix').text(context);
     }

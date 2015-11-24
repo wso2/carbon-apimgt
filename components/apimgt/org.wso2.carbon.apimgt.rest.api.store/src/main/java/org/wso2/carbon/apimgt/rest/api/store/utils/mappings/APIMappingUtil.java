@@ -83,12 +83,12 @@ public class APIMappingUtil {
         dto.setApiDefinition(apiSwaggerDefinition);
 
         Set<String> apiTags = model.getTags();
-        List<String> tagsToReturn = new ArrayList();
+        List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
         dto.setTags(tagsToReturn);
 
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
-        List<String> tiersToReturn = new ArrayList();
+        List<String> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
             tiersToReturn.add(tier.getName());
         }
@@ -102,8 +102,7 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
-
-        //todo: thumbnail still missing
+        dto.setThumbnailUrl(model.getThumbnailUrl());
         return dto;
     }
 
@@ -158,6 +157,12 @@ public class APIMappingUtil {
         return apiListDTO;
     }
 
+    /**
+     * Creates a minimal DTO representation of an API object
+     *
+     * @param api API object
+     * @return a minimal representation DTO
+     */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
@@ -168,6 +173,8 @@ public class APIMappingUtil {
         apiInfoDTO.setVersion(apiId.getVersion());
         apiInfoDTO.setProvider(apiId.getProviderName());
         apiInfoDTO.setStatus(api.getStatus().toString());
+        String providerName = api.getId().getProviderName();
+        apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         return apiInfoDTO;
     }
 }
