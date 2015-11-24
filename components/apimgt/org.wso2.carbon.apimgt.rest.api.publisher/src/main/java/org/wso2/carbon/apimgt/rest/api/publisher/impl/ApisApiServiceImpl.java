@@ -136,6 +136,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
 
             //todo: this can be moved to validation layer
+            if (body.getContext().endsWith("/")) {
+                throw RestApiUtil.buildBadRequestException("Context cannot end with '/' character");
+            }
+
             if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
                 throw RestApiUtil.buildBadRequestException(
                         "Error occurred while adding the API. A duplicate API context already exists for " + body
@@ -163,7 +167,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                                 .getApiName() + "-" + apiToAdd.getId().getVersion());
             }
 
-            //Overriding some properties:
+            //Overriding some properties: todo: review
             //only allow CREATED as the stating state for the new api
             apiToAdd.setStatus(APIStatus.CREATED);
 
@@ -339,14 +343,34 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            API apiInfo = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = apiInfo.getId();
+
+            //Overriding some properties: //todo: review
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
             body.setProvider(apiIdentifier.getProviderName());
+            body.setContext(apiInfo.getContextTemplate());
+            body.setStatus(apiInfo.getStatus().getStatus());
+
+            List<String> tiersFromDTO = body.getTiers();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                throw RestApiUtil.buildBadRequestException("No tier defined for the API");
+            }
+
+            //check whether the added API's tiers are all valid
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (invalidTiers.size() > 0) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid");
+            }
+
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
 
             apiProvider.updateAPI(apiToUpdate);
-            updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
+            API updatedApi = apiProvider.getAPI(apiIdentifier);
+            updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
         } catch (APIManagementException | FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
