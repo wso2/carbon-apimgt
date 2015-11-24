@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mozilla.javascript.NativeObject;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -1081,88 +1082,19 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
-     * @return Set<Tier>
+     * @param tierType     type of the tiers (api,resource ot application)
+     * @param username current logged user
+     * @return Set<Tier> return list of tier names
+     * @throws APIManagementException APIManagementException if failed to get the predefined tiers
      */
-    public Set<Tier> getAppTiers() throws APIManagementException {
+    public Set<Tier> getTiers(int tierType, String username) throws APIManagementException {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
-        Map<String, Tier> tierMap;
-        if (tenantId == 0) {
-            tierMap = APIUtil.getAppTiers();
-        } else {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-            tierMap = APIUtil.getAppTiers(tenantId);
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        Map<String, Tier> tierMap = APIUtil.getTiers(tierType, tenantDomain);
+
         tiers.addAll(tierMap.values());
 
-        return tiers;
-    }
-
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getAppTiers(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-        Map<String, Tier> tierMap;
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0) {
-            tierMap = APIUtil.getAppTiers();
-        } else {
-            tierMap = APIUtil.getAppTiers(requestedTenantId);
-        }
-        tiers.addAll(tierMap.values());
-        PrivilegedCarbonContext.endTenantFlow();
-        return tiers;
-    }
-
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getResTiers() throws APIManagementException {
-        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-        Map<String, Tier> tierMap;
-        if (tenantId == 0) {
-            tierMap = APIUtil.getResTiers();
-        } else {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-            tierMap = APIUtil.getResTiers(tenantId);
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-        tiers.addAll(tierMap.values());
-
-        return tiers;
-    }
-
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getResTiers(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-        Map<String, Tier> tierMap;
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0) {
-            tierMap = APIUtil.getResTiers();
-        } else {
-            tierMap = APIUtil.getResTiers(requestedTenantId);
-        }
-        tiers.addAll(tierMap.values());
-        PrivilegedCarbonContext.endTenantFlow();
         return tiers;
     }
 
