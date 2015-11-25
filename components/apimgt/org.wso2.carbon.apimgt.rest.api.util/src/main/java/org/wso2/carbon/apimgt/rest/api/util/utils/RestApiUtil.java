@@ -58,7 +58,10 @@ import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.ConstraintViolation;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -146,12 +149,6 @@ public class RestApiUtil {
 
     }
 
-    public static ErrorDTO getAuthenticationErrorDTO(String message) {
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setMessage(message);
-        return errorDTO;
-    }
-
     public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
@@ -184,6 +181,34 @@ public class RestApiUtil {
             return getLoggedInUserTenantDomain();
         } else {
             return xTenantHeader;
+        }
+    }
+
+    /**
+     * This method uploads a given file to specified location
+     *
+     * @param uploadedInputStream input stream of the file
+     * @param newFileName         name of the file to be created
+     * @param storageLocation     destination of the new file
+     * @throws APIManagementException if the file transfer fails
+     */
+    public static void transferFile(InputStream uploadedInputStream, String newFileName, String storageLocation)
+            throws APIManagementException {
+        FileOutputStream outFileStream = null;
+
+        try {
+            outFileStream = new FileOutputStream(new File(storageLocation, newFileName));
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                outFileStream.write(bytes, 0, read);
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error in transferring files.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
+        } finally {
+            IOUtils.closeQuietly(outFileStream);
         }
     }
 

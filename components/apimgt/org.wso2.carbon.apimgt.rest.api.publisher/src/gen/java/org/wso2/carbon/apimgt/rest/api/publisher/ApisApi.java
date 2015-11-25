@@ -1,9 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.apache.cxf.attachment.ContentDisposition;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApisApiServiceFactory;
@@ -15,7 +13,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-
 
 import java.util.List;
 
@@ -284,7 +281,7 @@ public class ApisApi  {
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update document details.", response = DocumentDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Upload a file to a document or add inline content to the document.\n\nDocument's source type should be **FILE** in order to upload a file to the document using **file** parameter.\nDocument's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.\n\nOnly one of **file** or **inlineContent** can be specified at one time.", response = DocumentDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nDocument updated"),
         
@@ -296,13 +293,14 @@ public class ApisApi  {
 
     public Response apisApiIdDocumentsDocumentIdContentPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.",required=true ) @PathParam("apiId") String apiId,
     @ApiParam(value = "**Document Identifier**",required=true ) @PathParam("documentId") String documentId,
-    @ApiParam(value = "Document to upload") @Multipart("file") InputStream inputStream,
-    @ApiParam(value = "file detail") @Multipart("file") Attachment fileDetail,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON." ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
+    @ApiParam(value = "Document to upload") @Multipart(value = "file", required = false) InputStream inputStream,
+    @ApiParam(value = "file detail") @Multipart(value = "file", required = false) Attachment fileDetail,
+    @ApiParam(value = "Inline content of the document" )@Multipart(value = "inlineContent", required = false)  String inlineContent,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,inputStream, fileDetail,contentType,ifMatch,ifUnmodifiedSince);
+    return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,contentType,inputStream,fileDetail,inlineContent,ifMatch,ifUnmodifiedSince);
     }
 }
 

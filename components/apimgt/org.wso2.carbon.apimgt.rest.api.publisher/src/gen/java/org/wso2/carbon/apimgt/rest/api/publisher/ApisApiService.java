@@ -1,7 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
+
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.MultipartBody;
 import org.wso2.carbon.apimgt.rest.api.publisher.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
@@ -10,7 +10,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
-
 
 import java.util.List;
 
@@ -32,6 +31,6 @@ public abstract class ApisApiService {
     public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince);
     public abstract Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince);
-    public abstract Response apisApiIdDocumentsDocumentIdContentPost(String apiId,String documentId,InputStream fileDetail, Attachment attachment, String contentType,String ifMatch,String ifUnmodifiedSince);
+    public abstract Response apisApiIdDocumentsDocumentIdContentPost(String apiId,String documentId,String contentType,InputStream inputStream, Attachment fileDetail,String inlineContent,String ifMatch,String ifUnmodifiedSince);
 }
 

@@ -592,10 +592,74 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
-    @Override 
+    /**
+     * Add content to a document. Content can be inline or File
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param contentType content type of the payload
+     * @param inputStream file input stream
+     * @param fileDetail file details as Attachment
+     * @param inlineContent inline content for the document
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated document as DTO
+     */
+    @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-            InputStream fileDetail, Attachment attachment, String contentType, String ifMatch,
+            String contentType, InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
             String ifUnmodifiedSince) {
+
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = APIMappingUtil.getAPIInfoFromApiIdOrUUID(apiId, tenantDomain);
+            if (inputStream != null && inlineContent != null) {
+                throw RestApiUtil
+                        .buildBadRequestException("Only one of 'file' and 'inlineContent' should be specified");
+            }
+
+            //retrieves the document and send 404 if not found
+            Documentation documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+            }
+
+            //add content depending on the availability of either input stream or inline content
+            if (inputStream != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                    throw RestApiUtil
+                            .buildBadRequestException("Source type of document " + documentId + " is not FILE");
+                }
+                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+                    throw RestApiUtil
+                            .buildBadRequestException("Source type of document " + documentId + " is not INLINE");
+                }
+                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
+            } else {
+                throw RestApiUtil.buildBadRequestException("Either 'file' or 'inlineContent' should be specified");
+            }
+
+            //retrieving the updated doc and the URI
+            Documentation updatedDoc = apiProvider.getDocumentation(documentId, tenantDomain);
+            DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
+            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT
+                    .replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(documentDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                handleException("Failed to add content to the document " + documentId, e);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving document content location : " + documentId;
+            handleException(errorMessage, e);
+        }
         return null;
     }
 
