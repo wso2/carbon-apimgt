@@ -402,6 +402,7 @@ public class APIManagerComponent {
 
     private void addTierPolicy(String tierLocation,String defaultTierFileName) throws APIManagementException {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        InputStream inputStream = null;
         try {
             UserRegistry registry = registryService.getGovernanceSystemRegistry();
             if (registry.resourceExists(tierLocation)) {
@@ -410,7 +411,7 @@ public class APIManagerComponent {
             }
 
             log.debug("Adding API tier policies to the registry");
-            InputStream inputStream = FileUtils.openInputStream(new File(defaultTierFileName));
+            inputStream = FileUtils.openInputStream(new File(defaultTierFileName));
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setContent(data);
@@ -420,6 +421,14 @@ public class APIManagerComponent {
             throw new APIManagementException("Error while saving policy information to the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy file content", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("Error when closing input stream", e);
+                }
+            }
         }
     }
 

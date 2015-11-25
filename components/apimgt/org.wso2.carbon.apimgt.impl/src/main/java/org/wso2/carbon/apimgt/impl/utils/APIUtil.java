@@ -2449,6 +2449,7 @@ public final class APIUtil {
      */
     private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
             throws APIManagementException {
+        InputStream inputStream = null;
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
@@ -2463,7 +2464,7 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding API tier policies to the tenant's registry");
             }
-            InputStream inputStream = FileUtils.openInputStream(new File(fileName));
+            inputStream = FileUtils.openInputStream(new File(fileName));
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -2473,6 +2474,14 @@ public final class APIUtil {
             throw new APIManagementException("Error while saving policy information to the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy file content", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("Error when closing input stream", e);
+                }
+            }
         }
     }
 
