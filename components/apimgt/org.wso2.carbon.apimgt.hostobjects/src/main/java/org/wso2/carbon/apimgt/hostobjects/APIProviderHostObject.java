@@ -2990,22 +2990,22 @@ public class APIProviderHostObject extends ScriptableObject {
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-        boolean isTenantFlowStarted = false;
+        /*boolean isTenantFlowStarted = false;
         if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
         	isTenantFlowStarted = true;
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
+        }*/
         try {
             API api = apiProvider.getAPI(apiId);
             apiProvider.addDocumentationContent(api, docName, docContent);
         } catch (APIManagementException e) {
             handleException("Error occurred while adding the content of the documentation- " + docName, e);
-        } finally {
+        }/* finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
-        }
+        }*/
     }
 
     public static boolean jsFunction_addDocumentation(Context cx, Scriptable thisObj,
