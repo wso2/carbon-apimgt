@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.publisher;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.ApisApiServiceFactory;
@@ -13,10 +11,13 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
+import java.io.File;
 
 import java.util.List;
 
 import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
@@ -294,13 +295,13 @@ public class ApisApi  {
     public Response apisApiIdDocumentsDocumentIdContentPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.",required=true ) @PathParam("apiId") String apiId,
     @ApiParam(value = "**Document Identifier**",required=true ) @PathParam("documentId") String documentId,
     @ApiParam(value = "Media type of the entity in the body. Default is JSON." ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Document to upload") @Multipart(value = "file", required = false) InputStream inputStream,
-    @ApiParam(value = "file detail") @Multipart(value = "file", required = false) Attachment fileDetail,
+    @ApiParam(value = "Document to upload") @Multipart(value = "file", required = false) InputStream fileInputStream,
+    @ApiParam(value = "Document to upload : details") @Multipart(value = "file" , required = false) Attachment fileDetail,
     @ApiParam(value = "Inline content of the document" )@Multipart(value = "inlineContent", required = false)  String inlineContent,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
-    return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,contentType,inputStream,fileDetail,inlineContent,ifMatch,ifUnmodifiedSince);
+    return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,contentType,fileInputStream,fileDetail,inlineContent,ifMatch,ifUnmodifiedSince);
     }
 }
 
