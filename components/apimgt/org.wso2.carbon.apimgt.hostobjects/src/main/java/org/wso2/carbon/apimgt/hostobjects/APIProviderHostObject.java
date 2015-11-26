@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
-
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
@@ -69,8 +68,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
 import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
-import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
-import org.wso2.carbon.apimgt.usage.client.dto.*;
+import org.wso2.carbon.apimgt.usage.client.dto.APIRequestsByHourDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIRequestsByUserAgentsDTO;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
 import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
@@ -78,6 +77,7 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -87,15 +87,12 @@ import org.wso2.carbon.user.mgt.stub.UserAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-import org.wso2.carbon.governance.lcm.util.CommonUtil;
 
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-
 import java.io.*;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -3323,132 +3320,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         }
         return apiStatus;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIVersionUsage(Context cx, Scriptable thisObj,
-                                                                    Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIVersionUsageDTO> list = null;
-        if (args == null || args.length==0) {
-            handleException("Invalid input parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String providerName = (String) args[0];
-        String apiName = (String) args[1];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageByAPIVersions(providerName, apiName);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIVersionUsageDTO usage = (APIVersionUsageDTO) usageObject;
-                row.put("version", row, usage.getVersion());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIUserUsage(Context cx, Scriptable thisObj,
-                                                                 Object[] args, Function funObj)
-            throws APIManagementException {
-        List<PerUserAPIUsageDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String providerName = (String) args[0];
-        String apiName = (String) args[1];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageBySubscribers(providerName, apiName, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUserUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                PerUserAPIUsageDTO usage = (PerUserAPIUsageDTO) usageObject;
-                row.put("user", row, usage.getUsername());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIVersionUserUsage(Context cx,
-                                                                        Scriptable thisObj,
-                                                                        Object[] args,
-                                                                        Function funObj)
-            throws APIManagementException {
-        List<PerUserAPIUsageDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String providerName = (String) args[0];
-        String apiName = (String) args[1];
-        String version = (String) args[2];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageBySubscribers(providerName, apiName, version, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUserUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                PerUserAPIUsageDTO usage = (PerUserAPIUsageDTO) usageObject;
-                row.put("user", row, usage.getUsername());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
     }
 
     public static NativeArray jsFunction_getUserAgentSummaryForALLAPIs(Context cx,

@@ -74,6 +74,8 @@ public final class APIConstants {
 
     public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
 
+    public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
+
     public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
 
     public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
@@ -91,8 +93,6 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
-
-    public static final String API_TIER_IS_PAID_ATTRIBUTE = "IsPaid";
 
     public static final String API_CATEGORY_FREE = "Free";
 
@@ -508,8 +508,10 @@ public final class APIConstants {
     public static final String TIER_DESCRIPTION_PREFIX = "tier.desc.";
 
     public static final String THROTTLE_TIER_DESCRIPTION_ATTRIBUTE = "Description";
-    public static final String THROTTLE_TIER_PLAN_ATTRIBUTE = "BillingPlan";
-    public static final String THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE = "StopOnQuotaReach";
+
+    //"Billing plan" and "Stop on quota reach" are considered as x-wso2 type attributes
+    public static final String THROTTLE_TIER_PLAN_ATTRIBUTE = "x-wso2-BillingPlan";
+    public static final String THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE = "x-wso2-StopOnQuotaReach";
 
     public static final String TIER_MANAGEMENT = "TierManagement.";
     public static final String ENABLE_UNLIMITED_TIER = TIER_MANAGEMENT + "EnableUnlimitedTier";
