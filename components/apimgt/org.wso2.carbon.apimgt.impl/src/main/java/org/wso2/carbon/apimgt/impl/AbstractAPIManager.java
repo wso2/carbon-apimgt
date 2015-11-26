@@ -1043,7 +1043,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
         Map<String, Tier> tierMap;
-        if (tenantId == 0) {
+        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
             tierMap = APIUtil.getTiers();
         } else {
             PrivilegedCarbonContext.startTenantFlow();
@@ -1068,7 +1068,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Map<String, Tier> tierMap;
         int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0) {
+        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
             tierMap = APIUtil.getTiers();
         } else {
             tierMap = APIUtil.getTiers(requestedTenantId);
