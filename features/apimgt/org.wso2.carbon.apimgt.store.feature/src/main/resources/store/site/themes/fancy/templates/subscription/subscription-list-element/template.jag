@@ -2,6 +2,13 @@
 <% var i=outputs.i, app = outputs.app, thumbURL = '';
    var str_i = String(i).replace('.','_');
    var gatewayurlendpoint = outputs.gatewayurl;
+
+   var customURL = jagg.module("domains").getCustomizedGatewayURL(jagg.getTenantDomain(), "https");
+
+   if (customURL != null) {
+       gatewayurlendpoint = customURL;
+   }
+
 	var log = new Log();
 	var userName=jagg.getUser().username;
 
