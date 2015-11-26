@@ -1274,7 +1274,7 @@ public class ApiMgtDAO {
                             + identifier.getApiName() + " in Application " + applicationId);
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
-                    deleteSubscriptionByApiIDAndAppID(apiId, applicationId, identifier.getTier(), conn);
+                    deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
                 } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
                         || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus))  {
                     log.error("Subscription to API " + identifier.getApiName() + " through application "
@@ -3609,6 +3609,13 @@ public class ApiMgtDAO {
                 log.error(msg);
                 throw new APIManagementException(msg);
             }
+
+            String subsCreateStatus = getSubscriptionCreaeteStatus(identifier, applicationId, conn);
+
+            if (APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subsCreateStatus))   {
+                deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
+            }
+
 
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, UPDATED_BY = ?, UPDATED_TIME = ? " +
@@ -8180,6 +8187,48 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return status;
     }
 
+    /**
+     * Retrieve subscription create state for APIIdentifier and applicationID
+     * @param identifier - api identifier which is subscribed
+     * @param applicationId - application used to subscribed
+     * @param connection
+     * @return subscription create status
+     * @throws APIManagementException
+     */
+
+    public String getSubscriptionCreaeteStatus(APIIdentifier identifier, int applicationId, Connection connection)
+            throws APIManagementException   {
+
+        String status = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT SUBS_CREATE_STATE FROM" +
+                          " AM_SUBSCRIPTION WHERE" +
+                          " API_ID = ? AND" +
+                          " APPLICATION_ID = ?";
+
+        try {
+            int apiId = getAPIID(identifier, connection);
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.setInt(2, applicationId);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                status = rs.getString("SUBS_CREATE_STATE");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription entry for " +
+                            "Application : " + applicationId + ", API: " + identifier, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return status;
+
+    }
 
     private static class SubscriptionInfo {
         private int subscriptionId;
@@ -9032,19 +9081,17 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param tier - subscribed TIER ID
      * @throws java.sql.SQLException - Letting the caller to handle the roll back
      */
-    private void deleteSubscriptionByApiIDAndAppID(int apiId, int appId, String tier, Connection conn)
+    private void deleteSubscriptionByApiIDAndAppID(int apiId, int appId, Connection conn)
             throws SQLException {
         String deleteQuery = "DELETE FROM AM_SUBSCRIPTION " +
                              " WHERE " +
                              "API_ID = ? " +
-                             "AND APPLICATION_ID = ? " +
-                             "AND TIER_ID = ?";
+                             "AND APPLICATION_ID = ? ";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(deleteQuery);
             ps.setInt(1, apiId);
             ps.setInt(2, appId);
-            ps.setString(3, tier);
 
             ps.executeUpdate();
         } finally {
