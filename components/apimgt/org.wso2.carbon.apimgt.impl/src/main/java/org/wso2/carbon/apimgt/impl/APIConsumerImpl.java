@@ -2238,6 +2238,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (existingApp != null && APIConstants.ApplicationStatus.APPLICATION_CREATED.equals(existingApp.getStatus())) {
             throw new APIManagementException("Cannot update the application while it is INACTIVE");
         }
+        //validate callback url
+        if(!APIUtil.isValidURL(application.getCallbackUrl())){
+            application.setCallbackUrl("");
+        }
 
         apiMgtDAO.updateApplication(application);
 
