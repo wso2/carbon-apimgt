@@ -38,7 +38,7 @@ public class ScopesIssuer {
     private static final String DEFAULT_SCOPE_NAME = "default";
 
     private List<String> scopeSkipList = new ArrayList<String>();
-    private Map<String, String> restAPIScopes = new HashMap<String, String>();
+    private final Map<String, String> restAPIScopes;
 
     /**
      * Singleton of ScopeIssuer.*
@@ -49,11 +49,11 @@ public class ScopesIssuer {
         scopesIssuer = new ScopesIssuer();
         if (whitelist != null && !whitelist.isEmpty()) {
             scopesIssuer.scopeSkipList.addAll(whitelist);
-            scopesIssuer.restAPIScopes = APIUtil.getRestAPIScopes();
         }
     }
 
     private ScopesIssuer() {
+        restAPIScopes = APIUtil.getRestAPIScopes();
     }
 
     public static ScopesIssuer getInstance() {
