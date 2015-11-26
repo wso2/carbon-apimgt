@@ -327,7 +327,23 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                     }
                     builder.deleteCharAt(builder.length() - 1);
                     oAuthConsumerAppDTO.setGrantTypes(builder.toString());
-                }
+                } else {
+                    //update the grant type with respect to callback url
+                    String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+                    StringBuilder grantTypeString = new StringBuilder();
+
+                    for (String grantType : allowedGrantTypes) {
+                        if (callbackUrl == null || callbackUrl.isEmpty()) {
+                            if ("authorization_code".equals(grantType) || "implicit".equals(grantType)) {
+                                continue;
+                            }
+                        }
+                        grantTypeString.append(grantType).append(" ");
+                    }
+                    oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
+                }               
+                
+                
                 oAuthAdminService.updateConsumerApplication(oAuthConsumerAppDTO);
                 log.debug("Updated the OAuthApplication...");
 

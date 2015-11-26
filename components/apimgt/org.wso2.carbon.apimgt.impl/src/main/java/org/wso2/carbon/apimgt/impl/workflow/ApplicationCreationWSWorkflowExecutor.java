@@ -66,7 +66,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.info("Executing Application creation Workflow..");
+            log.info("Executing Application creation Workflow.");
         }
         super.execute(workflowDTO);
         try {
@@ -89,7 +89,6 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
             ApplicationWorkflowDTO appWorkFlowDTO = (ApplicationWorkflowDTO) workflowDTO;
             Application application = appWorkFlowDTO.getApplication();
             String callBackURL = appWorkFlowDTO.getCallbackUrl();
-
 
             payload = payload.replace("$1", application.getName());
             payload = payload.replace("$2", application.getTier());
@@ -128,7 +127,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
 
                 super.complete(workFlowDTO);
                 log.info("Application Creation [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO
-						.getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
+                        .getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
 
                 String status = null;
                 if (WorkflowStatus.CREATED.equals(workFlowDTO.getStatus())) {
@@ -153,11 +152,11 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
             }
         } catch (APIManagementException e) {
             String msg = "Error occurred when retrieving the Application creation with workflow ID :" + workFlowDTO
-					.getWorkflowReference();
+                    .getWorkflowReference();
             log.error(msg, e);
             throw new WorkflowException(msg, e);
         }
-		return new GeneralWorkflowResponse();
+        return new GeneralWorkflowResponse();
     }
 
     @Override
@@ -165,7 +164,6 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
         // TODO Auto-generated method stub
         return null;
     }
-
 
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
@@ -201,8 +199,8 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
      * @throws AxisFault
      */
     public ServiceClient getClient(String action) throws AxisFault {
-        ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-                .getContextService().getClientConfigContext(), null);
+        ServiceClient client = new ServiceClient(
+                ServiceReferenceHolder.getInstance().getContextService().getClientConfigContext(), null);
         Options options = new Options();
         options.setAction(action);
         options.setTo(new EndpointReference(serviceEndpoint));
@@ -210,8 +208,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
         if (contentType != null) {
             options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
         } else {
-            options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                    HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
         }
 
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
@@ -226,10 +223,9 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
             auth.setAuthSchemes(authSchemes);
 
             if (contentType == null) {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
             }
-            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
-                    auth);
+            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
             options.setManageSession(true);
         }
         client.setOptions(options);

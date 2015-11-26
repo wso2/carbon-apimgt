@@ -120,6 +120,13 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                             return true;
                         }
                     }
+                    else {
+                        if (log.isDebugEnabled()) {
+                        log.debug("Scope not defined in swagger for matching resource. So consider as anonymous permission and" +
+                                "let request to");
+                            return true;
+                        }
+                    }
                 }
             }
         }
