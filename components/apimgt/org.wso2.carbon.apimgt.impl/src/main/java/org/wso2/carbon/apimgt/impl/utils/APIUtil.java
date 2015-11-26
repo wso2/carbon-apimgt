@@ -4275,9 +4275,7 @@ public final class APIUtil {
      * @return map that contains Data of the resource
      * @throws APIManagementException
      */
-
-    public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain, int tenantId)
+    public static Map<String, Object> getDocument(String userName, String resourceUrl, String tenantDomain)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4291,7 +4289,15 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
+        boolean isTenantFlowStarted = false;
         try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4308,6 +4314,10 @@ public final class APIUtil {
             String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
             log.error(msg, e);
             handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return documentMap;
     }
