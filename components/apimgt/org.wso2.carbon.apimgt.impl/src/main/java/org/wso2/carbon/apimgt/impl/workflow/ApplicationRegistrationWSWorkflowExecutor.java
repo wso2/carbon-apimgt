@@ -42,175 +42,171 @@ import java.util.List;
 /**
  * This is the class to call external workflow to have human interaction on
  * Application Registration process.
- * 
  */
 public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicationRegistrationWorkflowExecutor {
 
-	private String serviceEndpoint;
+    private String serviceEndpoint;
 
-	private String username;
+    private String username;
 
-	private String password;
+    private String password;
 
-	private String contentType;
+    private String contentType;
 
-	private static final Log log = LogFactory.getLog(ApplicationRegistrationWSWorkflowExecutor.class);
+    private static final Log log = LogFactory.getLog(ApplicationRegistrationWSWorkflowExecutor.class);
 
+    @Override
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
-	@Override
-	public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
+        if (log.isDebugEnabled()) {
+            log.info("Executing Application registration Workflow..");
+        }
+        try {
+            String action = WorkflowConstants.CREATE_REGISTRATION_WS_ACTION;
+            ServiceClient client = getClient(action);
 
-		if (log.isDebugEnabled()) {
-			log.info("Executing Application registration Workflow..");
-		}
-		try {
-			String action = WorkflowConstants.CREATE_REGISTRATION_WS_ACTION;
-			ServiceClient client = getClient(action);
+            String payload =
+                    "<wor:ApplicationRegistrationWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt.carbon.wso2.org\">\n"
+                            + "        <wor:applicationName>$1</wor:applicationName>\n"
+                            + "        <wor:applicationTier>$2</wor:applicationTier>\n"
+                            + "        <wor:applicationCallbackUrl>$3</wor:applicationCallbackUrl>\n"
+                            + "        <wor:applicationDescription>$4</wor:applicationDescription>\n"
+                            + "        <wor:tenantDomain>$5</wor:tenantDomain>\n"
+                            + "        <wor:userName>$6</wor:userName>\n"
+                            + "        <wor:workflowExternalRef>$7</wor:workflowExternalRef>\n"
+                            + "        <wor:callBackURL>$8</wor:callBackURL>\n"
+                            + "        <wor:keyType>$9</wor:keyType>\n"
+                            + "      </wor:ApplicationRegistrationWorkFlowProcessRequest>";
 
-			String payload =
-			                 "<wor:ApplicationRegistrationWorkFlowProcessRequest xmlns:wor=\"http://workflow.application.apimgt.carbon.wso2.org\">\n"
-			                         + "        <wor:applicationName>$1</wor:applicationName>\n"			                         
-			                         + "        <wor:applicationTier>$2</wor:applicationTier>\n"
-			                         + "        <wor:applicationCallbackUrl>$3</wor:applicationCallbackUrl>\n"
-			                         + "        <wor:applicationDescription>$4</wor:applicationDescription>\n"	
-			                         + "        <wor:tenantDomain>$5</wor:tenantDomain>\n"	
-			                         + "        <wor:userName>$6</wor:userName>\n"
-			                         + "        <wor:workflowExternalRef>$7</wor:workflowExternalRef>\n"
-			                         + "        <wor:callBackURL>$8</wor:callBackURL>\n"
-                                     + "        <wor:keyType>$9</wor:keyType>\n"
-			                         + "      </wor:ApplicationRegistrationWorkFlowProcessRequest>";
-
-			ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
-			Application application = appRegDTO.getApplication();
-			String callBackURL = appRegDTO.getCallbackUrl();
+            ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO) workflowDTO;
+            Application application = appRegDTO.getApplication();
+            String callBackURL = appRegDTO.getCallbackUrl();
             String applicationCallbackUrl = application.getCallbackUrl();
             String applicationDescription = application.getDescription();
 
-			
-			payload = payload.replace("$1", application.getName());		
-			payload = payload.replace("$2", application.getTier());
-			payload = payload.replace("$3", applicationCallbackUrl != null ? applicationCallbackUrl: "?");
-			payload = payload.replace("$4", applicationDescription != null ? applicationDescription:"?");
-			payload = payload.replace("$5", appRegDTO.getTenantDomain());
-			payload = payload.replace("$6", appRegDTO.getUserName());
-			payload = payload.replace("$7", appRegDTO.getExternalWorkflowReference());
-			payload = payload.replace("$8", callBackURL != null ? callBackURL : "?");
+            payload = payload.replace("$1", application.getName());
+            payload = payload.replace("$2", application.getTier());
+            payload = payload.replace("$3", applicationCallbackUrl != null ? applicationCallbackUrl : "?");
+            payload = payload.replace("$4", applicationDescription != null ? applicationDescription : "?");
+            payload = payload.replace("$5", appRegDTO.getTenantDomain());
+            payload = payload.replace("$6", appRegDTO.getUserName());
+            payload = payload.replace("$7", appRegDTO.getExternalWorkflowReference());
+            payload = payload.replace("$8", callBackURL != null ? callBackURL : "?");
             payload = payload.replace("$9", appRegDTO.getKeyType());
 
-			client.fireAndForget(AXIOMUtil.stringToOM(payload));
+            client.fireAndForget(AXIOMUtil.stringToOM(payload));
             super.execute(workflowDTO);
-			
-		} catch (AxisFault axisFault) {
-			log.error("Error sending out message", axisFault);
-			throw new WorkflowException("Error sending out message", axisFault);
-		} catch (XMLStreamException e) {
-			log.error("Error converting String to OMElement", e);
-			throw new WorkflowException("Error converting String to OMElement", e);
-		}
-		return new GeneralWorkflowResponse();
-	}
 
-	/**
-	 * Complete the external process status.
-	 * Based on the workflow , we will update the status column of the
-	 * AM_APPLICATION_KEY_MAPPING table
-	 * 
-	 * @param workFlowDTO
-	 */
-	@Override
-	public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+        } catch (AxisFault axisFault) {
+            log.error("Error sending out message", axisFault);
+            throw new WorkflowException("Error sending out message", axisFault);
+        } catch (XMLStreamException e) {
+            log.error("Error converting String to OMElement", e);
+            throw new WorkflowException("Error converting String to OMElement", e);
+        }
+        return new GeneralWorkflowResponse();
+    }
+
+    /**
+     * Complete the external process status.
+     * Based on the workflow , we will update the status column of the
+     * AM_APPLICATION_KEY_MAPPING table
+     *
+     * @param workFlowDTO
+     */
+    @Override
+    public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
 
-        log.info("Application Registration [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO.getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
+        log.info("Application Registration [Complete] Workflow Invoked. Workflow ID : " + workFlowDTO
+                .getExternalWorkflowReference() + "Workflow State : " + workFlowDTO.getStatus());
         super.complete(workFlowDTO);
-        if(WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())){
+        if (WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())) {
             try {
-               generateKeysForApplication((ApplicationRegistrationWorkflowDTO) workFlowDTO);
+                generateKeysForApplication((ApplicationRegistrationWorkflowDTO) workFlowDTO);
             } catch (APIManagementException e) {
-                String msg = "Error occurred when updating the status of the Application Registration " +
-                        "process";
+                String msg = "Error occurred when updating the status of the Application Registration " + "process";
                 log.error(msg, e);
                 throw new WorkflowException(msg, e);
             }
         }
-		return new GeneralWorkflowResponse();
-	}
+        return new GeneralWorkflowResponse();
+    }
 
-	@Override
-	public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
-		super.cleanUpPendingTask(workflowExtRef);
-		String errorMsg = null;
+    @Override
+    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
+        super.cleanUpPendingTask(workflowExtRef);
+        String errorMsg = null;
 
-		try {
-			String action = WorkflowConstants.DELETE_REGISTRATION_WS_ACTION;
-			ServiceClient client = getClient(action);
+        try {
+            String action = WorkflowConstants.DELETE_REGISTRATION_WS_ACTION;
+            ServiceClient client = getClient(action);
 
-			String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
-							"   xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
-							"   	<p:workflowRef>" + workflowExtRef + "</p:workflowRef>\n" +
-							"   </p:CancelApplicationRegistrationWorkflowProcessRequest>";
-					client.fireAndForget(AXIOMUtil.stringToOM(payload));
+            String payload = "  <p:CancelApplicationRegistrationWorkflowProcessRequest " +
+                    "   xmlns:p=\"http://workflow.application.apimgt.carbon.wso2.org\">\n" +
+                    "   	<p:workflowRef>" + workflowExtRef + "</p:workflowRef>\n" +
+                    "   </p:CancelApplicationRegistrationWorkflowProcessRequest>";
+            client.fireAndForget(AXIOMUtil.stringToOM(payload));
 
-		} catch (AxisFault axisFault) {
-			errorMsg = "Error sending out cancel pending registration approval process message. cause: " +
-					axisFault.getMessage();
-			throw new WorkflowException(errorMsg, axisFault);
-		} catch (XMLStreamException e) {
-			errorMsg = "Error converting registration cleanup String to OMElement. cause: " + e.getMessage();
-			throw new WorkflowException(errorMsg, e);
-		}
-	}
+        } catch (AxisFault axisFault) {
+            errorMsg = "Error sending out cancel pending registration approval process message. cause: " + axisFault
+                    .getMessage();
+            throw new WorkflowException(errorMsg, axisFault);
+        } catch (XMLStreamException e) {
+            errorMsg = "Error converting registration cleanup String to OMElement. cause: " + e.getMessage();
+            throw new WorkflowException(errorMsg, e);
+        }
+    }
 
-	/**
-	 * Retrieves configured ServiceClient for communication with external services
-	 *
-	 * @param action web service action to use
-	 * @return configured service client
-	 * @throws AxisFault
-	 */
-	public ServiceClient getClient(String action) throws AxisFault {
-		ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-				.getContextService().getClientConfigContext(), null);
-		Options options = new Options();
-		options.setAction(action);
-		options.setTo(new EndpointReference(serviceEndpoint));
+    /**
+     * Retrieves configured ServiceClient for communication with external services
+     *
+     * @param action web service action to use
+     * @return configured service client
+     * @throws AxisFault
+     */
+    public ServiceClient getClient(String action) throws AxisFault {
+        ServiceClient client = new ServiceClient(
+                ServiceReferenceHolder.getInstance().getContextService().getClientConfigContext(), null);
+        Options options = new Options();
+        options.setAction(action);
+        options.setTo(new EndpointReference(serviceEndpoint));
 
-		if (contentType != null) {
-			options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
-		} else {
-			options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
-		}
+        if (contentType != null) {
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
+        } else {
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
+        }
 
-		HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
+        HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
-		// Assumes authentication is required if username and password is given
-		if (username != null && password != null) {
-			auth.setUsername(username);
-			auth.setPassword(password);
-			auth.setPreemptiveAuthentication(true);
-			List<String> authSchemes = new ArrayList<String>();
-			authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
-			auth.setAuthSchemes(authSchemes);
+        // Assumes authentication is required if username and password is given
+        if (username != null && password != null) {
+            auth.setUsername(username);
+            auth.setPassword(password);
+            auth.setPreemptiveAuthentication(true);
+            List<String> authSchemes = new ArrayList<String>();
+            authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
+            auth.setAuthSchemes(authSchemes);
 
-			if (contentType == null) {
-				options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
-			}
-			options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
-					auth);
-			options.setManageSession(true);
-		}
-		client.setOptions(options);
+            if (contentType == null) {
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
+            }
+            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
+            options.setManageSession(true);
+        }
+        client.setOptions(options);
 
-		return client;
-	}
+        return client;
+    }
 
-	public String getServiceEndpoint() {
+    public String getServiceEndpoint() {
         return serviceEndpoint;
     }
 
