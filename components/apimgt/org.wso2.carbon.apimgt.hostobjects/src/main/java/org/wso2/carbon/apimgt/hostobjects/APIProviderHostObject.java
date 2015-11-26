@@ -1670,7 +1670,7 @@ public class APIProviderHostObject extends ScriptableObject {
     
                     Map http_verbs = (Map) resource.get("http_verbs");
                     Iterator iterator = http_verbs.entrySet().iterator();
-    
+
                     while (iterator.hasNext()) {
                         Map.Entry mapEntry = (Map.Entry) iterator.next();
                         Map mapEntryValue = (Map) mapEntry.getValue();
@@ -2830,6 +2830,8 @@ public class APIProviderHostObject extends ScriptableObject {
                         apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getApiName());
                         apiSet.append("::");
                         apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getVersion());
+                        apiSet.append("::");
+                        apiSet.append(apiUsages[i].getApiSubscriptions()[k].getSubCreatedStatus());
                         if (k != apiUsages[i].getApiSubscriptions().length - 1) {
                             apiSet.append(",");
                         }
