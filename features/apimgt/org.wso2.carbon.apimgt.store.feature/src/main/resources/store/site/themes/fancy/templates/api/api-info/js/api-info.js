@@ -58,7 +58,7 @@ function triggerSubscribe() {
                               params = params.concat((key.concat("=")).concat(additionalParameters[key]));
                            }
                           }
-                         location.href=jsonObj.redirectUrl + "?params=" + params;
+                         location.href=jsonObj.redirectUrl + "?" + params;
                         }else{
                           location.href=jsonObj.redirectUrl;
                         }  
