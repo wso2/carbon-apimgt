@@ -22,5 +22,22 @@ var getDomainMappings = function (tenant) {
     }
 };
 
+var getCustomizedGatewayURL = function(tenant, protocol) {
+    var domains = getDomainMappings(String(tenant)).domains;
+
+    var url = null;
+    //populate custom url if exists
+    if(domains != null){
+        for (var key in domains) {
+            var re = /\/$/g
+            var host = domains[key].replace(re, "");
+
+            url = protocol + "://" + host
+        }
+    }
+
+    return url;
+}
+
 %>
 
