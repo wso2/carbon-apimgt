@@ -46,7 +46,6 @@ import java.util.List;
  */
 public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicationRegistrationWorkflowExecutor {
 
-
 	private String serviceEndpoint;
 
 	private String username;
@@ -185,8 +184,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 		if (contentType != null) {
 			options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
 		} else {
-			options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-					HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+			options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
 		}
 
 		HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
@@ -201,7 +199,7 @@ public class ApplicationRegistrationWSWorkflowExecutor extends AbstractApplicati
 			auth.setAuthSchemes(authSchemes);
 
 			if (contentType == null) {
-				options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+				options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
 			}
 			options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
 					auth);

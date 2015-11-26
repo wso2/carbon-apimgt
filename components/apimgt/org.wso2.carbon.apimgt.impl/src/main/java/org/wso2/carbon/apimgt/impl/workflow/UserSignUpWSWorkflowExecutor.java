@@ -89,7 +89,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
                 auth.setAuthSchemes(authSchemes);
 
                 if(contentType == null){
-                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
                 }
                 options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
                 options.setManageSession(true);

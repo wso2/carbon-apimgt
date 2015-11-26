@@ -66,7 +66,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
-            log.info("Executing Application creation Workflow..");
+            log.info("Executing Application creation Workflow.");
         }
         super.execute(workflowDTO);
         try {
@@ -210,8 +210,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
         if (contentType != null) {
             options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
         } else {
-            options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                    HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
         }
 
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
@@ -226,7 +225,7 @@ public class ApplicationCreationWSWorkflowExecutor extends WorkflowExecutor {
             auth.setAuthSchemes(authSchemes);
 
             if (contentType == null) {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
             }
             options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
                     auth);
