@@ -178,8 +178,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      * */
-    void changeAPIStatus(API api, APIStatus status, String userId,
-                                boolean updateGatewayConfig)
+    void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException;
 
 
