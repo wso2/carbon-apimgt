@@ -32,7 +32,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -43,7 +42,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -54,7 +53,6 @@ import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -1520,7 +1518,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename,
             InputStream content, String contentType) throws APIManagementException {
         if (Documentation.DocumentSourceType.FILE.equals(documentation.getSourceType())) {
-            Icon icon = new Icon(content, contentType);
+            ResourceFile icon = new ResourceFile(content, contentType);
             String filePath = APIUtil.getDocumentationFilePath(apiId, filename);
             API api;
             try {
@@ -1532,7 +1530,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
                 APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                         filePath);
-                documentation.setFilePath(addIcon(filePath, icon));
+                documentation.setFilePath(addResourceFile(filePath, icon));
                 APIUtil.setFilePermission(filePath);
             } catch (APIManagementException e) {
                 handleException("Failed to add file to document " + documentation.getName(), e);
@@ -1612,9 +1610,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiSourceArtifact.getContentStream();
                 APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
                                                            api.getId().getApiName(), newVersion);
-                Icon icon = new Icon(oldImage.getContentStream(), oldImage.getMediaType());
+                ResourceFile icon = new ResourceFile(oldImage.getContentStream(), oldImage.getMediaType());
                 artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
-                                      addIcon(APIUtil.getIconPath(newApiId), icon));
+                                      addResourceFile(APIUtil.getIconPath(newApiId), icon));
             }
             // Here we keep the old context
             String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
