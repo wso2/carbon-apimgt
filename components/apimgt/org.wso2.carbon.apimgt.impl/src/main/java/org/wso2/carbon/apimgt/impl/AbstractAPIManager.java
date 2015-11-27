@@ -808,9 +808,17 @@ public abstract class AbstractAPIManager implements APIManager {
                              documentationName;
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         Registry registry;
+
+        boolean isTenantFlowStarted = false;
         try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
 	        /* If the API provider is a tenant, load tenant registry*/
-	        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+	        if (tenantDomain != null && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
 	            int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
 	            registry = ServiceReferenceHolder.getInstance().
 	                    getRegistryService().getGovernanceSystemRegistry(id);
@@ -837,7 +845,11 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
         	handleException("Failed to get ddocument content found for documentation: "
         				 + documentationName + " of API: "+identifier.getApiName(), e);
-		}
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
         return null;
     }
 

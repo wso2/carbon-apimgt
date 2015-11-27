@@ -57,7 +57,7 @@ public class RestAPIStoreUtils {
      * @return group id of the current logged in user.
      */
     @SuppressWarnings("unchecked")
-    public static String getLoggedInUserGroupIds() {
+    public static String getLoggedInUserGroupId() {
         String username = RestApiUtil.getLoggedInUsername();
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         JSONObject loginInfoJsonObj = new JSONObject();
@@ -94,9 +94,9 @@ public class RestAPIStoreUtils {
                     return true;
                 }
             } else {
-                String userGroupIds = RestAPIStoreUtils.getLoggedInUserGroupIds();
+                String userGroupId = RestAPIStoreUtils.getLoggedInUserGroupId();
                 //if the application is a shared one, application's group id and the user's group id should be same
-                if (application.getGroupId().equals(userGroupIds)) {
+                if (application.getGroupId().equals(userGroupId)) {
                     return true;
                 }
             }

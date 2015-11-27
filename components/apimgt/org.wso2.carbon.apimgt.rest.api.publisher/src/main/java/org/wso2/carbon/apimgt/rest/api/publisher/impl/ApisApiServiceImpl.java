@@ -1,5 +1,5 @@
 /*
- *  Copyright WSO2 Inc.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
@@ -41,11 +43,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -82,13 +84,17 @@ public class ApisApiServiceImpl extends ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        query = query == null ? "" : query;
+        type = type == null ? "" : type;
+
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //if query parameter is not specified, This will search by name
             String searchType = "Name";
             String searchContent = "";
-            if (query != null) {
+            if (!StringUtils.isBlank(query)) {
                 String[] querySplit = query.split(":");
                 if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
                         .isNotBlank(querySplit[1])) {
@@ -131,6 +137,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
 
             //todo: this can be moved to validation layer
+            if (body.getContext().endsWith("/")) {
+                throw RestApiUtil.buildBadRequestException("Context cannot end with '/' character");
+            }
+
             if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
                 throw RestApiUtil.buildBadRequestException(
                         "Error occurred while adding the API. A duplicate API context already exists for " + body
@@ -158,7 +168,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                                 .getApiName() + "-" + apiToAdd.getId().getVersion());
             }
 
-            //Overriding some properties:
+            //Overriding some properties: todo: review
             //only allow CREATED as the stating state for the new api
             apiToAdd.setStatus(APIStatus.CREATED);
 
@@ -334,14 +344,34 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            API apiInfo = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
+            APIIdentifier apiIdentifier = apiInfo.getId();
+
+            //Overriding some properties: //todo: review
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
             body.setProvider(apiIdentifier.getProviderName());
-            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, username);
+            body.setContext(apiInfo.getContextTemplate());
+            body.setStatus(apiInfo.getStatus().getStatus());
+
+            List<String> tiersFromDTO = body.getTiers();
+            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+                throw RestApiUtil.buildBadRequestException("No tier defined for the API");
+            }
+
+            //check whether the added API's tiers are all valid
+            Set<Tier> definedTiers = apiProvider.getTiers();
+            List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
+            if (invalidTiers.size() > 0) {
+                throw RestApiUtil.buildBadRequestException(
+                        "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid");
+            }
+
+            API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
 
             apiProvider.updateAPI(apiToUpdate);
-            updatedApiDTO = APIMappingUtil.fromAPItoDTO(apiProvider.getAPI(apiIdentifier));
+            API updatedApi = apiProvider.getAPI(apiIdentifier);
+            updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
         } catch (APIManagementException | FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
@@ -381,8 +411,21 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
         return null;
     }
+
+    /**
+     *  Returns all the documents of the given API identifier that matches to the search condition
+     *
+     * @param apiId API identifier
+     * @param limit max number of records returned
+     * @param offset starting index
+     * @param query document search condition
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @return matched documents as a list if DocumentDTOs
+     */
     @Override
-    public Response apisApiIdDocumentsGet(String apiId,Integer limit,Integer offset,String query,String accept,String ifNoneMatch){
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
+            String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -415,6 +458,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Add a documentation to an API
+     * 
+     * @param apiId api identifier
+     * @param body Documentation DTO as request body
+     * @param contentType Content-Type header
+     * @return created document DTO as response
+     */
     @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String contentType) {
         try {
@@ -426,15 +477,31 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
             apiProvider.addDocumentation(apiIdentifier, documentation);
-            return Response.status(Response.Status.CREATED)
-                    .header("Location", "/apis/" + apiId + "/documents/" + documentation.getId()).build();
+            String newDocumentId = documentation.getId();
+
+            //retrieve the newly added document
+            documentation = apiProvider.getDocumentation(newDocumentId, tenantDomain);
+            DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
+            return Response.status(Response.Status.CREATED).header("Location",
+                    "/apis/" + apiId + "/documents/" + documentation.getId()).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
             throw new InternalServerErrorException(e);
         }
     }
 
+    /**
+     * Returns a specific document by identifier that is belong to the given API identifier
+     *
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return returns the matched document
+     */
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
         Documentation documentation;
         try {
             RestApiPublisherUtils.checkUserAccessAllowedForAPI(apiId);
@@ -459,8 +526,20 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Updates an existing document of an API
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param body updated document DTO
+     * @param contentType Content-Type header
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated document DTO as response
+     */
     @Override
-    public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
+    public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
@@ -478,8 +557,18 @@ public class ApisApiServiceImpl extends ApisApiService {
         }
     }
 
+    /**
+     * Deletes an existing document of an API
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if deleted successfully
+     */
     @Override
-    public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
+    public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
+            String ifUnmodifiedSince) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -503,6 +592,139 @@ public class ApisApiServiceImpl extends ApisApiService {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 handleException(errorMessage, e);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the content of a document
+     *
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Content of the document/ either inline/file or source url as a redirection
+     */
+    @Override
+    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
+
+        Documentation documentation;
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
+            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+            }
+
+            if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                String resource = documentation.getFilePath();
+                Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+                Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
+                Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
+                contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
+                String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
+                return Response.ok(fileDataStream)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
+                        .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+                String content = apiProvider.getDocumentationContent(apiIdentifier, documentation.getName());
+                return Response.ok(content)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
+                String sourceUrl = documentation.getSourceUrl();
+                return Response.seeOther(new URI(sourceUrl)).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+                handleException(errorMessage, e);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + documentId;
+            handleException(errorMessage, e);
+        }
+        return null;
+    }
+
+    /**
+     * Add content to a document. Content can be inline or File
+     * 
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param contentType content type of the payload
+     * @param inputStream file input stream
+     * @param fileDetail file details as Attachment
+     * @param inlineContent inline content for the document
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated document as DTO
+     */
+    @Override
+    public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
+            String contentType, InputStream inputStream, Attachment fileDetail, String inlineContent, String ifMatch,
+            String ifUnmodifiedSince) {
+
+        try {
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            API api = APIMappingUtil.getAPIInfoFromApiIdOrUUID(apiId, tenantDomain);
+            if (inputStream != null && inlineContent != null) {
+                throw RestApiUtil
+                        .buildBadRequestException("Only one of 'file' and 'inlineContent' should be specified");
+            }
+
+            //retrieves the document and send 404 if not found
+            Documentation documentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (documentation == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+            }
+
+            //add content depending on the availability of either input stream or inline content
+            if (inputStream != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                    throw RestApiUtil
+                            .buildBadRequestException("Source type of document " + documentId + " is not FILE");
+                }
+                RestApiPublisherUtils.attachFileToDocument(apiId, documentation, inputStream, fileDetail);
+            } else if (inlineContent != null) {
+                if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+                    throw RestApiUtil
+                            .buildBadRequestException("Source type of document " + documentId + " is not INLINE");
+                }
+                apiProvider.addDocumentationContent(api, documentation.getName(), inlineContent);
+            } else {
+                throw RestApiUtil.buildBadRequestException("Either 'file' or 'inlineContent' should be specified");
+            }
+
+            //retrieving the updated doc and the URI
+            Documentation updatedDoc = apiProvider.getDocumentation(documentId, tenantDomain);
+            DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
+            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT
+                    .replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(documentDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                handleException("Failed to add content to the document " + documentId, e);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving document content location : " + documentId;
+            handleException(errorMessage, e);
         }
         return null;
     }
