@@ -282,7 +282,7 @@ public class ApisApi  {
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API.", response = Void.class)
+    @io.swagger.annotations.ApiOperation(value = "", notes = "Downloads a FILE type document/get the inline content or source url of a certain document.", response = Void.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. \nFile or inline content returned."),
         

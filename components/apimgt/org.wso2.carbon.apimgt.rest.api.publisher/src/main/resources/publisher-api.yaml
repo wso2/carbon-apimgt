@@ -795,7 +795,7 @@ paths:
   #-------------------------------------------------------------------------------------------------
       get:
         description: |
-          Get a particular document associated with an API.
+          Downloads a FILE type document/get the inline content or source url of a certain document.
         parameters:
           - $ref: '#/parameters/apiId'
           - $ref: '#/parameters/documentId'
