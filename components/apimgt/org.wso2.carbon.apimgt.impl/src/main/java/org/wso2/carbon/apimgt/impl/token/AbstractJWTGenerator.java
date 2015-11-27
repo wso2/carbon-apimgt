@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.token;
 
-import org.apache.commons.codec.binary.Base64;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,6 +35,7 @@ import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -46,7 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * By default the following properties are encoded to each authenticated API request:
  * subscriber, applicationName, apiContext, version, tier, and endUserName
  * Additional properties can be encoded by engaging the ClaimsRetrieverImplClass callback-handler.
- * The JWT header and body are base64Url encoded separately and concatenated with a dot.
+ * The JWT header and body are base64 encoded separately and concatenated with a dot.
  * Finally the token is signed using SHA256 with RSA algorithm.
  */
 public abstract class AbstractJWTGenerator implements TokenGenerator {
@@ -58,8 +59,6 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
     private static final String SHA256_WITH_RSA = "SHA256withRSA";
 
     private static final String NONE = "NONE";
-
-    private static final Base64 base64Url = new Base64(0, null, true);
 
     private static volatile long ttl = -1L;
 
@@ -129,37 +128,57 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return generateToken(keyValidationInfoDTO, apiContext, version,null);
     }
 
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version, String accessToken)
-            throws APIManagementException {
+    public String encode(String stringToBeEncoded) throws APIManagementException{
+        try {
+            return Base64Utils.encode(stringToBeEncoded.getBytes("UTF-8"));
+
+        } catch(UnsupportedEncodingException e){
+            String error = "Unsupported encoding : " + e;
+            //do not log
+            throw new APIManagementException(error);
+        }
+    }
+
+    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
+            String accessToken) throws APIManagementException {
+
         String jwtHeader = buildHeader(keyValidationInfoDTO);
 
         /*//add cert thumbprint to header
      String headerWithCertThumb = addCertToHeader(endUserName);*/
 
-        String base64UrlEncodedHeader = "";
-        if (jwtHeader != null) {
-            base64UrlEncodedHeader = new String(base64Url.encode(jwtHeader.getBytes()));
-        }
-        String base64UrlEncodedBody = "";
-        String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version,accessToken);
-        if (jwtBody != null) {
-            base64UrlEncodedBody = new String(base64Url.encode(jwtBody.getBytes()));
-        }
+        try {
 
-        if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
-            String assertion = base64UrlEncodedHeader + "." + base64UrlEncodedBody;
-
-            //get the assertion signed
-            byte[] signedAssertion = signJWT(assertion, keyValidationInfoDTO.getEndUserName());
-
-            if (log.isDebugEnabled()) {
-                log.debug("signed assertion value : " + new String(signedAssertion));
+            String base64UrlEncodedHeader = "";
+            if (jwtHeader != null) {
+                base64UrlEncodedHeader = encode(jwtHeader);
             }
-            String base64UrlEncodedAssertion = new String(base64Url.encode(signedAssertion));
 
-            return base64UrlEncodedHeader + "." + base64UrlEncodedBody + "." + base64UrlEncodedAssertion;
-        } else {
-            return base64UrlEncodedHeader + "." + base64UrlEncodedBody + ".";
+            String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version, accessToken);
+            String base64UrlEncodedBody = "";
+            if (jwtBody != null) {
+                base64UrlEncodedBody = encode(jwtBody);
+            }
+
+            if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
+                String assertion = base64UrlEncodedHeader + "." + base64UrlEncodedBody;
+
+                //get the assertion signed
+                byte[] signedAssertion = signJWT(assertion, keyValidationInfoDTO.getEndUserName());
+
+                if (log.isDebugEnabled()) {
+                    log.debug("signed assertion value : " + new String(signedAssertion, "UTF-8"));
+                }
+                String base64UrlEncodedAssertion = encode(new String(signedAssertion, "UTF-8"));
+
+                return base64UrlEncodedHeader + "." + base64UrlEncodedBody + "." + base64UrlEncodedAssertion;
+            } else {
+                return base64UrlEncodedHeader + "." + base64UrlEncodedBody + ".";
+            }
+        } catch (UnsupportedEncodingException e) {
+            String error = "Unsupported encoding : " + e;
+            //do not log
+            throw new APIManagementException(error);
         }
     }
 
@@ -360,7 +379,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             byte[] digestInBytes = digestValue.digest();
 
             String publicCertThumbprint = hexify(digestInBytes);
-            String base64UrlEncodedThumbPrint = new String(base64Url.encode(publicCertThumbprint.getBytes()));
+            String base64UrlEncodedThumbPrint = encode(publicCertThumbprint);
             //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64UrlEncodedThumbPrint);
             //headerWithCertThumb = headerWithCertThumb.replaceAll("\\[2\\]", signatureAlgorithm);
             //return headerWithCertThumb;
