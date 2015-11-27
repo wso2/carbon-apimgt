@@ -78,7 +78,7 @@ $(document).ready(function() {
             }
         }
         return true;
-    }, 'You must upload or select a message mediation sequence');
+    }, 'You must upload or select a message mediation policy');
     
     $.validator.addMethod('validateProdWSDLService', function (value, element){
     	if (APP.is_production_endpoint_specified()) {
