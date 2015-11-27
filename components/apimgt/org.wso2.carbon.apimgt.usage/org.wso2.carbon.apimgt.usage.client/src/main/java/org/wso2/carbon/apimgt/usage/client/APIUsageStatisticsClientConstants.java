@@ -130,6 +130,9 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String GROUP_BY_WEEK = "week";
 
+    public static final String HOST_NAME = "hostName";
+    public static final String MAX_REQUEST_TIME = "max_request_time";
+
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_OCTET_STREAM="application/octet-stream";
     public static final String HTTP_AUTH_HEADER_NAME = "Authorization";
