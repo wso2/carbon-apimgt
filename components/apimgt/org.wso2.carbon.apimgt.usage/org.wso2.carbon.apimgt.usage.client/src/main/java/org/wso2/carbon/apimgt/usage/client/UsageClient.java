@@ -55,7 +55,7 @@ public class UsageClient {
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
 
         try {
-            APIUsageStatisticsClient client = UsageClient.getStatisticClient("");
+            APIUsageStatisticsClient client = UsageClient.getStatisticClient(null);
             client.initializeDataSource();
         } catch (APIMgtUsageQueryServiceClientException e) {
             throw new APIMgtUsageQueryServiceClientException("Error in initializing data sources", e);
@@ -212,4 +212,20 @@ public class UsageClient {
 
     }
 
+    /**
+     * getting the configured the statistics client type
+     *
+     * @return string value indicating type
+     */
+    public static String getStatClientType() {
+        String type = null;
+        try {
+            type = UsageClient.getStatisticClient(null).getClientType();
+        } catch (APIMgtUsageQueryServiceClientException e) {
+            //throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
+            log.warn("Error geting usage statistic client...");
+        }
+
+        return type;
+    }
 }

@@ -80,6 +80,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private APIProvider apiProviderImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRestClientImpl.class);
     private DASRestClient restClient;
+    private final String clientType = "REST";
 
     /**
      * Create a rest client instance.
@@ -1997,14 +1998,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         String query = null;
 
+        query = "api:" + apiName;
         //lucene query with time ranges
-        try {
-            query = "api:" + apiName + " AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
-                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
-        } catch (ParseException e) {
-            handleException("Error occurred while Error parsing date", e);
+        if (fromDate != null && toDate != null) {
+            try {
+                query = " AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
+                        .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
         }
-
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query, 2,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET,
@@ -2288,6 +2291,142 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
+     * return list of api usage for a particular api accross all versions
+     *
+     * @param providerName API provider name
+     * @param apiName      Name of the API
+     * @param limit        Number of sorted entries to return
+     * @return a List of PerUserAPIUsageDTO objects - Possibly empty
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
+     */
+    @Override
+    public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
+            throws APIMgtUsageQueryServiceClientException {
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, null);
+        Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
+        List<API> apiList = getAPIsByProvider(providerName);
+        for (APIUsageByUser usageEntry : usageData) {
+            for (API api : apiList) {
+                if (api.getContext().equals(usageEntry.getContext()) && api.getId().getApiName().equals(apiName)) {
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
+                    if (usageDTO != null) {
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
+                    } else {
+                        usageDTO = new PerUserAPIUsageDTO();
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
+    }
+
+    /**
+     * return list of api usage for a particular api and version
+     *
+     * @param providerName API provider name
+     * @param apiName      Name of the API
+     * @param limit        Number of sorted entries to return
+     * @return a List of PerUserAPIUsageDTO objects - Possibly empty
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
+     */
+    @Override
+    public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
+            int limit) throws APIMgtUsageQueryServiceClientException {
+
+        Collection<APIUsageByUser> usageData = getUsageOfAPI(apiName, apiVersion);
+        Map<String, PerUserAPIUsageDTO> usageByUsername = new TreeMap<String, PerUserAPIUsageDTO>();
+        List<API> apiList = getAPIsByProvider(providerName);
+        for (APIUsageByUser usageEntry : usageData) {
+            for (API api : apiList) {
+                if (api.getContext().equals(usageEntry.getContext()) &&
+                        api.getId().getApiName().equals(apiName) &&
+                        api.getId().getVersion().equals(apiVersion) &&
+                        apiVersion.equals(usageEntry.getApiVersion())) {
+
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
+                    if (usageDTO != null) {
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
+                    } else {
+                        usageDTO = new PerUserAPIUsageDTO();
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
+    }
+
+    private List<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
+            throws APIMgtUsageQueryServiceClientException {
+
+        String query = APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"";;
+
+        if (apiVersion != null) {
+            query += " AND " + APIUsageStatisticsClientConstants.VERSION + ":\"" + apiVersion + "\"";
+        }
+
+        //creating request bean
+        SearchRequestBean request = new SearchRequestBean(query, 3,
+                APIUsageStatisticsClientConstants.API_VERSION_USERID_CONTEXT_FACET,
+                APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY);
+
+        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
+        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
+                APIUsageStatisticsClientConstants.AGGREGATE_SUM,
+                APIUsageStatisticsClientConstants.ALIAS_TOTAL_REQUEST_COUNT);
+        fields.add(field);
+        request.setAggregateFields(fields);
+
+        //get the type of the required result type
+        Type type = new TypeToken<List<Result<UsageOfAPIValues>>>() {
+        }.getType();
+
+        List<Result<UsageOfAPIValues>> obj = null;
+
+        //do post and get the results
+        try {
+            obj = restClient.doPost(request, type);
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+
+        List<APIUsageByUser> apiUsage = new ArrayList<APIUsageByUser>();
+
+        //check the result status
+        if (obj == null || obj.isEmpty()) {
+            return apiUsage;
+        }
+
+        //get the POJO class from the response bean classes
+        //getColumnNames 0 index contain the api name, index 1 contain the version, 2 index contain userId, 3 index contain context
+        APIUsageByUser usage;
+        for (Result<UsageOfAPIValues> result : obj) {
+            UsageOfAPIValues v = result.getValues();
+
+            usage = new APIUsageByUser();
+            usage.setApiVersion(v.getColumnNames().get(1));
+            usage.setUsername(v.getColumnNames().get(2));
+            usage.setContext(v.getColumnNames().get(3));
+            usage.setRequestCount(v.getTotalRequestCount());
+            apiUsage.add(usage);
+        }
+
+        return apiUsage;
+
+    }
+
+    /**
      * Use to handle exception of common type in single step
      *
      * @param msg custom message
@@ -2364,5 +2503,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         });
 
         return usageData;
+    }
+
+    /**
+     * return a string to indicate type of statistics client
+     *
+     * @return String
+     */
+    @Override
+    public String getClientType() {
+        return clientType;
     }
 }

@@ -85,6 +85,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     private APIProvider apiProviderImpl;
     private APIConsumer apiConsumerImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRdbmsClientImpl.class);
+    private final String clientType = "RDBMS";
+
+    /**
+     * default constructor
+     */
+    public APIUsageStatisticsRdbmsClientImpl() {
+
+    }
 
     public APIUsageStatisticsRdbmsClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
         OMElement element = null;
@@ -211,13 +219,37 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
 
-                query = "SELECT " +
-                        "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
-                        " FROM " + tableName +
-                        " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
-                        " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
-                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
-                        + " ORDER BY net_total_requests DESC";
+                if (connection != null && connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+                    query = "SELECT " +
+                            APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.API_VERSION + "," +
+                            APIUsageStatisticsClientConstants.VERSION + "," + APIUsageStatisticsClientConstants.API_PUBLISHER + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," + APIUsageStatisticsClientConstants.USER_ID + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.REQUEST_TIME + "," +
+                            APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," + APIUsageStatisticsClientConstants.HOST_NAME + "," +
+                            APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
+                            APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME +
+                            ",SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") " +
+                            "AS net_total_requests FROM " + tableName +
+                            " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
+                            " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
+                            " GROUP BY " + APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.API_VERSION + "," +
+                            APIUsageStatisticsClientConstants.VERSION + "," + APIUsageStatisticsClientConstants.API_PUBLISHER + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," + APIUsageStatisticsClientConstants.USER_ID + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.REQUEST_TIME + "," +
+                            APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," + APIUsageStatisticsClientConstants.HOST_NAME + "," +
+                            APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
+                            APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME +
+                            " ORDER BY net_total_requests DESC";
+
+                } else {
+                    query = "SELECT " +
+                            "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
+                            " FROM " + tableName +
+                            " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
+                            " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
+                            " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
+                            + " ORDER BY net_total_requests DESC";
+                }
 
                 resultSet = statement.executeQuery(query);
                 AppUsageDTO appUsageDTO;
@@ -423,15 +455,36 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
 
-                query = "SELECT " +
-                        "*" +
-                        " FROM " + tableName +
-                        " WHERE " +
-                        APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
-                        " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
-                        " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
-                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
-                        + "resourcePath";
+
+                if (connection != null && connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+                    query = "SELECT " +
+                            APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.VERSION + "," +
+                            APIUsageStatisticsClientConstants.API_PUBLISHER + "," + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                            APIUsageStatisticsClientConstants.RESOURCE + "," + APIUsageStatisticsClientConstants.CONTEXT + "," +
+                            APIUsageStatisticsClientConstants.METHOD + "," + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," +
+                            APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR + "," +
+                            APIUsageStatisticsClientConstants.MONTH + "," + APIUsageStatisticsClientConstants.DAY + "," +
+                            APIUsageStatisticsClientConstants.TIME + " FROM " + tableName + " WHERE " +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                            " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
+                            " GROUP BY " + APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.VERSION + "," +
+                            APIUsageStatisticsClientConstants.API_PUBLISHER + "," + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                            APIUsageStatisticsClientConstants.RESOURCE + "," + APIUsageStatisticsClientConstants.CONTEXT + "," +
+                            APIUsageStatisticsClientConstants.METHOD + "," + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," +
+                            APIUsageStatisticsClientConstants.HOST_NAME + "," + APIUsageStatisticsClientConstants.YEAR + "," +
+                            APIUsageStatisticsClientConstants.MONTH + "," + APIUsageStatisticsClientConstants.DAY + "," +
+                            APIUsageStatisticsClientConstants.TIME;
+                } else {
+                    query = "SELECT " +
+                            "*" +
+                            " FROM " + tableName +
+                            " WHERE " +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                            " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
+                            " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                            APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
+                            + "resourcePath";
+                }
 
                 resultSet = statement.executeQuery(query);
                 AppCallTypeDTO appCallTypeDTO;
@@ -568,14 +621,39 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
 
-                query = "SELECT " +
-                        "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
-                        " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
-                        " WHERE " +
-                        APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
-                        " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
-                        " GROUP BY " +
-                        APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.CONSUMERKEY;
+                if (connection != null && connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+
+                    query = "SELECT " +
+                            APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.API_VERSION + "," +
+                            APIUsageStatisticsClientConstants.VERSION + "," + APIUsageStatisticsClientConstants.API_PUBLISHER + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," + APIUsageStatisticsClientConstants.USER_ID + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.MAX_REQUEST_TIME + "," +
+                            APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," + APIUsageStatisticsClientConstants.HOST_NAME + "," +
+                            APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
+                            APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME + ",SUM(" +
+                            APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
+                            " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY + " WHERE " +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                            " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
+                            " GROUP BY " +
+                            APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.API_VERSION + "," +
+                            APIUsageStatisticsClientConstants.VERSION + "," + APIUsageStatisticsClientConstants.API_PUBLISHER + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," + APIUsageStatisticsClientConstants.USER_ID + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.MAX_REQUEST_TIME + "," +
+                            APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + "," + APIUsageStatisticsClientConstants.HOST_NAME + "," +
+                            APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
+                            APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME;
+
+                } else {
+                    query = "SELECT " +
+                            "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
+                            " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
+                            " WHERE " +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
+                            " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
+                            " GROUP BY " +
+                            APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.CONSUMERKEY;
+                }
 
                 resultSet = statement.executeQuery(query);
                 PerAppApiCountDTO apiUsageDTO;
@@ -711,15 +789,23 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             //check whether table exist first
             if (isTableExist(tableName, connection)) {
 
-                query = "SELECT " +
-                        APIUsageStatisticsClientConstants.API + "," +
-                        APIUsageStatisticsClientConstants.CONTEXT + "," +
-                        APIUsageStatisticsClientConstants.VERSION + "," +
-                        "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
-                        " FROM " +
-                        tableName +
-                        " GROUP BY " +
-                        APIUsageStatisticsClientConstants.API;
+                if (connection != null && connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+                    query = "SELECT " +
+                            APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," +
+                            APIUsageStatisticsClientConstants.VERSION + "," +
+                            "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
+                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.VERSION;
+                } else {
+                    query = "SELECT " +
+                            APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," +
+                            APIUsageStatisticsClientConstants.VERSION + "," +
+                            "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
+                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API;
+                }
+
 
                 resultSet = statement.executeQuery(query);
 
@@ -1031,17 +1117,35 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             statement = connection.createStatement();
             String query;
 
-            query = "SELECT " +
-                    "TempTable.*, " +
-                    "SUM(" + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime ," +
-                    "SUM(weighted_service_time) AS totalWeightTime " +
-                    " FROM " +
-                    "(SELECT " +
-                    "*, (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
-                    APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS weighted_service_time " +
-                    " FROM " +
-                    APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
-                    " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION;
+            if (connection != null && connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+                query = "SELECT TempTable.*, " +
+                        "SUM(" + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime ," +
+                        "SUM(weighted_service_time) AS totalWeightTime " +
+                        " FROM (SELECT " +
+                        APIUsageStatisticsClientConstants.API_VERSION + "," + APIUsageStatisticsClientConstants.API_PUBLISHER + "," +
+                        APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.SERVICE_TIME + "," +
+                        APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + "," + APIUsageStatisticsClientConstants.HOST_NAME + "," +
+                        APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
+                        APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME +
+                        ", (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
+                        APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS weighted_service_time " +
+                        " FROM " +
+                        APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
+                        " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION + "," + APIUsageStatisticsClientConstants.API_PUBLISHER + "," +
+                        APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.SERVICE_TIME + "," +
+                        APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + "," + APIUsageStatisticsClientConstants.HOST_NAME + "," +
+                        APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
+                        APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME + ", weighted_service_time";
+            } else {
+                query = "SELECT " +
+                        "TempTable.*, SUM(" + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime ," +
+                        "SUM(weighted_service_time) AS totalWeightTime FROM (SELECT " +
+                        "*, (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
+                        APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS weighted_service_time " +
+                        " FROM " +
+                        APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
+                        " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION;
+            }
 
             resultSet = statement.executeQuery(query);
 
@@ -1234,6 +1338,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1242,15 +1347,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.context) && api.getId().getApiName().equals(apiName)) {
-                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.username);
+                if (api.getContext().equals(usageEntry.getContext()) && api.getId().getApiName().equals(apiName)) {
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usageEntry.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
                     } else {
                         usageDTO = new PerUserAPIUsageDTO();
-                        usageDTO.setUsername(usageEntry.username);
-                        usageDTO.setCount(usageEntry.requestCount);
-                        usageByUsername.put(usageEntry.username, usageDTO);
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
                     }
                     break;
                 }
@@ -1314,6 +1419,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return new ArrayList<String>(apisList);
     }
 
+    @Override
     public List<APIResponseFaultCountDTO> getAPIResponseFaultCount(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
 
@@ -1358,6 +1464,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return faultyCount;
     }
 
+    @Override
     public List<PerUserAPIUsageDTO> getUsageBySubscribers(String providerName, String apiName, String apiVersion,
             int limit) throws APIMgtUsageQueryServiceClientException {
 
@@ -1366,18 +1473,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<API> apiList = getAPIsByProvider(providerName);
         for (APIUsageByUser usageEntry : usageData) {
             for (API api : apiList) {
-                if (api.getContext().equals(usageEntry.context) &&
+                if (api.getContext().equals(usageEntry.getContext()) &&
                         api.getId().getApiName().equals(apiName) &&
                         api.getId().getVersion().equals(apiVersion) &&
-                        apiVersion.equals(usageEntry.apiVersion)) {
-                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.username);
+                        apiVersion.equals(usageEntry.getApiVersion())) {
+                    PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
-                        usageDTO.setCount(usageDTO.getCount() + usageEntry.requestCount);
+                        usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
                     } else {
                         usageDTO = new PerUserAPIUsageDTO();
-                        usageDTO.setUsername(usageEntry.username);
-                        usageDTO.setCount(usageEntry.requestCount);
-                        usageByUsername.put(usageEntry.username, usageDTO);
+                        usageDTO.setUsername(usageEntry.getUsername());
+                        usageDTO.setCount(usageEntry.getRequestCount());
+                        usageByUsername.put(usageEntry.getUsername(), usageDTO);
                     }
                     break;
                 }
@@ -2450,6 +2557,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 query = "SELECT TOP 1 time,year,month,day FROM  " + columnFamily + " order by time ASC";
 
+            } else if (connection != null && connection.getMetaData().getDatabaseProductName().contains("DB2")) {
+
+                query = "SELECT time,year,month,day FROM  " + columnFamily + " order by time ASC FETCH FIRST 1 ROWS ONLY";
+
             } else {
 
                 query = "SELECT time,year,month,day FROM  " + columnFamily + " order by time ASC limit 1";
@@ -2965,21 +3076,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
     }
 
-    private static class APIUsageByUser {
-
-        private String context;
-        private String username;
-        private long requestCount;
-        private String apiVersion;
-
-        public APIUsageByUser(String context, String username, long requestCount, String apiVersion) {
-            this.context = context;
-            this.username = username;
-            this.requestCount = requestCount;
-            this.apiVersion = apiVersion;
-        }
-    }
-
     private static class APIVersionUsageByUserMonth {
 
         private String context;
@@ -3049,4 +3145,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     }
 
+    /**
+     * return a string to indicate type of statistics client
+     *
+     * @return String
+     */
+    @Override
+    public String getClientType() {
+        return clientType;
+    }
 }

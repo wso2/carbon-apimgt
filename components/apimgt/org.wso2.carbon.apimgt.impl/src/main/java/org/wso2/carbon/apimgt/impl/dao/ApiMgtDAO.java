@@ -1264,23 +1264,25 @@ public class ApiMgtDAO {
                 String subStatus = resultSet.getString("SUB_STATUS");
                 String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
 
+                String applicationName = getApplicationNameFromId(applicationId);
+
                 if(APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus))  {
 
                 	//Throw error saying subscription already exists.
                     log.error("Subscription already exists for API " + identifier.getApiName() + " in Application "
-                            + applicationId);
+                            + applicationName);
                     throw new SubscriptionAlreadyExistingException("Subscription already exists for API "
-                            + identifier.getApiName() + " in Application " + applicationId);
+                            + identifier.getApiName() + " in Application " + applicationName);
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
-                    deleteSubscriptionByApiIDAndAppID(apiId, applicationId, identifier.getTier(), conn);
+                    deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
                 } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
                         || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus))  {
                     log.error("Subscription to API " + identifier.getApiName() + " through application "
-                              + applicationId + " was blocked");
+                              + applicationName + " was blocked");
                     throw new APIManagementException("Subscription to API " + identifier.getApiName()
-                                                     + " through application " + applicationId + " was blocked");
+                                                     + " through application " + applicationName + " was blocked");
                 }
 
 
@@ -1543,8 +1545,6 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     subscriptionStatus = resultSet.getString("SUB_STATUS");
                 }
-                resultSet.close();
-                ps.close();
                 return subscriptionStatus;
             } catch (SQLException e) {
                 handleException("Failed to retrieve subscription status", e);
@@ -3588,6 +3588,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
+        PreparedStatement updatePs = null;
         int apiId = -1;
 
         try {
@@ -3604,8 +3605,6 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 apiId = resultSet.getInt("API_ID");
             }
-            resultSet.close();
-            ps.close();
 
             if (apiId == -1) {
                 String msg = "Unable to get the API ID for: " + identifier;
@@ -3613,19 +3612,26 @@ public class ApiMgtDAO {
                 throw new APIManagementException(msg);
             }
 
+            String subsCreateStatus = getSubscriptionCreaeteStatus(identifier, applicationId, conn);
+
+            if (APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subsCreateStatus))   {
+                deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
+            }
+
+
             //This query to update the AM_SUBSCRIPTION table
             String sqlQuery ="UPDATE AM_SUBSCRIPTION SET SUB_STATUS = ?, UPDATED_BY = ?, UPDATED_TIME = ? " +
                              "WHERE API_ID = ? AND APPLICATION_ID = ?";
 
             //Updating data to the AM_SUBSCRIPTION table
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, subStatus);
+            updatePs = conn.prepareStatement(sqlQuery);
+            updatePs.setString(1, subStatus);
             //TODO Need to find logged in user who does this update.
-            ps.setString(2, null);
-            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            ps.setInt(4, apiId);
-            ps.setInt(5, applicationId);
-            ps.execute();
+            updatePs.setString(2, null);
+            updatePs.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+            updatePs.setInt(4, apiId);
+            updatePs.setInt(5, applicationId);
+            updatePs.execute();
 
             // finally commit transaction
             conn.commit();
@@ -3641,6 +3647,7 @@ public class ApiMgtDAO {
             handleException("Failed to update subscription data ", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+            APIMgtDBUtil.closeAllConnections(updatePs, null, null);
         }
     }
 
@@ -3805,7 +3812,6 @@ public class ApiMgtDAO {
             prepStmt = connection.prepareStatement(sqlDeleteAccessAllowDomains);
             prepStmt.setString(1, consumerKey);
             prepStmt.execute();
-            prepStmt.close();
 
             connection.commit();
 
@@ -4195,7 +4201,8 @@ public class ApiMgtDAO {
                               "   APP.NAME AS APPNAME, " +
                               "   SUBS.UUID AS SUB_UUID, " +
                               "   SUBS.TIER_ID AS SUB_TIER_ID, " +
-                              "   APP.UUID AS APP_UUID " +
+                              "   APP.UUID AS APP_UUID, " +
+                              "   SUBS.SUBS_CREATE_STATE AS SUBS_CREATE_STATE " +
                               "FROM " +
                               "   AM_SUBSCRIPTION SUBS, " +
                               "   AM_APPLICATION APP, " +
@@ -4206,7 +4213,6 @@ public class ApiMgtDAO {
                               "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID " +
                               "   AND API.API_PROVIDER = ? " +
                               "   AND API.API_ID = SUBS.API_ID " +
-                              "   AND SUBS.SUBS_CREATE_STATE = '" + APIConstants.SubscriptionCreatedStatus.SUBSCRIBE + "'" +
                               "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'" +
                               "ORDER BY " +
                               "   APP.NAME";
@@ -4225,6 +4231,7 @@ public class ApiMgtDAO {
                 String application = result.getString("APPNAME");
                 int appId = result.getInt("APPLICATION_ID");
                 String subStatus = result.getString("SUB_STATUS");
+                String subsCreateState = result.getString("SUBS_CREATE_STATE");
                 String key = userId + "::" + application;
                 UserApplicationAPIUsage usage = userApplicationUsages.get(key);
                 if (usage == null) {
@@ -4240,6 +4247,7 @@ public class ApiMgtDAO {
                                                       result.getString("API_NAME"), result.getString("API_VERSION"));
                 SubscribedAPI apiSubscription=new SubscribedAPI(new Subscriber(userId),apiId);
                 apiSubscription.setSubStatus(subStatus);
+                apiSubscription.setSubCreatedStatus(subsCreateState);
                 apiSubscription.setUUID(result.getString("SUB_UUID"));
                 apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
                 Application applicationObj = new Application(result.getString("APP_UUID"));
@@ -7388,7 +7396,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     authorizedDomains = authorizedDomains + "," + domain;
                 }
             }
-            prepStmt.close();
         } catch (SQLException e) {
             throw new APIManagementException
                     ("Error in retrieving access allowing domain list from table.", e);
@@ -8182,6 +8189,48 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         return status;
     }
 
+    /**
+     * Retrieve subscription create state for APIIdentifier and applicationID
+     * @param identifier - api identifier which is subscribed
+     * @param applicationId - application used to subscribed
+     * @param connection
+     * @return subscription create status
+     * @throws APIManagementException
+     */
+
+    public String getSubscriptionCreaeteStatus(APIIdentifier identifier, int applicationId, Connection connection)
+            throws APIManagementException   {
+
+        String status = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT SUBS_CREATE_STATE FROM" +
+                          " AM_SUBSCRIPTION WHERE" +
+                          " API_ID = ? AND" +
+                          " APPLICATION_ID = ?";
+
+        try {
+            int apiId = getAPIID(identifier, connection);
+            ps = connection.prepareStatement(sqlQuery);
+            ps.setInt(1, apiId);
+            ps.setInt(2, applicationId);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while (rs.next()) {
+                status = rs.getString("SUBS_CREATE_STATE");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting subscription entry for " +
+                            "Application : " + applicationId + ", API: " + identifier, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, null, rs);
+        }
+        return status;
+
+    }
 
     private static class SubscriptionInfo {
         private int subscriptionId;
@@ -8865,7 +8914,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             prepStmt = connection.prepareStatement(deleteScopes);
             prepStmt.setInt(1,apiId);
             prepStmt.execute();
-            prepStmt.close();
 
             connection.commit();
         } catch (SQLException e) {
@@ -8966,7 +9014,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             if (resultSet.next()) {
                 tokenOwner = resultSet.getString("USER_ID");
             }
-            resultSet.close();
             return tokenOwner;
         } catch (SQLException e) {
             handleException("Failed to retrieve user ID for given OAuth token", e);
@@ -9036,19 +9083,17 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * @param tier - subscribed TIER ID
      * @throws java.sql.SQLException - Letting the caller to handle the roll back
      */
-    private void deleteSubscriptionByApiIDAndAppID(int apiId, int appId, String tier, Connection conn)
+    private void deleteSubscriptionByApiIDAndAppID(int apiId, int appId, Connection conn)
             throws SQLException {
         String deleteQuery = "DELETE FROM AM_SUBSCRIPTION " +
                              " WHERE " +
                              "API_ID = ? " +
-                             "AND APPLICATION_ID = ? " +
-                             "AND TIER_ID = ?";
+                             "AND APPLICATION_ID = ? ";
         PreparedStatement ps = null;
         try {
             ps = conn.prepareStatement(deleteQuery);
             ps.setInt(1, apiId);
             ps.setInt(2, appId);
-            ps.setString(3, tier);
 
             ps.executeUpdate();
         } finally {

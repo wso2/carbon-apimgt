@@ -16,9 +16,19 @@
 
 package org.wso2.carbon.apimgt.rest.api.util;
 
+import java.io.File;
+
 public final class RestApiConstants {
 
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String DOC_UPLOAD_TMPDIR = "restAPI" + File.separator + "documentUpload";
+    public static final String DOC_NAME_DEFAULT = "DEFAULT_DOC_";
+
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+    public static final String CONTENT_DISPOSITION_FILENAME = "filename";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
@@ -38,6 +48,7 @@ public final class RestApiConstants {
     public static final String GROUPID_PARAM = "{groupId}";
     public static final String APIID_PARAM = "{apiId}";
     public static final String APPLICATIONID_PARAM = "{applicationId}";
+    public static final String DOCUMENTID_PARAM = "{documentId}";
     public static final String API_VERSION_PARAM="{version}";
 
     //todo better to take from cxf level
@@ -50,6 +61,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TIERS = "/tiers";
     public static final String RESOURCE_PATH_TAGS = "/tags";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
+    public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM + "/content";
     public static final String REST_API_STORE_CONTEXT="store_rest_api";
     public static final String REST_API_STORE_VERSION="v1";
     public static final String REST_API_PUBLISHER_VERSION="v1";

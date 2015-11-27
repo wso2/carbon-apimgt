@@ -74,6 +74,8 @@ public final class APIConstants {
 
     public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
 
+    public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
+
     public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
 
     public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
@@ -91,8 +93,6 @@ public final class APIConstants {
     public static final String API_TENANT_CONF_ENABLE_MONITZATION_KEY = "EnableMonetization";
 
     public static final String API_TENANT_CONF_IS_UNLIMITED_TIER_PAID = "IsUnlimitedTierPaid";
-
-    public static final String API_TIER_IS_PAID_ATTRIBUTE = "IsPaid";
 
     public static final String API_CATEGORY_FREE = "Free";
 
@@ -182,6 +182,10 @@ public final class APIConstants {
     public static final String DOCUMENTATION_INLINE_CONTENT_TYPE = "text/plain";
     
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "Doc";
+
+    public static final String DOCUMENTATION_RESOURCE_MAP_DATA = "Data";
+    public static final String DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE = "contentType";
+    public static final String DOCUMENTATION_RESOURCE_MAP_NAME = "name";
 
     public static final String SYNAPSE_NAMESPACE = "http://ws.apache.org/ns/synapse";
     // Those constance are used in API artifact.
@@ -398,7 +402,9 @@ public final class APIConstants {
     public static final String OPEN_ID_SCOPE_NAME = "openid";
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
     public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
-
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES = "RESTAPIScopes.";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_NAME = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Name";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_ROLES = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Roles";
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
@@ -506,8 +512,10 @@ public final class APIConstants {
     public static final String TIER_DESCRIPTION_PREFIX = "tier.desc.";
 
     public static final String THROTTLE_TIER_DESCRIPTION_ATTRIBUTE = "Description";
-    public static final String THROTTLE_TIER_PLAN_ATTRIBUTE = "BillingPlan";
-    public static final String THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE = "StopOnQuotaReach";
+
+    //"Billing plan" and "Stop on quota reach" are considered as x-wso2 type attributes
+    public static final String THROTTLE_TIER_PLAN_ATTRIBUTE = "x-wso2-BillingPlan";
+    public static final String THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE = "x-wso2-StopOnQuotaReach";
 
     public static final String TIER_MANAGEMENT = "TierManagement.";
     public static final String ENABLE_UNLIMITED_TIER = TIER_MANAGEMENT + "EnableUnlimitedTier";
@@ -808,7 +816,7 @@ public final class APIConstants {
 
     public static final String HTTP_PROXY_HOST = "http.proxyHost";
     public static final String HTTP_PROXY_PORT = "http.proxyPort";
-
+    
 
     public static final String KEYMANAGER_HOSTNAME = "keyManagerHostname";
     public static final String KEYMANAGER_PORT = "keyManagerPort";
@@ -913,6 +921,11 @@ public final class APIConstants {
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
+    
+    public static final String HTTPS_PROTOCOL = "https";
+    public static final int HTTPS_PROTOCOL_PORT = 443;
+    public static final int HTTP_PROTOCOL_PORT = 80;
+    
 
     public static final long MAX_FILE_SIZE = 1024L;
 

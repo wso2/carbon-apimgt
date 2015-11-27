@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -177,8 +178,7 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException on error
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      * */
-    void changeAPIStatus(API api, APIStatus status, String userId,
-                                boolean updateGatewayConfig)
+    void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException;
 
 
@@ -233,6 +233,19 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if failed to add documentation
      */
     void addDocumentation(APIIdentifier apiId, Documentation documentation) throws APIManagementException;
+
+    /**
+     * Add a file to a document of source type FILE 
+     *
+     * @param apiId API identifier the document belongs to
+     * @param documentation document
+     * @param filename name of the file
+     * @param content content of the file as an Input Stream
+     * @param contentType content type of the file
+     * @throws APIManagementException if failed to add the file
+     */
+    void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename, InputStream content,
+            String contentType) throws APIManagementException;
 
     /**
      * Checks if a given API exists in the registry
@@ -494,5 +507,29 @@ public interface APIProvider extends APIManager {
      * @return Map<String,Object> a map with lifecycle data
      */
      Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException;
+     
+     /**
+      * Push api related state changes to the gateway. Api related configurations will be deployed or destroyed
+      * according to the new state.
+      * @param identifier Api identifier
+      * @param newStatus new state of the lifecycle
+      * @return collection of failed gateways. Map contains gateway name as the key and the error as the value
+      * @throws APIManagementException
+      */
+     Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus) 
+             throws APIManagementException;
+     
+     /**
+      * Update api related information such as database entries, registry updates for state change.
+      * @param identifier
+      * @param newStatus
+      * @param failedGatewaysMap Map of failed gateways. Gateway name is the key and error message is value. Null is
+      * accepted if changes are not pushed to a gateway
+      * @return boolean value representing success not not
+      * @throws APIManagementException
+      * @throws FaultGatewaysException
+      */
+     boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus, 
+             Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
     
 }

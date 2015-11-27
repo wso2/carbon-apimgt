@@ -40,7 +40,7 @@ import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
+public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(SubscriptionCreationWSWorkflowExecutor.class);
 
@@ -89,10 +89,10 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
                     "         <wor:callBackURL>$9</wor:callBackURL>\n" +
                     "      </wor:SubscriptionApprovalWorkFlowProcessRequest>";
 
-            SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO)workflowDTO;
+            SubscriptionWorkflowDTO subsWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
             String callBackURL = subsWorkflowDTO.getCallbackUrl();
 
-            payload = payload.replace("$1", subsWorkflowDTO.getApiName()) ;
+            payload = payload.replace("$1", subsWorkflowDTO.getApiName());
             payload = payload.replace("$2", subsWorkflowDTO.getApiVersion());
             payload = payload.replace("$3", subsWorkflowDTO.getApiContext());
             payload = payload.replace("$4", subsWorkflowDTO.getApiProvider());
@@ -120,9 +120,10 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
 
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workflowDTO);
-        log.info("Subscription Creation [Complete] Workflow Invoked. Workflow ID : " + workflowDTO.getExternalWorkflowReference() + "Workflow State : "+ workflowDTO.getStatus());
+        log.info("Subscription Creation [Complete] Workflow Invoked. Workflow ID : " + workflowDTO
+                .getExternalWorkflowReference() + "Workflow State : " + workflowDTO.getStatus());
 
-        if(WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())){
+        if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
             try {
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
@@ -131,7 +132,7 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
                 log.error("Could not complete subscription creation workflow", e);
                 throw new WorkflowException("Could not complete subscription creation workflow", e);
             }
-        }else if(WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())){
+        } else if (WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())) {
             ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
             try {
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
@@ -159,8 +160,8 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
 
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
         } catch (AxisFault axisFault) {
-            errorMsg = "Error sending out cancel pending subscription approval process message. cause: " +
-                    axisFault.getMessage();
+            errorMsg = "Error sending out cancel pending subscription approval process message. cause: " + axisFault
+                    .getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         } catch (XMLStreamException e) {
             errorMsg = "Error converting subscription cleanup String to OMElement. cause: " + e.getMessage();
@@ -176,8 +177,8 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
      * @throws AxisFault
      */
     public ServiceClient getClient(String action) throws AxisFault {
-        ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-                .getContextService().getClientConfigContext(), null);
+        ServiceClient client = new ServiceClient(
+                ServiceReferenceHolder.getInstance().getContextService().getClientConfigContext(), null);
         Options options = new Options();
         options.setAction(action);
         options.setTo(new EndpointReference(serviceEndpoint));
@@ -185,8 +186,7 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
         if (contentType != null) {
             options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
         } else {
-            options.setProperty(Constants.Configuration.MESSAGE_TYPE,
-                    HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+            options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
         }
 
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
@@ -201,17 +201,15 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor{
             auth.setAuthSchemes(authSchemes);
 
             if (contentType == null) {
-                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+                options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
             }
-            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE,
-                    auth);
+            options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
             options.setManageSession(true);
         }
         client.setOptions(options);
 
         return client;
     }
-
 
     public String getServiceEndpoint() {
         return serviceEndpoint;

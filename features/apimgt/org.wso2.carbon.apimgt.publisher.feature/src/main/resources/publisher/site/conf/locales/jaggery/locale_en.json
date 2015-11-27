@@ -293,7 +293,7 @@
     "inFlow":"In Flow",
     "outFlow":"Out Flow",
     "faultFlow":"Fault Flow",
-    "sequenceMsg":"Check to select a custom sequence to be executed in the message flow",
+    "sequenceMsg":"Check to select a message mediation policy to be executed in the message flow",
     "responseCache":"Response Caching",
     "enabled":"Enabled",
     "disabled":"Disabled",

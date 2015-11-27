@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
+
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -152,6 +153,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -185,6 +187,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
  * and APIConsumer interfaces.
@@ -1129,7 +1133,6 @@ public final class APIUtil {
                     break;
                 case FILE: {
                     sourceType = Documentation.DocumentSourceType.FILE;
-                    setFilePermission(documentation.getFilePath());
                 }
                 break;
                 default:
@@ -2051,7 +2054,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
 
-    private static void setFilePermission(String filePath) throws APIManagementException {
+    public static void setFilePermission(String filePath) throws APIManagementException {
         try {
             filePath = filePath.replaceFirst("/registry/resource/", "");
             org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
@@ -4272,9 +4275,7 @@ public final class APIUtil {
      * @return map that contains Data of the resource
      * @throws APIManagementException
      */
-
-    public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain, int tenantId)
+    public static Map<String, Object> getDocument(String userName, String resourceUrl, String tenantDomain)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4288,7 +4289,18 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
+        boolean isTenantFlowStarted = false;
         try {
+            int tenantId;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            } else {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4305,6 +4317,10 @@ public final class APIUtil {
             String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
             log.error(msg, e);
             handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return documentMap;
     }
@@ -4540,11 +4556,9 @@ public final class APIUtil {
             if (tierAttributes != null) {
                 String isPaidValue = tier.getTierPlan();
 
-                if (isPaidValue != null && isPaidValue.equals("COMMERCIAL")) {
+                if (isPaidValue != null && APIConstants.COMMERCIAL_TIER_PLAN.equals(isPaidValue)) {
                     isPaid = true;
                 }
-            } else {
-                throw new APIManagementException("Tier attributes not specified for tier " + tierName);
             }
         } else {
             throw new APIManagementException("Tier " + tierName + "cannot be found");
@@ -4729,6 +4743,34 @@ public final class APIUtil {
     }
 
     /**
+     * Returns the Scopes associated roles defined in APIM configuration
+     *
+     * @return A Map with the scope names and the associated roles
+     */
+    public static Map<String, String> getRestAPIScopes() {
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        HashMap<String, String> scopesMap = new HashMap<String, String>();
+        List<String> scopeNamesList = apiManagerConfiguration
+                .getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_NAME);
+        List<String> rolesList = apiManagerConfiguration.getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_ROLES);
+
+        if (scopeNamesList != null && rolesList != null) {
+            if (scopeNamesList.size() != rolesList.size()) {
+                String errorMsg = "Provided Scopes for REST API are invalid."
+                        + " Every 'Scope' should include 'Name' and 'Roles' elements";
+                log.error(errorMsg);
+                return new HashMap<String, String>();
+            }
+
+            for (int i = 0; i < scopeNamesList.size(); i++) {
+                scopesMap.put(scopeNamesList.get(i), rolesList.get(i));
+            }
+        }
+        return scopesMap;
+    }
+
+    /**
      * Gets the  class given the class name.
      * @param className the fully qualified name of the class.
      * @return an instance of the class with the given name
@@ -4740,4 +4782,26 @@ public final class APIUtil {
     public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         return Class.forName(className);
     }
+    
+    /**
+     * This method will check the validity of given url.
+     * otherwise we will mark it as invalid url. 
+     * 
+     * @param url
+     *            url tobe tested
+     * @return true if its valid url else fale
+     */
+    public static boolean isValidURL(String url) {
+        
+        if(url == null) {
+            return false;
+        }
+        
+        String regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";        
+        Pattern p = Pattern.compile(regex);         
+        Matcher m = p.matcher(url); 
+       
+        return m.matches();
+    }
+
 }

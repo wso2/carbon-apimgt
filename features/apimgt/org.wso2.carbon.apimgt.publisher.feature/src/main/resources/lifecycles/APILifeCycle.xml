@@ -59,6 +59,7 @@
                     </datamodel>
                     <transition event="Publish" target="Published"/>
                     <transition event="Demote to Created" target="Created"/>
+                    <transition event="Deploy as a Prototype" target="Prototyped"/>
                 </state>
 
 

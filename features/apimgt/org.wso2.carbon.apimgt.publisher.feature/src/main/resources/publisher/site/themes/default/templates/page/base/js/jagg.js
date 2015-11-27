@@ -230,7 +230,6 @@ var jagg = jagg || {};
         });
     };
     jagg.getDate = function(timestamp){
-         timestamp = parseInt(timestamp);
          return new Date(timestamp).toLocaleString();
     };
 

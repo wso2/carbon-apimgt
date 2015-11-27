@@ -33,15 +33,18 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
@@ -52,9 +55,13 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.ConstraintViolation;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -142,12 +149,6 @@ public class RestApiUtil {
 
     }
 
-    public static ErrorDTO getAuthenticationErrorDTO(String message) {
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setMessage(message);
-        return errorDTO;
-    }
-
     public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
@@ -180,6 +181,34 @@ public class RestApiUtil {
             return getLoggedInUserTenantDomain();
         } else {
             return xTenantHeader;
+        }
+    }
+
+    /**
+     * This method uploads a given file to specified location
+     *
+     * @param uploadedInputStream input stream of the file
+     * @param newFileName         name of the file to be created
+     * @param storageLocation     destination of the new file
+     * @throws APIManagementException if the file transfer fails
+     */
+    public static void transferFile(InputStream uploadedInputStream, String newFileName, String storageLocation)
+            throws APIManagementException {
+        FileOutputStream outFileStream = null;
+
+        try {
+            outFileStream = new FileOutputStream(new File(storageLocation, newFileName));
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                outFileStream.write(bytes, 0, read);
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error in transferring files.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
+        } finally {
+            IOUtils.closeQuietly(outFileStream);
         }
     }
 
@@ -287,7 +316,20 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean isDueToResourceAlreadyExists(Throwable e) {
         Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause instanceof APIMgtResourceAlreadyExistsException;
+        return rootCause instanceof APIMgtResourceAlreadyExistsException || rootCause instanceof DuplicateAPIException;
+    }
+
+    /**
+     * Check if the message of the root cause message of 'e' matches with the specified message
+     * 
+     * @param e throwable to check
+     * @param message error message
+     * @return true if the message of the root cause of 'e' matches with 'message'
+     */
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    public static boolean rootCauseMessageMatches (Throwable e, String message) {
+        Throwable rootCause = getPossibleErrorCause(e);
+        return rootCause.getMessage().matches(".*" + message + ".*");
     }
 
     /**
@@ -302,6 +344,27 @@ public class RestApiUtil {
         return rootCause;
     }
 
+    /**
+     * Checks whether the specified tenant domain is available
+     * 
+     * @param tenantDomain tenant domain
+     * @return true if tenant domain available
+     * @throws UserStoreException
+     */
+    public static boolean isTenantAvailable(String tenantDomain) throws UserStoreException {
+        int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                .getTenantId(tenantDomain);
+        return tenantId != -1;
+    }
+
+    /**
+     * Returns the next/previous offset/limit parameters properly when current offset, limit and size parameters are specified
+     *
+     * @param offset current starting index
+     * @param limit current max records
+     * @param size maximum index possible
+     * @return the next/previous offset/limit parameters as a hash-map
+     */
     public static Map<String, Integer> getPaginationParams(Integer offset, Integer limit, Integer size) {
         Map<String, Integer> result = new HashMap<>();
         if (offset >= size || offset < 0)
@@ -356,6 +419,7 @@ public class RestApiUtil {
      * @return constructed paginated url
      */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
+        groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
@@ -373,6 +437,7 @@ public class RestApiUtil {
      */
     public static String getSubscriptionPaginatedURLForAPIId(Integer offset, Integer limit, String apiId,
             String groupId) {
+        groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APIID;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
@@ -437,6 +502,30 @@ public class RestApiUtil {
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         return paginatedURL;
+    }
+
+    /**
+     * Checks whether the list of tiers are valid given the all valid tiers
+     * 
+     * @param allTiers All defined tiers
+     * @param currentTiers tiers to check if they are a subset of defined tiers
+     * @return null if there are no invalid tiers or returns the set of invalid tiers if there are any
+     */
+    public static List<String> getInvalidTierNames(Set<Tier> allTiers, List<String> currentTiers) {
+        List<String> invalidTiers = new ArrayList<>();
+        for (String tierName : currentTiers) {
+            boolean isTierValid = false;
+            for (Tier definedTier : allTiers) {
+                if (tierName.equals(definedTier.getName())) {
+                    isTierValid = true;
+                    break;
+                }
+            }
+            if (!isTierValid) {
+                invalidTiers.add(tierName);
+            }
+        }
+        return invalidTiers;
     }
 
     /**
