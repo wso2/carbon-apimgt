@@ -1,5 +1,5 @@
 /*
- *  Copyright WSO2 Inc.
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -500,7 +500,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return returns the matched document
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdGet(String apiId,String documentId,String accept,String ifNoneMatch,String ifModifiedSince){
+    public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
         Documentation documentation;
         try {
             RestApiPublisherUtils.checkUserAccessAllowedForAPI(apiId);
@@ -537,7 +538,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return updated document DTO as response
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdPut(String apiId,String documentId,DocumentDTO body,String contentType,String ifMatch,String ifUnmodifiedSince){
+    public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body,
+            String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
@@ -565,7 +567,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return 200 response if deleted successfully
      */
     @Override
-    public Response apisApiIdDocumentsDocumentIdDelete(String apiId,String documentId,String ifMatch,String ifUnmodifiedSince){
+    public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
+            String ifUnmodifiedSince) {
         Documentation documentation;
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
