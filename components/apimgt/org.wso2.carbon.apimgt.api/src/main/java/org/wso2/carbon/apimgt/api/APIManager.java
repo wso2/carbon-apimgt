@@ -248,11 +248,11 @@ public interface APIManager {
      * Associates the given icon image with the specified path.
      *
      * @param resourcePath a String representing the relative path of a resource.
-     * @param icon         to be saved
+     * @param resourceFile         to be saved
      * @return a String URL pointing to the image that was added
      * @throws APIManagementException if an error occurs while adding the icon image
      */
-    String addIcon(String resourcePath, Icon icon) throws APIManagementException;
+    String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException;
 
     /**
      * Retrieves the icon image associated with a particular API as a stream.
@@ -261,7 +261,7 @@ public interface APIManager {
      * @return an Icon containing image content and content type information
      * @throws APIManagementException if an error occurs while retrieving the image
      */
-    Icon getIcon(APIIdentifier identifier) throws APIManagementException;
+    ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException;
 
     /**
      * Cleans up any resources acquired by this APIManager instance. It is recommended

@@ -632,19 +632,19 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("inSeqFile", apiData) != null)  {
             FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
-            Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+            ResourceFile inSeq = new ResourceFile(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
             String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
                                + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME;
-            String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
+            String inSeqFullPath = apiProvider.addResourceFile(inSeqPath, inSeq);
             api.setInSequence(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
         }
 
         if (apiData.get("outSeqFile", apiData) != null) {
             FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
-            Icon outSeq = new Icon(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
+            ResourceFile outSeq = new ResourceFile(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
             String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
                                 + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME;
-            String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
+            String outSeqFullPath = apiProvider.addResourceFile(outSeqPath, outSeq);
             api.setOutSequence(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
         }
 
@@ -1443,9 +1443,9 @@ public class APIProviderHostObject extends ScriptableObject {
     private static String addThumbIcon(InputStream inputStream, String contentType, APIProvider apiProvider, API api)
             throws APIManagementException {
 
-        Icon thumbIcon = new Icon(inputStream, contentType);
+        ResourceFile thumbIcon = new ResourceFile(inputStream, contentType);
         String thumbPath = APIUtil.getIconPath(api.getId());
-        String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
+        String thumbnailUrl = apiProvider.addResourceFile(thumbPath, thumbIcon);
         api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
 
         /*Set permissions to anonymous role for thumbPath*/
@@ -3092,7 +3092,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
             	String contentType = (String) args[10];
-                Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
+                ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(), contentType);
                 
                 String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
                 String fname = fileHostObject.getName();
@@ -3103,9 +3103,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 if (visibleRolesList != null) {
                     visibleRoles = visibleRolesList.split(",");
                 }
-                APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                                               api.getVisibility(), visibleRoles,filePath);
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
+                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,filePath);
+                doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
@@ -3721,10 +3720,10 @@ public class APIProviderHostObject extends ScriptableObject {
             Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
+                ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
                                      fileHostObject.getJavaScriptFile().getContentType());
                 String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
+                doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
             } else if (oldDoc.getFilePath() != null) {
                 doc.setFilePath(oldDoc.getFilePath());
             }

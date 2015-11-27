@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -599,11 +599,11 @@ public abstract class AbstractAPIManager implements APIManager {
         return definitionFromSwagger20.getAPIDefinition(apiId, registry);
     }
 
-    public String addIcon(String resourcePath, Icon icon) throws APIManagementException {
+    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
         try {
             Resource thumb = registry.newResource();
-            thumb.setContentStream(icon.getContent());
-            thumb.setMediaType(icon.getContentType());
+            thumb.setContentStream(resourceFile.getContent());
+            thumb.setMediaType(resourceFile.getContentType());
             registry.put(resourcePath, thumb);
             if(tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
             return RegistryConstants.PATH_SEPARATOR + "registry"
@@ -890,7 +890,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getSubscriber(subscriberId);
     }
 
-    public Icon getIcon(APIIdentifier identifier) throws APIManagementException {
+    public ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                               identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                               identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
@@ -899,7 +899,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             if (registry.resourceExists(thumbPath)) {
                 Resource res = registry.get(thumbPath);
-                return new Icon(res.getContentStream(), res.getMediaType());
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
             }
         } catch (RegistryException e) {
             handleException("Error while loading API icon from the registry", e);
