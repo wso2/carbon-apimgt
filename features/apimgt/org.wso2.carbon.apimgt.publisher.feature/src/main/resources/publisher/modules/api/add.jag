@@ -242,7 +242,7 @@ var getTiers = function () {
     try {
         tiers = provider.getTiers();
         if (log.isDebugEnabled()) {
-            log.debug("getTiers " +  " : " + tiers);
+            log.debug("getTiers " +  " : " + stringify(tiers));
         }
 
 
@@ -265,7 +265,7 @@ var getResourceTiers = function () {
     try {
         tiers = provider.getResourceTiers();
         if (log.isDebugEnabled()) {
-            log.debug("getTiers " +  " : " + tiers);
+            log.debug("getTiers " +  " : " + stringify(tiers));
         }
 
 
