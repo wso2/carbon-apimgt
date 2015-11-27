@@ -1264,23 +1264,25 @@ public class ApiMgtDAO {
                 String subStatus = resultSet.getString("SUB_STATUS");
                 String subCreationStatus = resultSet.getString("SUBS_CREATE_STATE");
 
+                String applicationName = getApplicationNameFromId(applicationId);
+
                 if(APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.SUBSCRIBE.equals(subCreationStatus))  {
 
                 	//Throw error saying subscription already exists.
                     log.error("Subscription already exists for API " + identifier.getApiName() + " in Application "
-                            + applicationId);
+                            + applicationName);
                     throw new SubscriptionAlreadyExistingException("Subscription already exists for API "
-                            + identifier.getApiName() + " in Application " + applicationId);
+                            + identifier.getApiName() + " in Application " + applicationName);
                 } else if (APIConstants.SubscriptionStatus.UNBLOCKED.equals(subStatus)
                         && APIConstants.SubscriptionCreatedStatus.UN_SUBSCRIBE.equals(subCreationStatus))    {
                     deleteSubscriptionByApiIDAndAppID(apiId, applicationId, conn);
                 } else if (APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
                         || APIConstants.SubscriptionStatus.PROD_ONLY_BLOCKED.equals(subStatus))  {
                     log.error("Subscription to API " + identifier.getApiName() + " through application "
-                              + applicationId + " was blocked");
+                              + applicationName + " was blocked");
                     throw new APIManagementException("Subscription to API " + identifier.getApiName()
-                                                     + " through application " + applicationId + " was blocked");
+                                                     + " through application " + applicationName + " was blocked");
                 }
 
 
