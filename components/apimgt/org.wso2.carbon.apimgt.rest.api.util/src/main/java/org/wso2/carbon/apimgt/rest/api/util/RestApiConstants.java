@@ -25,6 +25,7 @@ public final class RestApiConstants {
     public static final String DOC_NAME_DEFAULT = "DEFAULT_DOC_";
 
     public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
     public static final String CONTENT_DISPOSITION_FILENAME = "filename";
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
