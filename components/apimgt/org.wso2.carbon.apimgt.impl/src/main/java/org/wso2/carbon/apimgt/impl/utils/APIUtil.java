@@ -4291,12 +4291,15 @@ public final class APIUtil {
         Registry registryType = null;
         boolean isTenantFlowStarted = false;
         try {
+            int tenantId;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            } else {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
             }
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
 
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
