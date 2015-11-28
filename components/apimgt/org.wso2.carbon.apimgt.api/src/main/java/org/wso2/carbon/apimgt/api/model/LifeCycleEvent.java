@@ -21,8 +21,8 @@ import java.util.Date;
 public class LifeCycleEvent {
     
     private APIIdentifier api;
-    private APIStatus oldStatus;
-    private APIStatus newStatus;
+    private String oldStatus;
+    private String newStatus;
     private String userId;
     private Date date;
 
@@ -34,19 +34,27 @@ public class LifeCycleEvent {
         this.api = api;
     }
 
-    public APIStatus getOldStatus() {
+    public String getOldStatus() {
         return oldStatus;
     }
 
     public void setOldStatus(APIStatus oldStatus) {
+        this.oldStatus = oldStatus.toString();
+    }
+    
+    public void setOldStatus(String oldStatus) {
         this.oldStatus = oldStatus;
     }
 
-    public APIStatus getNewStatus() {
+    public String getNewStatus() {
         return newStatus;
     }
 
     public void setNewStatus(APIStatus newStatus) {
+        this.newStatus = newStatus.toString();
+    }
+    
+    public void setNewStatus(String newStatus) {
         this.newStatus = newStatus;
     }
 

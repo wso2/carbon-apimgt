@@ -1251,8 +1251,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     updateApiArtifact(api, false, false);
-                    apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
-                            APIUtil.appendDomainWithUser(currentUser, tenantDomain));
+                   // apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
+                   //         APIUtil.appendDomainWithUser(currentUser, tenantDomain));
 
                     if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
                                                                                      // to be changed
@@ -2999,6 +2999,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String currentStatus = apiArtifact.getLifecycleState();
             if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                 apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
+                apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus, targetStatus, 
+                        APIUtil.appendDomainWithUser(this.username, this.tenantDomain));
             }
             return true;
         } catch (GovernanceException e) {
