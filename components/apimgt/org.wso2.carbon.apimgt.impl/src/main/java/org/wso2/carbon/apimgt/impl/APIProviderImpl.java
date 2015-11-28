@@ -2999,7 +2999,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String currentStatus = apiArtifact.getLifecycleState();
             if (!currentStatus.equalsIgnoreCase(targetStatus)) {
                 apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
-                apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus, targetStatus, 
+                apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(), targetStatus.toUpperCase(), 
                         APIUtil.appendDomainWithUser(this.username, this.tenantDomain));
             }
             return true;
