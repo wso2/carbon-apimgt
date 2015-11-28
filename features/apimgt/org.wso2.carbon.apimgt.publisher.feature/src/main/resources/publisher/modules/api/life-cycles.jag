@@ -114,5 +114,24 @@ var setCheckListItemVal = function(apiData, checkListItemOrder, checkListItemVal
     }
 }
 
+var getAPILCStatus = function(apiData) {
+    var provider=APIUtil.replaceEmailDomain(apiData.provider);
+    var apiIdentifierObj = APIIdentifier(provider, apiData.name, apiData.version);
+    
+    try {
+        var result = APIManagerFactory.getInstance().getAPIProvider(user).getAPILifeCycleStatus(apiIdentifierObj);
+
+         if (log.isDebugEnabled()) {
+              log.debug("getAPILCStatus : " + apiData.name + "-" + apiData.version);
+         }
+         return result.toUpperCase();
+       
+    } catch (e) {
+         
+        log.error(e.message);
+        return "ERROR";
+    }
+};
+
 
 %>
