@@ -4,7 +4,7 @@
         var i, tag, tags = outputs.tags, length = tags.length;
         var urlPrefix;
         var tenant=request_tenant;
-        if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+        urlPrefix = jagg.getTenantURLPrefix("&");
 
         function getThumbnailUrl(tag){
             
@@ -36,7 +36,7 @@
                         <%
                         for(i = 0; i < length; i++) {
                             tag = tags[i];
-                            path = jagg.getMappedUrl("/site/pages/list-apis.jag") + "?tag=" + tag.name+"&"+urlPrefix;
+                            path = jagg.getMappedUrl("/site/pages/list-apis.jag") + "?tag=" + tag.name + urlPrefix;
                             if(tag.name.split(site.tagGroupKey).length == 2){
 
 

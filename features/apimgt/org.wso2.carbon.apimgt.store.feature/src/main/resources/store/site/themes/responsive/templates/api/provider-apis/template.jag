@@ -12,7 +12,7 @@
     <%
     var urlPrefix;
     var tenant=request_tenant;
-    if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+    urlPrefix = jagg.getTenantURLPrefix("&");
 
     var i, api, path,apis = outputs.apis, thumbURL;
     if(apis!=null && apis.length > 0){

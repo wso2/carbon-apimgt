@@ -15,11 +15,10 @@ i18n.init(request,localeResourcesBasePath);
     <%
 
     var tenant=request_tenant;
-    var urlPrefix;
     var fullUrl = null;
     var site = require("/site/conf/site.json");
     var currentURL = jagg.getAbsoluteUrl('/'); 
-    if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+    var urlPrefix = jagg.getTenantURLPrefix();
 	fullUrl = request.getRequestURI();
 	if(request.getQueryString() != null){
 	    fullUrl += '?'+request.getQueryString();

@@ -14,8 +14,7 @@ i18n.init(request,localeResourcesBasePath);
             currentURL += "?" + request.getQueryString();
         }
         var tenant=request_tenant;
-        var urlPrefix;
-        if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+        var urlPrefix = jagg.getTenantURLPrefix();
         
         if (jagg.getUser() != null) {
         	isSuperTenant = jagg.getUser().isSuperTenant;

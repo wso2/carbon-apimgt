@@ -568,8 +568,7 @@
 
             <%
             var tenant=request_tenant;
-            var urlPrefix;
-            if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+            var urlPrefix = jagg.getTenantURLPrefix();
             var apis = app.subscriptions;
             lenJ = apis.length;
             for(j = 0; j < lenJ; j++) {
