@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
@@ -12,6 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
@@ -28,7 +30,8 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
     private static final Log log = LogFactory.getLog(WebAppAuthenticatorImpl.class);
     private static final String REGEX_BEARER_PATTERN = "Bearer\\s";
     private static final Pattern PATTERN = Pattern.compile(REGEX_BEARER_PATTERN);
-
+    private static final String SUPER_TENANT_SUFFIX =
+            APIConstants.EMAIL_DOMAIN_SEPARATOR + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
     /**
      * @param message cxf message to be authenticated
@@ -56,10 +59,16 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                 RealmService realmService = (RealmService) carbonContext.getOSGiService(RealmService.class, null);
                 try {
+                    String username = tokenInfo.getEndUserName();
+                    if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                        if (username.endsWith(SUPER_TENANT_SUFFIX)) {
+                            username = username.substring(0, username.length() - SUPER_TENANT_SUFFIX.length());
+                        }
+                    }
                     tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
                     carbonContext.setTenantDomain(tenantDomain);
                     carbonContext.setTenantId(tenantId);
-                    carbonContext.setUsername(tokenInfo.getEndUserName());
+                    carbonContext.setUsername(username);
                     return true;
                 } catch (UserStoreException e) {
                     log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain);
@@ -119,13 +128,13 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                             }
                             return true;
                         }
-                    }
-                    else {
+                    } else {
                         if (log.isDebugEnabled()) {
-                        log.debug("Scope not defined in swagger for matching resource. So consider as anonymous permission and" +
-                                "let request to");
-                            return true;
+                            log.debug(
+                                    "Scope not defined in swagger for matching resource. So consider as anonymous permission and"
+                                            + "let request to");
                         }
+                        return true;
                     }
                 }
             }
