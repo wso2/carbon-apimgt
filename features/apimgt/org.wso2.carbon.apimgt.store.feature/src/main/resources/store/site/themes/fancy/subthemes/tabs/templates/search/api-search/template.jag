@@ -10,10 +10,8 @@ var query=request.getParameter("query");
         <div class="row-fluid">
             <div class="span6">
                 <%
-                var urlPrefix;
                 var tenant=request_tenant;
-                if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
-
+                var urlPrefix = jagg.getTenantURLPrefix("&");
 
                 var tag = null;
                 if(inputs.tag != null){

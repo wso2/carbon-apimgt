@@ -2,13 +2,8 @@
 
 var siteConf = require("/site/conf/site.json");
 
-var urlSuffix;
 var tenant=request_tenant;
-if(tenant!=null) {
-	urlSuffix="&tenant="+tenant;
-}else{
-	urlSuffix='';
-}
+var urlSuffix = jagg.getTenantURLPrefix();
 
 %>
 

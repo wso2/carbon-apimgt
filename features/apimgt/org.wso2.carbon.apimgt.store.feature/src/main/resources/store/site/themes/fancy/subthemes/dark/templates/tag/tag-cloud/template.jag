@@ -1,8 +1,7 @@
 <% jagg.template("tag/tag-cloud", function(inputs, outputs, jagg) { %>
 <%
     var tenant=request_tenant;
-    var urlPrefix;
-    if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+    var urlPrefix = jagg.getTenantURLPrefix();
 %>
 <div id="tag-cloud">
     <h4><%=i18n.localize("tags")%></h4>

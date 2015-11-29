@@ -24,11 +24,8 @@
     var itemsPerPage = 20; //reduce this number to preview the pagination
     var page = 1;
     var numberOfPages = parseInt(length / itemsPerPage);
-    var urlPrefix ="";
 
-    if(tenant != null) {
-	urlPrefix = "tenant=" + tenant;
-    } 
+    var urlPrefix = jagg.getTenantURLPrefix();
 
 
     if (length % itemsPerPage != 0) {

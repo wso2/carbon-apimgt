@@ -2,13 +2,8 @@
 
 var siteConf = require("/site/conf/site.json");
 
-var urlSuffix;
 var tenant=request_tenant;
-if(tenant!=null) {
-	urlSuffix="&tenant="+tenant;
-}else{
-	urlSuffix='';
-}
+var urlSuffix = jagg.getTenantURLPrefix();
 
 %>
 
@@ -35,7 +30,7 @@ if(inputs.api){
             <div class="row">
                 <div class="span6">
                     <div class="form-search from-inline">
-                        <a href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + urlSuffix%>" class="btn btn-primary pull-left <%= needLoginStyleClass %> " style="margin-right:30px">
+                        <a href="<%= jagg.getAbsoluteUrl('/forum/new')+'?parentId=' + parentId + '&' + urlSuffix%>" class="btn btn-primary pull-left <%= needLoginStyleClass %> " style="margin-right:30px">
                             <%=i18n.localize( 'forum.createNewTopic')%>
                         </a>
                         <div id="forum_topic_search_block" class="pull-left">
