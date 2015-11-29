@@ -153,7 +153,7 @@
 													</button>
 
 													<a class="icon-question-sign curlHelp_popup_prod"></a>
-                                                    <div id="curlProdtoken_help"></div>
+													<div id="curlProdtoken_help"></div>
 
 													<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'prodCurl');">GrantType: Password</a></li>
