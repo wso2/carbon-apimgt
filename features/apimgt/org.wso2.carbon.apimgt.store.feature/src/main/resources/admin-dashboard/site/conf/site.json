@@ -9,10 +9,10 @@
     "allowedRole":"admin",
     "allowedRoles":"admin,subscriber",
     "workflows":{
-     "applicationWorkFlowServerURL": "https://localhost:9445/services/",
-     "subscriptionWorkFlowServerURL": "https://localhost:9445/services/",
-     "signupWorkFlowServerURL": "https://localhost:9445/services/",
-     "appRegistrationWorkFlowServerURL": "https://localhost:9445/services/"
+     "applicationWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
+     "subscriptionWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
+     "signupWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
+     "appRegistrationWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/"
 
     },
     "ssoConfiguration" : {
