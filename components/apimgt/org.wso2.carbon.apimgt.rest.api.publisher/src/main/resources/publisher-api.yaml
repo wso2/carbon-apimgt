@@ -59,11 +59,11 @@ x-wso2-security:
   apim:
     x-wso2-scopes:
       - description: ""
-        roles: publisher
+        roles: admin
         name: API_PUBLISHER_SCOPE
         key: API_PUBLISHER_SCOPE
       - description: ""
-        roles: creator
+        roles: admin
         name: API_CREATOR_SCOPE
         key: API_CREATOR_SCOPE
       - description: ""
