@@ -98,19 +98,19 @@
 
 
 <script>
-    $(document).ready(function(){
-        <% if(api != null && api.subs == 0){ %>
+    $(document).ready(function() {
+        <% if(api != null && api.subs == 0) { %>
             var visibility = $('#visibility').find(":selected").val();
             if (visibility == "public"){
                 $('#visibility').change(function(){
                     visibility = $('#visibility').find(":selected").val();
                     if (visibility != "public"){
-                        jagg.message({content:"You have changed visibility of API, so based on visibility subscription availability may change",type:"warning"});
+                        jagg.message({content:"You have changed visibility of API, " +
+                         "so based on visibility subscription availability may change",type:"warning"});
                     }
                     if (visibility == "public" || visibility == "private" || visibility == "controlled"){
                         $('#rolesDiv').hide();
-                    }
-                    else {
+                    } else {
                         $('#rolesDiv').show();
                     }
                 });

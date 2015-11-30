@@ -25,6 +25,7 @@
 
                                 <th class="appSpecialCell">Subscribed APIs</th>
                                 <th class="userSpecialCell">Actions</th>
+                                <th class="userSpecialCell">Still Subscribed?</th>
                             </tr>
                         </thead>
                         <tbody id="users">
@@ -33,11 +34,17 @@
         var tenant= encode.forUriComponent(request.getParameter("tenant"));
         var urlPrefix;
         var urlPostfix;
-        if(tenant!='null') {
-            urlPrefix="?tenant="+tenant;}else{urlPrefix='';
+
+        if(tenant!='null')    {
+            urlPrefix="?tenant="+tenant;
+        } else  {
+            urlPrefix='';
         }
-        if(tenant!='null') {
-            urlPostfix="&tenant="+tenant;}else{urlPostfix='';
+
+        if(tenant!='null')    {
+            urlPostfix="&tenant="+tenant;
+        } else  {
+            urlPostfix='';
         }
 
         var i, apiPath,subscriber, numberOfPages, subscribers = outputs.subscribers;
@@ -111,12 +118,13 @@
                     <td rowspan=<%=apis.length%>><%=subscriber.application%></td>
 
 	                <%
-                    for(var n=0;n<apis.length;n++){
-                    api=apis[n].split("::");
-	                var existingStatus=api[0];
-                    apiName=api[1];
-                    version=api[2];
-                    apiPath=jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + apiName + "&version=" + version
+                    for(var n=0;n<apis.length;n++)  {
+                        api=apis[n].split("::");
+	                    var existingStatus=api[0];
+                        apiName=api[1];
+                        version=api[2];
+                        var subscriptionStatus = api[3];
+                        apiPath=jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + apiName + "&version=" + version
                         + "&provider=" + jagg.getUser().username+urlPostfix;
                     %>
 
@@ -130,8 +138,7 @@
 		                status='Unblock';
 		                newStatus='UNBLOCKED';
 		                className='icon-ok-circle';
-	                }
-	                else{
+	                } else  {
 		                status='Block';
 		                newStatus='BLOCKED';
 		                className='icon-ban-circle';
@@ -175,6 +182,14 @@
                             <i class="<%=className%>"></i> <%=status%>
                          </a>
                     <%}%>
+                    </td>
+
+                    <td style="width:100px">
+                    <% if (subscriptionStatus =='SUBSCRIBE') {%>
+                        <label>Yes</label>
+                    <%} else {%>
+                        <label>No</label>
+                    <%} %>
                     </td>
                 </tr>
                 <tr>

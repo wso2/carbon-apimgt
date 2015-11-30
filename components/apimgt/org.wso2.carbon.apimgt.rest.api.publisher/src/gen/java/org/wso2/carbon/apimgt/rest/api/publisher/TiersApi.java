@@ -14,6 +14,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
 import java.util.List;
 
 import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;

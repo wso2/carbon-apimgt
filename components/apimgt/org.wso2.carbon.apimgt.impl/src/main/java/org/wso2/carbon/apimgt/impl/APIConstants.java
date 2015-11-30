@@ -189,6 +189,10 @@ public final class APIConstants {
     
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "Doc";
 
+    public static final String DOCUMENTATION_RESOURCE_MAP_DATA = "Data";
+    public static final String DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE = "contentType";
+    public static final String DOCUMENTATION_RESOURCE_MAP_NAME = "name";
+
     public static final String SYNAPSE_NAMESPACE = "http://ws.apache.org/ns/synapse";
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
@@ -404,7 +408,9 @@ public final class APIConstants {
     public static final String OPEN_ID_SCOPE_NAME = "openid";
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
     public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
-
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES = "RESTAPIScopes.";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_NAME = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Name";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_ROLES = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Roles";
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";

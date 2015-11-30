@@ -1133,7 +1133,6 @@ public final class APIUtil {
                     break;
                 case FILE: {
                     sourceType = Documentation.DocumentSourceType.FILE;
-                    setFilePermission(documentation.getFilePath());
                 }
                 break;
                 default:
@@ -2002,7 +2001,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
 
-    private static void setFilePermission(String filePath) throws APIManagementException {
+    public static void setFilePermission(String filePath) throws APIManagementException {
         try {
             filePath = filePath.replaceFirst("/registry/resource/", "");
             org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
@@ -4232,9 +4231,7 @@ public final class APIUtil {
      * @return map that contains Data of the resource
      * @throws APIManagementException
      */
-
-    public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain, int tenantId)
+    public static Map<String, Object> getDocument(String userName, String resourceUrl, String tenantDomain)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4248,7 +4245,18 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
+        boolean isTenantFlowStarted = false;
         try {
+            int tenantId;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            } else {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4265,6 +4273,10 @@ public final class APIUtil {
             String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
             log.error(msg, e);
             handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return documentMap;
     }
@@ -4684,6 +4696,34 @@ public final class APIUtil {
             resourcePathBuilder.append(resourcePath);
         }
         return resourcePathBuilder.toString();
+    }
+
+    /**
+     * Returns the Scopes associated roles defined in APIM configuration
+     *
+     * @return A Map with the scope names and the associated roles
+     */
+    public static Map<String, String> getRestAPIScopes() {
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        HashMap<String, String> scopesMap = new HashMap<String, String>();
+        List<String> scopeNamesList = apiManagerConfiguration
+                .getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_NAME);
+        List<String> rolesList = apiManagerConfiguration.getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_ROLES);
+
+        if (scopeNamesList != null && rolesList != null) {
+            if (scopeNamesList.size() != rolesList.size()) {
+                String errorMsg = "Provided Scopes for REST API are invalid."
+                        + " Every 'Scope' should include 'Name' and 'Roles' elements";
+                log.error(errorMsg);
+                return new HashMap<String, String>();
+            }
+
+            for (int i = 0; i < scopeNamesList.size(); i++) {
+                scopesMap.put(scopeNamesList.get(i), rolesList.get(i));
+            }
+        }
+        return scopesMap;
     }
 
     /**

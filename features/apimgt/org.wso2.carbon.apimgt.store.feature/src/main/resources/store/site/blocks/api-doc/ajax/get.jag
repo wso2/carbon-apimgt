@@ -126,7 +126,6 @@ var log = new Log();
         jsonObj.basePath = api.context;
 
         var domains = jagg.module("domains").getDomainMappings(String(tenantDomain)).domains;
-        log.info(tenantDomain);
     	//populate custom url if exists
         if(domains != null){
             for (var key in domains) {

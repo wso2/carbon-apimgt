@@ -31,7 +31,15 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -50,7 +58,10 @@ import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.ConstraintViolation;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -138,12 +149,6 @@ public class RestApiUtil {
 
     }
 
-    public static ErrorDTO getAuthenticationErrorDTO(String message) {
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setMessage(message);
-        return errorDTO;
-    }
-
     public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }
@@ -176,6 +181,34 @@ public class RestApiUtil {
             return getLoggedInUserTenantDomain();
         } else {
             return xTenantHeader;
+        }
+    }
+
+    /**
+     * This method uploads a given file to specified location
+     *
+     * @param uploadedInputStream input stream of the file
+     * @param newFileName         name of the file to be created
+     * @param storageLocation     destination of the new file
+     * @throws APIManagementException if the file transfer fails
+     */
+    public static void transferFile(InputStream uploadedInputStream, String newFileName, String storageLocation)
+            throws APIManagementException {
+        FileOutputStream outFileStream = null;
+
+        try {
+            outFileStream = new FileOutputStream(new File(storageLocation, newFileName));
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                outFileStream.write(bytes, 0, read);
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error in transferring files.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
+        } finally {
+            IOUtils.closeQuietly(outFileStream);
         }
     }
 
@@ -386,6 +419,7 @@ public class RestApiUtil {
      * @return constructed paginated url
      */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
+        groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
@@ -403,6 +437,7 @@ public class RestApiUtil {
      */
     public static String getSubscriptionPaginatedURLForAPIId(Integer offset, Integer limit, String apiId,
             String groupId) {
+        groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APIID;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));

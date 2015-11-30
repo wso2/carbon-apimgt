@@ -17,20 +17,21 @@ jagg.block("life-cycles", {
     var permitted=inputs.isPublishPermitted;
     var modApi = jagg.module("api");
     var result = modApi.isAPIOlderVersionExist(api);
-    var oldExist=result.exist;
+    var oldExist = result.exist;
 
-    var apiData={};
-    apiData.provider= api.provider;
-    apiData.name= api.name;
-    apiData.version= api.version;
-    var resultData=modApi.getAPILCData(apiData);
+    var apiData = {};
+    apiData.provider = api.provider;
+    apiData.name = api.name;
+    apiData.version = api.version;
+    var resultData = modApi.getAPILCData(apiData);
     var result = modApi.getLifeCyclesEvents(apiData);
-    var lcs=result.lcs;
+    var lcs = result.lcs;
+    var lcStatus = modApi.getAPILCStatus(apiData);
 
     // jaggary code which check for published in external stores
-    var publishedInExternalStores=false;
-    if(api.apiStores!=null && api.apiStores != undefined){
-    for(var i=0;i<api.apiStores.length;i++){
+    var publishedInExternalStores = false;
+    if(api.apiStores != null && api.apiStores != undefined){
+    for(var i = 0;i < api.apiStores.length; i++){
          if(api.apiStores[i].published){
               publishedInExternalStores = true;
               break;
@@ -44,7 +45,8 @@ jagg.block("life-cycles", {
             "lcData":resultData,
             "oldExist":oldExist,
             "isPublishPermitted":permitted,
-            "publishedInExternalStores":publishedInExternalStores
+            "publishedInExternalStores":publishedInExternalStores,
+            "lcStatus":lcStatus
            
         }
     },

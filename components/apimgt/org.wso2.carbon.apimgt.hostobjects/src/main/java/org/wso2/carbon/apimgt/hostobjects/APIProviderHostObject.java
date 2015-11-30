@@ -632,19 +632,19 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("inSeqFile", apiData) != null)  {
             FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
-            Icon inSeq = new Icon(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+            ResourceFile inSeq = new ResourceFile(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
             String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
                                + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME;
-            String inSeqFullPath = apiProvider.addIcon(inSeqPath, inSeq);
+            String inSeqFullPath = apiProvider.addResourceFile(inSeqPath, inSeq);
             api.setInSequence(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
         }
 
         if (apiData.get("outSeqFile", apiData) != null) {
             FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
-            Icon outSeq = new Icon(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
+            ResourceFile outSeq = new ResourceFile(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
             String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
                                 + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME;
-            String outSeqFullPath = apiProvider.addIcon(outSeqPath, outSeq);
+            String outSeqFullPath = apiProvider.addResourceFile(outSeqPath, outSeq);
             api.setOutSequence(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
         }
 
@@ -1443,9 +1443,9 @@ public class APIProviderHostObject extends ScriptableObject {
     private static String addThumbIcon(InputStream inputStream, String contentType, APIProvider apiProvider, API api)
             throws APIManagementException {
 
-        Icon thumbIcon = new Icon(inputStream, contentType);
+        ResourceFile thumbIcon = new ResourceFile(inputStream, contentType);
         String thumbPath = APIUtil.getIconPath(api.getId());
-        String thumbnailUrl = apiProvider.addIcon(thumbPath, thumbIcon);
+        String thumbnailUrl = apiProvider.addResourceFile(thumbPath, thumbIcon);
         api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
 
         /*Set permissions to anonymous role for thumbPath*/
@@ -1670,7 +1670,7 @@ public class APIProviderHostObject extends ScriptableObject {
     
                     Map http_verbs = (Map) resource.get("http_verbs");
                     Iterator iterator = http_verbs.entrySet().iterator();
-    
+
                     while (iterator.hasNext()) {
                         Map.Entry mapEntry = (Map.Entry) iterator.next();
                         Map mapEntryValue = (Map) mapEntry.getValue();
@@ -2806,6 +2806,8 @@ public class APIProviderHostObject extends ScriptableObject {
                         apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getApiName());
                         apiSet.append("::");
                         apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getVersion());
+                        apiSet.append("::");
+                        apiSet.append(apiUsages[i].getApiSubscriptions()[k].getSubCreatedStatus());
                         if (k != apiUsages[i].getApiSubscriptions().length - 1) {
                             apiSet.append(",");
                         }
@@ -2910,25 +2912,25 @@ public class APIProviderHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
 
-        boolean isTenantFlowStarted = false;
+        //boolean isTenantFlowStarted = false;
 
         try {
-        	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+            /*String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
             		isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
+            }*/
 
             content = apiProvider.getDocumentationContent(apiId, docName);
         } catch (Exception e) {
             handleException("Error while getting Inline Document Content ", e);
             return null;
-        } finally {
+        }/* finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
-        }
+        }*/
         NativeObject row = new NativeObject();
         row.put("providerName", row,APIUtil.replaceEmailDomainBack(providerName));
         row.put("apiName", row, apiName);
@@ -2963,22 +2965,22 @@ public class APIProviderHostObject extends ScriptableObject {
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-        boolean isTenantFlowStarted = false;
+        /*boolean isTenantFlowStarted = false;
         if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
         	isTenantFlowStarted = true;
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
+        }*/
         try {
             API api = apiProvider.getAPI(apiId);
             apiProvider.addDocumentationContent(api, docName, docContent);
         } catch (APIManagementException e) {
             handleException("Error occurred while adding the content of the documentation- " + docName, e);
-        } finally {
+        }/* finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
-        }
+        }*/
     }
 
     public static boolean jsFunction_addDocumentation(Context cx, Scriptable thisObj,
@@ -3065,8 +3067,11 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-            	String contentType = (String) args[10];
-                Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
+                String contentType = (String) args[10];
+                apiProvider
+                        .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
+                                contentType);
+                /*Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
                 
                 String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
                 String fname = fileHostObject.getName();
@@ -3080,6 +3085,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.setResourcePermissions(api.getId().getProviderName(),
                                                api.getVisibility(), visibleRoles,filePath);
                 doc.setFilePath(apiProvider.addIcon(filePath, icon));
+                APIUtil.setFilePermission(filePath);*/
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
@@ -3695,10 +3701,10 @@ public class APIProviderHostObject extends ScriptableObject {
             Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
+                ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
                                      fileHostObject.getJavaScriptFile().getContentType());
                 String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
+                doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
             } else if (oldDoc.getFilePath() != null) {
                 doc.setFilePath(oldDoc.getFilePath());
             }
@@ -4512,7 +4518,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-        boolean isTenantFlowStarted = false;
+        /*boolean isTenantFlowStarted = false;
         try {
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
@@ -4520,7 +4526,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);
+            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);*/
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
@@ -4529,11 +4536,11 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             handleException("Resource couldn't found for " + resource);
         }
-        } finally {
+        /*} finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
-        }
+        }*/
         return data;
     }
 

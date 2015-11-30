@@ -878,14 +878,9 @@
         <!-- Axis2 Version -->
         <axis2.wso2.version>1.6.1-wso2v14</axis2.wso2.version>
         <orbit.version.axis2>1.6.1.wso2v14</orbit.version.axis2>
-        <axis2-transports.version>1.6.1-wso2v11</axis2-transports.version>
         <axis2.osgi.version.range>[1.6.1.wso2v11, 1.7.0)</axis2.osgi.version.range>
-        <orbit.version.wsdl4j>1.6.2.wso2v4</orbit.version.wsdl4j>
-        <orbit.version.neethi>2.0.4.wso2v4</orbit.version.neethi>
-        <rampart.wso2.version>1.6.1.wso2v13</rampart.wso2.version>
 
         <!-- Apache Axiom -->
-        <axiom.version>1.2.11-wso2v6</axiom.version>
         <orbit.version.axiom>1.2.11.wso2v6</orbit.version.axiom>
         <axiom.wso2.version>1.2.11.wso2v6</axiom.wso2.version>
         <exp.pkg.version.axiom>1.2.11.wso2v6</exp.pkg.version.axiom>
@@ -902,10 +897,8 @@
         <jaggery.version>0.12.0</jaggery.version>
 
         <!-- Misc Versions -->
-        <orbit.version.h2.engine>1.2.140.wso2v3</orbit.version.h2.engine>
         <synapse.version>2.1.4-wso2v2-SNAPSHOT</synapse.version>
 
-        <ganalytics.version>4.2.0</ganalytics.version>
         <orbit.version.json>2.0.0.wso2v1</orbit.version.json>
 
         <javax.xml.soap.imp.pkg.version>[1.0.0, 1.1.0)</javax.xml.soap.imp.pkg.version>
@@ -922,7 +915,6 @@
         <wss4j.version>1.5.11.wso2v11</wss4j.version>
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.0.0.wso2v1</commons-io.version>
-        <dblock.waffle.version>1.6.wso2v1</dblock.waffle.version>
         <google.code.gson.version>2.2.4</google.code.gson.version>
         <httpcomponents.version>4.2.5</httpcomponents.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>

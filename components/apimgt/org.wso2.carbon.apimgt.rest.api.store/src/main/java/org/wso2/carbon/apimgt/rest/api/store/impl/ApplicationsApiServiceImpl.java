@@ -69,7 +69,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
         // As a improvement, we can check admin privileges of the user and honor groupId.
-        groupId = RestAPIStoreUtils.getLoggedInUserGroupIds();
+        groupId = RestAPIStoreUtils.getLoggedInUserGroupId();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -107,7 +107,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             //setting the proper groupId. This is not honored for now.
             // Later we can honor it by checking admin privileges of the user.
-            String groupId = RestAPIStoreUtils.getLoggedInUserGroupIds();
+            String groupId = RestAPIStoreUtils.getLoggedInUserGroupId();
             application.setGroupId(groupId);
             int applicationId = apiConsumer.addApplication(application, username);
 

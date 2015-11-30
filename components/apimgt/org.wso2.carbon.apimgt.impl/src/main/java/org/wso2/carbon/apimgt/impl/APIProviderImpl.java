@@ -32,7 +32,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -43,7 +42,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -54,7 +53,6 @@ import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -105,6 +103,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1253,8 +1252,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     updateApiArtifact(api, false, false);
-                    apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
-                            APIUtil.appendDomainWithUser(currentUser, tenantDomain));
+                   // apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
+                   //         APIUtil.appendDomainWithUser(currentUser, tenantDomain));
 
                     if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
                                                                                      // to be changed
@@ -1510,6 +1509,43 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Add a file to a document of source type FILE 
+     * 
+     * @param apiId API identifier the document belongs to
+     * @param documentation document
+     * @param filename name of the file
+     * @param content content of the file as an Input Stream
+     * @param contentType content type of the file
+     * @throws APIManagementException if failed to add the file
+     */
+    public void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename,
+            InputStream content, String contentType) throws APIManagementException {
+        if (Documentation.DocumentSourceType.FILE.equals(documentation.getSourceType())) {
+            ResourceFile icon = new ResourceFile(content, contentType);
+            String filePath = APIUtil.getDocumentationFilePath(apiId, filename);
+            API api;
+            try {
+                api = getAPI(apiId);
+                String visibleRolesList = api.getVisibleRoles();
+                String[] visibleRoles = new String[0];
+                if (visibleRolesList != null) {
+                    visibleRoles = visibleRolesList.split(",");
+                }
+                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        filePath);
+                documentation.setFilePath(addResourceFile(filePath, icon));
+                APIUtil.setFilePermission(filePath);
+            } catch (APIManagementException e) {
+                handleException("Failed to add file to document " + documentation.getName(), e);
+            }
+        } else {
+            String errorMsg = "Cannot add file to the Document. Document " + documentation.getName()
+                    + "'s Source type is not FILE.";
+            handleException(errorMsg);
+        }
+    }
+
+    /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
      * @param api        The API to be copied
@@ -1577,9 +1613,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiSourceArtifact.getContentStream();
                 APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
                                                            api.getId().getApiName(), newVersion);
-                Icon icon = new Icon(oldImage.getContentStream(), oldImage.getMediaType());
+                ResourceFile icon = new ResourceFile(oldImage.getContentStream(), oldImage.getMediaType());
                 artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
-                                      addIcon(APIUtil.getIconPath(newApiId), icon));
+                                      addResourceFile(APIUtil.getIconPath(newApiId), icon));
             }
             // Here we keep the old context
             String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -1819,7 +1855,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     	String documentationPath = APIUtil.getAPIDocPath(identifier) + documentationName;
     	String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
     			RegistryConstants.PATH_SEPARATOR + documentationName;
+        boolean isTenantFlowStarted = false;
         try {
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
             Resource docResource = registry.get(documentationPath);
             GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
                                                          APIConstants.DOCUMENTATION_KEY);
@@ -1866,6 +1909,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String msg = "Failed to add the documentation content of : "
                          + documentationName + " of API :" + identifier.getApiName();
             handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -2993,7 +3040,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -3002,8 +3049,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
             String currentStatus = apiArtifact.getLifecycleState();
-            if (!currentStatus.equalsIgnoreCase(targetStatus)) {
-                apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
+            String targetStatus = "";
+            if (!currentStatus.equalsIgnoreCase(action)) {
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+                targetStatus = apiArtifact.getLifecycleState();
+                if(!currentStatus.equals(targetStatus)){
+                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(), targetStatus.toUpperCase(), 
+                            this.username);
+                }
+               
             }
             return true;
         } catch (GovernanceException e) {
@@ -3171,5 +3225,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return lcData;
     }
 
+    @Override
+    public String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);            
+            return apiArtifact.getLifecycleState();
+        } catch (GovernanceException e) {
+            handleException("Failed to get the life cycle status : " + e.getMessage(), e);
+            return null;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
 
 }
