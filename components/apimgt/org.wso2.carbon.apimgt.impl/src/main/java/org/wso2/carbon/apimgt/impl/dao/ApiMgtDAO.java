@@ -2957,7 +2957,7 @@ public class ApiMgtDAO {
                         "ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
                         "IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
                         "IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
-                        "IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
+                        "ISAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
                         "AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         "AKM.STATE AS STATE " +
                         "FROM " +
