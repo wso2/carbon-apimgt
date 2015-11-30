@@ -43,8 +43,6 @@ import java.io.IOException;
 
 public class ApplicationThrottleController {
     
-    public static final String APPLICATION_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/app-tiers.xml";
-
     public static final String APP_THROTTLE_CONTEXT_PREFIX = "APP_THROTTLE_CONTEXT_";
 
     public static final String GOVERNANCE_REGISTRY_PREFIX = "gov:";
@@ -52,19 +50,20 @@ public class ApplicationThrottleController {
     private static final Log log = LogFactory.getLog(ApplicationThrottleController.class);
 
     private static final Object lock = new Object();
-    
+
     public static ThrottleContext getApplicationThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder,
-                                                                String applicationId){
+            String applicationId, String policyKeyApplication) {
         synchronized (lock) {
             Object throttleContext = dataHolder.getThrottleContext(applicationId);
             if(throttleContext == null){
-                return createThrottleContext(synCtx, dataHolder, applicationId);
+                return createThrottleContext(synCtx, dataHolder, applicationId, policyKeyApplication);
             }
             return (ThrottleContext)throttleContext;
         }
     }
 
-    private static ThrottleContext createThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder, String applicationId){
+    private static ThrottleContext createThrottleContext(MessageContext synCtx, ThrottleDataHolder dataHolder,
+            String applicationId, String policyKeyApplication) {
 
         //Object entryValue = synCtx.getEntry(APPLICATION_THROTTLE_POLICY_KEY);
         PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
@@ -86,9 +85,9 @@ public class ApplicationThrottleController {
             return null;
         }
 
-        Object entryValue = lookup(APPLICATION_THROTTLE_POLICY_KEY, tenantId);
+        Object entryValue = lookup(policyKeyApplication, tenantId);
         if (entryValue == null || !(entryValue instanceof OMElement)) {
-            handleException("Unable to load throttling policy using key: " + APPLICATION_THROTTLE_POLICY_KEY);
+            handleException("Unable to load throttling policy using key: " + policyKeyApplication);
             return null;
         }
 

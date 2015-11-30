@@ -99,7 +99,6 @@ public class APIThrottleHandler extends AbstractHandler {
     private RoleBasedAccessRateController applicationRoleBasedAccessController;
 
     public static final String RESOURCE_THROTTLE_KEY = "resource_throttle_context";
-    public static final String RESOURCE_THROTTLE_POLICY_KEY = "gov:/apimgt/applicationdata/res-tiers.xml";
 
     private Map<String, Boolean> continueOnLimitReachedMap;
 
@@ -109,9 +108,20 @@ public class APIThrottleHandler extends AbstractHandler {
      */
     private String key;
     /**
-     * The key for getting the throttling policy - key refers to a/an [registry] entry
+     * The key for getting the throttling policy - key refers to a/an [registry] Api entry
      */
     private String policyKey = null;
+
+    /**
+     * The key for getting the throttling policy - key refers to a/an [registry] Application entry
+     */
+    private String policyKeyApplication = null;
+
+    /**
+     * The key for getting the throttling policy - key refers to a/an [registry] Resource entry
+     */
+    private String policyKeyResource = null;
+
     /**
      * The concurrent access control group id
      */
@@ -518,7 +528,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 //If application level throttling is applied
                 if (applicationRoleId != null) {
                     ThrottleContext applicationThrottleContext = ApplicationThrottleController
-                            .getApplicationThrottleContext(synCtx, dataHolder, applicationId);
+                            .getApplicationThrottleContext(synCtx, dataHolder, applicationId, policyKeyApplication);
                     if (isClusteringEnable) {
                         applicationThrottleContext.setConfigurationContext(cc);
                         applicationThrottleContext.setThrottleId(id);
@@ -818,10 +828,9 @@ public class APIThrottleHandler extends AbstractHandler {
                                 PolicyEngine.getPolicy(policyOMElement));
 
                         //load the resource level tiers
-                        Object resEntryValue = synCtx.getEntry(RESOURCE_THROTTLE_POLICY_KEY);
+                        Object resEntryValue = synCtx.getEntry(this.policyKeyResource);
                         if (resEntryValue == null || !(resEntryValue instanceof OMElement)) {
-                            handleException(
-                                    "Unable to load throttling policy using key: " + RESOURCE_THROTTLE_POLICY_KEY);
+                            handleException("Unable to load throttling policy using key: " + this.policyKeyResource);
                             return;
                         }
 
@@ -923,6 +932,22 @@ public class APIThrottleHandler extends AbstractHandler {
 
     public String gePolicyKey() {
         return policyKey;
+    }
+
+    public void setPolicyKeyApplication(String policyKeyApplication) {
+        this.policyKeyApplication = policyKeyApplication;
+    }
+
+    public String gePolicyKeyApplication() {
+        return policyKeyApplication;
+    }
+
+    public void setPolicyKeyResource(String policyKeyResource) {
+        this.policyKeyResource = policyKeyResource;
+    }
+
+    public String gePolicyKeyResource() {
+        return policyKeyResource;
     }
 
     private void handleException(String msg, Exception e) {

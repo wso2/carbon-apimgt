@@ -23,7 +23,7 @@ public class APIVersionLastAccessTimeDTO {
     private String apiName;
     private String apiVersion;
     private String user;
-    private String lastAccessTime;
+    private long lastAccessTime;
 
     public String getApiName() {
         return apiName;
@@ -49,11 +49,11 @@ public class APIVersionLastAccessTimeDTO {
         this.user = user;
     }
 
-    public String getLastAccessTime() {
+    public long getLastAccessTime() {
         return lastAccessTime;
     }
 
-    public void setLastAccessTime(String lastAccessTime) {
+    public void setLastAccessTime(long lastAccessTime) {
         this.lastAccessTime = lastAccessTime;
     }
 }

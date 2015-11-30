@@ -1452,6 +1452,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Map<String, String> properties = new HashMap<String, String>();
             properties.put("id", "A");
             properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
+            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+
             if(api.getProductionMaxTps() != null){
                 properties.put("productionMaxCount",api.getProductionMaxTps());
             }

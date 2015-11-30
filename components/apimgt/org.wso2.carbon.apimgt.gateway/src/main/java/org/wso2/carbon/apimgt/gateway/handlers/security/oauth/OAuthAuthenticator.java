@@ -215,8 +215,7 @@ public class OAuthAuthenticator implements Authenticator {
                 log.debug("User is NOT authorized to access the Resource");
             }
             throw new APISecurityException(info.getValidationStatus(),
-                    "Access failure for API: " + apiContext + ", version: " + apiVersion +
-                            " with key: " + apiKey);
+                    "Access failure for API: " + apiContext + ", version: " + apiVersion);
         }
     }
 
