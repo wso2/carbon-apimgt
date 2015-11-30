@@ -50,6 +50,9 @@
             "$ref": "#/parameters/offset"
           },
           {
+            "$ref": "#/parameters/requestedTenant"
+          },
+          {
             "name": "query",
             "in": "query",
             "description": "**Search condition**.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match an API if the provider of the API is wso2.\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, tag **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n",
@@ -126,6 +129,9 @@
           },
           {
             "$ref": "#/parameters/If-Modified-Since"
+          },
+          {
+            "$ref": "#/parameters/requestedTenant"
           }
         ],
         "tags": [
@@ -185,9 +191,12 @@
             "$ref": "#/parameters/offset"
           },
           {
+            "$ref": "#/parameters/requestedTenant"
+          },
+          {
             "name": "query",
             "in": "query",
-            "description": "Search condition.\n",
+            "description": "Search condition.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"name:Readme\" will match a document if the name of the document is 'Readme'.\n\nSupported attribute modifiers are [**name, summary, type **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against document Name.\n",
             "type": "string"
           },
           {
@@ -247,6 +256,9 @@
             "$ref": "#/parameters/documentId"
           },
           {
+            "$ref": "#/parameters/requestedTenant"
+          },
+          {
             "$ref": "#/parameters/Accept"
           },
           {
@@ -283,6 +295,78 @@
           },
           "304": {
             "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested Document does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/documents/{documentId}/content": {
+      "get": {
+        "description": "Downloads a FILE type document/get the inline content or source url of a certain document.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "$ref": "#/parameters/requestedTenant"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Retrieve Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nFile or inline content returned.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "303": {
+            "description": "See Other.\nSource can be retrived from the URL specified at the Location header.\n",
+            "headers": {
+              "Location": {
+                "description": "The Source URL of the document.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
           },
           "404": {
             "description": "Not Found. \nRequested Document does not exist.\n",
@@ -402,6 +486,12 @@
           },
           "400": {
             "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "409": {
+            "description": "Conflict. \nApplication already exists.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -663,7 +753,7 @@
     "/subscriptions": {
       "get": {
         "x-scope": "API_SUBSCRIBER_SCOPE",
-        "description": "Get subscription list.\nThe API Identifier and corresponding Application Identifier\nthe subscriptions of which are to be returned are passed as parameters.\n",
+        "description": "Get subscription list.\nThe API Identifier or Application Identifier\nthe subscriptions of which are to be returned are passed as parameters.\n",
         "parameters": [
           {
             "$ref": "#/parameters/apiId-Q"
@@ -866,6 +956,7 @@
     },
     "/tiers": {
       "get": {
+        "x-scope": "API_SUBSCRIBER_SCOPE",
         "description": "Get available tiers\n",
         "parameters": [
           {
@@ -919,6 +1010,7 @@
     },
     "/tiers/{tierName}": {
       "get": {
+        "x-scope": "API_SUBSCRIBER_SCOPE",
         "description": "Get tier details\n",
         "parameters": [
           {
@@ -979,7 +1071,7 @@
     },
     "/tags": {
       "get": {
-        "description": "Get a list of predefined sequences\n",
+        "description": "Get a list of tags that are already added to APIs\n",
         "parameters": [
           {
             "$ref": "#/parameters/limit"
@@ -1041,6 +1133,13 @@
     }
   },
   "parameters": {
+    "requestedTenant": {
+      "name": "X-WSO2-Tenant",
+      "in": "header",
+      "description": "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be \n  retirieved from.\n",
+      "required": false,
+      "type": "string"
+    },
     "apiId": {
       "name": "apiId",
       "in": "path",
@@ -1259,6 +1358,9 @@
             "type": "string"
           }
         },
+        "thumbnailUrl": {
+          "type": "string"
+        },
         "businessInformation": {
           "properties": {
             "businessOwner": {
@@ -1303,9 +1405,7 @@
     "Application": {
       "title": "Application",
       "required": [
-        "applicationId",
         "name",
-        "subscriber",
         "throttlingTier"
       ],
       "properties": {

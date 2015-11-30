@@ -30,13 +30,13 @@
       "x-wso2-scopes": [
         {
           "description": "",
-          "roles": "publisher",
+          "roles": "admin",
           "name": "API_PUBLISHER_SCOPE",
           "key": "API_PUBLISHER_SCOPE"
         },
         {
           "description": "",
-          "roles": "creator",
+          "roles": "admin",
           "name": "API_CREATOR_SCOPE",
           "key": "API_CREATOR_SCOPE"
         },
@@ -498,7 +498,7 @@
           {
             "name": "query",
             "in": "query",
-            "description": "Search condition.\n",
+            "description": "Search condition.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"name:Readme\" will match a document if the name of the document is 'Readme'.\n\nSupported attribute modifiers are [**name, summary, type **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against document Name.\n",
             "type": "string"
           },
           {
@@ -770,6 +770,161 @@
           },
           "404": {
             "description": "Not Found. \nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/documents/{documentId}/content": {
+      "get": {
+        "description": "Downloads a FILE type document/get the inline content or source url of a certain document.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Retrieve Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nFile or inline content returned.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "303": {
+            "description": "See Other.\nSource can be retrived from the URL specified at the Location header.\n",
+            "headers": {
+              "Location": {
+                "description": "The Source URL of the document.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested Document does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-scope": "API_CREATOR_SCOPE",
+        "description": "Upload a file to a document or add inline content to the document.\n\nDocument's source type should be **FILE** in order to upload a file to the document using **file** parameter.\nDocument's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.\n\nOnly one of **file** or **inlineContent** can be specified at one time.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "in": "formData",
+            "name": "file",
+            "description": "Document to upload",
+            "type": "file",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "inlineContent",
+            "description": "Inline content of the document",
+            "type": "string",
+            "required": false
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Update Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nDocument updated\n",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            },
+            "headers": {
+              "Location": {
+                "description": "The URL of the updated content of the document.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nThe resource to be updated does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1687,6 +1842,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "thumbnailUrl": {
+          "type": "string"
         },
         "visibility": {
           "type": "string",
