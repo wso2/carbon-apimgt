@@ -3050,8 +3050,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!currentStatus.equalsIgnoreCase(action)) {
                 apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
                 targetStatus = apiArtifact.getLifecycleState();
-                apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(), targetStatus.toUpperCase(), 
-                        this.username);
+                if(!currentStatus.equals(targetStatus)){
+                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(), targetStatus.toUpperCase(), 
+                            this.username);
+                }
+               
             }
             return true;
         } catch (GovernanceException e) {
