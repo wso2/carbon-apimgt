@@ -69,9 +69,11 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         else{
         ErrorDTO errorDetail = new ErrorDTO();
         errorDetail.setCode((long)401);
+        errorDetail.setMoreInfo("");
+        errorDetail.setMessage("");
         errorDetail.setDescription("Unauthenticated request");
             Response response = Response
-                    .status(Response.Status.BAD_REQUEST)
+                    .status(Response.Status.UNAUTHORIZED)
                     .entity(errorDetail)
                     .build();
         inMessage.getExchange().put(Response.class, response);
