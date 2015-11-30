@@ -84,8 +84,8 @@ include("/jagg/jagg.jag");
             if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
                 obj = {
                     "subscriptionCallbackResponse" : {
-                        "error":"true",
-                        "message":result.message
+                        "error" : "true",
+                        "message" : result.error.javaException.message
                     }
                 };
                 response.status = 404;
@@ -123,8 +123,8 @@ include("/jagg/jagg.jag");
             if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
                 obj = {
                     "subscriptionCallbackResponse" : {
-                        "error":"true",
-                        "message":result.message
+                        "error" : "true",
+                        "message" : result.error.javaException.message
                     }
                 };
                 response.status = 404;
