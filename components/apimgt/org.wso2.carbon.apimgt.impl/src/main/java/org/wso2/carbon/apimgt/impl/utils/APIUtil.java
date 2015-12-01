@@ -1618,42 +1618,33 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of API availability tiers as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getAppTiers() throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry();
-
-            return getTiers(registry, APIConstants.APP_TIER_LOCATION);
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getAppTiers(int tenantId) throws APIManagementException {
+    public static Map<String, Tier> getTiers(int tierType, String tenantDomain) throws APIManagementException {
+        boolean isTenantFlowStarted = false;
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
 
-            return getTiers(registry, APIConstants.APP_TIER_LOCATION);
+            if (tierType == APIConstants.TIER_API_TYPE) {
+                return getTiers(registry, APIConstants.API_TIER_LOCATION);
+            } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                return getTiers(registry, APIConstants.RES_TIER_LOCATION);
+            } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                return getTiers(registry, APIConstants.APP_TIER_LOCATION);
+            } else {
+                throw new APIManagementException("No such a tier type : " + tierType);
+            }
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -1662,54 +1653,10 @@ public final class APIUtil {
             String msg = "Malformed XML found in the API tier policy resource";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Returns a map of API availability tiers as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getResTiers() throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry();
-
-            return getTiers(registry, APIConstants.RES_TIER_LOCATION);
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Returns a map of API availability tiers of the tenant as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getResTiers(int tenantId) throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-
-            return getTiers(registry, APIConstants.RES_TIER_LOCATION);
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -2505,6 +2452,7 @@ public final class APIUtil {
      */
     private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
             throws APIManagementException {
+        InputStream inputStream = null;
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
@@ -2519,7 +2467,7 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding API tier policies to the tenant's registry");
             }
-            InputStream inputStream = FileUtils.openInputStream(new File(fileName));
+            inputStream = FileUtils.openInputStream(new File(fileName));
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -2529,6 +2477,14 @@ public final class APIUtil {
             throw new APIManagementException("Error while saving policy information to the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy file content", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("Error when closing input stream", e);
+                }
+            }
         }
     }
 
