@@ -4,8 +4,8 @@ jagg.module("tiers", {
     getTiers:function () {
         return jagg.require(jagg.getModulesDir() + "tiers/tiers.jag").getTiers.apply(this, arguments);
     },
-    getAppTiers:function () {
-        return jagg.require(jagg.getModulesDir() + "tiers/tiers.jag").getAppTiers.apply(this, arguments);
+    getApplicationTiers:function () {
+        return jagg.require(jagg.getModulesDir() + "tiers/tiers.jag").getApplicationTiers.apply(this, arguments);
     },
     getDeniedTiers:function () {
         return jagg.require(jagg.getModulesDir() + "tiers/tiers.jag").getDeniedTiers.apply(this, arguments);

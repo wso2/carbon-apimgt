@@ -67,9 +67,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.*;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -1227,13 +1225,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
         Map<String, APIVersionLastAccessTimeDTO> accessTimeByAPI = new TreeMap<String, APIVersionLastAccessTimeDTO>();
         List<APIVersionLastAccessTimeDTO> accessTimeDTOs = new ArrayList<APIVersionLastAccessTimeDTO>();
-        DateFormat dateFormat = new SimpleDateFormat();
         for (Map.Entry<String, APIAccessTime> entry : lastAccessTimes.entrySet()) {
             APIVersionLastAccessTimeDTO accessTimeDTO = new APIVersionLastAccessTimeDTO();
             accessTimeDTO.setApiName(entry.getKey());
             APIAccessTime lastAccessTime = entry.getValue();
             accessTimeDTO.setApiVersion(lastAccessTime.getApiVersion());
-            accessTimeDTO.setLastAccessTime(dateFormat.format(lastAccessTime.getAccessTime()));
+            accessTimeDTO.setLastAccessTime(lastAccessTime.getAccessTime());
             accessTimeDTO.setUser(lastAccessTime.getUsername());
             accessTimeByAPI.put(entry.getKey(), accessTimeDTO);
         }
@@ -1607,7 +1604,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
-                return o2.getLastAccessTime().compareToIgnoreCase(o1.getLastAccessTime());
+                return (int) (o2.getLastAccessTime() - o1.getLastAccessTime());
             }
         });
         if (usageData.size() > limit) {
