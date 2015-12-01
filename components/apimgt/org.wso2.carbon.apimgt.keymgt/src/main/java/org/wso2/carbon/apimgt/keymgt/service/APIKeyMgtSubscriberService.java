@@ -656,9 +656,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
     public void clearOAuthCache(String consumerKey, String authorizedUser) {
         OAuthCache oauthCache;
-        CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
+        OAuthCacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
         if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
-            oauthCache = OAuthCache.getInstance(OAuthServerConfiguration.getInstance().getOAuthCacheTimeout());
+            oauthCache = OAuthCache.getInstance();
             oauthCache.clearCacheEntry(cacheKey);
         }
     }
