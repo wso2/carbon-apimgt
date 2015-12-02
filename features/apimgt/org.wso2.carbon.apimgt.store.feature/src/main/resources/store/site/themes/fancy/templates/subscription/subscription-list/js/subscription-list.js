@@ -250,16 +250,15 @@ $(document).ready(function () {
         return false;
     });
 
-    $('.curlHelp_popup_prod').click(function(){
-        $('#curlProdtoken_help').toggle('fast', function()
-        {
+    $('.curlHelp_popup_prod').click(function () {
+        $('#curlProdtoken_help').toggle('fast', function() {
             $('#curlProdtoken_help').html(i18n.t('info.curlHelpMsg'));
         });
         return false;
     });
 
-    $('.curlHelp_popup_sand').click(function(){
-        $('#curlSandtoken_help').toggle('fast', function(){
+    $('.curlHelp_popup_sand').click(function () {
+        $('#curlSandtoken_help').toggle('fast', function () {
             $('#curlSandtoken_help').html(i18n.t('info.curlHelpMsg'));
         });
         return false;

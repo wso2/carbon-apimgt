@@ -531,5 +531,13 @@ public interface APIProvider extends APIManager {
       */
      boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus, 
              Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException;
+     
+     /**
+      * Get the current lifecycle status of the api
+      * @param apiIdentifier Api identifier
+      * @return Current lifecycle status
+      * @throws APIManagementException
+      */
+     String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
     
 }

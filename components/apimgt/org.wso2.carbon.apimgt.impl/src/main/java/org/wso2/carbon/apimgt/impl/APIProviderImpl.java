@@ -1252,8 +1252,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     updateApiArtifact(api, false, false);
-                    apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
-                            APIUtil.appendDomainWithUser(currentUser, tenantDomain));
+                   // apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
+                   //         APIUtil.appendDomainWithUser(currentUser, tenantDomain));
 
                     if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
                                                                                      // to be changed
@@ -3040,7 +3040,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -3049,8 +3049,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
             String currentStatus = apiArtifact.getLifecycleState();
-            if (!currentStatus.equalsIgnoreCase(targetStatus)) {
-                apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
+            String targetStatus = "";
+            if (!currentStatus.equalsIgnoreCase(action)) {
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+                targetStatus = apiArtifact.getLifecycleState();
+                if(!currentStatus.equals(targetStatus)){
+                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(), targetStatus.toUpperCase(), 
+                            this.username);
+                }
+               
             }
             return true;
         } catch (GovernanceException e) {
@@ -3218,5 +3225,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return lcData;
     }
 
+    @Override
+    public String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);            
+            return apiArtifact.getLifecycleState();
+        } catch (GovernanceException e) {
+            handleException("Failed to get the life cycle status : " + e.getMessage(), e);
+            return null;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
 
 }

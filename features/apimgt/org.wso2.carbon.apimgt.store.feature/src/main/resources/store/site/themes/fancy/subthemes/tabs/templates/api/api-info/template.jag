@@ -4,9 +4,8 @@
         result = mod.getAllTags();
         var tags = result.tags;
         var i, tag,  length = tags.length;
-        var urlPrefix;
         var tenant=request_tenant;
-        if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+        var urlPrefix = jagg.getTenantURLPrefix();
    %>
 <% jagg.includeBlock("search/api-search", {tag:'Databases-group'}); %>
 
@@ -40,9 +39,9 @@
 
                                     <%
                                     var i, length, app, thumbURL, api = outputs.api, apps = outputs.applications, deniedTiers = outputs.deniedTiers, user = outputs.user,isRatingActivated = outputs.isRatingActivated;
-                                    var urlPrefix;
+                                    
                                     var tenant=request_tenant;
-                                    if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+                                    var urlPrefix = jagg.getTenantURLPrefix();
                                     %>
                                     <%if(api!=null){
 

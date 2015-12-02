@@ -1,17 +1,18 @@
 <% jagg.template("life-cycles", function(inputs, outputs, jagg) {
 if(outputs.isPublishPermitted){
         var api = outputs.api;
-        var oldExist=outputs.oldExist;
-        var lcs=outputs.lcs;
-        var lcData=outputs.lcData; 
-        var publishedInExternalStores=outputs.publishedInExternalStores; 
-        var i,resCount,rowNums = [];     
+        var oldExist = outputs.oldExist;
+        var lcs = outputs.lcs;
+        var lcData = outputs.lcData; 
+        var publishedInExternalStores = outputs.publishedInExternalStores; 
+        var i,resCount,rowNums = [];  
+        var lcStatus = outputs.lcStatus   
  %>
 
 <script type="text/javascript">
 $(document).ready(function() {
 // call when page load to display message if the API is published to external stores and status is not published
-checkExternalStores('<%=api.status%>');
+checkExternalStores('<%=lcStatus%>');
 });
 
 function setChecklistItemVal(element,order) {
@@ -49,7 +50,7 @@ var provider=$("#provider").val();
 };
 
 
-var initOf_state = '<%=api.status%>';
+var initOf_state = '<%=lcStatus%>';
 // java script variable to store the status
 var publishedInExternalStores=<%=publishedInExternalStores%>;
 </script>
@@ -70,7 +71,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
      <div class="control-group">
                 <label class="control-label" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
                 <div class="control-label">
-                    <b><% print(api.status); %></b>                    
+                    <b><% print(lcStatus); %></b>                    
                     
                  </div> <br/>
                  <div class="controls publishCheckBoxes">  
@@ -97,7 +98,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
        <% for (var i=0;i<lcData.nextStates.length;i++) {
            var next = lcData.nextStates[i].toLowerCase();
       
-            if(api.status=="CREATED"){ 
+            if(lcStatus=="CREATED" || lcStatus=="PROTOTYPED"){ 
 	             if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>                      
 	                <input type="button" id="actionButton" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	           <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>

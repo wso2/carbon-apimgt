@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 public class HttpWorkflowResponse implements WorkflowResponse {
 
     private String redirectUrl = "";
-    private String displayUrl = "";
+    private String redirectConfirmationMsg = "";
     private JSONObject jsonPayloadObj = new JSONObject();
     private JSONObject additionalParameters = new JSONObject();
 
@@ -33,7 +33,7 @@ public class HttpWorkflowResponse implements WorkflowResponse {
     @SuppressWarnings("unchecked")
     public String getJSONPayload() {
        jsonPayloadObj.put("redirectUrl", redirectUrl);
-       jsonPayloadObj.put("displayUrl", displayUrl);
+       jsonPayloadObj.put("redirectConfirmationMsg", redirectConfirmationMsg);
        jsonPayloadObj.put("additionalParameters", additionalParameters);
        return jsonPayloadObj.toJSONString();
     }
@@ -46,12 +46,12 @@ public class HttpWorkflowResponse implements WorkflowResponse {
         this.redirectUrl = redirectUrl;
     }
 
-    public String getDisplayUrl() {
-        return displayUrl;
+    public String getRedirectConfirmationMsg() {
+        return redirectConfirmationMsg;
     }
 
-    public void setDisplayUrl(String displayUrl) {
-        this.displayUrl = displayUrl;
+    public void setRedirectConfirmationMsg(String redirectConfirmationMsg) {
+        this.redirectConfirmationMsg = redirectConfirmationMsg;
     }
 
     @SuppressWarnings("unchecked")

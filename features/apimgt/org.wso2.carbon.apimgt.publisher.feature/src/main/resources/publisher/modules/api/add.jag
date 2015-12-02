@@ -259,7 +259,7 @@ var getTiers = function () {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("getTiers " +  " : " + tierArray);
+            log.debug("getTiers " +  " : " + stringify(tierArray));
         }
 
         return {
@@ -298,7 +298,7 @@ var getResourceTiers = function () {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("getTiers " +  " : " + tierArray);
+            log.debug("getTiers " +  " : " + stringify(tierArray));
         }
 
         return {
