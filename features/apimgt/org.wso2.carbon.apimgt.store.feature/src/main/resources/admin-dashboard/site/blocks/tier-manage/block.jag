@@ -1,7 +1,0 @@
-<%
-include("/jagg/jagg.jag");
-
-jagg.block("tier-manage", {
-    initializer:function (data) {}
-});
-%>
