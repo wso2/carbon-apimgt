@@ -936,9 +936,6 @@ public final class APIConstants {
 
     public static final long MAX_FILE_SIZE = 1024L;
 
-    public static final String API_CUSTOM_IN_SEQUENCE_FILE_NAME = "custom_in_sequence.xml";
-    public static final String API_CUSTOM_OUT_SEQUENCE_FILE_NAME = "custom_out_sequence.xml";
-
     public static final String REGISTRY_RESOURCE_PREFIX="/registry/resource";
 
     public static enum RegistryResourceTypesForUI {
