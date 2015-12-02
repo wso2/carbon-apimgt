@@ -5,6 +5,9 @@ $(document).ready(function(){
         var type = '';
         var thisID = $(this).attr('id');
         var attr = $(this).attr('url-type');
+        var providerName = $(this).attr('providerName');
+        var apiName = $(this).attr('apiName');
+        var apiVersion = $(this).attr('apiVersion');
         if (attr) {
             type = $(btn).attr('url-type');
         } else {
@@ -30,7 +33,7 @@ $(document).ready(function(){
         if (!type) {
             type = "";
         }
-        jagg.post("/site/blocks/item-add/ajax/add.jag", { action:"isURLValid", type:type,url:url },
+        jagg.post("/site/blocks/item-add/ajax/add.jag", { action:"isURLValid", type:type, url:url, providerName:providerName, apiName:apiName, apiVersion:apiVersion },
                   function (result) {
                       if (!result.error) {
                           if (result.response.response == "success") {

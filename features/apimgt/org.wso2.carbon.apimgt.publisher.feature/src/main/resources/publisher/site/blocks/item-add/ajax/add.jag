@@ -226,7 +226,7 @@ if(jagg.isCSRFTokenValid())
             var providerName = request.getParameter("providerName");
             var apiName = request.getParameter("apiName");
             var apiVersion = request.getParameter("apiVersion");
-            result = mod.isURLValid(type, url, invalidStatusCodesRegex, provideName, apiName, apiVersion);
+            result = mod.isURLValid(type, url, invalidStatusCodesRegex, providerName, apiName, apiVersion);
             if (result.error) {
                 obj = {
                     error:true,
