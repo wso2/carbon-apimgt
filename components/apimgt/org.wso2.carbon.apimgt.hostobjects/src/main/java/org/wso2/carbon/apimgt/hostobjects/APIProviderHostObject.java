@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
@@ -91,6 +92,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
+import javax.xml.namespace.QName;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
@@ -633,19 +635,35 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("inSeqFile", apiData) != null)  {
             FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
             ResourceFile inSeq = new ResourceFile(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+            String inSeqFileName;
+            try {
+                OMElement seqElment = APIUtil.buildOMElement(inSeqFile.getInputStream());
+                inSeqFileName = seqElment.getAttributeValue(new QName("name"));
+            } catch (Exception e) {
+                log.error("An Error has occurred while reading custom sequence file");
+                throw new APIManagementException("An Error has occurred while reading custom sequence file");
+            }
             String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
-                               + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME;
+                               + inSeqFileName;
             String inSeqFullPath = apiProvider.addResourceFile(inSeqPath, inSeq);
-            api.setInSequence(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
+            api.setInSequence(inSeqFileName);
         }
 
         if (apiData.get("outSeqFile", apiData) != null) {
             FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
             ResourceFile outSeq = new ResourceFile(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
+            String outSeqFileName;
+            try {
+                OMElement seqElment = APIUtil.buildOMElement(outSeqFile.getInputStream());
+                outSeqFileName = seqElment.getAttributeValue(new QName("name"));
+            } catch (Exception e) {
+                log.error("An Error has occurred while reading custom sequence file");
+                throw new APIManagementException("An Error has occurred while reading custom sequence file");
+            }
             String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
-                                + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME;
+                                + outSeqFileName;
             String outSeqFullPath = apiProvider.addResourceFile(outSeqPath, outSeq);
-            api.setOutSequence(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
+            api.setOutSequence(outSeqFileName);
         }
 
         return saveAPI(apiProvider, api, null, false);
@@ -4150,7 +4168,7 @@ public class APIProviderHostObject extends ScriptableObject {
 	public static NativeArray jsFunction_getCustomOutSequences(Context cx, Scriptable thisObj,
 	                                                        Object[] args, Function funObj)
             throws APIManagementException {
-        if (args == null ||  args.length != 3) {
+        if (args == null ||  args.length < 3) {
             handleException("Invalid input parameters.");
         }
 		APIProvider apiProvider = getAPIProvider(thisObj);
@@ -4189,7 +4207,7 @@ public class APIProviderHostObject extends ScriptableObject {
     public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
                                                               Object[] args, Function funObj)
             throws APIManagementException {
-        if (args == null ||  args.length != 3) {
+        if (args == null ||  args.length < 3) {
             handleException("Invalid input parameters.");
         }
         APIProvider apiProvider = getAPIProvider(thisObj);
