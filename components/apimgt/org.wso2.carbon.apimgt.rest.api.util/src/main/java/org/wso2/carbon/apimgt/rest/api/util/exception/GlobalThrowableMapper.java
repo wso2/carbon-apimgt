@@ -69,6 +69,10 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
             return ((ConflictException) e).getResponse();
         }
 
+        if (e instanceof MethodNotAllowedException) {
+            return ((MethodNotAllowedException) e).getResponse();
+        }
+
         if (e instanceof JsonParseException) {
             //noinspection ThrowableResultOfMethodCallIgnored
             return RestApiUtil.buildBadRequestException("Malformed request body.").getResponse();

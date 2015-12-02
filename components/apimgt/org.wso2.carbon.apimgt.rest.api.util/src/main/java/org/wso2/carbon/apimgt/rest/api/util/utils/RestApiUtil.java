@@ -48,10 +48,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.*;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
@@ -63,6 +60,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -271,6 +269,19 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a new MethodNotAllowedException
+     * 
+     * @param method http method
+     * @param resource resource which the method is not allowed
+     * @return a new MethodNotAllowedException consists of the error message
+     */
+    public static MethodNotAllowedException buildMethodNotAllowedException(String method, String resource) {
+        String description = "Method " + method + " is not supported for " + resource;
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 405l, description);
+        return new MethodNotAllowedException(errorDTO);
+    }
+
+    /**
      * Returns a new ConflictException
      * 
      * @param description description of the exception
@@ -355,6 +366,22 @@ public class RestApiUtil {
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                 .getTenantId(tenantDomain);
         return tenantId != -1;
+    }
+
+    /**
+     * Check whether the HTTP method is allowed for given resources
+     *
+     * @param method HTTP method
+     * @param resource requested resource
+     * @throws MethodNotAllowedException if the method is not supported
+     */
+    public static void checkAllowedMethodForResource(String method, String resource) throws MethodNotAllowedException {
+        if (RestApiConstants.RESOURCE_PATH_TIERS_APPLICATION.equals(resource)
+                || RestApiConstants.RESOURCE_PATH_TIERS_RESOURCE.equals(resource)) {
+            if (!"GET".equals(method)) {
+                throw RestApiUtil.buildMethodNotAllowedException(method, resource);
+            }
+        }
     }
 
     /**
@@ -480,12 +507,15 @@ public class RestApiUtil {
 
     /** Returns the paginated url for tiers
      *
+     * @param tierLevel tier level (api/application or resource)
+     * @param tierLevel   tier level (api/application or resource)
      * @param offset starting index
      * @param limit max number of objects returned
      * @return constructed paginated url
      */
-    public static String getTiersPaginatedURL(Integer offset, Integer limit) {
+    public static String getTiersPaginatedURL(String tierLevel, Integer offset, Integer limit) {
         String paginatedURL = RestApiConstants.TIERS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.TIER_LEVEL_PARAM, tierLevel);
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         return paginatedURL;
@@ -526,6 +556,22 @@ public class RestApiUtil {
             }
         }
         return invalidTiers;
+    }
+
+    /**
+     * Search the tier in the given collection of Tiers. Returns it if it is included there. Otherwise return null
+     *
+     * @param tiers    Tier Collection
+     * @param tierName Tier to find
+     * @return Matched tier with its name
+     */
+    public static Tier findTier(Collection<Tier> tiers, String tierName) {
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
+                return tier;
+            }
+        }
+        return null;
     }
 
     /**
