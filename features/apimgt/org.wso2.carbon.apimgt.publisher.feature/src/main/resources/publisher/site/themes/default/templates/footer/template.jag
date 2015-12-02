@@ -6,9 +6,9 @@
                                        <h5><%=i18n.localize("gettingStarted")%></h5>
 
                                           <ul class="help-links">
-                                          <li><a href="https://docs.wso2.com/display/AM190/Getting+Started"><%=i18n.localize("gettingStartedGuide")%></a></li>
-                                          <li><a href="https://docs.wso2.com/display/AM190/Installing+the+Product" target="_blank"><%=i18n.localize("installationGuide")%></a></li>
-                                          <li><a href="https://docs.wso2.com/display/AM190/Quick+Start+Guide" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
+                                          <li><a href="https://docs.wso2.com/display/AM1100/Getting+Started"><%=i18n.localize("gettingStartedGuide")%></a></li>
+                                          <li><a href="https://docs.wso2.com/display/AM1100/Installing+the+Product" target="_blank"><%=i18n.localize("installationGuide")%></a></li>
+                                          <li><a href="https://docs.wso2.com/display/AM1100/Quick+Start+Guide" target="_blank"><%=i18n.localize("quickStartGuide")%></a></li>
                                           </ul>
                                    </div>
                                    <div class="span10 help-and-links">
@@ -26,7 +26,7 @@
                                        <div class="pull-left">
                                            <h5><%=i18n.localize("documentationSupport")%></h5>
                                            <ul class="help-links">
-                                            <li><a target="_blank" href="https://docs.wso2.com/display/AM190/WSO2+API+Manager+Documentation"><%=i18n.localize("productDocumentation")%></a></li>
+                                            <li><a target="_blank" href="https://docs.wso2.com/display/AM1100/WSO2+API+Manager+Documentation"><%=i18n.localize("productDocumentation")%></a></li>
                                             <li><a target="_blank" href="http://wso2.com/support"><%=i18n.localize("getSupport")%></a></li>
                                             <li><a target="_blank" href="http://wso2.com/products/api-manager/"><%=i18n.localize("productHome")%></a></li>
                                            </ul>
