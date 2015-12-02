@@ -147,6 +147,21 @@ public class RestApiUtil {
 
     }
 
+    /**
+     * Url validator, Allow any url with https and http.
+     * Allow any url without fully qualified domain
+     *
+     * @param url Url as string
+     * @return boolean type stating validated or not
+     */
+    public static boolean isURL(String url) {
+
+        Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(url);
+        return matcher.matches();
+
+    }
+
     public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
     }

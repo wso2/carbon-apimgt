@@ -66,7 +66,8 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";
     public static final String RESOURCE_PATH_TAGS = "/tags";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
-    public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM + "/content";
+    public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
+    public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String REST_API_STORE_CONTEXT="store_rest_api";
     public static final String REST_API_STORE_VERSION="v1";
     public static final String REST_API_PUBLISHER_VERSION="v1";

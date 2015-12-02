@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.util.exception;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -76,6 +77,13 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
         if (e instanceof JsonParseException) {
             //noinspection ThrowableResultOfMethodCallIgnored
             return RestApiUtil.buildBadRequestException("Malformed request body.").getResponse();
+        }
+
+        if (e instanceof JsonMappingException) {
+            //noinspection ThrowableResultOfMethodCallIgnored
+            return RestApiUtil
+                    .buildBadRequestException("One or more request body parameters contain disallowed values.")
+                    .getResponse();
         }
 
         //unknown exception log and return
