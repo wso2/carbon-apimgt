@@ -927,7 +927,7 @@ paths:
 ######################################################
 # The "Tier Collection" resource APIs
 ######################################################
-  /tiers:
+  /tiers/{tierLevel}:
 
 #-----------------------------------------------------
 # Retrieve the list of all available tiers
@@ -939,6 +939,7 @@ paths:
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -976,7 +977,7 @@ paths:
 ######################################################
 # The "Individual Tier" resource APIs
 ######################################################
-  '/tiers/{tierName}':
+  '/tiers/{tierLevel}/{tierName}':
 
 #-----------------------------------------------------
 # Retrieve a certain tier
@@ -987,6 +988,7 @@ paths:
         Get tier details
       parameters:
         - $ref: '#/parameters/tierName'
+        - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1200,6 +1202,19 @@ parameters:
       Tier name
     required: true
     type: string
+
+# Tier Type
+# Specified as part of the path expression
+  tierLevel:
+    name: tierLevel
+    in: path
+    description: |
+      List API or Application type tiers.
+    type: string
+    enum:
+      - api
+      - application
+    required: true
 
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET
@@ -1578,6 +1593,11 @@ definitions:
         type: string
       description:
         type: string
+      tierLevel:
+        type: string
+        enum:
+          - api
+          - application
       attributes:
         description: |
           Custom attributes added to the tier policy

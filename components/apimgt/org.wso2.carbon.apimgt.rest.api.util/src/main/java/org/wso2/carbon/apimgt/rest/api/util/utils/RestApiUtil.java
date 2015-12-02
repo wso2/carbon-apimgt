@@ -229,6 +229,17 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a new NotFoundException
+     *
+     * @param description description of the error
+     * @return a new NotFoundException with the specified details as a response DTO
+     */
+    public static NotFoundException buildNotFoundException(String description) {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
+        return new NotFoundException(errorDTO);
+    }
+
+    /**
      * Returns a new ForbiddenException
      * 
      * @param resource Resource type
