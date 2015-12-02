@@ -64,6 +64,8 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
         else{
             ErrorDTO errorDetail = new ErrorDTO();
             errorDetail.setCode((long)401);
+            errorDetail.setMoreInfo("");
+            errorDetail.setMessage("");
             errorDetail.setDescription("Unauthenticated request");
             Response response = Response
                     .status(Response.Status.UNAUTHORIZED)

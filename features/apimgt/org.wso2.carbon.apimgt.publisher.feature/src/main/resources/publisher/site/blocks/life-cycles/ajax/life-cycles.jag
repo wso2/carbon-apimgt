@@ -26,10 +26,10 @@ if(jagg.isCSRFTokenValid())
         var requireResubscription = request.getParameter("requireResubscription");
         var isTrueSet;
 
-        var olderVersionExists = mod.isAPIOlderVersionExist(apiData);
-        var apiInfo = mod.getAPI(apiData);
+        var olderVersionExists = mod.isAPIOlderVersionExist(apiData);     
+        var apiCurrentStatus = mod.getAPILCStatus(apiData);
         //checklist items only in create state
-        if(!olderVersionExists.error && olderVersionExists.exist && apiInfo.api.status == 'CREATED') {
+        if(!olderVersionExists.error && olderVersionExists.exist && apiCurrentStatus == 'CREATED') {
             if(deprecateOldVersions != null && 
                 (deprecateOldVersions.toLowerCase() == "true" || deprecateOldVersions.toLowerCase() == "false")) {           
                 isTrueSet = (deprecateOldVersions.toLowerCase() === 'true');

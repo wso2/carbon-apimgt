@@ -76,6 +76,12 @@ public final class APIConstants {
 
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
+    public static final int TIER_API_TYPE = 0;
+
+    public static final int TIER_RESOURCE_TYPE = 1;
+
+    public static final int TIER_APPLICATION_TYPE = 2;
+
     public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
 
     public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
@@ -904,6 +910,7 @@ public final class APIConstants {
     public static final String API_DATA_PROVIDER = "provider";
     public static final String API_DATA_VERSION = "version";
     public static final String API_DATA_DESCRIPTION = "description";
+    public static final String API_DATA_BUSINESS_OWNER = "businessOwner";
     public static final String API_DATA_RATES = "rates";
     public static final String API_DATA_ENDPOINT = "endpoint";
     public static final String API_DATA_THUMB_URL= "thumbnailurl";

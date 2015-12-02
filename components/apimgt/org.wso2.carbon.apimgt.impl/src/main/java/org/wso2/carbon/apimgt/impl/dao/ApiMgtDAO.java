@@ -2957,7 +2957,7 @@ public class ApiMgtDAO {
                         "ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
                         "IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
                         "IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
-                        "IAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
+                        "ISAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
                         "AKM.KEY_TYPE AS TOKEN_TYPE, " +
                         "AKM.STATE AS STATE " +
                         "FROM " +
@@ -3094,7 +3094,7 @@ public class ApiMgtDAO {
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
-                        "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
+                        " IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +
@@ -5076,19 +5076,18 @@ public class ApiMgtDAO {
         ResultSet resultSet = null;
         int appId = 0;
 
-        String sqlQuery = "SELECT " +
-                "   APP.APPLICATION_ID " +
-                "FROM " +
-                "   AM_APPLICATION APP," +
-                "   AM_SUBSCRIBER SUB " +
-                "WHERE " +
-                "   APP.NAME= ?" +
-                "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
+        String sqlQuery = "SELECT "
+                          + "   APP.APPLICATION_ID "
+                          + "FROM "
+                          + "   AM_APPLICATION APP,"
+                          + "   AM_SUBSCRIBER SUB "
+                          + "WHERE "
+                          + "   APP.NAME = ?"
+                          + "   AND APP.SUBSCRIBER_ID = SUB.SUBSCRIBER_ID";
 
         String whereClauseWithGroupId = " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' AND SUB.USER_ID = ?))";
         String whereClauseWithGroupIdCaseInsensitive =
-                " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " + "AND LOWER(SUB.USER_ID) = " +
-                        "LOWER(?)))";
+                " AND (APP.GROUP_ID = ? OR (APP.GROUP_ID = '' " + "AND LOWER(SUB.USER_ID) = LOWER(?)))";
         String whereClause = " AND SUB.USER_ID = ? ";
         String whereClauseCaseInsensitive = " AND LOWER(SUB.USER_ID) = LOWER(?) ";
 
@@ -5121,7 +5120,7 @@ public class ApiMgtDAO {
 
             resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 appId = resultSet.getInt("APPLICATION_ID");
             }
 
@@ -5902,6 +5901,19 @@ public class ApiMgtDAO {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
+            recordAPILifeCycleEvent(identifier, oldStatus.toString(), newStatus.toString(), userId, conn);
+        } catch (SQLException e) {
+            handleException("Failed to record API state change", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+    }
+    
+    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus,
+            String userId) throws APIManagementException {
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
             recordAPILifeCycleEvent(identifier, oldStatus, newStatus, userId, conn);
         } catch (SQLException e) {
             handleException("Failed to record API state change", e);
@@ -5910,8 +5922,8 @@ public class ApiMgtDAO {
         }
     }
 
-    public void recordAPILifeCycleEvent(APIIdentifier identifier, APIStatus oldStatus,
-                                        APIStatus newStatus, String userId, Connection conn)
+    public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus,
+                                        String newStatus, String userId, Connection conn)
             throws APIManagementException {
         //Connection conn = null;
         ResultSet resultSet = null;
@@ -5922,7 +5934,7 @@ public class ApiMgtDAO {
         int apiId = -1;
         tenantId = APIUtil.getTenantId(userId);
 
-        if (oldStatus == null && !newStatus.equals(APIStatus.CREATED)) {
+        if (oldStatus == null && !newStatus.equals(APIStatus.CREATED.toString())) {
             String msg = "Invalid old and new state combination";
             log.error(msg);
             throw new APIManagementException(msg);
@@ -5964,11 +5976,11 @@ public class ApiMgtDAO {
             ps = conn.prepareStatement(sqlQuery);
             ps.setInt(1, apiId);
             if (oldStatus != null) {
-                ps.setString(2, oldStatus.getStatus());
+                ps.setString(2, oldStatus);
             } else {
                 ps.setNull(2, Types.VARCHAR);
             }
-            ps.setString(3, newStatus.getStatus());
+            ps.setString(3, newStatus);
             ps.setString(4, userId);
             ps.setInt(5, tenantId);
             ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
@@ -6054,8 +6066,10 @@ public class ApiMgtDAO {
                 LifeCycleEvent event = new LifeCycleEvent();
                 event.setApi(apiId);
                 String oldState = rs.getString("PREVIOUS_STATE");
-                event.setOldStatus(oldState != null ? APIStatus.valueOf(oldState) : null);
-                event.setNewStatus(APIStatus.valueOf(rs.getString("NEW_STATE")));
+                //event.setOldStatus(oldState != null ? APIStatus.valueOf(oldState) : null);
+                event.setOldStatus(oldState != null ? oldState : null);
+                //event.setNewStatus(APIStatus.valueOf(rs.getString("NEW_STATE")));
+                event.setNewStatus(rs.getString("NEW_STATE"));
                 event.setUserId(rs.getString("USER_ID"));
                 event.setDate(rs.getTimestamp("EVENT_DATE"));
                 events.add(event);
@@ -6256,7 +6270,7 @@ public class ApiMgtDAO {
                 addScopes(api.getScopes(),applicationId, tenantId);
             }
             addURLTemplates(applicationId, api, connection);
-            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED, APIUtil.replaceEmailDomainBack(api.getId()
+            recordAPILifeCycleEvent(api.getId(), null, APIStatus.CREATED.toString(), APIUtil.replaceEmailDomainBack(api.getId()
                     .getProviderName()), connection);
             //If the api is selected as default version, it is added/replaced into AM_API_DEFAULT_VERSION table
             if(api.isDefaultVersion()){

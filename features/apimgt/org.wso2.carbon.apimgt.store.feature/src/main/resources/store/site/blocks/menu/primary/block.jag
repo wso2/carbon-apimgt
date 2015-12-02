@@ -16,11 +16,10 @@ jagg.block("menu/primary", {
     },
 
     getOutputs:function (inputs) {
-        var links = [], urlPrefix,user = jagg.getUser(),
+        var links = [], user = jagg.getUser(),
                 path = inputs.pagePath;
         var tenant=inputs.tenant;
-        if(tenant!=null) {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
-
+		var urlPrefix = jagg.getTenantURLPrefix("?");
         var mod = jagg.module("manager");
         var tenantDomains = mod.getActiveTenantDomains().tenantDomains;
 

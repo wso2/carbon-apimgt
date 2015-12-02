@@ -58,7 +58,7 @@ var jagg = jagg || (function () {
         //if jaggery allow session reset
         if (typeof request.getSession == "function") {
             if (session && !session.isNew()) {
-                session.invalidate();
+                   session.invalidate();
             }
             session = request.getSession(true);
         }
@@ -459,9 +459,22 @@ var jagg = jagg || (function () {
                 tail = "?";
             }
             tail = tail + params.join("&");
-        }
+        }        
         return getSiteContext()+ path + tail;
     };
+    
+    var getTenantURLPrefix = function(tail) {
+    	if (!tail) {
+    		tail = "";
+    	}
+    	if( site.reverseProxy.tenantHeader == null ||
+                request.getHeader(site.reverseProxy.tenantHeader) == null){
+        	if(getTenantDomain() != null){ 
+				return tail + "tenant=" + getTenantDomain();
+            }
+         }
+         return "";
+    }
 
     // following function will generate a url with the currently activated tenant
     var urlTenanted = function(path, parameters){
@@ -877,6 +890,7 @@ var jagg = jagg || (function () {
         setCSRFToken:setCSRFToken,
         isCSRFTokenValid:isCSRFTokenValid,
         validateInputs:validateInputs,
+        getTenantURLPrefix:getTenantURLPrefix
     };
 
 }());

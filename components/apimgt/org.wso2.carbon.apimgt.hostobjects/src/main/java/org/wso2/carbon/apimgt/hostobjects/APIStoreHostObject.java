@@ -958,7 +958,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 if(api.isAdvertiseOnly()){
                     currentApi.put("owner",currentApi,APIUtil.replaceEmailDomainBack(api.getApiOwner()));
                 }
-                currentApi.put("businessOwner", currentApi, APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
+                currentApi.put(APIConstants.API_DATA_BUSINESS_OWNER,
+                               currentApi,
+                               APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
                 currentApi.put("visibility", currentApi, api.getVisibility());
                 currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
                 apiArray.put(i, apiArray, currentApi);
@@ -2798,7 +2800,9 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("subStatus", apiObj, subscribedAPI.getSubStatus());
             apiObj.put("thumburl", apiObj, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
             apiObj.put("context", apiObj, api.getContext());
-            apiObj.put("businessOwner", apiObj, APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
+            apiObj.put(APIConstants.API_DATA_BUSINESS_OWNER,
+                       apiObj,
+                       APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
             //Read key from the appObject
             APIKey prodKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_PRODUCTION);
             if (prodKey != null) {
@@ -4104,35 +4108,6 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getAppTiers(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
-        NativeArray myn = new NativeArray(0);
-        APIConsumer apiConsumer = getAPIConsumer(thisObj);
-        Set<Tier> tiers;
-        try {
-            //If tenant domain is present in url we will use it to get available tiers
-            if (args.length > 0 && args[0] != null) {
-                tiers = apiConsumer.getAppTiers((String) args[0]);
-            } else {
-                tiers = apiConsumer.getAppTiers();
-            }
-
-            List<Tier> tierList = APIUtil.sortTiers(tiers);
-            int i = 0;
-            for (Tier tier : tierList) {
-                NativeObject row = new NativeObject();
-                row.put("tierName", row, tier.getName());
-                row.put("tierDisplayName", row, tier.getDisplayName());
-                row.put("tierDescription", row, tier.getDescription() != null ? tier.getDescription() : "");
-                row.put("defaultTier", row, i == 0);
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        } catch (Exception e) {
-            log.error("Error while getting available tiers", e);
-        }
-        return myn;
-    }
 
     public static NativeArray jsFunction_getDeniedTiers(Context cx, Scriptable thisObj,
                                                         Object[] args, Function funObj) throws APIManagementException {

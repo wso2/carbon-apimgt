@@ -2,7 +2,8 @@
 <% var api = outputs.api, user = outputs.user, log = new Log(); %>
 <% var domains = jagg.module("domains").getDomainMappings(jagg.getTenantDomain()).domains;%>
 <% var transports = api.transports.split(",");
- var tenantDomain=request_tenant;%>
+ var tenantDomain=request_tenant;
+ var urlPrefix = jagg.getTenantURLPrefix();%>
 <div id="overview">
 	<%if (!api.isAdvertiseOnly) {%>
 
