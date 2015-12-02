@@ -1,8 +1,0 @@
-<%
-jagg.module("tier-manage", {
-
-    deleteTier:function () {
-        return jagg.require(jagg.getModulesDir() + "tier-manage/tier-manage.jag").deleteTier.apply(this, arguments);
-    }
-});
-%>
