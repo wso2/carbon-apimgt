@@ -3784,10 +3784,83 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
+    public static NativeObject editEndpointUrlToTest(String urlVal, Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws APIManagementException {
+
+        String urlValue = urlVal;
+        boolean isContainUriTemplate = false;
+        NativeObject data = new NativeObject();
+
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid number of parameters or their types.");
+        }
+
+        String providerName = (String) args[3];
+        String apiName = (String) args[4];
+        String apiVersion = (String) args[5];
+
+        if (providerName != null) {
+            providerName = APIUtil.replaceEmailDomain(providerName);
+        }
+
+        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        API api = null;
+        try {
+            api = apiProvider.getAPI(apiIdentifier);
+        } catch (APIManagementException e) {
+            handleException("Cannot find the requested API- " + apiName + "-" + apiVersion);
+        }
+
+        if (api != null) {
+
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+            if (uriTemplates.size() != 0) {
+
+                Iterator i = uriTemplates.iterator();
+                List<String> urlPatternArray = new ArrayList<String>();
+                while (i.hasNext()) {
+                    URITemplate ut = (URITemplate) i.next();
+                    urlPatternArray.add(ut.getUriTemplate());
+                }
+
+                if(urlPatternArray.contains("/*")) { //Checking whether the urlPatternArray contains
+                    data.put("urlValue", data, urlValue);
+                    data.put("isContainUriTemplate", data, false);
+                    return data;
+                } else {
+                    for (String urlPattern : urlPatternArray) {
+                        //to check whether it is a uri-template
+                        String regex = "\\{(.*?)\\}"; //\\{.\\} //Matches anything between curly brackets
+                        Pattern pattern = Pattern.compile(regex);
+                        Matcher matcher = pattern.matcher(urlPattern);
+
+                        if (matcher.find()) {
+                            isContainUriTemplate = true;
+                        } else {
+                            urlValue = urlValue + urlPattern;
+                            isContainUriTemplate = false;
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        data.put("urlValue", data, urlValue);
+        data.put("isContainUriTemplate", data, isContainUriTemplate);
+        return data;
+
+    }
+
     public static NativeObject jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
                                                                                        throws APIManagementException {
         boolean isConnectionError = true;
         String response = null;
+        String isContainUriTemplate = null;//To check whether the resources contain only uri templates
         NativeObject data = new NativeObject();
 
         if (args == null || !isStringValues(args)) {
@@ -3798,8 +3871,16 @@ public class APIProviderHostObject extends ScriptableObject {
         String invalidStatusCodesRegex = args.length > 2 ? (String) args[2] : "404";
         if (urlVal != null && !urlVal.isEmpty()) {
             urlVal = urlVal.trim();
+
             try {
+
+                //Can add the editing process here if required
+                NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                urlVal = (String)obj.get("urlValue");
+                isContainUriTemplate = (String)obj.get("isContainUriTemplate");
+
                 URL url = new URL(urlVal);
+                
                 if (type != null && type.equals("wsdl")) {
                     validateWsdl(urlVal);
                     response = "success";
@@ -3808,16 +3889,21 @@ public class APIProviderHostObject extends ScriptableObject {
                 // checking http,https endpoints up to resource level by doing
                 // http HEAD. And other end point
                 // validation do through basic url connect
+
                 else if (url.getProtocol().matches("https")) {
                     ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
                     String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
                     String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
                     System.setProperty("javax.net.ssl.trustStore", trustStorePath);
                     System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+                    if (!isContainUriTemplate.equals("true")) {
+                        return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                    }
 
-                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
                 } else if (url.getProtocol().matches("http")) {
-                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                    if (!isContainUriTemplate.equals("true")) {
+                        return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                    }
                 }
             } catch (Exception e) {
                 response = e.getMessage();
@@ -3826,6 +3912,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         data.put("response", data, response);
         data.put("isConnectionError", data, isConnectionError);
+        data.put("isContainUriTemplate", data, isContainUriTemplate);
         return data;
 
     }

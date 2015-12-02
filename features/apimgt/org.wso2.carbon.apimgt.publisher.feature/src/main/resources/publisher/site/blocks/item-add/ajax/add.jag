@@ -223,7 +223,10 @@ if(jagg.isCSRFTokenValid())
             var type = request.getParameter("type");
             var url = request.getParameter("url");
             var invalidStatusCodesRegex = "404"; //A regex expression for invalid status codes
-            result = mod.isURLValid(type, url, invalidStatusCodesRegex);
+            var providerName = request.getParameter("providerName");
+            var apiName = request.getParameter("apiName");
+            var apiVersion = request.getParameter("apiVersion");
+            result = mod.isURLValid(type, url, invalidStatusCodesRegex, provideName, apiName, apiVersion);
             if (result.error) {
                 obj = {
                     error:true,
