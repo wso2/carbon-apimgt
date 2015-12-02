@@ -3778,11 +3778,11 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
-    public static String editEndpointUrlToTest(String urlVal, Context cx, Scriptable thisObj, Object[] args,
+    public static NativeObject editEndpointUrlToTest(String urlVal, Context cx, Scriptable thisObj, Object[] args,
             Function funObj) throws APIManagementException {
 
         String urlValue = urlVal;
-        //boolean isContainUriTemplate = false;
+        boolean isContainUriTemplatesOnly = false;
         NativeObject data = new NativeObject();
 
         if (args == null || !isStringValues(args)) {
@@ -3821,10 +3821,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
 
                 if(urlPatternArray.contains("/*")) { //Checking whether the urlPatternArray contains /*
-                    //data.put("urlValue", data, urlValue);
-                    //data.put("isContainUriTemplate", data, false);
-                    //return data;
-                    return urlValue;
+                    data.put("urlValue", data, urlValue);
+                    data.put("isContainUriTemplatesOnly", data, false);
+                    return data;
                 } else {
                     for (String urlPattern : urlPatternArray) {
                         //to check whether it is a uri-template
@@ -3832,26 +3831,22 @@ public class APIProviderHostObject extends ScriptableObject {
                         Pattern pattern = Pattern.compile(regex);
                         Matcher matcher = pattern.matcher(urlPattern);
 
-                        if (!matcher.find()) {
-                            //urlValue = urlValue + urlPattern;
-                            //isContainUriTemplate = false;
-                            //break;
+                        if (matcher.find()) {
+                            isContainUriTemplatesOnly = true;
+                        } else {
                             urlValue = urlValue + urlPattern;
+                            isContainUriTemplatesOnly = false;
                             break;
-                        } //else {
-                            //isContainUriTemplate = true;
-                            //do nothing
-                        //}
+                        }
                     }
                 }
 
             }
         }
 
-        //data.put("urlValue", data, urlValue);
-        //data.put("isContainUriTemplate", data, isContainUriTemplate);
-        //return data;
-        return urlValue;
+        data.put("urlValue", data, urlValue);
+        data.put("isContainUriTemplatesOnly", data, isContainUriTemplatesOnly);
+        return data;
 
     }
 
@@ -3859,7 +3854,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                                                                        throws APIManagementException {
         boolean isConnectionError = true;
         String response = null;
-        //String isContainUriTemplate = null;//To check whether the resources contain only uri templates
+        boolean isContainUriTemplatesOnly = false;//To check whether the resources contain only uri templates
         NativeObject data = new NativeObject();
 
         if (args == null || !isStringValues(args)) {
@@ -3873,11 +3868,12 @@ public class APIProviderHostObject extends ScriptableObject {
 
             try {
 
-                //NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
-                //urlVal = (String)obj.get("urlValue");
-                //isContainUriTemplate = (String)obj.get("isContainUriTemplate");
+                NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                urlVal = (String)obj.get("urlValue");
 
-                urlVal = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                if (obj.get("isContainUriTemplatesOnly").equals("true")) {
+                    isContainUriTemplatesOnly = true;
+                }
 
                 URL url = new URL(urlVal);
                 
@@ -3908,7 +3904,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         data.put("response", data, response);
         data.put("isConnectionError", data, isConnectionError);
-        //data.put("isContainUriTemplate", data, isContainUriTemplate);
+        data.put("isContainUriTemplatesOnly", data, isContainUriTemplatesOnly);
         return data;
 
     }

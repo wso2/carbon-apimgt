@@ -50,7 +50,11 @@ $(document).ready(function(){
                                     if (result.response.statusCode == null) { //When an exception is thrown from sendHttpHEADRequest method
                                         $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + result.response.response + '</span>');
                                     } else {
-                                        $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
+                                        if (result.response.isContainUriTemplatesOnly) {
+                                            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.provideCompleteUrl') + '</span>');
+                                        } else {
+                                            $(btn).parent().after(' <span class="label label-important url_validate_label"><i class="icon-remove icon-white"></i>' + i18n.t('validationMsgs.invalid') + '<br/>' + result.response.statusCode + ' - ' + result.response.reasonPhrase + '</span>');
+                                        }
                                     }
                               }
 
