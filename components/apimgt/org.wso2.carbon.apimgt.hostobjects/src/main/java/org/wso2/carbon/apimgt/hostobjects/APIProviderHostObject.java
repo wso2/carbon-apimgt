@@ -3827,9 +3827,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 } else {
                     for (String urlPattern : urlPatternArray) {
                         //to check whether it is a uri-template
-                        String regex = "\\{(.+?)\\}"; //\\{.\\} //Matches anything between curly brackets
-                        Pattern pattern = Pattern.compile(regex);
-                        Matcher matcher = pattern.matcher(urlPattern);
+                        Matcher matcher = pathParamExtractorPattern.matcher(urlPattern);
 
                         if (matcher.find()) {
                             isContainUriTemplatesOnly = true;
@@ -3871,7 +3869,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
                 urlVal = (String)obj.get("urlValue");
 
-                if (obj.get("isContainUriTemplatesOnly").equals("true")) {
+                if (obj.get("isContainUriTemplatesOnly").equals(true)) {
                     isContainUriTemplatesOnly = true;
                 }
 
@@ -3892,10 +3890,15 @@ public class APIProviderHostObject extends ScriptableObject {
                     String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
                     System.setProperty("javax.net.ssl.trustStore", trustStorePath);
                     System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+
+                    NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                    headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                    return headRequestResult;
 
                 } else if (url.getProtocol().matches("http")) {
-                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                    NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                    headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                    return headRequestResult;
                 }
             } catch (Exception e) {
                 response = e.getMessage();
