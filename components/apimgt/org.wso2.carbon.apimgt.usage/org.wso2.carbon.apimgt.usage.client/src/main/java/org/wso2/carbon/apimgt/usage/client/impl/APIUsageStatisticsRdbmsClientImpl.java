@@ -1209,6 +1209,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
         Collection<APIAccessTime> accessTimes = getLastAccessData(
                 APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY, providerName);
+
+        if (providerName.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<API> providerAPIs = getAPIsByProvider(providerName);
 
         List<APIVersionLastAccessTimeDTO> accessTimeByAPI = new ArrayList<APIVersionLastAccessTimeDTO>();
@@ -1262,14 +1266,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             + APIUsageStatisticsClientConstants.REQUEST_TIME + " FROM "
                             + APIUsageStatisticsClientConstants.API_LAST_ACCESS_TIME_SUMMARY);
 
-            lastAccessQuery.append(" where tenantDomain= \"" + tenantDomain + "\"");
+            lastAccessQuery.append(" where tenantDomain= \'" + tenantDomain + "\'");
 
             if (!providerName.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                 lastAccessQuery
-                        .append(" AND (" + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + "= \""
-                                + providerName + "\" OR "
-                                + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + "= \"" + APIUtil
-                                .getUserNameWithTenantSuffix(providerName) + "\")");
+                        .append(" AND (" + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + "= \'"
+                                + providerName + "\' OR "
+                                + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + "= \'" + APIUtil
+                                .getUserNameWithTenantSuffix(providerName) + "\')");
             }
 
             lastAccessQuery.append(" order by " + APIUsageStatisticsClientConstants.REQUEST_TIME + " DESC");
@@ -2728,7 +2732,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index++, tenantDomain);
                 statement.setString(index++, apiName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(index++, provider);
                 }
                 if (!StringUtils.isEmpty(appName)) {
@@ -2840,7 +2844,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index++, tenantDomain);
                 statement.setString(index++, appName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(index++, provider);
                 }
                 statement.setString(index++, fromDate);
@@ -2931,7 +2935,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement = connection.prepareStatement(query);
                 statement.setString(1, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(2, provider);
                 }
 
@@ -3018,7 +3022,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 int index = 1;
                 statement.setString(index++, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(index++, provider);
                 }
                 if (apiName != null) {
