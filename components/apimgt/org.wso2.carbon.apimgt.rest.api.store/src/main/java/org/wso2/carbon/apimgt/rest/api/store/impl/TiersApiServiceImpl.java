@@ -91,9 +91,9 @@ public class TiersApiServiceImpl extends TiersApiService {
             return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     /** Returns the matched tier to the given name
