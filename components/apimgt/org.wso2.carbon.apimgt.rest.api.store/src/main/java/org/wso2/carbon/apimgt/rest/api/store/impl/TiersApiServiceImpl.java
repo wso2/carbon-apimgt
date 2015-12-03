@@ -18,22 +18,25 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
+import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TierMappingUtil;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -46,6 +49,7 @@ public class TiersApiServiceImpl extends TiersApiService {
 
     /** Retrieves all the Tiers
      *
+     * @param tierLevel   tier level (api/application or resource)
      * @param limit max number of objects returns
      * @param offset starting index
      * @param accept accepted media type of the client
@@ -53,19 +57,37 @@ public class TiersApiServiceImpl extends TiersApiService {
      * @return Response object containing resulted tiers
      */
     @Override
-    public Response tiersGet(Integer limit, Integer offset, String accept, String ifNoneMatch) {
+    public Response tiersTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
+            String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset if they are null
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            Set<Tier> tiers = apiConsumer.getTiers();
             List<Tier> tierList = new ArrayList<>();
-            if (tiers != null)
-                tierList.addAll(tiers);
-            TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, limit, offset);
-            TierMappingUtil.setPaginationParams(tierListDTO, limit, offset, tierList.size());
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            if (!StringUtils.isBlank(tierLevel)) {
+                if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
+                    Set<Tier> apiTiers = apiConsumer.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
+                    if (apiTiers != null) {
+                        tierList.addAll(apiTiers);
+                    }
+                } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
+                    Set<Tier> appTiers = apiConsumer.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+                    if (appTiers != null) {
+                        tierList.addAll(appTiers);
+                    }
+                } else {
+                    throw RestApiUtil.buildNotFoundException(
+                            "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+                }
+            } else {
+                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+            }
+
+            TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, tierLevel, limit, offset);
+            TierMappingUtil.setPaginationParams(tierListDTO, tierLevel, limit, offset, tierList.size());
             return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
@@ -76,6 +98,7 @@ public class TiersApiServiceImpl extends TiersApiService {
 
     /** Returns the matched tier to the given name
      * 
+     * @param tierLevel   tier level (api/application or resource)
      * @param tierName name of the tier
      * @param accept accepted media type of the client
      * @param ifNoneMatch If-None-Match header value
@@ -83,16 +106,36 @@ public class TiersApiServiceImpl extends TiersApiService {
      * @return TierDTO matched to the given tier name
      */
     @Override
-    public Response tiersTierNameGet(String tierName, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
+    public Response tiersTierLevelTierNameGet(String tierName, String tierLevel, String accept,
+            String ifNoneMatch, String ifModifiedSince) {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
-            Tier tier = APIUtil.getTierFromCache(tierName, tenantDomain);
-            if (tier != null) {
-                return Response.ok().entity(TierMappingUtil.fromTiertoDTO(tier)).build();
+            TierDTO.TierLevelEnum tierType;
+            Tier foundTier;
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+            if (!StringUtils.isBlank(tierLevel)) {
+                if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
+                    foundTier = APIUtil.getTierFromCache(tierName, tenantDomain);
+                    tierType = TierDTO.TierLevelEnum.api;
+                } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
+                    Set<Tier> appTiers = apiConsumer.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+                    foundTier = RestApiUtil.findTier(appTiers, tierName);
+                    tierType = TierDTO.TierLevelEnum.application;
+                } else {
+                    throw RestApiUtil.buildNotFoundException(
+                            "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+                }
+                if (foundTier != null) {
+                    return Response.ok()
+                            .entity(TierMappingUtil.fromTierToDTO(foundTier, tierType.toString()))
+                            .build();
+                } else {
+                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+                }
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
             }
+
         } catch (APIManagementException e) {
             handleException("Error while retrieving the tier with name " + tierName, e);
             return null;

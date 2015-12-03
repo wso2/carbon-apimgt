@@ -314,7 +314,7 @@ function loadOutSequences() {
     }
 
     jagg.post("/site/blocks/item-add/ajax/add.jag", {
-                action : "getCustomOutSequences", provider:apiProvider, apiName:apiName, apiVersion:apiVersion
+                action : "getCustomOutSequences"
             },
               function(result) {
                   if (!result.error) {
