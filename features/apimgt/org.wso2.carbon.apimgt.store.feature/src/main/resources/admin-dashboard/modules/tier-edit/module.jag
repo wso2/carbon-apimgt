@@ -1,8 +1,0 @@
-<%
-jagg.module("tier-edit", {
-
-    saveTier:function () {
-        return jagg.require(jagg.getModulesDir() + "tier-edit/tier-edit.jag").saveTier.apply(this, arguments);
-    }
-});
-%>

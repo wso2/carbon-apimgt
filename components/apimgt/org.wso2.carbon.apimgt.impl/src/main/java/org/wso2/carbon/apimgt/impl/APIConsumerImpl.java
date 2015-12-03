@@ -1948,7 +1948,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             throws APIManagementException {
         API api = getAPI(identifier);
         WorkflowResponse workflowResponse = null;
-        JSONObject addSubscriptionResponse = new JSONObject();
         int subscriptionId;
         if (api.getStatus().equals(APIStatus.PUBLISHED)) {
             subscriptionId = apiMgtDAO.addSubscription(identifier, api.getContext(), applicationId,
