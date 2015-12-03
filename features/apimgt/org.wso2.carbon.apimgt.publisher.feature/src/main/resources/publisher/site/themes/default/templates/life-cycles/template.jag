@@ -98,7 +98,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
        <% for (var i=0;i<lcData.nextStates.length;i++) {
            var next = lcData.nextStates[i].toLowerCase();
       
-            if(lcStatus=="CREATED"){ 
+            if(lcStatus=="CREATED" || lcStatus=="PROTOTYPED"){ 
 	             if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>                      
 	                <input type="button" id="actionButton" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
 	           <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>

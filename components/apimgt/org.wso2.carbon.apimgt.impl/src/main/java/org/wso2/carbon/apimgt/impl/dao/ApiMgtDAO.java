@@ -3094,7 +3094,7 @@ public class ApiMgtDAO {
                         " IAT.USER_TYPE = ? AND" +
                         " ICA.CONSUMER_KEY = AKM.CONSUMER_KEY AND" +
                         " IAT.CONSUMER_KEY_ID = ICA.ID AND" +
-                        "IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
+                        " IAT.TOKEN_ID = ISAT.TOKEN_ID AND " +
                         " AKM.KEY_TYPE = 'SANDBOX' AND" +
                         " (IAT.TOKEN_STATE = 'ACTIVE' OR" +
                         " IAT.TOKEN_STATE = 'EXPIRED' OR" +

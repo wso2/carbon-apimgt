@@ -59,11 +59,11 @@ x-wso2-security:
   apim:
     x-wso2-scopes:
       - description: ""
-        roles: publisher
+        roles: admin
         name: API_PUBLISHER_SCOPE
         key: API_PUBLISHER_SCOPE
       - description: ""
-        roles: creator
+        roles: admin
         name: API_CREATOR_SCOPE
         key: API_CREATOR_SCOPE
       - description: ""
@@ -1201,7 +1201,7 @@ paths:
 ######################################################
 # The "Tier Collection" resource APIs
 ######################################################
-  /tiers:
+  '/tiers/{tierLevel}':
 
 #-----------------------------------------------------
 # Retrieve the list of all available tiers
@@ -1212,6 +1212,7 @@ paths:
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -1259,6 +1260,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Tier'
+        - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Content-Type'
       tags:
         - Tier (individual)
@@ -1299,7 +1301,7 @@ paths:
 ######################################################
 # The "Individual Tier" resource APIs
 ######################################################
-  '/tiers/{tierName}':
+  '/tiers/{tierLevel}/{tierName}':
 
 #-----------------------------------------------------
 # Retrieve a certain tier
@@ -1309,6 +1311,7 @@ paths:
         Get tier details
       parameters:
         - $ref: '#/parameters/tierName'
+        - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1370,6 +1373,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Tier'
+        - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
@@ -1430,6 +1434,7 @@ paths:
         Remove a tier
       parameters:
         - $ref: '#/parameters/tierName'
+        - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1467,6 +1472,7 @@ paths:
         Update tier permission
       parameters:
         - $ref: '#/parameters/tierName-Q'
+        - $ref: '#/parameters/tierLevel-Q'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
         - in: body
@@ -1660,6 +1666,34 @@ parameters:
       Name of the tier
     required: true
     type: string
+    
+# Tier Type
+# Specified as part of the path expression
+  tierLevel:
+    name: tierLevel
+    in: path
+    description: |
+      List API or Application or Resource type tiers.
+    type: string
+    enum:
+      - api
+      - application
+      - resource
+    required: true
+
+# Tier Type
+# Specified as part of the query string
+  tierLevel-Q:
+    name: tierLevel
+    in: query
+    description: |
+      List API or Application or Resource type tiers.
+    type: string
+    enum:
+      - api
+      - application
+      - resource
+    required: true
 
 # Used for pagination:
 # The maximum number of resoures to be returned by a GET
@@ -2022,6 +2056,12 @@ definitions:
         type: string
       description:
         type: string
+      tierLevel:
+        type: string
+        enum:
+          - api
+          - application
+          - resource
       attributes:
         description: |
           Custom attributes added to the tier policy

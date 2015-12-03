@@ -3487,36 +3487,48 @@ public final class APIUtil {
         org.wso2.carbon.registry.api.Collection seqCollection = null;
 
         try {
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
 
-            if (APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME.equals(sequenceName)
-                || APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME.equals(sequenceName))  {
+            if ("in".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+            }   else if ("out".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+            } else if("fault".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
+            }
 
-                Resource sequence = registry.get(getSequencePath(identifier, direction) + RegistryConstants.PATH_SEPARATOR + sequenceName);
-                return APIUtil.buildOMElement(sequence.getContentStream());
-            } else {
-                if ("in".equals(direction)) {
-                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
-                }   else if ("out".equals(direction)) {
-                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
-                } else if("fault".equals(direction)) {
-                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
-                }
+            if (seqCollection == null)  {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier, direction));
 
-                if (seqCollection != null) {
-                    String[] childPaths = seqCollection.getChildren();
+            }
 
-                    for (String childPath : childPaths) {
-                        Resource sequence = registry.get(childPath);
-                        OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                        if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                            return seqElment;
-                        }
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+
+                for (String childPath : childPaths) {
+                    Resource sequence = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                        return seqElment;
                     }
-
                 }
             }
+
+            // If the sequence not found the default sequences, check in custom sequences
+
+            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier, direction));
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+
+                for (String childPath : childPaths) {
+                    Resource sequence = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                        return seqElment;
+                    }
+                }
+            }
+
 
         } catch (Exception e) {
             String msg = "Issue is in accessing the Registry";

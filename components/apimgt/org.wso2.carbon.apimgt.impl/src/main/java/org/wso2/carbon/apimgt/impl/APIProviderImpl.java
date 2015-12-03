@@ -386,7 +386,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // We do the tier cache cleanup here.        
+        invalidateTierCache();
+
+        finalTiers.add(tier);
+        saveTiers(finalTiers);
+    }
+
+    /**
+     * This method is to cleanup tier cache when update or deletion is performed
+     */
+    private void invalidateTierCache() {
+
         try {
             // Note that this call happens to store node in a distributed setup.
             TierCacheInvalidationClient tierCacheInvalidationClient = new TierCacheInvalidationClient();
@@ -401,9 +411,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Hence we log the exception and continue to the flow
             log.error("Error while invalidating the tier cache", e);
         }
-
-        finalTiers.add(tier);
-        saveTiers(finalTiers);
     }
 
     private void saveTiers(Collection<Tier> tiers) throws APIManagementException {
@@ -543,6 +550,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (tiers.remove(tier)) {
             saveTiers(tiers);
+            invalidateTierCache();
         } else {
             handleException("No tier exists by the name: " + tier.getName());
         }
@@ -2848,8 +2856,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String customInSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, "in");
 
-            if(registry.resourceExists(customInSeqFileLocation + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME))    {
-                sequenceList.add(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
+            if(registry.resourceExists(customInSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection inSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customInSeqFileLocation);
+                if (inSeqCollection != null) {
+                    //   SequenceMediatorFactory factory = new SequenceMediatorFactory();
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths)    {
+                        Resource inSequence = registry.get(inSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
             }
 
 
@@ -2873,7 +2891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			                                              .getGovernanceSystemRegistry(tenantId);
 			if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
 	            org.wso2.carbon.registry.api.Collection outSeqCollection =
-	                                                                       (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
 	            if (outSeqCollection !=null) {
 	                String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String childPath : outSeqChildPaths)   {
@@ -2886,9 +2904,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, "out");
 
-            if(registry.resourceExists(customOutSeqFileLocation + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME))    {
-                sequenceList.add(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    //   SequenceMediatorFactory factory = new SequenceMediatorFactory();
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
             }
+
 		} catch (Exception e) {
 			handleException("Issue is in getting custom OutSequences from the Registry", e);
 		}

@@ -470,10 +470,27 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
+            String documentName = body.getName();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
+                //check otherTypeName for not null if doc type is OTHER
+                throw RestApiUtil.buildBadRequestException("otherTypeName cannot be empty if type is OTHER.");
+            }
+
+            String sourceUrl = body.getSourceUrl();
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
+                    (StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
+                throw RestApiUtil.buildBadRequestException("Invalid document sourceUrl Format");
+            }
 
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+
+            if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
+                String errorMessage = "Requested document '" + documentName + "' already exists";
+                throw RestApiUtil.buildConflictException(errorMessage);
+            }
 
             apiProvider.addDocumentation(apiIdentifier, documentation);
             String newDocumentId = documentation.getId();
@@ -481,11 +498,20 @@ public class ApisApiServiceImpl extends ApisApiService {
             //retrieve the newly added document
             documentation = apiProvider.getDocumentation(newDocumentId, tenantDomain);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
-            return Response.status(Response.Status.CREATED).header("Location",
-                    "/apis/" + apiId + "/documents/" + documentation.getId()).entity(newDocumentDTO).build();
+
+            String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
+                    .replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.DOCUMENTID_PARAM, newDocumentId);
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            String errorMessage = "Error while adding the document for API : " + apiId;
+            handleException(errorMessage, e);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving location for document " + body.getName() + " of API " + apiId;
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     /**
@@ -541,19 +567,40 @@ public class ApisApiServiceImpl extends ApisApiService {
             String contentType, String ifMatch, String ifUnmodifiedSince) {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
+            Documentation oldDocument = apiProvider.getDocumentation(documentId, tenantDomain);
+            if (oldDocument == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+            }
+
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
+                //check otherTypeName for not null if doc type is OTHER
+                throw RestApiUtil.buildBadRequestException("otherTypeName cannot be empty if type is OTHER.");
+            }
+
+            String sourceUrl = body.getSourceUrl();
+            if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
+                    (StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
+                throw RestApiUtil.buildBadRequestException("Invalid document sourceUrl Format");
+            }
+
+            //overriding some properties
+            body.setName(oldDocument.getName());
+
+            Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
-            apiProvider.updateDocumentation(apiIdentifier, documentation);
+            apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
             //retrieve the updated documentation
-            documentation = apiProvider.getDocumentation(documentId, tenantDomain);
-            return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(documentation)).build();
+            newDocumentation = apiProvider.getDocumentation(documentId, tenantDomain);
+            return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     /**

@@ -29,8 +29,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -38,6 +40,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  *  This class contains REST API Publisher related utility operations
@@ -109,6 +112,21 @@ public class RestApiPublisherUtils {
             handleException("Unable to read the file from path ", e);
         } finally {
             IOUtils.closeQuietly(docInputStream);
+        }
+    }
+
+    /**
+     * Check whether tier level is within allowed values
+     *
+     * @param tierLevel tier level (api/application or resource)
+     * @throws BadRequestException if tier level is invalid
+     */
+    public static void validateTierLevels(String tierLevel) throws BadRequestException {
+        try {
+            TierDTO.TierLevelEnum.valueOf(tierLevel);
+        } catch (IllegalArgumentException e) {
+            throw RestApiUtil.buildNotFoundException(
+                    "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
         }
     }
 
