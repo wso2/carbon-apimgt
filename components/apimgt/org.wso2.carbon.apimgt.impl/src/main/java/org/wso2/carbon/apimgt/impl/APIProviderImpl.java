@@ -386,7 +386,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // We do the tier cache cleanup here.        
+        invalidateTierCache();
+
+        finalTiers.add(tier);
+        saveTiers(finalTiers);
+    }
+
+    /**
+     * This method is to cleanup tier cache when update or deletion is performed
+     */
+    private void invalidateTierCache() {
+
         try {
             // Note that this call happens to store node in a distributed setup.
             TierCacheInvalidationClient tierCacheInvalidationClient = new TierCacheInvalidationClient();
@@ -401,9 +411,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Hence we log the exception and continue to the flow
             log.error("Error while invalidating the tier cache", e);
         }
-
-        finalTiers.add(tier);
-        saveTiers(finalTiers);
     }
 
     private void saveTiers(Collection<Tier> tiers) throws APIManagementException {
@@ -543,6 +550,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (tiers.remove(tier)) {
             saveTiers(tiers);
+            invalidateTierCache();
         } else {
             handleException("No tier exists by the name: " + tier.getName());
         }
