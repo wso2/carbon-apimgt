@@ -1888,21 +1888,30 @@ public final class APIUtil {
 
         boolean authorized;
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                                                                                        getTenantId(tenantDomain);
 
             if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
-                        getRealmService().getTenantUserRealm(tenantId).
-                        getAuthorizationManager();
-                authorized = manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
+                org.wso2.carbon.user.api.AuthorizationManager manager =
+                                                                        ServiceReferenceHolder.getInstance()
+                                                                                              .getRealmService()
+                                                                                              .getTenantUserRealm(tenantId)
+                                                                                              .getAuthorizationManager();
+                authorized =
+                             manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
                                                       CarbonConstants.UI_PERMISSION_ACTION);
             } else {
-                //On the first login attempt to publisher (without browsing the store), the user realm will be null.
-                if(ServiceReferenceHolder.getUserRealm() == null){
-                    ServiceReferenceHolder.setUserRealm((UserRealm)ServiceReferenceHolder.getInstance().
-                                            getRealmService().getTenantUserRealm(tenantId));
+                // On the first login attempt to publisher (without browsing the
+                // store), the user realm will be null.
+                if (ServiceReferenceHolder.getUserRealm() == null) {
+                    ServiceReferenceHolder.setUserRealm((UserRealm) ServiceReferenceHolder.getInstance()
+                                                                                          .getRealmService()
+                                                                                          .getTenantUserRealm(tenantId));
                 }
-                authorized = AuthorizationManager.getInstance().isUserAuthorized(username, permission);
+                authorized =
+                             AuthorizationManager.getInstance()
+                                                 .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username),
+                                                                   permission);
             }
             if (!authorized) {
                 throw new APIManagementException("User '" + username + "' does not have the " +
