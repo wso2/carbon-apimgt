@@ -804,7 +804,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             APIUsageStatisticsClientConstants.CONTEXT + "," +
                             APIUsageStatisticsClientConstants.VERSION + "," +
                             "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
-                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API;
+                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.VERSION;
                 }
 
 
@@ -1138,14 +1139,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
                         APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME + ", weighted_service_time";
             } else {
-                query = "SELECT " +
-                        "TempTable.*, SUM(" + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime ," +
-                        "SUM(weighted_service_time) AS totalWeightTime FROM (SELECT " +
-                        "*, (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
-                        APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS weighted_service_time " +
-                        " FROM " +
-                        APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
-                        " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION;
+
+                query = "select " + APIUsageStatisticsClientConstants.API_VERSION + ','
+                        + APIUsageStatisticsClientConstants.CONTEXT + ',' + "SUM("
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime,SUM("
+                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " * "
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalWeightTime" +
+                        " from " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.CONTEXT + ','
+                        + APIUsageStatisticsClientConstants.API_VERSION;
+
             }
 
             resultSet = statement.executeQuery(query);
