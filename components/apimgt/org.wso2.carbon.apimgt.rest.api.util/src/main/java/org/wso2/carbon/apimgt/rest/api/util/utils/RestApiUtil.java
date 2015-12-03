@@ -235,7 +235,7 @@ public class RestApiUtil {
     public static NotFoundException buildNotFoundException(String resource, String id) {
         String description;
         if (!StringUtils.isEmpty(id)) {
-            description = "Requested " + resource + " with Id " + id + " not found";
+            description = "Requested " + resource + " with Id '" + id + "' not found";
         } else {
             description = "Requested " + resource + " not found";
         }
