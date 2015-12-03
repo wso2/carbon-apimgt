@@ -375,6 +375,57 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /apis/{apiId}/swagger:
+#-----------------------------------------------------
+# Retrieve the API swagger definition
+#-----------------------------------------------------
+    get:
+      description: |
+        Get the swagger of an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - API (individual)
+        - Retrieve
+      responses:
+        200:
+          description: |
+            OK. 
+            Requested swagger document of the API is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time. 
+                Used by caches, or in conditional requests.
+              type: string
+        304:
+          description: |
+            Not Modified. 
+            Empty body because the client has already the latest version of the requested resource.
+        404:
+          description: |
+            Not Found. 
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable. 
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
 ######################################################
 # The "Copy API" Processing Function resource API
 ######################################################

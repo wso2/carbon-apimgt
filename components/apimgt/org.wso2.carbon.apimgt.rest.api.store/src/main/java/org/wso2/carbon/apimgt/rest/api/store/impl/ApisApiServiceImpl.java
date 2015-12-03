@@ -356,6 +356,48 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Retrieves the swagger document of an API
+     * 
+     * @param apiId API identifier
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @return Swagger document of the API
+     */
+    @Override 
+    public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            String xWSO2Tenant) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+            }
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
+
+            String apiSwagger = apiConsumer.getSwagger20Definition(apiIdentifier);
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+            }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
+        }
+        return null;
+    }
+
     private void handleException(String msg, Throwable t) throws InternalServerErrorException {
         log.error(msg, t);
         throw new InternalServerErrorException(t);
