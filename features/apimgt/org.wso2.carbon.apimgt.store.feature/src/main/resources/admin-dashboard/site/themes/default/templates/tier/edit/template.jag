@@ -1,12 +1,12 @@
 <% jagg.template("tier/edit", function(inputs, outputs, jagg) { %>
 	<%
-	    var tierName = request.getParameter("tierName");
+        var tierName = request.getParameter("tierName");
         var pageTitle = i18n.localize("tierAddTitle");
-
+        var nameFieldDisableStatus = "";
 
         if(tierName != null){
             pageTitle = i18n.localize("tierEditTitle");
-
+            nameFieldDisableStatus = "readonly";
             var tiers = session.get("tiers");
             var tier;
             // tiers contains a Set<Tier> that was returned. Hence we need to get the correct tier and proceed
@@ -53,7 +53,7 @@
                 value='<%=i18n.localize("errorMessageInvalid")%>'/>
             <div class="row-fluid">
                 <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
-                    action="/admin-dashboard/site/blocks/tier-edit/ajax/tier-edit.jag">
+                    action="/admin-dashboard/site/blocks/tier/edit/ajax/tier-edit.jag">
                     <fieldset>
                         <legend>General Details</legend>
 
@@ -61,7 +61,7 @@
                             <label class="control-label cnl-label"><%=i18n.localize("tierName")%>
                                 <span class="requiredAstrix">*</span></label>
                             <div class="controls cnls">
-                                <input type="text" id="tierName" name="tierName"/>
+                                <input type="text" id="tierName" name="tierName" <%=nameFieldDisableStatus%>/>
                             </div>
                         </div>
                         <div class="control-group cnl-group">
