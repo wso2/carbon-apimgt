@@ -64,14 +64,6 @@ public class ScopesIssuer {
     public boolean setScopes(OAuthTokenReqMessageContext tokReqMsgCtx) {
         String[] requestedScopes = tokReqMsgCtx.getScope();
         String[] defaultScope = new String[]{DEFAULT_SCOPE_NAME};
-        //TODO - remove this once scope list retrieve from configuration file.
-        /*
-        Map<String, String> restAPIScopes = new HashMap<String, String>();
-        restAPIScopes.put("API_PUBLISHER_SCOPE", "admin");
-        restAPIScopes.put("API_SUBSCRIBER_SCOPE", "subscriber");
-        restAPIScopes.put("API_CREATOR_SCOPE", "admin");
-        restAPIScopes.put("API_ADMINISTRATIVE_SCOPE", "admin");
-        */
         //If no scopes were requested.
         if (requestedScopes == null || requestedScopes.length == 0) {
             tokReqMsgCtx.setScope(defaultScope);
@@ -89,7 +81,6 @@ public class ScopesIssuer {
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
             //in memory and add it to each and every request coming.
-            //TODO this need to load from configuration file or some other way.
             if (restAPIScopes != null) {
                 appScopes.putAll(restAPIScopes);
             }

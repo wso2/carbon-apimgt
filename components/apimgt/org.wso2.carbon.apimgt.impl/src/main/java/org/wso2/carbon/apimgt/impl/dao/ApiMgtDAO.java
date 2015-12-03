@@ -65,6 +65,7 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
@@ -9422,6 +9423,55 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
     private String getScopeString(List<String> scopes){
         return StringUtils.join(scopes," ");
+    }
+
+    /**
+     * Find all active access tokens of a given user.
+     * @param username - Username of the user
+     * @return - The set of active access tokens of the user.
+     */
+    public Set<String> getActiveAccessTokensOfUser(String username) throws APIManagementException {
+
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+
+        Set<String> tokens = null;
+
+        String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
+        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
+                APIUtil.checkUserNameAssertionEnabled()) {
+            accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromUserId(username);
+        }
+
+        int tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            String sqlQuery = "SELECT IOAT.ACCESS_TOKEN" +
+                    " FROM " + accessTokenStoreTable + " IOAT" +
+                    " WHERE IOCA.AUTHZ_USER = ?" +
+                        " AND IOAT.TENANT_ID = ?" +
+                        " AND IOAT.TOKEN_STATE = 'ACTIVE'";
+
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, MultitenantUtils.getTenantAwareUsername(username));
+            ps.setInt(2, tenantId);
+            resultSet = ps.executeQuery();
+            tokens = new HashSet<String>();
+            while (resultSet.next()) {
+                tokens.add(APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN")));
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to get active access tokens of user " + username, e);
+        } catch (CryptoException e) {
+            handleException("Token decryption failed of an active access token of user " + username, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return tokens;
+
     }
 
 
