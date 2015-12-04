@@ -26,8 +26,11 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.AbstractIdentityUserOperationEventListener;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +48,7 @@ public class KeyManagerUserOperationListener extends AbstractIdentityUserOperati
         if (orderId != IdentityCoreConstants.EVENT_LISTENER_ORDER_ID) {
             return orderId;
         }
-        return 80;
+        return 10000;
     }
 
     /**
@@ -56,10 +59,17 @@ public class KeyManagerUserOperationListener extends AbstractIdentityUserOperati
                                    org.wso2.carbon.user.core.UserStoreManager userStoreManager)
             throws org.wso2.carbon.user.core.UserStoreException {
 
-        return !isEnable() || removeGatewayKeyCache(username);
+        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
 
-    private boolean removeGatewayKeyCache(String username){
+    private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager){
+
+        String userStoreDomain = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
+        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+
+        username = UserCoreUtil.addDomainToName(username, userStoreDomain);
+        username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
+        username = username.toLowerCase();
 
         APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -101,7 +111,7 @@ public class KeyManagerUserOperationListener extends AbstractIdentityUserOperati
 
                 log.debug("Removed cached tokens of the Gateway.");
             } catch (AxisFault axisFault) {
-                //log and ignore since we do not have to halt the user operation due to cache invalidation failures.
+                //log and continue invalidating caches of other Gateways (if any).
                 log.error("Error occurred while invalidating the Gateway Token Cache of Gateway '" +
                                                                             environment.getName() + "'", axisFault);
             }

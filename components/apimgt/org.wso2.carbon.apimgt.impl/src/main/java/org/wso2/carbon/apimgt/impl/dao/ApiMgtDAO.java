@@ -9450,7 +9450,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             conn = APIMgtDBUtil.getConnection();
             String sqlQuery = "SELECT IOAT.ACCESS_TOKEN" +
                     " FROM " + accessTokenStoreTable + " IOAT" +
-                    " WHERE IOCA.AUTHZ_USER = ?" +
+                    " WHERE IOAT.AUTHZ_USER = ?" +
                         " AND IOAT.TENANT_ID = ?" +
                         " AND IOAT.TOKEN_STATE = 'ACTIVE'";
 
