@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
@@ -67,7 +68,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.sql.*;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -801,7 +804,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             APIUsageStatisticsClientConstants.CONTEXT + "," +
                             APIUsageStatisticsClientConstants.VERSION + "," +
                             "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
-                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API;
+                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.VERSION;
                 }
 
 
@@ -1135,14 +1139,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         APIUsageStatisticsClientConstants.YEAR + "," + APIUsageStatisticsClientConstants.MONTH + "," +
                         APIUsageStatisticsClientConstants.DAY + "," + APIUsageStatisticsClientConstants.TIME + ", weighted_service_time";
             } else {
-                query = "SELECT " +
-                        "TempTable.*, SUM(" + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime ," +
-                        "SUM(weighted_service_time) AS totalWeightTime FROM (SELECT " +
-                        "*, (" + APIUsageStatisticsClientConstants.SERVICE_TIME + " * " +
-                        APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS weighted_service_time " +
-                        " FROM " +
-                        APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY + ") " + "TempTable " +
-                        " GROUP BY " + APIUsageStatisticsClientConstants.API_VERSION;
+
+                query = "select " + APIUsageStatisticsClientConstants.API_VERSION + ','
+                        + APIUsageStatisticsClientConstants.CONTEXT + ',' + "SUM("
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalTime,SUM("
+                        + APIUsageStatisticsClientConstants.SERVICE_TIME + " * "
+                        + APIUsageStatisticsClientConstants.TOTAL_RESPONSE_COUNT + ") AS totalWeightTime" +
+                        " from " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.CONTEXT + ','
+                        + APIUsageStatisticsClientConstants.API_VERSION;
+
             }
 
             resultSet = statement.executeQuery(query);
@@ -1205,38 +1210,35 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
 
         Collection<APIAccessTime> accessTimes = getLastAccessData(
-                APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY);
+                APIUsageStatisticsClientConstants.API_VERSION_KEY_LAST_ACCESS_SUMMARY, providerName);
+
+        if (providerName.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            providerName = APIUsageStatisticsClientConstants.ALL_PROVIDERS;
+        }
         List<API> providerAPIs = getAPIsByProvider(providerName);
-        Map<String, APIAccessTime> lastAccessTimes = new TreeMap<String, APIAccessTime>();
+
+        List<APIVersionLastAccessTimeDTO> accessTimeByAPI = new ArrayList<APIVersionLastAccessTimeDTO>();
+        APIVersionLastAccessTimeDTO accessTimeDTO;
+        DateFormat dateFormat = new SimpleDateFormat();
+
         for (APIAccessTime accessTime : accessTimes) {
             for (API providerAPI : providerAPIs) {
                 if (providerAPI.getId().getApiName().equals(accessTime.getApiName()) &&
                         providerAPI.getId().getVersion().equals(accessTime.getApiVersion()) &&
                         providerAPI.getContext().equals(accessTime.getContext())) {
 
+                    accessTimeDTO = new APIVersionLastAccessTimeDTO();
                     String apiName = accessTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
-                    APIAccessTime lastAccessTime = lastAccessTimes.get(apiName);
-                    if (lastAccessTime == null || lastAccessTime.getAccessTime() < accessTime.getAccessTime()) {
-                        lastAccessTimes.put(apiName, accessTime);
-                        break;
-                    }
+                    accessTimeDTO.setApiName(apiName);
+                    accessTimeDTO.setApiVersion(accessTime.getApiVersion());
+                    accessTimeDTO.setLastAccessTime(dateFormat.format(accessTime.getAccessTime()));
+                    accessTimeDTO.setUser(accessTime.getUsername());
+                    accessTimeByAPI.add(accessTimeDTO);
                 }
             }
         }
-        Map<String, APIVersionLastAccessTimeDTO> accessTimeByAPI = new TreeMap<String, APIVersionLastAccessTimeDTO>();
-        List<APIVersionLastAccessTimeDTO> accessTimeDTOs = new ArrayList<APIVersionLastAccessTimeDTO>();
-        for (Map.Entry<String, APIAccessTime> entry : lastAccessTimes.entrySet()) {
-            APIVersionLastAccessTimeDTO accessTimeDTO = new APIVersionLastAccessTimeDTO();
-            accessTimeDTO.setApiName(entry.getKey());
-            APIAccessTime lastAccessTime = entry.getValue();
-            accessTimeDTO.setApiVersion(lastAccessTime.getApiVersion());
-            accessTimeDTO.setLastAccessTime(lastAccessTime.getAccessTime());
-            accessTimeDTO.setUser(lastAccessTime.getUsername());
-            accessTimeByAPI.put(entry.getKey(), accessTimeDTO);
-        }
-        List<APIVersionLastAccessTimeDTO> usage = getLastAccessTimeTopEntries(
-                new ArrayList<APIVersionLastAccessTimeDTO>(accessTimeByAPI.values()), limit);
-        return usage;
+        return getLastAccessTimeTopEntries(accessTimeByAPI, limit);
+
     }
 
     /**
@@ -1246,7 +1248,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a collection containing the data related to API last access times
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<APIAccessTime> getLastAccessData(String tableName)
+    private Collection<APIAccessTime> getLastAccessData(String tableName, String providerName)
             throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
@@ -1254,31 +1256,31 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         ResultSet resultSet = null;
         Collection<APIAccessTime> lastAccessTimeData = new ArrayList<APIAccessTime>();
 
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
         try {
             connection = dataSource.getConnection();
             statement = connection.createStatement();
-            String query;
 
-            query = "SELECT " +
-                    "dataTable.* " +
-                    " FROM (" +
-                    " SELECT " +
-                    APIUsageStatisticsClientConstants.API + ",apiPublisher," +
-                    "MAX(" + APIUsageStatisticsClientConstants.TIME + ") " + "AS maxTime " +
-                    " FROM " + tableName +
-                    " GROUP BY " + APIUsageStatisticsClientConstants.API + ",apiPublisher) maxTimesTable " +
-                    " INNER JOIN " +
-                    "(SELECT * " +
-                    " FROM " +
-                    tableName + ") dataTable " +
-                    " ON maxTimesTable." +
-                    APIUsageStatisticsClientConstants.API + "=dataTable." + APIUsageStatisticsClientConstants.API +
-                    " AND " +
-                    "maxTimesTable.apiPublisher=dataTable.apiPublisher" +
-                    " AND " +
-                    "maxTimesTable.maxTime=dataTable." + APIUsageStatisticsClientConstants.TIME;
+            StringBuilder lastAccessQuery = new StringBuilder(
+                    "SELECT " + APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.VERSION
+                            + "," + APIUsageStatisticsClientConstants.CONTEXT + ","
+                            + APIUsageStatisticsClientConstants.USER_ID + ","
+                            + APIUsageStatisticsClientConstants.REQUEST_TIME + " FROM "
+                            + APIUsageStatisticsClientConstants.API_LAST_ACCESS_TIME_SUMMARY);
 
-            resultSet = statement.executeQuery(query);
+            lastAccessQuery.append(" where tenantDomain= \'" + tenantDomain + "\'");
+
+            if (!providerName.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+                lastAccessQuery
+                        .append(" AND (" + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + "= \'"
+                                + providerName + "\' OR "
+                                + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + "= \'" + APIUtil
+                                .getUserNameWithTenantSuffix(providerName) + "\')");
+            }
+
+            lastAccessQuery.append(" order by " + APIUsageStatisticsClientConstants.REQUEST_TIME + " DESC");
+
+            resultSet = statement.executeQuery(lastAccessQuery.toString());
 
             while (resultSet.next()) {
                 String apiName = resultSet.getString(APIUsageStatisticsClientConstants.API);
@@ -1604,7 +1606,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
-                return (int) (o2.getLastAccessTime() - o1.getLastAccessTime());
+                return (int) (o2.getLastAccessTime().compareToIgnoreCase(o1.getLastAccessTime()));
             }
         });
         if (usageData.size() > limit) {
@@ -2732,7 +2734,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index++, tenantDomain);
                 statement.setString(index++, apiName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(index++, provider);
                 }
                 if (!StringUtils.isEmpty(appName)) {
@@ -2844,7 +2846,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement.setString(index++, tenantDomain);
                 statement.setString(index++, appName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(index++, provider);
                 }
                 statement.setString(index++, fromDate);
@@ -2935,7 +2937,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 statement = connection.prepareStatement(query);
                 statement.setString(1, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(2, provider);
                 }
 
@@ -3022,7 +3024,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 int index = 1;
                 statement.setString(index++, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-                    provider = provider + '@' + tenantDomain;
+                    provider = APIUtil.getUserNameWithTenantSuffix(provider);
                     statement.setString(index++, provider);
                 }
                 if (apiName != null) {

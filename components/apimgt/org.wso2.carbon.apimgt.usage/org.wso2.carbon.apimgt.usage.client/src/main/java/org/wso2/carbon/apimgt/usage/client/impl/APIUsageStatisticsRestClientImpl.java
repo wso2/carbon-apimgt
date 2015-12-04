@@ -66,8 +66,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -950,6 +952,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         List<APIVersionLastAccessTimeDTO> apiVersionLastAccessTimeUsage = new ArrayList<APIVersionLastAccessTimeDTO>();
 
         APIVersionLastAccessTimeDTO accessTimeDTO;
+        DateFormat dateFormat = new SimpleDateFormat();
         String apiName;
 
         //iterate over all the result data
@@ -967,7 +970,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     accessTimeDTO.setApiName(apiName);
                     accessTimeDTO.setApiVersion(accessTime.getApiVersion());
                     accessTimeDTO.setUser(accessTime.getUsername());
-                    accessTimeDTO.setLastAccessTime(accessTime.getAccessTime());
+                    accessTimeDTO.setLastAccessTime(dateFormat.format(accessTime.getAccessTime()));
                     apiVersionLastAccessTimeUsage.add(accessTimeDTO);
                 }
             }
@@ -987,35 +990,22 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             int limit) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
 
-        String query = null;
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
 
-        //extending lucene query with time ranges
-        try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
-                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']';
-        } catch (ParseException e) {
-            handleException("Error occurred while Error parsing date", e);
+        StringBuilder lastAccessQuery = new StringBuilder();
+        lastAccessQuery.append("tenantDomain: \"" + tenantDomain + "\"");
+
+        if (!providerName.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+            lastAccessQuery
+                    .append(" AND (" + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + ": \""
+                            + providerName + "\" OR "
+                            + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + ": \"" + APIUtil
+                            .getUserNameWithTenantSuffix(providerName) + "\")");
         }
 
-        //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
-            query = new StringBuilder(query)
-                    .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
-                            + '\"').toString();
-        }
-
-        //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3,
-                APIUsageStatisticsClientConstants.API_VERSION_USERID_CONTEXT_FACET,
-                APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY);
-
-        ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-        AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.REQUEST_TIME,
-                APIUsageStatisticsClientConstants.AGGREGATE_MAX,
-                APIUsageStatisticsClientConstants.ALIAS_LAST_ACCESS_TIME);
-        fields.add(field);
-        request.setAggregateFields(fields);
+        //create the bean
+        RequestSearchBean lastAccessRequest = new RequestSearchBean(lastAccessQuery.toString(), 0, limit,
+                APIUsageStatisticsClientConstants.API_LAST_ACCESS_TIME_SUMMARY);
 
         //get the type of the required result type
         Type type = new TypeToken<List<Result<LastAccessTimesByAPIValue>>>() {
@@ -1025,7 +1015,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //do post and get the results
         try {
-            obj = restClient.doPost(request, type);
+            obj = restClient.doPost(lastAccessRequest, type);
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
@@ -1046,11 +1036,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             LastAccessTimesByAPIValue v = result.getValues();
 
             usage = new APIAccessTime();
-            usage.setAccessTime(v.getLastAccessTime());
-            usage.setApiName(v.getColumnNames().get(0));
-            usage.setApiVersion(v.getColumnNames().get(1));
-            usage.setUsername(v.getColumnNames().get(2));
-            usage.setContext(v.getColumnNames().get(3));
+            usage.setAccessTime(v.getMax_request_time());
+            usage.setApiName(v.getApi());
+            usage.setApiVersion(v.getVersion());
+            usage.setUsername(v.getUserId());
+            usage.setContext(v.getContext());
             lastAccessTimeData.add(usage);
         }
 
@@ -1659,7 +1649,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //create the bean
-        FirstAccessRequestSearchBean request = new FirstAccessRequestSearchBean(query.toString(), 0, 100,
+        RequestSearchBean request = new RequestSearchBean(query.toString(), 0, 100,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         //creating request bean
@@ -2108,7 +2098,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private APIFirstAccess queryFirstAccess(String tableName) throws APIMgtUsageQueryServiceClientException {
 
         //create the bean
-        FirstAccessRequestSearchBean request = new FirstAccessRequestSearchBean("", 0, 1, tableName);
+        RequestSearchBean request = new RequestSearchBean("", 0, 1, tableName);
 
         //get the type for expected result
         Type type = new TypeToken<List<Result<FirstAccessValue>>>() {
@@ -2230,7 +2220,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<API> getAPIsByProvider(String providerId) throws APIMgtUsageQueryServiceClientException {
         try {
-            if (APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerId)) {
+            if (providerId.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                 return apiProviderImpl.getAllAPIs();
             } else {
                 return apiProviderImpl.getAPIsByProvider(providerId);
@@ -2459,7 +2449,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
-                return (int) (o2.getLastAccessTime() - o1.getLastAccessTime());
+                return (int) (o2.getLastAccessTime().compareToIgnoreCase(o1.getLastAccessTime()));
             }
         });
         if (usageData.size() > limit) {

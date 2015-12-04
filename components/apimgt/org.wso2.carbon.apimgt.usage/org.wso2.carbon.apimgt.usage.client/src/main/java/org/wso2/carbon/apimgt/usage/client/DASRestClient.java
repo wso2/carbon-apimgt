@@ -33,7 +33,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
-import org.wso2.carbon.apimgt.usage.client.bean.FirstAccessRequestSearchBean;
+import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchBean;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
 import org.wso2.carbon.apimgt.usage.client.bean.SearchRequestBean;
 import org.wso2.carbon.apimgt.usage.client.bean.TableExistResponseBean;
@@ -188,14 +188,14 @@ public class DASRestClient {
     /**
      * Top level method to make post request and return java object type response for first access time requests
      *
-     * @param request FirstAccessRequestSearchBean representing the lucene json object for first access time search
+     * @param request RequestSearchBean representing the lucene json object for first access time search
      * @param type    type of the expected java object type
      * @param <T>     expected values of the Result object
      * @return return list of Result objects containing the <T> values
      * @throws JsonSyntaxException throws if error occur parsing response back to the java
      * @throws IOException         throws if connection error occur to the REST API
      */
-    public <T> List<Result<T>> doPost(FirstAccessRequestSearchBean request, Type type)
+    public <T> List<Result<T>> doPost(RequestSearchBean request, Type type)
             throws JsonSyntaxException, IOException {
         //get the json string of the request object
         String json = gson.toJson(request);
