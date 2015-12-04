@@ -588,15 +588,36 @@ public abstract class AbstractAPIManager implements APIManager {
         return versionSet;
     }
 
-    /** Returns the swagger 2.0 definition of the given API
-     * 
+    /**
+     * Returns the swagger 2.0 definition of the given API
+     *
      * @param apiId id of the APIIdentifier
      * @return An String containing the swagger 2.0 definition
      * @throws APIManagementException
      */
     @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
-        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
+        String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+        String swaggerDoc = null;
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(
+                        apiTenantDomain);
+                registryType = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            swaggerDoc = definitionFromSwagger20.getAPIDefinition(apiId, registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Failed to get swagger documentation of API : " + apiId.toString(), e);
+        } catch (RegistryException e) {
+            handleException("Failed to get swagger documentation of API : " + apiId.toString(), e);
+        }
+        return swaggerDoc;
     }
 
     public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {

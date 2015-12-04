@@ -447,7 +447,9 @@ public abstract class APIUsageStatisticsClient {
             String query;
 
             //make the query
-            query = "SELECT CONSUMER_KEY,AUTHZ_USER FROM IDN_OAUTH2_ACCESS_TOKEN AS A INNER JOIN IDN_OAUTH_CONSUMER_APPS AS B ON B.ID=A.CONSUMER_KEY_ID";
+            query = "SELECT CONSUMER_KEY,AUTHZ_USER FROM (select * from IDN_OAUTH2_ACCESS_TOKEN where "
+                    + "TOKEN_STATE='ACTIVE') AS tokenTable INNER JOIN IDN_OAUTH_CONSUMER_APPS AS appsTable ON "
+                    + "appsTable.ID=tokenTable.CONSUMER_KEY_ID";
 
             //get the result set
             rs = statement.executeQuery(query);

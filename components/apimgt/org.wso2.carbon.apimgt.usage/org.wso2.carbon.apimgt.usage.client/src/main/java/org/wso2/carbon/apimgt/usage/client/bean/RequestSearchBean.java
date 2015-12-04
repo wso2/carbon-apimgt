@@ -18,7 +18,7 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
-public class FirstAccessRequestSearchBean {
+public class RequestSearchBean {
     public String getQuery() {
         return query;
     }
@@ -51,7 +51,7 @@ public class FirstAccessRequestSearchBean {
         this.tableName = tableName;
     }
 
-    public FirstAccessRequestSearchBean(String query, int start, int count, String tableName) {
+    public RequestSearchBean(String query, int start, int count, String tableName) {
         super();
         this.query = query;
         this.start = start;

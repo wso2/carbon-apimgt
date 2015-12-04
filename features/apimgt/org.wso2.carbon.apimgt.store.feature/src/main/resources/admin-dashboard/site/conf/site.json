@@ -9,11 +9,7 @@
     "allowedRole":"admin",
     "allowedRoles":"admin,subscriber",
     "workflows":{
-     "applicationWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
-     "subscriptionWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
-     "signupWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
-     "appRegistrationWorkFlowServerURL": "https://<BPSHost>:<BPSPort>/services/"
-
+     "workFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
     },
     "ssoConfiguration" : {
         "enabled" : "false",
