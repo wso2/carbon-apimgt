@@ -122,7 +122,7 @@ var bpsRuning = false;
 try{
 var xhr = new XMLHttpRequest();
 var site = require("/site/conf/site.json");
-var endpoint =  site.workflows.applicationWorkFlowServerURL+"AuthenticationAdmin";
+var endpoint =  site.workflows.workFlowServerURL + "AuthenticationAdmin";
 try{
 var httpClient = new Packages.org.apache.http.impl.client.DefaultHttpClient();
 var httpPost = new Packages.org.apache.http.client.methods.HttpPost(endpoint);
