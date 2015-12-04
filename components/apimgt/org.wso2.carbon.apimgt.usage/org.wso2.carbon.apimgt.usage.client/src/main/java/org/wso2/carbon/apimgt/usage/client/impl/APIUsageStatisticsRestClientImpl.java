@@ -2220,7 +2220,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<API> getAPIsByProvider(String providerId) throws APIMgtUsageQueryServiceClientException {
         try {
-            if (APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerId)) {
+            if (providerId.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                 return apiProviderImpl.getAllAPIs();
             } else {
                 return apiProviderImpl.getAPIsByProvider(providerId);
