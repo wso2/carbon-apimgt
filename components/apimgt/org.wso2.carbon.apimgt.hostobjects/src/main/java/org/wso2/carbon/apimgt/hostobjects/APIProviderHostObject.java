@@ -3789,9 +3789,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters or their types.");
         }
 
-        String providerName = (String) args[3];
-        String apiName = (String) args[4];
-        String apiVersion = (String) args[5];
+        String providerName = (String) args[2];
+        String apiName = (String) args[3];
+        String apiVersion = (String) args[4];
 
         if (providerName != null) {
             providerName = APIUtil.replaceEmailDomain(providerName);
@@ -3860,45 +3860,46 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String urlVal = (String) args[1];
         String type = (String) args[0];
-        String invalidStatusCodesRegex = args.length > 2 ? (String) args[2] : "404";
+        String invalidStatusCodesRegex = args.length > 5 ? (String) args[5] : "404";
         if (urlVal != null && !urlVal.isEmpty()) {
             urlVal = urlVal.trim();
 
             try {
-
-                NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
-                urlVal = (String)obj.get("urlValue");
-
-                if (obj.get("isContainUriTemplatesOnly").equals(true)) {
-                    isContainUriTemplatesOnly = true;
-                }
-
-                URL url = new URL(urlVal);
                 
                 if (type != null && type.equals("wsdl")) {
                     validateWsdl(urlVal);
                     response = "success";
                     isConnectionError = false;
-                }
-                // checking http,https endpoints up to resource level by doing
-                // http HEAD. And other end point
-                // validation do through basic url connect
+                } else {
+                    // checking http,https endpoints up to resource level by doing
+                    // http HEAD. And other end point
+                    // validation do through basic url connect
 
-                else if (url.getProtocol().matches("https")) {
-                    ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
-                    String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
-                    String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
-                    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-                    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+                    NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                    urlVal = (String) obj.get("urlValue");
 
-                    NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
-                    headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
-                    return headRequestResult;
+                    if (obj.get("isContainUriTemplatesOnly").equals(true)) {
+                        isContainUriTemplatesOnly = true;
+                    }
 
-                } else if (url.getProtocol().matches("http")) {
-                    NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
-                    headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
-                    return headRequestResult;
+                    URL url = new URL(urlVal);
+
+                    if (url.getProtocol().matches("https")) {
+                        ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+                        String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+                        String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+                        System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+                        System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+                        NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                        headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                        return headRequestResult;
+
+                    } else if (url.getProtocol().matches("http")) {
+                        NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                        headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                        return headRequestResult;
+                    }
                 }
             } catch (Exception e) {
                 response = e.getMessage();
