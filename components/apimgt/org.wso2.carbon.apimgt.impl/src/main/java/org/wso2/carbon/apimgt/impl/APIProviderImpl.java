@@ -3100,21 +3100,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException {
-        GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+        String provider = apiIdentifier.getProviderName();
+        String providerTenantMode = apiIdentifier.getProviderName();
+        provider = APIUtil.replaceEmailDomain(provider);
         boolean success = false;
+        boolean isTenantFlowStarted = false;
         try {
-            if (apiArtifact != null) {
-                if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
-                    apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-                } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
-                    apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-                }
-                success = true;
+            
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-        } catch (GovernanceException e) {
-            handleException("Error while setting registry lifecycle checklist items for the API: " +
-                    apiIdentifier.getApiName(), e);
-        }
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            
+            try {
+                if (apiArtifact != null) {
+                    if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                        apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                    } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                        apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                    }
+                    success = true;
+                }
+            } catch (GovernanceException e) {
+                handleException("Error while setting registry lifecycle checklist items for the API: " +
+                        apiIdentifier.getApiName(), e);
+            }
+            
+       }finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        } 
         return success;
     }
 
@@ -3160,8 +3179,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
         String path = APIUtil.getAPIPath(apiId);
         Map<String, Object> lcData = new HashMap<String, Object>();
+    
+        String provider = apiId.getProviderName();
+        String providerTenantMode = apiId.getProviderName();
+        provider = APIUtil.replaceEmailDomain(provider);
+     
+        boolean isTenantFlowStarted = false;
 
         try {
+            
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
             Resource apiSourceArtifact = registry.get(path);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -3250,6 +3282,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (Exception e) {
             handleException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return lcData;
     }

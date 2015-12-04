@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.usage.client;
 
 public final class APIUsageStatisticsClientConstants {
 
+    public static final String API_LAST_ACCESS_TIME_SUMMARY = "API_LAST_ACCESS_TIME_SUMMARY";
 
     public static final String API_REQUEST_SUMMARY = "API_REQUEST_SUMMARY";
 
