@@ -103,19 +103,6 @@ paths:
           enum:
             - PRODUCTION
             - PROTOTYPE
-#
-# ?????? Provide list of attributes we support for sorting
-#
-        - name: sort
-          in: query
-          type: string
-          description: | 
-            ** Sort expression **
-            
-            A *sort expression* consists of a sequence of names of API 
-            properties concatenated by a '+' or '-' (indicating ascending or 
-            decending order) separated by a comma. The sequence of names 
-            corresponds to a conjunction. 
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
@@ -1438,10 +1425,9 @@ definitions:
       transport:
         type: array
         items:
+          description: |
+            Supported transports for the API (http and/or https).
           type: string
-#          enum:
-#            - http
-#            - https
       tags:
         type: array
         items:

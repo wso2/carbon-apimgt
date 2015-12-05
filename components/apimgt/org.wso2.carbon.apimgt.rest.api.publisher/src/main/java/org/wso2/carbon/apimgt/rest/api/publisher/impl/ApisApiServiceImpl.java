@@ -69,13 +69,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param offset starting index
      * @param query search condition
      * @param type value for the search condition
-     * @param sort sort parameter
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
+    public Response apisGet(Integer limit, Integer offset, String query, String type, String accept,
             String ifNoneMatch) {
         List<API> allMatchedApis;
         APIListDTO apiListDTO;

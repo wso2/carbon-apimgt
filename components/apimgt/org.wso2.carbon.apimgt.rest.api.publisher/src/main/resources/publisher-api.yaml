@@ -4,9 +4,9 @@ swagger: '2.0'
 ######################################################
 info:
   version: "0.9.0"
-  title: "WSO2 API Manager"
+  title: "WSO2 API Manager - Publisher"
   description: |
-    This document specifies a **RESTful API** for WSO2 **API Manager**.
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
     
     You can find the source of this API definition 
     [here](https://github.com/hevayo/restful-apim). 
@@ -111,19 +111,6 @@ paths:
           enum:
             - PRODUCTION
             - PROTOTYPE
-#
-# ?????? Provide list of attributes we support for sorting
-#
-        - name: sort
-          in: query
-          type: string
-          description: | 
-            ** Sort expression **
-            
-            A *sort expression* consists of a sequence of names of API 
-            properties concatenated by a '+' or '-' (indicating ascending or 
-            decending order) separated by a comma. The sequence of names 
-            corresponds to a conjunction. 
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
@@ -1919,12 +1906,11 @@ definitions:
       isDefaultVersion:
         type: boolean
       transport:
+        description: |
+          Supported transports for the API (http and/or https).
         type: array
         items:
           type: string
-#          enum:
-#            - http
-#            - https
       tags:
         type: array
         items:

@@ -60,7 +60,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param query search condition
      * @param type value for the search condition
-     * @param sort sort parameter
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
@@ -68,7 +67,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     @SuppressWarnings("unchecked")
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String type,
-            String sort, String accept, String ifNoneMatch) {
+            String accept, String ifNoneMatch) {
         Map<String, Object> apisMap;
 
         //pre-processing
