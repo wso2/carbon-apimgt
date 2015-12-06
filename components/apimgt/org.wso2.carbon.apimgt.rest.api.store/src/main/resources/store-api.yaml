@@ -1807,12 +1807,6 @@ definitions:
       accessToken:
         type: string
         description: Access token
-      refreshToken:
-        type: string
-        description: Refresh token
-      tokenState:
-        type: string
-        description: Token state
       tokenScopes:
         type: array
         items: 

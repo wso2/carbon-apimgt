@@ -55,11 +55,6 @@ public class ApplicationKeyMappingUtil {
             tokenDTO.setValidityTime((Long)keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
             tokenDTO.setAccessToken((String)keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
             String[] tokenScopes = (String[])keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
-            String tokenState = (String)keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_DETAILS);
-            JSONObject tokenStateJsonObj = (JSONObject) new JSONParser().parse(tokenState);
-            if (tokenStateJsonObj != null) {
-                tokenDTO.setTokenState((String)tokenStateJsonObj.get(APIConstants.AccessTokenConstants.TOKEN_STATE));
-            }
             tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
 
             applicationKeyDTO.setToken(tokenDTO);
@@ -78,8 +73,6 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setSupportedGrantTypes(null); //todo not supported by impl yet
 
         TokenDTO tokenDTO = new TokenDTO();
-        tokenDTO.setTokenState(null); //todo not supported by impl yet
-        tokenDTO.setRefreshToken(null); //todo not supported by impl yet
         if (apiKey.getTokenScope() != null) {
             tokenDTO.setTokenScopes(Arrays.asList(apiKey.getTokenScope().split(" ")));
         }
