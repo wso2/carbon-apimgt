@@ -298,6 +298,7 @@ public final class APIConstants {
     public static final String API_CONSUMER_AUTHENTICATION = "APIConsumerAuthentication.";
     public static final String TOKEN_GENERATOR_IMPL = API_CONSUMER_AUTHENTICATION+"TokenGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = API_CONSUMER_AUTHENTICATION+"EnableTokenGeneration";
+    public static final String CLAIM_CACHE_EXPIRY = API_CONSUMER_AUTHENTICATION+ "APIMClaimCacheExpiry";
 
     //documentation rxt
 
@@ -391,6 +392,7 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
+    public static final String API_KEY_VALIDATOR_KEY_CACHE_EXPIRY = API_KEY_VALIDATOR + "APIMKeyCacheExpiry";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
@@ -426,6 +428,7 @@ public final class APIConstants {
     public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
     public static final String API_KEY_VALIDATOR_ENCRYPT_TOKENS = API_KEY_VALIDATOR + "EncryptPersistedTokens";
     public static final String API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE = API_KEY_VALIDATOR +"ApplicationTokenScope";
+
 
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
@@ -647,6 +650,7 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_CONFIG_CACHE = "selfSignupCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
+    public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =

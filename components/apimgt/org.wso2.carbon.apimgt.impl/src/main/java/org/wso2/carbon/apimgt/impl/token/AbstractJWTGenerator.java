@@ -218,7 +218,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
             Iterator<Map.Entry<String, String>> entryIterator = standardClaims.entrySet().iterator();
             while (entryIterator.hasNext()) {
-                Map.Entry<String, String> entry = entryIterator.next();
+                 Map.Entry<String, String> entry = entryIterator.next();
                 String key = entry.getKey();
                 if("exp".equals(key) || "nbf".equals(key) || "iat".equals(key)){
                     //These values should be numbers.
