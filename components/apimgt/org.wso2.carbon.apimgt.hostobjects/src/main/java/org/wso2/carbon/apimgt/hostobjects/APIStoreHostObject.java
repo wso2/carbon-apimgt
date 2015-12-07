@@ -300,33 +300,6 @@ public class APIStoreHostObject extends ScriptableObject {
         return "http://" + System.getProperty(hostName) + ":" + System.getProperty(httpPort);
     }
 
-    /*
-     * getting key for API subscriber args[] list String subscriberID, String
-	 * api, String apiVersion, String Date
-	 */
-    public static String jsFunction_getKey(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
-
-        if (args != null && isStringArray(args)) {
-            APIInfoDTO apiInfo = new APIInfoDTO();
-            apiInfo.setProviderId((String) args[0]);
-            apiInfo.setApiName((String) args[1]);
-            apiInfo.setVersion((String) args[2]);
-            apiInfo.setContext((String) args[3]);
-            try {
-                SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-                return keyMgtClient.getAccessKey((String) args[5], apiInfo, (String) args[4], (String) args[6], (String) args[7]);
-            } catch (Exception e) {
-                String msg = "Error while obtaining access tokens";
-                handleException(msg, e);
-                return null;
-            }
-        } else {
-            handleException("Invalid input parameters.");
-            return null;
-        }
-    }
-
     /**
      * This method is responsible to create oAuth Application and Application keys for a given APIM application
      * @param cx      will be used to store information about the executing of the script.
