@@ -693,6 +693,10 @@ $(document).ready(function(){
         $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
     });
 
+    $("#clearSeqFile").on("click", function () {
+        $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge" name="apiThumb" />');
+    });
+
     $('#import_swagger').attr('disabled','disabled');
     $('.toggleRadios input[type=radio]').click(function(){
         if (($(this).val() == 'swagger_import_file' &&

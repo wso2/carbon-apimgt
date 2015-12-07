@@ -2267,7 +2267,8 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerNameTenantFlow));
-            String userTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
+            String userTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
             if(!tenantDomain.equals(userTenantDomain)){
                 throw new APIManagementException("Invalid Operation: Cannot access API:" + apiId + "from current tenant.");
             }
@@ -3778,10 +3779,85 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
+    /**
+     * This method is used to edit the endpoint URL provided during the implementation stage in the publisher
+     * based on the resource url patterns provided in the design stage of an API.It is used in jsFunction_isURLValid()
+     */
+    public static NativeObject editEndpointUrlToTest(String urlVal, Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws APIManagementException {
+
+        String urlValue = urlVal;
+        boolean isContainUriTemplatesOnly = false;
+        NativeObject data = new NativeObject();
+
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid number of parameters or their types.");
+        }
+
+        String providerName = (String) args[2];
+        String apiName = (String) args[3];
+        String apiVersion = (String) args[4];
+
+        if (providerName != null) {
+            providerName = APIUtil.replaceEmailDomain(providerName);
+        }
+
+        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        API api = null;
+        try {
+            api = apiProvider.getAPI(apiIdentifier);
+        } catch (APIManagementException e) {
+            handleException("Cannot find the requested API- " + apiName + "-" + apiVersion);
+        }
+
+        if (api != null) {
+
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+            if (uriTemplates.size() != 0) {
+
+                Iterator i = uriTemplates.iterator();
+                List<String> urlPatternArray = new ArrayList<String>();
+                while (i.hasNext()) {
+                    URITemplate ut = (URITemplate) i.next();
+                    urlPatternArray.add(ut.getUriTemplate());
+                }
+
+                if(urlPatternArray.contains("/*")) { //Checking whether the urlPatternArray contains /*
+                    data.put("urlValue", data, urlValue);
+                    data.put("isContainUriTemplatesOnly", data, false);
+                    return data;
+                } else {
+                    for (String urlPattern : urlPatternArray) {
+                        //to check whether it is a uri-template
+                        Matcher matcher = pathParamExtractorPattern.matcher(urlPattern);
+
+                        if (matcher.find()) {
+                            isContainUriTemplatesOnly = true;
+                        } else {
+                            urlValue = urlValue + urlPattern;
+                            isContainUriTemplatesOnly = false;
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        data.put("urlValue", data, urlValue);
+        data.put("isContainUriTemplatesOnly", data, isContainUriTemplatesOnly);
+        return data;
+
+    }
+
     public static NativeObject jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
                                                                                        throws APIManagementException {
         boolean isConnectionError = true;
         String response = null;
+        boolean isContainUriTemplatesOnly = false;//To check whether the resources contain only uri templates
         NativeObject data = new NativeObject();
 
         if (args == null || !isStringValues(args)) {
@@ -3789,29 +3865,46 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String urlVal = (String) args[1];
         String type = (String) args[0];
-        String invalidStatusCodesRegex = args.length > 2 ? (String) args[2] : "404";
+        String invalidStatusCodesRegex = args.length > 5 ? (String) args[5] : "404";
         if (urlVal != null && !urlVal.isEmpty()) {
             urlVal = urlVal.trim();
+
             try {
-                URL url = new URL(urlVal);
+                
                 if (type != null && type.equals("wsdl")) {
                     validateWsdl(urlVal);
                     response = "success";
                     isConnectionError = false;
-                }
-                // checking http,https endpoints up to resource level by doing
-                // http HEAD. And other end point
-                // validation do through basic url connect
-                else if (url.getProtocol().matches("https")) {
-                    ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
-                    String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
-                    String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
-                    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-                    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+                } else {
+                    // checking http,https endpoints up to resource level by doing
+                    // http HEAD. And other end point
+                    // validation do through basic url connect
 
-                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
-                } else if (url.getProtocol().matches("http")) {
-                    return sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                    NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                    urlVal = (String) obj.get("urlValue");
+
+                    if (obj.get("isContainUriTemplatesOnly").equals(true)) {
+                        isContainUriTemplatesOnly = true;
+                    }
+
+                    URL url = new URL(urlVal);
+
+                    if (url.getProtocol().matches("https")) {
+                        ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+                        String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+                        String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+                        System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+                        System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+                        NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                        headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                        return headRequestResult;
+
+                    } else if (url.getProtocol().matches("http")) {
+                        NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                        headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                        return headRequestResult;
+                    }
                 }
             } catch (Exception e) {
                 response = e.getMessage();
@@ -3820,6 +3913,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         data.put("response", data, response);
         data.put("isConnectionError", data, isConnectionError);
+        data.put("isContainUriTemplatesOnly", data, isContainUriTemplatesOnly);
         return data;
 
     }

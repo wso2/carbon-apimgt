@@ -41,7 +41,8 @@
             "testUri": "Probar URI",
             "validating": "Validaci�n en proceso..",
             "missingUrl": " Please provide a url to test",
-            "errorInConnection": " - Error connecting to backend"
+            "errorInConnection": " - Error connecting to backend",
+            "provideCompleteUrl": "Cannot test the endpoint provided. Please specify the full url for testing."
         },
 		"failOver":{
 			"title":"Failover State"
