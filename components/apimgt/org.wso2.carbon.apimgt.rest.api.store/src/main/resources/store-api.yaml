@@ -6,7 +6,7 @@ info:
   version: "0.9.0"
   title: "WSO2 API Manager"
   description: |
-    This document specifies a **RESTful API** for WSO2 **API Manager**.
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
     
     You can find the source of this API definition 
     [here](https://github.com/hevayo/restful-apim). 
