@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.token;
 
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
@@ -30,9 +31,11 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
 import javax.cache.Caching;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class is the default implementation of ClaimsRetriever.
@@ -46,6 +49,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
 
     private String dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
 
+    private  boolean isClaimsCacheInitialized = false;
     /**
      * Reads the DialectURI of the ClaimURIs to be retrieved from api-manager.xml ->
      * APIConsumerAuthentication -> ConsumerDialectURI.
@@ -60,7 +64,19 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     }
 
     protected Cache getClaimsLocalCache() {
-        return Caching.getCacheManager("API_MANAGER_CACHE").getCache("claimsLocalCache");
+        String apimClaimsCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.CLAIM_CACHE_EXPIRY);
+        if(!isClaimsCacheInitialized && apimClaimsCacheExpiry != null) {init();
+            isClaimsCacheInitialized = true;
+           return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    createCacheBuilder(APIConstants.CLAIMS_APIM_CACHE)
+                   .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                           Long.parseLong(apimClaimsCacheExpiry)))
+                   .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                           Long.parseLong(apimClaimsCacheExpiry))).setStoreByValue(false).build();
+        }else {
+           return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.CLAIMS_APIM_CACHE);
+        }
     }
 
     public SortedMap<String, String> getClaims(String endUserName) throws APIManagementException {
