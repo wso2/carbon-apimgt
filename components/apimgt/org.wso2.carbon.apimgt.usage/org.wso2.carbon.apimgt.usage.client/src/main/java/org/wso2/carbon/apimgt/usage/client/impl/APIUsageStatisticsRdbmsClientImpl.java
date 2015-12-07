@@ -71,6 +71,8 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.text.NumberFormat;
 import java.util.*;
 
 /**
@@ -1051,6 +1053,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         DecimalFormat format = new DecimalFormat("#.##");
+        NumberFormat numberFormat = NumberFormat.getInstance(Locale.getDefault());
         List<APIResponseTimeDTO> apiResponseTimeUsage = new ArrayList<APIResponseTimeDTO>();
 
         Map<String, Double> apiCumulativeServiceTimeMap = new HashMap<String, Double>();
@@ -1080,7 +1083,11 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     //calculate the average response time
                     double avgTime = responseTime.getResponseTime() / responseTime.getResponseCount();
                     //format the time
-                    responseTimeDTO.setServiceTime(Double.parseDouble(format.format(avgTime)));
+                    try {
+                        responseTimeDTO.setServiceTime(numberFormat.parse(format.format(avgTime)).doubleValue());
+                    } catch (ParseException e) {
+                        throw new APIMgtUsageQueryServiceClientException("Parse exception while formatting time");
+                    }
                     apiResponseTimeUsage.add(responseTimeDTO);
                 }
             }
@@ -1448,7 +1455,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             double faultPercentage =
                                     ((double) requestCount - fault.getFaultCount()) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
-                            faultPercentage = 100 - Double.valueOf(twoDForm.format(faultPercentage));
+
+                            NumberFormat numberFormat = NumberFormat.getInstance(Locale.getDefault());
+                            try {
+                                faultPercentage = 100 - numberFormat.parse(twoDForm.format(faultPercentage)).doubleValue();
+                            } catch (ParseException e) {
+                                throw new APIMgtUsageQueryServiceClientException("Parse exception while formatting time");
+                            }
                             faultyDTO.setFaultPercentage(faultPercentage);
                             faultyDTO.setTotalRequestCount(requestCount);
                             break;
