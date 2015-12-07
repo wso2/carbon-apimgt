@@ -2522,7 +2522,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // according to the token type.
         StringBuilder applicationNameAfterAppend = new StringBuilder(applicationName);
         //-------------------------------------------------------------------------------
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         int tenantId =
                 0;
         try {
@@ -2538,7 +2538,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (tokenScope != null && tokenScope.length() != 0 &&
                 !tokenScope.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
             scopeSet.addAll(getScopesByScopeKeys(tokenScope, tenantId));
-            authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
+            authorizedScopes = getAllowedScopesForUserApplication(userId, scopeSet);
         }
 
         if (!authorizedScopes.isEmpty()) {
