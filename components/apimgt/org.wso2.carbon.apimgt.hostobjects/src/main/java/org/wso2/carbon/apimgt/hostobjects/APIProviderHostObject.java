@@ -2267,7 +2267,8 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerNameTenantFlow));
-            String userTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
+            String userTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
             if(!tenantDomain.equals(userTenantDomain)){
                 throw new APIManagementException("Invalid Operation: Cannot access API:" + apiId + "from current tenant.");
             }
@@ -3778,6 +3779,10 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
+    /**
+     * This method is used to edit the endpoint URL provided during the implementation stage in the publisher
+     * based on the resource url patterns provided in the design stage of an API.It is used in jsFunction_isURLValid()
+     */
     public static NativeObject editEndpointUrlToTest(String urlVal, Context cx, Scriptable thisObj, Object[] args,
             Function funObj) throws APIManagementException {
 
