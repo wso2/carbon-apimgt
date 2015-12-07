@@ -1585,8 +1585,6 @@ definitions:
           - FILE
       sourceUrl:
         type: string
-      filePath:
-        type: string
       otherTypeName:
         type: string
 
