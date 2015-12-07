@@ -116,7 +116,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
                 //this is not an error of the user as he does not know the total number of apis available. Thus sends 
                 //  an empty response
-                //todo : is this ok? need to add logs?
                 apiListDTO.setCount(0);
                 apiListDTO.setNext("");
                 apiListDTO.setPrevious("");

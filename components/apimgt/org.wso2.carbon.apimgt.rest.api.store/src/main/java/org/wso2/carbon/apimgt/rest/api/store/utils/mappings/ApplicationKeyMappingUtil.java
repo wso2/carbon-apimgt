@@ -70,7 +70,7 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
         applicationKeyDTO.setKeyState(apiKey.getState());
-        applicationKeyDTO.setSupportedGrantTypes(null); //todo not supported by impl yet
+        applicationKeyDTO.setSupportedGrantTypes(null); //this is not supported by impl yet
 
         TokenDTO tokenDTO = new TokenDTO();
         if (apiKey.getTokenScope() != null) {

@@ -251,7 +251,6 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
-        //model.setThumbnailUrl(dto.getThumbnailUrl()); //todo if this is not a usual reg path, this breaks copying the api
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {

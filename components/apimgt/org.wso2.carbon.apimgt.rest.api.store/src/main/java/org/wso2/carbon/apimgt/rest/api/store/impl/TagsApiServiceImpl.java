@@ -54,8 +54,6 @@ public class TagsApiServiceImpl extends TagsApiService {
     @Override
     public Response tagsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String query) {
 
-        // todo: implement tag search
-
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
