@@ -26,16 +26,23 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.core.AbstractIdentityUserOperationEventListener;
-import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.oauth.listener.IdentityOathEventListener;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import java.util.Map;
 import java.util.Set;
 
-public class KeyManagerUserOperationListener extends AbstractIdentityUserOperationEventListener {
+/**
+ * This listener class will execute upon user deletion, role update of user and user update of role operations. It is
+ * intended to remove the cached access tokens in the API Gateway belonging to the relevant user when one of the above
+ * operations occur.
+ */
+public class KeyManagerUserOperationListener extends IdentityOathEventListener {
 
     private static final Log log = LogFactory.getLog(KeyManagerUserOperationListener.class);
 
@@ -44,20 +51,37 @@ public class KeyManagerUserOperationListener extends AbstractIdentityUserOperati
      */
     @Override
     public int getExecutionOrderId() {
-        int orderId = getOrderId();
-        if (orderId != IdentityCoreConstants.EVENT_LISTENER_ORDER_ID) {
-            return orderId;
-        }
-        return 10000;
+        /**
+         * This class is intended to remove the active access tokens from the API Gateway cache. Upon user removal, the
+         * IdentityOathEventListener class revokes the user's active access tokens. We need this listener class to
+         * execute before the IdentityOathEventListener so that it can retrieve the user's active access tokens before
+         * IdentityOathEventListener updates their status to 'REVOKED'.
+         */
+        return getOrderId() - 1;
     }
 
     /**
      * Deleting user from the identity database prerequisites.
      */
     @Override
-    public boolean doPreDeleteUser(java.lang.String username,
-                                   org.wso2.carbon.user.core.UserStoreManager userStoreManager)
-            throws org.wso2.carbon.user.core.UserStoreException {
+    public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager)
+                                                                    throws UserStoreException {
+
+        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
+    }
+
+    @Override
+    public boolean doPreUpdateRoleListOfUser(String username, String[] deletedRoles,
+                                             String[] newRoles,
+                                             UserStoreManager userStoreManager){
+
+        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
+    }
+
+    @Override
+    public boolean doPreUpdateUserListOfRole(String username, String[] deletedRoles,
+                                             String[] newRoles,
+                                             UserStoreManager userStoreManager){
 
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
@@ -69,9 +93,13 @@ public class KeyManagerUserOperationListener extends AbstractIdentityUserOperati
 
         username = UserCoreUtil.addDomainToName(username, userStoreDomain);
         username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
-        username = username.toLowerCase();
 
-        APIManagerConfiguration config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
+        //If the username is not case sensitive
+        if(!IdentityUtil.isUserStoreInUsernameCaseSensitive(username)){
+            username = username.toLowerCase();
+        }
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         if (config.getApiGatewayEnvironments().size() <= 0) {
@@ -119,4 +147,5 @@ public class KeyManagerUserOperationListener extends AbstractIdentityUserOperati
 
         return true;
     }
+
 }

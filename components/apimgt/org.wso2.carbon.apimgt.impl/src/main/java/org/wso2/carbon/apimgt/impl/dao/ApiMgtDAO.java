@@ -66,10 +66,12 @@ import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
 import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -9446,17 +9448,28 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         int tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
 
+        String userStoreDomain = IdentityUtil.extractDomainFromName(username).toUpperCase();
+        if(StringUtils.isEmpty(userStoreDomain)){
+            userStoreDomain = IdentityUtil.getPrimaryDomainName();
+        }
+        else{
+            //IdentityUtil doesn't have a function to remove the domain name from the username. Using the UserCoreUtil.
+            username = UserCoreUtil.removeDomainFromName(username);
+        }
+
         try {
             conn = APIMgtDBUtil.getConnection();
             String sqlQuery = "SELECT IOAT.ACCESS_TOKEN" +
                     " FROM " + accessTokenStoreTable + " IOAT" +
                     " WHERE IOAT.AUTHZ_USER = ?" +
                         " AND IOAT.TENANT_ID = ?" +
-                        " AND IOAT.TOKEN_STATE = 'ACTIVE'";
+                        " AND IOAT.TOKEN_STATE = 'ACTIVE'" +
+                        " AND LOWER(IOAT.USER_DOMAIN) = ?";
 
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, MultitenantUtils.getTenantAwareUsername(username));
             ps.setInt(2, tenantId);
+            ps.setString(3, userStoreDomain.toLowerCase());
             resultSet = ps.executeQuery();
             tokens = new HashSet<String>();
             while (resultSet.next()) {
