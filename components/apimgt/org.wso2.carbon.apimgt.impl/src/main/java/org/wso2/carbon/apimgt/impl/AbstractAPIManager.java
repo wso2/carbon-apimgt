@@ -400,7 +400,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIInfoByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Registry registry;
             if (requestedTenantDomain != null && !requestedTenantDomain.equals(
@@ -446,8 +446,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
-    public API getAPIInfo(APIIdentifier identifier)
-            throws APIManagementException {
+    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
 
         boolean tenantFlowStarted = false;

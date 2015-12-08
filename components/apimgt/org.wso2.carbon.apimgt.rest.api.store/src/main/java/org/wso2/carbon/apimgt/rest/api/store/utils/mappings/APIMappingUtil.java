@@ -53,9 +53,9 @@ public class APIMappingUtil {
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         if (RestApiUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getAPIInfoByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
         } else {
-            apiIdentifier = apiConsumer.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
         }
         return  apiIdentifier;
     }

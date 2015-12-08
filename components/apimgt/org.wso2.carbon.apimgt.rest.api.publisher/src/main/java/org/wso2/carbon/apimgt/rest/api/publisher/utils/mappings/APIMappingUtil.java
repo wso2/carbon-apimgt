@@ -86,9 +86,9 @@ public class APIMappingUtil {
         API api;
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         if (RestApiUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIInfoByUUID(apiId, requestedTenantDomain);
+            api = apiProvider.getLightweightAPIByUUID(apiId, requestedTenantDomain);
         } else {
-            api = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId));
+            api = apiProvider.getLightweightAPI(getAPIIdentifierFromApiId(apiId));
         }
         return api;
     }
