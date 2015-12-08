@@ -2931,25 +2931,13 @@ public class APIProviderHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
 
-        //boolean isTenantFlowStarted = false;
-
         try {
-            /*String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-            		isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }*/
-
             content = apiProvider.getDocumentationContent(apiId, docName);
         } catch (Exception e) {
             handleException("Error while getting Inline Document Content ", e);
             return null;
-        }/* finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
-        }*/
+        }
+
         NativeObject row = new NativeObject();
         row.put("providerName", row,APIUtil.replaceEmailDomainBack(providerName));
         row.put("apiName", row, apiName);
@@ -2984,22 +2972,12 @@ public class APIProviderHostObject extends ScriptableObject {
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-        /*boolean isTenantFlowStarted = false;
-        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-        	isTenantFlowStarted = true;
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }*/
         try {
             API api = apiProvider.getAPI(apiId);
             apiProvider.addDocumentationContent(api, docName, docContent);
         } catch (APIManagementException e) {
             handleException("Error occurred while adding the content of the documentation- " + docName, e);
-        }/* finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }*/
+        }
     }
 
     public static boolean jsFunction_addDocumentation(Context cx, Scriptable thisObj,
@@ -3090,21 +3068,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 apiProvider
                         .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
                                 contentType);
-                /*Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
-                
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                String fname = fileHostObject.getName();
-                API api = apiProvider.getAPI(apiId);
-                String apiPath=APIUtil.getAPIPath(apiId);
-                String visibleRolesList = api.getVisibleRoles();
-                String[] visibleRoles = new String[0];
-                if (visibleRolesList != null) {
-                    visibleRoles = visibleRolesList.split(",");
-                }
-                APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                                               api.getVisibility(), visibleRoles,filePath);
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
-                APIUtil.setFilePermission(filePath);*/
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
@@ -4630,15 +4593,6 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-        /*boolean isTenantFlowStarted = false;
-        try {
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);*/
         Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
@@ -4648,11 +4602,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             handleException("Resource couldn't found for " + resource);
         }
-        /*} finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }*/
         return data;
     }
 
