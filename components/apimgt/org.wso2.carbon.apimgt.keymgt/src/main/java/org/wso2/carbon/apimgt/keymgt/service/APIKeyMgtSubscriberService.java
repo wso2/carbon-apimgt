@@ -108,6 +108,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         String userName = MultitenantUtils.getTenantAwareUsername(userId);
+        String userNameForSP = userName;
 
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -119,13 +120,13 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         try {
 
             // Replace domain separator by "_" if user is coming from a secondary userstore.
-            String domain = UserCoreUtil.extractDomainFromName(userName);
+            String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
             if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
-                userName = userName.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+                userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
 
             // Append the username before Application name to make application name unique across two users.
-            applicationName = APIUtil.replaceEmailDomain(userName) + "_" + applicationName;
+            applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
 
             // Create the Service Provider
             ServiceProvider serviceProvider = new ServiceProvider();
@@ -273,7 +274,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         String userName = MultitenantUtils.getTenantAwareUsername(userId);
-        String fullUserName = userName;
+        String userNameForSP = userName;
 
         if (log.isDebugEnabled()) {
 
@@ -310,14 +311,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         try {
 
             // Replace domain separator by "_" if user is coming from a secondary userstore.
-            String domain = UserCoreUtil.extractDomainFromName(userName);
+            String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
             if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
-                userName = userName.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+                userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
             }
 
             if (applicationName != null && !applicationName.isEmpty()) {
                 // Append the username before Application name to make application name unique across two users.
-                applicationName = APIUtil.replaceEmailDomain(userName) + "_" + applicationName;
+                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
                 log.debug("Application Name has changed, hence updating Service Provider Name..");
 
                 // Get ServiceProvider Name by consumer Key.
@@ -328,7 +329,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 if (serviceProvider != null) {
                     serviceProvider.setApplicationName(applicationName);
                     serviceProvider.setDescription("Service Provider for application " + applicationName);
-                    appMgtService.updateApplication(serviceProvider, tenantDomain, fullUserName);
+                    appMgtService.updateApplication(serviceProvider, tenantDomain, userName);
                 }
                 log.debug("Service Provider Name Updated to : " + applicationName);
             }
