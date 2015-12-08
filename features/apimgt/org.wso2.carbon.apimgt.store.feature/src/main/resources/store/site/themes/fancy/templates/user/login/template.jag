@@ -17,8 +17,7 @@ i18n.init(request,localeResourcesBasePath);
             currentURL += "?" + request.getQueryString();
         }
         var tenant=request_tenant;
-        var urlPrefix;
-        if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+        var urlPrefix = jagg.getTenantURLPrefix();
         
         if (jagg.getUser() != null) {
         	isSuperTenant = jagg.getUser().isSuperTenant;
@@ -90,7 +89,7 @@ i18n.init(request,localeResourcesBasePath);
                    <%=i18n.localize("logged")%> <h4><%=user.username%></h4>
                </li>
                <% if(isSelfSignupEnabled) { %>
-               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag?tenant=<%=tenantDomain%>"><%=i18n.localize("privacy")%></a></li> <% } %>
+               <li><a href="<%= jagg.getHttpsUrl('/')%>site/pages/user-info.jag?<%=urlPrefix%>"><%=i18n.localize("privacy")%></a></li> <% } %>
                <li class="logout-link-special"><button id="logout-link" class="btn btn-danger"><%=i18n.localize("logout")%></button></li>
              </ul>
            </li>
@@ -127,7 +126,7 @@ if(isSelfSignupEnabled){%>
 
 		<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
 
-				Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?tenant=" + tenantDomain%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
+				Go to <a href="<%=jagg.getAbsoluteUrl("/")%><%="?" + urlPrefix%>"><%=tenantDomain%><%=i18n.localize("apistoreDesc")%></a>
 
 
 		<%} else if ((tenant != null) && site.showPublicStoreURL && tenantDomains != null){%>

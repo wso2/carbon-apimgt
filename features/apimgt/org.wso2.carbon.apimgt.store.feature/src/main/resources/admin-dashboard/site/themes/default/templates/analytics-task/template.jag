@@ -613,7 +613,7 @@ if(enableAnalytics){
                 document.getElementById("statDsAlternateUsernameAllowed").value = "<%=datasourceData.dataSource.statDsAlternateUsernameAllowed%>";
                 document.getElementById("statDsValidationQueryTimeout").value = "<%=datasourceData.dataSource.statDsValidationQueryTimeout%>";
         <% } else {%>
-                document.getElementById("statDsURL").value = "jdbc:h2:../wso2das-2.5.0/repository/database/WSO2AM_STATS_DB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE";
+                document.getElementById("statDsURL").value = "jdbc:h2:../wso2das/repository/database/WSO2AM_STATS_DB;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE";
                 document.getElementById("statDsDriver").value = "org.h2.Driver";
                 document.getElementById("statDsUsername").value = "wso2carbon";
                 document.getElementById("statDsPassword").value = "wso2carbon";

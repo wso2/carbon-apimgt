@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
@@ -39,6 +40,8 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.ws.rs.core.Response;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,6 +57,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      *
      * @param limit maximum number of APIs returns
      * @param offset starting index
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param query search condition
      * @param type value for the search condition
      * @param sort sort parameter
@@ -136,6 +140,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param accept accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @return API of the given ID
      */
     @Override
@@ -181,6 +186,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param apiId API identifier
      * @param limit max number of records returned
      * @param offset starting index
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param query document search condition
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
@@ -236,7 +242,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Returns a specific document by identifier that is belong to the given API identifier
      * 
      * @param apiId API identifier
-     * @param documentId document identifer
+     * @param documentId document identifier
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
@@ -271,6 +278,118 @@ public class ApisApiServiceImpl extends ApisApiService {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 handleException("Error while getting API " + apiId, e);
+            }
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the content of a document
+     *
+     * @param apiId API identifier
+     * @param documentId document identifier
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return Content of the document/ either inline/file or source url as a redirection
+     */
+    @Override
+    public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId, String xWSO2Tenant,
+            String accept, String ifNoneMatch, String ifModifiedSince) {
+
+        Documentation documentation;
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            String username = RestApiUtil.getLoggedInUsername();
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+            }
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
+
+            documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
+            if (documentation == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+            }
+
+            if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
+                String resource = documentation.getFilePath();
+                Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, requestedTenantDomain);
+                Object fileDataStream = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA);
+                Object contentType = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE);
+                contentType = contentType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : contentType;
+                String name = docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME).toString();
+                return Response.ok(fileDataStream)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, contentType)
+                        .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\"" + name + "\"")
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE)) {
+                String content = apiConsumer.getDocumentationContent(apiIdentifier, documentation.getName());
+                return Response.ok(content)
+                        .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
+                        .build();
+            } else if (documentation.getSourceType().equals(Documentation.DocumentSourceType.URL)) {
+                String sourceUrl = documentation.getSourceUrl();
+                return Response.seeOther(new URI(sourceUrl)).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+                handleException(errorMessage, e);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + documentId;
+            handleException(errorMessage, e);
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the swagger document of an API
+     * 
+     * @param apiId API identifier
+     * @param accept Accept header value
+     * @param ifNoneMatch If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @param xWSO2Tenant requested tenant domain for cross tenant invocations
+     * @return Swagger document of the API
+     */
+    @Override 
+    public Response apisApiIdSwaggerGet(String apiId, String accept, String ifNoneMatch, String ifModifiedSince,
+            String xWSO2Tenant) {
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
+
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+            }
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
+
+            String apiSwagger = apiConsumer.getSwagger20Definition(apiIdentifier);
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;

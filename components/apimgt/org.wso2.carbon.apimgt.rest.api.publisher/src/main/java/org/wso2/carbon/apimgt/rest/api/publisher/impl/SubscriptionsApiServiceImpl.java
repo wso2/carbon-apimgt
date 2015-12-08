@@ -67,14 +67,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             SubscriptionListDTO subscriptionListDTO;
             if (apiId != null) {
-                //todo: support groupId
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
                 List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
                 subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(apiUsages, limit, offset);
                 SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
                         apiUsages.size());
             } else {
-                //todo: support groupId
                 UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
                 subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
                         offset);
@@ -87,6 +85,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
     }
 
+    /**
+     * Blocks a subscription 
+     * 
+     * @param subscriptionId Subscription identifier
+     * @param blockState block state; either BLOCKED or PROD_ONLY_BLOCKED
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if successfully blocked the subscription
+     */
     @Override
     public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
             String ifUnmodifiedSince) {
@@ -106,6 +113,14 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
     }
 
+    /**
+     * Unblocks a subscription
+     * 
+     * @param subscriptionId subscription identifier
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if successfully unblocked the subscription
+     */
     @Override
     public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
             String ifUnmodifiedSince) {
@@ -125,6 +140,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         }
     }
 
+    /**
+     * Gets a subscription by identifier
+     *
+     * @param subscriptionId  subscription identifier
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return matched subscription as a SubscriptionDTO
+     */
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
             String ifModifiedSince) {

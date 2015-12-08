@@ -2,9 +2,8 @@
 <% var stars = require(jagg.getThemeFile("utils/ratings/star-generator.js")); %>
                  <h4>  <%=i18n.localize("recentlyAdded")%></h4>
                      <%
-        var urlPrefix;
         var tenant=request_tenant;
-        if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+        var urlPrefix = jagg.getTenantURLPrefix("&");
         var i, api, path, thumbURL, thumbURL1 , apis = outputs.apis, length = 0;
         if(length>8){length=8;}
         for(i = 0; i < length; i++) {
@@ -70,7 +69,7 @@
                                                           itemProviderDisplayName = api.businessOwner;
                                                        }
                                                        starsText = getStaticStars( context, rating ,theme );
-                                                       path = '<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>' + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+ "&" + '<%=urlPrefix%>';
+                                                       path = '<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>' + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider + '<%=urlPrefix%>';
                                                        backImageId = '02';
                                                        if (i%2 ==0){
                                                        backImageId = '01';

@@ -21,15 +21,19 @@ include("/jagg/jagg.jag");
             var from = request.getParameter("fromDate");
             var to = request.getParameter("toDate");
             var provider;
-            if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
-                result = mod.getProviderAPIVersionUserLastAccess(allProviders, from, to);
-            } else if (mode != null && mode == "browse") {
+
+            if (mode != null && mode == "browse") {
                 provider = request.getParameter("provider");
-                result = mod.getProviderAPIVersionUserLastAccess(provider, from, to);
             } else {
                 provider = jagg.getUser().username;
-                result = mod.getProviderAPIVersionUserLastAccess(provider, from, to);
             }
+
+            if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
+                provider = allProviders + '@' + org.wso2.carbon.utils.multitenancy.MultitenantUtils.getTenantDomain(provider);
+            }
+
+            result = mod.getProviderAPIVersionUserLastAccess(provider, from, to);
+
             if (result.error == "true") {
                 obj = {
                     error: result.error,

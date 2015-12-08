@@ -35,6 +35,7 @@ import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -127,37 +128,57 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         return generateToken(keyValidationInfoDTO, apiContext, version,null);
     }
 
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version, String accessToken)
-            throws APIManagementException {
+    public String encode(String stringToBeEncoded) throws APIManagementException{
+        try {
+            return Base64Utils.encode(stringToBeEncoded.getBytes("UTF-8"));
+
+        } catch(UnsupportedEncodingException e){
+            String error = "Unsupported encoding : " + e;
+            //do not log
+            throw new APIManagementException(error);
+        }
+    }
+
+    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
+            String accessToken) throws APIManagementException {
+
         String jwtHeader = buildHeader(keyValidationInfoDTO);
 
         /*//add cert thumbprint to header
      String headerWithCertThumb = addCertToHeader(endUserName);*/
 
-        String base64EncodedHeader = "";
-        if (jwtHeader != null) {
-            base64EncodedHeader = Base64Utils.encode(jwtHeader.getBytes());
-        }
-        String base64EncodedBody = "";
-        String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version,accessToken);
-        if (jwtBody != null) {
-            base64EncodedBody = Base64Utils.encode(jwtBody.getBytes());
-        }
+        try {
 
-        if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
-            String assertion = base64EncodedHeader + "." + base64EncodedBody;
-
-            //get the assertion signed
-            byte[] signedAssertion = signJWT(assertion, keyValidationInfoDTO.getEndUserName());
-
-            if (log.isDebugEnabled()) {
-                log.debug("signed assertion value : " + new String(signedAssertion));
+            String base64UrlEncodedHeader = "";
+            if (jwtHeader != null) {
+                base64UrlEncodedHeader = encode(jwtHeader);
             }
-            String base64EncodedAssertion = Base64Utils.encode(signedAssertion);
 
-            return base64EncodedHeader + "." + base64EncodedBody + "." + base64EncodedAssertion;
-        } else {
-            return base64EncodedHeader + "." + base64EncodedBody + ".";
+            String jwtBody = buildBody(keyValidationInfoDTO, apiContext, version, accessToken);
+            String base64UrlEncodedBody = "";
+            if (jwtBody != null) {
+                base64UrlEncodedBody = encode(jwtBody);
+            }
+
+            if (signatureAlgorithm.equals(SHA256_WITH_RSA)) {
+                String assertion = base64UrlEncodedHeader + "." + base64UrlEncodedBody;
+
+                //get the assertion signed
+                byte[] signedAssertion = signJWT(assertion, keyValidationInfoDTO.getEndUserName());
+
+                if (log.isDebugEnabled()) {
+                    log.debug("signed assertion value : " + new String(signedAssertion, "UTF-8"));
+                }
+                String base64UrlEncodedAssertion = encode(new String(signedAssertion, "UTF-8"));
+
+                return base64UrlEncodedHeader + "." + base64UrlEncodedBody + "." + base64UrlEncodedAssertion;
+            } else {
+                return base64UrlEncodedHeader + "." + base64UrlEncodedBody + ".";
+            }
+        } catch (UnsupportedEncodingException e) {
+            String error = "Unsupported encoding : " + e;
+            //do not log
+            throw new APIManagementException(error);
         }
     }
 
@@ -197,7 +218,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
             Iterator<Map.Entry<String, String>> entryIterator = standardClaims.entrySet().iterator();
             while (entryIterator.hasNext()) {
-                Map.Entry<String, String> entry = entryIterator.next();
+                 Map.Entry<String, String> entry = entryIterator.next();
                 String key = entry.getKey();
                 if("exp".equals(key) || "nbf".equals(key) || "iat".equals(key)){
                     //These values should be numbers.
@@ -358,8 +379,8 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             byte[] digestInBytes = digestValue.digest();
 
             String publicCertThumbprint = hexify(digestInBytes);
-            String base64EncodedThumbPrint = Base64Utils.encode(publicCertThumbprint.getBytes());
-            //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64EncodedThumbPrint);
+            String base64UrlEncodedThumbPrint = encode(publicCertThumbprint);
+            //String headerWithCertThumb = JWT_HEADER.replaceAll("\\[1\\]", base64UrlEncodedThumbPrint);
             //headerWithCertThumb = headerWithCertThumb.replaceAll("\\[2\\]", signatureAlgorithm);
             //return headerWithCertThumb;
 
@@ -373,7 +394,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             jwtHeader.append("\",");
 
             jwtHeader.append("\"x5t\":\"");
-            jwtHeader.append(base64EncodedThumbPrint);
+            jwtHeader.append(base64UrlEncodedThumbPrint);
             jwtHeader.append("\"");
 
             jwtHeader.append("}");

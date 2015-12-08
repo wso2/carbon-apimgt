@@ -10,12 +10,12 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import java.util.List;
 
 import java.io.InputStream;
-
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 
 import javax.ws.rs.core.Response;
 
 public abstract class TiersApiService {
-    public abstract Response tiersGet(Integer limit,Integer offset,String accept,String ifNoneMatch);
-    public abstract Response tiersTierNameGet(String tierName,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response tiersTierLevelGet(String tierLevel,Integer limit,Integer offset,String accept,String ifNoneMatch);
+    public abstract Response tiersTierLevelTierNameGet(String tierName,String tierLevel,String accept,String ifNoneMatch,String ifModifiedSince);
 }
 

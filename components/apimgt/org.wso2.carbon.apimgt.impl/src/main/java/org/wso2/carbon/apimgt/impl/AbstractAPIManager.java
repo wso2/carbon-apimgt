@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
@@ -588,22 +588,43 @@ public abstract class AbstractAPIManager implements APIManager {
         return versionSet;
     }
 
-    /** Returns the swagger 2.0 definition of the given API
-     * 
+    /**
+     * Returns the swagger 2.0 definition of the given API
+     *
      * @param apiId id of the APIIdentifier
      * @return An String containing the swagger 2.0 definition
      * @throws APIManagementException
      */
     @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
-        return definitionFromSwagger20.getAPIDefinition(apiId, registry);
+        String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+        String swaggerDoc = null;
+        try {
+            Registry registryType;
+            //Tenant store anonymous mode if current tenant and the required tenant is not matching
+            if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(
+                        apiTenantDomain);
+                registryType = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+            } else {
+                registryType = registry;
+            }
+            swaggerDoc = definitionFromSwagger20.getAPIDefinition(apiId, registryType);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Failed to get swagger documentation of API : " + apiId.toString(), e);
+        } catch (RegistryException e) {
+            handleException("Failed to get swagger documentation of API : " + apiId.toString(), e);
+        }
+        return swaggerDoc;
     }
 
-    public String addIcon(String resourcePath, Icon icon) throws APIManagementException {
+    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
         try {
             Resource thumb = registry.newResource();
-            thumb.setContentStream(icon.getContent());
-            thumb.setMediaType(icon.getContentType());
+            thumb.setContentStream(resourceFile.getContent());
+            thumb.setMediaType(resourceFile.getContentType());
             registry.put(resourcePath, thumb);
             if(tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
             return RegistryConstants.PATH_SEPARATOR + "registry"
@@ -808,9 +829,17 @@ public abstract class AbstractAPIManager implements APIManager {
                              documentationName;
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
         Registry registry;
+
+        boolean isTenantFlowStarted = false;
         try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
 	        /* If the API provider is a tenant, load tenant registry*/
-	        if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+	        if (tenantDomain != null && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
 	            int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
 	            registry = ServiceReferenceHolder.getInstance().
 	                    getRegistryService().getGovernanceSystemRegistry(id);
@@ -837,7 +866,11 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
         	handleException("Failed to get ddocument content found for documentation: "
         				 + documentationName + " of API: "+identifier.getApiName(), e);
-		}
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
         return null;
     }
 
@@ -890,7 +923,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getSubscriber(subscriberId);
     }
 
-    public Icon getIcon(APIIdentifier identifier) throws APIManagementException {
+    public ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                               identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                               identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
@@ -899,7 +932,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             if (registry.resourceExists(thumbPath)) {
                 Resource res = registry.get(thumbPath);
-                return new Icon(res.getContentStream(), res.getMediaType());
+                return new ResourceFile(res.getContentStream(), res.getMediaType());
             }
         } catch (RegistryException e) {
             handleException("Error while loading API icon from the registry", e);
@@ -1081,88 +1114,19 @@ public abstract class AbstractAPIManager implements APIManager {
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *
-     * @return Set<Tier>
+     * @param tierType     type of the tiers (api,resource ot application)
+     * @param username current logged user
+     * @return Set<Tier> return list of tier names
+     * @throws APIManagementException APIManagementException if failed to get the predefined tiers
      */
-    public Set<Tier> getAppTiers() throws APIManagementException {
+    public Set<Tier> getTiers(int tierType, String username) throws APIManagementException {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
 
-        Map<String, Tier> tierMap;
-        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            tierMap = APIUtil.getAppTiers();
-        } else {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-            tierMap = APIUtil.getAppTiers(tenantId);
-            PrivilegedCarbonContext.endTenantFlow();
-        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        Map<String, Tier> tierMap = APIUtil.getTiers(tierType, tenantDomain);
+
         tiers.addAll(tierMap.values());
 
-        return tiers;
-    }
-
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getAppTiers(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-        Map<String, Tier> tierMap;
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            tierMap = APIUtil.getAppTiers();
-        } else {
-            tierMap = APIUtil.getAppTiers(requestedTenantId);
-        }
-        tiers.addAll(tierMap.values());
-        PrivilegedCarbonContext.endTenantFlow();
-        return tiers;
-    }
-
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getResTiers() throws APIManagementException {
-        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-        Map<String, Tier> tierMap;
-        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            tierMap = APIUtil.getResTiers();
-        } else {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
-            tierMap = APIUtil.getResTiers(tenantId);
-            PrivilegedCarbonContext.endTenantFlow();
-        }
-        tiers.addAll(tierMap.values());
-
-        return tiers;
-    }
-
-    /**
-     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
-     *
-     * @return Set<Tier>
-     */
-    public Set<Tier> getResTiers(String tenantDomain) throws APIManagementException {
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
-
-        Map<String, Tier> tierMap;
-        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
-            tierMap = APIUtil.getResTiers();
-        } else {
-            tierMap = APIUtil.getResTiers(requestedTenantId);
-        }
-        tiers.addAll(tierMap.values());
-        PrivilegedCarbonContext.endTenantFlow();
         return tiers;
     }
 

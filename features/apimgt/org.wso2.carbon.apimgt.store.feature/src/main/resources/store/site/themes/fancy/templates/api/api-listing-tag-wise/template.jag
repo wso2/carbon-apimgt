@@ -2,10 +2,8 @@
 
     <%
         var i, tag, tags = outputs.tags, length = tags.length;
-        var urlPrefix;
         var tenant=request_tenant;
-        if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
-
+        var urlPrefix = jagg.getTenantURLPrefix("&");
     %>
 <div class="title-section">
      <h2>APIs groups</h2>

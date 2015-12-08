@@ -16,9 +16,19 @@
 
 package org.wso2.carbon.apimgt.rest.api.util;
 
+import java.io.File;
+
 public final class RestApiConstants {
 
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String DOC_UPLOAD_TMPDIR = "restAPI" + File.separator + "documentUpload";
+    public static final String DOC_NAME_DEFAULT = "DEFAULT_DOC_";
+
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+    public static final String CONTENT_DISPOSITION_FILENAME = "filename";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
@@ -26,6 +36,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_SUBSCRIPTION = "subscription";
     public static final String RESOURCE_DOCUMENTATION = "documentation";
     public static final String RESOURCE_TIER = "tier";
+    public static final String RESOURCE_TIER_UPDATE_PERMISSION = RESOURCE_TIER + "/update-permission";
     public static final String RESOURCE_TAG = "tag";
 
     public static final String API_ID_DELIMITER = "-";
@@ -34,10 +45,12 @@ public final class RestApiConstants {
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
     public static final String TYPE_PARAM = "{type}";
+    public static final String TIER_LEVEL_PARAM = "{tierLevel}";
     public static final String SUBSCRIBER_PARAM = "{subscriber}";
     public static final String GROUPID_PARAM = "{groupId}";
     public static final String APIID_PARAM = "{apiId}";
     public static final String APPLICATIONID_PARAM = "{applicationId}";
+    public static final String DOCUMENTID_PARAM = "{documentId}";
     public static final String API_VERSION_PARAM="{version}";
 
     //todo better to take from cxf level
@@ -48,8 +61,13 @@ public final class RestApiConstants {
     public static final String SERVER_PASSWORD = "/applications";
     public static final String RESOURCE_PATH_SUBSCRIPTIONS = "/subscriptions";
     public static final String RESOURCE_PATH_TIERS = "/tiers";
+    public static final String RESOURCE_PATH_TIERS_API = RESOURCE_PATH_TIERS + "/api";
+    public static final String RESOURCE_PATH_TIERS_APPLICATION = RESOURCE_PATH_TIERS + "/application";
+    public static final String RESOURCE_PATH_TIERS_RESOURCE = RESOURCE_PATH_TIERS + "/resource";
     public static final String RESOURCE_PATH_TAGS = "/tags";
     public static final String RESOURCE_PATH_DOCUMENTS = RESOURCE_PATH_APIS + "/" + APIID_PARAM + "/documents";
+    public static final String RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID = RESOURCE_PATH_DOCUMENTS + "/" + DOCUMENTID_PARAM;
+    public static final String RESOURCE_PATH_DOCUMENT_CONTENT = RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String REST_API_STORE_CONTEXT="store_rest_api";
     public static final String REST_API_STORE_VERSION="v1";
     public static final String REST_API_PUBLISHER_VERSION="v1";
@@ -85,7 +103,7 @@ public final class RestApiConstants {
             RESOURCE_PATH_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM  + "&query=" + QUERY_PARAM;
 
     public static final String TIERS_GET_PAGINATION_URL =
-            RESOURCE_PATH_TIERS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+            RESOURCE_PATH_TIERS + "/" + TIER_LEVEL_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String TAGS_GET_PAGINATION_URL =
             RESOURCE_PATH_TAGS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;

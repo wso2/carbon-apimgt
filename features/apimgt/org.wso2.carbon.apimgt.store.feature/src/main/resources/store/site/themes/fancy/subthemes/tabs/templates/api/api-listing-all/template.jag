@@ -1,9 +1,8 @@
 <% jagg.template("api/api-listing-all", function(inputs, outputs, jagg) { %>
 
         <%
-          var urlPrefix;
           var tenant=request_tenant;
-          if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+          var urlPrefix = jagg.getTenantURLPrefix("&");
           if (outputs.error) { %>
         		<label><b><%=outputs.message%></b></label>
     	  <% }else{

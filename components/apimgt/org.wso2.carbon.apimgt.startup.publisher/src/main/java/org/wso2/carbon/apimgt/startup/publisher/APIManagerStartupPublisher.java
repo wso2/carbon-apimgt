@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -233,9 +233,9 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
             if (!APIStartupPublisherConstants.API_ICON_PATH_AND_DOCUMENT_URL_DEFAULT.equals(iconPath)) {
                 file =new File(iconPath);
                 String absolutePath = file.getAbsolutePath();
-                Icon icon = new Icon(getImageInputStream(absolutePath), getImageContentType(absolutePath));
+                ResourceFile icon = new ResourceFile(getImageInputStream(absolutePath), getImageContentType(absolutePath));
                 String thumbPath = APIUtil.getIconPath(identifier);
-                String thumbnailUrl = provider.addIcon(thumbPath, icon);
+                String thumbnailUrl = provider.addResourceFile(thumbPath, icon);
                 api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, apiProvider));
                 
                 /*Set permissions to anonymous role for thumbPath*/

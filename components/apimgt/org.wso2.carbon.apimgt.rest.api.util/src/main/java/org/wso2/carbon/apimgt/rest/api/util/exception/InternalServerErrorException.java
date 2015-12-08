@@ -24,4 +24,8 @@ public class InternalServerErrorException extends WebApplicationException {
     public InternalServerErrorException(Throwable e) {
         super(e, Response.Status.INTERNAL_SERVER_ERROR);
     }
+
+    public InternalServerErrorException() {
+        super(Response.Status.INTERNAL_SERVER_ERROR);
+    }
 }

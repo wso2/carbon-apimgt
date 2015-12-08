@@ -63,27 +63,40 @@ public class APIMappingUtil {
     /**
      * Returns the APIIdentifier given the uuid or the id in {provider}-{api}-{version} format
      *
-     * @param apiId uuid or the id in {provider}-{api}-{version} format
+     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
      * @param requestedTenantDomain tenant domain of the API
      * @return APIIdentifier which represents the given id
      * @throws APIManagementException
      */
     public static APIIdentifier getAPIIdentifierFromApiIdOrUUID(String apiId, String requestedTenantDomain)
             throws APIManagementException {
-        APIIdentifier apiIdentifier;
+        return getAPIInfoFromApiIdOrUUID(apiId, requestedTenantDomain).getId();
+    }
+
+    /**
+     * Returns an API with minimal info given the uuid or the id in {provider}-{api}-{version} format
+     *
+     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
+     * @param requestedTenantDomain tenant domain of the API
+     * @return API which represents the given id
+     * @throws APIManagementException
+     */
+    public static API getAPIInfoFromApiIdOrUUID(String apiId, String requestedTenantDomain)
+            throws APIManagementException {
+        API api;
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         if (RestApiUtil.isUUID(apiId)) {
-            apiIdentifier = apiProvider.getAPIInfoByUUID(apiId, requestedTenantDomain).getId();
+            api = apiProvider.getAPIInfoByUUID(apiId, requestedTenantDomain);
         } else {
-            apiIdentifier = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
+            api = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId));
         }
-        return apiIdentifier;
+        return api;
     }
 
     /**
      * Returns the API given the uuid or the id in {provider}-{api}-{version} format
-     * 
-     * @param apiId uuid or the id in {provider}-{api}-{version} format
+     *
+     * @param apiId                 uuid or the id in {provider}-{api}-{version} format
      * @param requestedTenantDomain tenant domain of the API
      * @return API which represents the given id
      * @throws APIManagementException
@@ -111,7 +124,11 @@ public class APIMappingUtil {
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         dto.setId(model.getUUID());
-        dto.setContext(model.getContextTemplate());
+        String context = model.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        dto.setContext(context);
         dto.setDescription(model.getDescription());
 
         dto.setIsDefaultVersion(model.isDefaultVersion());
@@ -212,6 +229,11 @@ public class APIMappingUtil {
 
         String context = dto.getContext();
         final String originalContext = context;
+
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+
         context = context.startsWith("/") ? context : ("/" + context);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
@@ -312,11 +334,12 @@ public class APIMappingUtil {
 
     }
 
-    /** Converts a List object of APIs into a DTO
+    /**
+     * Converts a List object of APIs into a DTO
      *
      * @param apiList List of APIs
-     * @param limit maximum number of APIs returns
-     * @param offset starting index
+     * @param limit   maximum number of APIs returns
+     * @param offset  starting index
      * @return APIListDTO object containing APIDTOs
      */
     public static APIListDTO fromAPIListToDTO(List<API> apiList, int offset, int limit) {
@@ -337,15 +360,15 @@ public class APIMappingUtil {
         return apiListDTO;
     }
 
-    /** Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
+    /**
+     * Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
      *
      * @param apiListDTO a APIListDTO object
-     * @param query search condition
-     * @param type value for the search condition
-     * @param limit max number of objects returned
-     * @param offset starting index
-     * @param size max offset
-     *
+     * @param query      search condition
+     * @param type       value for the search condition
+     * @param limit      max number of objects returned
+     * @param offset     starting index
+     * @param size       max offset
      */
     public static void setPaginationParams(APIListDTO apiListDTO, String query, String type, int offset,
             int limit, int size) {
@@ -373,14 +396,18 @@ public class APIMappingUtil {
 
     /**
      * Creates a minimal DTO representation of an API object
-     * 
+     *
      * @param api API object
      * @return a minimal representation DTO
      */
     public static APIInfoDTO fromAPIToInfoDTO(API api) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setDescription(api.getDescription());
-        apiInfoDTO.setContext(api.getContextTemplate());
+        String context = api.getContextTemplate();
+        if (context.endsWith("/" + RestApiConstants.API_VERSION_PARAM)) {
+            context = context.replace("/" + RestApiConstants.API_VERSION_PARAM, "");
+        }
+        apiInfoDTO.setContext(context);
         apiInfoDTO.setId(api.getUUID());
         APIIdentifier apiId = api.getId();
         apiInfoDTO.setName(apiId.getApiName());

@@ -3,7 +3,7 @@
 <%
           var urlPrefix;
           var tenant=request_tenant;
-          if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+          urlPrefix = jagg.getTenantURLPrefix("&");
           if (outputs.error) { %>
 				<label><b><%=outputs.message%></b></label>
 <% }else{

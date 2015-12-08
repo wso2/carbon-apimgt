@@ -13,8 +13,7 @@ i18n.init(request,localeResourcesBasePath);
     <%
 
     var tenant=request_tenant;
-    var urlPrefix;
-    if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+    var urlPrefix = jagg.getTenantURLPrefix("&");
     var currentURL = jagg.getAbsoluteUrl('/'); 
 
     %>

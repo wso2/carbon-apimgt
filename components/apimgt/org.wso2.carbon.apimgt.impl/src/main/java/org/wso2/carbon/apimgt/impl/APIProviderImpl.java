@@ -32,7 +32,6 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -43,7 +42,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -54,7 +53,6 @@ import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -105,6 +103,7 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import java.io.File;
+import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -387,7 +386,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
 
-        // We do the tier cache cleanup here.        
+        invalidateTierCache();
+
+        finalTiers.add(tier);
+        saveTiers(finalTiers);
+    }
+
+    /**
+     * This method is to cleanup tier cache when update or deletion is performed
+     */
+    private void invalidateTierCache() {
+
         try {
             // Note that this call happens to store node in a distributed setup.
             TierCacheInvalidationClient tierCacheInvalidationClient = new TierCacheInvalidationClient();
@@ -402,9 +411,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             // Hence we log the exception and continue to the flow
             log.error("Error while invalidating the tier cache", e);
         }
-
-        finalTiers.add(tier);
-        saveTiers(finalTiers);
     }
 
     private void saveTiers(Collection<Tier> tiers) throws APIManagementException {
@@ -544,6 +550,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         if (tiers.remove(tier)) {
             saveTiers(tiers);
+            invalidateTierCache();
         } else {
             handleException("No tier exists by the name: " + tier.getName());
         }
@@ -1253,8 +1260,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
 
                     updateApiArtifact(api, false, false);
-                    apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
-                            APIUtil.appendDomainWithUser(currentUser, tenantDomain));
+                   // apiMgtDAO.recordAPILifeCycleEvent(api.getId(), currentStatus, newStatus,
+                   //         APIUtil.appendDomainWithUser(currentUser, tenantDomain));
 
                     if (api.isDefaultVersion() || api.isPublishedDefaultVersion()) { // published default version need
                                                                                      // to be changed
@@ -1453,6 +1460,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Map<String, String> properties = new HashMap<String, String>();
             properties.put("id", "A");
             properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+            properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
+            properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+
             if(api.getProductionMaxTps() != null){
                 properties.put("productionMaxCount",api.getProductionMaxTps());
             }
@@ -1503,6 +1513,43 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String msg = "Failed to update default API version : " + apiIdentifier.getVersion() + " of : "
                     + apiIdentifier.getApiName();
             handleException(msg, e);
+        }
+    }
+
+    /**
+     * Add a file to a document of source type FILE 
+     * 
+     * @param apiId API identifier the document belongs to
+     * @param documentation document
+     * @param filename name of the file
+     * @param content content of the file as an Input Stream
+     * @param contentType content type of the file
+     * @throws APIManagementException if failed to add the file
+     */
+    public void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename,
+            InputStream content, String contentType) throws APIManagementException {
+        if (Documentation.DocumentSourceType.FILE.equals(documentation.getSourceType())) {
+            ResourceFile icon = new ResourceFile(content, contentType);
+            String filePath = APIUtil.getDocumentationFilePath(apiId, filename);
+            API api;
+            try {
+                api = getAPI(apiId);
+                String visibleRolesList = api.getVisibleRoles();
+                String[] visibleRoles = new String[0];
+                if (visibleRolesList != null) {
+                    visibleRoles = visibleRolesList.split(",");
+                }
+                APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                        filePath);
+                documentation.setFilePath(addResourceFile(filePath, icon));
+                APIUtil.setFilePermission(filePath);
+            } catch (APIManagementException e) {
+                handleException("Failed to add file to document " + documentation.getName(), e);
+            }
+        } else {
+            String errorMsg = "Cannot add file to the Document. Document " + documentation.getName()
+                    + "'s Source type is not FILE.";
+            handleException(errorMsg);
         }
     }
 
@@ -1574,9 +1621,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiSourceArtifact.getContentStream();
                 APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
                                                            api.getId().getApiName(), newVersion);
-                Icon icon = new Icon(oldImage.getContentStream(), oldImage.getMediaType());
+                ResourceFile icon = new ResourceFile(oldImage.getContentStream(), oldImage.getMediaType());
                 artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
-                                      addIcon(APIUtil.getIconPath(newApiId), icon));
+                                      addResourceFile(APIUtil.getIconPath(newApiId), icon));
             }
             // Here we keep the old context
             String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
@@ -1816,7 +1863,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     	String documentationPath = APIUtil.getAPIDocPath(identifier) + documentationName;
     	String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.INLINE_DOCUMENT_CONTENT_DIR +
     			RegistryConstants.PATH_SEPARATOR + documentationName;
+        boolean isTenantFlowStarted = false;
         try {
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+
             Resource docResource = registry.get(documentationPath);
             GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
                                                          APIConstants.DOCUMENTATION_KEY);
@@ -1863,6 +1917,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String msg = "Failed to add the documentation content of : "
                          + documentationName + " of API :" + identifier.getApiName();
             handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -2798,8 +2856,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String customInSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, "in");
 
-            if(registry.resourceExists(customInSeqFileLocation + APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME))    {
-                sequenceList.add(APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME);
+            if(registry.resourceExists(customInSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection inSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customInSeqFileLocation);
+                if (inSeqCollection != null) {
+                    //   SequenceMediatorFactory factory = new SequenceMediatorFactory();
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths)    {
+                        Resource inSequence = registry.get(inSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
             }
 
 
@@ -2823,7 +2891,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 			                                              .getGovernanceSystemRegistry(tenantId);
 			if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
 	            org.wso2.carbon.registry.api.Collection outSeqCollection =
-	                                                                       (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+                        (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
 	            if (outSeqCollection !=null) {
 	                String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String childPath : outSeqChildPaths)   {
@@ -2836,9 +2904,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier, "out");
 
-            if(registry.resourceExists(customOutSeqFileLocation + APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME))    {
-                sequenceList.add(APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME);
+            if(registry.resourceExists(customOutSeqFileLocation))    {
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
+                if (outSeqCollection != null) {
+                    //   SequenceMediatorFactory factory = new SequenceMediatorFactory();
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                    }
+                }
             }
+
 		} catch (Exception e) {
 			handleException("Issue is in getting custom OutSequences from the Registry", e);
 		}
@@ -2990,7 +3069,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
             throws APIManagementException {
         try {
             PrivilegedCarbonContext.startTenantFlow();
@@ -2999,8 +3078,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
             String currentStatus = apiArtifact.getLifecycleState();
-            if (!currentStatus.equalsIgnoreCase(targetStatus)) {
-                apiArtifact.invokeAction(targetStatus, APIConstants.API_LIFE_CYCLE);
+            String targetStatus = "";
+            if (!currentStatus.equalsIgnoreCase(action)) {
+                apiArtifact.invokeAction(action, APIConstants.API_LIFE_CYCLE);
+                targetStatus = apiArtifact.getLifecycleState();
+                if(!currentStatus.equals(targetStatus)){
+                    apiMgtDAO.recordAPILifeCycleEvent(apiIdentifier, currentStatus.toUpperCase(), targetStatus.toUpperCase(), 
+                            this.username);
+                }
+               
             }
             return true;
         } catch (GovernanceException e) {
@@ -3014,21 +3100,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException {
-        GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+        String provider = apiIdentifier.getProviderName();
+        String providerTenantMode = apiIdentifier.getProviderName();
+        provider = APIUtil.replaceEmailDomain(provider);
         boolean success = false;
+        boolean isTenantFlowStarted = false;
         try {
-            if (apiArtifact != null) {
-                if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
-                    apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-                } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
-                    apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-                }
-                success = true;
+            
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-        } catch (GovernanceException e) {
-            handleException("Error while setting registry lifecycle checklist items for the API: " +
-                    apiIdentifier.getApiName(), e);
-        }
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            
+            try {
+                if (apiArtifact != null) {
+                    if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                        apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                    } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                        apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                    }
+                    success = true;
+                }
+            } catch (GovernanceException e) {
+                handleException("Error while setting registry lifecycle checklist items for the API: " +
+                        apiIdentifier.getApiName(), e);
+            }
+            
+       }finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        } 
         return success;
     }
 
@@ -3074,8 +3179,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
         String path = APIUtil.getAPIPath(apiId);
         Map<String, Object> lcData = new HashMap<String, Object>();
+    
+        String provider = apiId.getProviderName();
+        String providerTenantMode = apiId.getProviderName();
+        provider = APIUtil.replaceEmailDomain(provider);
+     
+        boolean isTenantFlowStarted = false;
 
         try {
+            
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
             Resource apiSourceArtifact = registry.get(path);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -3164,9 +3282,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (Exception e) {
             handleException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return lcData;
     }
 
+    @Override
+    public String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException {
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);            
+            return apiArtifact.getLifecycleState();
+        } catch (GovernanceException e) {
+            handleException("Failed to get the life cycle status : " + e.getMessage(), e);
+            return null;
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
 
 }

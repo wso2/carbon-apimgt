@@ -67,6 +67,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, profile.getOwner());
             applicationInfo.setClientId("");
             applicationInfo.setClientSecret("");
+            applicationInfo.setIsSaasApplication(profile.isSaasApp());
             appRequest.setOAuthApplicationInfo(applicationInfo);
             OAuthApplicationInfo returnedAPP = keyManager.createApplication(appRequest);
             if (returnedAPP != null) {

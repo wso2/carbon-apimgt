@@ -7,7 +7,7 @@ jagg.block("application/application-add", {
     getOutputs:function (inputs) {
 
         var tiers, result;
-        result = jagg.module("tiers").getAppTiers();
+        result = jagg.module("tiers").getApplicationTiers();
         tiers = result.tiers;
 
         return {

@@ -2,6 +2,13 @@
 <% var i=outputs.i, app = outputs.app, thumbURL = '';
    var str_i = String(i).replace('.','_');
    var gatewayurlendpoint = outputs.gatewayurl;
+
+   var customURL = jagg.module("domains").getCustomizedGatewayURL(jagg.getTenantDomain(), "https");
+
+   if (customURL != null) {
+       gatewayurlendpoint = customURL;
+   }
+
 	var log = new Log();
 	var userName=jagg.getUser().username;
 
@@ -146,7 +153,7 @@
 													</button>
 
 													<a class="icon-question-sign curlHelp_popup_prod"></a>
-                                                    <div id="curlProdtoken_help"></div>
+													<div id="curlProdtoken_help"></div>
 
 													<ul class="dropdown-menu" role="menu" aria-labelledby="gencurl-menu">
 														<li role="gencurl"><a role="menuitem" tabindex="-1" href="javascript:generateCurl('<%=app.prodConsumerKey%>:<%=app.prodConsumerSecret%>', '<%=gatewayurlendpoint%>', 'password', 'prodCurl');">GrantType: Password</a></li>
@@ -561,8 +568,7 @@
 
             <%
             var tenant=request_tenant;
-            var urlPrefix;
-            if(tenant!=null) {urlPrefix="tenant="+tenant;}else{urlPrefix='';}
+            var urlPrefix = jagg.getTenantURLPrefix();
             var apis = app.subscriptions;
             lenJ = apis.length;
             for(j = 0; j < lenJ; j++) {

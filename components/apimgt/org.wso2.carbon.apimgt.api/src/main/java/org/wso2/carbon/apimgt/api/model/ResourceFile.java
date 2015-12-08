@@ -18,12 +18,12 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.io.InputStream;
 
-public class Icon {
+public class ResourceFile {
     
     private InputStream content;
     private String contentType;
 
-    public Icon(InputStream content, String contentType) {
+    public ResourceFile(InputStream content, String contentType) {
         this.content = content;
         this.contentType = contentType;
     }

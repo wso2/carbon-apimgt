@@ -251,7 +251,7 @@ public class APIMgtDAOTest extends TestCase {
 		LifeCycleEvent event = events.get(0);
 		assertEquals(apiId, event.getApi());
 		assertNull(event.getOldStatus());
-		assertEquals(APIStatus.CREATED, event.getNewStatus());
+		assertEquals(APIStatus.CREATED.toString(), event.getNewStatus());
 		assertEquals("hiranya", event.getUserId());
 
 		apiMgtDAO.recordAPILifeCycleEvent(apiId, APIStatus.CREATED, APIStatus.PUBLISHED, "admin");

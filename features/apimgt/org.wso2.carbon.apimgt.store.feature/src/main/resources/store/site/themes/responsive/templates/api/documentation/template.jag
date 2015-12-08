@@ -7,11 +7,12 @@ var docUrl=jagg.getAbsoluteUrl("/site/pages/doc-viewer.jag");
 var docMappedUrl=jagg.getMappedUrl("/site/pages/doc-viewer.jag");
 var urlPrefix;
 var tenantDomain=request_tenant;
-if(tenantDomain!=null) {urlPrefix="&tenant="+tenantDomain;}else{urlPrefix='';}
+urlPrefix = jagg.getTenantURLPrefix("&");
 %>
 <div class="api-documentation">
     <%
     var i, type, length, doc, docs, empty = true, documentations = outputs.documentations;
+    var urlPrefix = jagg.getTenantURLPrefix();
     for(type in documentations) {
         if(documentations.hasOwnProperty(type)) {
             empty = false;
@@ -55,9 +56,9 @@ if(tenantDomain!=null) {urlPrefix="&tenant="+tenantDomain;}else{urlPrefix='';}
                     %>
                     <div>
                      <%if(reqUrl.indexOf(".jag")>=0){%>
-                     <a href="doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name)%>&name=<%= encode.forUriComponent(name) %>&version=<%= encode.forUriComponent(version)%>&provider=<%= encode.forUriComponent(provider)%>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("viewDoc")%></a>
+                     <a href="doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name)%>&name=<%= encode.forUriComponent(name) %>&version=<%= encode.forUriComponent(version)%>&provider=<%= encode.forUriComponent(provider)%><%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("viewDoc")%></a>
                      <%}else{%>
-                     <a href="../site/pages/doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name) %>&name=<%= encode.forUriComponent(name)%>&version=<%= encode.forUriComponent(version) %>&provider=<%=encode.forUriComponent(provider)%>&<%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("viewDoc")%></a>
+                     <a href="../site/pages/doc-viewer.jag?docName=<%= encode.forUriComponent(doc.name) %>&name=<%= encode.forUriComponent(name)%>&version=<%= encode.forUriComponent(version) %>&provider=<%=encode.forUriComponent(provider)%><%=urlPrefix%>" class="doc-content"  target="_blank"><%=i18n.localize("viewDoc")%></a>
                      <%}%>
                     </div>
                      <%}%>

@@ -256,7 +256,7 @@
                             <div class="input-group">
                                 <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required form-control"/>
                                 <span class="input-group-btn">
-                                    <button type="button" id="prototype_test" class="btn btn-default check_url_valid btn-block">
+                                    <button type="button" id="prototype_test" class="btn btn-default check_url_valid btn-block" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">
                                         <span>Test</span>
                                     </button>
                                 </span>

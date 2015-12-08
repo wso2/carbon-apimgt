@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
@@ -38,14 +39,18 @@ import org.wso2.carbon.user.api.TenantManager;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
 import javax.cache.Caching;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class APIKeyMgtUtil {
 
     private static final Log log = LogFactory.getLog(APIKeyMgtUtil.class);
+
+    private  static boolean isKeyCacheInistialized = false;
 
     public static String getTenantDomainFromTenantId(int tenantId) throws APIKeyMgtException {
         try {
@@ -90,7 +95,7 @@ public class APIKeyMgtUtil {
 
         boolean cacheEnabledKeyMgt = APIKeyMgtDataHolder.getKeyCacheEnabledKeyMgt();
 
-        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
+        Cache cache = getKeyManagerCache();
 
         //We only fetch from cache if KeyMgtValidationInfoCache is enabled.
         if (cacheEnabledKeyMgt) {
@@ -125,8 +130,7 @@ public class APIKeyMgtUtil {
 
         if (validationInfoDTO != null) {
             if (cacheEnabledKeyMgt) {
-                Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                        getCache(APIConstants.KEY_CACHE_NAME);
+                Cache cache = getKeyManagerCache();
                 cache.put(cacheKey, validationInfoDTO);
             }
         }
@@ -143,11 +147,28 @@ public class APIKeyMgtUtil {
 
         if (cacheKey != null && cacheEnabledKeyMgt) {
 
-            Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                    getCache(APIConstants.KEY_CACHE_NAME);
+            Cache cache = getKeyManagerCache();
             cache.remove(cacheKey);
             log.debug("KeyValidationInfoDTO removed for key : " + cacheKey);
         }
+    }
+
+    private static Cache getKeyManagerCache(){
+        String apimKeyCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_KEY_VALIDATOR_KEY_CACHE_EXPIRY);
+        if(!isKeyCacheInistialized && apimKeyCacheExpiry != null ) {
+            isKeyCacheInistialized = true;
+            return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    createCacheBuilder(APIConstants.KEY_CACHE_NAME)
+                    .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                            Long.parseLong(apimKeyCacheExpiry)))
+                    .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                            Long.parseLong(apimKeyCacheExpiry))).setStoreByValue(false).build();
+        } else{
+          return  Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    getCache(APIConstants.KEY_CACHE_NAME);
+        }
+
     }
 
     /**

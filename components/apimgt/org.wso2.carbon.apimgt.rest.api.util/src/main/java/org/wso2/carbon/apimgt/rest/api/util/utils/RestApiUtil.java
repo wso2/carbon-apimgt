@@ -31,7 +31,15 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -40,18 +48,19 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.*;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.validation.ConstraintViolation;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -138,10 +147,19 @@ public class RestApiUtil {
 
     }
 
-    public static ErrorDTO getAuthenticationErrorDTO(String message) {
-        ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setMessage(message);
-        return errorDTO;
+    /**
+     * Url validator, Allow any url with https and http.
+     * Allow any url without fully qualified domain
+     *
+     * @param url Url as string
+     * @return boolean type stating validated or not
+     */
+    public static boolean isURL(String url) {
+
+        Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(url);
+        return matcher.matches();
+
     }
 
     public static APIConsumer getConsumer(String subscriberName) throws APIManagementException {
@@ -180,6 +198,34 @@ public class RestApiUtil {
     }
 
     /**
+     * This method uploads a given file to specified location
+     *
+     * @param uploadedInputStream input stream of the file
+     * @param newFileName         name of the file to be created
+     * @param storageLocation     destination of the new file
+     * @throws APIManagementException if the file transfer fails
+     */
+    public static void transferFile(InputStream uploadedInputStream, String newFileName, String storageLocation)
+            throws APIManagementException {
+        FileOutputStream outFileStream = null;
+
+        try {
+            outFileStream = new FileOutputStream(new File(storageLocation, newFileName));
+            int read;
+            byte[] bytes = new byte[1024];
+            while ((read = uploadedInputStream.read(bytes)) != -1) {
+                outFileStream.write(bytes, 0, read);
+            }
+        } catch (IOException e) {
+            String errorMessage = "Error in transferring files.";
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
+        } finally {
+            IOUtils.closeQuietly(outFileStream);
+        }
+    }
+
+    /**
      * Returns a new NotFoundException
      * 
      * @param resource Resource type
@@ -189,10 +235,21 @@ public class RestApiUtil {
     public static NotFoundException buildNotFoundException(String resource, String id) {
         String description;
         if (!StringUtils.isEmpty(id)) {
-            description = "Requested " + resource + " with Id " + id + " not found";
+            description = "Requested " + resource + " with Id '" + id + "' not found";
         } else {
             description = "Requested " + resource + " not found";
         }
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
+        return new NotFoundException(errorDTO);
+    }
+
+    /**
+     * Returns a new NotFoundException
+     *
+     * @param description description of the error
+     * @return a new NotFoundException with the specified details as a response DTO
+     */
+    public static NotFoundException buildNotFoundException(String description) {
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, 404l, description);
         return new NotFoundException(errorDTO);
     }
@@ -235,6 +292,19 @@ public class RestApiUtil {
     public static BadRequestException buildBadRequestException(String description) {
         ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
         return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * Returns a new MethodNotAllowedException
+     * 
+     * @param method http method
+     * @param resource resource which the method is not allowed
+     * @return a new MethodNotAllowedException consists of the error message
+     */
+    public static MethodNotAllowedException buildMethodNotAllowedException(String method, String resource) {
+        String description = "Method " + method + " is not supported for " + resource;
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 405l, description);
+        return new MethodNotAllowedException(errorDTO);
     }
 
     /**
@@ -325,6 +395,22 @@ public class RestApiUtil {
     }
 
     /**
+     * Check whether the HTTP method is allowed for given resources
+     *
+     * @param method HTTP method
+     * @param resource requested resource
+     * @throws MethodNotAllowedException if the method is not supported
+     */
+    public static void checkAllowedMethodForResource(String method, String resource) throws MethodNotAllowedException {
+        if (RestApiConstants.RESOURCE_PATH_TIERS_APPLICATION.equals(resource)
+                || RestApiConstants.RESOURCE_PATH_TIERS_RESOURCE.equals(resource)) {
+            if (!"GET".equals(method)) {
+                throw RestApiUtil.buildMethodNotAllowedException(method, resource);
+            }
+        }
+    }
+
+    /**
      * Returns the next/previous offset/limit parameters properly when current offset, limit and size parameters are specified
      *
      * @param offset current starting index
@@ -386,6 +472,7 @@ public class RestApiUtil {
      * @return constructed paginated url
      */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit, String groupId) {
+        groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
@@ -403,6 +490,7 @@ public class RestApiUtil {
      */
     public static String getSubscriptionPaginatedURLForAPIId(Integer offset, Integer limit, String apiId,
             String groupId) {
+        groupId = groupId == null ? "" : groupId;
         String paginatedURL = RestApiConstants.SUBSCRIPTIONS_GET_PAGINATION_URL_APIID;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
@@ -445,12 +533,15 @@ public class RestApiUtil {
 
     /** Returns the paginated url for tiers
      *
+     * @param tierLevel tier level (api/application or resource)
+     * @param tierLevel   tier level (api/application or resource)
      * @param offset starting index
      * @param limit max number of objects returned
      * @return constructed paginated url
      */
-    public static String getTiersPaginatedURL(Integer offset, Integer limit) {
+    public static String getTiersPaginatedURL(String tierLevel, Integer offset, Integer limit) {
         String paginatedURL = RestApiConstants.TIERS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.TIER_LEVEL_PARAM, tierLevel);
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         return paginatedURL;
@@ -491,6 +582,22 @@ public class RestApiUtil {
             }
         }
         return invalidTiers;
+    }
+
+    /**
+     * Search the tier in the given collection of Tiers. Returns it if it is included there. Otherwise return null
+     *
+     * @param tiers    Tier Collection
+     * @param tierName Tier to find
+     * @return Matched tier with its name
+     */
+    public static Tier findTier(Collection<Tier> tiers, String tierName) {
+        for (Tier tier : tiers) {
+            if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
+                return tier;
+            }
+        }
+        return null;
     }
 
     /**

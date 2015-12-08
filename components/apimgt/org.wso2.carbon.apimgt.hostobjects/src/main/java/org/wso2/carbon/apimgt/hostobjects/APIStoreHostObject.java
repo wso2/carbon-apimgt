@@ -300,33 +300,6 @@ public class APIStoreHostObject extends ScriptableObject {
         return "http://" + System.getProperty(hostName) + ":" + System.getProperty(httpPort);
     }
 
-    /*
-     * getting key for API subscriber args[] list String subscriberID, String
-	 * api, String apiVersion, String Date
-	 */
-    public static String jsFunction_getKey(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException {
-
-        if (args != null && isStringArray(args)) {
-            APIInfoDTO apiInfo = new APIInfoDTO();
-            apiInfo.setProviderId((String) args[0]);
-            apiInfo.setApiName((String) args[1]);
-            apiInfo.setVersion((String) args[2]);
-            apiInfo.setContext((String) args[3]);
-            try {
-                SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-                return keyMgtClient.getAccessKey((String) args[5], apiInfo, (String) args[4], (String) args[6], (String) args[7]);
-            } catch (Exception e) {
-                String msg = "Error while obtaining access tokens";
-                handleException(msg, e);
-                return null;
-            }
-        } else {
-            handleException("Invalid input parameters.");
-            return null;
-        }
-    }
-
     /**
      * This method is responsible to create oAuth Application and Application keys for a given APIM application
      * @param cx      will be used to store information about the executing of the script.
@@ -958,7 +931,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 if(api.isAdvertiseOnly()){
                     currentApi.put("owner",currentApi,APIUtil.replaceEmailDomainBack(api.getApiOwner()));
                 }
-                currentApi.put("businessOwner", currentApi, APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
+                currentApi.put(APIConstants.API_DATA_BUSINESS_OWNER,
+                               currentApi,
+                               APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
                 currentApi.put("visibility", currentApi, api.getVisibility());
                 currentApi.put("visibleRoles", currentApi, api.getVisibleRoles());
                 apiArray.put(i, apiArray, currentApi);
@@ -2798,7 +2773,9 @@ public class APIStoreHostObject extends ScriptableObject {
             apiObj.put("subStatus", apiObj, subscribedAPI.getSubStatus());
             apiObj.put("thumburl", apiObj, APIUtil.prependWebContextRoot(api.getThumbnailUrl()));
             apiObj.put("context", apiObj, api.getContext());
-            apiObj.put("businessOwner", apiObj, APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
+            apiObj.put(APIConstants.API_DATA_BUSINESS_OWNER,
+                       apiObj,
+                       APIUtil.replaceEmailDomainBack(api.getBusinessOwner()));
             //Read key from the appObject
             APIKey prodKey = getAppKey(appObject, APIConstants.API_KEY_TYPE_PRODUCTION);
             if (prodKey != null) {
@@ -3271,15 +3248,15 @@ public class APIStoreHostObject extends ScriptableObject {
             apiName = (String) args[1];
             version = (String) args[2];
             docName = (String) args[3];
-            boolean isTenantFlowStarted = false;
-            try {
+            //boolean isTenantFlowStarted = false;
+            try {/*
                 String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
                 if (tenantDomain != null &&
                     !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     isTenantFlowStarted = true;
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                }
+                }*/
             	providerName = APIUtil.replaceEmailDomain(URLDecoder.decode(providerName, "UTF-8"));
             	APIIdentifier apiId = new APIIdentifier(providerName, apiName,
                         version);
@@ -3288,11 +3265,11 @@ public class APIStoreHostObject extends ScriptableObject {
                 content = apiConsumer.getDocumentationContent(apiId, docName);
             } catch (Exception e) {
                 handleException("Error while getting Inline Document Content ", e);
-            } finally {
+            }/*finally {
                 if (isTenantFlowStarted) {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
-            }
+            }*/
 
             if (content == null) {
                 content = "";
@@ -4104,35 +4081,6 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getAppTiers(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
-        NativeArray myn = new NativeArray(0);
-        APIConsumer apiConsumer = getAPIConsumer(thisObj);
-        Set<Tier> tiers;
-        try {
-            //If tenant domain is present in url we will use it to get available tiers
-            if (args.length > 0 && args[0] != null) {
-                tiers = apiConsumer.getAppTiers((String) args[0]);
-            } else {
-                tiers = apiConsumer.getAppTiers();
-            }
-
-            List<Tier> tierList = APIUtil.sortTiers(tiers);
-            int i = 0;
-            for (Tier tier : tierList) {
-                NativeObject row = new NativeObject();
-                row.put("tierName", row, tier.getName());
-                row.put("tierDisplayName", row, tier.getDisplayName());
-                row.put("tierDescription", row, tier.getDescription() != null ? tier.getDescription() : "");
-                row.put("defaultTier", row, i == 0);
-                myn.put(i, myn, row);
-                i++;
-            }
-
-        } catch (Exception e) {
-            log.error("Error while getting available tiers", e);
-        }
-        return myn;
-    }
 
     public static NativeArray jsFunction_getDeniedTiers(Context cx, Scriptable thisObj,
                                                         Object[] args, Function funObj) throws APIManagementException {
@@ -4369,7 +4317,7 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-        boolean isTenantFlowStarted = false;
+        /*boolean isTenantFlowStarted = false;
         try {
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
@@ -4377,18 +4325,19 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);
+            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);*/
+            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
             data.put("contentType", data, docResourceMap.get("contentType"));
             data.put("name", data, docResourceMap.get("name"));
-        }
+        }/*
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
-        }
+        }*/
         return data;
     }
 

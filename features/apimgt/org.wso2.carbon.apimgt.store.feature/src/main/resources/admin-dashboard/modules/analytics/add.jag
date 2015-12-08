@@ -10,6 +10,13 @@ var enableAnalytics = function (enable) {
                 buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
                 process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
@@ -64,6 +71,13 @@ var addAnalyticsConfig = function (configData) {
                 buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
                 process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
@@ -146,6 +160,13 @@ var addDatasourceConfig = function (configData) {
                 .buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
                 process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');

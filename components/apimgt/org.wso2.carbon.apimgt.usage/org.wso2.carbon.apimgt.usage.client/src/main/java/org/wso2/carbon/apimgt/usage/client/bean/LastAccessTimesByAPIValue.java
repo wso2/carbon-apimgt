@@ -18,28 +18,69 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
-import java.util.List;
-
 public class LastAccessTimesByAPIValue {
-	long lastAccessTime;
-	List<String> api_version_userId_context_facet;
-	public LastAccessTimesByAPIValue(int lastAccessTime,
-			List<String> api_version_userId_facet) {
-		super();
-		this.lastAccessTime = lastAccessTime;
-		this.api_version_userId_context_facet = api_version_userId_facet;
+
+	private String tenantDomain;
+	private String apiPublisher;
+	private String api;
+	private String version;
+	private String userId;
+	private String context;
+	private long max_request_time;
+
+	public String getTenantDomain() {
+		return tenantDomain;
 	}
-	public long getLastAccessTime() {
-		return lastAccessTime;
+
+	public void setTenantDomain(String tenantDomain) {
+		this.tenantDomain = tenantDomain;
 	}
-	public void setLastAccessTime(long lastAccessTime) {
-		this.lastAccessTime = lastAccessTime;
+
+	public String getApiPublisher() {
+		return apiPublisher;
 	}
-	public List<String> getColumnNames() {
-		return api_version_userId_context_facet;
+
+	public void setApiPublisher(String apiPublisher) {
+		this.apiPublisher = apiPublisher;
 	}
-	public void setColumnNames(List<String> api_version_userId_facet) {
-		this.api_version_userId_context_facet = api_version_userId_facet;
+
+	public String getApi() {
+		return api;
 	}
-	
+
+	public void setApi(String api) {
+		this.api = api;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public String getContext() {
+		return context;
+	}
+
+	public void setContext(String context) {
+		this.context = context;
+	}
+
+	public long getMax_request_time() {
+		return max_request_time;
+	}
+
+	public void setMax_request_time(long max_request_time) {
+		this.max_request_time = max_request_time;
+	}
 }

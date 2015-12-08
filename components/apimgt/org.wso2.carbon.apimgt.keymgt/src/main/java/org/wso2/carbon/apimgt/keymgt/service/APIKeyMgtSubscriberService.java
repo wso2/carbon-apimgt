@@ -84,17 +84,21 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     private static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
 
+
+
     /**
      * Register an OAuth application for the given user
-     * @param userId - username of the Application owner
-     * @param applicationName - name of the Application
-     * @param callbackUrl - callback url of the Application
+     * @param oauthApplicationInfo - An OAuthApplicationInfo object that holds the application details.
      * @return OAuthApplicationInfo containing the details of the created App.
      * @throws APIKeyMgtException
      * @throws APIManagementException
      */
-    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl)
+    public OAuthApplicationInfo createOAuthApplicationByApplicationInfo(OAuthApplicationInfo oauthApplicationInfo)
             throws APIKeyMgtException, APIManagementException {
+
+        String userId = oauthApplicationInfo.getAppOwner();
+        String applicationName = oauthApplicationInfo.getClientName();
+        String callbackUrl = oauthApplicationInfo.getCallBackURL();
 
         if (userId == null || userId.isEmpty()) {
             return null;
@@ -129,6 +133,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
+            ServiceProvider serviceProviderCreated = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
+            serviceProviderCreated.setSaasApp(oauthApplicationInfo.getIsSaasApplication());
+            appMgtService.updateApplication(serviceProviderCreated, tenantDomain, userName);
 
             ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
 
@@ -168,7 +175,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             log.debug("Created OAuth App " + applicationName);
             OAuthConsumerAppDTO createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
-                                                                                                        .getApplicationName());
+                    .getApplicationName());
             log.debug("Retrieved Details for OAuth App " + createdApp.getApplicationName());
 
             // Set the OAuthApp in InboundAuthenticationConfig
@@ -201,13 +208,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
             oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
+            oAuthApplicationInfo.setIsSaasApplication(createdServiceProvider.isSaasApp());
 
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                                                      OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
+                    OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                                                      OAUTH_CLIENT_NAME, createdApp.getApplicationName());
+                    OAUTH_CLIENT_NAME, createdApp.getApplicationName());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                                                      OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
+                    OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
 
             return oAuthApplicationInfo;
 
@@ -220,6 +228,26 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(baseUser);
         }
         return null;
+
+    }
+
+    /**
+     * Register an OAuth application for the given user
+     * @param userId - username of the Application owner
+     * @param applicationName - name of the Application
+     * @param callbackUrl - callback url of the Application
+     * @return OAuthApplicationInfo containing the details of the created App.
+     * @throws APIKeyMgtException
+     * @throws APIManagementException
+     */
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl)
+            throws APIKeyMgtException, APIManagementException {
+
+        OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
+        oauthApplicationInfo.setClientName(applicationName);
+        oauthApplicationInfo.setCallBackURL(callbackUrl);
+        oauthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, userId);
+        return createOAuthApplicationByApplicationInfo(oauthApplicationInfo);
     }
 
     /**
@@ -656,9 +684,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
     public void clearOAuthCache(String consumerKey, String authorizedUser) {
         OAuthCache oauthCache;
-        CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
+        OAuthCacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
         if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
-            oauthCache = OAuthCache.getInstance(OAuthServerConfiguration.getInstance().getOAuthCacheTimeout());
+            oauthCache = OAuthCache.getInstance();
             oauthCache.clearCacheEntry(cacheKey);
         }
     }

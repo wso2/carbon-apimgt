@@ -76,6 +76,12 @@ public final class APIConstants {
 
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
+    public static final int TIER_API_TYPE = 0;
+
+    public static final int TIER_RESOURCE_TYPE = 1;
+
+    public static final int TIER_APPLICATION_TYPE = 2;
+
     public static final String DEFAULT_API_TIER_FILE_NAME = "default-tiers.xml";
 
     public static final String DEFAULT_APP_TIER_FILE_NAME = "default-app-tiers.xml";
@@ -183,6 +189,10 @@ public final class APIConstants {
     
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "Doc";
 
+    public static final String DOCUMENTATION_RESOURCE_MAP_DATA = "Data";
+    public static final String DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE = "contentType";
+    public static final String DOCUMENTATION_RESOURCE_MAP_NAME = "name";
+
     public static final String SYNAPSE_NAMESPACE = "http://ws.apache.org/ns/synapse";
     // Those constance are used in API artifact.
     public static final String API_OVERVIEW_NAME = "overview_name";
@@ -288,6 +298,7 @@ public final class APIConstants {
     public static final String API_CONSUMER_AUTHENTICATION = "APIConsumerAuthentication.";
     public static final String TOKEN_GENERATOR_IMPL = API_CONSUMER_AUTHENTICATION+"TokenGeneratorImpl";
     public static final String ENABLE_JWT_GENERATION = API_CONSUMER_AUTHENTICATION+"EnableTokenGeneration";
+    public static final String CLAIM_CACHE_EXPIRY = API_CONSUMER_AUTHENTICATION+ "APIMClaimCacheExpiry";
 
     //documentation rxt
 
@@ -381,6 +392,7 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CONNECTION_TIMEOUT = API_KEY_VALIDATOR + "ThriftClientConnectionTimeOut";
+    public static final String API_KEY_VALIDATOR_KEY_CACHE_EXPIRY = API_KEY_VALIDATOR + "APIMKeyCacheExpiry";
 
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
@@ -398,7 +410,9 @@ public final class APIConstants {
     public static final String OPEN_ID_SCOPE_NAME = "openid";
     public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
     public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
-
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES = "RESTAPIScopes.";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_NAME = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Name";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_ROLES = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Roles";
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
@@ -414,6 +428,7 @@ public final class APIConstants {
     public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
     public static final String API_KEY_VALIDATOR_ENCRYPT_TOKENS = API_KEY_VALIDATOR + "EncryptPersistedTokens";
     public static final String API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE = API_KEY_VALIDATOR +"ApplicationTokenScope";
+
 
     public static final String API_STORE = "APIStore.";
     public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
@@ -635,6 +650,7 @@ public final class APIConstants {
     public static final String SELF_SIGN_UP_CONFIG_CACHE = "selfSignupCache";
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650 ;
+    public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
@@ -898,6 +914,7 @@ public final class APIConstants {
     public static final String API_DATA_PROVIDER = "provider";
     public static final String API_DATA_VERSION = "version";
     public static final String API_DATA_DESCRIPTION = "description";
+    public static final String API_DATA_BUSINESS_OWNER = "businessOwner";
     public static final String API_DATA_RATES = "rates";
     public static final String API_DATA_ENDPOINT = "endpoint";
     public static final String API_DATA_THUMB_URL= "thumbnailurl";
@@ -922,9 +939,6 @@ public final class APIConstants {
     
 
     public static final long MAX_FILE_SIZE = 1024L;
-
-    public static final String API_CUSTOM_IN_SEQUENCE_FILE_NAME = "custom_in_sequence.xml";
-    public static final String API_CUSTOM_OUT_SEQUENCE_FILE_NAME = "custom_out_sequence.xml";
 
     public static final String REGISTRY_RESOURCE_PREFIX="/registry/resource";
 

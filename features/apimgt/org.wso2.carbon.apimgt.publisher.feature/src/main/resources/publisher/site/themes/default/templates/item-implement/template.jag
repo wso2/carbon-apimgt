@@ -235,7 +235,7 @@
                                                             <input type="file" class="input-xlarge " id="inSeqFile"  name="inSeqFile" />
                                                         </div>
                                                     </div>
-                                                    <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
+                                                    <input type="button" class="btn pull-left" id="clearSeqFile" value="<%=i18n.localize("clear")%>"/>
                                                 </td>
                                                 <td>
                                                     <div id="inpFile" class="pull-left">
@@ -243,7 +243,7 @@
                                                             <input type="file" class="input-xlarge " id="outSeqFile"  name="outSeqFile" />
                                                         </div>
                                                     </div>
-                                                    <input type="button" class="btn pull-left" id="clearThumb" value="<%=i18n.localize("clear")%>"/>
+                                                    <input type="button" class="btn pull-left" id="clearSeqFile" value="<%=i18n.localize("clear")%>"/>
                                                 </td>
                                             </tr>
                                     </table>
@@ -311,7 +311,7 @@
                         <div class="controls">
                             <div class="input-append">
                             <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required">
-                            <button type="button" class="btn check_url_valid" id="prototype_test">Test</button>
+                            <button type="button" class="btn check_url_valid" id="prototype_test" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">Test</button>
 
                             <a style="margin-left:3px" class="icon-question-sign help_popup" help_data="endpoint_test_help"></a>
                             <div id="endpoint_test_help" class="hide">

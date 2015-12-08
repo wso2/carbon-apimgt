@@ -98,19 +98,19 @@
 
 
 <script>
-    $(document).ready(function(){
-        <% if(api != null && api.subs == 0){ %>
+    $(document).ready(function() {
+        <% if(api != null && api.subs == 0) { %>
             var visibility = $('#visibility').find(":selected").val();
             if (visibility == "public"){
                 $('#visibility').change(function(){
                     visibility = $('#visibility').find(":selected").val();
                     if (visibility != "public"){
-                        jagg.message({content:"You have changed visibility of API, so based on visibility subscription availability may change",type:"warning"});
+                        jagg.message({content:"You have changed visibility of API, " +
+                         "so based on visibility subscription availability may change",type:"warning"});
                     }
                     if (visibility == "public" || visibility == "private" || visibility == "controlled"){
                         $('#rolesDiv').hide();
-                    }
-                    else {
+                    } else {
                         $('#rolesDiv').show();
                     }
                 });
@@ -361,7 +361,7 @@
                         <div class="controls">
                         <div class="input-append">
                         <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
-                        <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
+                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
                         <a class="icon-question-sign help_popup" help_data="wsdldesc_help"></a>
                         <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
                     </div>

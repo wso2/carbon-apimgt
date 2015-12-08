@@ -3,9 +3,8 @@
     <%if(outputs.apiBizOwner != null){%> <h4><%=i18n.localize("moreAPI")%>  '<%=outputs.apiBizOwner%>'</h4><%}
     else if(outputs.apiOwner != null){%> <h4><%=i18n.localize("moreAPI")%>  '<%=outputs.apiOwner%>'</h4><%}%>
     <%
-    var urlPrefix;
     var tenant=request_tenant;
-    if(tenant!=null) {urlPrefix="&tenant="+tenant;}else{urlPrefix='';}
+    var urlPrefix = jagg.getTenantURLPrefix("&");
 
     var i, api, path,apis = outputs.apis, thumbURL;
     if(apis!=null){

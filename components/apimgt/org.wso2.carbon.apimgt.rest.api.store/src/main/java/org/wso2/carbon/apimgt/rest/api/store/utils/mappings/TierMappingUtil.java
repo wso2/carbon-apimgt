@@ -42,7 +42,7 @@ public class TierMappingUtil {
      * @param offset starting index
      * @return TierListDTO object containing TierDTOs
      */
-    public static TierListDTO fromTierListToDTO(List<Tier> tiers, int limit,
+    public static TierListDTO fromTierListToDTO(List<Tier> tiers, String tierLevel, int limit,
             int offset) {
         TierListDTO tierListDTO = new TierListDTO();
         List<TierDTO> tierDTOs = tierListDTO.getList();
@@ -58,7 +58,7 @@ public class TierMappingUtil {
 
         for (int i = start; i <= end; i++) {
             Tier tier = tiers.get(i);
-            tierDTOs.add(fromTiertoDTO(tier));
+            tierDTOs.add(fromTierToDTO(tier, tierLevel));
         }
         tierListDTO.setCount(tierDTOs.size());
         return tierListDTO;
@@ -72,7 +72,7 @@ public class TierMappingUtil {
      * @param offset      starting index
      * @param size        max offset
      */
-    public static void setPaginationParams(TierListDTO tierListDTO, int limit, int offset, int size) {
+    public static void setPaginationParams(TierListDTO tierListDTO, String tierLevel, int limit, int offset, int size) {
 
         String paginatedPrevious = "";
         String paginatedNext = "";
@@ -81,14 +81,15 @@ public class TierMappingUtil {
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiUtil
-                    .getTiersPaginatedURL(
+                    .getTiersPaginatedURL(tierLevel,
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiUtil
-                    .getTiersPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
+                    .getTiersPaginatedURL(tierLevel,
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }
 
@@ -100,9 +101,10 @@ public class TierMappingUtil {
      * Converts a Tier object into TierDTO
      *
      * @param tier Tier object
+     * @param tierLevel tier level (api/application or resource)
      * @return TierDTO corresponds to Tier object
      */
-    public static TierDTO fromTiertoDTO(Tier tier) {
+    public static TierDTO fromTierToDTO(Tier tier, String tierLevel) {
         TierDTO dto = new TierDTO();
         dto.setName(tier.getName());
         dto.setDisplayName(tier.getDisplayName());
@@ -110,6 +112,7 @@ public class TierMappingUtil {
         dto.setRequestCount(tier.getRequestCount());
         dto.setUnitTime(tier.getUnitTime());
         dto.setStopOnQuotaReach(tier.isStopOnQuotaReached());
+        dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(tierLevel));
         if (tier.getTierPlan() != null) {
             dto.setTierPlan(TierDTO.TierPlanEnum.valueOf(tier.getTierPlan()));
         }

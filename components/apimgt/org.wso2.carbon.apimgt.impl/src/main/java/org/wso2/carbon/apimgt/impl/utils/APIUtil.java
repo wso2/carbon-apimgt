@@ -1133,7 +1133,6 @@ public final class APIUtil {
                     break;
                 case FILE: {
                     sourceType = Documentation.DocumentSourceType.FILE;
-                    setFilePermission(documentation.getFilePath());
                 }
                 break;
                 default:
@@ -1619,42 +1618,33 @@ public final class APIUtil {
     }
 
     /**
-     * Returns a map of API availability tiers as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getAppTiers() throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry();
-
-            return getTiers(registry, APIConstants.APP_TIER_LOCATION);
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
-    public static Map<String, Tier> getAppTiers(int tenantId) throws APIManagementException {
+    public static Map<String, Tier> getTiers(int tierType, String tenantDomain) throws APIManagementException {
+        boolean isTenantFlowStarted = false;
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            isTenantFlowStarted = true;
+
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
 
-            return getTiers(registry, APIConstants.APP_TIER_LOCATION);
+            if (tierType == APIConstants.TIER_API_TYPE) {
+                return getTiers(registry, APIConstants.API_TIER_LOCATION);
+            } else if (tierType == APIConstants.TIER_RESOURCE_TYPE) {
+                return getTiers(registry, APIConstants.RES_TIER_LOCATION);
+            } else if (tierType == APIConstants.TIER_APPLICATION_TYPE) {
+                return getTiers(registry, APIConstants.APP_TIER_LOCATION);
+            } else {
+                throw new APIManagementException("No such a tier type : " + tierType);
+            }
         } catch (RegistryException e) {
             String msg = "Error while retrieving API tiers from registry";
             log.error(msg, e);
@@ -1663,54 +1653,10 @@ public final class APIUtil {
             String msg = "Malformed XML found in the API tier policy resource";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Returns a map of API availability tiers as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getResTiers() throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry();
-
-            return getTiers(registry, APIConstants.RES_TIER_LOCATION);
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        }
-    }
-
-    /**
-     * Returns a map of API availability tiers of the tenant as defined in the underlying governance
-     * registry.
-     *
-     * @return a Map of tier names and Tier objects - possibly empty
-     * @throws APIManagementException if an error occurs when loading tiers from the registry
-     */
-    public static Map<String, Tier> getResTiers(int tenantId) throws APIManagementException {
-        try {
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
-                    getGovernanceSystemRegistry(tenantId);
-
-            return getTiers(registry, APIConstants.RES_TIER_LOCATION);
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -1942,21 +1888,30 @@ public final class APIUtil {
 
         boolean authorized;
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                                                                                        getTenantId(tenantDomain);
 
             if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
-                        getRealmService().getTenantUserRealm(tenantId).
-                        getAuthorizationManager();
-                authorized = manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
+                org.wso2.carbon.user.api.AuthorizationManager manager =
+                                                                        ServiceReferenceHolder.getInstance()
+                                                                                              .getRealmService()
+                                                                                              .getTenantUserRealm(tenantId)
+                                                                                              .getAuthorizationManager();
+                authorized =
+                             manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username), permission,
                                                       CarbonConstants.UI_PERMISSION_ACTION);
             } else {
-                //On the first login attempt to publisher (without browsing the store), the user realm will be null.
-                if(ServiceReferenceHolder.getUserRealm() == null){
-                    ServiceReferenceHolder.setUserRealm((UserRealm)ServiceReferenceHolder.getInstance().
-                                            getRealmService().getTenantUserRealm(tenantId));
+                // On the first login attempt to publisher (without browsing the
+                // store), the user realm will be null.
+                if (ServiceReferenceHolder.getUserRealm() == null) {
+                    ServiceReferenceHolder.setUserRealm((UserRealm) ServiceReferenceHolder.getInstance()
+                                                                                          .getRealmService()
+                                                                                          .getTenantUserRealm(tenantId));
                 }
-                authorized = AuthorizationManager.getInstance().isUserAuthorized(username, permission);
+                authorized =
+                             AuthorizationManager.getInstance()
+                                                 .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(username),
+                                                                   permission);
             }
             if (!authorized) {
                 throw new APIManagementException("User '" + username + "' does not have the " +
@@ -2055,7 +2010,7 @@ public final class APIUtil {
      * @throws APIManagementException
      */
 
-    private static void setFilePermission(String filePath) throws APIManagementException {
+    public static void setFilePermission(String filePath) throws APIManagementException {
         try {
             filePath = filePath.replaceFirst("/registry/resource/", "");
             org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
@@ -2506,6 +2461,7 @@ public final class APIUtil {
      */
     private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
             throws APIManagementException {
+        InputStream inputStream = null;
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
@@ -2520,7 +2476,7 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding API tier policies to the tenant's registry");
             }
-            InputStream inputStream = FileUtils.openInputStream(new File(fileName));
+            inputStream = FileUtils.openInputStream(new File(fileName));
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -2530,6 +2486,14 @@ public final class APIUtil {
             throw new APIManagementException("Error while saving policy information to the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy file content", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("Error when closing input stream", e);
+                }
+            }
         }
     }
 
@@ -3532,36 +3496,48 @@ public final class APIUtil {
         org.wso2.carbon.registry.api.Collection seqCollection = null;
 
         try {
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getGovernanceSystemRegistry(tenantId);
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
 
-            if (APIConstants.API_CUSTOM_IN_SEQUENCE_FILE_NAME.equals(sequenceName)
-                || APIConstants.API_CUSTOM_OUT_SEQUENCE_FILE_NAME.equals(sequenceName))  {
+            if ("in".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+            }   else if ("out".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+            } else if("fault".equals(direction)) {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
+            }
 
-                Resource sequence = registry.get(getSequencePath(identifier, direction) + RegistryConstants.PATH_SEPARATOR + sequenceName);
-                return APIUtil.buildOMElement(sequence.getContentStream());
-            } else {
-                if ("in".equals(direction)) {
-                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
-                }   else if ("out".equals(direction)) {
-                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
-                } else if("fault".equals(direction)) {
-                    seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
-                }
+            if (seqCollection == null)  {
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier, direction));
 
-                if (seqCollection != null) {
-                    String[] childPaths = seqCollection.getChildren();
+            }
 
-                    for (String childPath : childPaths) {
-                        Resource sequence = registry.get(childPath);
-                        OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
-                        if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
-                            return seqElment;
-                        }
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+
+                for (String childPath : childPaths) {
+                    Resource sequence = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                        return seqElment;
                     }
-
                 }
             }
+
+            // If the sequence not found the default sequences, check in custom sequences
+
+            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier, direction));
+            if (seqCollection != null) {
+                String[] childPaths = seqCollection.getChildren();
+
+                for (String childPath : childPaths) {
+                    Resource sequence = registry.get(childPath);
+                    OMElement seqElment = APIUtil.buildOMElement(sequence.getContentStream());
+                    if (sequenceName.equals(seqElment.getAttributeValue(new QName("name")))) {
+                        return seqElment;
+                    }
+                }
+            }
+
 
         } catch (Exception e) {
             String msg = "Issue is in accessing the Registry";
@@ -4276,9 +4252,7 @@ public final class APIUtil {
      * @return map that contains Data of the resource
      * @throws APIManagementException
      */
-
-    public static Map<String, Object> getDocument(String userName, String resourceUrl,
-                                                  String tenantDomain, int tenantId)
+    public static Map<String, Object> getDocument(String userName, String resourceUrl, String tenantDomain)
             throws APIManagementException {
         Map<String, Object> documentMap = new HashMap<String, Object>();
 
@@ -4292,7 +4266,18 @@ public final class APIUtil {
         }
         Resource apiDocResource;
         Registry registryType = null;
+        boolean isTenantFlowStarted = false;
         try {
+            int tenantId;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            } else {
+                tenantId = MultitenantConstants.SUPER_TENANT_ID;
+            }
+
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
@@ -4309,6 +4294,10 @@ public final class APIUtil {
             String msg = "Couldn't retrieve registry for User " + userName + " Tenant " + tenantDomain;
             log.error(msg, e);
             handleException(msg, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return documentMap;
     }
@@ -4728,6 +4717,34 @@ public final class APIUtil {
             resourcePathBuilder.append(resourcePath);
         }
         return resourcePathBuilder.toString();
+    }
+
+    /**
+     * Returns the Scopes associated roles defined in APIM configuration
+     *
+     * @return A Map with the scope names and the associated roles
+     */
+    public static Map<String, String> getRestAPIScopes() {
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        HashMap<String, String> scopesMap = new HashMap<String, String>();
+        List<String> scopeNamesList = apiManagerConfiguration
+                .getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_NAME);
+        List<String> rolesList = apiManagerConfiguration.getProperty(APIConstants.API_KEY_MANGER_RESTAPI_SCOPES_ROLES);
+
+        if (scopeNamesList != null && rolesList != null) {
+            if (scopeNamesList.size() != rolesList.size()) {
+                String errorMsg = "Provided Scopes for REST API are invalid."
+                        + " Every 'Scope' should include 'Name' and 'Roles' elements";
+                log.error(errorMsg);
+                return new HashMap<String, String>();
+            }
+
+            for (int i = 0; i < scopeNamesList.size(); i++) {
+                scopesMap.put(scopeNamesList.get(i), rolesList.get(i));
+            }
+        }
+        return scopesMap;
     }
 
     /**

@@ -7,11 +7,8 @@ var urlPrefix;
 var tenant=request_tenant;
 var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-if(tenant!=null) {
-	urlPrefix="&tenant="+tenant;
-} else {
-	urlPrefix='';
-}
+
+urlPrefix = jagg.getTenantURLPrefix("&");
 %>
 <%if(api!=null){
 
@@ -84,8 +81,8 @@ if(tenant!=null) {
                 %>
 
     <ul class="breadcrumb">
-        <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=urlPrefix%>">APIs groups</a> <span class="divider">/</span></li>
-        <li><a href="<%=jagg.getAbsoluteUrl(groupPath+"&")%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
+        <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/list-apis.jag?")%><%=jagg.getTenantURLPrefix()%>">APIs groups</a> <span class="divider">/</span></li>
+        <li><a href="<%=jagg.getAbsoluteUrl(groupPath)%><%=urlPrefix%>"><%= encode.forHtml(tagDisplayName) %></a> <span class="divider">/</span></li>
         <li class="active"><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%></li>
     </ul>
     <%
