@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.stream.XMLStreamException;
@@ -108,6 +110,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
+        Timer.Context context = timer.start();
+
         long startTime = System.nanoTime();
         long endTime;
         long difference;
@@ -152,6 +158,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 log.debug("API authentication failed with error " + e.getErrorCode(), e);
             }
             handleAuthFailure(messageContext, e);
+        } finally {
+            context.stop();
         }
         return false;
     }

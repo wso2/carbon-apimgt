@@ -23,6 +23,9 @@ import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Map;
 
@@ -64,11 +67,25 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
-        return mediate(messageContext, DIRECTION_IN);
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_IN));
+        Timer.Context context = timer.start();
+        try {
+            return mediate(messageContext, DIRECTION_IN);
+        } finally {
+            context.stop();
+        }
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        return mediate(messageContext, DIRECTION_OUT);
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_OUT));
+        Timer.Context context = timer.start();
+        try {
+            return mediate(messageContext, DIRECTION_OUT);
+        } finally {
+            context.close();
+        }
     }
 }
 

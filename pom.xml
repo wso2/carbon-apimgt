@@ -949,6 +949,8 @@
         <!-- apache cxf version -->
         <cxf.version>2.7.18</cxf.version>
 
+        <carbon.metrics.version>1.1.0</carbon.metrics.version>
+
     </properties>
 </project>
 

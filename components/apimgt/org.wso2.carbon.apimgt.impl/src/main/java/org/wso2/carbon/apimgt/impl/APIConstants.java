@@ -934,4 +934,6 @@ public final class APIConstants {
     
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
 
+    public static final String METRICS_PREFIX = "org.wso2.am";
+
 }
