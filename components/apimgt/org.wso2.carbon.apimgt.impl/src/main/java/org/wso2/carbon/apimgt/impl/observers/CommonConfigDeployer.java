@@ -26,10 +26,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.h2.osgi.utils.CarbonUtils;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
+
+import java.io.File;
 
 /**
  * This task provisions mandatory configs & Artifacts needed by any tenant. The reason for introducing this task is
@@ -53,7 +57,18 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+            //Check whether GatewayType is synapse before loading sequences into registry
+            String filePath =
+                    CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "conf" +
+                            File.separator + "api-manager.xml";
+
+            APIManagerConfiguration configuration = new APIManagerConfiguration();
+            configuration.load(filePath);
+            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+
+            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+            }
         }
         // Need to continue the execution even if we encounter an error.
         catch (Exception e) {
