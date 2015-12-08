@@ -4774,7 +4774,12 @@ public final class APIUtil {
             return false;
         }
         
-        String regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";        
+        String regex;
+        if(url.contains("localhost")){
+           regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(:\\d+)?+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";   
+        } else { 
+           regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(:\\d+)?+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";      
+        }        
         Pattern p = Pattern.compile(regex);         
         Matcher m = p.matcher(url); 
        
