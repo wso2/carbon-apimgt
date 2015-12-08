@@ -5506,14 +5506,27 @@ public class ApiMgtDAO {
                 deleteMappingQuery.execute();
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription Key mapping details are deleted successfully for Application - " + application
+                        .getName());
+            }
 
             deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
             deleteRegistrationQuery.setInt(1, application.getId());
             deleteRegistrationQuery.execute();
 
+            if (log.isDebugEnabled()) {
+                log.debug("Application Registration details are deleted successfully for Application - " + application
+                        .getName());
+            }
+
             deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
             deleteSubscription.setInt(1, application.getId());
             deleteSubscription.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription details are deleted successfully for Application - " + application.getName());
+            }
 
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
             prepStmtGetConsumerKey.setInt(1, application.getId());
@@ -5545,10 +5558,18 @@ public class ApiMgtDAO {
             deleteAppKey.setInt(1, application.getId());
             deleteAppKey.execute();
 
+            if (log.isDebugEnabled()) {
+                log.debug("Application Key Mapping details are deleted successfully for Application - " + application
+                        .getName());
+            }
 
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
             deleteApp.setInt(1, application.getId());
             deleteApp.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Application " + application.getName() + " is deleted successfully.");
+            }
 
             for (String consumerKey : consumerKeys){
                 //delete on oAuthorization server.

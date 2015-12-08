@@ -139,9 +139,25 @@ public class APIExecutor implements Execution {
             //executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, deprecateOldVersions, makeKeysForwardCompatible);
             
             //push the state change to gateway
-            Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api.getId(), newStatus);       
+            Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api.getId(), newStatus);
+
+            if (log.isDebugEnabled()) {
+                String logMessage = "Publish changed status to the Gateway. API Name: " + api.getId().getApiName()
+                        + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
+                        + ", New Status : " + newStatus;
+                log.debug(logMessage);
+            }
+
             //update api related information for state change
             executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API related information successfully updated. API Name: " + api.getId().getApiName()
+                                + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
+                                + ", New Status : " + newStatus;
+                log.debug(logMessage);
+            }
             
             if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
                     && newStatus.equals(APIStatus.PUBLISHED)) {
