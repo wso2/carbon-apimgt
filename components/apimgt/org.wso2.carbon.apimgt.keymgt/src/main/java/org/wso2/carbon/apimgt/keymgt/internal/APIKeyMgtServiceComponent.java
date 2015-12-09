@@ -25,19 +25,23 @@ import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TTransportException;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService;
 import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.user.core.listener.UserOperationEventListener;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 
@@ -62,6 +66,7 @@ import java.util.concurrent.Executors;
  * @scr.reference name="org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent"
  * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
  * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
+ *
  */
 public class APIKeyMgtServiceComponent {
 
@@ -69,6 +74,9 @@ public class APIKeyMgtServiceComponent {
     private ThriftAuthenticatorService thriftAuthenticationService;
     private ExecutorService executor = Executors.newFixedThreadPool(1);
     private boolean isThriftServerEnabled;
+
+    private static KeyManagerUserOperationListener listener = null;
+    private ServiceRegistration serviceRegistration = null;
 
     protected void activate(ComponentContext ctxt) {
         try {
@@ -92,6 +100,12 @@ public class APIKeyMgtServiceComponent {
                     log.debug("API key validation thrift server is disabled");
                 }
             }
+
+            listener = new KeyManagerUserOperationListener();
+            serviceRegistration = ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(),
+                    listener, null);
+            log.debug("Key Manager User Operation Listener is enabled.");
+
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
             }
@@ -99,6 +113,16 @@ public class APIKeyMgtServiceComponent {
             log.error("Failed to initialize key management service.", e);
         }
     }
+
+    protected void deactivate(ComponentContext context) {
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
+        }
+        if (log.isDebugEnabled()) {
+            log.info("Key Manager User Operation Listener is deactivated.");
+        }
+    }
+
     protected void setRegistryService(RegistryService registryService) {
         APIKeyMgtDataHolder.setRegistryService(registryService);
         if (log.isDebugEnabled()) {
@@ -199,7 +223,7 @@ public class APIKeyMgtServiceComponent {
             String thriftClientTimeOut =
                     APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
                     APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
-            if (thriftPortString == null || thriftClientTimeOut == null) {
+            if (thriftClientTimeOut == null) {
                 throw new APIKeyMgtException("Port and Connection timeout not provided to start thrift key mgt service.");
             }
 
