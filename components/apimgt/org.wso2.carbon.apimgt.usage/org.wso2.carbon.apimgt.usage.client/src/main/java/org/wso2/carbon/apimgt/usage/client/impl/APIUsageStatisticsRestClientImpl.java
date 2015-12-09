@@ -2098,7 +2098,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private APIFirstAccess queryFirstAccess(String tableName) throws APIMgtUsageQueryServiceClientException {
 
         //create the bean
-        RequestSearchBean request = new RequestSearchBean("", 0, 1, tableName);
+        RequestSearchBean request = new RequestSearchBean("*:*", 0, 1, tableName);
 
         //get the type for expected result
         Type type = new TypeToken<List<Result<FirstAccessValue>>>() {
