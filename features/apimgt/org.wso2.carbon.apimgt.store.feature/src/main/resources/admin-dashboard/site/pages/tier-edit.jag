@@ -17,7 +17,7 @@ i18n.init(request,localeResourcesBasePath);
     jagg.render({
         "name":"page/base",
         "inputs":{
-            "title":"Tier Edit",
+            "title":"Update Tiers",
             "header":{
                 "name":"menu/primary"
             },
