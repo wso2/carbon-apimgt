@@ -77,6 +77,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -384,7 +385,7 @@ public class ApiMgtDAO {
         Subscriber subscriber = null;
 
         String sqlQuery =
-                "SELECT USERNAME,TENANT_ID FROM " +
+                "SELECT USERNAME, USER_DOMAIN, TENANT_ID FROM " +
                 " IDN_OAUTH_CONSUMER_APPS " +
                 " WHERE " +
                 " CONSUMER_KEY = ?";
@@ -396,7 +397,8 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 username = rs.getString("USERNAME");
-                subscriber = new Subscriber(username);
+                String endUsernameWithDomain = UserCoreUtil.addDomainToName(username, rs.getString("USER_DOMAIN"));
+                subscriber = new Subscriber(endUsernameWithDomain);
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
             }
         } catch (SQLException e) {
