@@ -566,6 +566,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addAPI(API api) throws APIManagementException {
         try {           
             createAPI(api);
+
+            if (log.isDebugEnabled()) {
+                log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
+                        + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
+            }
+
             int tenantId;
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
@@ -575,6 +581,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         +api.getId().getApiName(),e);
             }
             apiMgtDAO.addAPI(api,tenantId);
+
+            if (log.isDebugEnabled()) {
+                log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
+                        .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
+                        .getContext());
+            }
+
             if (APIUtil.isAPIManagementEnabled()) {
             	Cache contextCache = APIUtil.getAPIContextCache();
             	Boolean apiContext = null;
@@ -739,6 +752,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             +api.getId().getApiName(),e);
                 }
                 apiMgtDAO.updateAPI(api,tenantId);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated the API: " + api.getId() + " in the database");
+                }
 
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -1046,6 +1062,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 success = true;
+                if (log.isDebugEnabled()) {
+                    log.debug("API status successfully updated to: " + newStatus + " in API Name: " + api.getId()
+                            .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
+                            .getContext());
+                }
+
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
@@ -1790,8 +1812,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         +api.getId().getApiName(),e);
             }
 
-            apiMgtDAO.addAPI(newAPI,tenantId);
+            apiMgtDAO.addAPI(newAPI, tenantId);
             registry.commitTransaction();
+
+            if(log.isDebugEnabled()) {
+                String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
+                log.debug(logMessage);
+            }
 
         } catch (ParseException e) {
             String msg = "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
@@ -2118,11 +2145,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
-            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, artifactPath);
+            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                    artifactPath);
             registry.commitTransaction();
-            if(log.isDebugEnabled()){
-            	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" created";
-            	log.debug(logMessage);
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                + " created";
+                log.debug(logMessage);
             }
         } catch (Exception e) {
         	 try {
@@ -2360,6 +2390,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             apiMgtDAO.deleteAPI(identifier);
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                + " successfully removed from the database.";
+                log.debug(logMessage);
+            }
 
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -3140,6 +3177,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             this.username);
                 }
                
+            }
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Status changed successfully. API Name: " + apiIdentifier.getApiName() + ", API Version " +
+                                apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                log.debug(logMessage);
             }
             return true;
         } catch (GovernanceException e) {
