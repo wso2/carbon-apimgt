@@ -899,7 +899,7 @@
         <!-- Misc Versions -->
         <synapse.version>2.1.5-wso2v1</synapse.version>
 
-        <orbit.version.json>2.0.0.wso2v1</orbit.version.json>
+        <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
         <javax.xml.soap.imp.pkg.version>[1.0.0, 1.1.0)</javax.xml.soap.imp.pkg.version>
         <javax.xml.stream.imp.pkg.version>[1.0.1, 1.1.0)</javax.xml.stream.imp.pkg.version>
