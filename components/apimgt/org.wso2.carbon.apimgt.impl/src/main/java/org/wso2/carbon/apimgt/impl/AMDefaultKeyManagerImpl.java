@@ -96,7 +96,12 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         SubscriberKeyMgtClient keyMgtClient = null;
         try {
             keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
-            info = keyMgtClient.createOAuthApplication(userId, applicationName, callBackURL);
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate = new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
+            applicationToCreate.setIsSaasApplication(oAuthApplicationInfo.getIsSaasApplication());
+            applicationToCreate.setCallBackURL(oAuthApplicationInfo.getCallBackURL());
+            applicationToCreate.setClientName(oAuthApplicationInfo.getClientName());
+            applicationToCreate.setAppOwner(userId);
+            info = keyMgtClient.createOAuthApplicationbyApplicationInfo(applicationToCreate);
         } catch (Exception e) {
             handleException("Can not create OAuth application  : " + applicationName, e);
         } finally {
@@ -112,6 +117,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthApplicationInfo.setClientId(info.getClientId());
         oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
         oAuthApplicationInfo.setClientSecret(info.getClientSecret());
+        oAuthApplicationInfo.setIsSaasApplication(info.getIsSaasApplication());
 
         try {
             JSONObject jsonObject = new JSONObject(info.getJsonString());

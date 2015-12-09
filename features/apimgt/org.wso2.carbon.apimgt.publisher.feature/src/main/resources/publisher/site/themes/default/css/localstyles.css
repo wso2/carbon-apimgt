@@ -1598,3 +1598,11 @@ table.dataTable tbody td.no-padding {
     margin-left: 10px;
     white-space: nowrap;
 }
+
+.publishCheckBoxes {
+    display: table;
+}
+
+[id^="itemsDivfromLCXML"] {
+    margin-left: -150px;
+}
