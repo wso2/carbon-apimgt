@@ -1792,10 +1792,11 @@ public final class APIUtil {
                 Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
                 boolean foundTier = false;
 
+                String tierName = null;
                 while (policies.hasNext()) {
                     OMElement policy = (OMElement) policies.next();
                     OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
-                    String tierName = tier.getName();
+                    tierName = tier.getName();
                     if(tierName != null && tierName.equalsIgnoreCase(id.getText())){
                         foundTier = true;
                         policies.remove();
@@ -1803,7 +1804,8 @@ public final class APIUtil {
                     }
                 }
                 if(!foundTier){
-                    throw new APIManagementException("Tier doesn't exist!");
+                    log.error("Tier doesn't exist : " + tierName);
+                    throw new APIManagementException("Tier doesn't exist : " + tierName);
                 }
                 resource.setContent(element.toString());
                 registry.put(APIConstants.API_TIER_LOCATION, resource);
@@ -4774,7 +4776,12 @@ public final class APIUtil {
             return false;
         }
         
-        String regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";        
+        String regex;
+        if(url.contains("localhost")){
+           regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(:\\d+)?+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";   
+        } else { 
+           regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(:\\d+)?+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";      
+        }        
         Pattern p = Pattern.compile(regex);         
         Matcher m = p.matcher(url); 
        

@@ -3063,21 +3063,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
                 } catch (AxisFault e) {
                     //error is only logged because the process should be executed in all gateway environments
-                    log.error("Error in calling Stats update web service in Gateway Environment.", e);
+                    log.error("Error in calling Stats update web service in Gateway Environment : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (RemoteException e) {
                     //error is only logged because the change is affected in gateway environments,
                     // and the process should be executed in all environments and domains
-                    log.error("Error in updating Stats publish status in Gateways.", e);
+                    log.error("Error in updating Stats publish status in Gateway : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (GatewayStatsUpdateServiceAPIManagementExceptionException e) {
                     //error is only logged because the process should continue in other gateways
-                    log.error("Error in Stat Update web service call to Gateway.", e);
+                    log.error("Error in Stat Update web service call to Gateway : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (GatewayStatsUpdateServiceClusteringFaultException e) {
                     //error is only logged because the status should be updated in other gateways
-                    log.error("Failed to send cluster message in Gateway domain to update stats publishing status.", e);
+                    log.error("Failed to send cluster message to update stats publishing status in Gateway : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (GatewayStatsUpdateServiceExceptionException e) {
                     //error is only logged because the process should continue in other gateways
-                    log.error("Error occurred while updating EventingConfiguration, " +
-                            "it contains a dirty value about Stat publishing.", e);
+                    log.error("Updating EventingConfiguration failed, a dirty Stat publishing status exists in : " +
+                            currentGatewayEnvironment.getName(), e);
                 }
             }
         } else {
