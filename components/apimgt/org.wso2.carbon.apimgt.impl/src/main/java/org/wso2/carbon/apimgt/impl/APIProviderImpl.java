@@ -3014,21 +3014,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     stub.updateStatPublishGateway(receiverUrl, user, password, updatedStatus);
                 } catch (AxisFault e) {
                     //error is only logged because the process should be executed in all gateway environments
-                    log.error("Error in calling Stats update web service in Gateway Environment.", e);
+                    log.error("Error in calling Stats update web service in Gateway Environment : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (RemoteException e) {
                     //error is only logged because the change is affected in gateway environments,
                     // and the process should be executed in all environments and domains
-                    log.error("Error in updating Stats publish status in Gateways.", e);
+                    log.error("Error in updating Stats publish status in Gateway : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (GatewayStatsUpdateServiceAPIManagementExceptionException e) {
                     //error is only logged because the process should continue in other gateways
-                    log.error("Error in Stat Update web service call to Gateway.", e);
+                    log.error("Error in Stat Update web service call to Gateway : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (GatewayStatsUpdateServiceClusteringFaultException e) {
                     //error is only logged because the status should be updated in other gateways
-                    log.error("Failed to send cluster message in Gateway domain to update stats publishing status.", e);
+                    log.error("Failed to send cluster message to update stats publishing status in Gateway : " +
+                            currentGatewayEnvironment.getName(), e);
                 } catch (GatewayStatsUpdateServiceExceptionException e) {
                     //error is only logged because the process should continue in other gateways
-                    log.error("Error occurred while updating EventingConfiguration, " +
-                            "it contains a dirty value about Stat publishing.", e);
+                    log.error("Updating EventingConfiguration failed, a dirty Stat publishing status exists in : " +
+                            currentGatewayEnvironment.getName(), e);
                 }
             }
         } else {
@@ -3100,21 +3104,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException {
-        GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+        String provider = apiIdentifier.getProviderName();
+        String providerTenantMode = apiIdentifier.getProviderName();
+        provider = APIUtil.replaceEmailDomain(provider);
         boolean success = false;
+        boolean isTenantFlowStarted = false;
         try {
-            if (apiArtifact != null) {
-                if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
-                    apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-                } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
-                    apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
-                }
-                success = true;
+            
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-        } catch (GovernanceException e) {
-            handleException("Error while setting registry lifecycle checklist items for the API: " +
-                    apiIdentifier.getApiName(), e);
-        }
+            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            
+            try {
+                if (apiArtifact != null) {
+                    if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                        apiArtifact.checkLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                    } else if (!checkItemValue && apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
+                        apiArtifact.uncheckLCItem(checkItem, APIConstants.API_LIFE_CYCLE);
+                    }
+                    success = true;
+                }
+            } catch (GovernanceException e) {
+                handleException("Error while setting registry lifecycle checklist items for the API: " +
+                        apiIdentifier.getApiName(), e);
+            }
+            
+       }finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        } 
         return success;
     }
 
@@ -3160,8 +3183,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
         String path = APIUtil.getAPIPath(apiId);
         Map<String, Object> lcData = new HashMap<String, Object>();
+    
+        String provider = apiId.getProviderName();
+        String providerTenantMode = apiId.getProviderName();
+        provider = APIUtil.replaceEmailDomain(provider);
+     
+        boolean isTenantFlowStarted = false;
 
         try {
+            
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerTenantMode));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
             Resource apiSourceArtifact = registry.get(path);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                     APIConstants.API_KEY);
@@ -3250,6 +3286,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (Exception e) {
             handleException(e.getMessage(), e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return lcData;
     }

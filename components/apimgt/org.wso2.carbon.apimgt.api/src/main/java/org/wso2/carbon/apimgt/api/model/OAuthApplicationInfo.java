@@ -35,6 +35,8 @@ public class OAuthApplicationInfo {
     private String callBackURL;
     private String clientSecret;
     private Map<String,Object> parameters = new HashMap<String, Object>();
+    private boolean isSaasApplication;
+    private String appOwner;
 
     /**
      * get client Id (consumer id)
@@ -103,6 +105,22 @@ public class OAuthApplicationInfo {
 
     public void removeParameter(String key){
         this.parameters.remove(key);
+    }
+
+    public boolean getIsSaasApplication() {
+        return isSaasApplication;
+    }
+
+    public void setIsSaasApplication(boolean isSaasApplication) {
+        this.isSaasApplication = isSaasApplication;
+    }
+
+    public String getAppOwner() {
+        return appOwner;
+    }
+
+    public void setAppOwner(String appOwner) {
+        this.appOwner = appOwner;
     }
 
 }

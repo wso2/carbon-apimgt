@@ -74,7 +74,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                     <b><% print(lcStatus); %></b>                    
                     
                  </div> <br/>
-                 <div class="controls publishCheckBoxes">  
+                 <div class="controls publishCheckBoxes">
                  <%for (var j=0;j<lcData.items.length;j++){
                  var item=lcData.items[j];
                  var itemName=item.name;
@@ -85,7 +85,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                  %>
                  <% if(isVisible=="true"){%> 
                      <%if((state!="Created")||(state=="Created" && oldExist)){%>                
-                     <label class="checkbox" id="itemsDiv<%=String(j)%>">
+                     <label class="checkbox" id="itemsDivfromLCXML<%=String(j)%>">
                         <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
                      </label>
                  

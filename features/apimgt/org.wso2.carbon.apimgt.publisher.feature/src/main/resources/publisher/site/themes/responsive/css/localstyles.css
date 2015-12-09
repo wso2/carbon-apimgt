@@ -626,3 +626,11 @@ input.error{
     vertical-align: top;
     margin-top: 5px;
 }
+
+.publishCheckBoxes {
+    display: table;
+}
+
+[id^="itemsDivfromLCXML"] {
+    margin-left: -150px;
+}

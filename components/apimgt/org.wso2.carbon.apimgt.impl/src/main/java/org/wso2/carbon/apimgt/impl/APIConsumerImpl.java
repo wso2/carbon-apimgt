@@ -30,59 +30,22 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
-import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
@@ -96,19 +59,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Caching;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -1645,15 +1596,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             if (artifactManager != null) {
 
-                if (searchType.equalsIgnoreCase("Provider")) {
-                    criteria=APIConstants.API_OVERVIEW_PROVIDER;
+                if (searchType.equalsIgnoreCase(APIConstants.API_PROVIDER)) {
+                    criteria = APIConstants.API_OVERVIEW_PROVIDER;
                     searchTerm = searchTerm.replaceAll("@", "-AT-");
-                } else if (searchType.equalsIgnoreCase("Version")) {
-                    criteria=APIConstants.API_OVERVIEW_VERSION;
-                } else if (searchType.equalsIgnoreCase("Context")) {
-                    criteria=APIConstants.API_OVERVIEW_CONTEXT;
-                }else if (searchType.equalsIgnoreCase("Description")) {
-                    criteria=APIConstants.API_OVERVIEW_DESCRIPTION;
+                } else if (searchType.equalsIgnoreCase(APIConstants.API_VERSION_LABEL)) {
+                    criteria = APIConstants.API_OVERVIEW_VERSION;
+                } else if (searchType.equalsIgnoreCase(APIConstants.API_CONTEXT)) {
+                    criteria = APIConstants.API_OVERVIEW_CONTEXT;
+                } else if (searchType.equalsIgnoreCase(APIConstants.API_DESCRIPTION)) {
+                    criteria = APIConstants.API_OVERVIEW_DESCRIPTION;
                 } else if (searchType.equalsIgnoreCase(APIConstants.API_TAG)) {
                     criteria = APIConstants.API_OVERVIEW_TAG;
                 }
@@ -2522,7 +2473,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // according to the token type.
         StringBuilder applicationNameAfterAppend = new StringBuilder(applicationName);
         //-------------------------------------------------------------------------------
-        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         int tenantId =
                 0;
         try {
@@ -2538,7 +2489,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (tokenScope != null && tokenScope.length() != 0 &&
                 !tokenScope.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
             scopeSet.addAll(getScopesByScopeKeys(tokenScope, tenantId));
-            authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
+            authorizedScopes = getAllowedScopesForUserApplication(userId, scopeSet);
         }
 
         if (!authorizedScopes.isEmpty()) {
