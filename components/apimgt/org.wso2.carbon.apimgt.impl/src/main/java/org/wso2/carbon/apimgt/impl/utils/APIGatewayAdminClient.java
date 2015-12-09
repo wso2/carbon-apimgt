@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -33,6 +34,9 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         apiGatewayAdminStub = new APIGatewayAdminStub(null, environment.getServerURL() + "APIGatewayAdmin");
         setup(apiGatewayAdminStub, environment);
         this.environment = environment;
+
+        CarbonUtils.setBasicAccessSecurityHeaders(environment.getUserName(), environment.getPassword(),
+                true, apiGatewayAdminStub._getServiceClient());
     }
 
     /**

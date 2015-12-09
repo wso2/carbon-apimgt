@@ -51,7 +51,8 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
     private APIAuthenticationServiceStub stub;
 
     public APIAuthenticationAdminClient(Environment environment) throws AxisFault {
-        stub = new APIAuthenticationServiceStub(null, getServiceEndpointToClearCache(environment, "APIAuthenticationService"));
+        stub = new APIAuthenticationServiceStub(ServiceReferenceHolder.getContextService().getClientConfigContext(),
+                                            getServiceEndpointToClearCache(environment, "APIAuthenticationService"));
         setup(stub, environment);
     }
 
@@ -170,7 +171,8 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
             throw new AxisFault("API gateway URL is malformed", e);
         }
 
-        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url + "AuthenticationAdmin");
+        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(
+                    ServiceReferenceHolder.getContextService().getClientConfigContext(), url + "AuthenticationAdmin");
         ServiceClient client = authAdminStub._getServiceClient();
         Options options = client.getOptions();
         options.setManageSession(true);
