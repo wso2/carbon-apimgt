@@ -77,6 +77,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -384,7 +385,7 @@ public class ApiMgtDAO {
         Subscriber subscriber = null;
 
         String sqlQuery =
-                "SELECT USERNAME,TENANT_ID FROM " +
+                "SELECT USERNAME, USER_DOMAIN, TENANT_ID FROM " +
                 " IDN_OAUTH_CONSUMER_APPS " +
                 " WHERE " +
                 " CONSUMER_KEY = ?";
@@ -396,7 +397,8 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
             while (rs.next()) {
                 username = rs.getString("USERNAME");
-                subscriber = new Subscriber(username);
+                String endUsernameWithDomain = UserCoreUtil.addDomainToName(username, rs.getString("USER_DOMAIN"));
+                subscriber = new Subscriber(endUsernameWithDomain);
                 subscriber.setTenantId(rs.getInt("TENANT_ID"));
             }
         } catch (SQLException e) {
@@ -5509,14 +5511,27 @@ public class ApiMgtDAO {
                 deleteMappingQuery.execute();
             }
 
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription Key mapping details are deleted successfully for Application - " + application
+                        .getName());
+            }
 
             deleteRegistrationQuery = connection.prepareStatement(deleteRegistrationEntry);
             deleteRegistrationQuery.setInt(1, application.getId());
             deleteRegistrationQuery.execute();
 
+            if (log.isDebugEnabled()) {
+                log.debug("Application Registration details are deleted successfully for Application - " + application
+                        .getName());
+            }
+
             deleteSubscription = connection.prepareStatement(deleteSubscriptionsQuery);
             deleteSubscription.setInt(1, application.getId());
             deleteSubscription.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Subscription details are deleted successfully for Application - " + application.getName());
+            }
 
             prepStmtGetConsumerKey = connection.prepareStatement(getConsumerKeyQuery);
             prepStmtGetConsumerKey.setInt(1, application.getId());
@@ -5548,10 +5563,18 @@ public class ApiMgtDAO {
             deleteAppKey.setInt(1, application.getId());
             deleteAppKey.execute();
 
+            if (log.isDebugEnabled()) {
+                log.debug("Application Key Mapping details are deleted successfully for Application - " + application
+                        .getName());
+            }
 
             deleteApp = connection.prepareStatement(deleteApplicationQuery);
             deleteApp.setInt(1, application.getId());
             deleteApp.execute();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Application " + application.getName() + " is deleted successfully.");
+            }
 
             for (String consumerKey : consumerKeys){
                 //delete on oAuthorization server.
@@ -9248,13 +9271,16 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        PreparedStatement prepStmt2;
+        PreparedStatement prepStmt2 = null;
         ResultSet resultSet = null;
-        String apiScopeQuery = "SELECT API.API_ID from AM_API API, IDN_OAUTH2_SCOPE IDN, AM_API_SCOPES AMS "
-                                       + "WHERE IDN.SCOPE_ID=AMS.SCOPE_ID AND "
-                                       + "AMS.API_ID=API.API_ID AND "
-                                       + "IDN.SCOPE_KEY = ? AND "
-                                       + "IDN.tenant_id = ?";
+        ResultSet resultSet2 = null;
+
+        String apiScopeQuery = "SELECT API.API_ID, API.API_NAME, API.API_PROVIDER "
+                                   + "FROM AM_API API, IDN_OAUTH2_SCOPE IDN, AM_API_SCOPES AMS "
+                                   + "WHERE IDN.SCOPE_ID=AMS.SCOPE_ID AND "
+                                   + "AMS.API_ID=API.API_ID AND "
+                                   + "IDN.SCOPE_KEY = ? AND "
+                                   + "IDN.tenant_id = ?";
         String getApiQuery =
                              "SELECT API_ID FROM AM_API API WHERE API_PROVIDER = ? AND "
                                      + "API_NAME = ? AND API_VERSION = ?";
@@ -9269,15 +9295,30 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
             if (resultSet != null && resultSet.next()) {
                 int apiID = resultSet.getInt("API_ID");
+                String provider = resultSet.getString("API_PROVIDER");
+                String apiName = resultSet.getString("API_NAME");
 
                 prepStmt2 = connection.prepareStatement(getApiQuery);
                 prepStmt2.setString(1, APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
                 prepStmt2.setString(2, identifier.getApiName());
                 prepStmt2.setString(3, identifier.getVersion());
-                resultSet = prepStmt2.executeQuery();
+                resultSet2 = prepStmt2.executeQuery();
 
-                if (resultSet != null && resultSet.next()) {
-                    return (apiID != resultSet.getInt("API_ID"));
+                if (resultSet2 != null && resultSet2.next()) {
+                    //If the API ID is different from the one being saved
+                    if(apiID != resultSet2.getInt("API_ID")){
+                        //Check if the provider name and api name is same.
+                        if(provider.equals(APIUtil.replaceEmailDomainBack(identifier.getProviderName()))
+                                && apiName.equals(identifier.getApiName())){
+
+                            //Return false since this means we're attaching the scope to another version of the API.
+                            return false;
+                        }
+                        return true;
+                    }
+                    else{
+                        return false;
+                    }
                 }
 
             }
@@ -9286,6 +9327,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             handleException("Failed to check Scope Key availability : " + scopeKey, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, resultSet);
+            APIMgtDBUtil.closeAllConnections(prepStmt2, null, resultSet2);
         }
         return false;
     }

@@ -27,6 +27,7 @@ import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.*;
@@ -72,6 +73,8 @@ public class ScopesIssuer {
 
         String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
         String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
+        String endUsernameWithDomain = UserCoreUtil.addDomainToName(username,
+                        tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain());
         List<String> reqScopeList = Arrays.asList(requestedScopes);
 
         try {
@@ -110,7 +113,8 @@ public class ScopesIssuer {
                     tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
                 }
                 userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-                userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+                userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.
+                                                               getTenantAwareUsername(endUsernameWithDomain));
             } catch (UserStoreException e) {
                 //Log and return since we do not want to stop issuing the token in case of scope validation failures.
                 log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);

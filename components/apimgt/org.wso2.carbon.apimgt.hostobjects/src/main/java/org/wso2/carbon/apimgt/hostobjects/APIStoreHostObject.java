@@ -4287,7 +4287,10 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));

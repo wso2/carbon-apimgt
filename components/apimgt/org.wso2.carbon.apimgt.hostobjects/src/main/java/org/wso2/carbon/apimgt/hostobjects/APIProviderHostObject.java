@@ -999,7 +999,14 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibility = (String) apiData.get("visibility", apiData);
         String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String visibleRoles = "";
-
+        
+        if (name != null) {
+            name = name.trim();
+            if (name.isEmpty()) {
+                handleException("API name is not specified");
+            }
+        }
+        
         if (version != null) {
             version = version.trim();
             if (version.isEmpty()) {
@@ -3680,15 +3687,19 @@ public class APIProviderHostObject extends ScriptableObject {
                 doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
             }
 
-            Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
+            Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());            
 
-            if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
-            } else if (oldDoc.getFilePath() != null) {
-                doc.setFilePath(oldDoc.getFilePath());
+            try {
+                if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                    ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
+                                         fileHostObject.getJavaScriptFile().getContentType());
+                    String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
+                    doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
+                } else if (oldDoc.getFilePath() != null) {
+                    doc.setFilePath(oldDoc.getFilePath());
+                }
+            } catch (APIManagementException e) {
+                handleException("Failed to add file to document " + doc.getName(), e);
             }
             apiProvider.updateDocumentation(apiId, doc);
             success = true;
