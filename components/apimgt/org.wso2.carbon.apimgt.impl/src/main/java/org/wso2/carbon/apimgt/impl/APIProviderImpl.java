@@ -1597,15 +1597,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             APIConstants.API_RESOURCE_NAME;
         try {
             if (registry.resourceExists(targetPath)) {
-                throw new DuplicateAPIException("API version already exist with version :"
-                                                + newVersion);
+                throw new DuplicateAPIException("API version already exist with version :" + newVersion);
             }
             registry.beginTransaction();
             Resource apiSourceArtifact = registry.get(apiSourcePath);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(
-                    apiSourceArtifact.getUUID());
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
 
             //Create new API version
             artifact.setId(UUID.randomUUID().toString());
@@ -1618,18 +1615,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.CREATED);
             }
 
-            if(api.isDefaultVersion()){
+            if(api.isDefaultVersion())  {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
                 //Check whether an existing API is set as default version.
                 String defaultVersion = getDefaultVersion(api.getId());
 
                 //if so, change its DefaultAPIVersion attribute to false
 
-                if(defaultVersion!=null){
-                    APIIdentifier defaultAPIId=new APIIdentifier(api.getId().getProviderName(),api.getId().getApiName(),defaultVersion);
+                if(defaultVersion!=null)    {
+                    APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(),api.getId().getApiName(),
+                                                                   defaultVersion);
                     updateDefaultAPIInRegistry(defaultAPIId,false);
                 }
-            }else{
+            } else  {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
             }
             //Check whether the existing api has its own thumbnail resource and if yes,add that image
@@ -1647,6 +1645,57 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
                                       addResourceFile(APIUtil.getIconPath(newApiId), icon));
             }
+            // If the API has custom mediation policy, copy it to new version.
+
+            String inSeqFilePath = APIUtil.getSequencePath(api.getId(), "in");
+
+            if (registry.resourceExists(inSeqFilePath)) {
+
+                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+                                                           api.getId().getApiName(), newVersion);
+
+                String inSeqNewFilePath = APIUtil.getSequencePath(newApiId, "in");
+                org.wso2.carbon.registry.api.Collection inSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(inSeqFilePath);
+                if (inSeqCollection != null) {
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths)    {
+                        Resource inSequence = registry.get(inSeqChildPath);
+
+                        ResourceFile seqFile = new ResourceFile(inSequence.getContentStream(), inSequence.getMediaType());
+                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
+                        addResourceFile((inSeqNewFilePath + seqFileName), seqFile);
+                    }
+                }
+            }
+
+
+            String outSeqFilePath = APIUtil.getSequencePath(api.getId(), "out");
+
+            if (registry.resourceExists(outSeqFilePath)) {
+
+                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+                                                           api.getId().getApiName(), newVersion);
+
+                String outSeqNewFilePath = APIUtil.getSequencePath(newApiId, "out");
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(outSeqFilePath);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+
+                        ResourceFile seqFile = new ResourceFile(outSequence.getContentStream(), outSequence.getMediaType());
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
+                        addResourceFile((outSeqNewFilePath + seqFileName), seqFile);
+                    }
+                }
+            }
+
+
+
             // Here we keep the old context
             String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
 
