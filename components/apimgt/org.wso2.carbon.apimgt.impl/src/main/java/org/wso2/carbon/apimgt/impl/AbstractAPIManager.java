@@ -641,7 +641,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         + resourcePath;
             }
         } catch (RegistryException e) {
-            handleException("Error while adding the icon image to the registry", e);
+            handleException("Error while adding the resource to the registry", e);
         }
         return null;
     }
