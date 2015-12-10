@@ -342,9 +342,9 @@ public class APIDTO  {
 
   
   /**
-   * Comma seperated list of gateway environments.
+   * Comma separated list of gateway environments.
    **/
-  @ApiModelProperty(value = "Comma seperated list of gateway environments.")
+  @ApiModelProperty(value = "Comma separated list of gateway environments.")
   @JsonProperty("gatewayEnvironments")
   public String getGatewayEnvironments() {
     return gatewayEnvironments;

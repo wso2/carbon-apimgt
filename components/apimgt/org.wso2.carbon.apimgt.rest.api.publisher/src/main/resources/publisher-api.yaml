@@ -68,6 +68,10 @@ x-wso2-security:
         key: API_CREATOR_SCOPE
       - description: ""
         roles: admin
+        name: API_CREATOR_PUBLISHER_SCOPE
+        key: API_CREATOR_PUBLISHER_SCOPE
+      - description: ""
+        roles: admin
         name: API_ADMINISTRATIVE_SCOPE
         key: API_ADMINISTRATIVE_SCOPE
 
@@ -81,6 +85,7 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition  
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       summary: |
         Retrieving APIs
       description: |
@@ -204,6 +209,7 @@ paths:
 # Retrieve the details of an API definition
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get details of an API
       parameters:
@@ -367,6 +373,7 @@ paths:
 # Retrieve the API swagger definition
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get the swagger of an API
       parameters:
@@ -551,6 +558,7 @@ paths:
 # Retrieve the documents associated with an API that qualify under a search condition
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get a list of documents belonging to an API.
       parameters:
@@ -671,6 +679,7 @@ paths:
 # Retrieve a particular document of a certain API
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get a particular document associated with an API.
       parameters:
@@ -832,6 +841,7 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
+        x-scope: API_CREATOR_PUBLISHER_SCOPE
         description: |
           Downloads a FILE type document/get the inline content or source url of a certain document.
         parameters:
@@ -976,6 +986,7 @@ paths:
 # Retrieve the details about a certain application
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Get application details
       parameters:
@@ -1033,6 +1044,7 @@ paths:
 # Retrieve all subscriptions of a certain API
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Get subscription list.
         The API Identifier and corresponding Application Identifier
@@ -1082,6 +1094,7 @@ paths:
 # Retrieve a certain subscription
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Get subscription details
       parameters:
@@ -1129,7 +1142,7 @@ paths:
 # Block a certain subscription
 #-----------------------------------------------------
     post:
-      x-scope: API_PUBLISHER_SCOPE
+      x-scope: API_CREATOR_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - name: blockState
@@ -1191,7 +1204,7 @@ paths:
 # Unblock a certain subscription
 #-----------------------------------------------------
     post:
-      x-scope: API_PUBLISHER_SCOPE
+      x-scope: API_CREATOR_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - $ref: '#/parameters/If-Match'
@@ -1245,6 +1258,7 @@ paths:
 # Retrieve the list of all available tiers
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get available tiers
       parameters:
@@ -1345,6 +1359,7 @@ paths:
 # Retrieve a certain tier
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get tier details
       parameters:
@@ -1577,6 +1592,7 @@ paths:
 # Retrieve the list of environments configured for a certain API
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get a list of gateway environments configured previously.
       parameters:
@@ -1940,7 +1956,7 @@ definitions:
         type: string
       gatewayEnvironments:
         description: |
-          Comma seperated list of gateway environments.
+          Comma separated list of gateway environments.
         type: string
       sequences:
         type: array
