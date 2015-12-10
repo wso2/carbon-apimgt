@@ -1947,12 +1947,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
                 invalidateCachedKeys(applicationId);
             }
+
+            SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
+
             if (log.isDebugEnabled()) {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
-                        + " subscribe by " + userId + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
+                        + ", Subscription Status: " + addedSubscription.getSubStatus() + " subscribe by " + userId
+                        + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
                 log.debug(logMessage);
             }
-            SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
+
             return new SubscriptionResponse(addedSubscription.getSubStatus(), addedSubscription.getUUID(),
                     workflowResponse);
         } else {
@@ -2166,6 +2170,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Application Name: " + application.getName() +" added successfully.");
+        }
+
         return applicationId;
     }
 
@@ -2194,6 +2203,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         apiMgtDAO.updateApplication(application);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the Application: " + application.getId() +" in the database.");
+        }
 
         APIKey[] apiKeys = null;
 
