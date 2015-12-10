@@ -401,9 +401,6 @@ public class APIManagerComponent {
     }
 
     private void addTierPolicy(String tierLocation,String defaultTierFileName) throws APIManagementException {
-        boolean isTenantFlowStarted = false;
-        PrivilegedCarbonContext.startTenantFlow();
-        isTenantFlowStarted = true;
 
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         InputStream inputStream = null;
@@ -432,10 +429,6 @@ public class APIManagerComponent {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy file content", e);
         } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-
             if (inputStream != null) {
                 try {
                     inputStream.close();
