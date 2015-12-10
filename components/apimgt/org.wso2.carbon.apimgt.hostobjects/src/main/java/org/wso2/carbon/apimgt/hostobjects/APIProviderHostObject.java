@@ -3890,12 +3890,14 @@ public class APIProviderHostObject extends ScriptableObject {
                     // checking http,https endpoints up to resource level by doing
                     // http HEAD. And other end point
                     // validation do through basic url connect
+                    if(args[2] != "" && args[3] != "" && args[4] != "") { //To escape editing the url for auto validation of wsdl endpoints
 
-                    NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
-                    urlVal = (String) obj.get("urlValue");
+                        NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                        urlVal = (String) obj.get("urlValue");
 
-                    if (obj.get("isContainUriTemplatesOnly").equals(true)) {
-                        isContainUriTemplatesOnly = true;
+                        if (obj.get("isContainUriTemplatesOnly").equals(true)) {
+                            isContainUriTemplatesOnly = true;
+                        }
                     }
 
                     URL url = new URL(urlVal);

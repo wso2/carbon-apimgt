@@ -60,7 +60,7 @@
                               <label class="control-label col-sm-3 sub-select-label">Provide WSDL URL</label>
 
                                <div class="col-sm-6">
-                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text"/>
+                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" providerName="" apiName="" apiVersion=""/>
                                    <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
                                    <p class="help-block">Eg : http://appserver/services/echo?wsdl</p>
                                </div>
