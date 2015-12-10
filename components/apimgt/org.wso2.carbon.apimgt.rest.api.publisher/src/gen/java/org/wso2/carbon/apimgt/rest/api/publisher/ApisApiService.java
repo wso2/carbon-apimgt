@@ -18,7 +18,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class ApisApiService {
-    public abstract Response apisGet(Integer limit,Integer offset,String query,String type,String sort,String accept,String ifNoneMatch);
+    public abstract Response apisGet(Integer limit,Integer offset,String query,String type,String accept,String ifNoneMatch);
     public abstract Response apisPost(APIDTO body,String contentType);
     public abstract Response apisChangeLifecyclePost(String apiId,String action,String lifecycleChecklist,String ifMatch,String ifUnmodifiedSince);
     public abstract Response apisCopyApiPost(String apiId,String newVersion);

@@ -242,8 +242,9 @@ public class APIDTO  {
 
   
   /**
+   * Supported transports for the API (http and/or https).
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Supported transports for the API (http and/or https).")
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;

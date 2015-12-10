@@ -69,13 +69,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param offset starting index
      * @param query search condition
      * @param type value for the search condition
-     * @param sort sort parameter
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String type, String sort, String accept,
+    public Response apisGet(Integer limit, Integer offset, String query, String type, String accept,
             String ifNoneMatch) {
         List<API> allMatchedApis;
         APIListDTO apiListDTO;
@@ -136,7 +135,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String username = RestApiUtil.getLoggedInUsername();
 
-            //todo: this can be moved to validation layer
             if (body.getContext().endsWith("/")) {
                 throw RestApiUtil.buildBadRequestException("Context cannot end with '/' character");
             }
@@ -168,7 +166,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                                 .getApiName() + "-" + apiToAdd.getId().getVersion());
             }
 
-            //Overriding some properties: todo: review
+            //Overriding some properties:
             //only allow CREATED as the stating state for the new api
             apiToAdd.setStatus(APIStatus.CREATED);
 
@@ -346,7 +344,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             API apiInfo = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = apiInfo.getId();
 
-            //Overriding some properties: //todo: review
+            //Overriding some properties:
             body.setName(apiIdentifier.getApiName());
             body.setVersion(apiIdentifier.getVersion());
             body.setProvider(apiIdentifier.getProviderName());

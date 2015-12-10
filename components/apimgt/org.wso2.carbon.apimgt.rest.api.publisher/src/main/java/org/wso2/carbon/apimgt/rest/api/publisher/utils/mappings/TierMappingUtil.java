@@ -107,7 +107,6 @@ public class TierMappingUtil {
     public static TierDTO fromTierToDTO(Tier tier, String tierLevel) {
         TierDTO dto = new TierDTO();
         dto.setName(tier.getName());
-        dto.setDisplayName(tier.getDisplayName());
         dto.setDescription(tier.getDescription());
         dto.setRequestCount(tier.getRequestCount());
         dto.setUnitTime(tier.getUnitTime());
@@ -134,7 +133,6 @@ public class TierMappingUtil {
      */
     public static Tier fromDTOtoTier(TierDTO dto) {
         Tier tier = new Tier(dto.getName());
-        tier.setDisplayName(dto.getDisplayName());
         tier.setDescription(dto.getDescription() != null ? dto.getDescription() : "");
         tier.setRequestCount(dto.getRequestCount());
         tier.setUnitTime(dto.getUnitTime());
