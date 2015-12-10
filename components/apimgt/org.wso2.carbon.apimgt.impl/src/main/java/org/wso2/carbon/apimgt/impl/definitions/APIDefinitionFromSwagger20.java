@@ -100,11 +100,17 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
                             template.setThrottlingTier((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+                            template.setThrottlingTiers((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
                             template.setMediationScript((String) operation.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+                            template.setMediationScripts(httpVerb.toUpperCase(), 
+                                                      (String) operation.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
                             template.setUriTemplate(uriTempVal);
                             template.setHTTPVerb(httpVerb.toUpperCase());
+                            template.setHttpVerbs(httpVerb.toUpperCase());
                             template.setAuthType(authType);
+                            template.setAuthTypes(authType);
                             template.setScope(scope);
+                            template.setScopes(scope);
 
                             uriTemplates.add(template);
                         }
