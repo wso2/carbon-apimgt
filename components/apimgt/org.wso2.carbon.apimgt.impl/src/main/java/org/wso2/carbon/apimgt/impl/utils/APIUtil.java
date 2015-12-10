@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.poi.ss.formula.functions.T;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -80,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
@@ -4800,4 +4802,55 @@ public final class APIUtil {
         return m.matches();
     }
 
+
+    /**
+     *
+     * @param tenantDomain Tenant domain to be used to get configurations for REST API scopes
+     * @return JSON object which contains configuration for REST API scopes
+     * @throws APIManagementException
+     */
+    public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
+        JSONObject apiTenantConfig = null;
+        JSONObject restAPIConfigJSON = null;
+        try {
+            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (JSONObject) parser.parse(content);
+                if (apiTenantConfig != null) {
+                    Object value = apiTenantConfig.get(APIConstants.REST_API_SCOPES_CONFIG);
+                    if (value != null) {
+                        restAPIConfigJSON = (JSONObject) value;
+                    } else {
+                        throw new APIManagementException("RESTAPIScopes" + " config does not exist for tenant " + tenantDomain);
+                    }
+                }
+            }
+        } catch (UserStoreException e) {
+            handleException("UserStoreException thrown when getting API tenant config from registry", e);
+        } catch (RegistryException e) {
+            handleException("RegistryException thrown when getting API tenant config from registry", e);
+        } catch (ParseException e) {
+            handleException("ParseException thrown when passing API tenant config from registry", e);
+        }
+        return restAPIConfigJSON;
+    }
+
+    /**
+     *
+     * @param config JSON configuration object with scopes and associated roles
+     * @return  Map of scopes which contains scope names and associated role list
+     */
+    public static Map<String, String> getRESTAPIScopesFromConfig(JSONObject config) {
+        Map<String, String> scopes = new HashMap<String, String>();
+        JSONArray scopesArray = (JSONArray) ((JSONObject) config).get("Scope");
+        for (Object scopeObj : scopesArray) {
+            JSONObject scope = (JSONObject) scopeObj;
+            String scopeName = scope.get(APIConstants.REST_API_SCOPE_NAME).toString();
+            String scopeRoles = scope.get(APIConstants.REST_API_SCOPE_ROLE).toString();
+            scopes.put(scopeName, scopeRoles);
+        }
+        return scopes;
+    }
 }
