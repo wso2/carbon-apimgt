@@ -298,6 +298,7 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER = "AUTHZ_USER";
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
+    public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
 
     public static final String API_CONSUMER_AUTHENTICATION = "APIConsumerAuthentication.";
     public static final String TOKEN_GENERATOR_IMPL = API_CONSUMER_AUTHENTICATION+"TokenGeneratorImpl";
