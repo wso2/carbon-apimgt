@@ -936,7 +936,11 @@ public final class APIConstants {
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
-    
+
+    public static final String REST_API_SCOPE_NAME = "Name";
+    public static final String REST_API_SCOPE_ROLE = "Roles";
+    public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+
     public static final String HTTPS_PROTOCOL = "https";
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
