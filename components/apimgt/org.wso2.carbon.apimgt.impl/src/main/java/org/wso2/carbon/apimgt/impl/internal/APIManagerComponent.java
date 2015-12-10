@@ -401,6 +401,10 @@ public class APIManagerComponent {
     }
 
     private void addTierPolicy(String tierLocation,String defaultTierFileName) throws APIManagementException {
+        boolean isTenantFlowStarted = false;
+        PrivilegedCarbonContext.startTenantFlow();
+        isTenantFlowStarted = true;
+
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         InputStream inputStream = null;
         try {
@@ -411,7 +415,13 @@ public class APIManagerComponent {
             }
 
             log.debug("Adding API tier policies to the registry");
-            inputStream = FileUtils.openInputStream(new File(defaultTierFileName));
+
+            File defaultTiers = new File(defaultTierFileName);
+            if (!defaultTiers.exists()) {
+                log.info("Default tier policies not found in : " + defaultTierFileName);
+                return;
+            }
+            inputStream = FileUtils.openInputStream(defaultTiers);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setContent(data);
@@ -422,6 +432,10 @@ public class APIManagerComponent {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy file content", e);
         } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+
             if (inputStream != null) {
                 try {
                     inputStream.close();
