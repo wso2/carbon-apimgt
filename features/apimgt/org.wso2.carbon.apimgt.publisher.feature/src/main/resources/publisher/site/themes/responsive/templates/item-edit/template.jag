@@ -346,7 +346,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <div class="controls">
                         <div class="input-append">
                         <input type="text" class="input-xlarge validInput" id="wsdl" name="wsdl"  value="<%=api.wsdl%>" />
-                        <button class="btn check_url_valid" url-type="wsdl" type="button" providerName="" apiName="" apiVersion=""><%=i18n.localize("testURI")%></button>
+                        <button class="btn check_url_valid" url-type="wsdl" type="button" ><%=i18n.localize("testURI")%></button>
                         </div>
                         <p class="help-block"><%=i18n.localize("wsdlHelpMsg")%></p>
                     </div>
@@ -356,7 +356,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     <div class="controls">
                         <div class="input-append">
                         <input type="text" class="input-xlarge validInput" id="wadl" name="wadl" value="<%=api.wadl%>" />
-                        <button class="btn check_url_valid"  type="button" providerName="" apiName="" apiVersion=""><%=i18n.localize("testURI")%></button>
+                        <button class="btn check_url_valid"  type="button" ><%=i18n.localize("testURI")%></button>
                         </div>
                         <p class="help-block"><%=i18n.localize("wadlHelpMsg")%></p>
                     </div>
