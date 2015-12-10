@@ -661,6 +661,9 @@ public class APIStoreHostObject extends ScriptableObject {
             //update permission cache before validate user
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            if(tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                handleException("Invalid tenant domain.");
+            }
             PermissionUpdateUtil.updatePermissionTree(tenantId);
 
             String host = new URL(url).getHost();
