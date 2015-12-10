@@ -3724,6 +3724,8 @@ public final class APIUtil {
              api.setBusinessOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER));
              api.setApiOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_OWNER));
              api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
+             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+             api.setEnvironments(extractEnvironmentsForAPI(environments));
          } catch (GovernanceException e) {
              String msg = "Failed to get API fro artifact ";
              throw new APIManagementException(msg, e);
@@ -4317,14 +4319,14 @@ public final class APIUtil {
                                           .getAPIManagerConfiguration().getApiGatewayEnvironments().keySet());
         } else {
             //handle not to publish to any of the gateways
-            if ("none".equals(environments)) {
+            if (APIConstants.API_GATEWAY_NONE.equals(environments)) {
                 environmentStringSet = new HashSet<String>();
             }
             //handle to set published gateways nto api object
             else if (!"".equals(environments)) {
                 String[] publishEnvironmentArray = environments.split(",");
                 environmentStringSet = new HashSet<String>(Arrays.asList(publishEnvironmentArray));
-                environmentStringSet.remove("none");
+                environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
             }
             //handle to publish to any of the gateways when api creating stage
             else if ("".equals(environments)) {
@@ -4360,6 +4362,31 @@ public final class APIUtil {
         }
         return publishedEnvironments.toString();
     }
+
+    /**
+     * This method used to get the currently published gateway environments of an API .
+     *
+     * @param api API object with the attributes value
+     */
+    public static List<Environment> getEnvironmentsOfAPI(API api) {
+        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getApiGatewayEnvironments();
+        Set<String> apiEnvironments = api.getEnvironments();
+        List<Environment> returnEnvironments = new ArrayList<Environment>();
+
+        for (Environment environment : gatewayEnvironments.values()) {
+            for (String apiEnvironment : apiEnvironments) {
+                if (environment.getName().equals(apiEnvironment)) {
+                    returnEnvironments.add(environment);
+                    break;
+                }
+            }
+        }
+        return returnEnvironments;
+    }
+
     /**
      * Given the apps and the application name to check for, it will check if the application already exists.
      * 

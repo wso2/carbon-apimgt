@@ -212,7 +212,8 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
-
+        String gatewayEnvironments = StringUtils.join(model.getEnvironments(),",");
+        dto.setGatewayEnvironments(gatewayEnvironments);
         return dto;
     }
 
@@ -328,9 +329,14 @@ public class APIMappingUtil {
             model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
-
+        if (!StringUtils.isBlank(dto.getGatewayEnvironments())) {
+            String gatewaysString = dto.getGatewayEnvironments();
+            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysString));
+        } else if (dto.getGatewayEnvironments() != null) {
+            //this means the provided gatewayEnvironments is "" (empty)
+            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
+        }
         return model;
-
     }
 
     /**

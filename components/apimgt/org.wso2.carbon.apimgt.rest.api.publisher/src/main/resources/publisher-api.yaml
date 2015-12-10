@@ -1938,6 +1938,10 @@ definitions:
           type: string
       endpointConfig:
         type: string
+      gatewayEnvironments:
+        description: |
+          Comma seperated list of gateway environments.
+        type: string
       sequences:
         type: array
         items:
