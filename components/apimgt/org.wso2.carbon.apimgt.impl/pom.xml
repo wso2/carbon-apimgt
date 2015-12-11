@@ -85,10 +85,6 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.rest.api.stub</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
         </dependency>
@@ -101,32 +97,12 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.mediation.dependency.mgt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.mediation.registry</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.event.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.sequences.stub</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.registry</groupId>
@@ -297,7 +273,6 @@
                             org.wso2.carbon.apimgt.tier.cache.stub.*,
                             org.wso2.carbon.apimgt.gateway.dto.stub.*,
                             org.wso2.carbon.utils.*; version="${carbon.platform.package.import.version.range}",
-                            org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             org.wso2.carbon.authenticator.stub.*;version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.base;version="${imp.pkg.version.org.wso2.carbon.base}",
                             org.wso2.carbon.context;version="${carbon.platform.package.import.version.range}",
@@ -312,8 +287,6 @@
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,
                             org.wso2.carbon.registry.*;version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.mediation.security.stub.*;version="${carbon.mediation.imp.pkg.version}",
-                            org.wso2.carbon.sequences.stub.*;version="${carbon.mediation.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
