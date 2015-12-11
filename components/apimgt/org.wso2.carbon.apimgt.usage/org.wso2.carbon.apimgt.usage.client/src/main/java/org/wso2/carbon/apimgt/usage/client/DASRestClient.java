@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.usage.client;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
@@ -30,9 +31,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HttpContext;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.bean.RequestSearchBean;
 import org.wso2.carbon.apimgt.usage.client.bean.Result;
 import org.wso2.carbon.apimgt.usage.client.bean.SearchRequestBean;
@@ -65,8 +66,11 @@ public class DASRestClient {
      * @param pass DAs rest api password
      */
     public DASRestClient(String url, String user, String pass) {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();       
+       
+        URL dasURL = new URL(url);      
+        //httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        httpClient = (CloseableHttpClient) APIUtil.getHttpClient(dasURL.getPort(), dasURL.getProtocol());
         this.dasUrl = url;
         this.user = user;
         this.pass = pass;
