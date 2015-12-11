@@ -109,7 +109,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
             } catch (APIManagementException e) {
                 logger.error(e.getMessage());
             }
-        } else {
+          }
             try {
                 if (logger.isDebugEnabled()) {
                     logger.debug(String.format("Authenticating request: " + message.getId()));
@@ -123,7 +123,6 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
             } catch (APIManagementException e) {
                 logger.error("Error while authenticating incoming request to API Manager REST API");
             }
-        }
         return false;
     }
 
