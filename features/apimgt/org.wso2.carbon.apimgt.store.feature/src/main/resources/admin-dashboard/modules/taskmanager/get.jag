@@ -1,6 +1,10 @@
 <%
 var ws = require("ws");
+var carbon = require('carbon');
 var log=new Log();
+
+var adminUserName = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("AuthManager.Username");
+var adminPassword = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("AuthManager.Password");
 
 var getTasks = function (filterCategory,taskType) {
 
@@ -32,7 +36,7 @@ if(cookie != null){
 
     try {
 
-    version.open(options,endpoint, false);
+    version.open(options,endpoint, false, String(null), String(adminPassword));
     version.send(payload);
     result = version.responseE4X;
 
@@ -107,7 +111,7 @@ var response;
 
 try {
 
-version.open(options,endpoint, false);
+version.open(options,endpoint, false, String(null), String(adminPassword));
 version.send(payload);
 response = version.responseE4X;
 var actualOwner=response.*::taskAbstract.*::actualOwner;
