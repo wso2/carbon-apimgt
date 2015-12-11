@@ -4,7 +4,7 @@ swagger: '2.0'
 ######################################################
 info:
   version: "0.9.0"
-  title: "WSO2 API Manager"
+  title: "WSO2 API Manager - Store"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
     
