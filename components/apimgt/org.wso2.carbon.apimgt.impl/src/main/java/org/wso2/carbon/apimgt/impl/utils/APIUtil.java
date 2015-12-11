@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.poi.ss.formula.functions.T;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -80,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
@@ -1570,6 +1572,54 @@ public final class APIUtil {
     }
 
     /**
+     * Returns an unfiltered map of API availability tiers as defined in the underlying governance
+     * registry.
+     *
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getAllTiers() throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+
+            return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving API tiers from registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the API tier policy resource";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Returns an unfiltered map of API availability tiers of the tenant as defined in the underlying governance
+     * registry.
+     *
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry(tenantId);
+
+            return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving API tiers from registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the API tier policy resource";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
      * Returns a map of API availability tiers as defined in the underlying governance
      * registry.
      *
@@ -1660,7 +1710,20 @@ public final class APIUtil {
         }
     }
 
-    private static Map<String, Tier> getTiers(Registry registry,String tierLocation)
+
+    /**
+     * Retrieves unfiltered list of all available tiers from registry.
+     * Result will contains all the tiers including unauthenticated tier which is
+     * filtered out in {@link #getTiers(Registry, String)}  getTiers}
+     *
+     * @param registry registry to access tiers config
+     * @param tierLocation registry location of tiers config
+     * @return Map<String, Tier> containing all available tiers
+     * @throws RegistryException when registry action fails
+     * @throws XMLStreamException when xml parsing fails
+     * @throws APIManagementException when fails to retrieve tier attributes
+     */
+    private static Map<String, Tier> getAllTiers(Registry registry,String tierLocation)
             throws RegistryException, XMLStreamException, APIManagementException {
         // We use a treeMap here to keep the order
         Map<String, Tier> tiers = new TreeMap<String, Tier>();
@@ -1678,9 +1741,7 @@ public final class APIUtil {
                 OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
 
                 String tierName = id.getText();
-                if (APIConstants.UNAUTHENTICATED_TIER.equalsIgnoreCase(tierName)) {
-                    continue;
-                }
+
                 // Constructing the tier object
                 Tier tier = new Tier(tierName);
                 tier.setPolicyContent(policy.toString().getBytes());
@@ -1700,7 +1761,7 @@ public final class APIUtil {
 
                     long unitTime = APIDescriptionGenUtil.getTimeDuration(policy);
                     tier.setUnitTime(unitTime);
-                    
+
                     if (requestPerMin >= 1) {
                         desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
                     } else {
@@ -1715,7 +1776,7 @@ public final class APIUtil {
                     log.warn("Unable to get the request count/time duration information for : " + tier.getName());
                     continue;
                 }
-           
+
 
                 // Get all the attributes of the tier.
                 Map<String, Object> tierAttributes = APIDescriptionGenUtil.getTierAttributes(policy);
@@ -1770,6 +1831,29 @@ public final class APIUtil {
             tiers.put(tier.getName(), tier);
         }
 
+        return tiers;
+    }
+
+    /**
+     * Retrieves filtered list of available tiers from registry. This method will not return Unauthenticated
+     * tier in the list. Use {@link #getAllTiers(Registry, String) getAllTiers} to retrieve all tiers without
+     * any filtering.
+     *
+     * @param registry registry to access tiers config
+     * @param tierLocation registry location of tiers config
+     * @return map containing available tiers
+     * @throws RegistryException when registry action fails
+     * @throws XMLStreamException when xml parsing fails
+     * @throws APIManagementException when fails to retrieve tier attributes
+     */
+    private static Map<String, Tier> getTiers(Registry registry,String tierLocation)
+            throws RegistryException, XMLStreamException, APIManagementException {
+        Map<String, Tier> tiers = getAllTiers(registry, tierLocation);
+        try {
+            tiers.remove(APIConstants.UNAUTHENTICATED_TIER);
+        } catch (Exception e) {
+            handleException("Unable to remove Unauthenticated tier from tiers list", e);
+        }
         return tiers;
     }
 
@@ -2464,6 +2548,7 @@ public final class APIUtil {
     private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
             throws APIManagementException {
         InputStream inputStream = null;
+
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
@@ -2478,7 +2563,12 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding API tier policies to the tenant's registry");
             }
-            inputStream = FileUtils.openInputStream(new File(fileName));
+            File defaultTiers = new File(fileName);
+            if (!defaultTiers.exists()) {
+                log.info("Default tier policies not found in : " + fileName);
+                return;
+            }
+            inputStream = FileUtils.openInputStream(defaultTiers);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
@@ -4815,4 +4905,55 @@ public final class APIUtil {
         return m.matches();
     }
 
+
+    /**
+     *
+     * @param tenantDomain Tenant domain to be used to get configurations for REST API scopes
+     * @return JSON object which contains configuration for REST API scopes
+     * @throws APIManagementException
+     */
+    public static JSONObject getTenantRESTAPIScopesConfig(String tenantDomain) throws APIManagementException {
+        JSONObject apiTenantConfig = null;
+        JSONObject restAPIConfigJSON = null;
+        try {
+            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+
+            if (content != null) {
+                JSONParser parser = new JSONParser();
+                apiTenantConfig = (JSONObject) parser.parse(content);
+                if (apiTenantConfig != null) {
+                    Object value = apiTenantConfig.get(APIConstants.REST_API_SCOPES_CONFIG);
+                    if (value != null) {
+                        restAPIConfigJSON = (JSONObject) value;
+                    } else {
+                        throw new APIManagementException("RESTAPIScopes" + " config does not exist for tenant " + tenantDomain);
+                    }
+                }
+            }
+        } catch (UserStoreException e) {
+            handleException("UserStoreException thrown when getting API tenant config from registry", e);
+        } catch (RegistryException e) {
+            handleException("RegistryException thrown when getting API tenant config from registry", e);
+        } catch (ParseException e) {
+            handleException("ParseException thrown when passing API tenant config from registry", e);
+        }
+        return restAPIConfigJSON;
+    }
+
+    /**
+     *
+     * @param config JSON configuration object with scopes and associated roles
+     * @return  Map of scopes which contains scope names and associated role list
+     */
+    public static Map<String, String> getRESTAPIScopesFromConfig(JSONObject config) {
+        Map<String, String> scopes = new HashMap<String, String>();
+        JSONArray scopesArray = (JSONArray) ((JSONObject) config).get("Scope");
+        for (Object scopeObj : scopesArray) {
+            JSONObject scope = (JSONObject) scopeObj;
+            String scopeName = scope.get(APIConstants.REST_API_SCOPE_NAME).toString();
+            String scopeRoles = scope.get(APIConstants.REST_API_SCOPE_ROLE).toString();
+            scopes.put(scopeName, scopeRoles);
+        }
+        return scopes;
+    }
 }

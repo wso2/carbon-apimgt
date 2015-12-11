@@ -1066,6 +1066,42 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    @Override
+    public Set<Tier> getAllTiers() throws APIManagementException {
+        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
+
+        Map<String, Tier> tierMap;
+        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            tierMap = APIUtil.getAllTiers();
+        } else {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
+            tierMap = APIUtil.getAllTiers(tenantId);
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        tiers.addAll(tierMap.values());
+
+        return tiers;
+    }
+
+    @Override
+    public Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
+
+        Map<String, Tier> tierMap;
+        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            tierMap = APIUtil.getAllTiers();
+        } else {
+            tierMap = APIUtil.getAllTiers(requestedTenantId);
+        }
+        tiers.addAll(tierMap.values());
+        PrivilegedCarbonContext.endTenantFlow();
+        return tiers;
+    }
+
     /**
      * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.
      *

@@ -122,7 +122,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.entitlement.stub:4.5.0</bundleDef>
+                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.entitlement.stub:${carbon.identity.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
