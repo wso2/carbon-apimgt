@@ -108,14 +108,6 @@ paths:
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
           type: string
-        - name: type
-          in: query
-          description: |
-            List prototype or production APIs.
-          type: string
-          enum:
-            - PRODUCTION
-            - PROTOTYPE
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
@@ -2198,7 +2190,7 @@ definitions:
         type: string
       applicationId:
         type: string
-      apiId:
+      apiIdentifier:
         type: string
       tier:
         type: string

@@ -46,7 +46,7 @@ public class SubscriptionMappingUtil {
     public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription) {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
-        subscriptionDTO.setApiId(subscription.getApiId().toString());
+        subscriptionDTO.setApiIdentifier(subscription.getApiId().toString());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setTier(subscription.getTier().getName());
@@ -66,7 +66,7 @@ public class SubscriptionMappingUtil {
             String requestedTenantDomain) throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIMappingUtil
-                .getAPIIdentifierFromApiIdOrUUID(subscriptionDTO.getApiId(), requestedTenantDomain);
+                .getAPIIdentifierFromApiIdOrUUID(subscriptionDTO.getApiIdentifier(), requestedTenantDomain);
         Subscriber subscriber = new Subscriber(username);
         SubscribedAPI subscribedAPI = new SubscribedAPI(subscriber, apiIdentifier);
         subscribedAPI.setTier(new Tier(subscriptionDTO.getTier()));
