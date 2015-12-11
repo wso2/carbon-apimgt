@@ -1572,6 +1572,54 @@ public final class APIUtil {
     }
 
     /**
+     * Returns an unfiltered map of API availability tiers as defined in the underlying governance
+     * registry.
+     *
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getAllTiers() throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry();
+
+            return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving API tiers from registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the API tier policy resource";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Returns an unfiltered map of API availability tiers of the tenant as defined in the underlying governance
+     * registry.
+     *
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
+     */
+    public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
+        try {
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getGovernanceSystemRegistry(tenantId);
+
+            return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving API tiers from registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (XMLStreamException e) {
+            String msg = "Malformed XML found in the API tier policy resource";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
      * Returns a map of API availability tiers as defined in the underlying governance
      * registry.
      *
@@ -1662,7 +1710,20 @@ public final class APIUtil {
         }
     }
 
-    private static Map<String, Tier> getTiers(Registry registry,String tierLocation)
+
+    /**
+     * Retrieves unfiltered list of all available tiers from registry.
+     * Result will contains all the tiers including unauthenticated tier which is
+     * filtered out in {@link #getTiers(Registry, String)}  getTiers}
+     *
+     * @param registry registry to access tiers config
+     * @param tierLocation registry location of tiers config
+     * @return Map<String, Tier> containing all available tiers
+     * @throws RegistryException when registry action fails
+     * @throws XMLStreamException when xml parsing fails
+     * @throws APIManagementException when fails to retrieve tier attributes
+     */
+    private static Map<String, Tier> getAllTiers(Registry registry,String tierLocation)
             throws RegistryException, XMLStreamException, APIManagementException {
         // We use a treeMap here to keep the order
         Map<String, Tier> tiers = new TreeMap<String, Tier>();
@@ -1680,9 +1741,7 @@ public final class APIUtil {
                 OMElement id = policy.getFirstChildWithName(APIConstants.THROTTLE_ID_ELEMENT);
 
                 String tierName = id.getText();
-                if (APIConstants.UNAUTHENTICATED_TIER.equalsIgnoreCase(tierName)) {
-                    continue;
-                }
+
                 // Constructing the tier object
                 Tier tier = new Tier(tierName);
                 tier.setPolicyContent(policy.toString().getBytes());
@@ -1702,7 +1761,7 @@ public final class APIUtil {
 
                     long unitTime = APIDescriptionGenUtil.getTimeDuration(policy);
                     tier.setUnitTime(unitTime);
-                    
+
                     if (requestPerMin >= 1) {
                         desc = DESCRIPTION.replaceAll("\\[1\\]", Long.toString(requestPerMin));
                     } else {
@@ -1717,7 +1776,7 @@ public final class APIUtil {
                     log.warn("Unable to get the request count/time duration information for : " + tier.getName());
                     continue;
                 }
-           
+
 
                 // Get all the attributes of the tier.
                 Map<String, Object> tierAttributes = APIDescriptionGenUtil.getTierAttributes(policy);
@@ -1772,6 +1831,29 @@ public final class APIUtil {
             tiers.put(tier.getName(), tier);
         }
 
+        return tiers;
+    }
+
+    /**
+     * Retrieves filtered list of available tiers from registry. This method will not return Unauthenticated
+     * tier in the list. Use {@link #getAllTiers(Registry, String) getAllTiers} to retrieve all tiers without
+     * any filtering.
+     *
+     * @param registry registry to access tiers config
+     * @param tierLocation registry location of tiers config
+     * @return map containing available tiers
+     * @throws RegistryException when registry action fails
+     * @throws XMLStreamException when xml parsing fails
+     * @throws APIManagementException when fails to retrieve tier attributes
+     */
+    private static Map<String, Tier> getTiers(Registry registry,String tierLocation)
+            throws RegistryException, XMLStreamException, APIManagementException {
+        Map<String, Tier> tiers = getAllTiers(registry, tierLocation);
+        try {
+            tiers.remove(APIConstants.UNAUTHENTICATED_TIER);
+        } catch (Exception e) {
+            handleException("Unable to remove Unauthenticated tier from tiers list", e);
+        }
         return tiers;
     }
 

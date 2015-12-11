@@ -374,7 +374,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                              "tier are not allowed");
         }
 
-        Set<Tier> tiers = getTiers();
+        Set<Tier> tiers = getAllTiers();
         if (update && !tiers.contains(tier)) {
             throw new APIManagementException("No tier exists by the name: " + tier.getName());
         }
@@ -514,7 +514,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                              "tier are not allowed");
         }
 
-        Set<Tier> tiers = getTiers();
+        Set<Tier> tiers = getAllTiers();
         // We need to see whether this used in any of the APIs
         GenericArtifact tierArtifacts[] = null;
         boolean isTenantFlowStarted = false;
