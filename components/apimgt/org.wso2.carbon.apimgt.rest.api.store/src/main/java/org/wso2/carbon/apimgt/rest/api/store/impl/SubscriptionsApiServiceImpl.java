@@ -172,10 +172,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             //check whether user is permitted to access the API. If the API does not exist, 
             // this will throw a APIMgtResourceNotFoundException
-            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiId(), tenantDomain)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, body.getApiId());
+            if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiIdentifier(), tenantDomain)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, body.getApiIdentifier());
             }
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(body.getApiId(), tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(body.getApiIdentifier(), tenantDomain);
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
@@ -208,15 +208,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             throw RestApiUtil.buildForbiddenException(e.getMessage());
         } catch (SubscriptionAlreadyExistingException e) {
             throw RestApiUtil.buildConflictException(
-                    "Specified subscription already exists for API " + body.getApiId() + " for application " + body
+                    "Specified subscription already exists for API " + body.getApiIdentifier() + " for application " + body
                             .getApplicationId());
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 //this happens when the specified API identifier does not exist
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, body.getApiId());
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, body.getApiIdentifier());
             } else {
                 //unhandled exception
-                handleException("Error while adding the subscription API:" + body.getApiId() + ", application:" + body
+                handleException("Error while adding the subscription API:" + body.getApiIdentifier() + ", application:" + body
                         .getApplicationId() + ", tier:" + body.getTier(), e);
                 return null;
             }

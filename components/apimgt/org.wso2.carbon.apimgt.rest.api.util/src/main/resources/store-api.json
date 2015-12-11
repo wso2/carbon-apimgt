@@ -59,16 +59,6 @@
             "type": "string"
           },
           {
-            "name": "type",
-            "in": "query",
-            "description": "List prototype or production APIs.\n",
-            "type": "string",
-            "enum": [
-              "PRODUCTION",
-              "PROTOTYPE"
-            ]
-          },
-          {
             "$ref": "#/parameters/Accept"
           },
           {
@@ -1711,7 +1701,7 @@
         "applicationId": {
           "type": "string"
         },
-        "apiId": {
+        "apiIdentifier": {
           "type": "string"
         },
         "tier": {
