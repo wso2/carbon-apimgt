@@ -56,6 +56,22 @@ function validateInput(text, element, errorMsg){
     }
 }
 
+function validateInputCharactors(text, element, errorMsg){
+    var elementId = element.attr('id');
+    var illegalChars = /([~!&@#;%^*+={}\|\\<>\"\',])/;     
+    text = text.trim();
+    if(illegalChars.test(text)){
+        element.css("border", "1px solid red");
+        $('#label'+elementId).remove();
+        element.parent().append('<label class="error" id="label'+elementId+'" >' + errorMsg + '</label>');
+        return false;
+    }else{
+        $('#label'+elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+}
+
 function validateAttributesInput(text, element, requiredMsg, invalidErrorMsg){
     var elementId = element.attr('id');
     text = text.trim();
@@ -154,10 +170,15 @@ function validateInputs(){
         //validate name
         var requiredMsg = $('#errorMsgRequired').val();
         var invalidErrorMsg = $('#errorMessageInvalid').val();
+        var illegalChars = $('#errorMessageIllegalChar').val();
         var tierName = $('#tierName');
         var tierNameTxt = tierName.val();
 
         if(!validateInput(tierNameTxt,tierName,requiredMsg)){
+            return false;
+        }
+
+        if(!validateInputCharactors(tierNameTxt,tierName,illegalChars)){
             return false;
         }
 
