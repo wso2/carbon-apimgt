@@ -37,9 +37,6 @@ public class DocumentDTO  {
   private String sourceUrl = null;
   
   
-  private String filePath = null;
-  
-  
   private String otherTypeName = null;
   
   public enum VisibilityEnum {
@@ -124,18 +121,6 @@ public class DocumentDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("filePath")
-  public String getFilePath() {
-    return filePath;
-  }
-  public void setFilePath(String filePath) {
-    this.filePath = filePath;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("otherTypeName")
   public String getOtherTypeName() {
     return otherTypeName;
@@ -169,7 +154,6 @@ public class DocumentDTO  {
     sb.append("  summary: ").append(summary).append("\n");
     sb.append("  sourceType: ").append(sourceType).append("\n");
     sb.append("  sourceUrl: ").append(sourceUrl).append("\n");
-    sb.append("  filePath: ").append(filePath).append("\n");
     sb.append("  otherTypeName: ").append(otherTypeName).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");
     sb.append("}\n");

@@ -14,6 +14,6 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class TagsApiService {
-    public abstract Response tagsGet(Integer limit,Integer offset,String accept,String ifNoneMatch,String query);
+    public abstract Response tagsGet(Integer limit,Integer offset,String accept,String ifNoneMatch);
 }
 

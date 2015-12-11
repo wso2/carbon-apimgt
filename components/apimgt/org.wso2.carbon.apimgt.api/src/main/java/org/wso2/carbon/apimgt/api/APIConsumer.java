@@ -531,7 +531,7 @@ public interface APIConsumer extends APIManager {
      * @return An API object related to the given identifier or null
      * @throws APIManagementException if failed get API from APIIdentifier
      */
-    API getAPIInfo(APIIdentifier identifier) throws APIManagementException;
+    API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
     
     /**
      * Returns a paginated list of all APIs in given Status. If a given API has multiple APIs,

@@ -60,7 +60,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param query search condition
      * @param type value for the search condition
-     * @param sort sort parameter
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
@@ -68,7 +67,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     @SuppressWarnings("unchecked")
     public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String type,
-            String sort, String accept, String ifNoneMatch) {
+            String accept, String ifNoneMatch) {
         Map<String, Object> apisMap;
 
         //pre-processing
@@ -117,7 +116,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (RestApiUtil.rootCauseMessageMatches(e, "start index seems to be greater than the limit count")) {
                 //this is not an error of the user as he does not know the total number of apis available. Thus sends 
                 //  an empty response
-                //todo : is this ok? need to add logs?
                 apiListDTO.setCount(0);
                 apiListDTO.setNext("");
                 apiListDTO.setPrevious("");

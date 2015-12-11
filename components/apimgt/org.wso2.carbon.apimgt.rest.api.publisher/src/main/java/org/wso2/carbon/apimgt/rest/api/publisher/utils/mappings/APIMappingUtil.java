@@ -86,9 +86,9 @@ public class APIMappingUtil {
         API api;
         APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
         if (RestApiUtil.isUUID(apiId)) {
-            api = apiProvider.getAPIInfoByUUID(apiId, requestedTenantDomain);
+            api = apiProvider.getLightweightAPIByUUID(apiId, requestedTenantDomain);
         } else {
-            api = apiProvider.getAPIInfo(getAPIIdentifierFromApiId(apiId));
+            api = apiProvider.getLightweightAPI(getAPIIdentifierFromApiId(apiId));
         }
         return api;
     }
@@ -212,7 +212,8 @@ public class APIMappingUtil {
         apiBusinessInformationDTO.setTechnicalOwner(model.getTechnicalOwner());
         apiBusinessInformationDTO.setTechnicalOwnerEmail(model.getTechnicalOwnerEmail());
         dto.setBusinessInformation(apiBusinessInformationDTO);
-
+        String gatewayEnvironments = StringUtils.join(model.getEnvironments(),",");
+        dto.setGatewayEnvironments(gatewayEnvironments);
         return dto;
     }
 
@@ -251,7 +252,6 @@ public class APIMappingUtil {
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
-        //model.setThumbnailUrl(dto.getThumbnailUrl()); //todo if this is not a usual reg path, this breaks copying the api
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -329,9 +329,14 @@ public class APIMappingUtil {
             model.setTechnicalOwner(apiBusinessInformationDTO.getTechnicalOwner());
             model.setTechnicalOwnerEmail(apiBusinessInformationDTO.getTechnicalOwnerEmail());
         }
-
+        if (!StringUtils.isBlank(dto.getGatewayEnvironments())) {
+            String gatewaysString = dto.getGatewayEnvironments();
+            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(gatewaysString));
+        } else if (dto.getGatewayEnvironments() != null) {
+            //this means the provided gatewayEnvironments is "" (empty)
+            model.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
+        }
         return model;
-
     }
 
     /**

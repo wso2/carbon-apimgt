@@ -17,12 +17,6 @@ public class TokenDTO  {
   private String accessToken = null;
   
   
-  private String refreshToken = null;
-  
-  
-  private String tokenState = null;
-  
-  
   private List<String> tokenScopes = new ArrayList<String>();
   
   
@@ -39,32 +33,6 @@ public class TokenDTO  {
   }
   public void setAccessToken(String accessToken) {
     this.accessToken = accessToken;
-  }
-
-  
-  /**
-   * Refresh token
-   **/
-  @ApiModelProperty(value = "Refresh token")
-  @JsonProperty("refreshToken")
-  public String getRefreshToken() {
-    return refreshToken;
-  }
-  public void setRefreshToken(String refreshToken) {
-    this.refreshToken = refreshToken;
-  }
-
-  
-  /**
-   * Token state
-   **/
-  @ApiModelProperty(value = "Token state")
-  @JsonProperty("tokenState")
-  public String getTokenState() {
-    return tokenState;
-  }
-  public void setTokenState(String tokenState) {
-    this.tokenState = tokenState;
   }
 
   
@@ -101,8 +69,6 @@ public class TokenDTO  {
     sb.append("class TokenDTO {\n");
     
     sb.append("  accessToken: ").append(accessToken).append("\n");
-    sb.append("  refreshToken: ").append(refreshToken).append("\n");
-    sb.append("  tokenState: ").append(tokenState).append("\n");
     sb.append("  tokenScopes: ").append(tokenScopes).append("\n");
     sb.append("  validityTime: ").append(validityTime).append("\n");
     sb.append("}\n");
