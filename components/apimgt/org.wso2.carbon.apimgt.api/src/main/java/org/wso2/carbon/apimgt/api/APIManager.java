@@ -68,7 +68,7 @@ public interface APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getAPIInfoByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
 
     /** 
      * Get minimal details of API by API identifier
@@ -76,7 +76,7 @@ public interface APIManager {
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
-    API getAPIInfo(APIIdentifier identifier) throws APIManagementException;
+    API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
     /**
      * Returns details of an API
      *

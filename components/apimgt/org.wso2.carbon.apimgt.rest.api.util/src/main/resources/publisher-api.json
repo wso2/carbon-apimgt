@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "version": "0.9.0",
-    "title": "WSO2 API Manager",
-    "description": "This document specifies a **RESTful API** for WSO2 **API Manager**.\n\nYou can find the source of this API definition \n[here](https://github.com/hevayo/restful-apim). \nIt was written with [swagger 2](http://swagger.io/).\n",
+    "title": "WSO2 API Manager - Publisher",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Publisher.\n\nYou can find the source of this API definition \n[here](https://github.com/hevayo/restful-apim). \nIt was written with [swagger 2](http://swagger.io/).\n",
     "contact": {
       "name": "WSO2",
       "url": "http://wso2.com/products/api-manager/",
@@ -43,6 +43,12 @@
         {
           "description": "",
           "roles": "admin",
+          "name": "API_CREATOR_PUBLISHER_SCOPE",
+          "key": "API_CREATOR_PUBLISHER_SCOPE"
+        },
+        {
+          "description": "",
+          "roles": "admin",
           "name": "API_ADMINISTRATIVE_SCOPE",
           "key": "API_ADMINISTRATIVE_SCOPE"
         }
@@ -52,6 +58,7 @@
   "paths": {
     "/apis": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "summary": "Retrieving APIs\n",
         "description": "Get a list of available APIs qualifying under a given search condition.\n",
         "parameters": [
@@ -76,12 +83,6 @@
               "PRODUCTION",
               "PROTOTYPE"
             ]
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "type": "string",
-            "description": "** Sort expression **\n\nA *sort expression* consists of a sequence of names of API \nproperties concatenated by a '+' or '-' (indicating ascending or \ndecending order) separated by a comma. The sequence of names \ncorresponds to a conjunction. \n"
           },
           {
             "$ref": "#/parameters/Accept"
@@ -181,6 +182,7 @@
     },
     "/apis/{apiId}": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Get details of an API\n",
         "parameters": [
           {
@@ -364,6 +366,7 @@
     },
     "/apis/{apiId}/swagger": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Get the swagger of an API\n",
         "parameters": [
           {
@@ -541,6 +544,7 @@
     },
     "/apis/{apiId}/documents": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Get a list of documents belonging to an API.\n",
         "parameters": [
           {
@@ -662,6 +666,7 @@
     },
     "/apis/{apiId}/documents/{documentId}": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Get a particular document associated with an API.\n",
         "parameters": [
           {
@@ -842,6 +847,7 @@
     },
     "/apis/{apiId}/documents/{documentId}/content": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Downloads a FILE type document/get the inline content or source url of a certain document.\n",
         "parameters": [
           {
@@ -997,6 +1003,7 @@
     },
     "/applications/{applicationId}": {
       "get": {
+        "x-scope": "API_CREATOR_SCOPE",
         "description": "Get application details\n",
         "parameters": [
           {
@@ -1057,6 +1064,7 @@
     },
     "/subscriptions": {
       "get": {
+        "x-scope": "API_CREATOR_SCOPE",
         "description": "Get subscription list.\nThe API Identifier and corresponding Application Identifier\nthe subscriptions of which are to be returned are passed as parameters.\n",
         "parameters": [
           {
@@ -1110,6 +1118,7 @@
     },
     "/subscriptions/{subscriptionId}": {
       "get": {
+        "x-scope": "API_CREATOR_SCOPE",
         "description": "Get subscription details\n",
         "parameters": [
           {
@@ -1164,7 +1173,7 @@
     },
     "/subscriptions/block-subscription": {
       "post": {
-        "x-scope": "API_PUBLISHER_SCOPE",
+        "x-scope": "API_CREATOR_SCOPE",
         "parameters": [
           {
             "$ref": "#/parameters/subscriptionId-Q"
@@ -1228,7 +1237,7 @@
     },
     "/subscriptions/unblock-subscription": {
       "post": {
-        "x-scope": "API_PUBLISHER_SCOPE",
+        "x-scope": "API_CREATOR_SCOPE",
         "parameters": [
           {
             "$ref": "#/parameters/subscriptionId-Q"
@@ -1282,6 +1291,7 @@
     },
     "/tiers/{tierLevel}": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Get available tiers\n",
         "parameters": [
           {
@@ -1391,6 +1401,7 @@
     },
     "/tiers/{tierLevel}/{tierName}": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Get tier details\n",
         "parameters": [
           {
@@ -1647,6 +1658,7 @@
     },
     "/environments": {
       "get": {
+        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
         "description": "Get a list of gateway environments configured previously.\n",
         "parameters": [
           {
@@ -1925,6 +1937,7 @@
           "type": "boolean"
         },
         "transport": {
+          "description": "Supported transports for the API (http and/or https).\n",
           "type": "array",
           "items": {
             "type": "string"
@@ -1967,6 +1980,10 @@
           }
         },
         "endpointConfig": {
+          "type": "string"
+        },
+        "gatewayEnvironments": {
+          "description": "Comma separated list of gateway environments.\n",
           "type": "string"
         },
         "sequences": {
@@ -2092,9 +2109,6 @@
         "sourceUrl": {
           "type": "string"
         },
-        "filePath": {
-          "type": "string"
-        },
         "otherTypeName": {
           "type": "string"
         },
@@ -2141,9 +2155,6 @@
       ],
       "properties": {
         "name": {
-          "type": "string"
-        },
-        "displayName": {
           "type": "string"
         },
         "description": {

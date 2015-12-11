@@ -4,9 +4,9 @@ swagger: '2.0'
 ######################################################
 info:
   version: "0.9.0"
-  title: "WSO2 API Manager"
+  title: "WSO2 API Manager - Publisher"
   description: |
-    This document specifies a **RESTful API** for WSO2 **API Manager**.
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
     
     You can find the source of this API definition 
     [here](https://github.com/hevayo/restful-apim). 
@@ -68,6 +68,10 @@ x-wso2-security:
         key: API_CREATOR_SCOPE
       - description: ""
         roles: admin
+        name: API_CREATOR_PUBLISHER_SCOPE
+        key: API_CREATOR_PUBLISHER_SCOPE
+      - description: ""
+        roles: admin
         name: API_ADMINISTRATIVE_SCOPE
         key: API_ADMINISTRATIVE_SCOPE
 
@@ -81,6 +85,7 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition  
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       summary: |
         Retrieving APIs
       description: |
@@ -111,19 +116,6 @@ paths:
           enum:
             - PRODUCTION
             - PROTOTYPE
-#
-# ?????? Provide list of attributes we support for sorting
-#
-        - name: sort
-          in: query
-          type: string
-          description: | 
-            ** Sort expression **
-            
-            A *sort expression* consists of a sequence of names of API 
-            properties concatenated by a '+' or '-' (indicating ascending or 
-            decending order) separated by a comma. The sequence of names 
-            corresponds to a conjunction. 
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
@@ -217,6 +209,7 @@ paths:
 # Retrieve the details of an API definition
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get details of an API
       parameters:
@@ -380,6 +373,7 @@ paths:
 # Retrieve the API swagger definition
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get the swagger of an API
       parameters:
@@ -564,6 +558,7 @@ paths:
 # Retrieve the documents associated with an API that qualify under a search condition
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get a list of documents belonging to an API.
       parameters:
@@ -684,6 +679,7 @@ paths:
 # Retrieve a particular document of a certain API
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get a particular document associated with an API.
       parameters:
@@ -845,6 +841,7 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
+        x-scope: API_CREATOR_PUBLISHER_SCOPE
         description: |
           Downloads a FILE type document/get the inline content or source url of a certain document.
         parameters:
@@ -989,6 +986,7 @@ paths:
 # Retrieve the details about a certain application
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Get application details
       parameters:
@@ -1046,6 +1044,7 @@ paths:
 # Retrieve all subscriptions of a certain API
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Get subscription list.
         The API Identifier and corresponding Application Identifier
@@ -1095,6 +1094,7 @@ paths:
 # Retrieve a certain subscription
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_SCOPE
       description: |
         Get subscription details
       parameters:
@@ -1142,7 +1142,7 @@ paths:
 # Block a certain subscription
 #-----------------------------------------------------
     post:
-      x-scope: API_PUBLISHER_SCOPE
+      x-scope: API_CREATOR_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - name: blockState
@@ -1204,7 +1204,7 @@ paths:
 # Unblock a certain subscription
 #-----------------------------------------------------
     post:
-      x-scope: API_PUBLISHER_SCOPE
+      x-scope: API_CREATOR_SCOPE
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - $ref: '#/parameters/If-Match'
@@ -1258,6 +1258,7 @@ paths:
 # Retrieve the list of all available tiers
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get available tiers
       parameters:
@@ -1358,6 +1359,7 @@ paths:
 # Retrieve a certain tier
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get tier details
       parameters:
@@ -1590,6 +1592,7 @@ paths:
 # Retrieve the list of environments configured for a certain API
 #-----------------------------------------------------
     get:
+      x-scope: API_CREATOR_PUBLISHER_SCOPE
       description: |
         Get a list of gateway environments configured previously.
       parameters:
@@ -1919,12 +1922,11 @@ definitions:
       isDefaultVersion:
         type: boolean
       transport:
+        description: |
+          Supported transports for the API (http and/or https).
         type: array
         items:
           type: string
-#          enum:
-#            - http
-#            - https
       tags:
         type: array
         items:
@@ -1951,6 +1953,10 @@ definitions:
         items:
           type: string
       endpointConfig:
+        type: string
+      gatewayEnvironments:
+        description: |
+          Comma separated list of gateway environments.
         type: string
       sequences:
         type: array
@@ -2054,8 +2060,6 @@ definitions:
           - FILE
       sourceUrl:
         type: string
-      filePath:
-        type: string
       otherTypeName:
         type: string
       visibility:
@@ -2102,8 +2106,6 @@ definitions:
       - unitTime
     properties:
       name:
-        type: string
-      displayName:
         type: string
       description:
         type: string

@@ -79,6 +79,9 @@ public class APIDTO  {
   private String endpointConfig = null;
   
   
+  private String gatewayEnvironments = null;
+  
+  
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
   
   public enum SubscriptionAvailabilityEnum {
@@ -242,8 +245,9 @@ public class APIDTO  {
 
   
   /**
+   * Supported transports for the API (http and/or https).
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Supported transports for the API (http and/or https).")
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
@@ -338,6 +342,19 @@ public class APIDTO  {
 
   
   /**
+   * Comma separated list of gateway environments.
+   **/
+  @ApiModelProperty(value = "Comma separated list of gateway environments.")
+  @JsonProperty("gatewayEnvironments")
+  public String getGatewayEnvironments() {
+    return gatewayEnvironments;
+  }
+  public void setGatewayEnvironments(String gatewayEnvironments) {
+    this.gatewayEnvironments = gatewayEnvironments;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("sequences")
@@ -411,6 +428,7 @@ public class APIDTO  {
     sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
     sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
     sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
+    sb.append("  gatewayEnvironments: ").append(gatewayEnvironments).append("\n");
     sb.append("  sequences: ").append(sequences).append("\n");
     sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
     sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");

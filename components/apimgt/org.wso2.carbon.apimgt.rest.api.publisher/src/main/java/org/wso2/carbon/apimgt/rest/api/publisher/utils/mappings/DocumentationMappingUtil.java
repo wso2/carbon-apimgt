@@ -51,7 +51,6 @@ public class DocumentationMappingUtil {
         if (documentation.getSourceType() != null)
             documentDTO.setSourceType(DocumentDTO.SourceTypeEnum.valueOf(documentation.getSourceType().toString()));
         documentDTO.setSourceUrl(documentation.getSourceUrl());
-        documentDTO.setFilePath(documentation.getFilePath());
         if (documentation.getVisibility() != null)
             documentDTO.setVisibility(DocumentDTO.VisibilityEnum.valueOf(documentation.getVisibility().toString()));
         return documentDTO;
