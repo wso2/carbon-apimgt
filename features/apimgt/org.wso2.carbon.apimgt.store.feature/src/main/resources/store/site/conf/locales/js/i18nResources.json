@@ -69,7 +69,7 @@
         "emptyVerb":"At least one HTTP Verb has to be checked for a resource. ",
         "duplicateUrlPattern":"has duplicated entries. ",
         "noData":"No Data Found ... ",
-        "checkBAMConnectivity":" <a href='http://docs.wso2.org/wiki/display/AM1100/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure BAM correctly</a>",
+        "checkBAMConnectivity":" <a href='https://docs.wso2.com/display/AM1100/Publishing+API+Runtime+Statistics' target='_blank' class='warningLink'>Refer our wiki to configure DAS correctly</a>",
         "unavailableData":"Data unavailable",
         "login":"Unable to log you in!",
         "cannotDeleteForumTopic" : "Cannot delete the topic. ",
