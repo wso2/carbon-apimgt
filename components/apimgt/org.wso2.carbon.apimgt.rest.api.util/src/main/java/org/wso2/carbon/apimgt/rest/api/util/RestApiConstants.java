@@ -84,8 +84,7 @@ public final class RestApiConstants {
     public static final String PAGINATION_PREVIOUS_LIMIT = "previous_limit";
 
     public static final String APIS_GET_PAGINATION_URL =
-            RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM
-                    + "&type=" + TYPE_PARAM;
+            RESOURCE_PATH_APIS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
 
     public static final String APPLICATIONS_GET_PAGINATION_URL =
             RESOURCE_PATH_APPLICATIONS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&groupId="
