@@ -2190,7 +2190,7 @@ definitions:
         type: string
       applicationId:
         type: string
-      apiId:
+      apiIdentifier:
         type: string
       tier:
         type: string
