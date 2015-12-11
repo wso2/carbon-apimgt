@@ -15,7 +15,11 @@ $(document).ready(function () {
         } else {
             type = "";
         }
-
+        if (!providerName && !apiName && !apiVersion) {
+            providerName = "";
+            apiName = "";
+            apiVersion = "";
+        }
         if (url == '') {
             $(this).addClass('error');
             $('.wsdlError').show();
