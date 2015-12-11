@@ -2466,6 +2466,7 @@ public final class APIUtil {
     private static void loadTenantAPIPolicy(int tenantID, String location, String fileName)
             throws APIManagementException {
         InputStream inputStream = null;
+
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
@@ -2480,7 +2481,12 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding API tier policies to the tenant's registry");
             }
-            inputStream = FileUtils.openInputStream(new File(fileName));
+            File defaultTiers = new File(fileName);
+            if (!defaultTiers.exists()) {
+                log.info("Default tier policies not found in : " + fileName);
+                return;
+            }
+            inputStream = FileUtils.openInputStream(defaultTiers);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = govRegistry.newResource();
             resource.setContent(data);
