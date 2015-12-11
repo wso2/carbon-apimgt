@@ -61,5 +61,7 @@
     "saveTier":"Save",
     "cancelTier":"Cancel",
     "errorMsgRequired":"Required",
-    "errorMessageInvalid":"Invalid"
+    "errorMessageInvalid":"Invalid",
+    "errorMessageIllegalChar" : "Name contains one or more illegal characters ( [ ~ ! & @ # ; % ^ * + = { } | <> \"  , ] )."
+
 }
