@@ -107,7 +107,12 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
             try {
                 initializeAuthenticator();
             } catch (APIManagementException e) {
-                logger.error(e.getMessage());
+                if (logger.isDebugEnabled()) {
+                    logger.debug(" Initializing the authenticator resulted in an exception", e);
+                }else{
+                    logger.error(e.getMessage());
+                }
+                return false;
             }
           }
             try {
