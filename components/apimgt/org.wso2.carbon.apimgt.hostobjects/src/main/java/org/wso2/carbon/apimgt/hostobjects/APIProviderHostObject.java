@@ -209,6 +209,9 @@ public class APIProviderHostObject extends ScriptableObject {
             //update permission cache before validate user
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            if(tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                handleException("Invalid tenant domain.");
+            }
             PermissionUpdateUtil.updatePermissionTree(tenantId);
             
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();            
