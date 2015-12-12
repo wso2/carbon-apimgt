@@ -88,7 +88,14 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
                      <label class="checkbox" id="itemsDivfromLCXML<%=String(j)%>">
                         <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
                      </label>
-                 
+                    <%}else{%>   
+                        <%if((itemName == i18n.localize("requireReSubscription"))||(itemName  == i18n.localize("deprecateOldVersions"))){
+                                continue;
+                        }else{%> 
+                                 <label class="checkbox" id="itemsDivfromLCXML<%=String(j)%>">
+                                <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
+                            </label>
+                        <%} 
                  <%}}}%>
                  </div>
 
