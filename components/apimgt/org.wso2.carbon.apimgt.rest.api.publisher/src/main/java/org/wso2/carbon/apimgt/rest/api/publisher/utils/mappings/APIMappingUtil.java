@@ -251,7 +251,9 @@ public class APIMappingUtil {
         model.setContext(context);
         model.setDescription(dto.getDescription());
         model.setEndpointConfig(dto.getEndpointConfig());
-        model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
+        if (dto.getStatus() != null) {
+            model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
+        }
         model.setAsDefaultVersion(dto.getIsDefaultVersion());
         model.setResponseCache(dto.getResponseCaching());
         if (dto.getCacheTimeout() != null) {
@@ -370,13 +372,11 @@ public class APIMappingUtil {
      *
      * @param apiListDTO a APIListDTO object
      * @param query      search condition
-     * @param type       value for the search condition
      * @param limit      max number of objects returned
      * @param offset     starting index
      * @param size       max offset
      */
-    public static void setPaginationParams(APIListDTO apiListDTO, String query, String type, int offset,
-            int limit, int size) {
+    public static void setPaginationParams(APIListDTO apiListDTO, String query, int offset, int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
@@ -386,13 +386,13 @@ public class APIMappingUtil {
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query, type);
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query, type);
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
         apiListDTO.setNext(paginatedNext);

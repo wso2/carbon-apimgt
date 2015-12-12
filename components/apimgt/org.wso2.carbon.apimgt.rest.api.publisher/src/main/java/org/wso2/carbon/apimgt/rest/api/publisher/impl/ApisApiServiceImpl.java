@@ -68,14 +68,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param limit maximum number of APIs returns
      * @param offset starting index
      * @param query search condition
-     * @param type value for the search condition
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
      */
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String type, String accept,
-            String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch) {
         List<API> allMatchedApis;
         APIListDTO apiListDTO;
 
@@ -85,13 +83,12 @@ public class ApisApiServiceImpl extends ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         query = query == null ? "" : query;
-        type = type == null ? "" : type;
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
             //if query parameter is not specified, This will search by name
-            String searchType = "Name";
+            String searchType = APIConstants.API_NAME;
             String searchContent = "";
             if (!StringUtils.isBlank(query)) {
                 String[] querySplit = query.split(":");
@@ -110,7 +107,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             // instead of looking at type and query
             allMatchedApis = apiProvider.searchAPIs(searchContent, searchType, null);
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
-            APIMappingUtil.setPaginationParams(apiListDTO, query, type, offset, limit, allMatchedApis.size());
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
@@ -146,7 +143,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             List<String> tiersFromDTO = body.getTiers();
-            if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
+            //If tiers are not defined, the api should be a PROTOTYPED one,
+            if (!APIStatus.PROTOTYPED.toString().equals(body.getStatus()) && 
+                    (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 throw RestApiUtil.buildBadRequestException("No tier defined for the API");
             }
 
@@ -167,8 +166,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //Overriding some properties:
-            //only allow CREATED as the stating state for the new api
-            apiToAdd.setStatus(APIStatus.CREATED);
+            //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
+            if (!APIStatus.PROTOTYPED.equals(apiToAdd.getStatus())) {
+                apiToAdd.setStatus(APIStatus.CREATED);
+            }
 
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user

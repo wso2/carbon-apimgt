@@ -4,7 +4,7 @@ swagger: '2.0'
 ######################################################
 info:
   version: "0.9.0"
-  title: "WSO2 API Manager"
+  title: "WSO2 API Manager - Store"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
     
@@ -95,14 +95,6 @@ paths:
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
           type: string
-        - name: type
-          in: query
-          description: |
-            List prototype or production APIs.
-          type: string
-          enum:
-            - PRODUCTION
-            - PROTOTYPE
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
@@ -1679,7 +1671,7 @@ definitions:
         type: string
       applicationId:
         type: string
-      apiId:
+      apiIdentifier:
         type: string
       tier:
         type: string

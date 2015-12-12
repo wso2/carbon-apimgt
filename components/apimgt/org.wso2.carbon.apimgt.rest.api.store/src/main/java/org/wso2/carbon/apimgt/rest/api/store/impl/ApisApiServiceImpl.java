@@ -59,17 +59,16 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param offset starting index
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
      * @param query search condition
-     * @param type value for the search condition
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched APIs for the given search condition
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String type,
-            String accept, String ifNoneMatch) {
+    public Response apisGet(Integer limit, Integer offset, String xWSO2Tenant, String query, String accept,
+            String ifNoneMatch) {
         Map<String, Object> apisMap;
-
+        int size = 0;
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -86,7 +85,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             //if query parameter is not specified, This will search by name
-            String searchType = "Name";
+            String searchType = APIConstants.API_NAME;
             String searchContent = "*";
             if (query != null) {
                 String[] querySplit = query.split(":");
@@ -101,14 +100,30 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
-            apisMap = apiConsumer
-                    .searchPaginatedAPIs(searchContent, searchType, requestedTenantDomain, offset, limit, true);
+            if (searchType.equalsIgnoreCase(APIConstants.API_STATUS) && 
+                    searchContent.equalsIgnoreCase(APIConstants.PROTOTYPED)) {
+                apisMap = apiConsumer.getAllPaginatedAPIsByStatus(requestedTenantDomain, offset, limit,
+                        APIConstants.PROTOTYPED, false);
+            } else {
+                apisMap = apiConsumer
+                        .searchPaginatedAPIs(searchContent, searchType, requestedTenantDomain, offset, limit, true);
+            }
+
             Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
-            int size = (int)apisMap.get(APIConstants.API_DATA_LENGTH);
+            //APIConstants.API_DATA_LENGTH is returned by executing searchPaginatedAPIs()
+            if (apisMap.containsKey(APIConstants.API_DATA_LENGTH)) {
+                size = (int) apisMap.get(APIConstants.API_DATA_LENGTH);
+            //APIConstants.API_DATA_TOT_LENGTH is returned by executing getAllPaginatedAPIsByStatus()
+            } else if (apisMap.containsKey(APIConstants.API_DATA_TOT_LENGTH)) {
+                size = (int) apisMap.get(APIConstants.API_DATA_TOT_LENGTH);
+            } else {
+                log.warn("Size could not be determined from apis GET result for query " + query);
+            }
+
             if (apisResult != null) {
                 Set<API> apiSet = (Set)apisResult;
                 apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet);
-                APIMappingUtil.setPaginationParams(apiListDTO, query, type, offset, limit, size);
+                APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, size);
             }
 
             return Response.ok().entity(apiListDTO).build();
