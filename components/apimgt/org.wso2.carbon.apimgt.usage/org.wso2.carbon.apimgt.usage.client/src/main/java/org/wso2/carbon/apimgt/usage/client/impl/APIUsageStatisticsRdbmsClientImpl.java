@@ -2327,30 +2327,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
             closeDatabaseLinks(rs,statement,connection);
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
         }
     }
 
