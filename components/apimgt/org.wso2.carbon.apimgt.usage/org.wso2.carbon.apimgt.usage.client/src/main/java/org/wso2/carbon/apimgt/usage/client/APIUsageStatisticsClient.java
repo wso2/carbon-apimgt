@@ -544,25 +544,4 @@ public abstract class APIUsageStatisticsClient {
      * @return String
      */
     public abstract String getClientType();
-
-    /**
-     * This method is used to close the ResultSet, Statement and Connection after getting data from the DB
-     * This is called if a "Statement" is used to fetch the results
-     *
-     * @param resultSet ResultSet returned from the database query
-     * @param statement statement used in the database query
-     * @param connection DB connection used to get data from the database
-     */
-    public abstract void closeDatabaseLinks(ResultSet resultSet, Statement statement, Connection connection);
-
-    /**
-     * This method is used to close the ResultSet, PreparedStatement and Connection after getting data from the DB
-     * This is called if a "PreparedStatement" is used to fetch the results
-     *
-     * @param resultSet ResultSet returned from the database query
-     * @param preparedStatement prepared statement used in the database query
-     * @param connection DB connection used to get data from the database
-     */
-    public abstract void closeDatabaseLinks(ResultSet resultSet, PreparedStatement preparedStatement,
-                                            Connection connection);
 }
