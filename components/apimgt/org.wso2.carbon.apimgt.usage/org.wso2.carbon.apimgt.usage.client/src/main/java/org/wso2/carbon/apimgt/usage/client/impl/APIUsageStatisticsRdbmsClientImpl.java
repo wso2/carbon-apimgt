@@ -2594,7 +2594,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     /**
      * This method is used to close the ResultSet, PreparedStatement and Connection after getting data from the DB
-     * This is called if a "PreparedStatement" is used to fetch the results
+     * This is called if a "PreparedStatement" is used to fetch results from the DB
      *
      * @param resultSet ResultSet returned from the database query
      * @param preparedStatement prepared statement used in the database query
@@ -2631,7 +2631,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     /**
      * This method is used to close the ResultSet, Statement and Connection after getting data from the DB
-     * This is called if a "Statement" is used to fetch the results
+     * This is called if a "Statement" is used to fetch results from the DB
      *
      * @param resultSet ResultSet returned from the database query
      * @param statement statement used in the database query
@@ -2665,7 +2665,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
         }
     }
-    
+
     private static class APIVersionUsageByUserMonth {
 
         private String context;
