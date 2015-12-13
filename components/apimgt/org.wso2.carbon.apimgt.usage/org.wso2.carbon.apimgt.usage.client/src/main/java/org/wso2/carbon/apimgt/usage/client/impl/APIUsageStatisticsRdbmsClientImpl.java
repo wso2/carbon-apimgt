@@ -153,6 +153,80 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         return builder.getDocumentElement();
     }
 
+    /**
+     * This method is used to close the ResultSet, PreparedStatement and Connection after getting data from the DB
+     * This is called if a "PreparedStatement" is used to fetch results from the DB
+     *
+     * @param resultSet         ResultSet returned from the database query
+     * @param preparedStatement prepared statement used in the database query
+     * @param connection        DB connection used to get data from the database
+     */
+    public void closeDatabaseLinks(ResultSet resultSet, PreparedStatement preparedStatement,
+                                   Connection connection) {
+
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                //this is logged and the process is continued because the query has executed
+                log.error("Error occurred while closing the result set from JDBC database.", e);
+            }
+        }
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                //this is logged and the process is continued because the query has executed
+                log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+            }
+        }
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                //this is logged and the process is continued because the query has executed
+                log.error("Error occurred while closing the JDBC database connection.", e);
+            }
+        }
+    }
+
+    /**
+     * This method is used to close the ResultSet, Statement and Connection after getting data from the DB
+     * This is called if a "Statement" is used to fetch results from the DB
+     *
+     * @param resultSet  ResultSet returned from the database query
+     * @param statement  statement used in the database query
+     * @param connection DB connection used to get data from the database
+     */
+    public void closeDatabaseLinks(ResultSet resultSet, Statement statement,
+                                   Connection connection) {
+
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+                //this is logged and the process is continued because the query has executed
+                log.error("Error occurred while closing the result set from JDBC database.", e);
+            }
+        }
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                //this is logged and the process is continued because the query has executed
+                log.error("Error occurred while closing the prepared statement from JDBC database.", e);
+            }
+        }
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                //this is logged and the process is continued because the query has executed
+                log.error("Error occurred while closing the JDBC database connection.", e);
+            }
+        }
+    }
+
     @Override
     public List<FaultCountDTO> getPerAppAPIFaultCount(String subscriberName, String groupId, String fromDate,
             String toDate, int limit) throws APIMgtUsageQueryServiceClientException {
@@ -284,33 +358,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying top app usage data from JDBC database", e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(resultSet, statement, connection);
         }
         return topAppUsageDataList;
     }
@@ -379,33 +427,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying API faulty invocation data from JDBC database", e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(resultSet, statement, connection);
         }
         return falseAppUsageDataList;
     }
@@ -524,33 +546,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying API call type data from JDBC database", e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(resultSet, statement, connection);
         }
         return appApiCallTypeList;
     }
@@ -690,33 +686,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying per App usage data from JDBC database", e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(resultSet, statement, connection);
         }
         return perAppUsageDataList;
     }
@@ -825,33 +795,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying API usage data from JDBC database", e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(resultSet, statement, connection);
         }
         return usageDataList;
     }
@@ -1172,33 +1116,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying API response times from JDBC database", e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(resultSet, statement, connection);
         }
         return responseTimeData;
     }
@@ -1302,33 +1220,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying last access data for APIs from JDBC database", e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(resultSet, statement, connection);
         }
         return lastAccessTimeData;
     }
@@ -1690,27 +1582,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -1768,27 +1640,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -1834,27 +1686,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -1901,27 +1733,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -1963,27 +1775,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -2025,27 +1817,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -2088,27 +1860,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -2157,27 +1909,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -2277,27 +2009,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (Exception e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -2446,30 +2158,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (SQLException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -2597,27 +2286,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             throw new APIMgtUsageQueryServiceClientException(
                     "Error occurred while querying from JDBC database" + e.getMessage(), e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-
-                }
-            }
+            closeDatabaseLinks(rs, statement, connection);
         }
     }
 
@@ -2657,6 +2326,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (SQLException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
+            closeDatabaseLinks(rs,statement,connection);
             if (rs != null) {
                 try {
                     rs.close();
@@ -2706,7 +2376,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         Connection connection = null;
-        PreparedStatement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
@@ -2742,21 +2412,21 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         "GROUP BY " + groupByStmt + " " +
                         "ORDER BY " + groupByStmt + " ASC";
 
-                statement = connection.prepareStatement(query);
+                preparedStatement = connection.prepareStatement(query);
                 int index = 1;
-                statement.setString(index++, tenantDomain);
-                statement.setString(index++, apiName);
+                preparedStatement.setString(index++, tenantDomain);
+                preparedStatement.setString(index++, apiName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                     provider = APIUtil.getUserNameWithTenantSuffix(provider);
-                    statement.setString(index++, provider);
+                    preparedStatement.setString(index++, provider);
                 }
                 if (!StringUtils.isEmpty(appName)) {
-                    statement.setString(index++, appName);
+                    preparedStatement.setString(index++, appName);
                 }
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
+                preparedStatement.setString(index++, fromDate);
+                preparedStatement.setString(index, toDate);
 
-                rs = statement.executeQuery();
+                rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     int successRequestCount = rs.getInt(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT);
                     int throttledOutCount = rs.getInt(APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT);
@@ -2785,30 +2455,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (SQLException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(rs, preparedStatement, connection);
         }
     }
 
@@ -2832,7 +2479,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         Connection connection = null;
-        PreparedStatement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
@@ -2854,18 +2501,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         "GROUP BY api, apiPublisher " +
                         "ORDER BY api ASC";
 
-                statement = connection.prepareStatement(query);
+                preparedStatement = connection.prepareStatement(query);
                 int index = 1;
-                statement.setString(index++, tenantDomain);
-                statement.setString(index++, appName);
+                preparedStatement.setString(index++, tenantDomain);
+                preparedStatement.setString(index++, appName);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                     provider = APIUtil.getUserNameWithTenantSuffix(provider);
-                    statement.setString(index++, provider);
+                    preparedStatement.setString(index++, provider);
                 }
-                statement.setString(index++, fromDate);
-                statement.setString(index, toDate);
+                preparedStatement.setString(index++, fromDate);
+                preparedStatement.setString(index, toDate);
 
-                rs = statement.executeQuery();
+                rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     String api = rs.getString(APIUsageStatisticsClientConstants.API);
                     String apiPublisher = rs.getString(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE);
@@ -2887,30 +2534,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (SQLException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(rs, preparedStatement, connection);
         }
     }
 
@@ -2929,7 +2553,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         Connection connection = null;
-        PreparedStatement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
@@ -2947,14 +2571,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                                 "AND apiPublisher = ? ") +
                         "ORDER BY api ASC";
 
-                statement = connection.prepareStatement(query);
-                statement.setString(1, tenantDomain);
+                preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setString(1, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                     provider = APIUtil.getUserNameWithTenantSuffix(provider);
-                    statement.setString(2, provider);
+                    preparedStatement.setString(2, provider);
                 }
 
-                rs = statement.executeQuery();
+                rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     String api = rs.getString(APIUsageStatisticsClientConstants.API);
                     throttlingAPIData.add(api);
@@ -2970,30 +2594,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (SQLException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(rs, preparedStatement, connection);
         }
     }
 
@@ -3015,7 +2616,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         Connection connection = null;
-        PreparedStatement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
@@ -3033,18 +2634,18 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         (apiName == null ? "" : "AND api = ? ") +
                         "ORDER BY applicationName ASC";
 
-                statement = connection.prepareStatement(query);
+                preparedStatement = connection.prepareStatement(query);
                 int index = 1;
-                statement.setString(index++, tenantDomain);
+                preparedStatement.setString(index++, tenantDomain);
                 if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
                     provider = APIUtil.getUserNameWithTenantSuffix(provider);
-                    statement.setString(index++, provider);
+                    preparedStatement.setString(index++, provider);
                 }
                 if (apiName != null) {
-                    statement.setString(index, apiName);
+                    preparedStatement.setString(index, apiName);
                 }
 
-                rs = statement.executeQuery();
+                rs = preparedStatement.executeQuery();
                 while (rs.next()) {
                     String applicationName = rs.getString(APIUsageStatisticsClientConstants.APPLICATION_NAME);
                     throttlingAppData.add(applicationName);
@@ -3061,30 +2662,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         } catch (SQLException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the result set from JDBC database.", e);
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the prepared statement from JDBC database.", e);
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    //this is logged and the process is continued because the query has executed
-                    log.error("Error occurred while closing the JDBC database connection.", e);
-                }
-            }
+            closeDatabaseLinks(rs, preparedStatement, connection);
         }
     }
 
