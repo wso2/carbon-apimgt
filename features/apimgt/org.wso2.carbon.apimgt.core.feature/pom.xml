@@ -298,7 +298,7 @@
                                 <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v2</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.deployment:org.wso2.carbon.bam.service.data.publisher:${carbon.deployment.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:4.4.5</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>
                                 <importBundleDef>org.wso2.carbon:org.wso2.carbon.throttle.core:${carbon.throttle.module.version}</importBundleDef>
                             </importBundles>
                             <importFeatures>
