@@ -574,29 +574,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * This method builds a single string from a set of strings in a string array, to be used in database query
-     *
-     * @param keyArray string array containing the keys
-     * @return set of keys as a comma separated single string
-     */
-    private String buildKeySetString(String[] keyArray) {
-
-        String keySetString = "";
-
-        for (int i = 0; i < keyArray.length; i++) {
-            keySetString = keySetString + "'" + keyArray[i] + "'";
-            if (i != keyArray.length - 1) {
-                //adds a comma to the end of the string if the current key is not the last in the array
-                keySetString = keySetString + ",";
-            }
-        }
-        if (keySetString.isEmpty()) {
-            keySetString = "''";
-        }
-        return keySetString;
-    }
-
-    /**
      * This method gets the API usage data per application
      *
      * @param tableName name of the required table in the database
