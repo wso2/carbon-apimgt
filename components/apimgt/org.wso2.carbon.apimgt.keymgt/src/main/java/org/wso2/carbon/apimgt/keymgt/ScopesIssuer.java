@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.handlers;
+package org.wso2.carbon.apimgt.keymgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -30,7 +31,11 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.*;
+import javax.cache.Caching;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class ScopesIssuer {
 
@@ -39,7 +44,6 @@ public class ScopesIssuer {
     private static final String DEFAULT_SCOPE_NAME = "default";
 
     private List<String> scopeSkipList = new ArrayList<String>();
-    private final Map<String, String> restAPIScopes;
 
     /**
      * Singleton of ScopeIssuer.*
@@ -54,7 +58,6 @@ public class ScopesIssuer {
     }
 
     private ScopesIssuer() {
-        restAPIScopes = APIUtil.getRestAPIScopes();
     }
 
     public static ScopesIssuer getInstance() {
@@ -76,7 +79,7 @@ public class ScopesIssuer {
         String endUsernameWithDomain = UserCoreUtil.addDomainToName(username,
                         tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain());
         List<String> reqScopeList = Arrays.asList(requestedScopes);
-
+        Map<String, String> restAPIScopesOfCurrentTenant;
         try {
             Map<String, String> appScopes;
             ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -84,8 +87,20 @@ public class ScopesIssuer {
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
             //in memory and add it to each and every request coming.
-            if (restAPIScopes != null) {
-                appScopes.putAll(restAPIScopes);
+            String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
+            restAPIScopesOfCurrentTenant = (Map)Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                    .getCache("REST_API_SCOPE_CACHE")
+                    .get(tenantDomain);
+            if (restAPIScopesOfCurrentTenant!= null) {
+                appScopes.putAll(restAPIScopesOfCurrentTenant);
+            }else {
+                restAPIScopesOfCurrentTenant = APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                //call load tenant config for rest API.
+                //then put cache
+                appScopes.putAll(restAPIScopesOfCurrentTenant);
+                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                        .getCache("REST_API_SCOPE_CACHE")
+                        .put(tenantDomain, restAPIScopesOfCurrentTenant);
             }
             //If no scopes can be found in the context of the application
             if (appScopes.isEmpty()) {
@@ -106,7 +121,7 @@ public class ScopesIssuer {
 
             try {
                 tenantId = realmService.getTenantManager().
-                                    getTenantId(tokReqMsgCtx.getAuthorizedUser().getTenantDomain());
+                                    getTenantId(tenantDomain);
 
                 // If tenant Id is not set in the tokenReqContext, deriving it from username.
                 if (tenantId == 0 || tenantId == -1) {

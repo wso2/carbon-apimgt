@@ -31,10 +31,13 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
@@ -80,74 +83,82 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public boolean handleRequest(MessageContext messageContext) {
-		if (!initializeHeaderValues) {
-			initializeHeaders();
-		}
-		String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-		String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-		String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
-				getProperty(Constants.Configuration.HTTP_METHOD);
-		API selectedApi = null;
-		Resource selectedResourceWithVerb = null;
-		Resource selectedResource = null;
-		boolean status;
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
+        Timer.Context context = timer.start();
 
-		for (API api : messageContext.getConfiguration().getAPIs()) {
-			if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
-				selectedApi = api;
-				break;
-			}
-		}
-		String subPath;
-		String path = RESTUtils.getFullRequestPath(messageContext);
-		if (selectedApi.getVersionStrategy().getVersionType().equals(VersionStrategyFactory.TYPE_URL)) {
-			subPath = path.substring(
-					selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
-		} else {
-			subPath = path.substring(selectedApi.getContext().length());
-		}
-		if ("".equals(subPath)) {
-			subPath = "/";
-		}
-		messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+        boolean status;
+        try {
+            if (!initializeHeaderValues) {
+                initializeHeaders();
+            }
+            String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+            String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+                    getProperty(Constants.Configuration.HTTP_METHOD);
+            API selectedApi = null;
+            Resource selectedResourceWithVerb = null;
+            Resource selectedResource = null;
 
-		if (selectedApi.getResources().length > 0) {
-			for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-				Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedApi.getResources()));
-				if (resource != null) {
-					selectedResource = resource;
-					if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-						selectedResourceWithVerb = resource;
-						break;
-					}
-				}
-			}
-		}
-		String resourceString =
-				selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
-		String resourceCacheKey = APIUtil
-				.getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
-		messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
-		messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-		setCORSHeaders(messageContext, selectedResourceWithVerb);
-		if (selectedResource != null && selectedResourceWithVerb != null) {
-				if ("inline".equalsIgnoreCase(apiImplementationType)) {
-					messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
-				}
-				status =  true;
-			}else if (selectedResource != null && selectedResourceWithVerb == null ){
-			if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
-				messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
-				Utils.send(messageContext, HttpStatus.SC_OK);
-				status = false;
-			} else {
-				status = true;
-			}
-		}else{
-			status = true;
-		}
-		return status;
-	}
+            for (API api : messageContext.getConfiguration().getAPIs()) {
+                if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
+                    selectedApi = api;
+                    break;
+                }
+            }
+            String subPath;
+            String path = RESTUtils.getFullRequestPath(messageContext);
+            if (selectedApi.getVersionStrategy().getVersionType().equals(VersionStrategyFactory.TYPE_URL)) {
+                subPath = path.substring(
+                        selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
+            } else {
+                subPath = path.substring(selectedApi.getContext().length());
+            }
+            if ("".equals(subPath)) {
+                subPath = "/";
+            }
+            messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
+
+            if (selectedApi.getResources().length > 0) {
+                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                    Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedApi.getResources()));
+                    if (resource != null) {
+                        selectedResource = resource;
+                        if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                            selectedResourceWithVerb = resource;
+                            break;
+                        }
+                    }
+                }
+            }
+            String resourceString =
+                    selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
+            String resourceCacheKey = APIUtil
+                    .getResourceInfoDTOCacheKey(apiContext, apiVersion, resourceString, httpMethod);
+            messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
+            messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+            setCORSHeaders(messageContext, selectedResourceWithVerb);
+            if (selectedResource != null && selectedResourceWithVerb != null) {
+                if ("inline".equalsIgnoreCase(apiImplementationType)) {
+                    messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
+                }
+                status = true;
+            } else if (selectedResource != null && selectedResourceWithVerb == null) {
+                if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
+                    messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
+                    Utils.send(messageContext, HttpStatus.SC_OK);
+                    status = false;
+                } else {
+                    status = true;
+                }
+            } else {
+                status = true;
+            }
+        } finally {
+            context.stop();
+        }
+        return status;
+    }
 
 	public boolean handleResponse(MessageContext messageContext) {
 		messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);

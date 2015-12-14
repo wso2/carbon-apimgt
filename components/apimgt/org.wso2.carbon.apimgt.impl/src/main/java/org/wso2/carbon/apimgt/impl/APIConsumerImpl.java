@@ -1596,16 +1596,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             if (artifactManager != null) {
 
-                if (searchType.equalsIgnoreCase(APIConstants.API_PROVIDER)) {
+                if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_PROVIDER;
                     searchTerm = searchTerm.replaceAll("@", "-AT-");
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_VERSION_LABEL)) {
+                } else if (APIConstants.API_VERSION_LABEL.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_VERSION;
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_CONTEXT)) {
+                } else if (APIConstants.API_CONTEXT.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_CONTEXT;
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_DESCRIPTION)) {
+                } else if (APIConstants.API_DESCRIPTION.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_DESCRIPTION;
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_TAG)) {
+                } else if (APIConstants.API_TAG.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_TAG;
                 }
 

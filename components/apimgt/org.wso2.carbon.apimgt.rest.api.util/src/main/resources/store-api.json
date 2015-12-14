@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "version": "0.9.0",
-    "title": "WSO2 API Manager",
-    "description": "This document specifies a **RESTful API** for WSO2 **API Manager**.\n\nYou can find the source of this API definition \n[here](https://github.com/hevayo/restful-apim). \nIt was written with [swagger 2](http://swagger.io/).\n",
+    "title": "WSO2 API Manager - Store",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Store.\n\nYou can find the source of this API definition \n[here](https://github.com/hevayo/restful-apim). \nIt was written with [swagger 2](http://swagger.io/).\n",
     "contact": {
       "name": "WSO2",
       "url": "http://wso2.com/products/api-manager/",
@@ -57,22 +57,6 @@
             "in": "query",
             "description": "**Search condition**.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match an API if the provider of the API is wso2.\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, tag **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n",
             "type": "string"
-          },
-          {
-            "name": "type",
-            "in": "query",
-            "description": "List prototype or production APIs.\n",
-            "type": "string",
-            "enum": [
-              "PRODUCTION",
-              "PROTOTYPE"
-            ]
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "type": "string",
-            "description": "** Sort expression **\n\nA *sort expression* consists of a sequence of names of API \nproperties concatenated by a '+' or '-' (indicating ascending or \ndecending order) separated by a comma. The sequence of names \ncorresponds to a conjunction. \n"
           },
           {
             "$ref": "#/parameters/Accept"
@@ -1150,12 +1134,6 @@
           },
           {
             "$ref": "#/parameters/If-None-Match"
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "description": "**Search condition**.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nSupported attribute modifiers are [**apiName,version**]\n\n\nEg. \"apiName:phoneVerification\" will match if the API Name is\nphoneVerification.\n\n\nIf no attribute modifier is found search will match the given query string against Tag Name.\n",
-            "type": "string"
           }
         ],
         "tags": [
@@ -1420,6 +1398,7 @@
         "transport": {
           "type": "array",
           "items": {
+            "description": "Supported transports for the API (http and/or https).\n",
             "type": "string"
           }
         },
@@ -1607,9 +1586,6 @@
         "sourceUrl": {
           "type": "string"
         },
-        "filePath": {
-          "type": "string"
-        },
         "otherTypeName": {
           "type": "string"
         }
@@ -1648,9 +1624,6 @@
       ],
       "properties": {
         "name": {
-          "type": "string"
-        },
-        "displayName": {
           "type": "string"
         },
         "description": {
@@ -1728,7 +1701,7 @@
         "applicationId": {
           "type": "string"
         },
-        "apiId": {
+        "apiIdentifier": {
           "type": "string"
         },
         "tier": {
@@ -1838,14 +1811,6 @@
         "accessToken": {
           "type": "string",
           "description": "Access token"
-        },
-        "refreshToken": {
-          "type": "string",
-          "description": "Refresh token"
-        },
-        "tokenState": {
-          "type": "string",
-          "description": "Token state"
         },
         "tokenScopes": {
           "type": "array",

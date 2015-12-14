@@ -17,16 +17,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.listners;
 
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.core.StandardContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.CarbonContext;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;

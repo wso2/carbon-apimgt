@@ -48,13 +48,10 @@ public class TagsApiServiceImpl extends TagsApiService {
      * @param offset starting index
      * @param accept accepted media type of the client
      * @param ifNoneMatch If-None-Match header value
-     * @param query search condition
      * @return Response object containing resulted tags
      */
     @Override
-    public Response tagsGet(Integer limit, Integer offset, String accept, String ifNoneMatch, String query) {
-
-        // todo: implement tag search
+    public Response tagsGet(Integer limit, Integer offset, String accept, String ifNoneMatch) {
 
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;

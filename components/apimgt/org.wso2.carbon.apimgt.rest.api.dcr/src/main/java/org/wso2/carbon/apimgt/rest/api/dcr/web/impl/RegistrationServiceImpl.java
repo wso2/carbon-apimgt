@@ -71,6 +71,7 @@ public class RegistrationServiceImpl implements RegistrationService {
             appRequest.setOAuthApplicationInfo(applicationInfo);
             OAuthApplicationInfo returnedAPP = keyManager.createApplication(appRequest);
             if (returnedAPP != null) {
+                returnedAPP.removeParameter("tokenScope");
                 return Response.status(Response.Status.CREATED).entity(returnedAPP).build();
             }
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).

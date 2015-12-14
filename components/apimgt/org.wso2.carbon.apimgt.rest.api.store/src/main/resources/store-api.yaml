@@ -4,9 +4,9 @@ swagger: '2.0'
 ######################################################
 info:
   version: "0.9.0"
-  title: "WSO2 API Manager"
+  title: "WSO2 API Manager - Store"
   description: |
-    This document specifies a **RESTful API** for WSO2 **API Manager**.
+    This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
     
     You can find the source of this API definition 
     [here](https://github.com/hevayo/restful-apim). 
@@ -95,27 +95,6 @@ paths:
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
           type: string
-        - name: type
-          in: query
-          description: |
-            List prototype or production APIs.
-          type: string
-          enum:
-            - PRODUCTION
-            - PROTOTYPE
-#
-# ?????? Provide list of attributes we support for sorting
-#
-        - name: sort
-          in: query
-          type: string
-          description: | 
-            ** Sort expression **
-            
-            A *sort expression* consists of a sequence of names of API 
-            properties concatenated by a '+' or '-' (indicating ascending or 
-            decending order) separated by a comma. The sequence of names 
-            corresponds to a conjunction. 
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
       tags:
@@ -1103,24 +1082,6 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
-        - name: query
-          in: query
-          description: |
-            **Search condition**.
-            
-
-            You can search in attributes by using **"attribute:"** modifier.
-
-
-            Supported attribute modifiers are [**apiName,version**]
-            
-
-            Eg. "apiName:phoneVerification" will match if the API Name is
-            phoneVerification.
-
-
-            If no attribute modifier is found search will match the given query string against Tag Name.
-          type: string
       tags:
         - Tag Collection
         - Retrieve
@@ -1438,10 +1399,9 @@ definitions:
       transport:
         type: array
         items:
+          description: |
+            Supported transports for the API (http and/or https).
           type: string
-#          enum:
-#            - http
-#            - https
       tags:
         type: array
         items:
@@ -1599,8 +1559,6 @@ definitions:
           - FILE
       sourceUrl:
         type: string
-      filePath:
-        type: string
       otherTypeName:
         type: string
 
@@ -1641,8 +1599,6 @@ definitions:
       - unitTime
     properties:
       name:
-        type: string
-      displayName:
         type: string
       description:
         type: string
@@ -1715,7 +1671,7 @@ definitions:
         type: string
       applicationId:
         type: string
-      apiId:
+      apiIdentifier:
         type: string
       tier:
         type: string
@@ -1823,12 +1779,6 @@ definitions:
       accessToken:
         type: string
         description: Access token
-      refreshToken:
-        type: string
-        description: Refresh token
-      tokenState:
-        type: string
-        description: Token state
       tokenScopes:
         type: array
         items: 

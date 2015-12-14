@@ -28,15 +28,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.ServerContextInformation;
-import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.config.SynapseConfiguration;
-import org.apache.synapse.config.SynapseConfigurationBuilder;
-import org.apache.synapse.config.xml.MultiXMLConfigurationBuilder;
-import org.apache.synapse.config.xml.MultiXMLConfigurationSerializer;
-import org.apache.synapse.config.xml.SequenceMediatorFactory;
-import org.apache.synapse.mediators.base.SequenceMediator;
-import org.apache.synapse.registry.Registry;
+
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
@@ -47,8 +39,7 @@ import org.wso2.carbon.base.CarbonBaseUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
-import org.wso2.carbon.mediation.initializer.configurations.ConfigurationManager;
-import org.wso2.carbon.mediation.registry.WSO2Registry;
+
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
@@ -79,12 +70,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String faultSequenceName = "fault";
     private String mainSequenceName = "main";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
-    private SequenceMediator authFailureHandlerSequence = null;
-    private SequenceMediator resourceMisMatchSequence = null;
-    private SequenceMediator throttleOutSequence = null;    
-    private SequenceMediator sandboxKeyErrorSequence = null;
-    private SequenceMediator productionKeyErrorSequence = null;
-    private SequenceMediator corsSequence = null;
+
 
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
@@ -122,23 +108,20 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
 
             String synapseConfigsDirLocation = synapseConfigsDir.getAbsolutePath();
             // set the required configuration parameters to initialize the ESB
-            axisConfig.addParameter(SynapseConstants.Axis2Param.SYNAPSE_CONFIG_LOCATION,
-                    synapseConfigsDirLocation);
+            //axisConfig.addParameter(SynapseConstants.Axis2Param.SYNAPSE_CONFIG_LOCATION,synapseConfigsDirLocation);
 
             // init the multiple configuration tracker
-            ConfigurationManager manger = new ConfigurationManager((UserRegistry) registry,
-                    configurationContext);
-            manger.init();
+            //ConfigurationManager manger = new ConfigurationManager((UserRegistry) registry, configurationContext);
+            //manger.init();
 
-            File synapseConfigDir = new File(synapseConfigsDir,
-                    manger.getTracker().getCurrentConfigurationName());
-            File authFailureHandlerSequenceNameFile = new File(synapseConfigsDir + "/" + manger.getTracker().getCurrentConfigurationName() +
-                    "/" + MultiXMLConfigurationBuilder.SEQUENCES_DIR + "/" + authFailureHandlerSequenceName + ".xml");
+            //File synapseConfigDir = new File(synapseConfigsDir,manger.getTracker().getCurrentConfigurationName());
+            //File authFailureHandlerSequenceNameFile = new File(synapseConfigsDir + "/" + manger.getTracker().getCurrentConfigurationName() +
+                   // "/" + MultiXMLConfigurationBuilder.SEQUENCES_DIR + "/" + authFailureHandlerSequenceName + ".xml");
             //Here we will check authfailurehandler sequence exist in synapse artifact. If it is not available we will create
             //sequence synapse configurations by using resource artifacts
-            if (!authFailureHandlerSequenceNameFile.exists()) {
-                createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
-            }
+            //if (!authFailureHandlerSequenceNameFile.exists()) {
+               // createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
+            //}
         } catch (Exception e) {
             log.error("Failed to create Tenant's synapse sequences.");
         }
@@ -148,18 +131,15 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
 
     }
 
-    private void initPersistence(String configName,
-                                 ConfigurationContext configurationContext,
-                                 ServerContextInformation contextInfo)
+/*    private void initPersistence(String configName, ConfigurationContext configurationContext, ServerContextInformation contextInfo)
             throws RegistryException, AxisFault {
 
     }
 
-    private ServerContextInformation initESB(String configurationName,
-                                             ConfigurationContext configurationContext)
+    private ServerContextInformation initESB(String configurationName, ConfigurationContext configurationContext)
             throws AxisFault {
         return null;
-    }
+    }*/
 
     /**
      * Create the file system for holding the synapse configuration for a new tanent.
@@ -168,7 +148,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
      * @param tenantDomain     name of the tenent
      */
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
-    private void createTenantSynapseConfigHierarchy(File synapseConfigDir, String tenantDomain) {
+    /*private void createTenantSynapseConfigHierarchy(File synapseConfigDir, String tenantDomain) {
         synapseConfigDir.mkdir();
         File sequencesDir = new File(
                 synapseConfigDir, MultiXMLConfigurationBuilder.SEQUENCES_DIR);
@@ -253,7 +233,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
             handleException("Couldn't serialise the initial synapse configuration " +
                     "for the domain : " + tenantDomain, e);
         }
-    }
+    }*/
 
     /**
      * No need to implement

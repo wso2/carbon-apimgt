@@ -43,10 +43,9 @@ public class TagsApi  {
     public Response tagsGet(@ApiParam(value = "Maximum size of resource array to return.", defaultValue="25") @QueryParam("limit") Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.", defaultValue="0") @QueryParam("offset") Integer offset,
     @ApiParam(value = "Media types acceptable for the response. Default is JSON."  , defaultValue="JSON")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec."  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "**Search condition**.\n\n\nYou can search in attributes by using **\"attribute:\"** modifier.\n\n\nSupported attribute modifiers are [**apiName,version**]\n\n\nEg. \"apiName:phoneVerification\" will match if the API Name is\nphoneVerification.\n\n\nIf no attribute modifier is found search will match the given query string against Tag Name.") @QueryParam("query") String query)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.tagsGet(limit,offset,accept,ifNoneMatch,query);
+    return delegate.tagsGet(limit,offset,accept,ifNoneMatch);
     }
 }
 

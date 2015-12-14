@@ -121,7 +121,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             return Response.created(location).entity(createdApplicationDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                //todo: should we add debug/info logs
                 throw RestApiUtil.buildConflictException("An application already exists with name " + body.getName());
             } else {
                 handleException("Error while adding a new application for the user " + username, e);
@@ -166,7 +165,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
                     return Response.ok().entity(applicationKeyDTO).build();
                 } else {
-                    //todo: should we add debug/info logs
                     throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
@@ -199,7 +197,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                     return Response.ok().entity(applicationDTO).build();
                 } else {
-                    //todo: should we add debug/info logs
                     throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
@@ -246,7 +243,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                             .fromApplicationtoDTO(updatedApplication);
                     return Response.ok().entity(updatedApplicationDTO).build();
                 } else {
-                    //todo: should we add debug/info logs
                     throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {
@@ -279,7 +275,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     apiConsumer.removeApplication(application);
                     return Response.ok().build();
                 } else {
-                    //todo: should we add debug/info logs
                     throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
                 }
             } else {

@@ -18,9 +18,6 @@ public class TierDTO  {
   private String name = null;
   
   
-  private String displayName = null;
-  
-  
   private String description = null;
   
   public enum TierLevelEnum {
@@ -57,18 +54,6 @@ public class TierDTO  {
   }
   public void setName(String name) {
     this.name = name;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("displayName")
-  public String getDisplayName() {
-    return displayName;
-  }
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
   }
 
   
@@ -167,7 +152,6 @@ public class TierDTO  {
     sb.append("class TierDTO {\n");
     
     sb.append("  name: ").append(name).append("\n");
-    sb.append("  displayName: ").append(displayName).append("\n");
     sb.append("  description: ").append(description).append("\n");
     sb.append("  tierLevel: ").append(tierLevel).append("\n");
     sb.append("  attributes: ").append(attributes).append("\n");
