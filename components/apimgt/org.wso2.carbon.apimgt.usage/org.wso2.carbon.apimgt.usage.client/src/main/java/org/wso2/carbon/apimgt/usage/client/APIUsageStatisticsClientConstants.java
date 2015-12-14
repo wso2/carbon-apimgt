@@ -155,7 +155,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String API_VERSION_CONTEXT_METHOD_FACET ="api_version_context_method_facet";
     public static final String API_VERSION_CONTEXT_DEST_FACET="api_version_context_dest_facet";
     public static final String API_VERSION_APIPUBLISHER_CONTEXT_FACET ="api_version_apiPublisher_context_facet";
-    public static final String API_APIPUBLISHER_APPLICATIONNAME_FACET="api_apiPublisher_applicationName_facet";
+    public static final String API_YEAR_MONTH_WEEK_DAY_FACET ="api_year_month_week_day_facet";
     public static final String APPLICATIONNAME_FACET="applicationName_facet";
 
     public static final String AGGREGATE_SUM="SUM";
