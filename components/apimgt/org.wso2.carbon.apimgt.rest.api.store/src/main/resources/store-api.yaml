@@ -87,7 +87,13 @@ paths:
 
             You can search in attributes by using an **"attribute:"** modifier.
 
-            Eg. "provider:wso2" will match an API if the provider of the API is wso2.
+            Eg.
+            "provider:wso2" will match an API if the provider of the API is exactly "wso2".
+            
+            Additionally you can use wildcards.
+            
+            Eg.
+            "provider:wso2*" will match an API if the provider of the API starts with "wso2".
 
             Supported attribute modifiers are [**version, context, status,
             description, subcontext, doc, provider, tag **]

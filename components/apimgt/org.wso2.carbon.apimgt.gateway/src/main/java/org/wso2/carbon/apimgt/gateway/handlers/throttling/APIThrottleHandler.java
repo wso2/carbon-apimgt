@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.Replicator;
@@ -51,6 +52,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -277,7 +279,12 @@ public class APIThrottleHandler extends AbstractHandler {
         // This property need to be set to avoid sending the content in pass-through pipe (request message)
         // as the response.
         axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
-
+        try {
+            RelayUtils.consumeAndDiscardMessage(axis2MC);
+        } catch (AxisFault axisFault) {
+            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            log.error("Error occurred while consuming and discarding the message", axisFault);
+        }
 
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
             Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));

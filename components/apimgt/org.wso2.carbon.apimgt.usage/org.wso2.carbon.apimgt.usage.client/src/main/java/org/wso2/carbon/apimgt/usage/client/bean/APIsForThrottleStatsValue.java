@@ -23,7 +23,7 @@ import java.util.List;
 public class APIsForThrottleStatsValue {
     private int success_request_count;
     private int throttle_out_count;
-    private List<String> api_apiPublisher_applicationName_facet;
+    private List<String> api_year_month_week_day_facet;
     private long max_request_time;
 
     public long getMax_request_time() {
@@ -51,10 +51,10 @@ public class APIsForThrottleStatsValue {
     }
 
     public List<String> getColumnNames() {
-        return api_apiPublisher_applicationName_facet;
+        return api_year_month_week_day_facet;
     }
 
-    public void setApi_apiPublisher_applicationName_facet(List<String> api_apiPublisher_applicationName_facet) {
-        this.api_apiPublisher_applicationName_facet = api_apiPublisher_applicationName_facet;
+    public void setColumnNames(List<String> api_year_month_week_day_facet) {
+        this.api_year_month_week_day_facet = api_year_month_week_day_facet;
     }
 }
