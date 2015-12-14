@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.listeners.KeyManagerUserOperationListener;
 import org.wso2.carbon.apimgt.keymgt.service.thrift.APIKeyValidationServiceImpl;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
@@ -48,6 +49,8 @@ import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -66,7 +69,6 @@ import java.util.concurrent.Executors;
  * @scr.reference name="org.wso2.carbon.identity.thrift.authentication.internal.ThriftAuthenticationServiceComponent"
  * interface="org.wso2.carbon.identity.thrift.authentication.ThriftAuthenticatorService"
  * cardinality="1..1" policy="dynamic" bind="setThriftAuthenticationService"  unbind="unsetThriftAuthenticationService"
- *
  */
 public class APIKeyMgtServiceComponent {
 
@@ -89,7 +91,7 @@ public class APIKeyMgtServiceComponent {
                     new APIManagerConfigurationServiceImpl(configuration);
             ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(configurationService);
 
-            APIKeyMgtDataHolder.initData();                       
+            APIKeyMgtDataHolder.initData();
 
             //Based on configuration we have to decide thrift server run or not
             if (APIKeyMgtDataHolder.getThriftServerEnabled()) {
@@ -105,6 +107,21 @@ public class APIKeyMgtServiceComponent {
             serviceRegistration = ctxt.getBundleContext().registerService(UserOperationEventListener.class.getName(),
                     listener, null);
             log.debug("Key Manager User Operation Listener is enabled.");
+
+            // loading white listed scopes
+            List<String> whitelist = null;
+
+            // Read scope whitelist from Configuration.
+            whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
+
+            // If whitelist is null, default scopes will be put.
+            if (whitelist == null) {
+                whitelist = new ArrayList<String>();
+                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
+                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
+            }
+
+            ScopesIssuer.loadInstance(whitelist);
 
             if (log.isDebugEnabled()) {
                 log.debug("Identity API Key Mgt Bundle is started.");
@@ -213,16 +230,16 @@ public class APIKeyMgtServiceComponent {
 
             String thriftHostString =
                     APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                    APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_HOST);
+                            APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_HOST);
 
-            if(thriftHostString == null){
+            if (thriftHostString == null) {
                 thriftHostString = NetworkUtils.getLocalHostname();
                 log.info("Setting default carbon host for thrift key management service: " + thriftHostString);
             }
 
             String thriftClientTimeOut =
                     APIKeyMgtDataHolder.getAmConfigService().getAPIManagerConfiguration().getFirstProperty(
-                    APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
+                            APIConstants.API_KEY_VALIDATOR_CONNECTION_TIMEOUT);
             if (thriftClientTimeOut == null) {
                 throw new APIKeyMgtException("Port and Connection timeout not provided to start thrift key mgt service.");
             }
@@ -231,12 +248,12 @@ public class APIKeyMgtServiceComponent {
             int clientTimeOut = Integer.parseInt(thriftClientTimeOut);
             //set it in parameters
             transportParam.setKeyStore(keyStorePath, keyStorePassword);
-            
+
             TServerSocket serverTransport =
                     TSSLTransportFactory.getServerSocket(receivePort,
-                                                         clientTimeOut,
-                                                         getHostAddress(thriftHostString),
-                                                         transportParam);
+                            clientTimeOut,
+                            getHostAddress(thriftHostString),
+                            transportParam);
 
 
             APIKeyValidationService.Processor processor = new APIKeyValidationService.Processor(
