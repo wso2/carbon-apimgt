@@ -59,6 +59,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.Date;
@@ -152,7 +154,14 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
-        return doThrottle(messageContext);
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
+        Timer.Context context = timer.start();
+        try {
+            return doThrottle(messageContext);
+        } finally {
+            context.stop();
+        }
     }
 
     public boolean handleResponse(MessageContext messageContext) {
@@ -752,10 +761,16 @@ public class APIThrottleHandler extends AbstractHandler {
             if (hardThrottleContext != null && authContext.getKeyType() != null) {
                 String throttleKey = apiContext + ':' + apiVersion + ':' + authContext.getKeyType();
                 AccessInformation info = null;
+                if (isClusteringEnable) {
+                    hardThrottleContext.setConfigurationContext(cc);
+                }
+
                 if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
+                    hardThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                                                                APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                 } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
+                    hardThrottleContext.setThrottleId(id + APIThrottleConstants.SANDBOX_HARD_LIMIT);
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                                                                APIThrottleConstants.SANDBOX_HARD_LIMIT);
                 }
