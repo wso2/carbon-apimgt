@@ -221,6 +221,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_VISIBLE_TENANTS ="overview_visibleTenants";
     public static final String API_OVERVIEW_ENVIRONMENTS = "overview_environments";
     public static final String API_PROVIDER = "Provider";
+    public static final String API_NAME = "Name";
     public static final String API_VERSION_LABEL = "Version";
     public static final String API_CONTEXT = "Context";
     public static final String API_DESCRIPTION = "Description";
@@ -298,6 +299,7 @@ public final class APIConstants {
     public static final String IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER = "AUTHZ_USER";
     public static final String IDENTITY_OAUTH2_FIELD_TIME_CREATED = "TIME_CREATED";
     public static final String IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD = "VALIDITY_PERIOD";
+    public static final String IDENTITY_OAUTH2_FIELD_USER_DOMAIN = "USER_DOMAIN";
 
     public static final String API_CONSUMER_AUTHENTICATION = "APIConsumerAuthentication.";
     public static final String TOKEN_GENERATOR_IMPL = API_CONSUMER_AUTHENTICATION+"TokenGeneratorImpl";
@@ -383,6 +385,7 @@ public final class APIConstants {
     public static final String API_GATEWAY_CLIENT_DOMAIN_HEADER = API_GATEWAY + "ClientDomainHeader";
     public static final String API_GATEWAY_TYPE = "GatewayType";
     public static final String API_GATEWAY_TYPE_SYNAPSE = "Synapse";
+    public static final String API_GATEWAY_NONE = "none";
     public static final String GATEWAY_STATS_SERVICE = "GatewayStatsUpdateService";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
@@ -936,7 +939,11 @@ public final class APIConstants {
 
     public static final String ACTIVITY_ID = "activityID";
     public static final String USER_AGENT = "User-Agent";
-    
+
+    public static final String REST_API_SCOPE_NAME = "Name";
+    public static final String REST_API_SCOPE_ROLE = "Roles";
+    public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
+
     public static final String HTTPS_PROTOCOL = "https";
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;

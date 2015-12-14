@@ -1,5 +1,29 @@
 {
   "EnableMonetization" : false,
   "IsUnlimitedTierPaid" : false,
-  "ExtensionHandlerPosition": "bottom"
+  "ExtensionHandlerPosition": "bottom",
+  "RESTAPIScopes": {
+    "Scope": [
+      {
+        "Name": "API_PUBLISHER_SCOPE",
+        "Roles": "admin"
+      },
+      {
+        "Name": "API_CREATOR_SCOPE",
+        "Roles": "admin"
+      },
+      {
+        "Name": "API_CREATOR_PUBLISHER_SCOPE",
+        "Roles": "admin"
+      },
+      {
+        "Name": "API_SUBSCRIBER_SCOPE",
+        "Roles": "Internal/subscriber"
+      },
+      {
+        "Name": "API_ADMINISTRATIVE_SCOPE",
+        "Roles": "admin"
+      }
+    ]
+  }
 }

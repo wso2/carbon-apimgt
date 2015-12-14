@@ -45,12 +45,10 @@ public class ApisApi  {
     public Response apisGet(@ApiParam(value = "Maximum size of resource array to return.", defaultValue="25") @QueryParam("limit") Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.", defaultValue="0") @QueryParam("offset") Integer offset,
     @ApiParam(value = "**Search condition**.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match an API if the provider of the API is wso2.\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, tag **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.") @QueryParam("query") String query,
-    @ApiParam(value = "List prototype or production APIs.", allowableValues="{values=[PRODUCTION, PROTOTYPE]}") @QueryParam("type") String type,
-    @ApiParam(value = "** Sort expression **\n\nA *sort expression* consists of a sequence of names of API \nproperties concatenated by a '+' or '-' (indicating ascending or \ndecending order) separated by a comma. The sequence of names \ncorresponds to a conjunction.") @QueryParam("sort") String sort,
     @ApiParam(value = "Media types acceptable for the response. Default is JSON."  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apisGet(limit,offset,query,type,sort,accept,ifNoneMatch);
+    return delegate.apisGet(limit,offset,query,accept,ifNoneMatch);
     }
     @POST
     

@@ -18,13 +18,24 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.EnvironmentsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.EnvironmentMappingUtils;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
@@ -32,6 +43,8 @@ import javax.ws.rs.core.Response;
  *
  */
 public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
+
+    private static final Log log = LogFactory.getLog(EnvironmentsApiServiceImpl.class);
 
     /** Get all gateway environments or applied gateway environments for a given API specified by id
      * 
@@ -41,17 +54,38 @@ public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
     @Override
     public Response environmentsGet(String apiId) {
 
-        //todo : need to get environments of API if apiId is specified 
-        APIManagerConfiguration config =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                        .getAPIManagerConfiguration();
-        Map<String, Environment> environments = config.getApiGatewayEnvironments();
-        if (environments != null) {
-            EnvironmentListDTO environmentListDTO = EnvironmentMappingUtils.fromEnvironmentCollectionToDTO(
-                    environments.values());
-            return Response.ok().entity(environmentListDTO).build();
+        EnvironmentListDTO environmentListDTO = new EnvironmentListDTO();
+        if (StringUtils.isBlank(apiId)) {
+            // if apiId is not specified this will return all the environments
+            APIManagerConfiguration config =
+                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration();
+            Map<String, Environment> environments = config.getApiGatewayEnvironments();
+            if (environments != null) {
+                environmentListDTO = EnvironmentMappingUtils.fromEnvironmentCollectionToDTO(environments.values());
+            }
         } else {
-            return Response.noContent().build();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            try {
+                API api = APIMappingUtil.getAPIInfoFromApiIdOrUUID(apiId, tenantDomain);
+                List <Environment> apiEnvironments = APIUtil.getEnvironmentsOfAPI(api);
+                if (apiEnvironments != null) {
+                    environmentListDTO = EnvironmentMappingUtils.fromEnvironmentCollectionToDTO(apiEnvironments);
+                }
+            } catch (APIManagementException e) {
+                if (RestApiUtil.isDueToResourceNotFound(e)) {
+                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                } else {
+                    String errorMessage = "Error while retrieving API : " + apiId;
+                    handleException(errorMessage, e);
+                }
+            }
         }
+        return Response.ok().entity(environmentListDTO).build();
+    }
+
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
     }
 }

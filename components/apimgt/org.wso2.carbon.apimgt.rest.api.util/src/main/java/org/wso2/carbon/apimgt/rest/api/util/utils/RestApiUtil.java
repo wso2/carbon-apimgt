@@ -452,15 +452,13 @@ public class RestApiUtil {
      * @param offset starting index
      * @param limit max number of objects returned
      * @param query search query value
-     * @param type type of API attribute fir search to be performed
      * @return constructed paginated url
      */
-    public static String getAPIPaginatedURL(Integer offset, Integer limit, String query, String type) {
+    public static String getAPIPaginatedURL(Integer offset, Integer limit, String query) {
         String paginatedURL = RestApiConstants.APIS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
-        paginatedURL = paginatedURL.replace(RestApiConstants.TYPE_PARAM, type);
         return paginatedURL;
     }
 

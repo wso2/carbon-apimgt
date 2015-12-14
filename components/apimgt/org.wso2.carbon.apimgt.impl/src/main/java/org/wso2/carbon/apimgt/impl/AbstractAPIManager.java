@@ -400,7 +400,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    public API getAPIInfoByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Registry registry;
             if (requestedTenantDomain != null && !requestedTenantDomain.equals(
@@ -446,8 +446,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
-    public API getAPIInfo(APIIdentifier identifier)
-            throws APIManagementException {
+    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
 
         boolean tenantFlowStarted = false;
@@ -641,7 +640,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         + resourcePath;
             }
         } catch (RegistryException e) {
-            handleException("Error while adding the icon image to the registry", e);
+            handleException("Error while adding the resource to the registry", e);
         }
         return null;
     }
@@ -1065,6 +1064,42 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get API from : " + apiPath, e);
             return null;
         }
+    }
+
+    @Override
+    public Set<Tier> getAllTiers() throws APIManagementException {
+        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
+
+        Map<String, Tier> tierMap;
+        if (tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            tierMap = APIUtil.getAllTiers();
+        } else {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
+            tierMap = APIUtil.getAllTiers(tenantId);
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        tiers.addAll(tierMap.values());
+
+        return tiers;
+    }
+
+    @Override
+    public Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
+
+        Map<String, Tier> tierMap;
+        int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+        if (requestedTenantId == 0 || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
+            tierMap = APIUtil.getAllTiers();
+        } else {
+            tierMap = APIUtil.getAllTiers(requestedTenantId);
+        }
+        tiers.addAll(tierMap.values());
+        PrivilegedCarbonContext.endTenantFlow();
+        return tiers;
     }
 
     /**

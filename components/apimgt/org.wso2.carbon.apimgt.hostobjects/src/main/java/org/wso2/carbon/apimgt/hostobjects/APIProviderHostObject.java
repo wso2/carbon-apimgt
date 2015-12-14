@@ -62,7 +62,6 @@ import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -209,6 +208,9 @@ public class APIProviderHostObject extends ScriptableObject {
             //update permission cache before validate user
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            if(tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                handleException("Invalid tenant domain.");
+            }
             PermissionUpdateUtil.updatePermissionTree(tenantId);
             
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();            
@@ -452,7 +454,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                                                                             getTenantId(tenantDomain);                
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                    if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
                         if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
@@ -999,7 +1001,14 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibility = (String) apiData.get("visibility", apiData);
         String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String visibleRoles = "";
-
+        
+        if (name != null) {
+            name = name.trim();
+            if (name.isEmpty()) {
+                handleException("API name is not specified");
+            }
+        }
+        
         if (version != null) {
             version = version.trim();
             if (version.isEmpty()) {
@@ -1437,7 +1446,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                                      .getTenantId(tenantDomain);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                    if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
                         if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
@@ -1895,7 +1904,7 @@ public class APIProviderHostObject extends ScriptableObject {
                             .getTenantId(tenantDomain);
                     for (URITemplate uriTemplate : uriTemplates) {
                         Scope scope = uriTemplate.getScope();
-                        if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
                             if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
                                 handleException("Scope " + scope.getKey() + " is already assigned by another API");
                             }
@@ -2931,25 +2940,13 @@ public class APIProviderHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
 
-        //boolean isTenantFlowStarted = false;
-
         try {
-            /*String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-            		isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }*/
-
             content = apiProvider.getDocumentationContent(apiId, docName);
         } catch (Exception e) {
             handleException("Error while getting Inline Document Content ", e);
             return null;
-        }/* finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
-        }*/
+        }
+
         NativeObject row = new NativeObject();
         row.put("providerName", row,APIUtil.replaceEmailDomainBack(providerName));
         row.put("apiName", row, apiName);
@@ -2984,22 +2981,12 @@ public class APIProviderHostObject extends ScriptableObject {
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-        /*boolean isTenantFlowStarted = false;
-        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-        	isTenantFlowStarted = true;
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }*/
         try {
             API api = apiProvider.getAPI(apiId);
             apiProvider.addDocumentationContent(api, docName, docContent);
         } catch (APIManagementException e) {
             handleException("Error occurred while adding the content of the documentation- " + docName, e);
-        }/* finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }*/
+        }
     }
 
     public static boolean jsFunction_addDocumentation(Context cx, Scriptable thisObj,
@@ -3090,21 +3077,6 @@ public class APIProviderHostObject extends ScriptableObject {
                 apiProvider
                         .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
                                 contentType);
-                /*Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
-                
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                String fname = fileHostObject.getName();
-                API api = apiProvider.getAPI(apiId);
-                String apiPath=APIUtil.getAPIPath(apiId);
-                String visibleRolesList = api.getVisibleRoles();
-                String[] visibleRoles = new String[0];
-                if (visibleRolesList != null) {
-                    visibleRoles = visibleRolesList.split(",");
-                }
-                APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                                               api.getVisibility(), visibleRoles,filePath);
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
-                APIUtil.setFilePermission(filePath);*/
             } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
                 throw new APIManagementException("Empty File Attachment.");
             }
@@ -3717,15 +3689,19 @@ public class APIProviderHostObject extends ScriptableObject {
                 doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
             }
 
-            Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
+            Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());            
 
-            if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
-            } else if (oldDoc.getFilePath() != null) {
-                doc.setFilePath(oldDoc.getFilePath());
+            try {
+                if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                    ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
+                                         fileHostObject.getJavaScriptFile().getContentType());
+                    String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
+                    doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
+                } else if (oldDoc.getFilePath() != null) {
+                    doc.setFilePath(oldDoc.getFilePath());
+                }
+            } catch (APIManagementException e) {
+                handleException("Failed to add file to document " + doc.getName(), e);
             }
             apiProvider.updateDocumentation(apiId, doc);
             success = true;
@@ -4630,15 +4606,6 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-        /*boolean isTenantFlowStarted = false;
-        try {
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);*/
         Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
@@ -4648,11 +4615,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             handleException("Resource couldn't found for " + resource);
         }
-        /*} finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }*/
         return data;
     }
 
@@ -4697,7 +4659,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String scopeKey = (String) args[0];
             String username = (String) args[1];
             
-            if (!ScopesIssuer.getInstance().isWhiteListedScope(scopeKey)) {
+            if (!APIUtil.isWhiteListedScope(scopeKey)) {
                 String tenantDomain = MultitenantUtils.getTenantDomain(username);
                 //update permission cache before validate user
                 int tenantId = -1234;

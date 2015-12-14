@@ -30,7 +30,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -73,7 +72,6 @@ import org.wso2.carbon.utils.FileUtil;
 import javax.cache.Cache;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -136,20 +134,11 @@ public class APIManagerComponent {
             //load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
 
-
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                               File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
-            //WorkflowExecutorFactory.getInstance().load(filePath);
-
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-            /*if ("Synapse".equalsIgnoreCase(gatewayType)) {
-                //Register Tenant service creator to deploy tenant specific common synapse configurations
-                TenantServiceCreator listener = new TenantServiceCreator();
-                bundleContext.registerService(
-                        Axis2ConfigurationContextObserver.class.getName(), listener, null);
-            }*/
             if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                 addDefinedSequencesToRegistry();
             }
@@ -227,22 +216,6 @@ public class APIManagerComponent {
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
             
-            // loading white listed scopes
-            List<String> whitelist = null;
-
-            // Read scope whitelist from Configuration.
-            if (configuration != null) {
-                whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
-            }
-
-            // If whitelist is null, default scopes will be put.
-            if (whitelist == null) {
-                whitelist = new ArrayList<String>();
-                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
-                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
-            }
-
-            ScopesIssuer.loadInstance(whitelist);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -332,6 +305,12 @@ public class APIManagerComponent {
             }
         };
         String[] rxtFilePaths = file.list(filenameFilter);
+
+        if(rxtFilePaths == null || rxtFilePaths.length == 0){
+            log.info("No RXTs Found.");
+            return;
+        }
+
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         UserRegistry systemRegistry;
         try {
@@ -401,6 +380,13 @@ public class APIManagerComponent {
     }
 
     private void addTierPolicy(String tierLocation,String defaultTierFileName) throws APIManagementException {
+
+        File defaultTiers = new File(defaultTierFileName);
+        if (!defaultTiers.exists()) {
+            log.info("Default tier policies not found in : " + defaultTierFileName);
+            return;
+        }
+
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         InputStream inputStream = null;
         try {
@@ -411,7 +397,8 @@ public class APIManagerComponent {
             }
 
             log.debug("Adding API tier policies to the registry");
-            inputStream = FileUtils.openInputStream(new File(defaultTierFileName));
+
+            inputStream = FileUtils.openInputStream(defaultTiers);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setContent(data);

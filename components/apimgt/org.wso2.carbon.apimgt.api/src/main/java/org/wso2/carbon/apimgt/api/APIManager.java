@@ -68,7 +68,7 @@ public interface APIManager {
      * @return API of the provided artifact id
      * @throws APIManagementException
      */
-    API getAPIInfoByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
+    API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
 
     /** 
      * Get minimal details of API by API identifier
@@ -76,7 +76,7 @@ public interface APIManager {
      * @return API of the provided APIIdentifier
      * @throws APIManagementException
      */
-    API getAPIInfo(APIIdentifier identifier) throws APIManagementException;
+    API getLightweightAPI(APIIdentifier identifier) throws APIManagementException;
     /**
      * Returns details of an API
      *
@@ -328,6 +328,22 @@ public interface APIManager {
      * @throws APIManagementException
      */
     Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException;
+
+    /**
+     * Retrieves all predefined {@link org.wso2.carbon.apimgt.api.model.Tier} in the system
+     *
+     * @return Set of tiers
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getAllTiers() throws APIManagementException;
+
+    /**
+     * Retrieves all predefined {@link org.wso2.carbon.apimgt.api.model.Tier} for the tenant in the system
+     *
+     * @return Set of tiers
+     * @throws APIManagementException if failed to get the predefined tiers
+     */
+    Set<Tier> getAllTiers(String tenantDomain) throws APIManagementException;
 
     /**
     * Returns a list of pre-defined # {@link org.wso2.carbon.apimgt.api.model.Tier} in the system.

@@ -48,12 +48,10 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.xsd.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
 import org.wso2.carbon.apimgt.impl.workflow.*;
 import org.wso2.carbon.apimgt.keymgt.client.APIAuthenticationServiceClient;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -661,6 +659,9 @@ public class APIStoreHostObject extends ScriptableObject {
             //update permission cache before validate user
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            if(tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                handleException("Invalid tenant domain.");
+            }
             PermissionUpdateUtil.updatePermissionTree(tenantId);
 
             String host = new URL(url).getHost();
@@ -968,19 +969,7 @@ public class APIStoreHostObject extends ScriptableObject {
             Set<API> apiSet = null;
             boolean noSearchTerm = false;
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            boolean isTenantFlowStarted = false;
             try {
-                /*if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                } else {
-                	tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-                    isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-
-                }*/
                 if (searchValue.contains(":")) {
                     if (searchValue.split(":").length > 1) {
                         searchType = searchValue.split(":")[0];
@@ -1012,11 +1001,7 @@ public class APIStoreHostObject extends ScriptableObject {
             } catch (Exception e) {
                 log.error("Error while searching APIs by type", e);
                 return resultObj;
-            }/* finally {
-                if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-            }*/
+            }
 
             if (noSearchTerm) {
                 throw new APIManagementException("Search term is missing. Try again with valid search query.");
@@ -2764,7 +2749,7 @@ public class APIStoreHostObject extends ScriptableObject {
         APIConsumer apiConsumer = getAPIConsumer(thisObj);
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         try {
-            API api = apiConsumer.getAPIInfo(subscribedAPI.getApiId());
+            API api = apiConsumer.getLightweightAPI(subscribedAPI.getApiId());
             apiObj.put("name", apiObj, subscribedAPI.getApiId().getApiName());
             apiObj.put("provider", apiObj, APIUtil.replaceEmailDomainBack(subscribedAPI.getApiId().getProviderName()));
             apiObj.put("version", apiObj, subscribedAPI.getApiId().getVersion());
@@ -3248,15 +3233,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiName = (String) args[1];
             version = (String) args[2];
             docName = (String) args[3];
-            //boolean isTenantFlowStarted = false;
-            try {/*
-                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-                if (tenantDomain != null &&
-                    !org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                }*/
+            try {
             	providerName = APIUtil.replaceEmailDomain(URLDecoder.decode(providerName, "UTF-8"));
             	APIIdentifier apiId = new APIIdentifier(providerName, apiName,
                         version);
@@ -3265,11 +3242,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 content = apiConsumer.getDocumentationContent(apiId, docName);
             } catch (Exception e) {
                 handleException("Error while getting Inline Document Content ", e);
-            }/*finally {
-                if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
-                }
-            }*/
+            }
 
             if (content == null) {
                 content = "";
@@ -4317,27 +4290,16 @@ public class APIStoreHostObject extends ScriptableObject {
         }
         String resource = (String) args[1];
         String tenantDomain = (String) args[0];
-        /*boolean isTenantFlowStarted = false;
-        try {
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain, tenantId);*/
-            Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
             data.put("contentType", data, docResourceMap.get("contentType"));
             data.put("name", data, docResourceMap.get("name"));
-        }/*
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }*/
+        }
         return data;
     }
 

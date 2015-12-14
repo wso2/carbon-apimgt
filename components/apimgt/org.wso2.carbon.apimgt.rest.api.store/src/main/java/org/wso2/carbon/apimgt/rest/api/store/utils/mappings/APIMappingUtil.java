@@ -53,9 +53,9 @@ public class APIMappingUtil {
         APIIdentifier apiIdentifier;
         APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
         if (RestApiUtil.isUUID(apiId)) {
-            apiIdentifier = apiConsumer.getAPIInfoByUUID(apiId, requestedTenantDomain).getId();
+            apiIdentifier = apiConsumer.getLightweightAPIByUUID(apiId, requestedTenantDomain).getId();
         } else {
-            apiIdentifier = apiConsumer.getAPIInfo(getAPIIdentifierFromApiId(apiId)).getId();
+            apiIdentifier = apiConsumer.getLightweightAPI(getAPIIdentifierFromApiId(apiId)).getId();
         }
         return  apiIdentifier;
     }
@@ -110,12 +110,11 @@ public class APIMappingUtil {
      * 
      * @param apiListDTO APIListDTO object to which pagination urls need to be set 
      * @param query query parameter
-     * @param type type parameter
      * @param offset starting index
      * @param limit max number of returned objects
      * @param size max offset
      */
-    public static void setPaginationParams(APIListDTO apiListDTO, String query, String type, int offset, int limit, int size) {
+    public static void setPaginationParams(APIListDTO apiListDTO, String query, int offset, int limit, int size) {
         Map<String, Integer> paginatedParams = RestApiUtil.getPaginationParams(offset, limit, size);
 
         String paginatedPrevious = "";
@@ -124,13 +123,13 @@ public class APIMappingUtil {
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query, type);
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiUtil
                     .getAPIPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query, type);
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
         apiListDTO.setNext(paginatedNext);

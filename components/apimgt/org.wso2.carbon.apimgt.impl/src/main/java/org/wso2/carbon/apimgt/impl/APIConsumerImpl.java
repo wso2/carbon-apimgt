@@ -1596,16 +1596,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
             if (artifactManager != null) {
 
-                if (searchType.equalsIgnoreCase(APIConstants.API_PROVIDER)) {
+                if (APIConstants.API_PROVIDER.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_PROVIDER;
                     searchTerm = searchTerm.replaceAll("@", "-AT-");
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_VERSION_LABEL)) {
+                } else if (APIConstants.API_VERSION_LABEL.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_VERSION;
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_CONTEXT)) {
+                } else if (APIConstants.API_CONTEXT.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_CONTEXT;
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_DESCRIPTION)) {
+                } else if (APIConstants.API_DESCRIPTION.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_DESCRIPTION;
-                } else if (searchType.equalsIgnoreCase(APIConstants.API_TAG)) {
+                } else if (APIConstants.API_TAG.equalsIgnoreCase(searchType)) {
                     criteria = APIConstants.API_OVERVIEW_TAG;
                 }
 
@@ -1947,12 +1947,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
                 invalidateCachedKeys(applicationId);
             }
+
+            SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
+
             if (log.isDebugEnabled()) {
                 String logMessage = "API Name: " + identifier.getApiName() + ", API Version " + identifier.getVersion()
-                        + " subscribe by " + userId + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
+                        + ", Subscription Status: " + addedSubscription.getSubStatus() + " subscribe by " + userId
+                        + " for app " + apiMgtDAO.getApplicationNameFromId(applicationId);
                 log.debug(logMessage);
             }
-            SubscribedAPI addedSubscription = getSubscriptionById(subscriptionId);
+
             return new SubscriptionResponse(addedSubscription.getSubStatus(), addedSubscription.getUUID(),
                     workflowResponse);
         } else {
@@ -2166,6 +2170,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Application Name: " + application.getName() +" added successfully.");
+        }
+
         return applicationId;
     }
 
@@ -2194,6 +2203,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         apiMgtDAO.updateApplication(application);
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the Application: " + application.getId() +" in the database.");
+        }
 
         APIKey[] apiKeys = null;
 

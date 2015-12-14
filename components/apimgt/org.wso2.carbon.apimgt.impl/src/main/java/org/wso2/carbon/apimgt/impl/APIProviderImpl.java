@@ -374,7 +374,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                              "tier are not allowed");
         }
 
-        Set<Tier> tiers = getTiers();
+        Set<Tier> tiers = getAllTiers();
         if (update && !tiers.contains(tier)) {
             throw new APIManagementException("No tier exists by the name: " + tier.getName());
         }
@@ -514,7 +514,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                              "tier are not allowed");
         }
 
-        Set<Tier> tiers = getTiers();
+        Set<Tier> tiers = getAllTiers();
         // We need to see whether this used in any of the APIs
         GenericArtifact tierArtifacts[] = null;
         boolean isTenantFlowStarted = false;
@@ -566,6 +566,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addAPI(API api) throws APIManagementException {
         try {           
             createAPI(api);
+
+            if (log.isDebugEnabled()) {
+                log.debug("API details successfully added to the registry. API Name: " + api.getId().getApiName()
+                        + ", API Version : " + api.getId().getVersion() + ", API context : " + api.getContext());
+            }
+
             int tenantId;
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
@@ -575,6 +581,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         +api.getId().getApiName(),e);
             }
             apiMgtDAO.addAPI(api,tenantId);
+
+            if (log.isDebugEnabled()) {
+                log.debug("API details successfully added to the API Manager Database. API Name: " + api.getId()
+                        .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
+                        .getContext());
+            }
+
             if (APIUtil.isAPIManagementEnabled()) {
             	Cache contextCache = APIUtil.getAPIContextCache();
             	Boolean apiContext = null;
@@ -739,6 +752,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             +api.getId().getApiName(),e);
                 }
                 apiMgtDAO.updateAPI(api,tenantId);
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully updated the API: " + api.getId() + " in the database");
+                }
 
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -1046,6 +1062,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 success = true;
+                if (log.isDebugEnabled()) {
+                    log.debug("API status successfully updated to: " + newStatus + " in API Name: " + api.getId()
+                            .getApiName() + ", API Version : " + api.getId().getVersion() + ", API context : " + api
+                            .getContext());
+                }
+
             } else {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
@@ -1575,15 +1597,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             APIConstants.API_RESOURCE_NAME;
         try {
             if (registry.resourceExists(targetPath)) {
-                throw new DuplicateAPIException("API version already exist with version :"
-                                                + newVersion);
+                throw new DuplicateAPIException("API version already exist with version :" + newVersion);
             }
             registry.beginTransaction();
             Resource apiSourceArtifact = registry.get(apiSourcePath);
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                                                                                APIConstants.API_KEY);
-            GenericArtifact artifact = artifactManager.getGenericArtifact(
-                    apiSourceArtifact.getUUID());
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(apiSourceArtifact.getUUID());
 
             //Create new API version
             artifact.setId(UUID.randomUUID().toString());
@@ -1596,18 +1615,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_STATUS, APIConstants.CREATED);
             }
 
-            if(api.isDefaultVersion()){
+            if(api.isDefaultVersion())  {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "true");
                 //Check whether an existing API is set as default version.
                 String defaultVersion = getDefaultVersion(api.getId());
 
                 //if so, change its DefaultAPIVersion attribute to false
 
-                if(defaultVersion!=null){
-                    APIIdentifier defaultAPIId=new APIIdentifier(api.getId().getProviderName(),api.getId().getApiName(),defaultVersion);
+                if(defaultVersion!=null)    {
+                    APIIdentifier defaultAPIId = new APIIdentifier(api.getId().getProviderName(),api.getId().getApiName(),
+                                                                   defaultVersion);
                     updateDefaultAPIInRegistry(defaultAPIId,false);
                 }
-            }else{
+            } else  {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION, "false");
             }
             //Check whether the existing api has its own thumbnail resource and if yes,add that image
@@ -1625,6 +1645,57 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL,
                                       addResourceFile(APIUtil.getIconPath(newApiId), icon));
             }
+            // If the API has custom mediation policy, copy it to new version.
+
+            String inSeqFilePath = APIUtil.getSequencePath(api.getId(), "in");
+
+            if (registry.resourceExists(inSeqFilePath)) {
+
+                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+                                                           api.getId().getApiName(), newVersion);
+
+                String inSeqNewFilePath = APIUtil.getSequencePath(newApiId, "in");
+                org.wso2.carbon.registry.api.Collection inSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(inSeqFilePath);
+                if (inSeqCollection != null) {
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths)    {
+                        Resource inSequence = registry.get(inSeqChildPath);
+
+                        ResourceFile seqFile = new ResourceFile(inSequence.getContentStream(), inSequence.getMediaType());
+                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
+                        addResourceFile((inSeqNewFilePath + seqFileName), seqFile);
+                    }
+                }
+            }
+
+
+            String outSeqFilePath = APIUtil.getSequencePath(api.getId(), "out");
+
+            if (registry.resourceExists(outSeqFilePath)) {
+
+                APIIdentifier newApiId = new APIIdentifier(api.getId().getProviderName(),
+                                                           api.getId().getApiName(), newVersion);
+
+                String outSeqNewFilePath = APIUtil.getSequencePath(newApiId, "out");
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                        (org.wso2.carbon.registry.api.Collection) registry.get(outSeqFilePath);
+                if (outSeqCollection != null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths)    {
+                        Resource outSequence = registry.get(outSeqChildPath);
+
+                        ResourceFile seqFile = new ResourceFile(outSequence.getContentStream(), outSequence.getMediaType());
+                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                        String seqFileName = seqElment.getAttributeValue(new QName("name"));
+                        addResourceFile((outSeqNewFilePath + seqFileName), seqFile);
+                    }
+                }
+            }
+
+
+
             // Here we keep the old context
             String oldContext =  artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
 
@@ -1741,8 +1812,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         +api.getId().getApiName(),e);
             }
 
-            apiMgtDAO.addAPI(newAPI,tenantId);
+            apiMgtDAO.addAPI(newAPI, tenantId);
             registry.commitTransaction();
+
+            if(log.isDebugEnabled()) {
+                String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
+                log.debug(logMessage);
+            }
 
         } catch (ParseException e) {
             String msg = "Couldn't Create json Object from Swagger object for version" + newVersion + " of : " +
@@ -2069,11 +2145,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
-            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles, artifactPath);
+            APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
+                    artifactPath);
             registry.commitTransaction();
-            if(log.isDebugEnabled()){
-            	String logMessage = "API Name: " + api.getId().getApiName() + ", API Version "+api.getId().getVersion()+" created";
-            	log.debug(logMessage);
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                + " created";
+                log.debug(logMessage);
             }
         } catch (Exception e) {
         	 try {
@@ -2311,6 +2390,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             apiMgtDAO.deleteAPI(identifier);
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
+                                + " successfully removed from the database.";
+                log.debug(logMessage);
+            }
 
             /*remove empty directories*/
             String apiCollectionPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -3091,6 +3177,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             this.username);
                 }
                
+            }
+
+            if (log.isDebugEnabled()) {
+                String logMessage =
+                        "API Status changed successfully. API Name: " + apiIdentifier.getApiName() + ", API Version " +
+                                apiIdentifier.getVersion() + ", New Status : " + targetStatus;
+                log.debug(logMessage);
             }
             return true;
         } catch (GovernanceException e) {
