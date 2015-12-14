@@ -761,10 +761,16 @@ public class APIThrottleHandler extends AbstractHandler {
             if (hardThrottleContext != null && authContext.getKeyType() != null) {
                 String throttleKey = apiContext + ':' + apiVersion + ':' + authContext.getKeyType();
                 AccessInformation info = null;
+                if (isClusteringEnable) {
+                    hardThrottleContext.setConfigurationContext(cc);
+                }
+
                 if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
+                    hardThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                                                                APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                 } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
+                    hardThrottleContext.setThrottleId(id + APIThrottleConstants.SANDBOX_HARD_LIMIT);
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                                                                APIThrottleConstants.SANDBOX_HARD_LIMIT);
                 }
