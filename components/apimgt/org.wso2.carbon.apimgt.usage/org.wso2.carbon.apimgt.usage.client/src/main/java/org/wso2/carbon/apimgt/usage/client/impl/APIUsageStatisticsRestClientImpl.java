@@ -1994,22 +1994,19 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIUsage> getUsageByAPIVersionsData(String tableName, String fromDate, String toDate, String apiName)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query = null;
-
-        query = "api:" + apiName;
+        StringBuilder query = new StringBuilder("api:" + apiName);
         //lucene query with time ranges
         if (fromDate != null && toDate != null) {
             try {
-                query = " AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
-                        .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]";
+                query.append(" AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
+                        .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]");
             } catch (ParseException e) {
                 handleException("Error occurred while Error parsing date", e);
             }
         }
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 2,
-                APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET,
-                APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 2,
+                APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET, tableName);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
