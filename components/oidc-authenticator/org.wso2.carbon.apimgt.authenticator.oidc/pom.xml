@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>4.3.0</version>
+        <version>4.3.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -58,13 +58,17 @@
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.nimbusds.wso2</groupId>
+            <groupId>org.wso2.orbit.com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
+	<dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+       </dependency>
     </dependencies>
 
     <build>
