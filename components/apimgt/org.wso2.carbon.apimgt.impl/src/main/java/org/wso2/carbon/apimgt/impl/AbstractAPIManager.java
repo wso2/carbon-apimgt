@@ -47,6 +47,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.h2.osgi.utils.CarbonUtils;
 import org.wso2.carbon.registry.core.ActionConstants;
 import org.wso2.carbon.registry.core.Association;
 import org.wso2.carbon.registry.core.Collection;
@@ -64,6 +65,7 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -126,7 +128,20 @@ public abstract class AbstractAPIManager implements APIManager {
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT( tenantUserName, tenantId);
                 APIUtil.loadTenantAPIPolicy( tenantUserName, tenantId);
-                APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+
+                //Check whether GatewayType is synapse before loading sequences into registry
+                String filePath =
+                        CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "conf" +
+                                File.separator + "api-manager.xml";
+
+                APIManagerConfiguration configuration = new APIManagerConfiguration();
+                configuration.load(filePath);
+                String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+
+                if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                    APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+                }
+
                 ServiceReferenceHolder.setUserRealm((UserRealm)(ServiceReferenceHolder.getInstance().
                         getRealmService().getTenantUserRealm(tenantId)));
             }
