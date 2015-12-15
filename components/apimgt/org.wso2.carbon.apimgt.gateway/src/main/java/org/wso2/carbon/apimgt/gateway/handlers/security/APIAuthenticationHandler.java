@@ -210,8 +210,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             status = HttpStatus.SC_UNAUTHORIZED;
             Map<String, String> headers =
                     (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
-            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+            if (headers != null) {
+                headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
+                axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+            }
         }
 
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
