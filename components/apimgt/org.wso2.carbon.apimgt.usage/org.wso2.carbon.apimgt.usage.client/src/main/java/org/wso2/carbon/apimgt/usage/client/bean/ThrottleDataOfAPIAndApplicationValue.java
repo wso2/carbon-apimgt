@@ -18,109 +18,18 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
+import java.util.Calendar;
+import java.util.List;
+
 public class ThrottleDataOfAPIAndApplicationValue {
-    private String api;
-    private String api_version;
-    private String context;
-    private String apiPublisher;
-    private String applicationName;
-    private String tenantDomain;
+    private int success_request_count;
+    private int throttle_out_count;
+    private List<String> api_year_month_week_day_facet;
+    private long max_request_time;
     private int year;
     private int month;
-    private int day;
     private int week;
-    private String time;
-    private int success_request_count;
-    private int throttleout_count;
-    private long max_request_time;
-
-    public String getApi() {
-        return api;
-    }
-
-    public void setApi(String api) {
-        this.api = api;
-    }
-
-    public String getApi_version() {
-        return api_version;
-    }
-
-    public void setApi_version(String api_version) {
-        this.api_version = api_version;
-    }
-
-    public String getContext() {
-        return context;
-    }
-
-    public void setContext(String context) {
-        this.context = context;
-    }
-
-    public String getApiPublisher() {
-        return apiPublisher;
-    }
-
-    public void setApiPublisher(String apiPublisher) {
-        this.apiPublisher = apiPublisher;
-    }
-
-    public String getApplicationName() {
-        return applicationName;
-    }
-
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public String getTenantDomain() {
-        return tenantDomain;
-    }
-
-    public void setTenantDomain(String tenantDomain) {
-        this.tenantDomain = tenantDomain;
-    }
-
-    public int getYear() {
-        return year;
-    }
-
-    public void setYear(int year) {
-        this.year = year;
-    }
-
-    public int getMonth() {
-        return month;
-    }
-
-    public void setMonth(int month) {
-        this.month = month;
-    }
-
-    public int getDay() {
-        return day;
-    }
-
-    public void setDay(int day) {
-        this.day = day;
-    }
-
-    public int getWeek() {
-        return week;
-    }
-
-    public void setWeek(int week) {
-        this.week = week;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
+    private int day;
 
     public int getSuccess_request_count() {
         return success_request_count;
@@ -130,16 +39,37 @@ public class ThrottleDataOfAPIAndApplicationValue {
         this.success_request_count = success_request_count;
     }
 
-    public int getThrottleout_count() {
-        return throttleout_count;
+    public int getThrottle_out_count() {
+        return throttle_out_count;
     }
 
-    public void setThrottleout_count(int throttleout_count) {
-        this.throttleout_count = throttleout_count;
+    public void setThrottle_out_count(int throttle_out_count) {
+        this.throttle_out_count = throttle_out_count;
+    }
+
+    public List<String> getColumnNames() {
+        return api_year_month_week_day_facet;
+    }
+
+    public void setApi_year_month_week_day_facet(List<String> api_year_month_week_day_facet) {
+        this.api_year_month_week_day_facet = api_year_month_week_day_facet;
     }
 
     public long getMax_request_time() {
-        return max_request_time;
+
+        int year=Integer.parseInt(getColumnNames().get(1));
+        int month=Integer.parseInt(getColumnNames().get(2));
+        int day=Integer.parseInt(getColumnNames().get(4));
+
+        Calendar calender = Calendar.getInstance();
+        calender.set(Calendar.HOUR, 0);
+        calender.set(Calendar.MINUTE, 0);
+        calender.set(Calendar.SECOND, 0);
+        calender.set(Calendar.DATE, day);
+        calender.set(Calendar.MONTH, month-1);
+        calender.set(Calendar.YEAR, year);
+        long time= calender.getTimeInMillis();
+        return time;
     }
 
     public void setMax_request_time(long max_request_time) {
