@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -53,7 +54,15 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+            //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+
+            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+            }
         }
         // Need to continue the execution even if we encounter an error.
         catch (Exception e) {

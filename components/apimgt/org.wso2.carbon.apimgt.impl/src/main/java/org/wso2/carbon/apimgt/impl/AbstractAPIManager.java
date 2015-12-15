@@ -126,8 +126,18 @@ public abstract class AbstractAPIManager implements APIManager {
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT( tenantUserName, tenantId);
                 APIUtil.loadTenantAPIPolicy( tenantUserName, tenantId);
-                APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
-                ServiceReferenceHolder.setUserRealm((UserRealm)(ServiceReferenceHolder.getInstance().
+
+                //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
+                APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+                String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+
+                if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                    APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+                }
+
+                ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().
                         getRealmService().getTenantUserRealm(tenantId)));
             }
             ServiceReferenceHolder.setUserRealm(ServiceReferenceHolder.getInstance().
