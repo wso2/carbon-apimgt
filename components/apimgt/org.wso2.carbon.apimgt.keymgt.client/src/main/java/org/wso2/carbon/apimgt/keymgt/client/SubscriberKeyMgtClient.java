@@ -94,7 +94,8 @@ public class SubscriberKeyMgtClient {
                                                        String consumerKey, String[] grantTypes)
             throws RemoteException, APIKeyMgtSubscriberServiceAPIManagementException,
                    APIKeyMgtSubscriberServiceAPIKeyMgtException, APIKeyMgtSubscriberServiceIdentityException {
-        return subscriberServiceStub.updateOAuthApplication(userId, applicationName, callbackUrl, consumerKey, null);
+        return subscriberServiceStub.updateOAuthApplication(userId, applicationName, callbackUrl, consumerKey, 
+                                                            grantTypes);
     }
 
     public void deleteOAuthApplication(String consumerKey) throws Exception {
