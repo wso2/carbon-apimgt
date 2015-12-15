@@ -830,6 +830,18 @@
                 <version>${wso2-uri-templates.version}</version>
             </dependency>
 
+	    <dependency>
+                <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${orbit.version.pdfbox}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+                <artifactId>fontbox</artifactId>
+                <version>${orbit.version.pdfbox}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -938,6 +950,8 @@
         <cxf.version>3.1.4</cxf.version>
 
         <carbon.metrics.version>1.1.0</carbon.metrics.version>
+        <!-- apache pdfbox version -->
+        <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
     </properties>
 </project>
