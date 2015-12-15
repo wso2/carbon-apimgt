@@ -223,7 +223,7 @@
                                 <a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
                             <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
                        </div>
-
+                    <% } %>
                         <br/>
                            </div>
                                <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
@@ -237,7 +237,6 @@
                                    </div>
 
                                </div>
-                       <% } %>
                 </div>
       </div>
     </div>

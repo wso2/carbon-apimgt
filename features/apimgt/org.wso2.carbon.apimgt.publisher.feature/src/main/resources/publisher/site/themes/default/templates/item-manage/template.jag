@@ -253,6 +253,7 @@
                             	<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
                            	<div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
                        </div>
+                      <% } %>
 
                        <br/>
                            <div class="control-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
@@ -266,7 +267,6 @@
                                </div>
 
                            </div>
-                       <% } %>
                 </div>
     </fieldset>
 
