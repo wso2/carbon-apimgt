@@ -30,6 +30,7 @@ label, input, button, select, textarea{
 .tenant-position-setter{
     color: #888;
     margin-top: 48px;
+    padding-top: 20px;
     text-align: right;
     position: absolute;
     right:20px;

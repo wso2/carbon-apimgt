@@ -223,20 +223,21 @@
                                 <a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
                             <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
                        </div>
-                       <% } %>            
-                <br/>
-                </div>
-                    <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
-                        <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
-                            <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
-                        </label>
-                        <div class="col-sm-6">
-                            <input type="text" class="input form-control"
-                            id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
-                            <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
-                        </div>
-                    
-                    </div>
+
+                        <br/>
+                           </div>
+                               <div class="form-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                                   <label class="control-label col-sm-3" for="tenants" id="tenantLabel" name="tenantLabel">
+                                       <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
+                                   </label>
+                                   <div class="col-sm-6">
+                                       <input type="text" class="input form-control"
+                                       id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+                                       <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
+                                   </div>
+
+                               </div>
+                        <% } %>
                 </div>
       </div>
     </div>
