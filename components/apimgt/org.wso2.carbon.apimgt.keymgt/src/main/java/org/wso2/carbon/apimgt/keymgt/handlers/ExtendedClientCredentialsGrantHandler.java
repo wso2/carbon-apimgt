@@ -16,11 +16,10 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import edu.emory.mathcs.backport.java.util.Arrays;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.identity.application.common.model.User;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
@@ -29,7 +28,6 @@ import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGra
 import java.util.ArrayList;
 
 public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
-    private static final Log log = LogFactory.getLog(ExtendedClientCredentialsGrantHandler.class);
     private static final String VALIDITY_PERIOD = "validity_period";
 
     @Override
@@ -37,7 +35,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
 
         RequestParameter[] parameters = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getRequestParameters();
 
-        long validityPeriod = 0;
+        long validityPeriod;
 
         if (parameters == null) {
             return true;
@@ -64,9 +62,8 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
             throws IdentityOAuth2Exception {
 
         boolean validateResult = super.validateGrant(tokReqMsgCtx);
-        User user = tokReqMsgCtx.getAuthorizedUser();
-        String tenantDomain = user.getTenantDomain();
-        String username = user.getUserName(); 
+        AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
+        String username = user.getUserName();
         user.setUserName(username);
         tokReqMsgCtx.setAuthorizedUser(user);
 
@@ -97,9 +94,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
 
                 // Arrays.asList won't work here, because list.add cannot be called on the returned list.
                 ArrayList<String> scopeList = new ArrayList<String>(scopes.length);
-                for (String scope : scopes) {
-                    scopeList.add(scope);
-                }
+                scopeList.addAll(Arrays.asList(scopes));
                 // Forcefully add application scope if it's not included in the list.
                 if (!scopeList.contains(applicationScope)) {
                     scopeList.add(applicationScope);
