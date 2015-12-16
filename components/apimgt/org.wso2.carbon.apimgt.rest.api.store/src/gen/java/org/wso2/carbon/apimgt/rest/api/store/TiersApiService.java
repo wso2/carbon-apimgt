@@ -15,7 +15,7 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class TiersApiService {
-    public abstract Response tiersTierLevelGet(String tierLevel,Integer limit,Integer offset,String accept,String ifNoneMatch);
-    public abstract Response tiersTierLevelTierNameGet(String tierName,String tierLevel,String accept,String ifNoneMatch,String ifModifiedSince);
+    public abstract Response tiersTierLevelGet(String tierLevel,Integer limit,Integer offset,String xWSO2Tenant,String accept,String ifNoneMatch);
+    public abstract Response tiersTierLevelTierNameGet(String tierName,String tierLevel,String xWSO2Tenant,String accept,String ifNoneMatch,String ifModifiedSince);
 }
 
