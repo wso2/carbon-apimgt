@@ -853,7 +853,7 @@
         <carbon.apimgt.imp.pkg.version>[5.0.0, 6.0.0)</carbon.apimgt.imp.pkg.version>
 
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.2</carbon.kernel.version>
+        <carbon.kernel.version>4.4.3</carbon.kernel.version>
 
         <carbon.commons.version>4.4.8</carbon.commons.version>
         <carbon.registry.version>4.4.8</carbon.registry.version>
