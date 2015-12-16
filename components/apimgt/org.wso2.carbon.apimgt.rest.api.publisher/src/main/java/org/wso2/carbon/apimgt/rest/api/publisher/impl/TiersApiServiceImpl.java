@@ -38,10 +38,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /** This is the service implementation class for Publisher tier related operations
  *
@@ -69,23 +66,23 @@ public class TiersApiServiceImpl extends TiersApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         try {
             List<Tier> tierList = new ArrayList<>();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             if (!StringUtils.isBlank(tierLevel)) {
                 if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
-                    Set<Tier> apiTiers = apiProvider.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
-                    if (apiTiers != null) {
-                        tierList.addAll(apiTiers);
+                    Map<String, Tier> apiTiersMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
+                    if (apiTiersMap != null) {
+                        tierList.addAll(apiTiersMap.values());
                     }
                 } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
-                    Set<Tier> appTiers = apiProvider.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
-                    if (appTiers != null) {
-                        tierList.addAll(appTiers);
+                    Map<String, Tier> appTiersMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+                    if (appTiersMap != null) {
+                        tierList.addAll(appTiersMap.values());
                     }
-                } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)){
-                    Set<Tier> resourceTiers = apiProvider.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                    if (resourceTiers != null) {
-                        tierList.addAll(resourceTiers);
+                } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)) {
+                    Map<String, Tier> resourceTiersMap = 
+                            APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                    if (resourceTiersMap != null) {
+                        tierList.addAll(resourceTiersMap.values());
                     }
                 } else {
                     throw RestApiUtil.buildNotFoundException(
@@ -198,21 +195,25 @@ public class TiersApiServiceImpl extends TiersApiService {
 
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             TierDTO.TierLevelEnum tierType;
-            Tier foundTier;
+            Tier foundTier = null;
             if (!StringUtils.isBlank(tierLevel)) {
                 if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
                     foundTier = APIUtil.getTierFromCache(tierName, tenantDomain);
                     tierType = TierDTO.TierLevelEnum.api;
                 } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
-                    Set<Tier> appTiers = apiProvider.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
-                    foundTier = RestApiUtil.findTier(appTiers, tierName);
+                    Map<String, Tier> appTiersMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
                     tierType = TierDTO.TierLevelEnum.application;
-                } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)){
-                    Set<Tier> resourceTiers = apiProvider.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                    foundTier = RestApiUtil.findTier(resourceTiers, tierName);
+                    if (appTiersMap != null) {
+                        foundTier = RestApiUtil.findTier(appTiersMap.values(), tierName);
+                    }
+                } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)) {
+                    Map<String, Tier> resourceTiersMap = 
+                            APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
                     tierType = TierDTO.TierLevelEnum.resource;
+                    if (resourceTiersMap != null) {
+                        foundTier = RestApiUtil.findTier(resourceTiersMap.values(), tierName);
+                    }
                 } else {
                     throw RestApiUtil.buildNotFoundException(
                             "type should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
