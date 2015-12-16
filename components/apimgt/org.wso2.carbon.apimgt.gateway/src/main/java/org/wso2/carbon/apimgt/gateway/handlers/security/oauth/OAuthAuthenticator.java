@@ -140,7 +140,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApiKey(clientIP);
             authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
             //This name is hardcoded as anonymous because there is no associated user token
-            authContext.setUsername("anonymous");
+            authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
             authContext.setConsumerKey(null);
@@ -187,7 +187,11 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setTier(info.getTier());
             authContext.setApiKey(apiKey);
             authContext.setKeyType(info.getType());
-            authContext.setUsername(info.getEndUserName());
+            if (info.getEndUserName() != null) {
+                authContext.setUsername(info.getEndUserName());
+            } else {
+                authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+            }
             authContext.setCallerToken(info.getEndUserToken());
             authContext.setApplicationId(info.getApplicationId());
             authContext.setApplicationName(info.getApplicationName());
