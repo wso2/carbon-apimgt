@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
@@ -26,6 +25,7 @@ import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
     private static final String VALIDITY_PERIOD = "validity_period";
