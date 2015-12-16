@@ -77,6 +77,10 @@ public class APIGatewayManager {
         }
         for (String environmentName : api.getEnvironments()) {
             Environment environment = environments.get(environmentName);
+            //If the environment is removed from the configuration, continue without publishing
+            if (environment == null) {
+                continue;
+            }
             APIGatewayAdminClient client;
             try {
                 client = new APIGatewayAdminClient(api.getId(), environment);
@@ -214,6 +218,10 @@ public class APIGatewayManager {
             for (String environmentName : api.getEnvironments()) {
                 try {
                     Environment environment = environments.get(environmentName);
+                    //If the environment is removed from the configuration, continue without removing
+                    if (environment == null) {
+                        continue;
+                    }
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
                     if (client.getApi(tenantDomain, api.getId()) != null) {
