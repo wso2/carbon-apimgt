@@ -1168,8 +1168,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     if (isThumbnailExists == true) {
                         tag.setThumbnailUrl(APIUtil.getRegistryResourcePathForUI(APIConstants.
                                                                                          RegistryResourceTypesForUI.TAG_THUMBNAIL, tenantDomain, thumbnailPath));
-                    } else {
-                        tag.setThumbnailUrl(APIConstants.API_STORE_API_GROUP_DEFAULT_ICON_PATH);
                     }
                 } catch (RegistryException e) {
                     //warn and then proceed to load rest of tags
