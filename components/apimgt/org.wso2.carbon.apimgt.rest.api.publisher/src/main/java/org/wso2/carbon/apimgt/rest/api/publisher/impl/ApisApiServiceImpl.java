@@ -807,6 +807,43 @@ public class ApisApiServiceImpl extends ApisApiService {
         return null;
     }
 
+    /**
+     * Updates the swagger definition of an existing API
+     * 
+     * @param apiId API identifier
+     * @param apiDefinition Swagger definition
+     * @param contentType content type of the payload
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated swagger document of the API
+     */
+    @Override
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
+            String ifUnmodifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            apiProvider.saveSwagger20Definition(apiIdentifier, apiDefinition);
+
+            //retrieves the updated swagger definition
+            String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+            }
+        }
+        return null;
+    }
+
     private void handleException(String msg, Throwable t) throws InternalServerErrorException {
         log.error(msg, t);
         throw new InternalServerErrorException(t);
