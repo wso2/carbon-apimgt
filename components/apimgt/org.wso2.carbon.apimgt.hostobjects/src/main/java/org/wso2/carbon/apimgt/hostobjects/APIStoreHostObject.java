@@ -4045,6 +4045,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("tierDescription", row,
                         tier.getDescription() != null ? tier.getDescription() : "");
                 row.put("defaultTier", row, i == 0);
+                row.put("requestCount", row, tier.getRequestCount());
+                row.put("unitTime", row, tier.getUnitTime());
                 myn.put(i, myn, row);
                 i++;
             }
