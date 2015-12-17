@@ -1648,13 +1648,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Error occurred while Error parsing date", e);
         }
 
-        //create the bean
-        RequestSearchBean request = new RequestSearchBean(query.toString(), 0, 100,
-                APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
-
         //creating request bean
-        /*SearchRequestBean request = new SearchRequestBean(query.toString(), 2,
-                APIUsageStatisticsClientConstants.API_APIPUBLISHER_APPLICATIONNAME_FACET,
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 4,
+                APIUsageStatisticsClientConstants.API_YEAR_MONTH_WEEK_DAY_FACET,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
@@ -1666,17 +1662,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(success_request_count_fields);
 
-        //set the aggregate request to get max time
-        AggregateField max_request_time_fields = new AggregateField(APIUsageStatisticsClientConstants.REQUEST_TIME,
-                APIUsageStatisticsClientConstants.AGGREGATE_MAX, APIUsageStatisticsClientConstants.REQUEST_TIME);
-        fields.add(max_request_time_fields);
-
         //set the aggregate request to get success throttle count
         AggregateField throttle_out_count_fields = new AggregateField(
                 APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT, APIUsageStatisticsClientConstants.AGGREGATE_SUM,
                 APIUsageStatisticsClientConstants.ALIAS_THROTTLE_OUT_COUNT);
         fields.add(throttle_out_count_fields);
-        request.setAggregateFields(fields);*/
+        request.setAggregateFields(fields);
 
         //get the type of the required result type
         Type type = new TypeToken<List<Result<ThrottleDataOfAPIAndApplicationValue>>>() {
@@ -1697,16 +1688,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
         APIThrottlingOverTimeDTO usage;
 
-        List<Result<ThrottleDataOfAPIAndApplicationValue>> soretedResult = getThrottleDataOfAPIAndApplicationSortedData(obj);
+        List<Result<ThrottleDataOfAPIAndApplicationValue>> sortedResult = getThrottleDataOfAPIAndApplicationSortedData(obj);
 
-        for (Result<ThrottleDataOfAPIAndApplicationValue> result : soretedResult) {
+        for (Result<ThrottleDataOfAPIAndApplicationValue> result : sortedResult) {
             ThrottleDataOfAPIAndApplicationValue v = result.getValues();
 
-            String api = v.getApi();
-            String publisher = v.getApiPublisher();
+            String api = v.getColumnNames().get(0);
+
             String time = RestClientUtil.longToDate(v.getMax_request_time());
-            usage = new APIThrottlingOverTimeDTO(api, publisher, v.getSuccess_request_count(),
-                    v.getThrottleout_count(), time);
+            usage = new APIThrottlingOverTimeDTO(api, "publisher", v.getSuccess_request_count(),
+                    v.getThrottle_out_count(), time);
             throttlingData.add(usage);
         }
         return throttlingData;
@@ -1755,7 +1746,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query.toString(), 1,
-                APIUsageStatisticsClientConstants.API_APIPUBLISHER_APPLICATIONNAME_FACET,
+                APIUsageStatisticsClientConstants.API_YEAR_MONTH_WEEK_DAY_FACET,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         //set the aggregate request to get success count
@@ -1834,7 +1825,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query.toString(), 0,
-                APIUsageStatisticsClientConstants.API_APIPUBLISHER_APPLICATIONNAME_FACET,
+                APIUsageStatisticsClientConstants.API_YEAR_MONTH_WEEK_DAY_FACET,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
 
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
