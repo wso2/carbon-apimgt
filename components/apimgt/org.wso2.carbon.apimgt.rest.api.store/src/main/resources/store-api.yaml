@@ -971,13 +971,13 @@ paths:
 # Retrieve the list of all available tiers
 #-----------------------------------------------------
     get:
-      x-scope: apim_subscribe_api_scope
       description: |
         Get available tiers
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/tierLevel'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
@@ -1021,12 +1021,12 @@ paths:
 # Retrieve a certain tier
 #-----------------------------------------------------
     get:
-      x-scope: apim_subscribe_api_scope
       description: |
         Get tier details
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/tierLevel'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
@@ -1086,6 +1086,7 @@ paths:
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/requestedTenant'
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
       tags:
