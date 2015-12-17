@@ -438,7 +438,7 @@ public class RestApiUtil {
         if (previousEnd >= 0) {
             if (previousStart < 0) {
                 result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, 0);
-                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, previousEnd + 1);
+                result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, limit);
             } else {
                 result.put(RestApiConstants.PAGINATION_PREVIOUS_OFFSET, previousStart);
                 result.put(RestApiConstants.PAGINATION_PREVIOUS_LIMIT, limit);
