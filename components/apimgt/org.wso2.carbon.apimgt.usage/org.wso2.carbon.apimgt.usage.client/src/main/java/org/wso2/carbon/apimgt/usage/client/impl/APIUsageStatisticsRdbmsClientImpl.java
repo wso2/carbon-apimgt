@@ -625,7 +625,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 } else {
                     query = "SELECT " +
-                            "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
+                            APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                            " SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
                             " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
                             " WHERE " +
                             APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
