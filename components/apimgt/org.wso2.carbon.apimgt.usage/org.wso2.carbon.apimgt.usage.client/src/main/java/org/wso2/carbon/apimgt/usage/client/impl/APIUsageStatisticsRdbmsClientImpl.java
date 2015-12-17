@@ -320,11 +320,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 } else {
                     query = "SELECT " +
-                            "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + ','
+                            + APIUsageStatisticsClientConstants.USER_ID + ",SUM("
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
                             " FROM " + tableName +
                             " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
                             " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
-                            " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
+                            " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
+                            + APIUsageStatisticsClientConstants.USER_ID
                             + " ORDER BY net_total_requests DESC";
                 }
 
