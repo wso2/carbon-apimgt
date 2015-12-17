@@ -20,27 +20,39 @@ package org.wso2.carbon.apimgt.impl.token;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 public class JWTSignatureAlgTestCase extends TestCase {
 
+    @Override
+    protected void setUp() throws Exception {
+        String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
+        APIManagerConfiguration config = new APIManagerConfiguration();
+        config.load(dbConfigPath);
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(
+                new APIManagerConfigurationServiceImpl(config));
+    }
+
     public void testJwtSignatureAlgorithm(){
 
-//        JWTGenerator jwtGenerator = new JWTGenerator();
-//
-//        String noneAlg = jwtGenerator.getJWSCompliantAlgorithmCode(null);
-//
-//        Assert.assertTrue("Expected 'none', but was " + noneAlg, "none".equals(noneAlg));
-//
-//        noneAlg = jwtGenerator.getJWSCompliantAlgorithmCode("NONE");
-//
-//        Assert.assertTrue("Expected 'none', but was " + noneAlg, "none".equals(noneAlg));
-//
-//        String shaWithRsa256Code = jwtGenerator.getJWSCompliantAlgorithmCode("SHA256withRSA");
-//
-//        Assert.assertTrue("Expected 'RS256' but was " + shaWithRsa256Code, "RS256".equals(shaWithRsa256Code));
-//
-//        shaWithRsa256Code = jwtGenerator.getJWSCompliantAlgorithmCode("RS256");
-//
-//        Assert.assertTrue("Expected 'RS256' but was " + shaWithRsa256Code, "RS256".equals(shaWithRsa256Code));
+        JWTGenerator jwtGenerator = new JWTGenerator();
+
+        String noneAlg = jwtGenerator.getJWSCompliantAlgorithmCode(null);
+
+        Assert.assertTrue("Expected 'none', but was " + noneAlg, "none".equals(noneAlg));
+
+        noneAlg = jwtGenerator.getJWSCompliantAlgorithmCode("NONE");
+
+        Assert.assertTrue("Expected 'none', but was " + noneAlg, "none".equals(noneAlg));
+
+        String shaWithRsa256Code = jwtGenerator.getJWSCompliantAlgorithmCode("SHA256withRSA");
+
+        Assert.assertTrue("Expected 'RS256' but was " + shaWithRsa256Code, "RS256".equals(shaWithRsa256Code));
+
+        shaWithRsa256Code = jwtGenerator.getJWSCompliantAlgorithmCode("RS256");
+
+        Assert.assertTrue("Expected 'RS256' but was " + shaWithRsa256Code, "RS256".equals(shaWithRsa256Code));
     }
 }
