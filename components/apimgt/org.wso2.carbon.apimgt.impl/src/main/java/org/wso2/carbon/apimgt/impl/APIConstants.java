@@ -589,6 +589,10 @@ public final class APIConstants {
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
+    //Rest API Config data in api-config.xml
+    public static final String API_USAGE_DAS_REST_API_URL = API_USAGE_TRACKING + "DataAnalyzerURL";
+    public static final String API_USAGE_DAS_REST_API_USER = API_USAGE_TRACKING + "DataAnalyzeUsername";
+    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_USAGE_TRACKING + "DataAnalyzerURLPassword";
     
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";

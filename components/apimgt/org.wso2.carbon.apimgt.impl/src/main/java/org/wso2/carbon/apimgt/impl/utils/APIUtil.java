@@ -88,6 +88,7 @@ import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.bam.service.data.publisher.conf.EventingConfigData;
+import org.wso2.carbon.bam.service.data.publisher.conf.RESTAPIConfigData;
 import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -2910,6 +2911,7 @@ public final class APIUtil {
             log.debug("APIUsageTracking set to : " + usageEnabled);
             boolean usageEnabledState = JavaUtils.isTrueExplicitly(usageEnabled);
             EventingConfigData eventingConfigData = serviceDataPublisherAdmin.getEventingConfigData();
+            RESTAPIConfigData restApiConfigData = serviceDataPublisherAdmin.getRestAPIConfigData();
             eventingConfigData.setServiceStatsEnable(usageEnabledState);
             try {
                 if (usageEnabledState) {
@@ -2919,6 +2921,13 @@ public final class APIUtil {
                     eventingConfigData.setUrl(bamServerURL);
                     eventingConfigData.setUserName(bamServerUser);
                     eventingConfigData.setPassword(bamServerPassword);
+
+                    String restAPIURL = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
+                    String restAPIUser = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
+                    String restAPIPassword = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
+                    restApiConfigData.setUrl(restAPIURL);
+                    restApiConfigData.setUserName(restAPIUser);
+                    restApiConfigData.setPassword(restAPIPassword);
                     if (log.isDebugEnabled()) {
                         log.debug("BAMServerURL : " + bamServerURL + " , BAMServerUserName : " + bamServerUser + " , " +
                                 "BAMServerPassword : " + bamServerPassword);
@@ -2927,6 +2936,7 @@ public final class APIUtil {
                 }
 
                 serviceDataPublisherAdmin.configureEventing(eventingConfigData);
+                serviceDataPublisherAdmin.configureRestAPI(restApiConfigData);
             } catch (APIManagementException e) {
                 log.error("Error occurred while adding BAMServerProfile");
             } catch (Exception e) {
