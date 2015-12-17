@@ -27,7 +27,10 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
@@ -102,6 +105,19 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String username = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //validate the tier specified for the application
+            String tierName = body.getThrottlingTier();
+            if (tierName != null) {
+                Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+                if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
+                    throw RestApiUtil.buildBadRequestException("Specified tier " + tierName + " is invalid");
+                }
+            } else {
+                throw RestApiUtil.buildBadRequestException("Throttling tier cannot be null");
+            }
+
             //subscriber field of the body is not honored. It is taken from the context
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);
 
