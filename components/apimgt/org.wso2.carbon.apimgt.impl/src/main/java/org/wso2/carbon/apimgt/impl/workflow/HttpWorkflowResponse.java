@@ -25,7 +25,7 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 public class HttpWorkflowResponse implements WorkflowResponse {
 
     private String redirectUrl = "";
-    private String redirectConfirmationMsg = "";
+    private String redirectConfirmationMsg = null;
     private JSONObject jsonPayloadObj = new JSONObject();
     private JSONObject additionalParameters = new JSONObject();
 
