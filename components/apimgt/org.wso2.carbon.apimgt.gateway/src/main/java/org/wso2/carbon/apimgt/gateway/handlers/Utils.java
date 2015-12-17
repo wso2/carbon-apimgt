@@ -187,6 +187,12 @@ public class Utils {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
     }
+
+    public static boolean isAllowCredentials() {
+        String allowCredentials = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
+        return Boolean.parseBoolean(allowCredentials);
+    }
     
     public static boolean isCORSEnabled() {
     	String corsEnabled = config.
