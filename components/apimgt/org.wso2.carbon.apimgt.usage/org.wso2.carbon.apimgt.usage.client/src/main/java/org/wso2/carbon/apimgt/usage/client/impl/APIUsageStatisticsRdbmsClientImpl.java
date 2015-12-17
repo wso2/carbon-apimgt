@@ -501,14 +501,17 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             APIUsageStatisticsClientConstants.TIME;
                 } else {
                     query = "SELECT " +
-                            "*" +
+                            APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.METHOD + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                            APIUsageStatisticsClientConstants.RESOURCE +
                             " FROM " + tableName +
                             " WHERE " +
                             APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                             " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
                             " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
                             APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
-                            + "resourcePath";
+                            + APIUsageStatisticsClientConstants.RESOURCE;
                 }
 
                 resultSet = statement.executeQuery(query);
