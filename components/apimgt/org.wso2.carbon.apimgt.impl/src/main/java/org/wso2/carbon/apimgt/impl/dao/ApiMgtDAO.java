@@ -348,7 +348,7 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, APIUtil.encryptToken(consumerKey));
+            ps.setString(1, consumerKey);
             rs = ps.executeQuery();
             while (rs.next()) {
                 oAuthApplicationInfo.setClientId(consumerKey);
@@ -361,8 +361,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while executing SQL for getting OAuth application info", e);
         } catch (CryptoException e) {
-            handleException("Unable to encrypt consumer key " + consumerKey + " or unable to decrypt consumer secret " +
-                    "of the same", e);
+            handleException("Unable to decrypt consumer secret of consumer key " + consumerKey, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
@@ -797,7 +796,7 @@ public class ApiMgtDAO {
                 keyValidationInfoDTO.setSubscriber(subscriberName);
 
                 keyValidationInfoDTO.setAuthorizedDomains(ApiMgtDAO.getAuthorizedDomainList(accessToken));
-                keyValidationInfoDTO.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                keyValidationInfoDTO.setConsumerKey(consumerKey);
                 Set<String> scopes = new HashSet<String>();
 
                 do {
@@ -1020,12 +1019,10 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            //encrypt consumer key before passing it to query.
-            String encryptedConsumerKey = APIUtil.encryptToken(consumerKey);
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sql);
             ps.setString(1, context);
-            ps.setString(2, encryptedConsumerKey);
+            ps.setString(2, consumerKey);
             if (!defaultVersionInvoked) {
                 ps.setString(3, version);
             }
@@ -1065,8 +1062,6 @@ public class ApiMgtDAO {
 
         } catch (SQLException e) {
             handleException("Exception occurred while validating Subscription.", e);
-        } catch (CryptoException e) {
-            handleException("Error while encrypting consumer key", e);
         }
         finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
@@ -2308,7 +2303,6 @@ public class ApiMgtDAO {
 
         try {
 
-            consumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
             ps = connection.prepareStatement(getScopeSql);
             ps.setString(1, consumerKey);
@@ -2320,8 +2314,6 @@ public class ApiMgtDAO {
             tokenScope = getScopeString(scopes);
         } catch (SQLException e) {
             handleException("Failed to get token scope from consumer key: " + consumerKey, e);
-        } catch (CryptoException e) {
-            handleException("Error while encrypting consumer key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, connection, result);
         }
@@ -2490,7 +2482,7 @@ public class ApiMgtDAO {
                 apiKey.setAccessToken(decryptedAccessToken);                
                 apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                 String consumerKey = result.getString("CONSUMER_KEY");
-                apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                apiKey.setConsumerKey(consumerKey);
                 apiKey.setValidityPeriod(result.getLong("VALIDITY_PERIOD"));
                 List<String> scopes = new ArrayList<String>();
                 do{
@@ -2557,7 +2549,7 @@ public class ApiMgtDAO {
                     
                     apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = result.getString("CONSUMER_KEY");
-                    apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                    apiKey.setConsumerKey(consumerKey);
                     apiKey.setValidityPeriod(result.getLong("VALIDITY_PERIOD"));
                     // Load all the rows to in memory and build the scope string
                     List<String> scopes = new ArrayList<String>();
@@ -2643,7 +2635,7 @@ public class ApiMgtDAO {
                     apiKey.setAuthUser(authorizedUserWithDomain);
                     apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = result.getString("CONSUMER_KEY");
-                    apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                    apiKey.setConsumerKey(consumerKey);
                     apiKey.setValidityPeriod(result.getLong("VALIDITY_PERIOD"));
                     // Load all the rows to in memory and build the scope string
                     List<String> scopes = new ArrayList<String>();
@@ -2729,7 +2721,7 @@ public class ApiMgtDAO {
                     apiKey.setAuthUser(authorizedUserWithDomain);
                     apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = result.getString("CONSUMER_KEY");
-                    apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                    apiKey.setConsumerKey(consumerKey);
                     apiKey.setValidityPeriod(result.getLong("VALIDITY_PERIOD"));
                     // Load all the rows to in memory and build the scope string
                     List<String> scopes = new ArrayList<String>();
@@ -2858,7 +2850,7 @@ public class ApiMgtDAO {
             rs = ps.executeQuery();
 
             while (rs.next()){
-                consumerKey = APIUtil.decryptToken(rs.getString(1));
+                consumerKey = rs.getString(1);
             }
 
             if(consumerKey != null){
@@ -2868,9 +2860,6 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Failed to get  client of application. SQL error", e);
-        }  catch (CryptoException e) {
-            handleException("Failed to decrypt consumer key of Application ID " + applicationID +
-                    " and Key Type " + keyType, e);
         } finally {
              APIMgtDBUtil.closeAllConnections(ps,connection,rs);
         }
@@ -3043,7 +3032,7 @@ public class ApiMgtDAO {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
-                apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                apiKey.setConsumerKey(consumerKey);
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
@@ -3168,7 +3157,7 @@ public class ApiMgtDAO {
                 APIKey apiKey = new APIKey();
                 accessToken = APIUtil.decryptToken(resultSet.getString("ACCESS_TOKEN"));
                 String consumerKey = resultSet.getString("CONSUMER_KEY");
-                apiKey.setConsumerKey(APIUtil.decryptToken(consumerKey));
+                apiKey.setConsumerKey(consumerKey);
                 String consumerSecret = resultSet.getString("CONSUMER_SECRET");
                 apiKey.setConsumerSecret(APIUtil.decryptToken(consumerSecret));
                 apiKey.setAccessToken(accessToken);
@@ -3869,7 +3858,7 @@ public class ApiMgtDAO {
             if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
                 for (String domain : accessAllowDomains)    {
                     prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                    prepStmt.setString(1, APIUtil.encryptToken(oAuthConsumerKey));
+                    prepStmt.setString(1, oAuthConsumerKey);
                     prepStmt.setString(2, domain.trim());
                     prepStmt.execute();
                     prepStmt.close();
@@ -3877,7 +3866,7 @@ public class ApiMgtDAO {
                 }
             } else {
                 prepStmt = connection.prepareStatement(sqlAddAccessAllowDomains);
-                prepStmt.setString(1, APIUtil.encryptToken(oAuthConsumerKey));
+                prepStmt.setString(1, oAuthConsumerKey);
                 prepStmt.setString(2, "ALL");
                 prepStmt.execute();
                 prepStmt.close();
@@ -3893,11 +3882,6 @@ public class ApiMgtDAO {
                     log.error("Failed to rollback the add access token ", e);
                 }
             }
-        } catch (CryptoException e) {
-            log.error("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
-                    " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
-            throw new APIManagementException("Error occurred while attempting to encrypt consumer key " + oAuthConsumerKey +
-                    " before inserting to AM_APP_KEY_DOMAIN_MAPPING", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
@@ -3920,7 +3904,6 @@ public class ApiMgtDAO {
         PreparedStatement prepStmt = null;
         try {
 
-            consumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
             connection.setAutoCommit(false);
 
@@ -3950,8 +3933,6 @@ public class ApiMgtDAO {
             connection.commit();
         } catch (SQLException e) {
             handleException("Failed to update the access allow domains.", e);
-        } catch (CryptoException e) {
-            handleException("Error while encrypting consumer-key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
@@ -4009,7 +3990,7 @@ public class ApiMgtDAO {
                 connection = APIMgtDBUtil.getConnection();
                 connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
-                ps.setString(1, APIUtil.encryptToken(consumerKey));
+                ps.setString(1, consumerKey);
                 ps.setInt(2, application.getId());
                 ps.setString(3, keyType);
                 ps.executeUpdate();
@@ -4017,9 +3998,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 handleException("Error updating the CONSUMER KEY of the AM_APPLICATION_KEY_MAPPING table where " +
                         "APPLICATION_ID = " + application.getId() + " and KEY_TYPE = " + keyType, e);
-            } catch (CryptoException e) {
-                handleException("Error while encrypting the consumer key " + consumerKey + " before updating the " +
-                        "AM_APPLICATION_KEY_MAPPING table", e);
             } finally {
                 APIMgtDBUtil.closeAllConnections(ps,connection,null);
             }
@@ -4060,7 +4038,7 @@ public class ApiMgtDAO {
                 connection.setAutoCommit(false);
                 ps = connection.prepareStatement(addApplicationKeyMapping);
                 ps.setInt(1, applicationId);
-                ps.setString(2, APIUtil.encryptToken(consumerKey));
+                ps.setString(2, consumerKey);
                 ps.setString(3, keyType);
                 ps.setString(4, APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED);
                 // If the CK/CS pair is pasted on the screen set this to MAPPED
@@ -4071,9 +4049,6 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 handleException("Error while inserting record to the AM_APPLICATION_KEY_MAPPING table,  " +
                         "error is =  " + e.getMessage(), e);
-            } catch (CryptoException e) {
-                handleException("Error while encrypting the consumer key " + consumerKey + " before inserting to the " +
-                        "AM_APPLICATION_KEY_MAPPING table", e);
             } finally {
                 APIMgtDBUtil.closeAllConnections(ps, connection, null);
             }
@@ -4379,7 +4354,6 @@ public class ApiMgtDAO {
             if (rs.next()) {
                 consumerKey = rs.getString("CONSUMER_KEY");
                 consumerSecret = rs.getString("CONSUMER_SECRET");
-                consumerKey = APIUtil.encryptToken(consumerKey);
                 consumerSecret = APIUtil.encryptToken(consumerSecret);
             }
             else {
@@ -4393,7 +4367,6 @@ public class ApiMgtDAO {
                 }
                 while (isDuplicateConsumer(consumerKey));
 
-                consumerKey = APIUtil.encryptToken(consumerKey);
                 consumerSecret = APIUtil.encryptToken(consumerSecret);
 
                 prepStmt = connection.prepareStatement(sqlStmt);
@@ -4412,14 +4385,14 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error when adding a new OAuth consumer.", e);
         } catch (CryptoException e) {
-            handleException("Error while attempting to encrypt consumer-key, consumer-secret.", e);
+            handleException("Error while attempting to encrypt consumer-secret.", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         try {
-            return new String[]{APIUtil.decryptToken(consumerKey), APIUtil.decryptToken(consumerSecret)};
+            return new String[]{consumerKey, APIUtil.decryptToken(consumerSecret)};
         } catch (CryptoException e) {
-            handleException("Error while decrypting consumer-key, consumer-secret", e);
+            handleException("Error while decrypting consumer-secret", e);
         }
         return null;
     }
@@ -4458,7 +4431,6 @@ public class ApiMgtDAO {
         boolean isDuplicateConsumer = false;
 
         try {
-            consumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(sqlQuery);
             prepStmt.setString(1, consumerKey);
@@ -4469,8 +4441,6 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error when reading the application information from" + " the persistence store.", e);
-        } catch (CryptoException e) {
-            handleException("Error while encrypting consumer-key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rSet);
         }
@@ -7527,11 +7497,9 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         try {
-            //encrypt consumer key before passing it to query.
-            String encryptedConsumerKey = APIUtil.encryptToken(consumerKey);
             connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(accessAllowDomainsSql);
-            prepStmt.setString(1, encryptedConsumerKey);
+            prepStmt.setString(1, consumerKey);
             rs = prepStmt.executeQuery();
             boolean first = true;
             while (rs.next()) {
@@ -7546,8 +7514,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } catch (SQLException e) {
             throw new APIManagementException
                     ("Error in retrieving access allowing domain list from table.", e);
-        } catch (CryptoException e) {
-            handleException("Error while encrypting consumer key", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -7576,9 +7542,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
             rs = smt.executeQuery();
             while (rs.next()) {
                 consumerKey = rs.getString(1);
-            }
-            if(consumerKey != null){
-                consumerKey = APIUtil.decryptToken(consumerKey);
             }
         } catch (SQLException e) {
             handleException("Error while getting authorized domians.", e);
@@ -9024,12 +8987,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
-        try {
-            consumerKey = APIUtil.encryptToken(consumerKey);
-        } catch (CryptoException e) {
-            log.error("Could not encrypt consumerKey " + consumerKey + ". " + e.getMessage());
-            throw new APIManagementException("Could not encrypt consumerKey " + consumerKey + ". " + e.getMessage());
-        }
+
         try {
             conn = APIMgtDBUtil.getConnection();
 
@@ -9396,7 +9354,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                               " WHERE CONSUMER_KEY   = ?";
 
             ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, APIUtil.encryptToken(consumerKey));
+            ps.setString(1, consumerKey);
 
             resultSet = ps.executeQuery();
 
@@ -9407,10 +9365,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
 
         } catch (SQLException e) {
             handleException("Failed to get Application ID by consumerKey "
-                    , e);
-        } catch (CryptoException e) {
-            log.error("Failed to encrypt the consumer key " + consumerKey, e);
-            handleException("Failed to encrypt the consumer key " + consumerKey
                     , e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
