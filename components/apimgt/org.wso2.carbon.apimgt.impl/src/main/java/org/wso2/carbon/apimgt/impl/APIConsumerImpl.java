@@ -183,7 +183,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     /**
      * Returns the set of APIs with the given tag, retrieved from registry
-     * 
+     *
      * @param requestedTenant - Tenant domain of the accessed store
      * @param registry - Current registry; tenant/SuperTenant
      * @param tag
@@ -197,9 +197,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
-                isTenantFlowStarted = true;                
+                isTenantFlowStarted = true;
             }
-            
+
             String resourceByTagQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/resource-by-tag";
             Map<String, String> params = new HashMap<String, String>();
             params.put("1", tag);
@@ -554,7 +554,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     API api  = APIUtil.getAPI(artifact);
-                    
+
                     if (api != null) {
 
                         if (returnAPItags) {
@@ -1099,7 +1099,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Failed to get all the tags", e);
         } catch (UserStoreException e) {
             handleException("Failed to get all the tags", e);
-        } 
+        }
         return tagSet;
     }
 
@@ -1660,7 +1660,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
 
                     if (APIUtil.isAllowDisplayAPIsWithMultipleStatus()) {
-                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED) 
+                        if (status.equals(APIConstants.PROTOTYPED) || status.equals(APIConstants.PUBLISHED)
                                 || status.equals(APIConstants.DEPRECATED)) {
                             API resultAPI;
                             if (limitAttributes) {
@@ -1703,7 +1703,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         result.put("isMore", isMore);
         return result;
     }
-    
+
 
     private  GenericArtifact[] searchAPIsByOwner(GenericArtifactManager artifactManager, final String searchValue) throws GovernanceException {
         Map<String, List<String>> listMap = new HashMap<String, List<String>>();
@@ -1910,7 +1910,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             try {
-
                 WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                         getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
 
@@ -1962,7 +1961,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     api.getStatus().getStatus());
         }
     }
-    
+
     public String getSubscriptionStatusById(int subscriptionId) throws APIManagementException {
         return apiMgtDAO.getSubscriptionStatusById(subscriptionId);
     }
@@ -1973,39 +1972,54 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isTenantFlowStarted = false;
 
         String providerTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.
-                                                                replaceEmailDomainBack(identifier.getProviderName()));
+                replaceEmailDomainBack(identifier.getProviderName()));
 
         try {
-            if (providerTenantDomain != null &&
-                    !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(providerTenantDomain)) {
+            if (providerTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equals(providerTenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(providerTenantDomain, true);
                 isTenantFlowStarted = true;
             }
 
             API api = getAPI(identifier);
+            SubscriptionWorkflowDTO workflowDTO;
             WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(identifier, applicationId);
 
-            SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
+            // in a normal flow workflowExtRef is null when workflows are not enabled
+            if (workflowExtRef == null) {
+                workflowDTO = new SubscriptionWorkflowDTO();
+            } else {
+                workflowDTO = (SubscriptionWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
+                // set tiername to the workflowDTO only when workflows are enabled
+                SubscribedAPI subscription = apiMgtDAO
+                        .getSubscriptionById(Integer.parseInt(workflowDTO.getWorkflowReference()));
+                workflowDTO.setTierName(subscription.getTier().getName());
+            }
             workflowDTO.setApiProvider(identifier.getProviderName());
             workflowDTO.setApiContext(api.getContext());
             workflowDTO.setApiName(identifier.getApiName());
             workflowDTO.setApiVersion(identifier.getVersion());
             workflowDTO.setApplicationName(apiMgtDAO.getApplicationNameFromId(applicationId));
-            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
             workflowDTO.setExternalWorkflowReference(workflowExtRef);
             workflowDTO.setSubscriber(userId);
+            workflowDTO.setCallbackUrl(removeSubscriptionWFExecutor.getCallbackURL());
 
             String status = apiMgtDAO.getSubscriptionStatus(identifier, applicationId);
             if (APIConstants.SubscriptionStatus.ON_HOLD.equals(status)) {
                 createSubscriptionWFExecutor.cleanUpPendingTask(workflowExtRef);
             }
+            // update attributes of the new remove workflow to be created
+            workflowDTO.setStatus(WorkflowStatus.CREATED);
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            workflowDTO.setCreatedTime(System.currentTimeMillis());
+            workflowDTO.setExternalWorkflowReference(removeSubscriptionWFExecutor.generateUUID());
             removeSubscriptionWFExecutor.execute(workflowDTO);
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION + "" +
@@ -2273,6 +2287,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         try {
             String workflowExtRef;
+            ApplicationWorkflowDTO workflowDTO;
             WorkflowExecutor createApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
             WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
@@ -2286,12 +2301,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceByApplicationID(application.getId());
 
-            ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
+            // in a normal flow workflowExtRef is null when workflows are not enabled
+            if (workflowExtRef == null) {
+                workflowDTO = new ApplicationWorkflowDTO();
+            } else {
+                workflowDTO = (ApplicationWorkflowDTO) apiMgtDAO.retrieveWorkflow(workflowExtRef);
+            }
             workflowDTO.setApplication(application);
-            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            workflowDTO.setCallbackUrl(removeApplicationWFExecutor.getCallbackURL());
+            workflowDTO.setUserName(this.username);
             workflowDTO.setTenantDomain(tenantDomain);
             workflowDTO.setTenantId(tenantId);
-            workflowDTO.setExternalWorkflowReference(workflowExtRef);
 
             // Remove from cache first since we won't be able to find active access tokens
             // once the application is removed.
@@ -2305,19 +2325,28 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             // cleanup pending application registration tasks
-            String productionKeyStatus = apiMgtDAO.getRegistrationApprovalState(applicationId, APIConstants
-                    .API_KEY_TYPE_PRODUCTION);
-            String sandboxKeyStatus = apiMgtDAO.getRegistrationApprovalState(applicationId, APIConstants
-                    .API_KEY_TYPE_SANDBOX);
+            String productionKeyStatus = apiMgtDAO
+                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+            String sandboxKeyStatus = apiMgtDAO
+                    .getRegistrationApprovalState(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
             if (WorkflowStatus.CREATED.toString().equals(productionKeyStatus)) {
-                workflowExtRef = apiMgtDAO.getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
+                workflowExtRef = apiMgtDAO
+                        .getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_PRODUCTION);
                 createProductionRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
             }
             if (WorkflowStatus.CREATED.toString().equals(sandboxKeyStatus)) {
                 workflowExtRef = apiMgtDAO.getRegistrationWFReference(applicationId, APIConstants.API_KEY_TYPE_SANDBOX);
                 createSandboxRegistrationWFExecutor.cleanUpPendingTask(workflowExtRef);
             }
-            createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
+            if (workflowExtRef != null) {
+                createApplicationWFExecutor.cleanUpPendingTask(workflowExtRef);
+            }
+            // update attributes of the new remove workflow to be created
+            workflowDTO.setStatus(WorkflowStatus.CREATED);
+            workflowDTO.setCreatedTime(System.currentTimeMillis());
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            workflowDTO.setExternalWorkflowReference(removeApplicationWFExecutor.generateUUID());
+
             removeApplicationWFExecutor.execute(workflowDTO);
         } catch (WorkflowException e) {
             String errorMsg = "Could not execute Workflow, " + WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION + " " +
