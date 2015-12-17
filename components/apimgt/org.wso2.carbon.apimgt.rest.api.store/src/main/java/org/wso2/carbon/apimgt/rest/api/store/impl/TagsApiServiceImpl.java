@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TagMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,19 +52,23 @@ public class TagsApiServiceImpl extends TagsApiService {
      * @return Response object containing resulted tags
      */
     @Override
-    public Response tagsGet(Integer limit, Integer offset, String accept, String ifNoneMatch) {
+    public Response tagsGet(Integer limit, Integer offset, String xWSO2Tenant, String accept, String ifNoneMatch) {
 
         //pre-processing
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        String username = RestApiUtil.getLoggedInUsername();
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         Set<Tag> tagSet;
         List<Tag> tagList = new ArrayList<>();
         try {
+            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
+                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+            }
+
+            String username = RestApiUtil.getLoggedInUsername();
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
-            tagSet = apiConsumer.getAllTags(tenantDomain);
+            tagSet = apiConsumer.getAllTags(requestedTenantDomain);
             if (tagSet != null)
                 tagList.addAll(tagSet);
             TagListDTO tagListDTO = TagMappingUtil.fromTagListToDTO(tagList, limit, offset);
@@ -71,8 +76,11 @@ public class TagsApiServiceImpl extends TagsApiService {
             return Response.ok().entity(tagListDTO).build();
         } catch (APIManagementException e) {
             handleException("Error while retrieving tags", e);
-            return null;
+        } catch (UserStoreException e) {
+            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     private void handleException(String msg, Throwable t) throws InternalServerErrorException {
