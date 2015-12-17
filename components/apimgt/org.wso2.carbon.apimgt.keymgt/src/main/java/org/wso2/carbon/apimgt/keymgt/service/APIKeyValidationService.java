@@ -165,7 +165,8 @@ public class APIKeyValidationService extends AbstractAdmin {
 
         log.debug("State after calling validateScopes... " + state);
 
-        if (state && APIKeyMgtDataHolder.isJwtGenerationEnabled()) {
+        if (state && APIKeyMgtDataHolder.isJwtGenerationEnabled() 
+                && validationContext.getValidationInfoDTO().getEndUserName() != null) {
             keyValidationHandler.generateConsumerToken(validationContext);
         }
         log.debug("State after calling generateConsumerToken... " + state);
