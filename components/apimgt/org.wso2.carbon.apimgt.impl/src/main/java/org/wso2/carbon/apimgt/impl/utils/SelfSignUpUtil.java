@@ -85,22 +85,7 @@ public final class SelfSignUpUtil {
 					.setTenantDomain(tenantDomain, true);
 				}
 			}
-			String cacheName = tenantDomain + "_" + APIConstants.SELF_SIGN_UP_CONFIG_CACHE;
-			Cache signupConfigCache =
-					Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
-					.getCache(APIConstants.SELF_SIGN_UP_CONFIG_CACHE);
-			// load self signup configuration from the cache
-			config = (UserRegistrationConfigDTO) signupConfigCache.get(cacheName);
-
-			if (config == null) {
-				// get the tenant's configuration from the registry and put it
-				// in the cache
-				 if (log.isDebugEnabled()) {
-		             log.debug("Cache miss for " + cacheName );
-		         }       
-				config = getSignupConfigurationFromRegistry(tenantDomain);
-				signupConfigCache.put(cacheName, config);
-			}
+			config = getSignupConfigurationFromRegistry(tenantDomain);
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
