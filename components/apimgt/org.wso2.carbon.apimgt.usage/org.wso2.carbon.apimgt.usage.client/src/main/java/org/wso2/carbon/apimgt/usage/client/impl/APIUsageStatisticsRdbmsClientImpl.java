@@ -320,11 +320,14 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 } else {
                     query = "SELECT " +
-                            "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + ','
+                            + APIUsageStatisticsClientConstants.USER_ID + ",SUM("
+                            + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS net_total_requests" +
                             " FROM " + tableName +
                             " WHERE " + APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ")" +
                             " AND time BETWEEN " + "'" + fromDate + "' AND \'" + toDate + "' " +
-                            " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY
+                            " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + ','
+                            + APIUsageStatisticsClientConstants.USER_ID
                             + " ORDER BY net_total_requests DESC";
                 }
 
@@ -501,14 +504,17 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             APIUsageStatisticsClientConstants.TIME;
                 } else {
                     query = "SELECT " +
-                            "*" +
+                            APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.METHOD + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                            APIUsageStatisticsClientConstants.RESOURCE +
                             " FROM " + tableName +
                             " WHERE " +
                             APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +
                             " AND time BETWEEN " + "'" + fromDate + "' AND '" + toDate + "' " +
                             " GROUP BY " + APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
                             APIUsageStatisticsClientConstants.API + "," + APIUsageStatisticsClientConstants.METHOD + ","
-                            + "resourcePath";
+                            + APIUsageStatisticsClientConstants.RESOURCE;
                 }
 
                 resultSet = statement.executeQuery(query);
@@ -622,7 +628,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 } else {
                     query = "SELECT " +
-                            "*,SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
+                            APIUsageStatisticsClientConstants.API + "," +
+                            APIUsageStatisticsClientConstants.CONSUMERKEY + "," +
+                            " SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS total_calls " +
                             " FROM " + APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY +
                             " WHERE " +
                             APIUsageStatisticsClientConstants.CONSUMERKEY + " IN (" + keyString + ") " +

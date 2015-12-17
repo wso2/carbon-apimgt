@@ -31,26 +31,26 @@
         {
           "description": "",
           "roles": "admin",
-          "name": "API_PUBLISHER_SCOPE",
-          "key": "API_PUBLISHER_SCOPE"
+          "name": "apim_publish_api_scope",
+          "key": "apim_publish_api_scope"
         },
         {
           "description": "",
           "roles": "admin",
-          "name": "API_CREATOR_SCOPE",
-          "key": "API_CREATOR_SCOPE"
+          "name": "apim_create_api_scope",
+          "key": "apim_create_api_scope"
         },
         {
           "description": "",
           "roles": "admin",
-          "name": "API_CREATOR_PUBLISHER_SCOPE",
-          "key": "API_CREATOR_PUBLISHER_SCOPE"
+          "name": "apim_create_publish_api_scope",
+          "key": "apim_create_publish_api_scope"
         },
         {
           "description": "",
           "roles": "admin",
-          "name": "API_ADMINISTRATIVE_SCOPE",
-          "key": "API_ADMINISTRATIVE_SCOPE"
+          "name": "apim_edit_tiers_scope",
+          "key": "apim_edit_tiers_scope"
         }
       ]
     }
@@ -58,7 +58,7 @@
   "paths": {
     "/apis": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "summary": "Retrieving APIs\n",
         "description": "Get a list of available APIs qualifying under a given search condition.\n",
         "parameters": [
@@ -114,7 +114,7 @@
         }
       },
       "post": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Create a new API\n",
         "parameters": [
           {
@@ -172,7 +172,7 @@
     },
     "/apis/{apiId}": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Get details of an API\n",
         "parameters": [
           {
@@ -231,7 +231,7 @@
         }
       },
       "put": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Update an existing API\n",
         "parameters": [
           {
@@ -312,7 +312,7 @@
         }
       },
       "delete": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Delete an existing API\n",
         "parameters": [
           {
@@ -356,7 +356,7 @@
     },
     "/apis/{apiId}/swagger": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Get the swagger of an API\n",
         "parameters": [
           {
@@ -414,7 +414,7 @@
     },
     "/apis/copy-api": {
       "post": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Create a new API by copying an existing API\n",
         "parameters": [
           {
@@ -458,7 +458,7 @@
     },
     "/apis/change-lifecycle": {
       "post": {
-        "x-scope": "API_PUBLISHER_SCOPE",
+        "x-scope": "apim_publish_api_scope",
         "description": "Change the lifecycle of an API\n",
         "parameters": [
           {
@@ -534,7 +534,7 @@
     },
     "/apis/{apiId}/documents": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Get a list of documents belonging to an API.\n",
         "parameters": [
           {
@@ -598,7 +598,7 @@
         }
       },
       "post": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Add a new document to an API\n",
         "parameters": [
           {
@@ -656,7 +656,7 @@
     },
     "/apis/{apiId}/documents/{documentId}": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Get a particular document associated with an API.\n",
         "parameters": [
           {
@@ -718,7 +718,7 @@
         }
       },
       "put": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Update document details.\n",
         "parameters": [
           {
@@ -796,7 +796,7 @@
         }
       },
       "delete": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Delete a document of an API\n",
         "parameters": [
           {
@@ -837,7 +837,7 @@
     },
     "/apis/{apiId}/documents/{documentId}/content": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Downloads a FILE type document/get the inline content or source url of a certain document.\n",
         "parameters": [
           {
@@ -908,7 +908,7 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Upload a file to a document or add inline content to the document.\n\nDocument's source type should be **FILE** in order to upload a file to the document using **file** parameter.\nDocument's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.\n\nOnly one of **file** or **inlineContent** can be specified at one time.\n",
         "parameters": [
           {
@@ -993,7 +993,7 @@
     },
     "/applications/{applicationId}": {
       "get": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Get application details\n",
         "parameters": [
           {
@@ -1054,7 +1054,7 @@
     },
     "/subscriptions": {
       "get": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Get subscription list.\nThe API Identifier and corresponding Application Identifier\nthe subscriptions of which are to be returned are passed as parameters.\n",
         "parameters": [
           {
@@ -1108,7 +1108,7 @@
     },
     "/subscriptions/{subscriptionId}": {
       "get": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "description": "Get subscription details\n",
         "parameters": [
           {
@@ -1163,7 +1163,7 @@
     },
     "/subscriptions/block-subscription": {
       "post": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "parameters": [
           {
             "$ref": "#/parameters/subscriptionId-Q"
@@ -1227,7 +1227,7 @@
     },
     "/subscriptions/unblock-subscription": {
       "post": {
-        "x-scope": "API_CREATOR_SCOPE",
+        "x-scope": "apim_create_api_scope",
         "parameters": [
           {
             "$ref": "#/parameters/subscriptionId-Q"
@@ -1281,7 +1281,7 @@
     },
     "/tiers/{tierLevel}": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Get available tiers\n",
         "parameters": [
           {
@@ -1333,7 +1333,7 @@
         }
       },
       "post": {
-        "x-scope": "API_ADMINISTRATIVE_SCOPE",
+        "x-scope": "apim_edit_tiers_scope",
         "description": "Add a new tier\n",
         "parameters": [
           {
@@ -1391,7 +1391,7 @@
     },
     "/tiers/{tierLevel}/{tierName}": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Get tier details\n",
         "parameters": [
           {
@@ -1453,7 +1453,7 @@
         }
       },
       "put": {
-        "x-scope": "API_ADMINISTRATIVE_SCOPE",
+        "x-scope": "apim_edit_tiers_scope",
         "description": "Update tier details\n",
         "parameters": [
           {
@@ -1531,7 +1531,7 @@
         }
       },
       "delete": {
-        "x-scope": "API_ADMINISTRATIVE_SCOPE",
+        "x-scope": "apim_edit_tiers_scope",
         "description": "Remove a tier\n",
         "parameters": [
           {
@@ -1572,7 +1572,7 @@
     },
     "/tiers/update-permission": {
       "post": {
-        "x-scope": "API_ADMINISTRATIVE_SCOPE",
+        "x-scope": "apim_edit_tiers_scope",
         "description": "Update tier permission\n",
         "parameters": [
           {
@@ -1648,7 +1648,7 @@
     },
     "/environments": {
       "get": {
-        "x-scope": "API_CREATOR_PUBLISHER_SCOPE",
+        "x-scope": "apim_create_publish_api_scope",
         "description": "Get a list of gateway environments configured previously.\n",
         "parameters": [
           {

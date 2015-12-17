@@ -44,6 +44,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
 	private String apiImplementationType;
 	private String allowHeaders;
+	private boolean allowCredentials;
 	private List<String> allowedOrigins;
 	private boolean initializeHeaderValues;
 
@@ -73,6 +74,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				allowedOrigins = Arrays.asList(allowedOriginsList.split(","));
 			}
 		}
+
+		allowCredentials = Utils.isAllowCredentials();
+
 		initializeHeaderValues =  true;
 	}
 
@@ -177,8 +181,15 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		Map<String, String> headers =
 				(Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 		String requestOrigin = headers.get("Origin");
-		messageContext
-				.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, getAllowedOrigins(requestOrigin));
+		String allowedOrigin = getAllowedOrigins(requestOrigin);
+
+		//Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
+		//and the allowed origin is not the wildcard (*)
+		if (allowCredentials && !allowedOrigin.equals("*")) {
+			messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, true);
+		}
+
+		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
 		String allowedMethods = "";
 		if (selectedResource != null) {
 			for (String method : selectedResource.getMethods()) {
