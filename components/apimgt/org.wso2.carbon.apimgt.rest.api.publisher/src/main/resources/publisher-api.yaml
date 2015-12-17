@@ -60,20 +60,20 @@ x-wso2-security:
     x-wso2-scopes:
       - description: ""
         roles: admin
-        name: API_PUBLISHER_SCOPE
-        key: API_PUBLISHER_SCOPE
+        name: apim_publish_api_scope
+        key: apim_publish_api_scope
       - description: ""
         roles: admin
-        name: API_CREATOR_SCOPE
-        key: API_CREATOR_SCOPE
+        name: apim_create_api_scope
+        key: apim_create_api_scope
       - description: ""
         roles: admin
-        name: API_CREATOR_PUBLISHER_SCOPE
-        key: API_CREATOR_PUBLISHER_SCOPE
+        name: apim_create_publish_api_scope
+        key: apim_create_publish_api_scope
       - description: ""
         roles: admin
-        name: API_ADMINISTRATIVE_SCOPE
-        key: API_ADMINISTRATIVE_SCOPE
+        name: apim_edit_tiers_scope
+        key: apim_edit_tiers_scope
 
 ######################################################
 # The "API Collection" resource APIs
@@ -85,7 +85,7 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition  
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       summary: |
         Retrieving APIs
       description: |
@@ -143,7 +143,7 @@ paths:
 # Create a new API 
 #-----------------------------------------------------
     post:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Create a new API
       parameters:
@@ -201,7 +201,7 @@ paths:
 # Retrieve the details of an API definition
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       description: |
         Get details of an API
       parameters:
@@ -254,7 +254,7 @@ paths:
 # Update the definition of an API
 #-----------------------------------------------------
     put:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Update an existing API
       parameters:
@@ -326,7 +326,7 @@ paths:
 # Delete the definition of an API
 #-----------------------------------------------------
     delete:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: | 
         Delete an existing API
       parameters:
@@ -365,7 +365,7 @@ paths:
 # Retrieve the API swagger definition
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       description: |
         Get the swagger of an API
       parameters:
@@ -421,7 +421,7 @@ paths:
 # Create a new API based on an already existing one
 #-----------------------------------------------------
     post:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Create a new API by copying an existing API
       parameters:
@@ -465,7 +465,7 @@ paths:
 # Change the lifecycle of an API
 #-----------------------------------------------------
     post:
-      x-scope: API_PUBLISHER_SCOPE
+      x-scope: apim_publish_api_scope
       description: |
         Change the lifecycle of an API
       parameters:
@@ -550,7 +550,7 @@ paths:
 # Retrieve the documents associated with an API that qualify under a search condition
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       description: |
         Get a list of documents belonging to an API.
       parameters:
@@ -613,7 +613,7 @@ paths:
 # Add a document to a certain API
 #-----------------------------------------------------
     post:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Add a new document to an API
       parameters:
@@ -671,7 +671,7 @@ paths:
 # Retrieve a particular document of a certain API
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       description: |
         Get a particular document associated with an API.
       parameters:
@@ -726,7 +726,7 @@ paths:
 # Update a particular document of a certain API
 #-----------------------------------------------------
     put:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Update document details.
       parameters:
@@ -794,7 +794,7 @@ paths:
 # Delete a particular document of a certain API
 #-----------------------------------------------------
     delete:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Delete a document of an API
       parameters:
@@ -833,7 +833,7 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
-        x-scope: API_CREATOR_PUBLISHER_SCOPE
+        x-scope: apim_create_publish_api_scope
         description: |
           Downloads a FILE type document/get the inline content or source url of a certain document.
         parameters:
@@ -897,7 +897,7 @@ paths:
       post:
         consumes: 
           - multipart/form-data
-        x-scope: API_CREATOR_SCOPE
+        x-scope: apim_create_api_scope
         description: |
           Upload a file to a document or add inline content to the document.
 
@@ -978,7 +978,7 @@ paths:
 # Retrieve the details about a certain application
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Get application details
       parameters:
@@ -1036,7 +1036,7 @@ paths:
 # Retrieve all subscriptions of a certain API
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Get subscription list.
         The API Identifier and corresponding Application Identifier
@@ -1086,7 +1086,7 @@ paths:
 # Retrieve a certain subscription
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       description: |
         Get subscription details
       parameters:
@@ -1134,7 +1134,7 @@ paths:
 # Block a certain subscription
 #-----------------------------------------------------
     post:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - name: blockState
@@ -1196,7 +1196,7 @@ paths:
 # Unblock a certain subscription
 #-----------------------------------------------------
     post:
-      x-scope: API_CREATOR_SCOPE
+      x-scope: apim_create_api_scope
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
         - $ref: '#/parameters/If-Match'
@@ -1250,7 +1250,7 @@ paths:
 # Retrieve the list of all available tiers
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       description: |
         Get available tiers
       parameters:
@@ -1293,7 +1293,7 @@ paths:
 # Create a new tier
 #-----------------------------------------------------
     post:
-      x-scope: API_ADMINISTRATIVE_SCOPE
+      x-scope: apim_edit_tiers_scope
       description: |
         Add a new tier
       parameters:
@@ -1351,7 +1351,7 @@ paths:
 # Retrieve a certain tier
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       description: |
         Get tier details
       parameters:
@@ -1406,7 +1406,7 @@ paths:
 # Update a certain tier
 #-----------------------------------------------------
     put:
-      x-scope: API_ADMINISTRATIVE_SCOPE
+      x-scope: apim_edit_tiers_scope
       description: |
         Update tier details
       parameters:
@@ -1474,7 +1474,7 @@ paths:
 # Delete a certain tier
 #-----------------------------------------------------
     delete:
-      x-scope: API_ADMINISTRATIVE_SCOPE
+      x-scope: apim_edit_tiers_scope
       description: |
         Remove a tier
       parameters:
@@ -1512,7 +1512,7 @@ paths:
 # Update the permission of a certain tier
 #-----------------------------------------------------
     post:
-      x-scope: API_ADMINISTRATIVE_SCOPE
+      x-scope: apim_edit_tiers_scope
       description: |
         Update tier permission
       parameters:
@@ -1584,7 +1584,7 @@ paths:
 # Retrieve the list of environments configured for a certain API
 #-----------------------------------------------------
     get:
-      x-scope: API_CREATOR_PUBLISHER_SCOPE
+      x-scope: apim_create_publish_api_scope
       description: |
         Get a list of gateway environments configured previously.
       parameters:
