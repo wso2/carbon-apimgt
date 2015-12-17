@@ -971,7 +971,6 @@ paths:
 # Retrieve the list of all available tiers
 #-----------------------------------------------------
     get:
-      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Get available tiers
       parameters:
@@ -1022,7 +1021,6 @@ paths:
 # Retrieve a certain tier
 #-----------------------------------------------------
     get:
-      x-scope: API_SUBSCRIBER_SCOPE
       description: |
         Get tier details
       parameters:

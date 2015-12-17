@@ -1000,7 +1000,6 @@
     },
     "/tiers/{tierLevel}": {
       "get": {
-        "x-scope": "API_SUBSCRIBER_SCOPE",
         "description": "Get available tiers\n",
         "parameters": [
           {
@@ -1011,6 +1010,9 @@
           },
           {
             "$ref": "#/parameters/tierLevel"
+          },
+          {
+            "$ref": "#/parameters/requestedTenant"
           },
           {
             "$ref": "#/parameters/Accept"
@@ -1057,7 +1059,6 @@
     },
     "/tiers/{tierLevel}/{tierName}": {
       "get": {
-        "x-scope": "API_SUBSCRIBER_SCOPE",
         "description": "Get tier details\n",
         "parameters": [
           {
@@ -1065,6 +1066,9 @@
           },
           {
             "$ref": "#/parameters/tierLevel"
+          },
+          {
+            "$ref": "#/parameters/requestedTenant"
           },
           {
             "$ref": "#/parameters/Accept"
@@ -1128,6 +1132,9 @@
           },
           {
             "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/requestedTenant"
           },
           {
             "$ref": "#/parameters/Accept"
