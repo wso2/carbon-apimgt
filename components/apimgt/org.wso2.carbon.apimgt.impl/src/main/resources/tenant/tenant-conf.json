@@ -5,23 +5,23 @@
   "RESTAPIScopes": {
     "Scope": [
       {
-        "Name": "API_PUBLISHER_SCOPE",
+        "Name": "apim_publish_api_scope",
         "Roles": "admin"
       },
       {
-        "Name": "API_CREATOR_SCOPE",
+        "Name": "apim_create_api_scope",
         "Roles": "admin"
       },
       {
-        "Name": "API_CREATOR_PUBLISHER_SCOPE",
+        "Name": "apim_create_publish_api_scope",
         "Roles": "admin"
       },
       {
-        "Name": "API_SUBSCRIBER_SCOPE",
+        "Name": "apim_subscribe_api_scope",
         "Roles": "Internal/subscriber"
       },
       {
-        "Name": "API_ADMINISTRATIVE_SCOPE",
+        "Name": "apim_edit_tiers_scope",
         "Roles": "admin"
       }
     ]
