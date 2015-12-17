@@ -452,7 +452,6 @@ public final class APIConstants {
     public static final String API_STORE_REUSE_APP_NAME = API_STORE + "ReuseAppName";
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
-    public static final String API_STORE_API_GROUP_DEFAULT_ICON_PATH="images/api-group-default.png";
 
 
     public static final String API_PUBLISHER = "APIPublisher.";

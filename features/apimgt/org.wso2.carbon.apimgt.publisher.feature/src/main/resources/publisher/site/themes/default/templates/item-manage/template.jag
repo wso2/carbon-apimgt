@@ -253,19 +253,20 @@
                             	<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
                            	<div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
                        </div>
-                       <% } %>            
-                <br/>
-                    <div class="control-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
-                        <label class="control-label" for="tenants" id="tenantLabel" name="tenantLabel">
-                            <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
-                        </label>
-                        <div class="controls">
-                            <input type="text" class="input"
-                            id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
-                            <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
-                        </div>
-                    
-                    </div>
+
+                       <br/>
+                           <div class="control-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                               <label class="control-label" for="tenants" id="tenantLabel" name="tenantLabel">
+                                   <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
+                               </label>
+                               <div class="controls">
+                                   <input type="text" class="input"
+                                   id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+                                   <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
+                               </div>
+
+                           </div>
+                       <% } %>
                 </div>
     </fieldset>
 

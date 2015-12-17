@@ -372,7 +372,7 @@
                         <div class="col-sm-10">
                         <div class="input-append">
                         <input type="text" class="form-control validInput" id="wsdl" name="wsdl"  value="<%= wsdl %>" />
-                        <button class="btn check_url_valid" url-type="wsdl" type="button" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>"><%=i18n.localize("testURI")%></button>
+                        <button class="btn check_url_valid" url-type="wsdl" type="button"><%=i18n.localize("testURI")%></button>
                         <a class="help_popup" help_data="wsdldesc_help"><i class="fa fa-question-circle"></i></a>
                         <p id="wsdldesc_help" class="hide"><%=i18n.localize("wsdlDescHelpMsg")%></p>
                     </div>

@@ -3770,9 +3770,9 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters or their types.");
         }
 
-        String providerName = (String) args[2];
-        String apiName = (String) args[3];
-        String apiVersion = (String) args[4];
+        String providerName = args.length > 2 ? (String) args[2] : "";
+        String apiName = args.length > 3 ? (String) args[3] : "";
+        String apiVersion = args.length > 4 ? (String) args[4] : "";
 
         if (providerName != null) {
             providerName = APIUtil.replaceEmailDomain(providerName);
@@ -3841,6 +3841,9 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         String urlVal = (String) args[1];
         String type = (String) args[0];
+        String providerName = args.length > 2 ? (String) args[2] : "";
+        String apiName = args.length > 3 ? (String) args[3] : "";
+        String apiVersion = args.length > 4 ? (String) args[4] : "";
         String invalidStatusCodesRegex = args.length > 5 ? (String) args[5] : "404";
         if (urlVal != null && !urlVal.isEmpty()) {
             urlVal = urlVal.trim();
@@ -3855,12 +3858,15 @@ public class APIProviderHostObject extends ScriptableObject {
                     // checking http,https endpoints up to resource level by doing
                     // http HEAD. And other end point
                     // validation do through basic url connect
+                    if (!StringUtils.equals(providerName, "") && !StringUtils.equals(apiName, "") && !StringUtils
+                            .equals(apiVersion, "")) { //To escape editing the url for auto validation of wsdl endpoints
 
-                    NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
-                    urlVal = (String) obj.get("urlValue");
+                        NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                        urlVal = (String) obj.get("urlValue");
 
-                    if (obj.get("isContainUriTemplatesOnly").equals(true)) {
-                        isContainUriTemplatesOnly = true;
+                        if (obj.get("isContainUriTemplatesOnly").equals(true)) {
+                            isContainUriTemplatesOnly = true;
+                        }
                     }
 
                     URL url = new URL(urlVal);

@@ -154,6 +154,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
 
             String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
+            String[] grantTypes = null;
+            if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT) != null) {
+                grantTypes = ((String)oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT))
+                                                                                                           .split(",");
+            }
             String applicationName = oAuthApplicationInfo.getClientName();
             log.debug("Updating OAuth Client with ID : " + oAuthApplicationInfo.getClientId());
 
@@ -166,7 +171,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = keyMgtClient
                     .updateOAuthApplication(userId, applicationName, oAuthApplicationInfo.getCallBackURL(),
-                            oAuthApplicationInfo.getClientId(), null);
+                            oAuthApplicationInfo.getClientId(), grantTypes);
             OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
             newAppInfo.setClientId(applicationInfo.getClientId());
             newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());

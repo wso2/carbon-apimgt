@@ -830,6 +830,18 @@
                 <version>${wso2-uri-templates.version}</version>
             </dependency>
 
+	    <dependency>
+                <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${orbit.version.pdfbox}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+                <artifactId>fontbox</artifactId>
+                <version>${orbit.version.pdfbox}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -841,7 +853,7 @@
         <carbon.apimgt.imp.pkg.version>[5.0.0, 6.0.0)</carbon.apimgt.imp.pkg.version>
 
         <!-- Carbon kernel version -->
-        <carbon.kernel.version>4.4.2</carbon.kernel.version>
+        <carbon.kernel.version>4.4.3</carbon.kernel.version>
 
         <carbon.commons.version>4.4.8</carbon.commons.version>
         <carbon.registry.version>4.4.8</carbon.registry.version>
@@ -938,6 +950,8 @@
         <cxf.version>3.1.4</cxf.version>
 
         <carbon.metrics.version>1.1.0</carbon.metrics.version>
+        <!-- apache pdfbox version -->
+        <orbit.version.pdfbox>1.8.10.wso2v2</orbit.version.pdfbox>
 
     </properties>
 </project>
