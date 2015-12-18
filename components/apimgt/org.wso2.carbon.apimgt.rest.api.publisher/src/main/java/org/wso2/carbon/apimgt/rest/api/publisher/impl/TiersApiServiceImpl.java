@@ -70,29 +70,31 @@ public class TiersApiServiceImpl extends TiersApiService {
         try {
             List<Tier> tierList = new ArrayList<>();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            if (!StringUtils.isBlank(tierLevel)) {
-                if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
-                    Map<String, Tier> apiTiersMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
-                    if (apiTiersMap != null) {
-                        tierList.addAll(apiTiersMap.values());
-                    }
-                } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
-                    Map<String, Tier> appTiersMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
-                    if (appTiersMap != null) {
-                        tierList.addAll(appTiersMap.values());
-                    }
-                } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)) {
-                    Map<String, Tier> resourceTiersMap = 
-                            APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                    if (resourceTiersMap != null) {
-                        tierList.addAll(resourceTiersMap.values());
-                    }
-                } else {
-                    throw RestApiUtil.buildNotFoundException(
-                            "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+
+            if (StringUtils.isBlank(tierLevel)) {
+                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+            }
+
+            //retrieves the tier based on the given tier-level
+            if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
+                Map<String, Tier> apiTiersMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, tenantDomain);
+                if (apiTiersMap != null) {
+                    tierList.addAll(apiTiersMap.values());
+                }
+            } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
+                Map<String, Tier> appTiersMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+                if (appTiersMap != null) {
+                    tierList.addAll(appTiersMap.values());
+                }
+            } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)) {
+                Map<String, Tier> resourceTiersMap = 
+                        APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                if (resourceTiersMap != null) {
+                    tierList.addAll(resourceTiersMap.values());
                 }
             } else {
-                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+                throw RestApiUtil.buildNotFoundException(
+                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
             }
             TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, tierLevel, limit, offset);
             TierMappingUtil.setPaginationParams(tierListDTO, tierLevel , limit, offset, tierList.size());
@@ -200,36 +202,40 @@ public class TiersApiServiceImpl extends TiersApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             TierDTO.TierLevelEnum tierType;
             Tier foundTier = null;
-            if (!StringUtils.isBlank(tierLevel)) {
-                if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
-                    foundTier = APIUtil.getTierFromCache(tierName, tenantDomain);
-                    tierType = TierDTO.TierLevelEnum.api;
-                } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
-                    Map<String, Tier> appTiersMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
-                    tierType = TierDTO.TierLevelEnum.application;
-                    if (appTiersMap != null) {
-                        foundTier = RestApiUtil.findTier(appTiersMap.values(), tierName);
-                    }
-                } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)) {
-                    Map<String, Tier> resourceTiersMap = 
-                            APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
-                    tierType = TierDTO.TierLevelEnum.resource;
-                    if (resourceTiersMap != null) {
-                        foundTier = RestApiUtil.findTier(resourceTiersMap.values(), tierName);
-                    }
-                } else {
-                    throw RestApiUtil.buildNotFoundException(
-                            "type should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+
+            if (StringUtils.isBlank(tierLevel)) {
+                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+            }
+
+            //retrieves the tier based on the given tier-level
+            if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
+                foundTier = APIUtil.getTierFromCache(tierName, tenantDomain);
+                tierType = TierDTO.TierLevelEnum.api;
+            } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)) {
+                Map<String, Tier> appTiersMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
+                tierType = TierDTO.TierLevelEnum.application;
+                if (appTiersMap != null) {
+                    foundTier = RestApiUtil.findTier(appTiersMap.values(), tierName);
                 }
-                if (foundTier != null) {
-                    return Response.ok()
-                            .entity(TierMappingUtil.fromTierToDTO(foundTier, tierType.toString()))
-                            .build();
-                } else {
-                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+            } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)) {
+                Map<String, Tier> resourceTiersMap =
+                        APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
+                tierType = TierDTO.TierLevelEnum.resource;
+                if (resourceTiersMap != null) {
+                    foundTier = RestApiUtil.findTier(resourceTiersMap.values(), tierName);
                 }
             } else {
-                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+                throw RestApiUtil.buildNotFoundException(
+                        "type should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+            }
+
+            //returns if the tier is found, otherwise send 404
+            if (foundTier != null) {
+                return Response.ok()
+                        .entity(TierMappingUtil.fromTierToDTO(foundTier, tierType.toString()))
+                        .build();
+            } else {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
