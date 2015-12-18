@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
@@ -29,7 +31,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -42,6 +43,8 @@ import javax.ws.rs.core.Response;
  * 
  */
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
+
+    private static final Log log = LogFactory.getLog(SubscriptionsApiService.class);
 
     /** Retieves all subscriptions or retrieves subscriptions for a given API Id
      * 
@@ -81,8 +84,14 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             }
             return Response.ok().entity(subscriptionListDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String msg = "Error while retrieving subscriptions of API " + apiId;
+                handleException(msg, e);
+            }
         }
+        return null;
     }
 
     /**
@@ -101,16 +110,25 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         APIProvider apiProvider;
         try {
             apiProvider = RestApiUtil.getProvider(username);
+
+            //validates the subscriptionId if it exists
+            SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+            if (currentSubscription == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+            }
+
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
             subscribedAPI.setSubStatus(blockState);
             apiProvider.updateSubscription(subscribedAPI);
 
-            SubscribedAPI updatedSubscribedAPI = apiProvider.getSubscriptionByUUID(subscriptionId);
-            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
+            SubscribedAPI updatedSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            String msg = "Error while blocking the subscription " + subscriptionId;
+            handleException(msg, e);
         }
+        return null;
     }
 
     /**
@@ -128,6 +146,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         APIProvider apiProvider;
         try {
             apiProvider = RestApiUtil.getProvider(username);
+
+            //validates the subscriptionId if it exists
+            SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+            if (currentSubscription == null) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+            }
+
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
             subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
             apiProvider.updateSubscription(subscribedAPI);
@@ -136,8 +161,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            String msg = "Error while unblocking the subscription " + subscriptionId;
+            handleException(msg, e);
         }
+        return null;
     }
 
     /**
@@ -161,11 +188,17 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
                 return Response.ok().entity(subscriptionDTO).build();
             } else {
-                throw new NotFoundException();
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
             }
         } catch (APIManagementException e) {
-            throw new InternalServerErrorException(e);
+            String msg = "Error while getting the subscription " + subscriptionId;
+            handleException(msg, e);
         }
+        return null;
     }
 
+    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
+        log.error(msg, t);
+        throw new InternalServerErrorException(t);
+    }
 }
