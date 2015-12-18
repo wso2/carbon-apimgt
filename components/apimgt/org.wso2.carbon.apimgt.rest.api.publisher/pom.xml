@@ -108,7 +108,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#publisher#v1</warName>
+                    <warName>api#am#publisher#v0.9</warName>
                 </configuration>
             </plugin>
 

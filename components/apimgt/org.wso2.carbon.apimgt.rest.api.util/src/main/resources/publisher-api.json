@@ -18,7 +18,7 @@
     "https"
   ],
   "host": "apis.wso2.com",
-  "basePath": "/apim/v1.0.0",
+  "basePath": "/api/am/publisher/v0.9",
   "consumes": [
     "application/json"
   ],
