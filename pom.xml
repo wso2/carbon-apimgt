@@ -905,7 +905,7 @@
         <jaggery.version>0.12.0</jaggery.version>
 
         <!-- Misc Versions -->
-        <synapse.version>2.1.5-wso2v2-SNAPSHOT</synapse.version>
+        <synapse.version>2.1.5-wso2v2</synapse.version>
 
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
