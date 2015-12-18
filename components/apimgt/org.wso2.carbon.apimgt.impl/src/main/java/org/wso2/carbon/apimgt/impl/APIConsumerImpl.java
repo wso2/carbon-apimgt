@@ -2040,10 +2040,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (subscribedAPI != null) {
             Application application = subscribedAPI.getApplication();
             APIIdentifier identifier = subscribedAPI.getApiId();
-            apiMgtDAO.removeSubscription(subscription);
-            if (APIUtil.isAPIGatewayKeyCacheEnabled()) {
-                invalidateCachedKeys(application.getId());
-            }
+            String userId = application.getSubscriber().getName();
+            removeSubscription(identifier, userId, application.getId());
             if (log.isDebugEnabled()) {
                 String appName = application.getName();
                 String logMessage =
