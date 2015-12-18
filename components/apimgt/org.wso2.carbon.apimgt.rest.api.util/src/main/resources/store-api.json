@@ -238,12 +238,6 @@
             "$ref": "#/parameters/requestedTenant"
           },
           {
-            "name": "query",
-            "in": "query",
-            "description": "Search condition.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"name:Readme\" will match a document if the name of the document is 'Readme'.\n\nSupported attribute modifiers are [**name, summary, type **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against document Name.\n",
-            "type": "string"
-          },
-          {
             "$ref": "#/parameters/Accept"
           },
           {
