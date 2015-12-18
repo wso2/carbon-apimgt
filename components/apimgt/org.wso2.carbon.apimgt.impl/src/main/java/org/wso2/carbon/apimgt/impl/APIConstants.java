@@ -567,10 +567,10 @@ public final class APIConstants {
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
-    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "DASServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
-    public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
-    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "BAMPassword";
+    public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "DASUsername";
+    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "DASPassword";
     public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_USAGE_TRACKING + "SkipEventReceiverConnection";
     public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
     public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";
@@ -590,6 +590,10 @@ public final class APIConstants {
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";
+    //Rest API Config data in api-config.xml
+    public static final String API_USAGE_DAS_REST_API_URL = API_USAGE_TRACKING + "DataAnalyzerURL";
+    public static final String API_USAGE_DAS_REST_API_USER = API_USAGE_TRACKING + "DataAnalyzeUsername";
+    public static final String API_USAGE_DAS_REST_API_PASSWORD = API_USAGE_TRACKING + "DataAnalyzerURLPassword";
     
     public static final String UNLIMITED_TIER = "Unlimited";
     public static final String UNLIMITED_TIER_DESC = "Allows unlimited requests";
