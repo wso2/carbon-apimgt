@@ -51,7 +51,10 @@ import java.util.Set;
 public class APIMappingUtil {
 
     public static APIIdentifier getAPIIdentifierFromApiId(String apiId) {
+        //if apiId contains -AT-, that need to be replaced before splitting
+        apiId = APIUtil.replaceEmailDomainBack(apiId);
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
+
         // apiId format: provider-apiName-version
         String providerName = apiIdDetails[0];
         String apiName = apiIdDetails[1];

@@ -416,21 +416,17 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param apiId API identifier
      * @param limit max number of records returned
      * @param offset starting index
-     * @param query document search condition
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched documents as a list if DocumentDTOs
      */
     @Override
-    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String query, String accept,
+    public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String accept,
             String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        if (query == null) {
-            query = "";
-        }
 
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -443,7 +439,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
                     offset, limit);
             DocumentationMappingUtil
-                    .setPaginationParams(documentListDTO, query, apiId, offset, limit, allDocumentation.size());
+                    .setPaginationParams(documentListDTO, apiId, offset, limit, allDocumentation.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -792,6 +788,43 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
 
+            String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
+            return Response.ok().entity(apiSwagger).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while retrieving API : " + apiId;
+                handleException(errorMessage, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Updates the swagger definition of an existing API
+     * 
+     * @param apiId API identifier
+     * @param apiDefinition Swagger definition
+     * @param contentType content type of the payload
+     * @param ifMatch If-match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return updated swagger document of the API
+     */
+    @Override
+    public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
+            String ifUnmodifiedSince) {
+        try {
+            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+
+            //this will fail if user does not have access to the API or the API does not exist
+            APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+            apiProvider.saveSwagger20Definition(apiIdentifier, apiDefinition);
+
+            //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {

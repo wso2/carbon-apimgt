@@ -300,11 +300,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          If failed to get UserApplicationAPIUsage
      */
     public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException {
+        APIIdentifier apiIdEmailReplaced = new APIIdentifier(APIUtil.replaceEmailDomain(apiId.getProviderName()),
+                apiId.getApiName(), apiId.getVersion());
         UserApplicationAPIUsage[] allApiResult = apiMgtDAO.getAllAPIUsageByProvider(apiId.getProviderName());
         List<SubscribedAPI> subscribedAPIs = new ArrayList<SubscribedAPI>();
         for (UserApplicationAPIUsage usage : allApiResult) {
             for (SubscribedAPI apiSubscription : usage.getApiSubscriptions()) {
-                if (apiSubscription.getApiId().equals(apiId)) {
+                APIIdentifier subsApiId = apiSubscription.getApiId();
+                APIIdentifier subsApiIdEmailReplaced = new APIIdentifier(
+                        APIUtil.replaceEmailDomain(subsApiId.getProviderName()), subsApiId.getApiName(),
+                        subsApiId.getVersion());
+                if (subsApiIdEmailReplaced.equals(apiIdEmailReplaced)) {
                     subscribedAPIs.add(apiSubscription);
                 }
             }

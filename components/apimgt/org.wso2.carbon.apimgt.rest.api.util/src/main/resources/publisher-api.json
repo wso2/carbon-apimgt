@@ -410,6 +410,85 @@
             }
           }
         }
+      },
+      "put": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-scope": "apim_create_api_scope",
+        "description": "Update an existing swagger definition of an API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "in": "formData",
+            "name": "apiDefinition",
+            "description": "Swagger definition of the API",
+            "type": "string",
+            "required": true
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Update"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSuccessful response with updated Swagger definition\n",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created resource.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden. \nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
       }
     },
     "/apis/copy-api": {
@@ -545,12 +624,6 @@
           },
           {
             "$ref": "#/parameters/offset"
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "description": "Search condition.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"name:Readme\" will match a document if the name of the document is 'Readme'.\n\nSupported attribute modifiers are [**name, summary, type **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against document Name.\n",
-            "type": "string"
           },
           {
             "$ref": "#/parameters/Accept"
