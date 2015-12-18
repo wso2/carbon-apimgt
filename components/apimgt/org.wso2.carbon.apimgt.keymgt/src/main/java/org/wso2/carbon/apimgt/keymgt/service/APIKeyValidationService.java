@@ -137,16 +137,6 @@ public class APIKeyValidationService extends AbstractAdmin {
             validationContext.setCacheHit(true);
             log.debug("APIKeyValidationInfoDTO fetched from cache. Setting cache hit to true...");
             validationContext.setValidationInfoDTO(infoDTO);
-
-            // If JWTCache is disabled, we have to re-generate JWT.
-            if (!APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt()) {
-                infoDTO.setEndUserToken(null);
-            }
-
-            if (infoDTO.getEndUserToken() != null) {
-                log.debug("JWT fetched from cache. Setting JWTCacheHit to true...");
-                validationContext.setJWTCacheHit(true);
-            }
         }
 
         log.debug("Before calling Validate Token method...");

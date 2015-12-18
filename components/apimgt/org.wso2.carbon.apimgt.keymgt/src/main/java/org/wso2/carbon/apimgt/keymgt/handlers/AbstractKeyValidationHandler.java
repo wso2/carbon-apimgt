@@ -135,12 +135,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
     @Override
     public boolean generateConsumerToken(TokenValidationContext validationContext) throws APIKeyMgtException {
 
-        // If JWT is already taken from cache, we can safely exit from the function.
-        if (validationContext.isJWTCacheHit()) {
-            return true;
-        }
-
-        TokenGenerator generator = APIKeyMgtDataHolder.getTokenGenerator();
+      TokenGenerator generator = APIKeyMgtDataHolder.getTokenGenerator();
 
         try {
             String jwt = generator.generateToken(validationContext.getValidationInfoDTO(),

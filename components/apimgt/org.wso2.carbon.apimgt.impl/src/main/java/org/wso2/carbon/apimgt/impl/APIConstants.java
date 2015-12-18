@@ -426,7 +426,6 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
     public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_VALIDATOR + "SecurityContextTTL";
-    public static final String API_KEY_VALIDATOR_ENABLE_JWT_CACHE = API_KEY_VALIDATOR + "EnableJWTCache";
     public static final String API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE = API_KEY_VALIDATOR + "EnableKeyMgtValidationInfoCache";
     public static final String API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_VALIDATOR + "RemoveUserNameFromJWTForApplicationToken";
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";

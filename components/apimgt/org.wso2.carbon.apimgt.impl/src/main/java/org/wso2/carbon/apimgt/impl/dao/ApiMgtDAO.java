@@ -866,31 +866,8 @@ public class ApiMgtDAO {
                         keyValidationInfoDTO.setAuthorized(true);
 
                         if (tokenGenerator != null) {
-                            String calleeToken = null;
-
-                            String enableJWTCache = ServiceReferenceHolder.getInstance()
-                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                                    .getFirstProperty(ENABLE_JWT_CACHE);
-
-                            Cache jwtCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                                    getCache(APIConstants.JWT_CACHE_NAME);
-
-                            //If JWT Caching is enabled.
-                            if(enableJWTCache != null && JavaUtils.isTrueExplicitly(enableJWTCache)){
-                                String cacheKey = accessToken + ":" + context + ":" + version + ":" + requiredAuthenticationLevel;
-                                calleeToken = (String)jwtCache.get(cacheKey);
-                                //On a Cache miss
-                                if(calleeToken == null){
-                                    //Generate Token and update Cache.
-                                    calleeToken = generateJWTToken(keyValidationInfoDTO, context, version,accessToken);
-                                    jwtCache.put(cacheKey, calleeToken);
-                                }
-                            }
-                            else{
-                                calleeToken = generateJWTToken(keyValidationInfoDTO, context, version,accessToken);
-                            }
-
-                            keyValidationInfoDTO.setEndUserToken(calleeToken);
+                            String jwtToken = generateJWTToken(keyValidationInfoDTO, context, version,accessToken);
+                            keyValidationInfoDTO.setEndUserToken(jwtToken);
                         }
                     }
 				} else {
