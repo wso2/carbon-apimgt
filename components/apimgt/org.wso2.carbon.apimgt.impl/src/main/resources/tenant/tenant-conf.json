@@ -5,23 +5,35 @@
   "RESTAPIScopes": {
     "Scope": [
       {
-        "Name": "apim_publish_api_scope",
+        "Name": "apim:api_publish",
         "Roles": "admin"
       },
       {
-        "Name": "apim_create_api_scope",
+        "Name": "apim:api_create",
         "Roles": "admin"
       },
       {
-        "Name": "apim_create_publish_api_scope",
+        "Name": "apim:api_view",
         "Roles": "admin"
       },
       {
-        "Name": "apim_subscribe_api_scope",
+        "Name": "apim:subscribe",
         "Roles": "Internal/subscriber"
       },
       {
-        "Name": "apim_edit_tiers_scope",
+        "Name": "apim:tier_view",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:tier_manage",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:subscription_view",
+        "Roles": "admin"
+      },
+      {
+        "Name": "apim:subscription_block",
         "Roles": "admin"
       }
     ]
