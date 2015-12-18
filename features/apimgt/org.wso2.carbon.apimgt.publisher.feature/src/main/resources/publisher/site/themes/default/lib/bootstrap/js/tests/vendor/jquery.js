@@ -24,7 +24,7 @@ var jQuery = function( selector, context ) {
 
 	// A simple way to check for HTML strings or ID strings
 	// Prioritize #id over <tag> to avoid XSS via location.hash (#9521)
-	quickExpr = /^(?:(<[\w\W]+>)[^>]*|#([\w-]*))$/,
+	quickExpr = /^(?:[^#<]*(<[\w\W]+>)[^>]*$|#([\w\-]*)$)/,
 
 	// Check if a string has a non-whitespace character in it
 	rnotwhite = /\S/,
