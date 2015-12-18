@@ -109,7 +109,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#am#store#v1</warName>
+                    <warName>api#am#store#v0.9</warName>
                 </configuration>
             </plugin>
             <plugin>
