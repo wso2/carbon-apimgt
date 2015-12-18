@@ -39,7 +39,7 @@ var login = login || {};
 
 $(document).ready(function () {
     var registerEventsForLogin = function(){
-        $('#mainLoginForm input').off();
+        $('#mainLoginForm input').die();
          $('#mainLoginForm input').keydown(function(event) {
          if (event.which == 13) {
                 var goto_url =$.cookie("goto_url");
@@ -49,7 +49,7 @@ $(document).ready(function () {
             }
         });
 
-        $('#loginBtn').off();
+        $('#loginBtn').die();
          $('#loginBtn').click(
             function() {
                 var goto_url = $.cookie("goto_url");

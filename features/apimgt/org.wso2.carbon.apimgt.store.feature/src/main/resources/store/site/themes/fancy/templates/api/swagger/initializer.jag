@@ -5,6 +5,7 @@ jagg.initializer("api/swagger", {
         jagg.addFooterJS("api/api-info", "api-info", "templates/api/api-info/js/api-info.js");
         jagg.addHeaderCSS("api/api-info", "api-info", "templates/api/api-info/css/divStyle.css");
 
+		jagg.addHeaderJS("api/api-info", "api-info0", "templates/api/swagger/swagger/lib/jquery-1.8.0.min.js");
 		jagg.addHeaderJS("api/api-info", "api-info1", "templates/api/swagger/swagger/lib/jquery.slideto.min.js");
 		jagg.addHeaderJS("api/api-info", "api-info2", "templates/api/swagger/swagger/lib/jquery.wiggle.min.js");
 		jagg.addHeaderJS("api/api-info", "api-info3", "templates/api/swagger/swagger/lib/jquery.ba-bbq.min.js");
