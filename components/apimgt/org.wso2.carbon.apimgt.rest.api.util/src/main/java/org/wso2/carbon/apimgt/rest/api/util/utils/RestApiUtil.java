@@ -517,15 +517,13 @@ public class RestApiUtil {
      *
      * @param offset starting index
      * @param limit max number of objects returned
-     * @param query document search query
      * @return constructed paginated url
      */
-    public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String query, String apiId) {
+    public static String getDocumentationPaginatedURL(Integer offset, Integer limit, String apiId) {
         String paginatedURL = RestApiConstants.DOCUMENTS_GET_PAGINATION_URL;
         paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
         paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
         paginatedURL = paginatedURL.replace(RestApiConstants.APIID_PARAM, apiId);
-        paginatedURL = paginatedURL.replace(RestApiConstants.QUERY_PARAM, query);
         return paginatedURL;
     }
 

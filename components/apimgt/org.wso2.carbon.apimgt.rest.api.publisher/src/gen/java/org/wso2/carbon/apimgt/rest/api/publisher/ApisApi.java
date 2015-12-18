@@ -188,11 +188,10 @@ public class ApisApi  {
     public Response apisApiIdDocumentsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.",required=true ) @PathParam("apiId") String apiId,
     @ApiParam(value = "Maximum size of resource array to return.", defaultValue="25") @QueryParam("limit") Integer limit,
     @ApiParam(value = "Starting point within the complete list of items qualified.", defaultValue="0") @QueryParam("offset") Integer offset,
-    @ApiParam(value = "Search condition.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"name:Readme\" will match a document if the name of the document is 'Readme'.\n\nSupported attribute modifiers are [**name, summary, type **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against document Name.") @QueryParam("query") String query,
     @ApiParam(value = "Media types acceptable for the response. Default is JSON."  , defaultValue="JSON")@HeaderParam("Accept") String accept,
     @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec."  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
-    return delegate.apisApiIdDocumentsGet(apiId,limit,offset,query,accept,ifNoneMatch);
+    return delegate.apisApiIdDocumentsGet(apiId,limit,offset,accept,ifNoneMatch);
     }
     @POST
     @Path("/{apiId}/documents")

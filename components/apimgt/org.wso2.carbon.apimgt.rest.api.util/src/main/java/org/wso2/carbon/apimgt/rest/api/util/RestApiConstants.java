@@ -99,7 +99,7 @@ public final class RestApiConstants {
                     + APPLICATIONID_PARAM;
 
     public static final String DOCUMENTS_GET_PAGINATION_URL =
-            RESOURCE_PATH_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM  + "&query=" + QUERY_PARAM;
+            RESOURCE_PATH_DOCUMENTS + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
     public static final String TIERS_GET_PAGINATION_URL =
             RESOURCE_PATH_TIERS + "/" + TIER_LEVEL_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;

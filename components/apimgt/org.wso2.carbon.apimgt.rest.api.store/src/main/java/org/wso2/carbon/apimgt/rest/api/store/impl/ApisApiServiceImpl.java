@@ -200,24 +200,18 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param limit max number of records returned
      * @param offset starting index
      * @param xWSO2Tenant requested tenant domain for cross tenant invocations
-     * @param query document search condition
      * @param accept Accept header value
      * @param ifNoneMatch If-None-Match header value
      * @return matched documents as a list if DocumentDTOs
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String xWSO2Tenant,
-            String query, String accept, String ifNoneMatch) {
-
-        //todo : implement document search. Search conditions can be found at store-api.yaml
-
+            String accept, String ifNoneMatch) {
         //pre-processing
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        if (query == null) {
-            query = "";
-        }
+
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         try {
             String username = RestApiUtil.getLoggedInUsername();
@@ -234,7 +228,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentListDTO documentListDTO = DocumentationMappingUtil
                     .fromDocumentationListToDTO(documentationList, offset, limit);
             DocumentationMappingUtil
-                    .setPaginationParams(documentListDTO, query, apiId, offset, limit, documentationList.size());
+                    .setPaginationParams(documentListDTO, apiId, offset, limit, documentationList.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {

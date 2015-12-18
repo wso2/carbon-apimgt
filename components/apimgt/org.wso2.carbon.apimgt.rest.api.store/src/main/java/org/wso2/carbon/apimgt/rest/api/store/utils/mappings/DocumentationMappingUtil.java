@@ -81,13 +81,12 @@ public class DocumentationMappingUtil {
     /** Sets pagination urls for a DocumentListDTO object given pagination parameters and url parameters
      *
      * @param documentListDTO a DocumentListDTO object
-     * @param query search condition
      * @param limit max number of objects returned
      * @param offset starting index
      * @param size max offset
      *
      */
-    public static void setPaginationParams(DocumentListDTO documentListDTO, String query, String apiId, int offset,
+    public static void setPaginationParams(DocumentListDTO documentListDTO, String apiId, int offset,
             int limit, int size) {
 
         //acquiring pagination parameters and setting pagination urls
@@ -98,13 +97,13 @@ public class DocumentationMappingUtil {
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = RestApiUtil
                     .getDocumentationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query, apiId);
+                            paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), apiId);
         }
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = RestApiUtil
                     .getDocumentationPaginatedURL(paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query, apiId);
+                            paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), apiId);
         }
 
         documentListDTO.setNext(paginatedNext);
