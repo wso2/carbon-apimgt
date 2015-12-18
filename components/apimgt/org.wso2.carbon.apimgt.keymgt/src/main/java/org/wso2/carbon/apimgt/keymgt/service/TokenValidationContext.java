@@ -42,7 +42,6 @@ public class TokenValidationContext {
     private String cacheKey;
     private APIKeyValidationInfoDTO validationInfoDTO;
     private boolean isCacheHit;
-    private boolean isJWTCacheHit;
     private AccessTokenInfo tokenInfo;
 
     public AccessTokenInfo getTokenInfo() {
@@ -139,13 +138,5 @@ public class TokenValidationContext {
 
     public Object getAttribute(String key){
         return this.attributeMap.get(key);
-    }
-
-    public boolean isJWTCacheHit() {
-        return isJWTCacheHit;
-    }
-
-    public void setJWTCacheHit(boolean cacheHit) {
-        this.isJWTCacheHit = cacheHit;
     }
 }
