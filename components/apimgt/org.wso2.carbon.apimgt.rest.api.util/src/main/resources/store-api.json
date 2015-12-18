@@ -30,9 +30,9 @@
       "x-wso2-scopes": [
         {
           "description": "",
-          "roles": "subscriber",
-          "name": "apim_subscribe_api_scope",
-          "key": "apim_subscribe_api_scope"
+          "roles": "Internal/subscriber",
+          "name": "apim:subscribe",
+          "key": "apim:subscribe"
         }
       ]
     }
@@ -423,7 +423,7 @@
     },
     "/applications": {
       "get": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Get a list of applications\n",
         "parameters": [
           {
@@ -481,7 +481,7 @@
         }
       },
       "post": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Create a new application.\n",
         "parameters": [
           {
@@ -545,7 +545,7 @@
     },
     "/applications/{applicationId}": {
       "get": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Get application details\n",
         "parameters": [
           {
@@ -604,7 +604,7 @@
         }
       },
       "put": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Update application details\n",
         "parameters": [
           {
@@ -679,7 +679,7 @@
         }
       },
       "delete": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Remove an application\n",
         "parameters": [
           {
@@ -717,7 +717,7 @@
     },
     "/applications/generate-keys": {
       "post": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Generate keys for application\n",
         "parameters": [
           {
@@ -790,7 +790,7 @@
     },
     "/subscriptions": {
       "get": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Get subscription list.\nThe API Identifier or Application Identifier\nthe subscriptions of which are to be returned are passed as parameters.\n",
         "parameters": [
           {
@@ -848,7 +848,7 @@
         }
       },
       "post": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Add a new subscription\n",
         "parameters": [
           {
@@ -903,7 +903,7 @@
     },
     "/subscriptions/{subscriptionId}": {
       "get": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Get subscription details\n",
         "parameters": [
           {
@@ -956,7 +956,7 @@
         }
       },
       "delete": {
-        "x-scope": "apim_subscribe_api_scope",
+        "x-scope": "apim:subscribe",
         "description": "Remove subscription\n",
         "parameters": [
           {

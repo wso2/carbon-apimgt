@@ -58,9 +58,9 @@ x-wso2-security:
   apim:
     x-wso2-scopes:
       - description: ""
-        roles: subscriber
-        name: apim_subscribe_api_scope
-        key: apim_subscribe_api_scope
+        roles: Internal/subscriber
+        name: apim:subscribe
+        key: apim:subscribe
 
 ######################################################
 # The "API Collection" resource APIs
@@ -436,7 +436,7 @@ paths:
 # Retrieve a list of all applications of a certain subscriber
 #-----------------------------------------------------
     get:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Get a list of applications
       parameters:
@@ -486,7 +486,7 @@ paths:
 # Create a new application
 #-----------------------------------------------------
     post:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Create a new application.
       parameters:
@@ -550,7 +550,7 @@ paths:
 # Retrieve the details about a certain application
 #-----------------------------------------------------
     get:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Get application details
       parameters:
@@ -603,7 +603,7 @@ paths:
 # Update a certain application
 #-----------------------------------------------------
     put:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Update application details
       parameters:
@@ -669,7 +669,7 @@ paths:
 # Delete a certain application
 #-----------------------------------------------------
     delete:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Remove an application
       parameters:
@@ -706,7 +706,7 @@ paths:
 # Generate keys for an application
 #-----------------------------------------------------
     post:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Generate keys for application
       parameters:
@@ -774,7 +774,7 @@ paths:
 # Retrieve all subscriptions of a certain API and application
 #-----------------------------------------------------
     get:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Get subscription list.
         The API Identifier or Application Identifier
@@ -821,7 +821,7 @@ paths:
 # Create a new subscription
 #-----------------------------------------------------
     post:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Add a new subscription
       parameters:
@@ -877,7 +877,7 @@ paths:
 # Retrieve a certain subscription
 #-----------------------------------------------------
     get:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Get subscription details
       parameters:
@@ -920,7 +920,7 @@ paths:
 # Delete a certain subscription
 #-----------------------------------------------------
     delete:
-      x-scope: apim_subscribe_api_scope
+      x-scope: apim:subscribe
       description: |
         Remove subscription
       parameters:
