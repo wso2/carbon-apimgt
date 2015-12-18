@@ -566,10 +566,10 @@ public final class APIConstants {
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
-    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "BAMServerURL";
+    public static final String API_USAGE_BAM_SERVER_URL_GROUPS = API_USAGE_TRACKING + "DASServerURL";
     public static final String API_USAGE_BUILD_MSG = API_USAGE_TRACKING + "PublishResponseMessageSize";
-    public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "BAMUsername";
-    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "BAMPassword";
+    public static final String API_USAGE_BAM_SERVER_USER = API_USAGE_TRACKING + "DASUsername";
+    public static final String API_USAGE_BAM_SERVER_PASSWORD = API_USAGE_TRACKING + "DASPassword";
     public static final String API_USAGE_SKIP_EVENT_RECEIVER_CONN = API_USAGE_TRACKING + "SkipEventReceiverConnection";
     public static final String API_USAGE_PUBLISHER_CLASS = API_USAGE_TRACKING + "PublisherClass";
     public static final String API_USAGE_DATA_SOURCE_NAME = "WSO2AM_STATS_DB";

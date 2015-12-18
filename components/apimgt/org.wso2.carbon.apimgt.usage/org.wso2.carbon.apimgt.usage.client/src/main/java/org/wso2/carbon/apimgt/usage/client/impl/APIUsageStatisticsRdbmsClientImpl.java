@@ -691,7 +691,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     public List<APIUsageDTO> getProviderAPIUsage(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
 
-        Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
+        Collection<APIUsage> usageData = getAPIUsageData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
+                fromDate, toDate);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIUsageDTO> usageByAPIs = new TreeMap<String, APIUsageDTO>();
         for (APIUsage usage : usageData) {
@@ -732,7 +733,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @return a collection containing the API usage data
      * @throws APIMgtUsageQueryServiceClientException if an error occurs while querying the database
      */
-    private Collection<APIUsage> getAPIUsageData(String tableName) throws APIMgtUsageQueryServiceClientException {
+    private Collection<APIUsage> getAPIUsageData(String tableName, String fromDate, String toDate)
+            throws APIMgtUsageQueryServiceClientException {
 
         Connection connection = null;
         Statement statement = null;
@@ -761,7 +763,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             APIUsageStatisticsClientConstants.CONTEXT + "," +
                             APIUsageStatisticsClientConstants.VERSION + "," +
                             "SUM(" + APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT + ") AS aggregateSum " +
-                            " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
+                            " FROM " + tableName +
+                            " WHERE " + APIUsageStatisticsClientConstants.TIME + " BETWEEN " +
+                            "\'" + fromDate + "\' AND \'" + toDate + "\'" +
+                            " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
                             APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.VERSION;
                 }
 

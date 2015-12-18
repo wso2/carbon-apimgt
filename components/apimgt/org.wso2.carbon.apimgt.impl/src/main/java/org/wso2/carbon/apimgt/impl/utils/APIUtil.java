@@ -2924,7 +2924,8 @@ public final class APIUtil {
 
                     String restAPIURL = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_URL);
                     String restAPIUser = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_USER);
-                    String restAPIPassword = configuration.getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
+                    String restAPIPassword = configuration
+                            .getFirstProperty(APIConstants.API_USAGE_DAS_REST_API_PASSWORD);
                     restApiConfigData.setUrl(restAPIURL);
                     restApiConfigData.setUserName(restAPIUser);
                     restApiConfigData.setPassword(restAPIPassword);
