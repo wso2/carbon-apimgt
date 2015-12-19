@@ -210,7 +210,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return 200 response if successful
      */
     @Override 
-    public Response apisChangeLifecyclePost(String apiId, String action, String lifecycleChecklist,
+    public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist,
             String ifMatch, String ifUnmodifiedSince) {
 
         //pre-processing
@@ -260,7 +260,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return API new version
      */
     @Override
-    public Response apisCopyApiPost(String apiId, String newVersion){
+    public Response apisCopyApiPost(String newVersion, String apiId){
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
 
