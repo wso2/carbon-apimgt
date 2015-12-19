@@ -103,7 +103,10 @@ public class RestApiUtil {
 
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations) {
         ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setMessage("Constraint Violation");
+        errorDTO.setDescription("Validation Error");
+        errorDTO.setMessage("Bad Request");
+        errorDTO.setCode(400l);
+        errorDTO.setMoreInfo("");
         List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
         for (ConstraintViolation violation : violations) {
             ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
