@@ -21,13 +21,13 @@ import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.io.EOFException;
 
 public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
@@ -94,6 +94,14 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
                         .buildBadRequestException("One or more request body parameters contain disallowed values.")
                         .getResponse();
             }
+        }
+
+        //This occurs when received an empty body in an occasion where the body is mandatory
+        if (e instanceof EOFException) {
+            //noinspection ThrowableResultOfMethodCallIgnored
+            return RestApiUtil
+                    .buildBadRequestException("Request payload cannot be empty.")
+                    .getResponse();
         }
 
         //unknown exception log and return
