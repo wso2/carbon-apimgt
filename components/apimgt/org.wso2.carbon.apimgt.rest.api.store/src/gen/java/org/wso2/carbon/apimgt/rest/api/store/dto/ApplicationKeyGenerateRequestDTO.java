@@ -16,16 +16,16 @@ public class ApplicationKeyGenerateRequestDTO  {
   public enum KeyTypeEnum {
      PRODUCTION,  SANDBOX, 
   };
-  
+  @NotNull
   private KeyTypeEnum keyType = null;
   
-  
+  @NotNull
   private String validityTime = null;
   
   
   private String callbackUrl = null;
   
-  
+  @NotNull
   private List<String> accessAllowDomains = new ArrayList<String>();
   
   
@@ -34,7 +34,7 @@ public class ApplicationKeyGenerateRequestDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("keyType")
   public KeyTypeEnum getKeyType() {
     return keyType;
@@ -46,7 +46,7 @@ public class ApplicationKeyGenerateRequestDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("validityTime")
   public String getValidityTime() {
     return validityTime;
@@ -72,7 +72,7 @@ public class ApplicationKeyGenerateRequestDTO  {
   /**
    * Allowed domains for the access token
    **/
-  @ApiModelProperty(value = "Allowed domains for the access token")
+  @ApiModelProperty(required = true, value = "Allowed domains for the access token")
   @JsonProperty("accessAllowDomains")
   public List<String> getAccessAllowDomains() {
     return accessAllowDomains;

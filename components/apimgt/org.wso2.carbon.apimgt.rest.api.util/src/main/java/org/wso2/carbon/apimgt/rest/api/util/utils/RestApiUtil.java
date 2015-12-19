@@ -391,7 +391,7 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean rootCauseMessageMatches (Throwable e, String message) {
         Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause.getMessage().matches(".*" + message + ".*");
+        return rootCause.getMessage().contains(message);
     }
 
     /**

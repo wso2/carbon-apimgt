@@ -30,7 +30,7 @@ public class DocumentDTO  {
   public enum SourceTypeEnum {
      INLINE,  URL,  FILE, 
   };
-  
+  @NotNull
   private SourceTypeEnum sourceType = null;
   
   
@@ -90,7 +90,7 @@ public class DocumentDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("sourceType")
   public SourceTypeEnum getSourceType() {
     return sourceType;

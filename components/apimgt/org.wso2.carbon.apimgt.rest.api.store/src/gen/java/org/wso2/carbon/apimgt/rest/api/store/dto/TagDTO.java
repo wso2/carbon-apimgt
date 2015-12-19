@@ -15,7 +15,7 @@ public class TagDTO  {
   @NotNull
   private String name = null;
   
-  
+  @NotNull
   private Integer weight = null;
 
   
@@ -33,7 +33,7 @@ public class TagDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("weight")
   public Integer getWeight() {
     return weight;
