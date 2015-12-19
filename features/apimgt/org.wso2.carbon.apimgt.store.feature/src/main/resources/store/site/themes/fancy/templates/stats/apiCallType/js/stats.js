@@ -49,15 +49,9 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                     rangeSlider.bind("valuesChanged", function(e, data){
                         var from = convertTimeString(data.values.min);
                         var to = convertTimeStringPlusDay(data.values.max);
-
-                      
-                        drawAppAPICallType(from,to); 
-                        
-                       
-
-                        
+                        drawAppAPICallType(from,to);
                     });
-
+                    drawAppAPICallType(convertTimeString(firstAccessDay), convertTimeString(currentDay));
 
                 }
 
