@@ -242,7 +242,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiProvider.changeLifeCycleStatus(apiIdentifier, action);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            handleException("Error while updating lifecycle of API " + apiId, e);
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                handleException("Error while updating lifecycle of API " + apiId, e);
+            }
         }
         return null;
     }
@@ -283,7 +288,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
                 String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
                 throw RestApiUtil.buildConflictException(errorMessage);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+            } else if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String errorMessage = "Error while copying API : " + apiId;
@@ -315,7 +321,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
@@ -371,7 +378,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
             return Response.ok().entity(updatedApiDTO).build();
-        } catch (APIManagementException | FaultGatewaysException e) {
+        } catch (APIManagementException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while updating API : " + apiId;
+                handleException(errorMessage, e);
+            }
+        } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
             handleException(errorMessage, e);
         }
@@ -400,7 +415,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String errorMessage = "Error while deleting API : " + apiId;
@@ -442,7 +458,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .setPaginationParams(documentListDTO, apiId, offset, limit, allDocumentation.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String msg = "Error while retrieving documents of API " + apiId;
@@ -500,8 +517,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             URI uri = new URI(uriString);
             return Response.created(uri).entity(newDocumentDTO).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while adding the document for API : " + apiId;
-            handleException(errorMessage, e);
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while adding the document for API : " + apiId;
+                handleException(errorMessage, e);
+            }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving location for document " + body.getName() + " of API " + apiId;
             handleException(errorMessage, e);
@@ -536,10 +558,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             return Response.ok().entity(documentDTO).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
+                String errorMessage = "Error while retrieving document : " + documentId;
                 handleException(errorMessage, e);
             }
         }
@@ -592,8 +615,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             newDocumentation = apiProvider.getDocumentation(documentId, tenantDomain);
             return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
-            handleException(errorMessage, e);
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+            } else {
+                String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
+                handleException(errorMessage, e);
+            }
         }
         return null;
     }
@@ -627,7 +655,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().build();
 
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
@@ -686,7 +715,8 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.seeOther(new URI(sourceUrl)).build();
             }
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
@@ -758,7 +788,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             URI uri = new URI(uriString);
             return Response.created(uri).entity(documentDTO).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 handleException("Failed to add content to the document " + documentId, e);
@@ -791,9 +822,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
@@ -828,9 +858,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
-            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;

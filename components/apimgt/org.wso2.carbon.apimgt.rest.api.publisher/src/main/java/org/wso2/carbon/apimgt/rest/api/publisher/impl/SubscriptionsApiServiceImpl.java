@@ -84,7 +84,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             }
             return Response.ok().entity(subscriptionListDTO).build();
         } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e)) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
             } else {
                 String msg = "Error while retrieving subscriptions of API " + apiId;
