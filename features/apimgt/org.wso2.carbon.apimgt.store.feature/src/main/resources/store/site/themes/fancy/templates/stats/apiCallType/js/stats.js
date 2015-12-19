@@ -51,7 +51,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         var to = convertTimeStringPlusDay(data.values.max);
                         drawAppAPICallType(from,to);
                     });
-                    drawAppAPICallType(convertTimeString(firstAccessDay), convertTimeString(currentDay));
+                    drawAppAPICallType(convertTimeString(firstAccessDay), convertTimeStringPlusDay(currentDay));
 
                 }
 

@@ -51,7 +51,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         var to = convertTimeStringPlusDay(data.values.max);                        
                         drawAPIResponseFaultCountTable(from,to);
                     });
-                    drawAPIResponseFaultCountTable(convertTimeString(firstAccessDay), convertTimeString(currentDay));
+                    drawAPIResponseFaultCountTable(convertTimeString(firstAccessDay), convertTimeStringPlusDay(currentDay));
                 }
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {

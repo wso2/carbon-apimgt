@@ -52,8 +52,8 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         drawRegisteredUserCountByApplications(from,to);
                         drawTopUsersGraph(from,to);
                     });
-                    drawRegisteredUserCountByApplications(convertTimeString(firstAccessDay), convertTimeString(currentDay));
-                    drawTopUsersGraph(convertTimeString(firstAccessDay), convertTimeString(currentDay));
+                    drawRegisteredUserCountByApplications(convertTimeString(firstAccessDay), convertTimeStringPlusDay(currentDay));
+                    drawTopUsersGraph(convertTimeString(firstAccessDay), convertTimeStringPlusDay(currentDay));
 
                 }
 

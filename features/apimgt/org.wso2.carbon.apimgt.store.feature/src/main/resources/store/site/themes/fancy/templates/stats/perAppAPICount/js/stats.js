@@ -55,7 +55,7 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         drawGraphAPIUsage(from,to);
                         console.info("drawGraphAPIUsage");
                     });
-                    drawGraphAPIUsage(convertTimeString(firstAccessDay), convertTimeString(currentDay));
+                    drawGraphAPIUsage(convertTimeString(firstAccessDay), convertTimeStringPlusDay(currentDay));
 
                 }
 
