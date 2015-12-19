@@ -15,13 +15,13 @@ public class ApplicationDTO  {
   
   private String applicationId = null;
   
-  
+  @NotNull
   private String name = null;
   
   
   private String subscriber = null;
   
-  
+  @NotNull
   private String throttlingTier = null;
   
   
@@ -45,7 +45,7 @@ public class ApplicationDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -69,7 +69,7 @@ public class ApplicationDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("throttlingTier")
   public String getThrottlingTier() {
     return throttlingTier;
