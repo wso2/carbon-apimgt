@@ -49,7 +49,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.*;
+import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
@@ -110,6 +114,7 @@ public class RestApiUtil {
         List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
         for (ConstraintViolation violation : violations) {
             ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
+            errorListItemDTO.setCode(400 + "_" + violation.getPropertyPath());
             errorListItemDTO.setMessage(violation.getPropertyPath() + ": " + violation.getMessage());
             errorListItemDTOs.add(errorListItemDTO);
         }

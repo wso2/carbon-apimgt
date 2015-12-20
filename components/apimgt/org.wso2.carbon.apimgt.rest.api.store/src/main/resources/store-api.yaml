@@ -1763,8 +1763,7 @@ definitions:
       - message
     properties:
       code:
-        type: integer
-        format: int64
+        type: string
       message:
         type: string
         description: |
