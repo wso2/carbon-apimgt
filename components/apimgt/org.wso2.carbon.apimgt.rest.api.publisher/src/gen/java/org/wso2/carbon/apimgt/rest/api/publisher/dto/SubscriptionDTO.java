@@ -12,16 +12,16 @@ import javax.validation.constraints.NotNull;
 public class SubscriptionDTO  {
   
   
-  @NotNull
+  
   private String subscriptionId = null;
   
-  
+  @NotNull
   private String applicationId = null;
   
-  
+  @NotNull
   private String apiIdentifier = null;
   
-  
+  @NotNull
   private String tier = null;
   
   public enum StatusEnum {
@@ -33,7 +33,7 @@ public class SubscriptionDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("subscriptionId")
   public String getSubscriptionId() {
     return subscriptionId;
@@ -45,7 +45,7 @@ public class SubscriptionDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("applicationId")
   public String getApplicationId() {
     return applicationId;
@@ -57,7 +57,7 @@ public class SubscriptionDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("apiIdentifier")
   public String getApiIdentifier() {
     return apiIdentifier;
@@ -69,7 +69,7 @@ public class SubscriptionDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("tier")
   public String getTier() {
     return tier;

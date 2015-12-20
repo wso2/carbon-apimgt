@@ -30,6 +30,8 @@ public final class RestApiConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
+    public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
+    
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
     public static final String RESOURCE_APPLICATION = "application";

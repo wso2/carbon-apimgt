@@ -29,13 +29,13 @@ public class APIDTO  {
   @NotNull
   private String version = null;
   
-  
+  @NotNull
   private String provider = null;
   
   @NotNull
   private String apiDefinition = null;
   
-  
+  @NotNull
   private String status = null;
   
   
@@ -121,7 +121,7 @@ public class APIDTO  {
   /**
    * If the provider value is not given user invoking the api will be used as the provider.
    **/
-  @ApiModelProperty(value = "If the provider value is not given user invoking the api will be used as the provider.")
+  @ApiModelProperty(required = true, value = "If the provider value is not given user invoking the api will be used as the provider.")
   @JsonProperty("provider")
   public String getProvider() {
     return provider;
@@ -146,7 +146,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("status")
   public String getStatus() {
     return status;

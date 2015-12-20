@@ -91,7 +91,12 @@ public class APIMappingUtil {
         if (RestApiUtil.isUUID(apiId)) {
             api = apiProvider.getLightweightAPIByUUID(apiId, requestedTenantDomain);
         } else {
-            api = apiProvider.getLightweightAPI(getAPIIdentifierFromApiId(apiId));
+            APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
+
+            //Checks whether the logged in user's tenant and the API's tenant is equal
+            RestApiUtil.validateUserTenantWithAPIIdentifier(apiIdentifier);
+
+            api = apiProvider.getLightweightAPI(apiIdentifier);
         }
         return api;
     }
@@ -112,6 +117,10 @@ public class APIMappingUtil {
             api = apiProvider.getAPIbyUUID(apiId, requestedTenantDomain);
         } else {
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiId(apiId);
+
+            //Checks whether the logged in user's tenant and the API's tenant is equal
+            RestApiUtil.validateUserTenantWithAPIIdentifier(apiIdentifier);
+
             api = apiProvider.getAPI(apiIdentifier);
         }
         return api;

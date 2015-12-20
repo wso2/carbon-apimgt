@@ -518,7 +518,8 @@
             "name": "newVersion",
             "description": "Version of the new API.",
             "type": "string",
-            "in": "query"
+            "in": "query",
+            "required": true
           },
           {
             "$ref": "#/parameters/apiId-Q"
@@ -563,6 +564,7 @@
             "description": "The action to demote or promote the state of the API.\n\nSupported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]\n",
             "in": "query",
             "type": "string",
+            "required": true,
             "enum": [
               "Publish",
               "Deploy as a Prototype",
@@ -1264,6 +1266,7 @@
             "in": "query",
             "description": "Subscription block state.\n",
             "type": "string",
+            "required": true,
             "enum": [
               "BLOCKED",
               "PROD_ONLY_BLOCKED"
@@ -1975,7 +1978,13 @@
         "name",
         "context",
         "version",
-        "apiDefinition"
+        "apiDefinition",
+        "tiers",
+        "isDefaultVersion",
+        "transport",
+        "endpointConfig",
+        "visibility",
+        "subscriptionAvailability"
       ],
       "properties": {
         "id": {
@@ -2107,6 +2116,10 @@
     },
     "Application": {
       "title": "Application",
+      "required": [
+        "name",
+        "throttlingTier"
+      ],
       "properties": {
         "applicationId": {
           "type": "string"
@@ -2155,7 +2168,9 @@
       "title": "Document",
       "required": [
         "name",
-        "type"
+        "type",
+        "sourceType",
+        "visibility"
       ],
       "properties": {
         "documentId": {
@@ -2232,7 +2247,8 @@
         "name",
         "tierPlan",
         "requestCount",
-        "unitTime"
+        "unitTime",
+        "stopOnQuotaReach"
       ],
       "properties": {
         "name": {
@@ -2327,7 +2343,9 @@
     "Subscription": {
       "title": "Subscription",
       "required": [
-        "subscriptionId"
+        "applicationId",
+        "apiIdentifier",
+        "tier"
       ],
       "properties": {
         "subscriptionId": {

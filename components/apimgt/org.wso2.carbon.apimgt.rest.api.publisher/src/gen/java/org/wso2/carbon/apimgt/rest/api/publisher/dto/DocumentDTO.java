@@ -30,7 +30,7 @@ public class DocumentDTO  {
   public enum SourceTypeEnum {
      INLINE,  URL,  FILE, 
   };
-  
+  @NotNull
   private SourceTypeEnum sourceType = null;
   
   
@@ -42,7 +42,7 @@ public class DocumentDTO  {
   public enum VisibilityEnum {
      OWNER_ONLY,  PRIVATE,  API_LEVEL, 
   };
-  
+  @NotNull
   private VisibilityEnum visibility = null;
 
   
@@ -96,7 +96,7 @@ public class DocumentDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("sourceType")
   public SourceTypeEnum getSourceType() {
     return sourceType;
@@ -132,7 +132,7 @@ public class DocumentDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;

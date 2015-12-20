@@ -1363,6 +1363,8 @@
         "name",
         "context",
         "version",
+        "provider",
+        "status",
         "apiDefinition"
       ],
       "properties": {
@@ -1552,7 +1554,8 @@
       "title": "Document",
       "required": [
         "name",
-        "type"
+        "type",
+        "sourceType"
       ],
       "properties": {
         "documentId": {
@@ -1621,7 +1624,8 @@
         "name",
         "tierPlan",
         "requestCount",
-        "unitTime"
+        "unitTime",
+        "stopOnQuotaReach"
       ],
       "properties": {
         "name": {
@@ -1693,7 +1697,9 @@
     "Subscription": {
       "title": "Subscription",
       "required": [
-        "subscriptionId"
+        "applicationId",
+        "apiIdentifier",
+        "tier"
       ],
       "properties": {
         "subscriptionId": {
@@ -1723,7 +1729,8 @@
     "Tag": {
       "title": "Tag",
       "required": [
-        "name"
+        "name",
+        "weight"
       ],
       "properties": {
         "name": {
@@ -1865,6 +1872,11 @@
     },
     "ApplicationKeyGenerateRequest": {
       "title": "Application key generation request object",
+      "required": [
+        "keyType",
+        "validityTime",
+        "accessAllowDomains"
+      ],
       "properties": {
         "keyType": {
           "type": "string",

@@ -48,16 +48,16 @@ public class APIDTO  {
   
   private String destinationStatsEnabled = null;
   
-  
+  @NotNull
   private Boolean isDefaultVersion = null;
   
-  
+  @NotNull
   private List<String> transport = new ArrayList<String>();
   
   
   private List<String> tags = new ArrayList<String>();
   
-  
+  @NotNull
   private List<String> tiers = new ArrayList<String>();
   
   
@@ -66,7 +66,7 @@ public class APIDTO  {
   public enum VisibilityEnum {
      PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
   };
-  
+  @NotNull
   private VisibilityEnum visibility = null;
   
   
@@ -75,7 +75,7 @@ public class APIDTO  {
   
   private List<String> visibleTenants = new ArrayList<String>();
   
-  
+  @NotNull
   private String endpointConfig = null;
   
   
@@ -87,7 +87,7 @@ public class APIDTO  {
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
   };
-  
+  @NotNull
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
   
   
@@ -234,7 +234,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
@@ -247,7 +247,7 @@ public class APIDTO  {
   /**
    * Supported transports for the API (http and/or https).
    **/
-  @ApiModelProperty(value = "Supported transports for the API (http and/or https).")
+  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https).")
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
@@ -271,7 +271,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("tiers")
   public List<String> getTiers() {
     return tiers;
@@ -295,7 +295,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
@@ -331,7 +331,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("endpointConfig")
   public String getEndpointConfig() {
     return endpointConfig;
@@ -368,7 +368,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("subscriptionAvailability")
   public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
     return subscriptionAvailability;

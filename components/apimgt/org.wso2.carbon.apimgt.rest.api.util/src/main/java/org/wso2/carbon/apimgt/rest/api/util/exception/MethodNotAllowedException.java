@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 
@@ -33,7 +34,10 @@ public class MethodNotAllowedException extends WebApplicationException {
     }
 
     public MethodNotAllowedException(ErrorDTO errorDTO){
-        super(Response.status(Response.Status.METHOD_NOT_ALLOWED).entity(errorDTO).build());
+        super(Response.status(Response.Status.METHOD_NOT_ALLOWED)
+                .entity(errorDTO)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .build());
     }
 
     public MethodNotAllowedException(){
