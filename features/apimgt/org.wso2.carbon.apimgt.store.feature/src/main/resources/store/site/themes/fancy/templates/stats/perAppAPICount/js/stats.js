@@ -52,15 +52,10 @@ require(["dojo/dom", "dojo/domReady!"], function(dom){
                         var from = convertTimeString(data.values.min);
                         var to = convertTimeStringPlusDay(data.values.max);
 
-             
                         drawGraphAPIUsage(from,to);
-
-
                         console.info("drawGraphAPIUsage");
-
-                        
                     });
-                    
+                    drawGraphAPIUsage(convertTimeString(firstAccessDay), convertTimeStringPlusDay(currentDay));
 
                 }
 

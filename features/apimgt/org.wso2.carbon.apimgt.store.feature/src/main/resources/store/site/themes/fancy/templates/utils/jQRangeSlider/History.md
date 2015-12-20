@@ -1,5 +1,40 @@
 jQRangeSlider
 -------------
+* 5.7.1: 2015-01-23
+    * Fixed #174: Touch and jquery-ui 1.11.0 (not working)
+* 5.7.0: 2014-03-18
+	* Enhancement #154: 
+		* Introduced a new option "symmetricPositionning" for a different way of positionning handles
+		* Allowed minimum ranges to be 0
+	* Fixed #152: Calling resize on an hidden slider resets values
+	* Fixed #146: Inverted labels in small ranges
+	* Fixed #153 Edit range slider does not parse float number correctly
+* 5.6.0: 2014-02-01
+	* Fixed #144: Inverted label order with small range
+	* Fixed #146: Setting values via the `min`, `max`, or `values` methods produces an invalid slider
+* 5.5.0: 2013-11-01
+	* Fixed #124: Scales and slider position don't line up
+	* Fixed #141: userValuesChanged event not fired when user edits input value
+	* Fixed #142: Labels don't show up the first time after a programmatically value change
+	* Fixed #143: Changing formatter causes labels to disappear
+* 5.4.0: 2013-09-16
+	* Fixed #128: Using the mouse wheel changes the values, even if slider is disabled
+	* Fixed #130: Labels don't disappear when values changed in code
+	* Fixed #133: Step in weeks breaks the slider
+	* Fixed #123: Incorrect values after switching handles
+* 5.3.0: 2013-07-12
+	* Fixed #54: Add enabled option, enable/disable function to allow read-only sliders
+* 5.2.0: 2013-06-28
+	* Fixed #108: Memory leaks when calling destroy
+	* Styling improvement: setting correct height to the slider element.
+* 5.1.1: 2013-03-17
+	* Fixed #100: Inconsistent parameter type passed to the next method of scales.
+	* Fixed #102: valuesChanged event triggered even if values are identical
+	* Fixed #103: CSS bug related to IE7 and scale ticks
+	* Fixed #104: Resizing the window breaks label position
+	* Fixed #105: Tick appear outside of its container
+* 5.1.0: 2013-03-23
+	* Ticks formatting, with a new callback function: format
 * 5.0.2: 2013-03-17
 	* Fixed #93 (theming with scales): ticks and handle values desynchronized on the right
 * 5.0.1: 2013-03-07
