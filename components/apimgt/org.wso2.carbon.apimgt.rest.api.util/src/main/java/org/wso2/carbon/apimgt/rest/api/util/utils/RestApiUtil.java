@@ -333,7 +333,7 @@ public class RestApiUtil {
      */
     public static MethodNotAllowedException buildMethodNotAllowedException(String method, String resource) {
         String description = "Method " + method + " is not supported for " + resource;
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 405l, description);
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_METHOD_NOT_ALLOWED_MESSAGE_DEFAULT, 405l, description);
         return new MethodNotAllowedException(errorDTO);
     }
 

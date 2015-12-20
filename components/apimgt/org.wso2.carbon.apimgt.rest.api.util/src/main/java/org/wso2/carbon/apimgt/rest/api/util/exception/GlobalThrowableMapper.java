@@ -44,64 +44,74 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
     public Response toResponse(Throwable e) {
 
         if (e instanceof ClientErrorException) {
+            log.error("Client error", e);
             return ((ClientErrorException) e).getResponse();
         }
 
         if (e instanceof NotFoundException) {
+            log.error("Resource not found", e);
             return ((NotFoundException) e).getResponse();
         }
 
         if (e instanceof PreconditionFailedException) {
+            log.error("Precondition failed", e);
             return ((PreconditionFailedException) e).getResponse();
         }
 
         if (e instanceof BadRequestException) {
+            log.error("Bad request", e);
             return ((BadRequestException) e).getResponse();
         }
 
         if (e instanceof ConstraintViolationException) {
+            log.error("Constraint violation", e);
             return ((ConstraintViolationException) e).getResponse();
         }
 
         if (e instanceof ForbiddenException) {
+            log.error("Resource forbidden", e);
             return ((ForbiddenException) e).getResponse();
         }
 
         if (e instanceof ConflictException) {
+            log.error("Conflict", e);
             return ((ConflictException) e).getResponse();
         }
 
         if (e instanceof MethodNotAllowedException) {
+            log.error("Method not allowed", e);
             return ((MethodNotAllowedException) e).getResponse();
         }
 
         if (e instanceof JsonParseException) {
+            String errorMessage = "Malformed request body.";
+            log.error(errorMessage, e);
             //noinspection ThrowableResultOfMethodCallIgnored
-            return RestApiUtil.buildBadRequestException("Malformed request body.").getResponse();
+            return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
         }
 
         if (e instanceof JsonMappingException) {
             if (e instanceof UnrecognizedPropertyException) {
                 UnrecognizedPropertyException unrecognizedPropertyException = (UnrecognizedPropertyException) e;
                 String unrecognizedProperty = unrecognizedPropertyException.getUnrecognizedPropertyName();
+                String errorMessage = "Unrecognized property '" + unrecognizedProperty + "'";
+                log.error(errorMessage, e);
                 //noinspection ThrowableResultOfMethodCallIgnored
-                return RestApiUtil
-                        .buildBadRequestException("Unrecognized property '" + unrecognizedProperty + "'")
-                        .getResponse();
+                return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
             } else {
+                String errorMessage = "One or more request body parameters contain disallowed values.";
+                log.error(errorMessage, e);
                 //noinspection ThrowableResultOfMethodCallIgnored
-                return RestApiUtil
-                        .buildBadRequestException("One or more request body parameters contain disallowed values.")
-                        .getResponse();
+                return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
             }
         }
 
         //This occurs when received an empty body in an occasion where the body is mandatory
         if (e instanceof EOFException) {
+            String errorMessage = "Request payload cannot be empty.";
+            log.error(errorMessage, e);
             //noinspection ThrowableResultOfMethodCallIgnored
-            return RestApiUtil
-                    .buildBadRequestException("Request payload cannot be empty.")
-                    .getResponse();
+            return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
         }
 
         //unknown exception log and return
