@@ -3,6 +3,8 @@ include("/jagg/jagg.jag");
 
 (function () {
     response.contentType = "application/json; charset=UTF-8";
+    var msg = require("/site/conf/ui-messages.jag");
+
     var log=new Log();
     var action = request.getParameter("action");
     if (action === "sessionCheck") {
