@@ -42,9 +42,9 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                     <%}%>
                     <%if(doc.sourceUrl&& doc.sourceUrl!=""){
                         %>
-                    <p><a href="<%=doc.sourceUrl%>" class="doc-content" target="_blank">
+                    <p><a href="<%= encode.forHtmlAttribute(doc.sourceUrl)%>" class="doc-content" target="_blank">
                     <% if(doc.sourceType=="URL"){%>
-                     <%=doc.sourceUrl%></a></p>
+                     <%=  encode.forHtml(doc.sourceUrl) %></a></p>
                     <%}else{%>
                     <%=i18n.localize("viewDoc")%></a></p>
                     <%}}else if(doc.filePath && doc.filePath!=""){%>
