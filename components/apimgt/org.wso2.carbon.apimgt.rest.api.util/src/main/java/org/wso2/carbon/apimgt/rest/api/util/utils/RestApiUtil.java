@@ -768,7 +768,11 @@ public class RestApiUtil {
      */
     public static String extractOAuthAccessTokenFromMessage(Message message, Pattern pattern, String authHeaderName) {
         String authHeader = null;
-        String headerString = ((ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS))).get(authHeaderName)).get(0).toString();
+        ArrayList authHeaders = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS))).get(authHeaderName);
+        if (authHeaders == null)
+            return null;
+
+        String headerString = authHeaders.get(0).toString();
         Matcher matcher = pattern.matcher(headerString);
         if (matcher.find()) {
             authHeader = headerString.substring(matcher.end());
