@@ -37,7 +37,9 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
     GlobalThrowableMapper() {
         e500.setCode((long) 500);
-        e500.setMessage("Internal server error. Please contact administrator.");
+        e500.setMessage("Internal server error");
+        e500.setMoreInfo("");
+        e500.setDescription("The server encountered an internal error. Please contact administrator.");
     }
 
     @Override
