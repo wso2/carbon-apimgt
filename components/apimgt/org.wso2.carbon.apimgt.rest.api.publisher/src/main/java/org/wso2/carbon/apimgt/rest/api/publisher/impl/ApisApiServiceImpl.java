@@ -137,7 +137,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
-                throw RestApiUtil.buildBadRequestException(
+                throw RestApiUtil.buildConflictException(
                         "Error occurred while adding the API. A duplicate API context already exists for " + body
                                 .getContext());
             }
@@ -160,7 +160,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, username);
 
             if (apiProvider.isAPIAvailable(apiToAdd.getId())) {
-                throw RestApiUtil.buildBadRequestException(
+                throw RestApiUtil.buildConflictException(
                         "Error occurred while adding the API. A duplicate API already exists for " + apiToAdd.getId()
                                 .getApiName() + "-" + apiToAdd.getId().getVersion());
             }

@@ -17,23 +17,15 @@ package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.cxf.jaxrs.impl.MetadataMap;
+import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.exception.ErrorDetail;
 import org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 /**
@@ -67,19 +59,9 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
             }
         }
         else{
-        ErrorDTO errorDetail = new ErrorDTO();
-        errorDetail.setCode((long)401);
-        errorDetail.setMoreInfo("");
-        errorDetail.setMessage("");
-        errorDetail.setDescription("Unauthenticated request");
-            Response response = Response
-                    .status(Response.Status.UNAUTHORIZED)
-                    .entity(errorDetail)
-                    .build();
-        inMessage.getExchange().put(Response.class, response);
+            throw new AuthenticationException("Unauthenticated request");
         }
     }
-
 
     /**
      * This method will initialize Web APP authenticator to validate incoming requests

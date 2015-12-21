@@ -28,6 +28,8 @@ import javax.ws.rs.core.Response;
  */
 public class ForbiddenException extends WebApplicationException {
 
+    private String message;
+
     public ForbiddenException(){
         super(Response.status(Response.Status.FORBIDDEN)
                 .build());
@@ -38,6 +40,11 @@ public class ForbiddenException extends WebApplicationException {
                 .entity(errorDTO)
                 .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
                 .build());
+        message = errorDTO.getDescription();
     }
 
+    @Override
+    public String getMessage() {
+        return message;
+    }
 }
