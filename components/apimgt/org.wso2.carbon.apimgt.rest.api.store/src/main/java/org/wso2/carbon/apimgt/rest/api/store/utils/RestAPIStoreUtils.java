@@ -189,26 +189,6 @@ public class RestAPIStoreUtils {
         API api = apiConsumer.getAPI(apiIdentifier);
         Set<Tier> tiers = api.getAvailableTiers();
 
-        //check whether the specified tier is within the allowed tiers for the API
-        Iterator<Tier> iterator = tiers.iterator();
-        boolean isTierAllowed = false;
-        List<String> allowedTierList = new ArrayList<>();
-        while (iterator.hasNext()) {
-            Tier t = iterator.next();
-            if (t.getName() != null && (t.getName()).equals(tier)) {
-                isTierAllowed = true;
-            }
-            allowedTierList.add(t.getName());
-        }
-        if (!isTierAllowed) {
-            String msg = "Tier " + tier + " is not allowed for API " + apiIdentifier.getApiName() + "-" + apiIdentifier
-                    .getVersion() + ". Only " + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed." ;
-            throw new APIMgtAuthorizationFailedException(msg);
-        }
-        if (apiConsumer.isTierDeneid(tier)) {
-            throw new APIMgtAuthorizationFailedException("Tier " + tier + " is not allowed for user " + username);
-        }
-
         //Tenant based validation for subscription
         boolean subscriptionAllowed = false;
         if (!userTenantDomain.equals(apiTenantDomain)) {
@@ -234,5 +214,26 @@ public class RestAPIStoreUtils {
         if (!subscriptionAllowed) {
             throw new APIMgtAuthorizationFailedException("Subscription is not allowed for " + userTenantDomain);
         }
+
+        //check whether the specified tier is within the allowed tiers for the API
+        Iterator<Tier> iterator = tiers.iterator();
+        boolean isTierAllowed = false;
+        List<String> allowedTierList = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Tier t = iterator.next();
+            if (t.getName() != null && (t.getName()).equals(tier)) {
+                isTierAllowed = true;
+            }
+            allowedTierList.add(t.getName());
+        }
+        if (!isTierAllowed) {
+            String msg = "Tier " + tier + " is not allowed for API " + apiIdentifier.getApiName() + "-" + apiIdentifier
+                    .getVersion() + ". Only " + Arrays.toString(allowedTierList.toArray()) + " Tiers are allowed." ;
+            throw new APIMgtAuthorizationFailedException(msg);
+        }
+        if (apiConsumer.isTierDeneid(tier)) {
+            throw new APIMgtAuthorizationFailedException("Tier " + tier + " is not allowed for user " + username);
+        }
+
     }
 }
