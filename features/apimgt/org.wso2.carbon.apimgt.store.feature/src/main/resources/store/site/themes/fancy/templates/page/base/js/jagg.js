@@ -174,7 +174,7 @@ var jagg = jagg || {};
         if(!$('#messageModal').is(":visible")){
             $('#messageModal').modal('show');
         }
-         $('#mainLoginForm input').die();
+         $('#mainLoginForm input').off();
          $('#mainLoginForm input').keydown(function(event) {
          if (event.which == 13) {
                 event.preventDefault();
@@ -183,7 +183,7 @@ var jagg = jagg || {};
             }
         });
 
-        $('#loginBtn').die();
+        $('#loginBtn').off();
          $('#loginBtn').click(
             function() {
                 jagg.login($("#username").val(), $("#password").val(),params);
