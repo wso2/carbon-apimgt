@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
@@ -37,71 +38,95 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
     GlobalThrowableMapper() {
         e500.setCode((long) 500);
-        e500.setMessage("Internal server error. Please contact administrator.");
+        e500.setMessage("Internal server error");
+        e500.setMoreInfo("");
+        e500.setDescription("The server encountered an internal error. Please contact administrator.");
     }
 
     @Override
     public Response toResponse(Throwable e) {
 
         if (e instanceof ClientErrorException) {
+            log.error("Client error", e);
             return ((ClientErrorException) e).getResponse();
         }
 
         if (e instanceof NotFoundException) {
+            log.error("Resource not found", e);
             return ((NotFoundException) e).getResponse();
         }
 
         if (e instanceof PreconditionFailedException) {
+            log.error("Precondition failed", e);
             return ((PreconditionFailedException) e).getResponse();
         }
 
         if (e instanceof BadRequestException) {
+            log.error("Bad request", e);
             return ((BadRequestException) e).getResponse();
         }
 
         if (e instanceof ConstraintViolationException) {
+            log.error("Constraint violation", e);
             return ((ConstraintViolationException) e).getResponse();
         }
 
         if (e instanceof ForbiddenException) {
+            log.error("Resource forbidden", e);
             return ((ForbiddenException) e).getResponse();
         }
 
         if (e instanceof ConflictException) {
+            log.error("Conflict", e);
             return ((ConflictException) e).getResponse();
         }
 
         if (e instanceof MethodNotAllowedException) {
+            log.error("Method not allowed", e);
             return ((MethodNotAllowedException) e).getResponse();
         }
 
         if (e instanceof JsonParseException) {
+            String errorMessage = "Malformed request body.";
+            log.error(errorMessage, e);
             //noinspection ThrowableResultOfMethodCallIgnored
-            return RestApiUtil.buildBadRequestException("Malformed request body.").getResponse();
+            return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
         }
 
         if (e instanceof JsonMappingException) {
             if (e instanceof UnrecognizedPropertyException) {
                 UnrecognizedPropertyException unrecognizedPropertyException = (UnrecognizedPropertyException) e;
                 String unrecognizedProperty = unrecognizedPropertyException.getUnrecognizedPropertyName();
+                String errorMessage = "Unrecognized property '" + unrecognizedProperty + "'";
+                log.error(errorMessage, e);
                 //noinspection ThrowableResultOfMethodCallIgnored
-                return RestApiUtil
-                        .buildBadRequestException("Unrecognized property '" + unrecognizedProperty + "'")
-                        .getResponse();
+                return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
             } else {
+                String errorMessage = "One or more request body parameters contain disallowed values.";
+                log.error(errorMessage, e);
                 //noinspection ThrowableResultOfMethodCallIgnored
-                return RestApiUtil
-                        .buildBadRequestException("One or more request body parameters contain disallowed values.")
-                        .getResponse();
+                return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
             }
+        }
+
+        if (e instanceof AuthenticationException) {
+            ErrorDTO errorDetail = new ErrorDTO();
+            errorDetail.setCode((long)401);
+            errorDetail.setMoreInfo("");
+            errorDetail.setMessage("");
+            errorDetail.setDescription(e.getMessage());
+            return Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .entity(errorDetail)
+                    .build();
         }
 
         //This occurs when received an empty body in an occasion where the body is mandatory
         if (e instanceof EOFException) {
+            String errorMessage = "Request payload cannot be empty.";
+            log.error(errorMessage, e);
             //noinspection ThrowableResultOfMethodCallIgnored
-            return RestApiUtil
-                    .buildBadRequestException("Request payload cannot be empty.")
-                    .getResponse();
+            return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
         }
 
         //unknown exception log and return

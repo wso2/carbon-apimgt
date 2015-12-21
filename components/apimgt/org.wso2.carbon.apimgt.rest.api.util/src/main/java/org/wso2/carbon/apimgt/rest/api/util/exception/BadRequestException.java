@@ -18,22 +18,28 @@ package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.util.List;
 
 public class BadRequestException extends WebApplicationException {
+
+    private String message;
 
     public BadRequestException(ErrorDTO errorDTO){
         super(Response.status(Response.Status.BAD_REQUEST)
                 .entity(errorDTO)
                 .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
                 .build());
+        message = errorDTO.getDescription();
     }
 
     public BadRequestException(){
         super(Response.Status.BAD_REQUEST);
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 }

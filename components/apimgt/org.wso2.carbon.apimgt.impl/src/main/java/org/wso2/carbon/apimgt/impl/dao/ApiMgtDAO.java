@@ -6644,6 +6644,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     				"APP.DESCRIPTION, " +
     				"APP.SUBSCRIBER_ID,"+
     				"APP.APPLICATION_STATUS," +
+                    "APP.GROUP_ID," +
+                    "APP.UUID," +
     				"SUB.USER_ID" +
     				" FROM " +
     				"AM_SUBSCRIBER SUB," +
@@ -6691,6 +6693,8 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 application.setCallbackUrl(rs.getString("CALLBACK_URL"));
                 application.setId(rs.getInt("APPLICATION_ID"));
                 application.setTier(rs.getString("APPLICATION_TIER"));
+                application.setUUID(rs.getString("UUID"));
+                application.setGroupId(rs.getString("GROUP_ID"));
             }
 
         } catch (SQLException e) {

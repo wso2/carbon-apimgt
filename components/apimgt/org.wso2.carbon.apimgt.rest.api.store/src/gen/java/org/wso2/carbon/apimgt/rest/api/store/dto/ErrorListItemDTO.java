@@ -13,7 +13,7 @@ public class ErrorListItemDTO  {
   
   
   @NotNull
-  private Long code = null;
+  private String code = null;
   
   @NotNull
   private String message = null;
@@ -23,10 +23,10 @@ public class ErrorListItemDTO  {
    **/
   @ApiModelProperty(required = true, value = "")
   @JsonProperty("code")
-  public Long getCode() {
+  public String getCode() {
     return code;
   }
-  public void setCode(Long code) {
+  public void setCode(String code) {
     this.code = code;
   }
 

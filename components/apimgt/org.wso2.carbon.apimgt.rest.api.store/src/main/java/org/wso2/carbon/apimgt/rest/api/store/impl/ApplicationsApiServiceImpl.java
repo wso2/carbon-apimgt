@@ -59,6 +59,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * Retrieves all the applications that the user has access to
      * 
      * @param groupId group Id
+     * @param query search condition
      * @param limit max number of objects returns
      * @param offset starting index
      * @param accept accepted media type of the client
@@ -66,7 +67,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      * @return Response object containing resulted applications
      */
     @Override
-    public Response applicationsGet(String groupId, Integer limit, Integer offset, String accept,
+    public Response applicationsGet(String groupId, String query, Integer limit, Integer offset, String accept,
             String ifNoneMatch) {
         String username = RestApiUtil.getLoggedInUsername();
 
@@ -80,7 +81,17 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         ApplicationListDTO applicationListDTO;
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            Application[] allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+            Application[] allMatchedApps = new Application[0];
+            if (StringUtils.isBlank(query)) {
+                allMatchedApps = apiConsumer.getApplications(new Subscriber(username), groupId);
+            } else {
+                Application application = apiConsumer.getApplicationsByName(username, query, groupId);
+                if (application != null) {
+                    allMatchedApps = new Application[1];
+                    allMatchedApps[0] = application;
+                }
+            }
+
             //allMatchedApps are already sorted to application name
             applicationListDTO = ApplicationMappingUtil.fromApplicationsToDTO(allMatchedApps, limit, offset);
             ApplicationMappingUtil.setPaginationParams(applicationListDTO, groupId, limit, offset,
