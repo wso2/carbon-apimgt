@@ -87,7 +87,7 @@ public class APIDTO  {
   public enum SubscriptionAvailabilityEnum {
      current_tenant,  all_tenants,  specific_tenants, 
   };
-  @NotNull
+  
   private SubscriptionAvailabilityEnum subscriptionAvailability = null;
   
   
@@ -368,7 +368,7 @@ public class APIDTO  {
   
   /**
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(value = "")
   @JsonProperty("subscriptionAvailability")
   public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
     return subscriptionAvailability;
