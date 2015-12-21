@@ -35,7 +35,7 @@ host: apis.wso2.com
 
 # The base path of the API.
 # Will be prefixed to all paths.
-basePath: /apim/v0.9.0
+basePath: /api/am/store/v0.9
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -1363,6 +1363,8 @@ definitions:
       - name
       - context
       - version
+      - provider
+      - status
       - apiDefinition
     properties:
       id:
@@ -1527,6 +1529,7 @@ definitions:
     required:
       - name
       - type
+      - sourceType
     properties:
       documentId:
         type: string
@@ -1590,6 +1593,7 @@ definitions:
       - tierPlan
       - requestCount
       - unitTime
+      - stopOnQuotaReach
     properties:
       name:
         type: string
@@ -1658,7 +1662,9 @@ definitions:
   Subscription:
     title: Subscription
     required:
-      - subscriptionId
+      - applicationId
+      - apiIdentifier
+      - tier
     properties:
       subscriptionId:
         type: string
@@ -1684,6 +1690,7 @@ definitions:
     title: Tag
     required:
       - name
+      - weight
     properties:
       name:
         type: string
@@ -1817,6 +1824,10 @@ definitions:
 #-----------------------------------------------------
   ApplicationKeyGenerateRequest :
     title: Application key generation request object
+    required:
+      - keyType
+      - validityTime
+      - accessAllowDomains
     properties:
       keyType:
         type: string

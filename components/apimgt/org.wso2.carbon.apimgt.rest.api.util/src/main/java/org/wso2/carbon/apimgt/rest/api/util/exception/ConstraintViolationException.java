@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.validation.ConstraintViolation;
@@ -31,8 +32,10 @@ public class ConstraintViolationException extends WebApplicationException {
     protected Log log = LogFactory.getLog(getClass());
 
     public <T> ConstraintViolationException(Set<ConstraintViolation<T>> violations) {
-        super(Response.status(Response.Status.BAD_REQUEST).entity(
-                RestApiUtil.getConstraintViolationErrorDTO(violations)).build());
+        super(Response.status(Response.Status.BAD_REQUEST)
+                .entity(RestApiUtil.getConstraintViolationErrorDTO(violations))
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .build());
         for (ConstraintViolation violation : violations) {
             log.info(violation.getRootBeanClass().getSimpleName() + "." + violation.getPropertyPath()
                     + ": " + violation.getMessage());

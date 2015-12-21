@@ -62,7 +62,7 @@ public class SubscriptionsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.") })
 
     public Response subscriptionsBlockSubscriptionPost(@ApiParam(value = "Subscription Id",required=true) @QueryParam("subscriptionId") String subscriptionId,
-    @ApiParam(value = "Subscription block state.", allowableValues="{values=[BLOCKED, PROD_ONLY_BLOCKED]}") @QueryParam("blockState") String blockState,
+    @ApiParam(value = "Subscription block state.",required=true, allowableValues="{values=[BLOCKED, PROD_ONLY_BLOCKED]}") @QueryParam("blockState") String blockState,
     @ApiParam(value = "Validator for conditional requests; based on ETag."  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header."  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {

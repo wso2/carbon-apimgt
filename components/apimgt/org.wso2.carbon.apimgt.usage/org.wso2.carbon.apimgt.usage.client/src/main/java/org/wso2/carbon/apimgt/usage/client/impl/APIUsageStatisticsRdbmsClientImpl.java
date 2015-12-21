@@ -2242,7 +2242,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             String query;
             if (connection != null && connection.getMetaData().getDatabaseProductName().equalsIgnoreCase("oracle")) {
 
-                query = "SELECT time,year,month,day FROM  " + columnFamily + " WHERE ROWNUM <= 1 order by time ASC";
+                query = "SELECT time,year,month,day FROM (SELECT time,year,month,day FROM " + columnFamily
+                        + " order by time ASC) where ROWNUM <= 1";
 
             } else if (connection != null && connection.getMetaData().getDatabaseProductName().contains("Microsoft")) {
 

@@ -73,7 +73,8 @@ public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
                     environmentListDTO = EnvironmentMappingUtils.fromEnvironmentCollectionToDTO(apiEnvironments);
                 }
             } catch (APIManagementException e) {
-                if (RestApiUtil.isDueToResourceNotFound(e)) {
+                //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
+                if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                     throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
                 } else {
                     String errorMessage = "Error while retrieving API : " + apiId;

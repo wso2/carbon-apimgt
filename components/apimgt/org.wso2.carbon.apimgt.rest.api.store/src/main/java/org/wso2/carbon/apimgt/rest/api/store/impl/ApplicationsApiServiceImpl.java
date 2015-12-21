@@ -187,9 +187,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
             }
         } catch (APIManagementException e) {
-            handleException("Error while generating keys for application " + applicationId, e);
-            return null;
+            if (RestApiUtil.rootCauseMessageMatches(e, "primary key violation")) {
+                throw RestApiUtil.buildConflictException("Keys already generated for the application " + applicationId);
+            } else{
+                handleException("Error while generating keys for application " + applicationId, e);
+            }
         }
+        return null;
     }
 
     /**

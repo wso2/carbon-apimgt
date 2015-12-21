@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
@@ -53,6 +54,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.ConstraintViolation;
 import java.io.File;
@@ -101,7 +103,10 @@ public class RestApiUtil {
 
     public static <T> ErrorDTO getConstraintViolationErrorDTO(Set<ConstraintViolation<T>> violations) {
         ErrorDTO errorDTO = new ErrorDTO();
-        errorDTO.setMessage("Constraint Violation");
+        errorDTO.setDescription("Validation Error");
+        errorDTO.setMessage("Bad Request");
+        errorDTO.setCode(400l);
+        errorDTO.setMoreInfo("");
         List<ErrorListItemDTO> errorListItemDTOs = new ArrayList<>();
         for (ConstraintViolation violation : violations) {
             ErrorListItemDTO errorListItemDTO = new ErrorListItemDTO();
@@ -182,6 +187,26 @@ public class RestApiUtil {
 
     public static String getLoggedInUserTenantDomain() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    /**
+     * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an 
+     * APIMgtAuthorizationFailedException
+     * 
+     * @param apiIdentifier API Identifier
+     * @throws APIMgtAuthorizationFailedException
+     */
+    public static void validateUserTenantWithAPIIdentifier(APIIdentifier apiIdentifier)
+            throws APIMgtAuthorizationFailedException {
+        String username = RestApiUtil.getLoggedInUsername();
+        String providerName = APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName());
+        String providerTenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        String loggedInUserTenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        if (!providerTenantDomain.equals(loggedInUserTenantDomain)) {
+            String errorMsg = "User " + username + " is not allowed to access " + apiIdentifier.toString()
+                    + " as it belongs to a different tenant : " + providerTenantDomain;
+            throw new APIMgtAuthorizationFailedException(errorMsg);
+        }
     }
 
     /**
@@ -366,7 +391,7 @@ public class RestApiUtil {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public static boolean rootCauseMessageMatches (Throwable e, String message) {
         Throwable rootCause = getPossibleErrorCause(e);
-        return rootCause.getMessage().matches(".*" + message + ".*");
+        return rootCause.getMessage().contains(message);
     }
 
     /**

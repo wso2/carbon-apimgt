@@ -20,13 +20,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
+import java.io.EOFException;
 
 public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
 
@@ -80,9 +81,26 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
         }
 
         if (e instanceof JsonMappingException) {
+            if (e instanceof UnrecognizedPropertyException) {
+                UnrecognizedPropertyException unrecognizedPropertyException = (UnrecognizedPropertyException) e;
+                String unrecognizedProperty = unrecognizedPropertyException.getUnrecognizedPropertyName();
+                //noinspection ThrowableResultOfMethodCallIgnored
+                return RestApiUtil
+                        .buildBadRequestException("Unrecognized property '" + unrecognizedProperty + "'")
+                        .getResponse();
+            } else {
+                //noinspection ThrowableResultOfMethodCallIgnored
+                return RestApiUtil
+                        .buildBadRequestException("One or more request body parameters contain disallowed values.")
+                        .getResponse();
+            }
+        }
+
+        //This occurs when received an empty body in an occasion where the body is mandatory
+        if (e instanceof EOFException) {
             //noinspection ThrowableResultOfMethodCallIgnored
             return RestApiUtil
-                    .buildBadRequestException("One or more request body parameters contain disallowed values.")
+                    .buildBadRequestException("Request payload cannot be empty.")
                     .getResponse();
         }
 

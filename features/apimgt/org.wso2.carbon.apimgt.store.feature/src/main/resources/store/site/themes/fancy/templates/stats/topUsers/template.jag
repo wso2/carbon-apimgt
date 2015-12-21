@@ -7,7 +7,7 @@
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/easy-pie-chart/jquery.easy-pie-chart.css"))%>"/>
 
 <!-- jqRangeSlider plugin -->
-<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jQRangeSlider/lib/jquery-ui-1.8.16.custom.min.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jQRangeSlider/lib/jquery-ui-1.10.3.custom.min.js"))%>"></script>
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jQRangeSlider/jQDateRangeSlider-min.js"))%>"></script>
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jQRangeSlider/css/iThing.css"))%>"/>
 <link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jQRangeSlider/css/iThing.css"))%>"/>
