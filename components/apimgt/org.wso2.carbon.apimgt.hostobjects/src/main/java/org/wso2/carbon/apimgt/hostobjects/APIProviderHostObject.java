@@ -2455,6 +2455,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(45, myn, JSONObject.toJSONString(registeredResource));
                 myn.put(46, myn, checkValue(api.getProductionMaxTps()));
                 myn.put(47, myn, checkValue(api.getSandboxMaxTps()));
+                myn.put(48, myn, checkValue(Boolean.toString(api.isEndpointAuthDigest())));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
