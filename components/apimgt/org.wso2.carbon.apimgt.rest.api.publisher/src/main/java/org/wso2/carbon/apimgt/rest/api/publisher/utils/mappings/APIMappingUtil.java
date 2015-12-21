@@ -300,7 +300,7 @@ public class APIMappingUtil {
         }
 
         if (dto.getSubscriptionAvailableTenants() != null) {
-            model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
+            model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
 
         if (dto.getApiDefinition() != null) {
@@ -337,7 +337,7 @@ public class APIMappingUtil {
 
         if (dto.getVisibleTenants() != null) {
             String visibleTenants = StringUtils.join(dto.getVisibleTenants(), ',');
-            model.setVisibleRoles(visibleTenants);
+            model.setVisibleTenants(visibleTenants);
         }
 
         APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();
