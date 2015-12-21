@@ -55,6 +55,10 @@ public class APIMappingUtil {
         apiId = APIUtil.replaceEmailDomainBack(apiId);
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
 
+        if (apiIdDetails.length < 3) {
+            throw RestApiUtil.buildBadRequestException("Provided API identifier '" + apiId + "' is invalid");
+        }
+
         // apiId format: provider-apiName-version
         String providerName = apiIdDetails[0];
         String apiName = apiIdDetails[1];
