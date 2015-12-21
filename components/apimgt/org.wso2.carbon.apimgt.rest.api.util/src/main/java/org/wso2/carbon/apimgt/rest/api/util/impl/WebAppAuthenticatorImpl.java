@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -71,7 +72,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                        APIUtil.loadTenantConfig(tenantDomain);
+                        APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }
                     return true;
                 } catch (UserStoreException e) {
