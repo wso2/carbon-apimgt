@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -69,6 +70,9 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                     carbonContext.setTenantDomain(tenantDomain);
                     carbonContext.setTenantId(tenantId);
                     carbonContext.setUsername(username);
+                    if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                        APIUtil.loadTenantConfig(tenantDomain);
+                    }
                     return true;
                 } catch (UserStoreException e) {
                     log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain);
