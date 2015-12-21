@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.util.exception;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.cxf.interceptor.security.AuthenticationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.exc.UnrecognizedPropertyException;
@@ -106,6 +107,18 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
                 //noinspection ThrowableResultOfMethodCallIgnored
                 return RestApiUtil.buildBadRequestException(errorMessage).getResponse();
             }
+        }
+
+        if (e instanceof AuthenticationException) {
+            ErrorDTO errorDetail = new ErrorDTO();
+            errorDetail.setCode((long)401);
+            errorDetail.setMoreInfo("");
+            errorDetail.setMessage("");
+            errorDetail.setDescription(e.getMessage());
+            return Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .entity(errorDetail)
+                    .build();
         }
 
         //This occurs when received an empty body in an occasion where the body is mandatory
