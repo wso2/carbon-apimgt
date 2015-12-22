@@ -1958,7 +1958,6 @@ definitions:
       - transport
       - endpointConfig
       - visibility
-      - subscriptionAvailability
     properties:
       id:
         type: string
