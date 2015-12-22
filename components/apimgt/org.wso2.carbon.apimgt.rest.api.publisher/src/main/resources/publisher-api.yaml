@@ -1958,7 +1958,6 @@ definitions:
       - transport
       - endpointConfig
       - visibility
-      - subscriptionAvailability
     properties:
       id:
         type: string
@@ -2344,8 +2343,7 @@ definitions:
       - message
     properties:
       code:
-        type: integer
-        format: int64
+        type: string
       message:
         type: string
         description: |

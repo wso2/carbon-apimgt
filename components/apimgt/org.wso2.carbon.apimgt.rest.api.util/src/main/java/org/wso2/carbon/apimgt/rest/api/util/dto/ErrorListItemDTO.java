@@ -1,18 +1,19 @@
 package org.wso2.carbon.apimgt.rest.api.util.dto;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotNull;
 
 
+
 @ApiModel(description = "")
-public class ErrorListItemDTO {
+public class ErrorListItemDTO  {
 
 
     @NotNull
-    private Long code = null;
+    private String code = null;
 
     @NotNull
     private String message = null;
@@ -22,31 +23,30 @@ public class ErrorListItemDTO {
      **/
     @ApiModelProperty(required = true, value = "")
     @JsonProperty("code")
-    public Long getCode() {
+    public String getCode() {
         return code;
     }
-
-    public void setCode(Long code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
 
     /**
      * Description about individual errors occurred
-     */
+     **/
     @ApiModelProperty(required = true, value = "Description about individual errors occurred")
     @JsonProperty("message")
     public String getMessage() {
         return message;
     }
-
     public void setMessage(String message) {
         this.message = message;
     }
 
 
+
     @Override
-    public String toString() {
+    public String toString()  {
         StringBuilder sb = new StringBuilder();
         sb.append("class ErrorListItemDTO {\n");
 

@@ -441,6 +441,18 @@ paths:
         Get a list of applications
       parameters:
         - $ref: '#/parameters/groupId'
+        - name : query
+          in: query
+          description: |
+            **Search condition**.
+
+            You can search for an application by specifying the name as "query" attribute.
+
+            Eg.
+            "app1" will match an application if the name is exactly "app1".
+
+            Currently this does not support wildcards. Given name must exactly match the application name.
+          type: string
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
@@ -1763,8 +1775,7 @@ definitions:
       - message
     properties:
       code:
-        type: integer
-        format: int64
+        type: string
       message:
         type: string
         description: |

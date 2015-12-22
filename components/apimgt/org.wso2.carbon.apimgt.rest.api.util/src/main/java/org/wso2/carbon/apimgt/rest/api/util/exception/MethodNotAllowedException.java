@@ -26,21 +26,21 @@ import java.util.List;
 
 public class MethodNotAllowedException extends WebApplicationException {
 
-    List<ErrorListItemDTO> list;
-
-    public MethodNotAllowedException(List<ErrorListItemDTO> l) {
-        super(Response.Status.METHOD_NOT_ALLOWED);
-        list = l;
-    }
-
+    private String message;
     public MethodNotAllowedException(ErrorDTO errorDTO){
         super(Response.status(Response.Status.METHOD_NOT_ALLOWED)
                 .entity(errorDTO)
                 .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
                 .build());
+        message = errorDTO.getDescription();
     }
 
     public MethodNotAllowedException(){
         super(Response.Status.METHOD_NOT_ALLOWED);
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 }

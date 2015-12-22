@@ -794,13 +794,21 @@ public class APIStoreHostObject extends ScriptableObject {
 
         try {
 
-            //RealmService realmService = OAuthComponentServiceHolder.getRealmService();
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(MultitenantUtils.getTenantDomain(username));
-
-            org.wso2.carbon.user.api.UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-            Boolean authStatus = userStoreManager.authenticate(username, password);
+            Boolean authStatus = true;
+          
+            APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+            String url = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+            if (url == null) {
+                handleException("API key manager URL unspecified");
+            }
+            AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url + "AuthenticationAdmin");
+            ServiceClient client = authAdminStub._getServiceClient();
+            Options options = client.getOptions();
+            options.setManageSession(true);
+            String host = new URL(url).getHost();
+            if (!authAdminStub.login(username, password, host)) {
+                authStatus = false;
+            }
 
             if (!authStatus) {
                 //throw new WorkflowException("Please recheck the username and password and try again.");
@@ -810,14 +818,8 @@ public class APIStoreHostObject extends ScriptableObject {
                 return row;
             }
 
-            String tenantDomain = MultitenantUtils.getTenantDomain(username);
-
             String usernameWithDomain = APIUtil.setDomainNameToUppercase(username);
-
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                usernameWithDomain = usernameWithDomain + "@" + tenantDomain;
-            }
-
+         
             boolean authorized = APIUtil.checkPermissionQuietly(usernameWithDomain, APIConstants.Permissions.API_WORKFLOWADMIN);
 
             if (authorized) {

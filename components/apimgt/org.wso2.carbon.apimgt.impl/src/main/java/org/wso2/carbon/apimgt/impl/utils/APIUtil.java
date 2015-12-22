@@ -4221,6 +4221,21 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * load tenant axis configurations.
+     * @param tenantDomain
+     */
+    public static void loadTenantConfigBlockingMode(String tenantDomain) {
+
+        try {
+            ConfigurationContext ctx = ServiceReferenceHolder.getContextService().getServerConfigContext();
+            TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, ctx);
+        } catch (Exception e) {
+            log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
+        }
+
+    }
+
     public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
             throws APIManagementException {
         if (clientDomain != null) {

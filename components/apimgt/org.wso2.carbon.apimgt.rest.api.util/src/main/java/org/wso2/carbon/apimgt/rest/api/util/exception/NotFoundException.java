@@ -24,6 +24,7 @@ import javax.ws.rs.core.Response;
 
 public class NotFoundException extends WebApplicationException {
 
+    private String message;
     public NotFoundException() {
         super(Response.Status.NOT_FOUND);
     }
@@ -33,5 +34,11 @@ public class NotFoundException extends WebApplicationException {
                 .entity(errorDTO)
                 .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
                 .build());
+        message = errorDTO.getDescription();
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
     }
 }

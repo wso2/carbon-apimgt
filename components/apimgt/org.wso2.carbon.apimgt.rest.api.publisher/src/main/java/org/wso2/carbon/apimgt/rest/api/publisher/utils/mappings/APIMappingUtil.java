@@ -55,6 +55,10 @@ public class APIMappingUtil {
         apiId = APIUtil.replaceEmailDomainBack(apiId);
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
 
+        if (apiIdDetails.length < 3) {
+            throw RestApiUtil.buildBadRequestException("Provided API identifier '" + apiId + "' is invalid");
+        }
+
         // apiId format: provider-apiName-version
         String providerName = apiIdDetails[0];
         String apiName = apiIdDetails[1];
@@ -296,7 +300,7 @@ public class APIMappingUtil {
         }
 
         if (dto.getSubscriptionAvailableTenants() != null) {
-            model.setSubscriptionAvailableTenants(dto.getSubscriptionAvailableTenants().toString());
+            model.setSubscriptionAvailableTenants(StringUtils.join(dto.getSubscriptionAvailableTenants(), ","));
         }
 
         if (dto.getApiDefinition() != null) {
@@ -333,7 +337,7 @@ public class APIMappingUtil {
 
         if (dto.getVisibleTenants() != null) {
             String visibleTenants = StringUtils.join(dto.getVisibleTenants(), ',');
-            model.setVisibleRoles(visibleTenants);
+            model.setVisibleTenants(visibleTenants);
         }
 
         APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();

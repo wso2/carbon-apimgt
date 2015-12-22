@@ -340,9 +340,9 @@ var getCustomInSequences = function (apiName, apiVersion, apiProvider) {
     try {
     	sequences = provider.getCustomInSequences(apiName, apiVersion, apiProvider);
         if (log.isDebugEnabled()) {
-            log.debug("getCustomInSequences " +  " : " + sequences);
+            log.debug("getCustomInSequences " +  " : " + stringify(sequences));
         }
-     
+
         return {
             error:false,
             sequences:sequences
@@ -362,9 +362,9 @@ var getCustomOutSequences = function (apiName, apiVersion, apiProvider) {
     try {
     	sequences = provider.getCustomOutSequences(apiName, apiVersion, apiProvider);
         if (log.isDebugEnabled()) {
-            log.debug("getCustomOutSequences " +  " : " + sequences);
+            log.debug("getCustomOutSequences " +  " : " + stringify(sequences));
         }
-     
+
         return {
             error:false,
             sequences:sequences
@@ -384,7 +384,7 @@ var getCustomFaultSequences = function () {
     try {
     	sequences = provider.getCustomFaultSequences();
         if (log.isDebugEnabled()) {
-            log.debug("getCustomFaultSequences " +  " : " + sequences);
+            log.debug("getCustomFaultSequences " +  " : " + stringify(sequences));
         }
 
         return {
