@@ -58,9 +58,9 @@ var getAPI = function (api) {
             isDefaultVersion:result[42],
             implementation:result[43],
             environments:result[44],
-            endpointAuthTypeDigest:result[45],
             productionTps:result[46],
             sandboxTps:result[47],
+            endpointAuthTypeDigest:result[48],
             hasDefaultVersion:hasDefaultVersion,
             currentDefaultVersion:defaultVersion
         };
