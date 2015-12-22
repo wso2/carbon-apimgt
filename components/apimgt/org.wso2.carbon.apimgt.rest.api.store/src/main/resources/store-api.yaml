@@ -452,7 +452,7 @@ paths:
             "app1" will match an application if the name is exactly "app1".
 
             Currently this does not support wildcards. Given name must exactly match the application name.
-
+          type: string
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/Accept'
