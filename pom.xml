@@ -857,7 +857,7 @@
 
         <carbon.commons.version>4.4.8</carbon.commons.version>
         <carbon.registry.version>4.4.8</carbon.registry.version>
-        <carbon.mediation.version>4.5.1-SNAPSHOT</carbon.mediation.version>
+        <carbon.mediation.version>4.5.1</carbon.mediation.version>
         <carbon.identity.version>5.0.7</carbon.identity.version>
         <carbon.deployment.version>4.6.0</carbon.deployment.version>
         <carbon.governance.version>4.5.8</carbon.governance.version>
