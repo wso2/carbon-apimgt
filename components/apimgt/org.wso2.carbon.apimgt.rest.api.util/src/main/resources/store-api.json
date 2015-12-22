@@ -3,7 +3,7 @@
   "info": {
     "version": "0.9.0",
     "title": "WSO2 API Manager - Store",
-    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Store.\n\nYou can find the source of this API definition \n[here](https://github.com/hevayo/restful-apim). \nIt was written with [swagger 2](http://swagger.io/).\n",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Store.\n\nIt is written with [swagger 2](http://swagger.io/).\n",
     "contact": {
       "name": "WSO2",
       "url": "http://wso2.com/products/api-manager/",
