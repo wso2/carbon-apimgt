@@ -7,10 +7,8 @@ info:
   title: "WSO2 API Manager - Store"
   description: |
     This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
-    
-    You can find the source of this API definition 
-    [here](https://github.com/hevayo/restful-apim). 
-    It was written with [swagger 2](http://swagger.io/).
+
+    It is written with [swagger 2](http://swagger.io/).
 
   contact:
     name: "WSO2"
