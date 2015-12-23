@@ -210,13 +210,17 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             for (String row : collection.getChildren()) {
                 String uuid = row.substring(row.indexOf(";") + 1, row.length());
-                GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
-                if (genericArtifact != null &&
-                    genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
-                    API api = APIUtil.getAPI(genericArtifact);
-                    if (api != null) {
-                        apiSet.add(api);
+                try {
+                    GenericArtifact genericArtifact = artifactManager.getGenericArtifact(uuid);
+                    if (genericArtifact != null &&
+                            genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS).equals(APIConstants.PUBLISHED)) {
+                        API api = APIUtil.getAPI(genericArtifact);
+                        if (api != null) {
+                            apiSet.add(api);
+                        }
                     }
+                } catch (RegistryException e) {
+                    log.warn("User is not authorized to get an API with tag " + tag);
                 }
             }
 
@@ -1050,12 +1054,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             }
-            
+
             if (collection != null) {
                 for (String fullTag : collection.getChildren()) {
                     //remove hardcoded path value
                     String tagName = fullTag.substring(fullTag.indexOf(";") + 1, fullTag.indexOf(":"));
-    
+
                     Set<API> apisWithTag = getAPIsWithTag(requestedTenant, userRegistry, tagName);
                         /* Add the APIs against the tag name */
                         if (apisWithTag.size() != 0) {
@@ -1865,7 +1869,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return subscribedAPIs;
     }
-    
+
     public Integer getSubscriptionCount(Subscriber subscriber,String applicationName,String groupingId)
             throws APIManagementException {
         return apiMgtDAO.getSubscriptionCount(subscriber,applicationName,groupingId);
@@ -2136,12 +2140,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public int addApplication(Application application, String userId)
             throws APIManagementException {
-        
+
         if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
         }
-        
+
         int applicationId = apiMgtDAO.addApplication(application, userId);
 
         boolean isTenantFlowStarted = false;
@@ -2777,7 +2781,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public String getApplicationStatusById(int applicationId) throws APIManagementException {
         return apiMgtDAO.getApplicationStatusById(applicationId);
     }
-    
+
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {
         return apiMgtDAO.isAccessTokenExists(accessToken);
     }
