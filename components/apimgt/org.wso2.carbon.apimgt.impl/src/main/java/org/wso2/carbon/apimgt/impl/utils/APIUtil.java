@@ -4397,8 +4397,9 @@ public final class APIUtil {
         try {
             int tenantId;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             } else {
