@@ -450,11 +450,11 @@ public class APIKeyValidator {
                             if(log.isDebugEnabled()){
                                 log.debug("Putting resource object in cache with key: ".concat(resourceCacheKey));
                             }
+                            verbDTO.setRequestKey(resourceCacheKey);
                             //Store verb in cache
                             getResourceCache().put(resourceCacheKey, verbDTO);
                             //Set cache key in the message context so that it can be used by the subsequent handlers.
                             synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-                            verbDTO.setRequestKey(resourceCacheKey);
                             return verbDTO;
                         }
                     }
