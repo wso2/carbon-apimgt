@@ -23,6 +23,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -4504,7 +4505,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String reasonPhrase = String.valueOf(httpResponse.getStatusLine().getReasonPhrase());
             //If the endpoint doesn't match the regex which specify the invalid status code, it will return success.
             if (!statusCode.matches(invalidStatusCodesRegex)) {
-                if (log.isDebugEnabled() && statusCode.equals("405")) {
+                if (log.isDebugEnabled() && statusCode.equals(String.valueOf(HttpStatus.SC_METHOD_NOT_ALLOWED))) {
                     log.debug("Endpoint doesn't support HTTP HEAD");
                 }
                 response = "success";
