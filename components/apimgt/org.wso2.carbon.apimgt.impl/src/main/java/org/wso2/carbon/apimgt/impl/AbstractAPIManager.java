@@ -842,8 +842,9 @@ public abstract class AbstractAPIManager implements APIManager {
         boolean isTenantFlowStarted = false;
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 

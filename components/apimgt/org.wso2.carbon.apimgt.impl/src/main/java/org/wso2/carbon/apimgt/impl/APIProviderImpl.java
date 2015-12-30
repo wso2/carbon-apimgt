@@ -1947,9 +1947,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     			RegistryConstants.PATH_SEPARATOR + documentationName;
         boolean isTenantFlowStarted = false;
         try {
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
