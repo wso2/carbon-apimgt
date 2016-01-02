@@ -46,6 +46,7 @@ import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -94,12 +95,19 @@ public class Util {
         }
     }
 
+    /**
+     * Builds an xml object with the given QName
+     * 
+     * @param objectQName QName object
+     * @return built XML object
+     * @throws SSOHostObjectException
+     */
     public static XMLObject buildXMLObject(QName objectQName)
-            throws Exception {
+            throws SSOHostObjectException {
 
         XMLObjectBuilder builder = org.opensaml.xml.Configuration.getBuilderFactory().getBuilder(objectQName);
         if (builder == null) {
-            throw new Exception("Unable to retrieve builder for object QName "
+            throw new SSOHostObjectException("Unable to retrieve builder for object QName "
                                 + objectQName);
         }
         return builder.buildObject(objectQName.getNamespaceURI(), objectQName.getLocalPart(),

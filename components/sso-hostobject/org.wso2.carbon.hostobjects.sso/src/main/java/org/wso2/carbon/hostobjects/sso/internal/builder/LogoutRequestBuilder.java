@@ -30,6 +30,7 @@ import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.*;
 import org.opensaml.xml.util.Base64;
+import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.util.*;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
@@ -113,10 +114,11 @@ public class LogoutRequestBuilder {
 
     /**
      * Overload Logout request for sessionIndexId is not exist case
-     * @param subject
-     * @param reason
-     * @param issuerId
-     * @return
+     *
+     * @param subject Subject
+     * @param reason Reason for logout
+     * @param issuerId id of issuer
+     * @return SAML logout request
      */
     public LogoutRequest buildLogoutRequest(String subject, String reason,
                                             String issuerId, String nameIdFormat) {
@@ -142,10 +144,11 @@ public class LogoutRequestBuilder {
 
     /**
      * Overload Logout request for sessionIndexId is not exist case
-     * @param subject
-     * @param reason
-     * @param issuerId
-     * @return
+     *
+     * @param subject Subject
+     * @param reason Reason for logout
+     * @param issuerId id of issuer
+     * @return Signed SAML logout request
      */
     public LogoutRequest buildSignedLogoutRequest(String subject, String reason,
             String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
@@ -179,15 +182,13 @@ public class LogoutRequestBuilder {
     /**
      * Sign the SAML LogoutRequest message
      *
-     * @param logoutRequest
-     * @param signatureAlgorithm
-     * @param cred
-     * @return
+     * @param logoutRequest SAML logout request
+     * @param signatureAlgorithm Signature algorithm
+     * @param cred X.509 credential object
+     * @return SAML logout request including the signature
      */
-
-
     public static LogoutRequest setSignature(LogoutRequest logoutRequest, String signatureAlgorithm,
-            X509Credential cred) throws SignatureException {
+            X509Credential cred) throws SSOHostObjectException {
         try {
             Signature signature = (Signature) Util.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
             signature.setSigningCredential(cred);
@@ -220,13 +221,13 @@ public class LogoutRequestBuilder {
             Signer.signObjects(signatureList);
             return logoutRequest;
         } catch (CertificateEncodingException e) {
-            throw new SignatureException("Error getting certificate", e);
+            throw new SSOHostObjectException("Error getting certificate", e);
         } catch (MarshallingException e) {
-            throw new SignatureException("Error while marshalling logout request", e);
+            throw new SSOHostObjectException("Error while marshalling logout request", e);
         } catch (SignatureException e) {
-            throw new SignatureException("Error while signing the SAML logout request", e);
-        } catch (Exception e) { //buildXMLObject() throws a generic Exception
-            throw new SignatureException("Error while signing the SAML logout request", e);
+            throw new SSOHostObjectException("Error while signing the SAML logout request", e);
+        } catch (SSOHostObjectException e) {
+            throw new SSOHostObjectException("Error while signing the SAML logout request", e);
         }
     }
 
