@@ -4887,17 +4887,12 @@ public final class APIUtil {
         if (url == null) {
             return false;
         }
-
-        String regex;
-        if (url.contains("localhost")) {
-            regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(:\\d+)?+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";
-        } else {
-            regex = "(@)?(https://)?(http://)?[a-zA-Z_0-9\\-]+(\\.\\w[a-zA-Z_0-9\\-]+)+(:\\d+)?+(/[#&\\n\\-=?\\+\\%/\\.\\w]+)?";
+        try {
+            URL urlVal = new URL(url);
+            return true;
+        } catch (MalformedURLException e) {           
+            return false;
         }
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(url);
-
-        return m.matches();
     }
 
 
