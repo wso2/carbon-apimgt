@@ -46,7 +46,10 @@ $(document).ready(function() {
     $.validator.addMethod('validateUrl', function(value, element){
         var validUrlRegex = /^(http|https):\/\/(.)+/g;
         value = value.replace(/^\s+|\s+$/g, "");
-        return validUrlRegex.test(value);
+        if(value != ""){
+            return validUrlRegex.test(value);
+        }
+        return true;
     }, 'Please provide a valid URL.');
 
     $.validator.addMethod('noSpace', function(value, element) {
