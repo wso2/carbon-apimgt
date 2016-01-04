@@ -1419,6 +1419,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             }
             if (api != null) {
+                String apiVisibility = api.getVisibility();
+                if(!StringUtils.isEmpty(apiVisibility) && !APIConstants.API_GLOBAL_VISIBILITY.equalsIgnoreCase(apiVisibility)) {
+                    String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
+                    String loginUserDomain = MultitenantUtils.getTenantDomain(loggedUsername);
+                    if(!StringUtils.isEmpty(providerDomain) && !StringUtils.isEmpty(loginUserDomain)
+                            && !providerDomain.equals(loginUserDomain)){
+                        return false;
+                    }
+                }
                 // apiOwner is the value coming from front end and compared against the API instance
                 if (apiOwner != null && !apiOwner.isEmpty()) {
                     if (APIUtil.replaceEmailDomainBack(providerId).equals(APIUtil.replaceEmailDomainBack(apiOwner)) &&
