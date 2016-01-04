@@ -43,6 +43,12 @@ $(document).ready(function() {
         return value.indexOf("{}") == -1
     }, 'Empty curly brackets "{}" are not allowed in context field.');
 
+    $.validator.addMethod('validateUrl', function(value, element){
+        var validUrlRegex = /^(http|https):\/\/(.)+/g;
+        value = value.replace(/^\s+|\s+$/g, "");
+        return validUrlRegex.test(value);
+    }, 'Please provide a valid URL.');
+
     $.validator.addMethod('noSpace', function(value, element) {
         return !/\s/g.test(value);
     },'Name contains white spaces.');
