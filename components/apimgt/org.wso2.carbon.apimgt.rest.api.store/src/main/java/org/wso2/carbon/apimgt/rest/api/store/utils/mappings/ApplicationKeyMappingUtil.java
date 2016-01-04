@@ -42,12 +42,15 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setKeyState((String) keyDetails.get(APIConstants.FrontEndParameterNames.KEY_STATE));
         try {
             String appDetailsString = (String) keyDetails.get(ApplicationConstants.OAUTH_APP_DETAILS);
-            JSONObject appDetailsJsonObj = (JSONObject) new JSONParser().parse(appDetailsString);
-            if (appDetailsJsonObj != null) {
-                applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(applicationKeyType));
-                String supportedGrantTypes =  (String) appDetailsJsonObj.get(ApplicationConstants.OAUTH_CLIENT_GRANT);
-                if (supportedGrantTypes != null) {
-                    applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(supportedGrantTypes.split(" ")));
+            if (appDetailsString != null) {
+                JSONObject appDetailsJsonObj = (JSONObject) new JSONParser().parse(appDetailsString);
+                if (appDetailsJsonObj != null) {
+                    applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(applicationKeyType));
+                    String supportedGrantTypes = (String) appDetailsJsonObj
+                            .get(ApplicationConstants.OAUTH_CLIENT_GRANT);
+                    if (supportedGrantTypes != null) {
+                        applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(supportedGrantTypes.split(" ")));
+                    }
                 }
             }
 
@@ -55,7 +58,9 @@ public class ApplicationKeyMappingUtil {
             tokenDTO.setValidityTime((Long)keyDetails.get(APIConstants.AccessTokenConstants.VALIDITY_TIME));
             tokenDTO.setAccessToken((String)keyDetails.get(APIConstants.AccessTokenConstants.ACCESS_TOKEN));
             String[] tokenScopes = (String[])keyDetails.get(APIConstants.AccessTokenConstants.TOKEN_SCOPES);
-            tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
+            if (tokenScopes != null) {
+                tokenDTO.setTokenScopes(Arrays.asList(tokenScopes));
+            }
 
             applicationKeyDTO.setToken(tokenDTO);
         } catch (ParseException e) {
