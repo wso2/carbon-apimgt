@@ -261,7 +261,7 @@
                     <input type="hidden" value="endpoint" name="implementation_methods" >
                     <div class="form-actions" id="saveButtons">
                         <button type="submit" class="btn btn-default manageSaveButton has-spinner" id="saveBtn" >Save</button>
-                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
+                        <button id="go_to_manage" type="button" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
                     </div>
                     </form>
                 </div>
