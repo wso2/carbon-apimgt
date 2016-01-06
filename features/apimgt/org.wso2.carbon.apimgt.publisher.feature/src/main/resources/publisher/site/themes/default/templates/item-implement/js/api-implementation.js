@@ -178,7 +178,8 @@ $(document).ready(function(){
                     dataType: "json"
                 });               
             });
-        $("#prototype_form").submit();                        
+        $("#prototype_form").submit();
+	return false;                         
     });
 
     // last saved implementation state
