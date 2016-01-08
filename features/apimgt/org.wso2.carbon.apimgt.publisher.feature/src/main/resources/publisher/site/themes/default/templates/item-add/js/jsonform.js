@@ -338,7 +338,7 @@ jsonform.elementTypes = {
       '<div class="input-append">'+
       '<input type="text" ' +
       '<%= (fieldHtmlClass ? "class=\'" + fieldHtmlClass + "\' " : "") %>' +
-      ' class="validateEndpoints" '+
+      ' class="validateEndpoints validateUrl" '+
       'name="<%= node.name %>" value="<%= escape(value) %>" id="<%= id %>"' +
       '<%= (node.disabled? " disabled" : "")%>' +
       '<%= (node.readOnly ? " readonly=\'readonly\'" : "") %>' +
