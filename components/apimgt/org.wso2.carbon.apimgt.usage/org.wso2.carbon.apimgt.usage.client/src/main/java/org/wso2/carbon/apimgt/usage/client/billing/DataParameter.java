@@ -26,7 +26,6 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**

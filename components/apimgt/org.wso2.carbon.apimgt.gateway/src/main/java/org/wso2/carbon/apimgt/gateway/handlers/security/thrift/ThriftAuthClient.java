@@ -43,14 +43,13 @@ public class ThriftAuthClient {
 
     public String getSessionId(String userName, String password) throws AuthenticationException {
         try {
-            //if (sessionId == null) {
-                TProtocol protocol = new TCompactProtocol(client);
-                AuthenticatorService.Client authClient = new AuthenticatorService.Client(
-                        protocol);
-                client.open();
-                sessionId = authClient.authenticate(userName, password);
-                client.close();
-            //}
+
+            TProtocol protocol = new TCompactProtocol(client);
+            AuthenticatorService.Client authClient = new AuthenticatorService.Client(protocol);
+            client.open();
+            sessionId = authClient.authenticate(userName, password);
+            client.close();
+
         } catch (TTransportException e) {
             throw new AuthenticationException("Error in authenticating with thrift client..");
         } catch (TException e) {

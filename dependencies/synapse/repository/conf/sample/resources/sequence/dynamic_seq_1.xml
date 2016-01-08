@@ -1,8 +1,0 @@
-<sequence name="dynamic_sequence" xmlns="http://ws.apache.org/ns/synapse">
-	<in>
-		<log level="custom">
-      	   <property name="message" value="*** Test Message 1 ***"/>
-		</log>
-	</in>
-	<send/>
-</sequence>

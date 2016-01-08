@@ -18,6 +18,6 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 
 public interface APIKeyCacheable {
 
-    public APIKeyCache getKeyCache();
+    APIKeyCache getKeyCache();
 
 }

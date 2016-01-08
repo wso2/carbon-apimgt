@@ -1,0 +1,113 @@
+<%
+
+response.addHeader('Cache-Control','no-cache, no-store, must-revalidate'); // HTTP 1.1.
+response.addHeader('Pragma','no-cache'); // HTTP 1.0.
+response.addHeader('Expires','0');
+response.contentType = "application/json; charset=UTF-8";
+
+include("/jagg/jagg.jag");
+var site = require("/site/conf/site.json");
+var msg = require("/site/conf/ui-messages.jag");
+
+
+var verb = request.getMethod();
+
+var topic = request.getParameter('topic');
+var data = request.getContent();
+var log = new Log();
+var topicId;
+var replyId;
+
+var date = new Date();
+var time = date.getTime();
+
+var resourceIdentifier = site.forum.resourceIdentifier;
+var tenantDomain = "carbon.super";
+
+var uri = request.getRequestURI();
+var callPath = uri.replace(site.context+"/forum/api", "");
+var action;
+
+
+
+if (uri != null) {
+    var uriMatcher = new URIMatcher(callPath);
+
+    if (uriMatcher.match("/reply") || uriMatcher.match("/reply/")) {
+        // new reply
+        replyId = null;
+    } else if (uriMatcher.match("/reply/{replyId}/")) {
+        replyId = uriMatcher.elements().replyId;
+    } else if (uriMatcher.match("/reply/{replyId}/{page}")) {
+        replyId = uriMatcher.elements().replyId;
+
+    } else {
+        //Invalid URL
+        action = "exit";
+    }
+}
+
+if (action == "exit") {
+    response.sendError(404);
+}
+else {
+var user = jagg.getUser();
+var storeForum = Packages.org.wso2.carbon.forum.registry.RegistryForumManager;
+var forum = new storeForum();
+
+var forumReplyDTO = Packages.org.wso2.carbon.forum.dto.ForumReplyDTO;
+var replyDTO = new forumReplyDTO();
+
+
+
+
+
+var message = {error:false};
+
+try{
+
+if( ( request.getMethod() == 'POST' || 
+      request.getMethod() == 'DELETE' || 
+      request.getMethod() == 'PUT' ) && !jagg.isCSRFTokenValid()){
+    message.error = true;
+    message.message = msg.error.csrfError;
+}else if (verb == "DELETE" && replyId != null) {
+
+    forum.removeReply(replyId, user.username, tenantDomain);
+
+} else if (verb == "PUT") {
+
+    replyDTO.setReply(data.reply);
+	replyDTO.setCreatedBy(user.username);
+    replyDTO.setTopicId(data.topicId);
+    replyDTO.setReplyId(data.replyId);
+    replyDTO.setCreatedDate(date);
+    replyDTO.setTimestamp(time);
+    replyDTO.setCreatorTenantDomain(tenantDomain);
+    replyDTO.setTopicResourceIdentifier(resourceIdentifier);
+
+    forum.updateReply(replyDTO, user.username);
+
+} else if (verb == "POST") {
+
+    var topicData = JSON.parse(topic);
+    replyDTO.setReply(topicData.reply);
+    replyDTO.setCreatedBy(user.username);
+    replyDTO.setTopicId(topicData.topicId);
+    replyDTO.setCreatedDate(date);
+    replyDTO.setTimestamp(time);
+    replyDTO.setCreatorTenantDomain(tenantDomain);
+    replyDTO.setTopicResourceIdentifier(resourceIdentifier);
+
+    forum.addReply(replyDTO);
+}
+}catch(err){
+    message.error = true;
+    message.message = err.message;
+}
+print(message);
+
+}
+
+
+%>

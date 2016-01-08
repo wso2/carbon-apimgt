@@ -40,7 +40,7 @@
                               <ul class="nav actions login-sign-up">
                                   <li class="dropdown">
                                     <a id="userMenu"><%if(outputs.user != null && outputs.user != 'null'){%><%=outputs.user.username%><%}%><b class="caret"></b></a>
-                                    <ul id="userInfoMenu" class="dropdown-menu">
+                                    <ul id="userInfoMenu" class="dropdown-menu pull-right">
                                       <li class="userInfoSection">
                                           <%=i18n.localize("logged")%> <h4><%=outputs.user.username%></h4>
                                       </li>

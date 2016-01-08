@@ -12,7 +12,6 @@ $(document).ready(function(){
         e.preventDefault();
     });
 
-    $('select').selectpicker();
 
 
     $('.rating-tooltip-manual').rating({

@@ -29,6 +29,7 @@ public class Tag {
     private String description;
     private boolean thumbnailExists;
     private int noOfOccurrences;
+    private String thumbnailUrl;
 
     public Tag(String name) {
         this.name = name;
@@ -69,5 +70,13 @@ public class Tag {
 
     public void setThumbnailExists(boolean thumbnailExists) {
         this.thumbnailExists = thumbnailExists;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 }

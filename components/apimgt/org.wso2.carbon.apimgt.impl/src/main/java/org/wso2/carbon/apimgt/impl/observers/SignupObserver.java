@@ -23,6 +23,8 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;

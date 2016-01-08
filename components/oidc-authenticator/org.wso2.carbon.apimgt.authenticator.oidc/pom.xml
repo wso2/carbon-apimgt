@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -54,20 +54,16 @@
             <artifactId>org.wso2.carbon.utils</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.nimbusds</groupId>
+            <groupId>com.nimbusds.wso2</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.minidev</groupId>
-            <artifactId>json-smart</artifactId>
         </dependency>
     </dependencies>
 
@@ -80,6 +76,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -99,7 +96,6 @@
                             org.apache.lucene.*,
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

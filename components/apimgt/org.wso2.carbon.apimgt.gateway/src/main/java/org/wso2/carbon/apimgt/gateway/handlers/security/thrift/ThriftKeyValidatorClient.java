@@ -161,7 +161,7 @@ public class ThriftKeyValidatorClient {
             param.setTrustStore(thriftUtils.getTrustStorePath(), thriftUtils.getTrustStorePassword());
 
             TTransport transport = TSSLTransportFactory.getClientSocket(
-                    thriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
+                    ThriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
                     thriftUtils.getThriftClientConnectionTimeOut(), param);
 
             //TProtocol protocol = new TCompactProtocol(transport);

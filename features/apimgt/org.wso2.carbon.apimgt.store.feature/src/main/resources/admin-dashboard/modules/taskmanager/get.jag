@@ -1,6 +1,10 @@
 <%
 var ws = require("ws");
+var carbon = require('carbon');
 var log=new Log();
+
+var adminUserName = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("AuthManager.Username");
+var adminPassword = carbon.server.osgiService('org.wso2.carbon.apimgt.impl.APIManagerConfigurationService').getAPIManagerConfiguration().getFirstProperty("AuthManager.Password");
 
 var getTasks = function (filterCategory,taskType) {
 
@@ -23,16 +27,7 @@ if(cookie != null){
     searchBy='CLAIMABLE';
     }
 
-    var prefixEndpoint;
-    if(taskType=="ApproveSubscription"){
-    prefixEndpoint= site.workflows.subscriptionWorkFlowServerURL;
-    } else if(taskType=="ApproveUser"){
-    prefixEndpoint=site.workflows.signupWorkFlowServerURL;
-    } else if(taskType=="ApproveApplication"){
-    prefixEndpoint=site.workflows.applicationWorkFlowServerURL;
-    } else if(taskType=="ApplicationRegistration"){
-    prefixEndpoint=site.workflows.appRegistrationWorkFlowServerURL;
-    }
+    var prefixEndpoint = site.workflows.workFlowServerURL;
 
     var payload = '<ns:simpleQuery xmlns:ns="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/api/200803" xmlns:ns1="http://docs.oasis-open.org/ns/bpel4people/ws-humantask/types/200803">'+
     '<ns:simpleQueryInput><ns1:status>RESERVED</ns1:status><ns1:status>IN_PROGRESS</ns1:status><ns1:status>READY</ns1:status><ns1:pageSize>'+50+'</ns1:pageSize><ns1:pageNumber>'+0+'</ns1:pageNumber><ns1:simpleQueryCategory>'+'ALL_TASKS'+'</ns1:simpleQueryCategory></ns:simpleQueryInput></ns:simpleQuery>';
@@ -41,7 +36,7 @@ if(cookie != null){
 
     try {
 
-    version.open(options,endpoint, false);
+    version.open(options,endpoint, false, String(null), String(adminPassword));
     version.send(payload);
     result = version.responseE4X;
 
@@ -116,7 +111,7 @@ var response;
 
 try {
 
-version.open(options,endpoint, false);
+version.open(options,endpoint, false, String(null), String(adminPassword));
 version.send(payload);
 response = version.responseE4X;
 var actualOwner=response.*::taskAbstract.*::actualOwner;

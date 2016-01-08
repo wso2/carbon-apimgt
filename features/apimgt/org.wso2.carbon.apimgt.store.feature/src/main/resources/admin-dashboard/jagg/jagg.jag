@@ -1,5 +1,5 @@
 <%
-
+var site = require("/site/conf/site.json");
 //TODO : remove this when log configs are implemented
 Log.prototype.isDebugEnabled = function () {
     return false;
@@ -32,6 +32,8 @@ var jagg = jagg || (function () {
     var bloks = {};
 
     var data;
+
+    var reverse_proxy;    
 
     var setData = function (d) {
         data = d;
@@ -339,24 +341,156 @@ return getThemePath() + path;
         return url ? url : path;
     };
 
-    var url = function(path,parameters){
-        var params = ""
-        if(parameters){
-            params = "?";
-            for (var key in parameters) {
-                params = key+"="+parameters[key];
-            }
+    var getRequestSegments = function(){
+        var href = request.getRequestURL()
+        var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+        return match && {
+            protocol: match[1],
+            host: match[2],
+            hostname: match[3],
+            port: match[4],
+            pathname: match[5],
+            search: match[6],
+            hash: match[7]
         }
-        return  "/admin-dashboard" + path;
-    };
+
+    };    
 
     var getMappedUrl = function (path) {
         return getAbsoluteUrl(getUrlMapping(path));
     };
 
     var getAbsoluteUrl = function (path) {
-        return site.context + path;
+        var host = "" 
+        if(isReverseProxyEnabled()){
+            host = "https://" + site.reverseProxy.host ;
+        }else{
+            var match = getRequestSegments();
+            var host = match.protocol + "//" + match.host;
+        }
+        return host + url(path);
     };
+
+    var getSiteDomainFromRequest = function(){
+        var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)(\/[^?#]*)(\?[^#]*|)(#.*|)$/);
+    }
+
+    var getHttpsUrl = function(path, parameters){
+        var hostname = "";
+        var requestSegments = getRequestSegments();     
+        mod = jagg.module("manager");
+        hostname = mod.getHTTPsURL();
+        hostname = hostname.replace("https://","");
+
+        // if the site is fronted by a proxy server
+        if(isReverseProxyEnabled()){
+             hostname = site.reverseProxy.host ;
+             //if a custom https port is used
+             if(site.reverseProxy.hosts_port){
+                hostname = hostname + ":" + site.reverseProxy.hosts_port;
+             }
+        }        
+
+        return "https://" + hostname + url(path, parameters);
+    }    
+
+    var url = function(path,parameters){
+        var tail = "";
+        if(parameters){
+            var params = [];
+            for (var key in parameters) {                
+                params.push(key+"="+parameters[key]) ;
+            }
+            if(/\?/.test(path)){
+                tail = "&";
+            }
+            else{
+                tail = "?";
+            }
+            tail = tail + params.join("&");
+        }
+        return getSiteContext()+ path + tail;
+    };
+
+    // following function will generate a url with the currently activated tenant
+    var urlTenanted = function(path, parameters){
+        //if tenented add tenant url
+        if(getTenantDomain() != null && !(/(\?tenant\=|\&tenant\=)/i.test(path))){
+            if(!parameters){
+                parameters = {};
+            }
+            parameters.tenant = getTenantDomain();
+        }
+        if(isReverseProxyEnabled()){
+            return getHttpsUrl(path, parameters)
+        }
+        return url(path,parameters)
+    };
+
+    var getCarbonProxyContextPath = function(){
+        var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
+        var carbonUtils = new CarbonUtils();
+        var context = carbonUtils.getServerConfiguration().getFirstProperty("ProxyContextPath");
+        if(context != null)
+            return context;
+        else
+            return '';    
+    };
+
+    var isReverseProxyEnabled = function(){
+        if(reverse_proxy != undefined){
+            return reverse_proxy;
+        }
+        if(site.reverseProxy.enabled){
+            if(site.reverseProxy.enabled == "auto"){
+                var xfwd = request.getHeader("X-Forwarded-Host");
+                if(xfwd != null){
+                    var xfwd = xfwd.split(",")[0]; 
+                    //if(xfwd.trim() == site.reverseProxy.host){
+                        reverse_proxy = true;      
+                        site.reverseProxy.host = xfwd.trim();       
+                    //}                                 
+                }else{
+                    reverse_proxy = false;                
+                }                    
+            }
+            else{
+                reverse_proxy = true;
+            }            
+        }
+        else{
+            reverse_proxy = false;
+        }        
+        return reverse_proxy;
+    };
+
+    var getSiteContext = function(){
+        if(isReverseProxyEnabled()){
+            //If we use a custom domain mapping we will not use the context.
+            if( site.reverseProxy.tenantHeader != null && 
+                request.getHeader(site.reverseProxy.tenantHeader) != null){
+                return "";
+            }
+            else{
+                return site.reverseProxy.context
+            }
+        }
+
+        var proxyContext = getCarbonProxyContextPath();
+        return proxyContext + site.context;        
+    };
+
+    var getRegistryPath = function(path){
+        if(isReverseProxyEnabled()){
+            if(site.reverseProxy.regContext != undefined){
+                return site.reverseProxy.regContext + path;
+            }
+            return site.reverseProxy.context + path;
+        }
+
+        var ProxyContextPath = getCarbonProxyContextPath();
+        return ProxyContextPath + path;
+    }    
 
     var module = function (name, module) {
         if (module) {
@@ -500,7 +634,7 @@ return getThemePath() + path;
     };
 
     var addHeaderCSS = function (template, key, css) {
-        css = '<link type="text/css" rel="stylesheet" href="' + site.context + getThemeFile(css) + '"/>';
+        css = '<link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
         insertData(this, template, "header", "css", key, css);
     };
 
@@ -510,7 +644,7 @@ return getThemePath() + path;
     };
 
     var addHeaderJS = function (template, key, js) {
-        js = '<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>';
+        js = '<script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
         insertData(this, template, "header", "js", key, js);
     };
 
@@ -524,7 +658,7 @@ return getThemePath() + path;
     };
 
     var addFooterCSS = function (template, key, css) {
-        css = '<link type="text/css" rel="stylesheet" href="' + site.context + getThemeFile(css) + '"/>';
+        css = '<link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
         insertData(this, template, "footer", "css", key, css);
     };
 
@@ -534,7 +668,7 @@ return getThemePath() + path;
     };
 
     var addFooterJS = function (template, key, js) {
-        js = '<script type="text/javascript" src="' + site.context + getThemeFile(js) + '"></script>';
+        js = '\t<script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
         insertData(this, template, "footer", "js", key, js);
     };
 
@@ -550,6 +684,109 @@ return getThemePath() + path;
     var includeJag = function (path) {
         include(getThemeFile(path));
     };
+
+    var getTenantDomain = function(){
+        if(isReverseProxyEnabled()){
+            // check if tenant header exists
+            if(site.reverseProxy.tenantHeader != undefined && site.reverseProxy.tenantHeader != null
+                && request.getHeader(site.reverseProxy.tenantHeader) != null){
+                return request.getHeader(site.reverseProxy.tenantHeader);
+            }
+        }
+        return request.getParameter("tenant");
+    }
+
+    var setCSRFToken = function(){
+        var cookie = request.getCookie("csrftoken");         
+        var user = jagg.getUser();
+        var csrfuser =  session.get('csrfuser');
+        //set CSRF if it is not set + you need to refresh the token if the user has changed.
+        if( !cookie || user != csrfuser){
+            //Use a secure random as the CSRF token.
+            var SecureRandom = Packages.java.security.SecureRandom;
+            var random = new SecureRandom();
+            var BigInteger = Packages.java.math.BigInteger;
+            var token = new BigInteger(130, random).toString(32);
+
+            var cookie= {'name':'csrftoken','value': token , 'maxAge': 86400, 'path':"/"};
+            session.put('csrfuser',user);
+            response.addCookie(cookie);
+        }     
+    }
+
+    var isCSRFTokenValid = function(){
+        var log = new Log();
+        var cookie = request.getCookie("csrftoken");
+        var token = request.getHeader("X-CSRFToken");
+        var user = jagg.getUser();
+        if(cookie == null || cookie.value == token){
+            return true;
+        }
+        else{
+            log.info("CSRF Token error at "+request.getRequestURI());
+            return false;
+        }
+    }
+
+    var validateInputs = function(config){
+        var errors = [];
+        //set most used parapeters
+        config.name = { type:"name"};
+        config.provider = { type:"provider"};
+        config.version = { type:"name"};        
+
+        for(var key in config){
+            var value = request.getParameter(key);
+            if(value == null){
+                if(config[key].required)
+                    errors.push(key);
+                continue;
+            }
+            switch (config[key].type) {
+              case "url":
+                break;
+              case "input":
+                var regex = /([<>\"\'])/;
+                if(regex.test(value)) errors.push(key);
+                break;                 
+              case "number":
+                var regex = /^[0-9]*$/;
+                if(!regex.test(value)) errors.push(key); 
+                break;  
+              case "safetext":
+                var regex = /^[a-zA-Z0-9]*$/;
+                if(!regex.test(value)) errors.push(key); 
+                break;        
+              case "uuid":
+                var regex = /^[a-zA-Z0-9\-]*$/;
+                if(!regex.test(value)) errors.push(key); 
+                break;                                        
+              case "name":
+                var regex = /([~!#$;%^*+={}\|\\<>\"\'\/,])/;  
+                if(regex.test(value)) errors.push(key);                
+                break;
+              case "password":
+                var regex = /^[\S]{5,30}$/;
+                if(!regex.test(value)) errors.push(key);                
+                break;
+              case "email":
+                var regex = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+                if(!regex.test(value)) errors.push(key);              
+                break;
+               case "provider":
+                var regex = /([~!#$;%^*+={}\|\\<>\"\'\,])/;  
+                if(regex.test(value)) errors.push(key);
+                break;
+              default:
+            }            
+        }
+        if(errors.length > 0){
+            return errors;
+        }
+        else{
+            return true;
+        }
+    }
 
     return {
         setUser:setUser,
@@ -590,7 +827,15 @@ return getThemePath() + path;
         includeJag:includeJag,
         url:url,
         getUserTheme:getUserTheme,
-        getThemeFile:getThemeFile
+        getThemeFile:getThemeFile,
+        urlTenanted:urlTenanted,
+        getRegistryPath:getRegistryPath,
+        getSiteContext:getSiteContext,
+        getHttpsUrl:getHttpsUrl,
+        getTenantDomain:getTenantDomain,
+        setCSRFToken:setCSRFToken,
+        isCSRFTokenValid:isCSRFTokenValid,
+        validateInputs:validateInputs,
     };
 
 }());

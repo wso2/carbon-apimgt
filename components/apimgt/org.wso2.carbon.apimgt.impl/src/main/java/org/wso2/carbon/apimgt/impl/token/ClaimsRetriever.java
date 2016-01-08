@@ -59,6 +59,6 @@ public interface ClaimsRetriever {
      *
      * @throws APIManagementException
      */
-    String getDialectURI(String endUserName);
+    String getDialectURI(String endUserName) throws APIManagementException;
 
 }

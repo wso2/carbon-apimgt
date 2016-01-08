@@ -143,8 +143,7 @@
 */
 
 .scope_container {
-    margin: 5px 0 0 10px;
-    padding: 10px;    
+    padding: 10px;
     background-color: #F5F5BB !important;
 }
 
@@ -199,7 +198,9 @@
 .resource-method-get{
     background-color: #0F6AB4;
 }
-
+.resource-method-head{
+    background-color: #ffd20f;
+}
 .resource-method-post{
     background-color: #10A54A;
 }
@@ -250,10 +251,28 @@ margin: 20px 0px 10px 10px;
 }
 
 .swagger_editer_header{
-    padding: 10px;
-    background: #4a4a4a;
+    position: absolute;
+    top:0;
+    padding: 5px;
+    height: 30px;
 }
 
 body.modal-open {
     overflow: hidden;
+}
+
+.tierSelect, input#cacheTimeout, .responseCacheSelect{
+    width:30% !important;
+}
+
+.businessInfo{
+    width:40%;
+}
+
+.form-actions{
+    margin-top: 20px;
+}
+
+.icon-implement{
+    padding:13px 0 0 10px;
 }

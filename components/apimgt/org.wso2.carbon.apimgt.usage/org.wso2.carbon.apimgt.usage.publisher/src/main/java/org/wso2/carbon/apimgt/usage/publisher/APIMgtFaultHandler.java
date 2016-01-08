@@ -4,6 +4,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -44,7 +46,8 @@ public class APIMgtFaultHandler extends AbstractMediator {
                         PrivilegedCarbonContext.startTenantFlow();
                         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                                 setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                        publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).newInstance();
+                        publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance()
+                        ;
                         publisher.init();
                     } catch (ClassNotFoundException e) {
                         log.error("Class not found " + publisherClass);
@@ -70,41 +73,41 @@ public class APIMgtFaultHandler extends AbstractMediator {
             if (!enabled || skipEventReceiverConnection) {
                 return true;
             }
-            long requestTime = Long.parseLong((String) messageContext.getProperty(APIMgtUsagePublisherConstants.
+            long requestTime = Long.parseLong((String) messageContext.getProperty(APIMgtGatewayConstants.
                                                                          REQUEST_START_TIME));
 
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
             faultPublisherDTO.setConsumerKey((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.CONSUMER_KEY));
+                    APIMgtGatewayConstants.CONSUMER_KEY));
             faultPublisherDTO.setContext((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.CONTEXT));
+                    APIMgtGatewayConstants.CONTEXT));
             faultPublisherDTO.setApi_version((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.API_VERSION));
+                    APIMgtGatewayConstants.API_VERSION));
             faultPublisherDTO.setApi((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.API));
+                    APIMgtGatewayConstants.API));
             faultPublisherDTO.setResourcePath((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.RESOURCE));
+                    APIMgtGatewayConstants.RESOURCE));
             faultPublisherDTO.setMethod((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.HTTP_METHOD));
+                    APIMgtGatewayConstants.HTTP_METHOD));
             faultPublisherDTO.setVersion((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.VERSION));
+                    APIMgtGatewayConstants.VERSION));
             faultPublisherDTO.setErrorCode(String.valueOf(messageContext.getProperty(
                     SynapseConstants.ERROR_CODE)));
             faultPublisherDTO.setErrorMessage((String) messageContext.getProperty(
                     SynapseConstants.ERROR_MESSAGE));
             faultPublisherDTO.setRequestTime(requestTime);
             faultPublisherDTO.setUsername((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.USER_ID));
+                    APIMgtGatewayConstants.USER_ID));
             faultPublisherDTO.setTenantDomain(MultitenantUtils.getTenantDomain(
                     faultPublisherDTO.getUsername()));
             faultPublisherDTO.setHostName((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.HOST_NAME));
+                    APIMgtGatewayConstants.HOST_NAME));
             faultPublisherDTO.setApiPublisher((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.API_PUBLISHER));
+                    APIMgtGatewayConstants.API_PUBLISHER));
             faultPublisherDTO.setApplicationName((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.APPLICATION_NAME));
+                    APIMgtGatewayConstants.APPLICATION_NAME));
             faultPublisherDTO.setApplicationId((String) messageContext.getProperty(
-                    APIMgtUsagePublisherConstants.APPLICATION_ID));
+                    APIMgtGatewayConstants.APPLICATION_ID));
             String url = (String) messageContext.getProperty(
                     RESTConstants.REST_URL_PREFIX);
             URL apiurl = new URL(url);

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 # Copyright (c) 2008, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 #
@@ -13,16 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-
 
     <artifactId>apimgt</artifactId>
     <modelVersion>4.0.0</modelVersion>
@@ -30,16 +28,20 @@
     <name>API Management</name>
 
     <modules>
-
         <module>org.wso2.carbon.apimgt.api</module>
         <module>org.wso2.carbon.apimgt.impl</module>
-        <!--module>org.wso2.carbon.apimgt.hostobjects</module-->
+        <module>org.wso2.carbon.apimgt.hostobjects</module>
         <module>org.wso2.carbon.apimgt.keymgt</module>
-	    <module>org.wso2.carbon.apimgt.keymgt.client</module>
+        <module>org.wso2.carbon.apimgt.keymgt.client</module>
         <module>org.wso2.carbon.apimgt.gateway</module>
         <module>org.wso2.carbon.apimgt.usage</module>
-	    <module>org.wso2.carbon.apimgt.core</module>
-	    <module>org.wso2.carbon.apimgt.interceptor</module>
-	    <module>org.wso2.carbon.apimgt.startup.publisher</module>
-    </modules>
+        <module>org.wso2.carbon.apimgt.core</module>
+        <module>org.wso2.carbon.apimgt.interceptor</module>
+        <module>org.wso2.carbon.apimgt.startup.publisher</module>
+        <module>org.wso2.carbon.apimgt.rest.api.util</module>
+        <module>org.wso2.carbon.apimgt.rest.api.store</module>
+        <module>org.wso2.carbon.apimgt.rest.api.publisher</module>
+        <module>org.wso2.carbon.apimgt.rest.api.dcr</module>
+        <module>samples/org.wso2.carbon.apimgt.samples.calculator</module>
+  </modules>
 </project>

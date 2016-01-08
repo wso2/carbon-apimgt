@@ -14,14 +14,12 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.hostobjects</groupId>
         <artifactId>sso-hostobject</artifactId>
-        <version>4.2.3</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,48 +27,40 @@
     <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - Single Sign-On Relying party HostObject</name>
-    <description>signle sign-on relying party</description>
+    <description>Single Sign-On relying party</description>
 
     <dependencies>
         <dependency>
             <groupId>rhino.wso2</groupId>
             <artifactId>js</artifactId>
-            <version>1.7.0.R4.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>opensaml.wso2</groupId>
             <artifactId>opensaml2</artifactId>
-            <version>2.4.1.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>commons-codec.wso2</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.4.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
-            <version>4.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.jaggeryjs</groupId>
             <artifactId>org.jaggeryjs.hostobjects.web</artifactId>
-            <version>0.9.0.ALPHA4.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml</artifactId>
-            <version>2.2.3</version>
          </dependency>
     </dependencies>
 
@@ -101,14 +91,13 @@
                         <Export-Package>
                             org.wso2.carbon.hostobjects.sso.*;
                         </Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
+			<Import-Package>
+			    javax.xml.*;version="0.0.0",
+			    *;resolution:=optional
+			</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
-        <opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-    </properties>
 </project>

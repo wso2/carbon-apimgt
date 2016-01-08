@@ -1,0 +1,59 @@
+<%
+var getApplications = function (username) {
+    var applications,
+            log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+        var groupId = session.get("groupId");
+        applications = store.getApplications(username, groupId);
+        if (log.isDebugEnabled()) {
+            log.debug("getApplications : " + stringify(applications));
+        }
+        return {
+            error:false,
+            applications:applications
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e.message,
+            applications:null
+        };
+
+    }
+
+};
+/**
+ * This method will accept user name and application name and sends a request to host object and gets the response.
+ * @param {string} username - subscriber name
+ * @param {string} applicationName - application name
+ * @param {string} group id.
+ * return {Application} a Application.
+ */
+var getApplicationByName = function (username, applicationName, groupId) {
+    var application,
+        log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+
+    try {
+
+        application = store.getApplicationByName(username , applicationName, groupId);
+        if (log.isDebugEnabled()) {
+            log.debug("getApplicationsByName : " + stringify(application));
+        }
+        return {
+            error: false,
+            application: application
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error: e,
+            applications: null
+        };
+    }
+};
+
+%>
+

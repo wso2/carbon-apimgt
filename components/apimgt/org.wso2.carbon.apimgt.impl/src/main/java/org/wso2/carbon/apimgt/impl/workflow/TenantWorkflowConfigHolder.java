@@ -25,10 +25,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -41,7 +37,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -131,6 +126,22 @@ public class TenantWorkflowConfigHolder implements Serializable {
             workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
             loadProperties(workflowElem, workFlowExecutor);
             workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION, workFlowExecutor);
+
+            workflowElem = workflowExtensionsElem.getFirstChildWithName(
+                    new QName(WorkflowConstants.SUBSCRIPTION_DELETION));
+            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
+            loadProperties(workflowElem, workFlowExecutor);
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION, workFlowExecutor);
+
+            workflowElem = workflowExtensionsElem.getFirstChildWithName(
+                    new QName(WorkflowConstants.APPLICATION_DELETION));
+            executorClass = workflowElem.getAttributeValue(new QName("executor"));
+            clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+            workFlowExecutor = (WorkflowExecutor)clazz.newInstance();
+            loadProperties(workflowElem, workFlowExecutor);
+            workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION, workFlowExecutor);
 
         } catch (RegistryException e) {
             log.error("Error loading Resource from path" + APIConstants.WORKFLOW_EXECUTOR_LOCATION, e);

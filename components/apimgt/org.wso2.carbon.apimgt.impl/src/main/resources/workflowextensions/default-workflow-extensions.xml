@@ -34,4 +34,27 @@
          <Property name="password">admin</Property>
          <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
     </UserSignUp-->
+
+	<!--
+	***NOTE:***
+        Users of deletion workflows are expected to implement their own deletion workflow executors and services.
+        By default API Manager only implements the core functionalities required to support deletion workflows and
+        simple deletion workflow executors. Default WS deletion workflow implementations are not available with the
+        distribution.
+    -->
+
+    <SubscriptionDeletion executor="org.wso2.carbon.apimgt.impl.workflow.SubscriptionDeletionSimpleWorkflowExecutor"/>
+    <!--SubscriptionDeletion executor="org.wso2.carbon.apimgt.impl.workflow.SubscriptionDeletionSimpleWorkflowExecutor">
+         <Property name="serviceEndpoint">http://localhost:9765/services/SubscriptionApprovalWorkFlowProcess/</Property>
+         <Property name="username">admin</Property>
+         <Property name="password">admin</Property>
+         <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
+    </SubscriptionDeletion -->
+    <ApplicationDeletion executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionSimpleWorkflowExecutor"/>
+    <!--ApplicationDeletion executor="org.wso2.carbon.apimgt.impl.workflow.ApplicationDeletionSimpleWorkflowExecutor">
+         <Property name="serviceEndpoint">http://localhost:9765/services/ApplicationApprovalWorkFlowProcess/</Property>
+         <Property name="username">admin</Property>
+         <Property name="password">admin</Property>
+         <Property name="callbackURL">https://localhost:8243/services/WorkflowCallbackService</Property>
+    </ApplicationDeletion-->
 </WorkFlowExtensions>

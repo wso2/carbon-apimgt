@@ -27,7 +27,7 @@ public enum APIStatus {
 
     private String status;
 
-    private APIStatus(String status) {
+    APIStatus(String status) {
         this.status = status;
     }
 

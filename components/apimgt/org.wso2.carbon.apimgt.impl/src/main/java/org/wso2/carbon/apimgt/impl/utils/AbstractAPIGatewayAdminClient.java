@@ -22,10 +22,7 @@ import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.client.Stub;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 
@@ -90,8 +87,7 @@ public abstract class AbstractAPIGatewayAdminClient {
             authAdminStub.login(user, password, host);
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
-            String sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-            return sessionCookie;
+            return (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         } catch (RemoteException e) {
             throw new AxisFault("Error while contacting the authentication admin services", e);
         } catch (LoginAuthenticationExceptionException e) {

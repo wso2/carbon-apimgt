@@ -76,8 +76,7 @@ public class ThrottleManager {
                 available = concurrentAccessController.getAndDecrement();
                 canAccess = available > 0;
                 if (log.isDebugEnabled()) {
-                    log.debug("Concurrency Throttle: Access " +
-                            (canAccess ? "allowed" : "denied") + " :: " + available
+                    log.debug("Concurrency Throttle: Access " + (canAccess ? "allowed" : "denied") + " :: " + available
                             + " of available of " + concurrentLimit + " connections");
                 }
             } else {
@@ -90,12 +89,12 @@ public class ThrottleManager {
         }
         return canAccess;
 	}
-	
-	public boolean throttleByAccessRate(String remoteIP, String domainName, ConfigurationContext cc, boolean isClusteringEnable, 
-			ConcurrentAccessController concurrentAccessController, Throttle throttle) {
-		String callerId = null;
+
+    public boolean throttleByAccessRate(String remoteIP, String domainName, ConfigurationContext cc, boolean isClusteringEnable,
+                                        ConcurrentAccessController concurrentAccessController, Throttle throttle) {
+        String callerId = null;
         boolean canAccess = true;
-      //Using remote caller domain name , If there is a throttle configuration for
+        //Using remote caller domain name , If there is a throttle configuration for
         // this domain name ,then throttling will occur according to that configuration
         if (domainName != null) {
             // do the domain based throttling
@@ -103,8 +102,7 @@ public class ThrottleManager {
                 log.trace("The Domain Name of the caller is :" + domainName);
             }
             // loads the DomainBasedThrottleContext
-            ThrottleContext context
-                    = throttle.getThrottleContext(ThrottleConstants.DOMAIN_BASED_THROTTLE_KEY);
+            ThrottleContext context = throttle.getThrottleContext(ThrottleConstants.DOMAIN_BASED_THROTTLE_KEY);
             if (context != null) {
                 //loads the DomainBasedThrottleConfiguration
                 ThrottleConfiguration config = context.getThrottleConfiguration();
@@ -113,20 +111,15 @@ public class ThrottleManager {
                     callerId = config.getConfigurationKeyOfCaller(domainName);
                     if (callerId != null) {  // there is configuration for this domain name
 
-                        //If this is a clustered env.
-                        //if (isClusteringEnable) {
-                          //  context.setConfigurationContext(cc);
-                            context.setThrottleId(id);
-                       // }
-
+                        context.setThrottleId(id);
                         try {
                             //Checks for access state
-                            AccessInformation accessInformation = accessController.canAccess(context,
-                                    callerId, ThrottleConstants.DOMAIN_BASE);
+                            AccessInformation accessInformation
+                                    = accessController.canAccess(context, callerId, ThrottleConstants.DOMAIN_BASE);
                             canAccess = accessInformation.isAccessAllowed();
                             if (log.isDebugEnabled()) {
                                 log.debug("Access " + (canAccess ? "allowed" : "denied")
-                                        + " for Domain Name : " + domainName);
+                                          + " for Domain Name : " + domainName);
                             }
 
                             //In the case of both of concurrency throttling and
@@ -166,8 +159,7 @@ public class ThrottleManager {
                 }
                 try {
                     // Loads the IPBasedThrottleContext
-                    ThrottleContext context =
-                            throttle.getThrottleContext(ThrottleConstants.IP_BASED_THROTTLE_KEY);
+                    ThrottleContext context = throttle.getThrottleContext(ThrottleConstants.IP_BASED_THROTTLE_KEY);
                     if (context != null) {
                         //Loads the IPBasedThrottleConfiguration
                         ThrottleConfiguration config = context.getThrottleConfiguration();
@@ -176,21 +168,14 @@ public class ThrottleManager {
                             callerId = config.getConfigurationKeyOfCaller(remoteIP);
                             if (callerId != null) {   // there is configuration for this ip
 
-                                //For clustered env.
-                               // if (isClusteringEnable) {
-                                //    context.setConfigurationContext(cc);
-                                    context.setThrottleId(id);
-                               // }
+                                context.setThrottleId(id);
                                 //Checks access state
-                                AccessInformation accessInformation = accessController.canAccess(
-                                        context,
-                                        callerId,
-                                        ThrottleConstants.IP_BASE);
+                                AccessInformation accessInformation = accessController.canAccess(context, callerId,
+                                                                                                 ThrottleConstants.IP_BASE);
 
                                 canAccess = accessInformation.isAccessAllowed();
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Access " + (canAccess ? "allowed" : "denied")
-                                            + " for IP : " + remoteIP);
+                                    log.debug("Access " + (canAccess ? "allowed" : "denied") + " for IP : " + remoteIP);
                                 }
                                 //In the case of both of concurrency throttling and
                                 //rate based throttling have enabled ,
@@ -212,7 +197,7 @@ public class ThrottleManager {
             }
         }
         return canAccess;
-	}
+    }
 	
 	public boolean doRoleBasedAccessThrottling(boolean isClusteringEnable, ConfigurationContext cc, APIKeyValidationInfoDTO apiKeyValidationInfoDTO, 
 			String accessToken, Throttle throttle) {
@@ -276,16 +261,13 @@ public class ThrottleManager {
             if(applicationRoleId != null){
 
                 ThrottleContext applicationThrottleContext = getApplicationThrottleContext(cc, applicationId, throttle);
-              //  if (isClusteringEnable) {
-              //      applicationThrottleContext.setConfigurationContext(cc);
-                	  applicationThrottleContext.setThrottleId(id);
-              //  }
+                applicationThrottleContext.setThrottleId(id);
                 //First throttle by application
                 try {
                     info = applicationRoleBasedAccessController.canAccess(applicationThrottleContext, applicationId, applicationRoleId);
                     if(log.isDebugEnabled()){
                         log.debug("Throttle by Application " + applicationId);
-                        log.debug("Allowed = " + info != null ? info.isAccessAllowed() : "false");
+                        log.debug("Allowed = " + (info != null ? info.isAccessAllowed() : "false"));
                     }
                 } catch (ThrottleException e) {
                     log.warn("Exception occurred while performing role " +
@@ -327,11 +309,7 @@ public class ThrottleManager {
             //check for configuration role of the caller
             String consumerRoleID = config.getConfigurationKeyOfCaller(roleID);
             if (consumerRoleID != null) {
-                // If this is a clustered env.
-                //if (isClusteringEnable) {
-                  //  context.setConfigurationContext(cc);
-                    context.setThrottleId(id);
-                //}
+                context.setThrottleId(id);
 
                 try {
                     //If the application has not been subscribed to the Unlimited Tier and

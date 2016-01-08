@@ -10,6 +10,13 @@ var enableAnalytics = function (enable) {
                 buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
                 process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
@@ -29,6 +36,10 @@ var enableAnalytics = function (enable) {
             eventingConfigData.setServiceStatsEnable(false);
             stub.configureEventing(eventingConfigData);
             configReaderService.setAnalyticsEnabled(false);
+            var userInSession = session.get("LOGGED_IN_USER");
+            var emptyText = '';
+            var statUpdateDriver = new org.wso2.carbon.apimgt.impl.APIProviderImpl(userInSession);
+            statUpdateDriver.callStatUpdateService(emptyText, emptyText, emptyText, false);
             log.info("Analytics disabled");
         } else if(enable === "true" && eventingConfigData.getUrl() !== "" && eventingConfigData.getUrl() !== null) {
             log.info("Enabling Analytics...");
@@ -60,6 +71,13 @@ var addAnalyticsConfig = function (configData) {
                 buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
                 process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
@@ -78,22 +96,40 @@ var addAnalyticsConfig = function (configData) {
         eventingConfigData.setUserName(configData.eventReceiverUsername);
         eventingConfigData.setPassword(configData.eventReceiverPassword);
         eventingConfigData.setServiceStatsEnable(true);
+
         var analyzingConfigData = stub.getAnalyzingConfigData();
         analyzingConfigData.setUrl(configData.eventAnalyserURL);
         analyzingConfigData.setUserName(configData.eventAnalyserUsername);
         analyzingConfigData.setPassword(configData.eventAnalyserPassword);
 
+        var restAPIConfigData = stub.getRestAPIConfigData();
+        restAPIConfigData.setUrl(configData.eventAnalyserURL);
+        restAPIConfigData.setUserName(configData.eventAnalyserUsername);
+        restAPIConfigData.setPassword(configData.eventAnalyserPassword);
+
         log.info("Saving Analytics config in registry...");
         stub.configureEventing(eventingConfigData);
         stub.configureAnalyzing(analyzingConfigData);
+        stub.configureRestAPI(restAPIConfigData);
         var configReaderService = org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration.getInstance();
-        log.info(configReaderService.getRequestStreamName());
-        log.info(configReaderService.getResponseStreamName());
         configReaderService.setAnalyticsEnabled(true);
         configReaderService.setBamServerUrlGroups(configData.eventReceiverURL);
         configReaderService.setBamServerUser(configData.eventReceiverUsername);
         configReaderService.setBamServerPassword(configData.eventReceiverPassword);
         log.info("Analytics config saved in registry.");
+
+        var eventReceiver = configData.eventReceiverURL;
+        var eventReceiverUser = configData.eventReceiverUsername;
+        var eventReceiverPassword = configData.eventReceiverPassword;
+
+        if(eventReceiver != null && eventReceiverUser != null && eventReceiverPassword != null){
+            var userInSession = session.get("LOGGED_IN_USER");
+            var statUpdateDriver = new org.wso2.carbon.apimgt.impl.APIProviderImpl(userInSession);
+            statUpdateDriver.callStatUpdateService
+                (eventReceiver, eventReceiverUser, eventReceiverPassword, true);
+        } else {
+            log.error("Event receiver URL and username and password should not be null.");
+        }
 
         return {
             error: false
@@ -111,6 +147,12 @@ var addAnalyticsConfig = function (configData) {
 
 var addDatasourceConfig = function (configData) {
 
+    if (!org.wso2.carbon.apimgt.usage.client.UsageClient.getStatClientType().equals("RDBMS")) {
+        return {
+            error: false
+        };
+    }
+
     try {
         var carbon = require('carbon');
         var process = require('process');
@@ -118,6 +160,13 @@ var addDatasourceConfig = function (configData) {
                 .buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
                 process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
@@ -149,7 +198,7 @@ var addDatasourceConfig = function (configData) {
         log.info("Saving datasource '" + dsName + "'...");
         stub.addDataSource(dataSourceMetaInfo);
         log.info("Datasource '" + dsName + "' saved");
-        org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient.initializeDataSource();
+        org.wso2.carbon.apimgt.usage.client.UsageClient.initializeDataSource();
         log.info("Initialized datasource '" + dsName);
         return {
             error: false
@@ -166,72 +215,15 @@ var addDatasourceConfig = function (configData) {
 
 
 var addToolbox = function (configData) {
-    if(configData.eventAnalyserURL.trim() == ""){
-        var message = "Data Analyzer URL is empty. Toolbox will not be deployed.";
-        log.warn(message);
-        return {
-            error: false,
-            message: message
-        };
-    }
-    if(configData.eventAnalyserUsername.trim() == ""){
-        var message = "Event Analyzer Username is empty.";
-        log.error(message);
-        return {
-            error: true,
-            message: message
-        };
-    }
-    if(configData.eventAnalyserUsername.trim().indexOf(" ") > -1){
-        var message = "Event Analyzer Username cannot contain space character.";
-        log.error(message);
-        return {
-            error: true,
-            message: message
-        };
-    }
-    if(configData.eventAnalyserPassword.trim() == ""){
-        var message = "Data Analyzer Password is empty.";
-        log.error(message);
-        return {
-            error: true,
-            message: message
-        };
-    }
+
     try {
-        var process = require('process');
-        var toolBoxPath = process.getProperty('carbon.home') + '/statistics';
-        var toolBoxName = '';
-
-        if (configData.statDsDriver.toLowerCase().indexOf('oracle') !=-1) {
-            toolBoxName = 'API_Manager_Analytics_Oracle.tbox';
-        } else {
-            toolBoxName = 'API_Manager_Analytics.tbox';
-        }
-        toolBoxPath = toolBoxPath + '/' + toolBoxName;
-        var file = new java.io.File(toolBoxPath);
-
-        var byteArray = org.apache.commons.io.FileUtils.readFileToByteArray(file);
-        var dataHandler = new javax.activation.DataHandler(byteArray, "application/octet-stream");
-
-        var stub = new org.wso2.carbon.bam.toolbox.deployer.stub.BAMToolboxDepolyerServiceStub(configData.
-                eventAnalyserURL + '/services/BAMToolboxDepolyerService');
-        var client = stub._getServiceClient();
-        var options = client.getOptions();
-        var authenticator = new org.apache.axis2.transport.http.HttpTransportProperties.Authenticator();
-        authenticator.setUsername(configData.eventAnalyserUsername);
-        authenticator.setPassword(configData.eventAnalyserPassword);
-        authenticator.setPreemptiveAuthentication(true);
-        options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, authenticator);
-        client.setOptions(options);
-        log.info("Deploying BAM toolbox '" + toolBoxName + "'...");
-        stub.uploadBAMToolBox(dataHandler, toolBoxName);
-        log.info("BAM toolbox '" + toolBoxName + "' deployed");
+        var client=org.wso2.carbon.apimgt.usage.client.UsageClient.getClient("");
+        client.deployArtifacts(configData.eventAnalyserURL,configData.eventAnalyserUsername,configData.eventAnalyserPassword);
         return {
             error: false
         };
-    } catch (ex) {
-        var message = "Error occurred while installing BAM Toolbox (Cause:" + ex.message + ")";
+    }catch(ex){
+        var message = "Error occurred while deploying artifacts (Cause:" + ex.message + ")";
         log.error(message);
         return {
             error: true,

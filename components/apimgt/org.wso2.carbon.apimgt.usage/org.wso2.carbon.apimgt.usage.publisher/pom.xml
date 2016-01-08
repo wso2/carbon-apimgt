@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -28,10 +28,6 @@
     <name>WSO2 Carbon - API Management Usage Publisher</name>
 
     <dependencies>
-        <!-- <dependency>
-            <groupId>org.apache.synapse</groupId>
-            <artifactId>synapse-core</artifactId>
-        </dependency> -->
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
@@ -41,20 +37,12 @@
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.commons</groupId>
-            <artifactId>org.wso2.carbon.databridge.agent.thrift</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.multitenancy</groupId>
             <artifactId>org.wso2.carbon.tenant.usage.agent</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.commons</groupId>
             <artifactId>org.wso2.carbon.ganalytics.publisher</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.deployment</groupId>
-            <artifactId>org.wso2.carbon.bam.service.data.publisher</artifactId>
         </dependency>
     </dependencies>
 
@@ -81,13 +69,13 @@
                             org.eclipse.equinox.http.helper,
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -96,6 +84,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
+                <version>1.7.4</version>
             </plugin>
         </plugins>
     </build>

@@ -38,7 +38,6 @@ public class AccessTokenRequest {
     private String tenantDomain;
     private long validityPeriod;
     private String tokenToRevoke;
-    private boolean isRegenerateOptionEnabled;
 
     // This map can be used to store additional properties not captured by above list of fields.
     private HashMap<String,Object> requestParameters = new HashMap<String, Object>();
@@ -139,14 +138,6 @@ public class AccessTokenRequest {
 
     public Object getRequestParam(String key){
         return requestParameters.get(key);
-    }
-
-    public void setRegenerateOptionEnabled(boolean regenarateOptionEnabled){
-        isRegenerateOptionEnabled= regenarateOptionEnabled;
-    }
-
-    public boolean isRegenerateOptionEnabled(){
-        return isRegenerateOptionEnabled;
     }
 
 

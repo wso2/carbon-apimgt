@@ -18,17 +18,16 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.SelfSignUpUtil;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.List;
@@ -44,17 +43,18 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
 	}
 
 	@Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
         if (log.isDebugEnabled()) {
             log.debug("Executing User SignUp Workflow for " +
                       workflowDTO.getWorkflowReference());
         }
         complete(workflowDTO);
         super.publishEvents(workflowDTO);
+		return new GeneralWorkflowResponse();
     }
 
 	@Override
-	public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
+	public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
 
 		if (log.isDebugEnabled()) {
         	log.debug("User Sign Up [Complete] Workflow Invoked. Workflow ID : " +
@@ -90,6 +90,7 @@ public class UserSignUpSimpleWorkflowExecutor extends UserSignUpWorkflowExecutor
 		} catch (Exception e) {
 			throw new WorkflowException("Error while assigning role to user", e);
 		}
+		return new GeneralWorkflowResponse();
 	}
 
 	@Override

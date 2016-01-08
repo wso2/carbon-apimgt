@@ -28,7 +28,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
-import org.apache.synapse.rest.dispatch.URITemplateBasedDispatcher;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
@@ -46,8 +45,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import java.util.*;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -139,7 +136,7 @@ public class APIKeyValidator {
 
                 if (info != null) {
                     if (APIUtil.isAccessTokenExpired(info)) {
-                        log.info("Token " + apiKey + " expired.");
+                        log.info("Invalid OAuth Token : Access Token " + apiKey + " expired.");
                         info.setAuthorized(false);
                         // in cache, if token is expired  remove cache entry.
                         getGatewayKeyCache().remove(cacheKey);
@@ -383,7 +380,8 @@ public class APIKeyValidator {
             for (API api : synCtx.getConfiguration().getAPIs()) {
                 if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
                     if (log.isDebugEnabled()) {
-                        log.debug("Selected API: ".concat(apiContext).concat(", Version: ").concat(apiVersion));
+
+                        log.debug("Selected API: " + apiContext + ", Version: " + apiVersion);
                     }
                     selectedApi = api;
                     break;
@@ -402,8 +400,9 @@ public class APIKeyValidator {
 
             if (selectedResource == null) {
                 //No matching resource found.
-                log.error("Could not find matching resource for " + requestPath);
-                throw new ResourceNotFoundException("Could not find matching resource for " + requestPath);
+                String msg = "Could not find matching resource for " + requestPath;
+                log.error(msg);
+                throw new ResourceNotFoundException(msg);
             }
 
             resourceString = selectedResource.getDispatcherHelper().getString();
@@ -451,11 +450,11 @@ public class APIKeyValidator {
                             if(log.isDebugEnabled()){
                                 log.debug("Putting resource object in cache with key: ".concat(resourceCacheKey));
                             }
+                            verbDTO.setRequestKey(resourceCacheKey);
                             //Store verb in cache
                             getResourceCache().put(resourceCacheKey, verbDTO);
                             //Set cache key in the message context so that it can be used by the subsequent handlers.
                             synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-                            verbDTO.setRequestKey(resourceCacheKey);
                             return verbDTO;
                         }
                     }

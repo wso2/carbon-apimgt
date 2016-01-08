@@ -1,0 +1,764 @@
+<% jagg.template("item-manage", function(inputs, outputs, jagg) {
+    var api = outputs.api;
+    var createPermitted = outputs.isCreatePermitted;
+    var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
+    //get environments detail from api-manager.xml
+    var provider = jagg.module("manager").getAPIProviderObj();
+    var environmentsList=provider.getEnvironments();
+    //fetch and display tiers
+    var mod = jagg.module("api");
+    var tiers = mod.getTiers().tiers;
+    var resourceTiers = mod.getResourceTiers().tiers;
+    var default_tier = tiers[tiers.length -1].tierName;
+    for (var i = 0; i < tiers.length; i++){
+        if(tiers[i].defaultTier){
+            default_tier = tiers[i].tierName;
+            break;
+        }
+    }
+    var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
+    var storeUrl = jagg.module("manager").getAPIStoreURL().url;
+
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+    %> 
+<script language="javascript">
+    var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH' , 'OPTIONS'];
+    var AUTH_TYPES = [
+      { "value": "None", "text":"<%=i18n.localize("none")%>"} ,
+      { "value": "Application", "text":"<%=i18n.localize("application")%>"},
+      { "value": "Application User", "text":"<%=i18n.localize("applicationUser")%>"},
+      { "value": "Application & Application User", "text":"<%=i18n.localize("application&applicationUser")%>"}
+    ];
+    var TIERS =[
+        <% for (var i = 0; i < resourceTiers.length; i++) {
+        %>{ "value": "<%= resourceTiers[i].tierName %>", "text": "<%= resourceTiers[i].tierDisplayName %>" }<% if((i+1) != resourceTiers.length){%>,<%}%>
+        <% } %>
+    ];
+
+    var DEFAULT_TIER = "<%=default_tier%>";
+    var DEFAULT_AUTH = "Application & Application User";
+    var OPTION_DEFAULT_AUTH = "None";
+
+    var insequence = "<%=api.inSequence%>";
+    var outsequence = "<%=api.outSequence%>";
+    var faultsequence = "<%=api.faultSequence%>";
+    var inSequencesLoaded = false;
+    var outSequencesLoaded = false;
+    var faultSequencesLoaded = false;
+</script>
+<div id="item-add">
+<%
+    var design_w_link = jagg.url('/design?'+apiUrlId);
+    var implement_w_link = jagg.url('/implement?'+apiUrlId);
+    var manage_w_link = jagg.url('/manage?'+apiUrlId);    
+%>
+<center>
+<%if(createPermitted){%>
+<ul class="new-sub-menu-wizard" style="margin:0 auto">
+    <li>
+        <a href="<%= design_w_link %>" class="wizard-done">
+            <div class="wizard-number">1</div>
+            <span>Design</span>
+        </a>
+    </li>
+    <li>
+        <a href="<%= implement_w_link %>" class="wizard-done">
+            <div class="wizard-number">2</div>
+            <span>Implement</span>
+        </a>
+    </li>
+    <li>
+        <a href="<%= manage_w_link %>" class="wizard-active">
+            <div class="wizard-number">3</div>
+            <span>Manage</span>
+        </a>
+    </li>
+</ul>
+<%}%>
+
+</center>
+    <div class="title-section">
+
+        <h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
+        <% if(api){ %>
+               <a class = "goTo_api_overview" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class=" icon-list-alt"></i> Go to Overview</a>
+        <% } %>
+        </h2>
+
+    </div>     
+    <div class="content-section shadow-up">
+    <div class="content-data">   
+    <div class="alert alert-error" id="addAPIError" style="display:none">
+        <span id="addErrorSpan"></span>
+    </div>
+<%
+    if(api != null && api.subs > 0){%>
+    <div class="alert alert-block" id="editAPIWarn" style="display:block">
+        <span id="editWarnSpan"><b>Warning!</b><br/>
+        You are editing an API with active subscribers. Tier Availability changes will not be reflected on
+        active subscriptions.
+        </span>
+    </div>
+  <%  }%>
+
+    <div class="row-fluid">
+        <div class="span12">                           
+            <form class="form-horizontal" method="POST"
+              id="manage_form"
+              enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
+    <fieldset>
+    <legend>Configurations</legend>
+
+            <div class="control-group">
+                    <label  class="control-label">Make this the Default Version</label>
+                     <div class="controls">
+                        <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
+
+                        <a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+            
+                        <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
+
+                        <%if(api.isDefaultVersion=="false"){if(api.hasDefaultVersion){%>
+                            <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                        <%}else{%>
+                            <p class="help-block">No default version defined for the current API</p>
+                        <%}}%>
+
+                        <input type="hidden" id="default_version_checked" name="default_version_checked" value=<%if(api.isDefaultVersion=="true"){%>"default_version"<%}else{%>""<%}%>/>
+                    </div>
+                    
+            </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="tier"><%=i18n.localize("tier")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">                   
+                        <select id="tier" name="tier"  class="multiselect selected hide required" multiple="multiple">
+                        <%
+                        for (var i = 0; i < tiers.length; i++) {
+                            var isSelected = api.availableTiers.indexOf(tiers[i].tierName) > -1;
+                            %><option value="<%= tiers[i].tierName %>" <%if(isSelected){%>selected="selected"<%}%>><%= tiers[i].tierDisplayName %></option>%%><%
+                        }
+                        %>
+                        </select>
+                        <script type="text/javascript">
+
+                        </script> 
+                        <a class="icon-question-sign help_popup" help_data="tier_help"></a>
+                        <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
+                    </div>
+                </div>
+
+                <div class="control-group transport-styles">
+                <label class="control-label" for="transports"><%=i18n.localize("transports")%>:<span class="requiredAstrix">*</span></label>
+                <div class="controls">
+                    <div class="checkbox">
+                        <label  class="checkbox inline" >
+                            <input type="checkbox" id="transport_https" name="transport_https"  value="https" <%if(api.transport_https=="checked"){%>checked<%}%>/>
+
+                            <%=i18n.localize("httpsTransport")%>
+                        </label>
+                        <label  class="checkbox inline " >
+                            <input type="checkbox"  id="transport_http" name="transport_http"  value="http" <%if(api.transport_http=="checked"){%>checked<%}%>/>
+                         
+                            <%=i18n.localize("httpTransport")%>
+                        </label>
+                        <a class="icon-question-sign help_popup" help_data="http_help"></a>
+                        <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
+                    </div>
+                </div>
+             </div>
+
+            <% if (isSynapseGateway) { %>
+
+            <div class="control-group">
+                            <label class="control-label" for="throttle"><%=i18n.localize("throttle")%></label>
+                            <div class="controls">
+                            <label class="checkbox">
+                                <input type="checkbox" id="toggleThrottle" name="throttle_check" id="throttle_check"
+                            <%
+                            if((api.productionTps && (!"none".equals(api.productionTps))) || (api.sandboxTps && (!"none".equals(api.sandboxTps)))){ %>
+                            checked="checked"<%}%>><%=i18n.localize("throttleMsg")%>
+                            </label>
+                            <table class="table table-bordered table-striped" id="throttleTable"
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th><%=i18n.localize("maxCount")%></th>
+                                    </tr>
+                                </thead>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("prodLimit")%>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="validInput" id="productionTps" name="productionTps" placeholder="Max TPS" value="<%=api.productionTps%>">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("sandLimit")%>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="validInput" id="sandboxTps" name="sandboxTps" placeholder="Max TPS" value="<%=api.sandboxTps%>">
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+            <%}%>
+
+
+            <!--Response Caching -->
+                <div class="control-group">
+                    <label class="control-label" for="responseCache"><%=i18n.localize("responseCache")%>:</label>
+                      <div class="controls"> 
+                       <select class="select required" id="responseCache" name="responseCache">
+                            <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
+                            <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
+                        </select>                                
+                        <a class="icon-question-sign help_popup" help_data="cache_help"></a>
+                        <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>           
+                     </div>
+                </div>
+                <div class="control-group" id="cacheTimeout"  <%if(api.responseCache != "Enabled"){%> style="display:none;" <%}%>>
+                    <label class="control-label" for="cacheTimeout"><%=i18n.localize("cacheTimeout")%>:<span class="requiredAstrix">*</span></label>
+                    <div class="controls">
+                        <input type="text" style="text-align:right;" class="input-small required validInput number" id="cacheTimeout" name="cacheTimeout" value=<%=api.cacheTimeout%>>
+                    </div>
+                </div>
+            <!--Response Caching End -->
+
+                <div class="control-group">
+		        <% mod = jagg.module("api");
+		 	result = mod.isMultipleTenantsAvailable();
+	         	var isMultipleTenantsAvailable = result.status;
+			if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
+                        <label class="control-label" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
+                        <div class="controls">
+                        	<% if(api.visibility!="public") {%>
+                           	<select class="select required" id="subscriptions" name="subscriptions" >
+                               	<option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
+                           	</select> 
+                        	<%} else {%>
+                            	<select class="select required" id="subscriptions" name="subscriptions" >
+                               	<option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
+                                <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
+                                	<% if(!(enableSelectedTenantSubscription == 'false')) {%>
+                                	<option value="specific_tenants" <%if(api.subscriptionAvailability=="specific_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToSpecificTenants")%></option>
+                                	<% } %>
+                            	</select> 
+                        	<%}%>     
+                            	<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+                           	<div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
+                       </div>
+
+                       <br/>
+                           <div class="control-group" id="tenantsDiv" <%if(api.subscriptionAvailability!="specific_tenants"){%>style="display: none;"<%}%>>
+                               <label class="control-label" for="tenants" id="tenantLabel" name="tenantLabel">
+                                   <%=i18n.localize("tenants")%>:<span class="requiredAstrix">*</span>
+                               </label>
+                               <div class="controls">
+                                   <input type="text" class="input"
+                                   id="tenants" name="tenants" value="<%=api.subscriptionTenants%>"/>
+                                   <p class="help-block" id="tenantsHelp"><%=i18n.localize("tenantsHelpMsg")%></p>
+                               </div>
+
+                           </div>
+                       <% } %>
+                </div>
+    </fieldset>
+
+       <fieldset>
+    	<legend class="legend-with-hidden-info js_hidden_section_title">Gateway Environments<i class="icon-chevron-right icon-keys"></i></legend>
+    	 <div id="gatewayEnvironments" style="display: none;">
+    	<!--legend>Environments</legend-->
+
+        <table class="table table-bordered table-striped">
+        	 <thead>
+        	 <tr>
+                <th width="5%"><div class="environments_checkbox"></div></th>
+                <th><div class="environments_data">Environment Name</div></th>
+                <th><div class="environments_data">Type</div></th>
+                <th><div class="environments_data">Description</div></th>
+             </tr>
+             </thead>
+             <tbody>
+
+             <%
+             var environmentsJson=api.environments;
+             if(environmentsJson=="none"){
+                    for(i=0 ;i<environmentsList.length;i++){
+             %>
+                <tr>
+                    <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div></td>
+                    <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                    <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                    <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                </tr>
+             <%}}
+             else{
+                 for(i=0 ;i<environmentsList.length;i++){
+                        if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
+                            <tr>
+                                 <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env"></div></td>
+                                 <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                                 <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                                 <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                            </tr>
+                      <%}else{%>
+                            <tr>
+                                 <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div></td>
+                                 <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
+                                 <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
+                                 <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
+                            </tr>
+
+                       <%}}}%>
+                       </tbody>
+                       </table>
+                     </div>
+                    <script>
+                    $('input').on('change', function() {
+                        var values = $('input:checked.env').map(function() {
+                            return this.value;
+                        }).get();
+                    if(values==""){
+                    values="none";
+                    }
+                        $('#environments').val(values.toString());
+                    });
+                    </script>
+                </fieldset>
+    <fieldset>
+	<legend class="legend-with-hidden-info js_hidden_section_title"><%=i18n.localize("businessInformationTitle")%> <i class="icon-chevron-right icon-keys"></i></legend>
+	 <div style="display: none">
+	<!--legend>Business Information</legend-->
+                               
+                    <div class="control-group">
+                        <label class="control-label" for="bizOwner"><%=i18n.localize("busiOwner")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge validInput" id="bizOwner" name="bizOwner" value="<%=api.bizOwner%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="bizOwnerMail"><%=i18n.localize("busiOwnerMail")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge email" id="bizOwnerMail" name="bizOwnerMail" value="<%=api.bizOwnerMail%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="techOwner"><%=i18n.localize("techOwner")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge validInput" id="techOwner" name="techOwner" value="<%=api.techOwner%>"/>
+                        </div>
+                    </div>
+                     <div class="control-group">
+                        <label class="control-label" for="techOwnerMail"><%=i18n.localize("techOwnerMail")%>:</label>
+                        <div class="controls">
+                             <input type="text" class="input-xlarge email" id="techOwnerMail" name="techOwnerMail" value="<%=api.techOwnerMail%>"/>
+                        </div>
+                    </div>
+                 </div>
+            </fieldset>
+
+                <div id="api_designer">
+                    <div id ="apidoc_details"></div>
+                    <legend>Resources</legend>
+                    <div id="scopes_view"></div>
+                    <div id ="resource_details"></div>
+                </div>           
+                <input type="hidden" id="environments" name="environments" value='<%=environmentsJson%>'/>
+                <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
+                <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
+                <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
+                <input type="hidden" name="action" value="manage" />
+                <input type="hidden" id="swagger" name="swagger" value="" />
+                <div class="form-actions" style="display:none" id="saveMessage">
+                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                </div>
+                <div class="form-actions" id="saveButtons"> 
+
+                    <button class="btn btn-default has-spinner" id="save_api"><%=i18n.localize("save")%></button>
+                    <%if(outputs.isPermitted){%> <a class="btn btn-primary has-spinner" id="publish_api">Save & Publish</a>  <%}%>
+
+                    <input type="reset" class="btn" value="<%=i18n.localize("cancel")%>" onclick="javascript:window.location.href='./'" />                                         
+                </div>
+            </form>
+
+        </div>
+
+        <div id="publish-success" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3>Congratulations</h3>
+            </div>
+            <div class="modal-body">
+                <label class="publish-label">You have successfully published your API : <%=api.name%>-<%=api.version%></label>
+                </br>
+                <label class="publish-label">What's Next</label>
+            </div>
+            <div class="modal-footer successMsgFooter">
+                <div class="pull-right">
+                <a href="<%= jagg.url("/info?"+ apiUrlId ) %>" class="btn btn-primary">Go to Overview</a>
+                <a href='javascript:void(0)' id="goToStore-btn" class="btn btn-default">Go to API Store</a>
+                <button id="editAPI-btn" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Keep Editing API</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+</div>
+
+<script id="designer-apidoc-template" type="text/x-handlebars-template">    
+</script>
+
+<script id="designer-resource-template" type="text/x-handlebars-template">
+<div class="resource_body_padding">
+    <h5>Description :</h5>
+    <a class="notes" data-path="{{resource_path}}" data-attr="description">{{ description }}</a>
+    <br />
+    <br />        
+    <h5>Response Content Type : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type">{{ content_type }}</a></h5>
+    <br />
+    <h5>Parameters :</h5>
+    {{#if parameters}}
+    <table class="table table-condensed table-hover table-bordered">
+        <tr>
+        <th width="200px">Parameter Name</th>
+        <th>Description</th>
+        <th width="100px">Parameter Type</th>
+        <th width="100px">Data Type</th>
+        <th width="100px">Required</th>            
+        </tr>    
+    {{#each parameters}}
+        <tr>
+        <td>{{ name }}</td>
+        <td>{{ description }}</td>
+        <td>{{ in }}</td>
+        <td>{{ type }}</td>
+        <td>{{toString required }}</td>
+        </tr> 
+    {{/each}}
+    {{/if}}
+    </table>
+</div>  
+</script>
+
+
+<script id="designer-resources-template" type="text/x-handlebars-template">
+<br />
+<table style="width:100%">                       
+{{#each doc.paths}}
+    {{# each this}}
+        <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
+            <td class="resource-method-td resource_expand" data-path="$.paths.{{ path}}.{{ @key }}">
+                <span class=" resource-method resource-method-{{ @key }}">{{ @key }}</span>
+            </td>
+            <td class="resource_expand"><a class="resource-path">{{ path }}</a></td>    
+            <td  width="99%"><span class="operation-summary change_summary" data-path="$.paths.{{ path }}.{{@key}}" data-attr="summary" >{{ summary }}</span></td>
+            <td><a class="operation-summary auth_type_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-auth-type" data-value="{{ x-auth-type }}"></a></td>        
+            <td><a class='operation-summary throttling_select'  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-throttling-tier">{{ x-throttling-tier }}</a></td>
+            <td><a class="operation-summary scope_select"  data-type="select" data-path="$.paths.{{ path }}.{{@key}}" data-attr="x-scope">{{ x-scope }}</a></td>        </tr>
+        <tr><td colspan="6" class="resource_body hide" data-path="$.paths.{{ path }}.{{@key}}"></td></tr>
+    {{/each}}
+{{/each}}
+</table>                           
+</script>
+
+<script id="scopes-template" type="text/x-handlebars-template">
+    <div class="scope_container">
+    {{#if api_doc.x-wso2-security.apim.x-wso2-scopes }}
+        <h4>Scopes</h4>
+        <ul>
+            {{#each api_doc.x-wso2-security.apim.x-wso2-scopes }}
+            <li>
+                <h6><a data-index='{{ @index }}' class='delete_scope'><i class='icon-trash'></i></a> &nbsp;&nbsp; {{ key }} {{#if name }}: {{ name }}{{/if}}  </h6>
+                <strong>Roles</strong> : {{ roles }}    
+                <p>{{ description }}</p>
+            </li>
+            {{/each}}
+        </ul>
+    {{/if}}
+        <a id="define_scopes" class="pointer btn"><i class="icon-plus-sign"></i>&nbsp;Add Scopes</a>
+    </div>
+</script>
+
+<script>
+    $(document).ready(function(){
+        $.ajaxSetup({
+            contentType: "application/x-www-form-urlencoded; charset=utf-8"
+        });
+
+        $.get( "<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=swagger" , function( data ) {
+            var data = jQuery.parseJSON(data);
+            var designer = APIDesigner();
+            designer.load_api_document(data);
+            designer.set_default_management_values();
+            designer.render_resources();
+            $("#swaggerUpload").modal('hide');
+        });
+
+        var publish_api = function(e){
+            $.ajax({
+                type: "POST",
+                url: "<%= jagg.url("/site/blocks/life-cycles/ajax/life-cycles.jag") %>",
+		async : false,
+                data: {
+                    action :"updateStatus",
+                    name:"<%=api.name%>",
+                    version:"<%=api.version%>",
+                    provider: "<%=api.provider%>",
+                    status: "Publish",
+                    publishToGateway:true,
+                    requireResubscription:true
+                },
+                success: function(responseText){
+                    $("body").unbind('api_saved');
+                    if (!responseText.error) {
+                        $('#publish-success').modal({
+                            backdrop: 'static',
+                            keyboard: false
+                        });
+                        $('#publish-success').modal('show');
+                        $('#goToStore-btn').click(function(){
+                            window.open('<%=storeUrl%>/apis/info?name=<%=api.name%>&version=<%=api.version%>&provider=<%=api.provider%>&tenant=<%=tenantDomain%>', '_blank');
+                            location.href = '<%= jagg.url("/info?"+ apiUrlId ) %>';
+                        });
+                    } else {
+                         if (responseText.message == "timeout") {
+                             if (ssoEnabled) {
+                                 var currentLoc = window.location.pathname;
+                                 var queryString=encodeURIComponent(window.location.search);
+                                 if (currentLoc.indexOf(".jag") >= 0) {
+                                     location.href = "login.jag?requestedPage=" + currentLoc + queryString;
+                                 } else {
+                                     location.href = 'site/pages/login.jag?requestedPage=' + currentLoc + queryString;
+                                 }
+                             } else {
+                                 jagg.showLogin();
+                             }
+                         } else {
+                              var message=responseText.message;
+                                   if(message.split("||")[1]=="warning"){
+                                     var environmentsFailed=JSON.parse(message.split("||")[0]);
+                                     var failedToPublishEnvironments=environmentsFailed.PUBLISHED;
+                                     var failedToUnpublishedEnvironments=environmentsFailed.UNPUBLISHED;
+                                     var divPublish="",divUnpublished="";
+                                     for(i= 0; i< failedToPublishEnvironments.split(",").length;i++){
+                                        var splitPublished = (failedToPublishEnvironments.split(",")[i]).split(":");
+                                        divPublish+=splitPublished[0]+"<br>"+splitPublished[1]+"<br>";
+                                         }
+                                     for(i= 0; i< failedToUnpublishedEnvironments.split(",").length;i++){
+                                        var splitUnPublished = (failedToUnpublishedEnvironments.split(",")[i]).split(":");
+
+                                        divUnpublished+=splitUnPublished[0]+"<br>"+splitUnPublished[1]+"<br>";
+                                         }
+                                       $( "#modal-published-content" ).empty();
+                                       $( "#modal-unpublished-content" ).empty();
+                                       $( "#modal-published-content" ).append(divPublish);
+                                       $( "#modal-unpublished-content" ).append(divUnpublished);
+                                       if(failedToPublishEnvironments==""){
+                                       $("#modal-published-header").hide();
+                                       $("#modal-published-content").hide();
+                                        }
+                                       if(failedToUnpublishedEnvironments==""){
+                                            $("#modal-unpublished-header").hide();
+                                            $("#modal-unpublished-content").hide();
+                                          }
+                                         $("#retryType").val("manage");
+                                         $("#environmentsRetry-modal").modal('show');
+                                   }
+                                   else{
+                                   jagg.message({content:responseText.message,type:"error"});
+                                       }
+                         }
+                     }
+                },
+                dataType: "json"
+            });
+        };
+
+        $("#scope_form").validate();
+
+        var v = $("#manage_form").validate({
+            submitHandler: function(form) {
+            var tiersValidated = validate_tiers();
+            var subscriptionValidated = validate_subscription();
+            if(!tiersValidated || !subscriptionValidated){
+                return false;
+            }
+            if(!validate_Transports()){
+                return false;
+            }
+            var designer = APIDesigner();
+            $('#swagger').val(JSON.stringify(designer.api_doc));
+            $('#'+thisID).buttonLoader('start');
+            $(form).ajaxSubmit({
+                success:function(responseText, statusText, xhr, $form) {
+                    $('#'+thisID).buttonLoader('stop');
+                    if (!responseText.error) {                
+                        $( "body" ).trigger( "api_saved" );       
+                    } else {
+                         if (responseText.message == "timeout") {
+                             if (ssoEnabled) {
+                                 var currentLoc = window.location.pathname;
+                                 var queryString=encodeURIComponent(window.location.search);
+                                 if (currentLoc.indexOf(".jag") >= 0) {
+                                     location.href = "login.jag?requestedPage=" + currentLoc + queryString;
+                                 } else {
+                                     location.href = 'site/pages/login.jag?requestedPage=' + currentLoc + queryString;
+                                 }
+                             } else {
+                                 jagg.showLogin();
+                             }
+                         } else {
+                         var message=responseText.message;
+                         if(message.split("||")[1]=="warning"){
+                          var environmentsFailed=JSON.parse(message.split("||")[0]);
+                          var failedToPublishEnvironments=environmentsFailed.PUBLISHED;
+                           var failedToUnpublishedEnvironments=environmentsFailed.UNPUBLISHED;
+                           var divPublish="",divUnpublished="";
+                                       for(i= 0; i< failedToPublishEnvironments.split(",").length;i++){
+                                      divPublish+=failedToPublishEnvironments.split(",")[i]+"<br>";
+                                     }
+                                   for(i= 0; i< failedToUnpublishedEnvironments.split(",").length;i++){
+                                   divUnpublished+=failedToUnpublishedEnvironments.split(",")[i]+"<br>";
+                                  }
+                                  $( "#modal-published-content" ).empty();
+                                 $( "#modal-unpublished-content" ).empty();
+                            $( "#modal-published-content" ).append(divPublish);
+                           $( "#modal-unpublished-content" ).append(divUnpublished);
+                             if(failedToPublishEnvironments==""){
+                                            $("#modal-published-header").hide();
+                                            $("#modal-published-content").hide();
+                                            }
+                                                 if(failedToUnpublishedEnvironments==""){
+                                                                    $("#modal-unpublished-header").hide();
+                                                                    $("#modal-unpublished-content").hide();
+                                                                    }
+                                $("#retryType").val("lifeCycle");
+                                $("#environmentsRetry-modal").modal('show');
+                         }
+                         else{
+                        jagg.message({content:responseText.message,type:"error"});
+                         }
+                                                  }
+                    }
+                },
+                error: function(){
+                    $('#'+thisID).buttonLoader('stop');
+                    jagg.message({content:"Error occurred while updating API",type:"error"});
+                },
+                dataType: 'json'
+            });
+            }
+        });
+
+        var thisID='';
+        $('#publish_api').click(function(e){
+            $("body").on("api_saved", publish_api);
+            thisID = $(this).attr('id');
+                if(!$("#toggleThrottle").attr('checked')) {
+                // Setting text field values to null if check box is not selected.
+                    $('#productionTps').val(null);
+                    $('#sandboxTps').val(null);
+            } 
+            $("#manage_form").submit();
+        });
+
+        $('#save_api').click(function(e){
+            thisID=$(this).attr('id');
+        });
+
+        
+        $('#responseCache').change(function(){
+            var cache = $('#responseCache').find(":selected").val();
+            if(cache == "enabled"){
+                $('#cacheTimeout').show();
+            }
+            else{
+                $('#cacheTimeout').hide();
+            }
+        });
+
+    });
+</script>
+
+<div  id="define_scope_modal" class="modal hide fade">
+    <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Define Scope</h3>
+    </div>
+    <div class="modal-body">
+    <form id="scope_form" class="form-horizontal">
+        <div class="control-group">
+            <label class="control-label" for="scopeKey">Scope Key<span class="requiredAstrix">*</span></label>
+            <div class="controls">
+            <input type="text" id="scopeKey" name="scopeKey" class="required" placeholder="Eg: api_name_read">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="scopeName">Scope Name<span class="requiredAstrix">*</span></label>
+            <div class="controls">
+            <input type="text" id="scopeName" name="scopeName"  class="required" placeholder="Eg: Read My Data">
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="scopeRoles">Roles</label>
+            <div class="controls">
+            <input type="text" id="scopeRoles" class="" placeholder="E.g.: role1,role2,role3" data-role="tagsinput" />
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label" for="inputEmail">Description</label>
+            <div class="controls">
+            <textarea id="scopeDescription" placeholder="Eg: This scope will group all the administration APIs"></textarea>
+            </div>
+        </div>        
+    </form>
+    </div>
+    <div class="modal-footer">
+    <div id="res" class="hide" style="color:red;float:left"></div>
+    <a class="btn" data-dismiss="modal">Close</a>
+    <a class="btn btn-primary" id="scope_submit">Add Scope</a>
+    </div>
+</div>
+
+<div  id="environmentsRetry-modal" class="modal hide fade">
+        <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Gateway Failures</h3>
+        </div>
+        <div class="modal-body">
+        <div id="modal-published-header">
+        Failed to Publish Environments
+        </div>
+        <div id="modal-published-content">
+        </div>
+        <div id="modal-unpublished-header">
+                Failed to UnPublish Environments
+                </div>
+                <div id="modal-unpublished-content">
+                </div>
+                <input type="hidden" id="retryType"/>
+        </div>
+        <div class="modal-footer">
+        <div id="res" class="hide" style="color:red;float:left"></div>
+        <a class="btn btn-primary" id="retry" onClick="doGatewayAction()">OK</a>
+                                   <script type="text/javascript">
+                            function doGatewayAction() {
+                            var type=$("#retryType").val();
+                            if(type=="manage"){
+                               $("#environmentsRetry-modal").modal('hide');
+                               $( "body" ).trigger( "api_saved" );
+                               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                            }else{
+                               location.href = "<%= jagg.url("/info?"+ apiUrlId ) %>";
+                            }
+                              }
+                                   </script>
+        </div>
+<% }); %>

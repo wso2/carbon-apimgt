@@ -56,12 +56,12 @@ public class APIHandlerServiceComponent {
         }
         clientPool = APIKeyValidatorClientPool.getInstance();
         thriftClientPool = ThriftKeyValidatorClientPool.getInstance();
-        
+
         String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                 File.separator + "conf" + File.separator + "api-manager.xml";
 		try {
 			configuration.load(filePath);
-			
+
 			String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
 			if ("Synapse".equalsIgnoreCase(gatewayType)) {
 			  //Register Tenant service creator to deploy tenant specific common synapse configurations
@@ -72,8 +72,8 @@ public class APIHandlerServiceComponent {
 		} catch (APIManagementException e) {
 			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
 		}
-				
-		
+
+
 
     }
 

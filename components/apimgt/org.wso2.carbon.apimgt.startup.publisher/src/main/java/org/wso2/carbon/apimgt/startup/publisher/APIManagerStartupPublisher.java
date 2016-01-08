@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Icon;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -233,9 +233,9 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
             if (!APIStartupPublisherConstants.API_ICON_PATH_AND_DOCUMENT_URL_DEFAULT.equals(iconPath)) {
                 file =new File(iconPath);
                 String absolutePath = file.getAbsolutePath();
-                Icon icon = new Icon(getImageInputStream(absolutePath), getImageContentType(absolutePath));
+                ResourceFile icon = new ResourceFile(getImageInputStream(absolutePath), getImageContentType(absolutePath));
                 String thumbPath = APIUtil.getIconPath(identifier);
-                String thumbnailUrl = provider.addIcon(thumbPath, icon);
+                String thumbnailUrl = provider.addResourceFile(thumbPath, icon);
                 api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, apiProvider));
                 
                 /*Set permissions to anonymous role for thumbPath*/
@@ -310,7 +310,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 		GenericArtifactManager artifactManager = APIUtil.getArtifactManager(
 				registry, APIConstants.API_KEY);
 		try {
-			//registry.beginTransaction();
+			registry.beginTransaction();
 			GenericArtifact genericArtifact = artifactManager
 					.newGovernanceArtifact(new QName(api.getId().getApiName()));
 			GenericArtifact artifact = APIUtil.createAPIArtifactContent(
@@ -348,20 +348,20 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			}
 			APIUtil.setResourcePermissions(api.getId().getProviderName(),
 					api.getVisibility(), visibleRoles, artifactPath);
-			//registry.commitTransaction();
+			registry.commitTransaction();
 
 			// Generate API Definition for Swagger. 
 			//TO DO: Need to re-write this method to generate swagger 2.0 resource
 			//createUpdateAPIDefinition(api);
 
 		} catch (RegistryException e) {
-			/*try {
+			try {
 				registry.rollbackTransaction();
 			} catch (RegistryException re) {
 				handleException(
 						"Error while rolling back the transaction for API: "
 								+ api.getId().getApiName(), re);
-			}*/
+			}
 			handleException(
 					"Error while performing registry transaction operation", e);
 		}
@@ -437,7 +437,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 
 	private Set<URITemplate> getURITemplates(String endpoint, String authType) {
 		Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-		String[] httpVerbs = { "GET", "POST", "PUT", "DELETE", "OPTIONS" };
+		String[] httpVerbs = { "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS" };
 		
 		if (authType.equals(APIConstants.AUTH_NO_AUTHENTICATION)) {
 			for (int i = 0; i < 5; i++) {

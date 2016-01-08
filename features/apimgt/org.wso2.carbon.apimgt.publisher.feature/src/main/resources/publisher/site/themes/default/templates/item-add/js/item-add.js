@@ -5,8 +5,8 @@ $( document ).ready(function() {
         $(btn).buttonLoader('start');
         $('#startFromExistingAPI-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
+                $(btn).buttonLoader('stop');
                 if (!responseText.error) {
-                    $(btn).buttonLoader('stop');
                     window.location = jagg.site.context + "/design"
                 }else {
                     if (responseText.message == "timeout") {
@@ -28,13 +28,39 @@ $( document ).ready(function() {
         });
     });
 
+    //$('#startFromExistingSOAPEndpoint').attr('disabled',true);
+    $('#wsdl-url').change(function(){
+        $('.wsdlError').hide();
+        $('#wsdl-url').removeClass('error');
+    });
+
+    $('#wsdl-url').keyup(function(){
+        $('.wsdlError').hide();
+        $('#wsdl-url').removeClass('error');
+        if($('#wsdl-url').val().length != 0) {
+            $('#startFromExistingSOAPEndpoint').removeAttr("disabled");
+        } else {
+            //$('#startFromExistingSOAPEndpoint').attr('disabled','disabled');
+        }
+    });
+
     $("#startFromExistingSOAPEndpoint").click(function(){
+        var wsdlURL = $('#wsdl-url').val();
+        if(wsdlURL!=""){
+            if (wsdlURL.toLowerCase().indexOf("wsdl") < 0) {
+                $('#wsdl-url').addClass('error');
+                $('.wsdlError').show();
+                console.log("Wrong endpoint.");
+                return;
+            }
+        }
+
         var btn = $(this);
         $(btn).buttonLoader('start');
         $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
-                if (!responseText.error) {
-                    $(btn).buttonLoader('stop');
+                $(btn).buttonLoader('stop');
+                if (!responseText.error) {                    
                     window.location = jagg.site.context + "/design"
                 }else {
                     if (responseText.message == "timeout") {
@@ -55,7 +81,7 @@ $( document ).ready(function() {
             }, dataType: 'json'
         });
     });
-    
+
 
     $('.create-api').click(function(){
         $('.create-options').each(function(){
@@ -64,6 +90,7 @@ $( document ).ready(function() {
 
         $(this).closest('.create-options').addClass('selected');
         $('#designNewAPI').hide();
+        $('.wsdlError').hide();
     });
 
     $('#create-new-api').click(function(){
@@ -71,8 +98,29 @@ $( document ).ready(function() {
     });
 
 
+    $('#swagger-url').val('');
+    $('#swagger-file').val('');
+    $('#wsdl-url').val('');
+    //$('#startFromExistingAPI').attr('disabled',true);
+
     $('.create-options input[type=radio]').click(function(){
        $(this).prop('checked', true);
+
+        $("input#swagger-file:file").change(function (){
+           if ($('#swagger-file').val().length != 0) {
+               $('#startFromExistingAPI').removeAttr("disabled");
+           } else {
+               //$('#startFromExistingAPI').attr('disabled','disabled');
+           }
+        });
+
+        $('#swagger-url').keyup(function(){
+            if($('#swagger-url').val().length != 0) {
+                $('#startFromExistingAPI').removeAttr("disabled");
+            } else {
+                //$('#startFromExistingAPI').attr('disabled','disabled');
+            }
+        });
 
        $('.create-options input[type=radio]').each(function(){
            if(!$(this).is(':checked')){
@@ -87,7 +135,6 @@ $( document ).ready(function() {
     $('.toggleRadios input[type=radio]').prop('checked', false);
     $('.toggleRadios input[type=radio]').click(function(){
         $('.toggleContainers .controls').hide();
-        $('#startFromExistingAPI').css('margin-top','-67px');
         $('.toggleRadios input[type=radio]').prop('checked', false);
         $('#' + $(this).val()).closest('div').fadeIn();
         $(this).prop('checked', true);

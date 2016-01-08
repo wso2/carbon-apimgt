@@ -10,13 +10,16 @@ jagg.initializer("page/base", {
         jagg.addHeaderCSS("page/base", "bootstrap-select-css", "lib/bootstrap-select/css/bootstrap-select.min.css");
         jagg.addHeaderCSS("page/base", "localstyles", "css/localstyles.css");
         jagg.addHeaderCSS("page/base", "bootstrap-rating.css", "lib/bootstrap-rating/bootstrap-rating.css");
+        jagg.addHeaderCSS("page/base", "bootstrap-jasny.css", "lib/jasny-bootstrap/dist/css/jasny-bootstrap.min.css");
+
 
         //include jquery at the top
-        jagg.addHeaderJS("page/base", "jquery1.9.0", "lib/jquery.min.js");        
+        jagg.addHeaderJS("page/base", "jquery1.9.0", "lib/jquery.min.js");
         jagg.addHeaderJS("page/base", "i18n", "lib/i18n/i18next-1.5.9.js");
         jagg.addHeaderJS("page/base", "csrf", "lib/jquery-csrf.js");
         jagg.addHeaderJS("page/base", "handlebars", "lib/handlebars.min.js");
         jagg.addHeaderJS("page/base", "bootstrap-rating.js", "lib/bootstrap-rating/bootstrap-rating.js");
+        jagg.addHeaderJS("page/base", "validator", "lib/jquery-validation/jquery.validate.min.js");
        
 
         jagg.addHeaderJS("page/base", "jagg", "templates/page/base/js/jagg.js");
@@ -28,9 +31,9 @@ jagg.initializer("page/base", {
         jagg.addFooterJS("page/base", "bootstrap-selectjs", "lib/bootstrap-select/js/bootstrap-select.min.js");
         jagg.addFooterJS("page/base", "jquery-form", "lib/jquery.form.js");
         jagg.addFooterJS("page/base", "cookie", "lib/jquery.cookie.js");
-        jagg.addFooterJS("page/base", "validator", "lib/jquery-validation/jquery.validate.min.js");
         jagg.addFooterJS("page/base", "typeahead", "lib/typeahead.jquery.min.js");
-        jagg.addFooterJS("page/base", "editable", "lib/bootstrap3-editable/js/bootstrap-editable.min.js");        
+        jagg.addFooterJS("page/base", "editable", "lib/bootstrap3-editable/js/bootstrap-editable.min.js"); 
+        jagg.addFooterJS("page/base", "bootstrap-jasny.js", "lib/jasny-bootstrap/dist/js/jasny-bootstrap.min.js");       
 
     }
 });

@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.hostobjects.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
-import org.wso2.carbon.apimgt.hostobjects.APIStoreHostObject;
 import org.wso2.carbon.apimgt.hostobjects.HostObjectUtils;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;

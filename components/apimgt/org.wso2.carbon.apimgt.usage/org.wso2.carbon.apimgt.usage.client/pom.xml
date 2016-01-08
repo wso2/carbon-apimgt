@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>org.wso2.carbon.apimgt.usage</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -40,6 +40,10 @@
             <groupId>commons-lang.wso2</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.commons</groupId>
+            <artifactId>org.wso2.carbon.application.mgt.stub</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -58,7 +62,6 @@
                         </Export-Package>
                         <Private-Package>
                             org.wso2.carbon.apimgt.usage.client.internal,
-                            org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent,
                         </Private-Package>
                         <Import-Package>
                             org.wso2.carbon.bam.presentation.*;version="${carbon.platform.package.import.version.range}",
@@ -68,7 +71,6 @@
                             org.eclipse.equinox.http.helper,
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

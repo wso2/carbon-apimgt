@@ -24,7 +24,9 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -32,7 +34,7 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
 /**
  * This task provisions mandatory configs & Artifacts needed by any tenant. The reason for introducing this task is
- * to prevent {@link org.wso2.carbon.apimgt.gateway.internal.TenantServiceCreator} class being run on None-synapse
+ * to prevent {@link org.wso2.carbon.apimgt.impl.observers.TenantServiceCreator} class being run on None-synapse
  * environments. Configs such as workflow configs, analytic configs should be loaded within this task.
  */
 public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObserver {
@@ -52,7 +54,15 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
 
         try {
-            APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+            //Check whether GatewayType is "Synapse" before attempting to load Custom-Sequences into registry
+            APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+
+            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                APIUtil.writeDefinedSequencesToTenantRegistry(tenantId);
+            }
         }
         // Need to continue the execution even if we encounter an error.
         catch (Exception e) {
@@ -96,6 +106,14 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
             }
         } catch (APIManagementException e) {
             log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry");
+        }
+
+        try {
+            APIUtil.loadTenantConf(tenantId);
+        } catch (APIManagementException e) {
+            log.error("Failed to load " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);
+        } catch (Exception e) { // The generic Exception is handled explicitly so execution does not stop during config deployment
+            log.error("Exception when loading " + APIConstants.API_TENANT_CONF + " for tenant " + tenantDomain, e);
         }
     }
 }

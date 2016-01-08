@@ -16,9 +16,6 @@
 
 package org.wso2.carbon.apimgt.impl.template;
 
-import org.apache.velocity.VelocityContext;
-import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 
 /**
@@ -26,14 +23,14 @@ import org.wso2.carbon.apimgt.api.model.API;
  */
 public class EndpointBckConfigContext extends ConfigContextDecorator {
 
-    private API api;
+    //private API api;
 
     public EndpointBckConfigContext(ConfigContext context, API api) {
         super(context);
-        this.api = api;
+        //this.api = api;
         //check if endpoint_config not set
         String endpoint_config = api.getEndpointConfig();
-        if(endpoint_config == null && "".equals(endpoint_config)){
+        if(endpoint_config == null || "".equals(endpoint_config)){
             // Without setting the context make the endpoint_config json of api
             // The following config will be picked up by EndpointConfigContext
             endpoint_config = "{\"production_endpoints\":{\"url\":\""+ api.getUrl()+"\", \"config\":null},\"sandbox_endpoint\":{\"url\":\""+api.getSandboxUrl()+"\",\"config\":null},\"endpoint_type\":\"http\"}";

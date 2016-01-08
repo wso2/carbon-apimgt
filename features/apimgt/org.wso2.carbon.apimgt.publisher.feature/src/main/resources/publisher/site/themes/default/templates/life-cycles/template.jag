@@ -1,0 +1,186 @@
+<% jagg.template("life-cycles", function(inputs, outputs, jagg) {
+if(outputs.isPublishPermitted){
+        var api = outputs.api;
+        var oldExist = outputs.oldExist;
+        var lcs = outputs.lcs;
+        var lcData = outputs.lcData; 
+        var publishedInExternalStores = outputs.publishedInExternalStores; 
+        var i,resCount,rowNums = [];  
+        var lcStatus = outputs.lcStatus   
+ %>
+
+<script type="text/javascript">
+$(document).ready(function() {
+// call when page load to display message if the API is published to external stores and status is not published
+checkExternalStores('<%=lcStatus%>');
+});
+
+function setChecklistItemVal(element,order) {
+    if ($(element).is(":checked") == false) {
+        $(element).attr('value', false);
+    }
+    else {
+        $(element).attr('value', true);
+    }
+    var apiName=$("#name").val();
+    var version=$("#apiVersion").val();
+    var provider=$("#provider").val();
+    var value= $(element).val();
+    jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"setCheckListItemVal",provider:provider,name:apiName,version:version,order:order,value:value },
+               function (result) {
+                  if (!result.error) {
+                    
+                     setTimeout(function(){
+                            location = ''
+                     },1000)
+                  } else {
+                    jagg.message({content:result.message,type:"error"});
+                  }
+              },"json");
+    
+};
+function updateStatus(status){
+var apiName=$("#name").val();
+var version=$("#apiVersion").val();
+var provider=$("#provider").val();
+
+ jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"updateStatus",provider:provider,name:apiName,version:version,status:status },
+              function (result) {
+                  if (!result.error) {
+                     $('#statusUpdateMsg').show();
+                     setTimeout(function(){
+    						location = ''
+  					 },1000)
+                  } else {
+                    jagg.message({content:result.message,type:"error"});
+                  }
+              }, "json");
+
+};
+
+
+var initOf_state = '<%=lcStatus%>';
+// java script variable to store the status
+var publishedInExternalStores=<%=publishedInExternalStores%>;
+</script>
+
+<div class="alert alert-error" id="statusAPIError" style="display:none">
+<span id="statusErrorSpan"></span>
+</div>
+
+<div class="row-fluid">
+    <div class="span12">
+ <form class="form-horizontal well">
+     <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
+     <input type="hidden" name="version" id="apiVersion" value="<%=api.version%>"/>
+     <input type="hidden" name="provider" id="provider" value="<%=api.provider%>"/>
+     <div class="alert alert-warning" id="removeFromExternalStoresMsg" style="display:none;">
+     	  <span class="badge badge-warning">!</span> <%=i18n.localize("removeAPIFromExternalStoresWarning")%>
+     </div>
+     <div class="control-group">
+                <label class="control-label" for="editStatus" name="state"><%=i18n.localize("state")%>:</label>
+                <div class="control-label">
+                    <b><% print(lcStatus); %></b>                    
+                    
+                 </div> <br/>
+                 <div class="controls publishCheckBoxes">
+                 <%for (var j=0;j<lcData.items.length;j++){
+                 var item=lcData.items[j];
+                 var itemName=item.name;
+                 var isVisible=item.isVisible;
+                 var itemValue=item.value;
+                 var itemOrder=item.order;
+                 var state=item.lifeCycleStatus;
+                 %>
+                 <% if(isVisible=="true"){%> 
+                     <%if((state!="Created")||(state=="Created" && oldExist)){%>                
+                     <label class="checkbox" id="itemsDivfromLCXML<%=String(j)%>">
+                        <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
+                     </label>
+                    <%}else{%>   
+                        <%if((itemName == i18n.localize("requireReSubscription"))||(itemName  == i18n.localize("deprecateOldVersions"))){
+                                continue;
+                        }else{%> 
+                                 <label class="checkbox" id="itemsDivfromLCXML<%=String(j)%>">
+                                <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>><%=itemName%>
+                            </label>
+                        <%} 
+                 <%}}}%>
+                 </div>
+
+
+      </div>
+    <div class="form-actions"> 
+       <% for (var i=0;i<lcData.nextStates.length;i++) {
+           var next = lcData.nextStates[i].toLowerCase();
+      
+            if(lcStatus=="CREATED" || lcStatus=="PROTOTYPED"){ 
+	             if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>                      
+	                <input type="button" id="actionButton" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	           <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
+	                <input type="button" id="actionButton" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	           <%} else {%>
+	                <input type="button" id="actionButton" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/> 
+	           <%}
+	        } else {%>
+	             <input type="button" id="actionButton" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+	      	<%}      
+
+        }%>
+                
+       </div>
+       <div class="alert alert-success" id="statusUpdateMsg" style="display:none;">
+        <%=i18n.localize("lifecycleSuccessMsg")%>
+      </div>
+      </form>
+
+<h4><%=i18n.localize("lifecycleHistory")%></h4><br/>
+<%if(lcs!=null){
+        var length = lcs.length;
+        if (length == 0) {
+        %>
+        <span class="label label-info"><%=i18n.localize("noLifecycleMsg")%></span>
+ <%}%>
+
+        <table class="lifeCycleTable" id="lifeCycleTable">
+  <thead>
+         </thead>
+       <tbody>
+        <%for(var j=0;j<length;j++){
+        var lc=lcs[j];
+        var path = jagg.getMappedUrl("/site/pages/user.jag") + "?uname=" + lc.username;
+        %>
+        <tr>
+        <td><i class="icon-info-sign"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="icon-user"></i><a href="<%=path%>"><%=lc.username%></a>
+        <%if(lc.oldStatus==""){%><%=i18n.localize("createAPIMsg")%> <%}else{%>
+        <%=i18n.localize("changeAPIStatusMsg")%>  '<%=lc.oldStatus%>' to '<%=lc.newStatus%>'.
+        <%}%>
+        </td>
+        </tr>
+        <%}%>
+        </tbody></table>
+        <%}%>
+
+</div></div>
+
+<script type="text/javascript">
+function hideMsg() {
+    $('#statusUpdateMsg').hide("fast");
+};
+
+// function to show / hide external stores message
+var checkExternalStores=function(status){
+	if(status !== 'PUBLISHED' && publishedInExternalStores==true){
+		$('#removeFromExternalStoresMsg').show();
+	}else{
+		$('#removeFromExternalStoresMsg').hide();
+	}
+    if (status !== 'PUBLISHED') {
+        $('#externalAPIStoresTab').hide();
+    }else{
+        $('#externalAPIStoresTab').show();
+    }
+}
+
+ </script>
+<% }}); %>

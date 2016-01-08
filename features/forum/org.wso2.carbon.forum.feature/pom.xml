@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum-feature</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
 	<relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -44,6 +44,7 @@
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
+                <version>${carbon.p2.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>4-p2-feature-generation</id>
@@ -53,12 +54,12 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.forum</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core:${carbon.platform.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core:${carbon.kernel.version}</importFeatureDef>
                             </importFeatures>
                             <includedFeatures>
-                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum.server.feature:${carbon.forum.server.feature.version}</includedFeatureDef>
+                                <includedFeatureDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum.server.feature:${carbon.apimgt.version}</includedFeatureDef>
                             </includedFeatures>
                         </configuration>
                     </execution>

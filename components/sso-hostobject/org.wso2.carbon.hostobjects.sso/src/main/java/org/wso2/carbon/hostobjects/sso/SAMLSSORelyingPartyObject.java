@@ -403,100 +403,31 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
      * @return
      * @throws Exception
      */
+
     public static String jsFunction_getSAMLAuthRequest(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws Exception {
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-        boolean isPassiveRequired = false;
-        String acsUrl;
+
         int argLength = args.length;
-        if (argLength == 2) {
-            isPassiveRequired = (Boolean) args[0];
-            acsUrl = (String) args[1];
-            if (isPassiveRequired) {
-                if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
-                    //builds an unsigned passive authentication request
-                    return Util.marshall(new AuthReqBuilder().
-                            buildPassiveAuthenticationRequest(relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
-                                    acsUrl));
-                } else {
-                    //builds a signed passive authentication request
-                    return Util.marshall(new AuthReqBuilder().
-                            buildPassiveSignedAuthenticationRequest(
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
-                                    MultitenantConstants.SUPER_TENANT_ID,
-                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
-                                    acsUrl));
-                }
-            } else {
-                if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
-                    //builds an unsigned non-passive authentication request
-                    return Util.marshall(new AuthReqBuilder().
-                            buildAuthenticationRequest(
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
-                } else {
-                    //builds a signed non-passive authentication request with consumer url
-                    return Util.marshall(new AuthReqBuilder().
-                            buildSignedAuthRequestWithConsumerUrl(
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
-                                    acsUrl, MultitenantConstants.SUPER_TENANT_ID,
-                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
-                }
-            }
-        } else {
-            //When number of args are not eq. to 2, then its assumed to be a non passive auth request build
-            if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
-                //builds an unsigned non-passive authentication request
-                return Util.marshall(new AuthReqBuilder().
-                        buildAuthenticationRequest(
-                                relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
-            } else {
-                if (argLength == 0) {
-                    //builds a signed non-passive authentication request without consumer url
-                    return Util.marshall(new AuthReqBuilder().
-                            buildSignedAuthRequest(
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
-                                    MultitenantConstants.SUPER_TENANT_ID,
-                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
-                } else {
-                    //builds a signed non-passive authentication request with consumer url
-                    String consumerUrl = (String) args[0];
-                    return Util.marshall(new AuthReqBuilder().
-                            buildSignedAuthRequestWithConsumerUrl(
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
-                                    consumerUrl, MultitenantConstants.SUPER_TENANT_ID,
-                                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
-                }
-            }
-        }
-    }
+        String acsUrl = argLength >= 1 ? (String) args[0] : null; //set as the value of 1st arg if exists
+        boolean isPassiveAuthRequired = argLength >= 2 ? (Boolean) args[1] : false; //set as 2nd arg if exists
+        String nameIdPolicy = relyingPartyObject.getSSOProperty(SSOConstants.NAME_ID_POLICY);
 
-    /**
-     * Provides a way to includes passiveAuth and assertionConsumerServiceURL parameters to SAML Auth request
-     *
-     * @param cx
-     * @param thisObj
-     * @param args - args[0] indicates passiveAuth required or not args[1] indicates assertionConsumerServiceURL
-     * @param funObj
-     * @return
-     * @throws Exception
-     */
-
-    public static String jsFunction_getSAMLPassiveAuthRequest(Context cx, Scriptable thisObj,
-                                                              Object[] args,
-                                                              Function funObj) throws Exception {
-        SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-
-        if ((Boolean) args[0])  {
-            String acsUrl = (String) args[1];
+        //check if request signing is required
+        if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+            //builds an unsigned authentication request
             return Util.marshall(new AuthReqBuilder().
-                    buildPassiveAuthenticationRequest(relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), acsUrl));
+                    buildAuthenticationRequest(
+                            relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), acsUrl, isPassiveAuthRequired,
+                            nameIdPolicy));
         } else {
+            //builds a signed authentication request
             return Util.marshall(new AuthReqBuilder().
-                    buildAuthenticationRequest(relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+                    buildSignedAuthRequest(
+                            relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
+                            relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
+                            acsUrl, isPassiveAuthRequired, MultitenantConstants.SUPER_TENANT_ID,
+                            MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, nameIdPolicy));
         }
     }
 
@@ -522,6 +453,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             log.debug("The user to be logged out is " + args[0]);
         }
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
+        String nameIdFormat = relyingPartyObject.getSSOProperty(SSOConstants.NAME_ID_POLICY);
         log.debug("SAMLLogoutRequest is going to get session details");
         if (relyingPartyObject.getSessionInfo((String) args[1]) != null) {
             String sessionIndexId = relyingPartyObject.getSessionInfo((String) args[1]).getSessionIndex();
@@ -530,7 +462,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildLogoutRequest((String) args[0], sessionIndexId,
                                     SSOConstants.LOGOUT_USER,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), nameIdFormat));
                 } else {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildSignedLogoutRequest((String) args[0], sessionIndexId,
@@ -538,20 +470,20 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL)));
+                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
                 }
             } else {
                 if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildLogoutRequest((String) args[0], SSOConstants.LOGOUT_USER,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID)));
+                                    relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), nameIdFormat));
                 } else {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildSignedLogoutRequest((String) args[0], SSOConstants.LOGOUT_USER,
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID),
                                     MultitenantConstants.SUPER_TENANT_ID,
                                     MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL)));
+                                    relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
                 }
             }
         }

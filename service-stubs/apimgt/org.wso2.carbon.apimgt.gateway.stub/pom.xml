@@ -22,20 +22,21 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.gateway.stub</artifactId>
     <packaging>bundle</packaging>
+    <version>5.0.4-SNAPSHOT</version>
     <name>WSO2 Carbon - API Gateway Management Stub</name>
     <url>http://wso2.org</url>
 
     <build>
         <plugins>
 
-             <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.1</version>
@@ -49,7 +50,7 @@
                         <configuration>
                             <tasks>
                                 <path id="wsdl2java.classpath">
-			 <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${axiom.wso2.version}/axiom-${axiom.wso2.version}.jar" />
+                                    <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${axiom.wso2.version}/axiom-${axiom.wso2.version}.jar" />
                                     <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2-client/${axis2.wso2.version}/axis2-client-${axis2.wso2.version}.jar" />
                                     <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${axis2.wso2.version}/axis2-${axis2.wso2.version}.jar" />
                                     <pathelement location="${settings.localRepository}/org/apache/ws/commons/axiom/wso2/axiom/${axiom.wso2.version}/axiom-${axiom.wso2.version}.jar" />
@@ -93,16 +94,14 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.gateway.stub.*;version="${apimgt.gateway.version}",
-			org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${apimgt.gateway.version}"	
-                           
+                            org.wso2.carbon.apimgt.gateway.stub.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.gateway.dto.stub.*;version="${carbon.apimgt.version}"
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.namespace,

@@ -18,12 +18,15 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
-
+import org.apache.axiom.om.OMElement;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHost;
@@ -31,6 +34,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.woden.WSDLFactory;
 import org.apache.woden.WSDLReader;
@@ -54,24 +58,27 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
-import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
-import org.wso2.carbon.apimgt.usage.client.dto.*;
+import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.apimgt.usage.client.dto.APIRequestsByHourDTO;
+import org.wso2.carbon.apimgt.usage.client.dto.APIRequestsByUserAgentsDTO;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
+import org.wso2.carbon.apimgt.usage.client.impl.APIUsageStatisticsRdbmsClientImpl;
+import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.PermissionUpdateUtil;
+import org.wso2.carbon.governance.lcm.util.CommonUtil;
+import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -84,11 +91,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Caching;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSession;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.*;
+import javax.xml.namespace.QName;
+import java.io.*;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,6 +108,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     private String username;
     private static String VERSION_PARAM="{version}";
+    private static String ICON_PATH = "tmp/icon";
 
     private APIProvider apiProvider;
 
@@ -159,8 +165,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static void handleFaultGateWayException(FaultGatewaysException e) throws FaultGatewaysException {
         throw e;
     }
-    public static NativeObject jsFunction_login(Context cx, Scriptable thisObj,
-                                                Object[] args, Function funObj)
+    public static NativeObject jsFunction_login(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         if (args==null || args.length == 0 || !isStringValues(args)) {
@@ -203,7 +208,14 @@ public class APIProviderHostObject extends ScriptableObject {
             //update permission cache before validate user
             int tenantId =  ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            if(tenantId == MultitenantConstants.INVALID_TENANT_ID) {
+                handleException("Invalid tenant domain.");
+            }
             PermissionUpdateUtil.updatePermissionTree(tenantId);
+            
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();            
+            CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(tenantId), 
+                                                          CommonUtil.getRootSystemRegistry(tenantId));
 
             String host = new URL(url).getHost();
             if (!authAdminStub.login(username, password, host)) {
@@ -260,8 +272,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return true if update successful, false otherwise
      * @throws APIManagementException
      */
-    public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
+    public static boolean jsFunction_updatePermissionCache(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || args.length == 0) {
             handleException("Invalid input parameters to the login method");
@@ -283,8 +294,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return updated;
     }
 
-    public static String jsFunction_getAuthServerURL(Context cx, Scriptable thisObj,
-                                                     Object[] args, Function funObj)
+    public static String jsFunction_getAuthServerURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
@@ -295,8 +305,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return url;
     }
 
-    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj,
-                                                Object[] args, Function funObj)
+    public static String jsFunction_getHTTPsURL(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         String hostName = CarbonUtils.getServerConfiguration().getFirstProperty("HostName");
         String backendHttpsPort = HostObjectUtils.getBackendPort("https");
@@ -316,8 +325,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return true if the API was added successfully
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj,
-                                               Object[] args, Function funObj)
+    public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
     	boolean success = false;
     	
@@ -341,9 +349,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String tier = (String) apiData.get("tier", apiData);
 
-        String inSequence =  (String) apiData.get("inSequence", apiData);
-        String outSequence = (String) apiData.get("outSequence", apiData);
-        String faultSequence = (String) apiData.get("faultSequence", apiData);
         String businessOwner = (String) apiData.get("bizOwner", apiData);
         String businessOwnerEmail = (String) apiData.get("bizOwnerMail", apiData);
         String technicalOwner = (String) apiData.get("techOwner", apiData);
@@ -394,20 +399,18 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
 
-		api.removeCustomSequences();
-		if (!"none".equals(inSequence)) {
-			api.setInSequence(inSequence);
-		}
-		if (!"none".equals(outSequence)) {
-			api.setOutSequence(outSequence);
-		}
-		
-		List<String> sequenceList = apiProvider.getCustomFaultSequences();
-		if (!"none".equals(faultSequence) && sequenceList.contains(faultSequence)) {
-			api.setFaultSequence(faultSequence);
-		}
+        String productionTps = (String) apiData.get("productionTps", apiData);
+        String sandboxTps = (String) apiData.get("sandboxTps", apiData);
+
+        if (!"none".equals(productionTps)) {
+            api.setProductionMaxTps(productionTps);
+        }
+
+        if (!"none".equals(sandboxTps)) {
+            api.setSandboxMaxTps(sandboxTps);
+        }
 	
         if(!"none".equals(businessOwner)){
             api.setBusinessOwner(businessOwner);
@@ -438,7 +441,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("swagger", apiData) != null) {
 
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+            Set<URITemplate> uriTemplates =
+                    definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
@@ -450,7 +454,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                                                                             getTenantId(tenantDomain);                
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                    if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
                         if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
@@ -466,8 +470,8 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         // removing scopes from cache
-        ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
         try {
+            ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
             String[] consumerKeys = apiProvider.getConsumerKeys(new APIIdentifier(provider, name, version));
             if (consumerKeys != null && consumerKeys.length != 0) {
                 providerClient.removeScopeCache(consumerKeys);
@@ -485,9 +489,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (registeredResource == null) {
             boolean isNewResourceRegistered = keyManager.registerNewResource(api , null);
             if (!isNewResourceRegistered) {
-                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName
-                        () + "-" + api
-                        .getId().getVersion());
+                handleException("APIResource registration is failed while adding the API- " + api.getId().getApiName()
+                                + "-" + api.getId().getVersion());
             }
         } else {
             //update APIResource.
@@ -513,6 +516,8 @@ public class APIProviderHostObject extends ScriptableObject {
     public static boolean jsFunction_updateAPIImplementation(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
+
+        // Get the InSeq or outSeq here and put into registry
     	
     	if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -523,7 +528,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String implementationType = (String) apiData.get("implementation_type", apiData);
-        
+
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }        
@@ -555,6 +560,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String wsdl = (String) apiData.get("wsdl", apiData);
         String wadl = (String) apiData.get("wadl", apiData);
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
             
@@ -564,14 +570,13 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
 
-        if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
+        if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE))    {
             api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_INLINE);
-        }
-        else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
+        } else if(implementationType.equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT))   {
             api.setImplementation(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT);
             // Validate endpoint URI format
             validateEndpointURI(api.getEndpointConfig());
-        }else{
+        } else  {
             throw new APIManagementException("Invalid Implementation Type.");
         }
 
@@ -589,8 +594,12 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.setEndpointSecured(true);
         	api.setEndpointUTUsername(endpointUTUsername);
         	api.setEndpointUTPassword(endpointUTPassword);
+            if ("digestAuth".equals(endpointAuthDigest)) {
+                api.setEndpointAuthDigest(true);
+            }
         } else {
             api.setEndpointSecured(false);
+            api.setEndpointAuthDigest(false);
             api.setEndpointUTUsername(null);
             api.setEndpointUTPassword(null);
         }
@@ -606,7 +615,59 @@ public class APIProviderHostObject extends ScriptableObject {
 
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
-                
+
+        String inSequence =  (String) apiData.get("inSequence", apiData);
+        String outSequence = (String) apiData.get("outSequence", apiData);
+        String faultSequence = (String) apiData.get("faultSequence", apiData);
+
+        api.removeCustomSequences();
+
+        if (!"none".equals(inSequence))  {
+            api.setInSequence(inSequence);
+        }
+
+        if (!"none".equals(outSequence)) {
+            api.setOutSequence(outSequence);
+        }
+
+        if (!"none".equals(faultSequence))  {
+            api.setFaultSequence(faultSequence);
+        }
+
+        if (apiData.get("inSeqFile", apiData) != null)  {
+            FileHostObject inSeqFile = (FileHostObject) apiData.get("inSeqFile", apiData);
+            ResourceFile inSeq = new ResourceFile(inSeqFile.getInputStream(), inSeqFile.getJavaScriptFile().getContentType());
+            String inSeqFileName;
+            try {
+                OMElement seqElment = APIUtil.buildOMElement(inSeqFile.getInputStream());
+                inSeqFileName = seqElment.getAttributeValue(new QName("name"));
+            } catch (Exception e) {
+                log.error("An Error has occurred while reading custom sequence file");
+                throw new APIManagementException("An Error has occurred while reading custom sequence file");
+            }
+            String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
+                               + inSeqFileName;
+            String inSeqFullPath = apiProvider.addResourceFile(inSeqPath, inSeq);
+            api.setInSequence(inSeqFileName);
+        }
+
+        if (apiData.get("outSeqFile", apiData) != null) {
+            FileHostObject outSeqFile = (FileHostObject) apiData.get("outSeqFile", apiData);
+            ResourceFile outSeq = new ResourceFile(outSeqFile.getInputStream(), outSeqFile.getJavaScriptFile().getContentType());
+            String outSeqFileName;
+            try {
+                OMElement seqElment = APIUtil.buildOMElement(outSeqFile.getInputStream());
+                outSeqFileName = seqElment.getAttributeValue(new QName("name"));
+            } catch (Exception e) {
+                log.error("An Error has occurred while reading custom sequence file");
+                throw new APIManagementException("An Error has occurred while reading custom sequence file");
+            }
+            String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
+                                + outSeqFileName;
+            String outSeqFullPath = apiProvider.addResourceFile(outSeqPath, outSeq);
+            api.setOutSequence(outSeqFileName);
+        }
+
         return saveAPI(apiProvider, api, null, false);
     	
     }
@@ -646,8 +707,7 @@ public class APIProviderHostObject extends ScriptableObject {
         
         String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
         String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain))
-        {
+        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
             //Create tenant aware context for API
             context= "/t/"+ providerDomain+context;
         }
@@ -656,7 +716,7 @@ public class APIProviderHostObject extends ScriptableObject {
         Set<String> tag = new HashSet<String>();
 
         if (tags != null) {
-            if (tags.indexOf(",") >= 0) {
+            if (tags.contains(",")) {
                 String[] userTag = tags.split(",");
                 tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
             } else {
@@ -698,7 +758,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         if (apiData.containsKey("wsdl")) {
             String wsdl = (String) apiData.get("wsdl", apiData);
-            if(wsdl != null && !wsdl.isEmpty()) {
+            if (StringUtils.isNotEmpty(wsdl)) {
                 api.setWsdlUrl(wsdl);
             }
         }
@@ -726,7 +786,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setLastUpdated(new Date());
 
-        
+
         return saveAPI(apiProvider, api, fileHostObject, false);
     }
     
@@ -865,12 +925,11 @@ public class APIProviderHostObject extends ScriptableObject {
      * @param apiProvider
      * @param api
      * @param fileHostObject
-     * @param create
+     * @param isNewApi
      * @return true if the API was added successfully
      * @throws APIManagementException
      */
-    private static boolean saveAPI(APIProvider apiProvider,API api,
-                                  FileHostObject fileHostObject, boolean create)
+    private static boolean saveAPI(APIProvider apiProvider, API api, FileHostObject fileHostObject, boolean isNewApi)
             throws APIManagementException, FaultGatewaysException {
     	boolean success = false;
     	boolean isTenantFlowStarted = false;
@@ -883,17 +942,11 @@ public class APIProviderHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String thumbPath = APIUtil.getIconPath(api.getId());
 
-                String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
-
-                /*Set permissions to anonymous role for thumbPath*/
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
-            }  
-            if (create) {
+                String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
+                        fileHostObject.getJavaScriptFile().getContentType(), apiProvider, api);
+            }
+            if (isNewApi) {
             	apiProvider.addAPI(api);
             } else {
                 apiProvider.manageAPI(api);
@@ -926,9 +979,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      * @throws FaultGatewaysException 
      */
-    public static boolean jsFunction_addAPI(Context cx, Scriptable thisObj,
-                                            Object[] args,
-                                            Function funObj)
+    public static boolean jsFunction_addAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, ScriptException, FaultGatewaysException {
         if (args==null||args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -948,14 +999,26 @@ public class APIProviderHostObject extends ScriptableObject {
         String endpoint = (String) apiData.get("endpoint", apiData);
         String sandboxUrl = (String) apiData.get("sandbox", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
+        String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String visibleRoles = "";
-
+        
+        if (name != null) {
+            name = name.trim();
+            if (name.isEmpty()) {
+                handleException("API name is not specified");
+            }
+        }
+        
+        if (version != null) {
+            version = version.trim();
+            if (version.isEmpty()) {
+                handleException("Version not specified for API " + name);
+            }
+        }
 
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
-        } else {
-            visibility = APIConstants.API_GLOBAL_VISIBILITY;
-        }
+        } 
 
         if (sandboxUrl != null && sandboxUrl.trim().length() == 0) {
             sandboxUrl = null;
@@ -993,7 +1056,7 @@ public class APIProviderHostObject extends ScriptableObject {
         Set<String> tag = new HashSet<String>();
 
         if (tags != null) {
-            if (tags.indexOf(",") >= 0) {
+            if (tags.contains(",")) {
                 String[] userTag = tags.split(",");
                 tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
             } else {
@@ -1004,8 +1067,20 @@ public class APIProviderHostObject extends ScriptableObject {
         String transport = getTransports(apiData);
 
         String tier = (String) apiData.get("tier", apiData);
+        if(StringUtils.isBlank(tier)) {
+            handleException("No tier defined for the API");
+        }
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
         String contextVal = (String) apiData.get("context", apiData);
+
+        if (contextVal.isEmpty()) {
+            handleException("Context not defined for API");
+        }
+
+        if (contextVal.endsWith("/")) {
+            handleException("Context cannot end with '/' character");
+        }
+
         APIProvider apiProvider = getAPIProvider(thisObj);
         //check for context exists
         if (apiProvider.isDuplicateContextTemplate(contextVal)) {
@@ -1035,6 +1110,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
 
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 
@@ -1119,7 +1195,14 @@ public class APIProviderHostObject extends ScriptableObject {
                         String uriTempVal = (String) resource.get("url_pattern");
                         uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
                         template.setUriTemplate(uriTempVal);
-                        template.setHTTPVerb((String) mapEntry.getKey());
+                        String verb = (String) mapEntry.getKey();
+                        if (isHTTPMethodValid(verb)) {
+                            template.setHTTPVerb(verb);
+                        }
+                        else {
+                            handleException("Specified HTTP verb " + verb + " is invalid");
+                        }
+
                         String authType = (String) mapEntryValue.get("auth_type");
                         if (authType.equals("Application & Application User")) {
                             authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -1165,7 +1248,14 @@ public class APIProviderHostObject extends ScriptableObject {
                                         String uriTempVal = uriTemp.startsWith("/") ? uriTemp : ("/" + uriTemp);
                                         template.setUriTemplate(uriTempVal);
                                         String throttlingTier = throttlingTierArray[j];
-                                        template.setHTTPVerb(uriMethodArray[k]);
+
+                                        if (isHTTPMethodValid(uriMethodArray[k])) {
+                                            template.setHTTPVerb(uriMethodArray[k]);
+                                        }
+                                        else {
+                                            handleException("Specified HTTP verb " + uriMethodArray[k] + " is invalid");
+                                        }
+
                                         String authType = authTypeArray[j];
                                         if (authType.equals("Application & Application User")) {
                                             authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -1212,7 +1302,10 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setDestinationStatsEnabled(destinationStats);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
+
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
 
         if(!"none".equals(inSequence)){
             api.setInSequence(inSequence);
@@ -1230,7 +1323,19 @@ public class APIProviderHostObject extends ScriptableObject {
         String[] tierNames;
         if (tier != null) {
             tierNames = tier.split(",");
+            Set<Tier> definedTiers = apiProvider.getTiers();
             for (String tierName : tierNames) {
+                boolean isTierValid =  false;
+                for (Tier definedTier : definedTiers) {
+                    if (tierName.equals(definedTier.getName())) {
+                        isTierValid = true;
+                        break;
+                    }
+                }
+
+                if (!isTierValid) {
+                    handleException("Specified tier " + tierName + " does not exist");
+                }
                 availableTier.add(new Tier(tierName));
             }
             api.addAvailableTiers(availableTier);
@@ -1245,16 +1350,22 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
 
-        // @todo needs to be validated
-        api.setEndpointConfig((String) apiData.get("endpoint_config", apiData));
-        //Validate endpoint URI format
-        validateEndpointURI(api.getEndpointConfig());
-
+        String endpointConfig = (String) apiData.get("endpoint_config", apiData);
+        if(StringUtils.isEmpty(endpointConfig)) {
+            handleException("Endpoint Configuration is missing");
+        } else {
+            api.setEndpointConfig(endpointConfig);
+            //Validate endpoint URI format
+            validateEndpointURI(api.getEndpointConfig());
+        }
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
+            if ("digestAuth".equals(endpointAuthDigest)) {
+                api.setEndpointAuthDigest(true);
+            }
         }
 
         checkFileSize(fileHostObject);
@@ -1270,15 +1381,9 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.addAPI(api);
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String thumbPath = APIUtil.getIconPath(apiId);
 
-                String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, provider));
-
-                /*Set permissions to anonymous role for thumbPath*/
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+                String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
+                        fileHostObject.getJavaScriptFile().getContentType(), apiProvider, api);
                 apiProvider.updateAPI(api);
             }
             NativeArray externalAPIStores = (NativeArray) apiData.get("externalAPIStores", apiData);
@@ -1290,7 +1395,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     String apiStoreName = externalAPIStores.get(k, externalAPIStores).toString();
                     apiStores.add(APIUtil.getExternalAPIStore(apiStoreName, tenantId));
                 }
-            apiProvider.publishToExternalAPIStores(api, apiStores);
+            apiProvider.publishToExternalAPIStores(api, apiStores,false);
             }
             success = true;
 
@@ -1302,7 +1407,29 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        
+        if(thumbUrl != null && !thumbUrl.isEmpty()) {
+            try {
+                URL url = new URL(thumbUrl);
+                String imageType = url.openConnection().getContentType();
+                File fileToUploadFromUrl = new File(ICON_PATH);
+                if (!fileToUploadFromUrl.exists()) {
+                    fileToUploadFromUrl.createNewFile();
+                }
+                FileUtils.copyURLToFile(url, fileToUploadFromUrl);
+                FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
+
+                checkImageSize(fileToUploadFromUrl);
+
+                String thumbPath = addThumbIcon(fileBody.getInputStream(),
+                        url.openConnection().getContentType(), apiProvider, api);
+
+            } catch (IOException e) {
+                handleException("[Error] Cannot read data from the URL", e);
+            }
+            apiProvider.updateAPI(api);
+
+        }
+
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
@@ -1319,7 +1446,7 @@ public class APIProviderHostObject extends ScriptableObject {
                                                      .getTenantId(tenantDomain);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
-                    if (scope != null && !(ScopesIssuer.getInstance().isWhiteListedScope(scope.getKey()))) {
+                    if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
                         if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
                             handleException("Scope " + scope.getKey() + " is already assigned by another API");
                         }
@@ -1338,6 +1465,31 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return success;
 
+    }
+
+    private static String addThumbIcon(InputStream inputStream, String contentType, APIProvider apiProvider, API api)
+            throws APIManagementException {
+
+        ResourceFile thumbIcon = new ResourceFile(inputStream, contentType);
+        String thumbPath = APIUtil.getIconPath(api.getId());
+        String thumbnailUrl = apiProvider.addResourceFile(thumbPath, thumbIcon);
+        api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+
+        /*Set permissions to anonymous role for thumbPath*/
+        APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+        return thumbPath;
+    }
+
+    private static boolean isHTTPMethodValid(String httpMethod) {
+        boolean isValid = false;
+
+        for (APIConstants.SupportedHTTPVerbs verb : APIConstants.SupportedHTTPVerbs.values()) {
+            if (verb.name().equalsIgnoreCase(httpMethod)) {
+                isValid = true;
+            }
+        }
+
+        return isValid;
     }
 
     private static String checkAndSetVersionParam(String context) {
@@ -1366,7 +1518,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static boolean jsFunction_updateAPI(Context cx, Scriptable thisObj,
                                                Object[] args,
-                                               Function funObj) throws APIManagementException {
+                                               Function funObj) throws APIManagementException, FaultGatewaysException {
 
         if (args==null || args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -1390,6 +1542,8 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
+        String thumbUrl = (String) apiData.get("thumbUrl", apiData);
+        String environments = (String) apiData.get("environments", apiData);
         String visibleRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
@@ -1400,6 +1554,7 @@ public class APIProviderHostObject extends ScriptableObject {
         	visibleTenants = (String) apiData.get("visibleTenants", apiData);
         }
         String endpointSecured = (String) apiData.get("endpointSecured", apiData);
+        String endpointAuthDigest = (String) apiData.get("endpointAuthDigest", apiData);
         String endpointUTUsername = (String) apiData.get("endpointUTUsername", apiData);
         String endpointUTPassword = (String) apiData.get("endpointUTPassword", apiData);
 
@@ -1461,7 +1616,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String tags = (String) apiData.get("tags", apiData);
         Set<String> tag = new HashSet<String>();
         if (tags != null) {
-            if (tags.indexOf(",") >= 0) {
+            if (tags.contains(",")) {
                 String[] userTag = tags.split(",");
                 tag.addAll(Arrays.asList(userTag).subList(0, tags.split(",").length));
             } else {
@@ -1505,126 +1660,130 @@ public class APIProviderHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
         API api = new API(apiId);
 
-        //to keep the backword compatibility if resource_config not set process the old way.
-        if(apiData.get("resource_config", apiData) != null){
-            Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-            JSONParser parser = new JSONParser();
-            JSONObject resourceConfig =null;
-            try{
-                resourceConfig = (JSONObject) parser.parse((String) apiData.get("resource_config", apiData));
-            }catch(ParseException e){
-                handleException("Invalid resource config", e);
-            }catch(ClassCastException e){
-                handleException("Unable to create JSON object from resource config", e);
-            }
-
-            //process scopes
-            JSONArray scopes = (JSONArray) resourceConfig.get("scopes");
-            Set<Scope> scopeList = new LinkedHashSet<Scope>();
-            for (int i=0; i < scopes.size(); i++)
-            {
-                Map scope = (Map) scopes.get(i); //access with get() method
-                Scope scopeObj = new Scope();
-                scopeObj.setKey((String) scope.get("key"));
-                scopeObj.setName((String) scope.get("name"));
-                scopeObj.setRoles((String) scope.get("roles"));
-                scopeObj.setDescription((String) scope.get("description"));
-                scopeList.add(scopeObj);
-            }
-            api.setScopes(scopeList);
-
-
-            JSONArray resources = (JSONArray) resourceConfig.get("resources");
-            for (int k = 0; k < resources.size(); k++) {
-                JSONObject resource = (JSONObject) resources.get(k);
-
-
-                Map http_verbs = (Map) resource.get("http_verbs");
-                Iterator iterator = http_verbs.entrySet().iterator();
-
-                while (iterator.hasNext()) {
-                    Map.Entry mapEntry = (Map.Entry) iterator.next();
-                    Map mapEntryValue = (Map) mapEntry.getValue();
-
-                    URITemplate template = new URITemplate();
-                    String uriTempVal = (String) resource.get("url_pattern");
-                    uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
-                    template.setUriTemplate(uriTempVal);
-                    template.setHTTPVerb((String)mapEntry.getKey());
-                    String authType = (String) mapEntryValue.get("auth_type");
-                    if (authType.equals("Application & Application User")) {
-                        authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                    }
-                    if (authType.equals("Application User")) {
-                        authType = "Application_User";
-                    }
-                    if (authType.equals("Application")) {
-                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
-                    }
-                    template.setThrottlingTier((String) mapEntryValue.get("throttling_tier"));
-                    template.setAuthType(authType);
-                    template.setResourceURI(endpoint);
-                    template.setResourceSandboxURI(sandboxUrl);
-                    Scope scope= APIUtil.findScopeByKey(scopeList,(String) mapEntryValue.get("scope"));
-                    template.setScope(scope);
-                    uriTemplates.add(template);
+        // to keep the backword compatibility if swagger not set process from
+        // resource_config or old way.
+        if (apiData.get("swagger", apiData) == null) {
+            if(apiData.get("resource_config", apiData) != null){
+                Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+                JSONParser parser = new JSONParser();
+                JSONObject resourceConfig =null;
+                try{
+                    resourceConfig = (JSONObject) parser.parse((String) apiData.get("resource_config", apiData));
+                }catch(ParseException e){
+                    handleException("Invalid resource config", e);
+                }catch(ClassCastException e){
+                    handleException("Unable to create JSON object from resource config", e);
                 }
-            }
-            //todo handle casting exceptions
-            api.setUriTemplates(uriTemplates);
-            //todo clean out the code.
-        }else{
-            //following is the old fashioned way of processing resources
-            NativeArray uriMethodArr = (NativeArray) apiData.get("uriMethodArr", apiData);
-            NativeArray authTypeArr = (NativeArray) apiData.get("uriAuthMethodArr", apiData);
-            NativeArray throttlingTierArr = (NativeArray) apiData.get("throttlingTierArr", apiData);
-            NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
-            if (uriTemplateArr != null && uriMethodArr != null && authTypeArr != null) {
-                if (uriTemplateArr.getLength() == uriMethodArr.getLength()) {
-                    Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-                    for (int i = 0; i < uriTemplateArr.getLength(); i++) {
-                        String uriMethods = (String) uriMethodArr.get(i, uriMethodArr);
-                        String uriMethodsAuthTypes = (String) authTypeArr.get(i, authTypeArr);
-                        String[] uriMethodArray = uriMethods.split(",");
-                        String[] authTypeArray = uriMethodsAuthTypes.split(",");
-                        String uriMethodsThrottlingTiers = (String) throttlingTierArr.get(i, throttlingTierArr);
-                        String[] throttlingTierArray = uriMethodsThrottlingTiers.split(",");
-                        for (int k = 0; k < uriMethodArray.length; k++) {
-                            for (int j = 0; j < authTypeArray.length; j++) {
-                                if (j == k) {
-                                    URITemplate template = new URITemplate();
-                                    String uriTemp = (String) uriTemplateArr.get(i, uriTemplateArr);
-                                    String uriTempVal = uriTemp.startsWith("/") ? uriTemp : ("/" + uriTemp);
-                                    template.setUriTemplate(uriTempVal);
-                                    String throttlingTier = throttlingTierArray[j];
-                                    template.setHTTPVerb(uriMethodArray[k]);
-                                    String authType = authTypeArray[j];
-                                    if (authType.equals("Application & Application User")) {
-                                        authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                                    }
-                                    if (authType.equals("Application User")) {
-                                        authType = "Application_User";
-                                    }
-                                    if (authType.equals("Application")) {
-                                        authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
-                                    }
-                                    template.setThrottlingTier(throttlingTier);
-                                    template.setAuthType(authType);
-                                    template.setResourceURI(endpoint);
-                                    template.setResourceSandboxURI(sandboxUrl);
+    
+                //process scopes
+                JSONArray scopes = (JSONArray) resourceConfig.get("scopes");
+                Set<Scope> scopeList = new LinkedHashSet<Scope>();
+                for (int i=0; i < scopes.size(); i++)   {
+                    Map scope = (Map) scopes.get(i); //access with get() method
+                    Scope scopeObj = new Scope();
+                    scopeObj.setKey((String) scope.get("key"));
+                    scopeObj.setName((String) scope.get("name"));
+                    scopeObj.setRoles((String) scope.get("roles"));
+                    scopeObj.setDescription((String) scope.get("description"));
+                    scopeList.add(scopeObj);
+                }
+                api.setScopes(scopeList);
+    
+    
+                JSONArray resources = (JSONArray) resourceConfig.get("resources");
+                for (int k = 0; k < resources.size(); k++) {
+                    JSONObject resource = (JSONObject) resources.get(k);
+    
+    
+                    Map http_verbs = (Map) resource.get("http_verbs");
+                    Iterator iterator = http_verbs.entrySet().iterator();
 
-                                    uriTemplates.add(template);
-                                    break;
-                                }
-
-                            }
+                    while (iterator.hasNext()) {
+                        Map.Entry mapEntry = (Map.Entry) iterator.next();
+                        Map mapEntryValue = (Map) mapEntry.getValue();
+    
+                        URITemplate template = new URITemplate();
+                        String uriTempVal = (String) resource.get("url_pattern");
+                        uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
+                        template.setUriTemplate(uriTempVal);
+                        template.setHTTPVerb((String)mapEntry.getKey());
+                        String authType = (String) mapEntryValue.get("auth_type");
+                        if (authType.equals("Application & Application User")) {
+                            authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                         }
-
+                        if (authType.equals("Application User")) {
+                            authType = "Application_User";
+                        }
+                        if (authType.equals("Application")) {
+                            authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                        }
+                        template.setThrottlingTier((String) mapEntryValue.get("throttling_tier"));
+                        template.setAuthType(authType);
+                        template.setResourceURI(endpoint);
+                        template.setResourceSandboxURI(sandboxUrl);
+                        Scope scope= APIUtil.findScopeByKey(scopeList,(String) mapEntryValue.get("scope"));
+                        template.setScope(scope);
+                        uriTemplates.add(template);
                     }
-                    api.setUriTemplates(uriTemplates);
+                }
+                //todo handle casting exceptions
+                api.setUriTemplates(uriTemplates);
+                //todo clean out the code.
+            }else{
+                //following is the old fashioned way of processing resources
+                NativeArray uriMethodArr = (NativeArray) apiData.get("uriMethodArr", apiData);
+                NativeArray authTypeArr = (NativeArray) apiData.get("uriAuthMethodArr", apiData);
+                NativeArray throttlingTierArr = (NativeArray) apiData.get("throttlingTierArr", apiData);
+                NativeArray uriTemplateArr = (NativeArray) apiData.get("uriTemplateArr", apiData);
+                if (uriTemplateArr != null && uriMethodArr != null && authTypeArr != null) {
+                    if (uriTemplateArr.getLength() == uriMethodArr.getLength()) {
+                        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+                        for (int i = 0; i < uriTemplateArr.getLength(); i++) {
+                            String uriMethods = (String) uriMethodArr.get(i, uriMethodArr);
+                            String uriMethodsAuthTypes = (String) authTypeArr.get(i, authTypeArr);
+                            String[] uriMethodArray = uriMethods.split(",");
+                            String[] authTypeArray = uriMethodsAuthTypes.split(",");
+                            String uriMethodsThrottlingTiers = (String) throttlingTierArr.get(i, throttlingTierArr);
+                            String[] throttlingTierArray = uriMethodsThrottlingTiers.split(",");
+                            for (int k = 0; k < uriMethodArray.length; k++) {
+                                for (int j = 0; j < authTypeArray.length; j++) {
+                                    if (j == k) {
+                                        URITemplate template = new URITemplate();
+                                        String uriTemp = (String) uriTemplateArr.get(i, uriTemplateArr);
+                                        String uriTempVal = uriTemp.startsWith("/") ? uriTemp : ("/" + uriTemp);
+                                        template.setUriTemplate(uriTempVal);
+                                        String throttlingTier = throttlingTierArray[j];
+                                        template.setHTTPVerb(uriMethodArray[k]);
+                                        String authType = authTypeArray[j];
+                                        if (authType.equals("Application & Application User")) {
+                                            authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
+                                        }
+                                        if (authType.equals("Application User")) {
+                                            authType = "Application_User";
+                                        }
+                                        if (authType.equals("Application")) {
+                                            authType = APIConstants.AUTH_APPLICATION_LEVEL_TOKEN;
+                                        }
+                                        template.setThrottlingTier(throttlingTier);
+                                        template.setAuthType(authType);
+                                        template.setResourceURI(endpoint);
+                                        template.setResourceSandboxURI(sandboxUrl);
+    
+                                        uriTemplates.add(template);
+                                        break;
+                                    }
+    
+                                }
+                            }
+    
+                        }
+                        api.setUriTemplates(uriTemplates);
+                    }
                 }
             }
         }
+
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
 
         api.setDescription(StringEscapeUtils.escapeHtml(description));
         api.setLastUpdated(new Date());
@@ -1676,43 +1835,92 @@ public class APIProviderHostObject extends ScriptableObject {
         //Validate endpoint URI format
         validateEndpointURI(api.getEndpointConfig());
 
+        api.setProductionMaxTps((String) apiData.get("productionTps", apiData));
+        api.setSandboxMaxTps((String) apiData.get("sandboxTps", apiData));
+
         api.setSubscriptionAvailability(subscriptionAvailability);
         api.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
         api.setResponseCache(responseCache);
         api.setCacheTimeout(cacheTimeOut);
         api.setDestinationStatsEnabled(destinationStats);
-        api.setAsDefaultVersion("default_version".equals(defaultVersion) ? true : false);
+        api.setAsDefaultVersion("default_version".equals(defaultVersion));
         //set secured endpoint parameters
         if ("secured".equals(endpointSecured)) {
             api.setEndpointSecured(true);
             api.setEndpointUTUsername(endpointUTUsername);
             api.setEndpointUTPassword(endpointUTPassword);
+            if("digestAuth".equals(endpointAuthDigest)){
+                api.setEndpointAuthDigest(true);
+            }
         }
 
         try {
             checkFileSize(fileHostObject);
 
             if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String thumbPath = APIUtil.getIconPath(apiId);
 
+                String thumbPath = addThumbIcon(fileHostObject.getInputStream(),
+                        fileHostObject.getJavaScriptFile().getContentType(),apiProvider, api);
 
-
-                    String thumbnailUrl = apiProvider.addIcon(thumbPath, icon);
-                    api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, provider));
-
-
-                /*Set permissions to anonymous role for thumbPath*/
-                APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
             } else if (oldApi.getThumbnailUrl() != null) {
                 // retain the previously uploaded image
                 api.setThumbnailUrl(oldApi.getThumbnailUrl());
             }
-            apiProvider.updateAPI(api);
-            boolean hasAPIUpdated=false;
-            if(!oldApi.equals(api)){
-            hasAPIUpdated=true;
+
+            if(thumbUrl != null && !thumbUrl.isEmpty()){
+                try {
+                    URL url = new URL(thumbUrl);
+                    String imageType = url.openConnection().getContentType();
+
+                    File fileToUploadFromUrl = new File("tmp/icon");
+                    if (!fileToUploadFromUrl.exists()) {
+                        fileToUploadFromUrl.createNewFile();
+                    }
+                    FileUtils.copyURLToFile(url, fileToUploadFromUrl);
+                    FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
+
+                    checkImageSize(fileToUploadFromUrl);
+
+                    String thumbPath = addThumbIcon(fileBody.getInputStream(), url.openConnection().getContentType(),
+                            apiProvider, api);
+
+                } catch (IOException e) {
+                    handleException("[Error] Cannot read data from the URL", e);
+                }
+            }
+
+            if (apiData.get("swagger", apiData) != null) {
+                // Read URI Templates from swagger resource and set to api object
+                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                        String.valueOf(apiData.get("swagger", apiData)));
+                api.setUriTemplates(uriTemplates);
+
+                // scopes
+                Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+                api.setScopes(scopes);
+
+                try {
+                    int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                            .getTenantId(tenantDomain);
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        Scope scope = uriTemplate.getScope();
+                        if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
+                            if (apiProvider.isScopeKeyAssigned(apiId, scope.getKey(), tenantId)) {
+                                handleException("Scope " + scope.getKey() + " is already assigned by another API");
+                            }
+                        }
+                    }
+                } catch (UserStoreException e) {
+                    handleException("Error while reading tenant information ", e);
+                }
+
+                // Save swagger in the registry
+                apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
+                saveAPI(apiProvider, api, null, false);
+            } else {
+                String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+                apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
+                apiProvider.updateAPI(api);
             }
 
             success = true;
@@ -1724,8 +1932,7 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-        String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
-        apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
+
         return success;
     }
 
@@ -1741,18 +1948,19 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return context;
     }
+
     /**
+     * This method used to change status of API
      *
-     * @param cx Rhino context
+     * @param cx      Rhino context
      * @param thisObj Scriptable object
-     * @param args Passing arguments
-     * @param funObj Function object
+     * @param args    Passing arguments
+     * @param funObj  Function object
      * @return true if the API was added successfully
-     * @throws APIManagementException
+     * @throws APIManagementException if API couldn't found
+     * @throw FaultGatewaysException if any gateway couldn't update or create api
      */
-    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj,
-                                                    Object[] args,
-                                                    Function funObj)
+    public static boolean jsFunction_updateAPIStatus(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException, FaultGatewaysException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -1855,16 +2063,25 @@ public class APIProviderHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
         if (fileHostObject != null) {
             long length = fileHostObject.getJavaScriptFile().getLength();
-            if (length / 1024.0 > 1024) {
+            if (length / 1024.0 > APIConstants.MAX_FILE_SIZE) {
                 handleException("Image file exceeds the maximum limit of 1MB");
             }
         }
     }
 
-    public static boolean jsFunction_updateTierPermissions(Context cx, Scriptable thisObj,
-            Object[] args,
-            Function funObj)
-            		throws APIManagementException {
+    private static void checkImageSize(File file)
+            throws ScriptException, APIManagementException, IOException {
+
+        if(file.exists()) {
+            long length = file.length();
+            if(length/ 1024 > APIConstants.MAX_FILE_SIZE) {
+                handleException("Image file exceeds the maximum limit of 1MB");
+            }
+        }
+    }
+
+    public static boolean jsFunction_updateTierPermissions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
     	if (args == null ||args.length == 0) {
     		handleException("Invalid input parameters.");
     	}
@@ -1872,12 +2089,12 @@ public class APIProviderHostObject extends ScriptableObject {
     	NativeObject tierData = (NativeObject) args[0];
     	boolean success = false;
     	String tierName = (String) tierData.get("tierName", tierData);
-    	String permissiontype = (String) tierData.get("permissiontype", tierData);
+    	String permissionType = (String) tierData.get("permissiontype", tierData);
     	String roles = (String) tierData.get("roles", tierData);
 
     	try {
     		APIProvider apiProvider = getAPIProvider(thisObj);
-    		apiProvider.updateTierPermissions(tierName, permissiontype, roles);
+    		apiProvider.updateTierPermissions(tierName, permissionType, roles);
     		return true;
 
     	} catch (APIManagementException e) {
@@ -2059,16 +2276,25 @@ public class APIProviderHostObject extends ScriptableObject {
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerNameTenantFlow));
-            String userTenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
+            String userTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(((APIProviderHostObject) thisObj).getUsername()));
             if(!tenantDomain.equals(userTenantDomain)){
                 throw new APIManagementException("Invalid Operation: Cannot access API:" + apiId + "from current tenant.");
             }
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             	isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-            API api = apiProvider.getAPI(apiId);
+
+            API api = null;
+            try {
+                api = apiProvider.getAPI(apiId);
+            } catch (APIManagementException e) {
+                handleException("Cannot find the requested API- " + apiName +
+                        "-" + version);
+            }
+
             if (api != null) {
                 Set<URITemplate> uriTemplates = api.getUriTemplates();
 
@@ -2227,15 +2453,14 @@ public class APIProviderHostObject extends ScriptableObject {
                 KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
                 Map registeredResource = keyManager.getResourceByApiId(api.getId().toString());
                 myn.put(45, myn, JSONObject.toJSONString(registeredResource));
-
+                myn.put(46, myn, checkValue(api.getProductionMaxTps()));
+                myn.put(47, myn, checkValue(api.getSandboxMaxTps()));
+                myn.put(48, myn, checkValue(Boolean.toString(api.isEndpointAuthDigest())));
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                                 "-" + version);
             }
-        } catch (Exception e) {
-            handleException("Error occurred while getting API information of the api- " + apiName +
-                            "-" + version, e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -2305,24 +2530,6 @@ public class APIProviderHostObject extends ScriptableObject {
                     sub.count = entry.getValue();
                     subscriptionData.add(sub);
                 }
-//                Collections.sort(subscriptionData, new Comparator<APISubscription>() {
-//                    public int compare(APISubscription o1, APISubscription o2) {
-//                        // Note that o2 appears before o1
-//                        // This is because we need to sort in the descending order
-//                        return (int) (o2.count - o1.count);
-//                    }
-//                });
-//                if (subscriptionData.size() > 10) {
-//                    APISubscription other = new APISubscription();
-//                    other.name = "[Other]";
-//                    for (int i = 10; i < subscriptionData.size(); i++) {
-//                        other.count = other.count + subscriptionData.get(i).count;
-//                    }
-//                    while (subscriptionData.size() > 10) {
-//                        subscriptionData.remove(10);
-//                    }
-//                    subscriptionData.add(other);
-//                }
 
                 int i = 0;
                 for (APISubscription sub : subscriptionData) {
@@ -2343,9 +2550,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static NativeArray jsFunction_getTiers(Context cx, Scriptable thisObj,
-                                                  Object[] args,
-                                                  Function funObj) {
+    public static NativeArray jsFunction_getTiers(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         NativeArray myn = new NativeArray(1);
         APIProvider apiProvider = getAPIProvider(thisObj);
         try {
@@ -2369,6 +2574,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return myn;
     }
+
 
     public static NativeArray jsFunction_getSubscriberCountByAPIVersions(Context cx,
                                                                          Scriptable thisObj,
@@ -2443,8 +2649,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-    private static String checkTransport(String compare, String transport)
-            throws APIManagementException {
+    private static String checkTransport(String compare, String transport)  throws APIManagementException {
         if(transport!=null){
             List<String> transportList = new ArrayList<String>();
             transportList.addAll(Arrays.asList(transport.split(",")));
@@ -2475,11 +2680,7 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         NativeArray myn = new NativeArray(0);
         APIProvider apiProvider = getAPIProvider(thisObj);
-        /*String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }*/
+
         try {
             List<API> apiList = apiProvider.getAllAPIs();
             if (apiList != null) {
@@ -2634,6 +2835,8 @@ public class APIProviderHostObject extends ScriptableObject {
                         apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getApiName());
                         apiSet.append("::");
                         apiSet.append(apiUsages[i].getApiSubscriptions()[k].getApiId().getVersion());
+                        apiSet.append("::");
+                        apiSet.append(apiUsages[i].getApiSubscriptions()[k].getSubCreatedStatus());
                         if (k != apiUsages[i].getApiSubscriptions().length - 1) {
                             apiSet.append(",");
                         }
@@ -2738,25 +2941,13 @@ public class APIProviderHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         APIProvider apiProvider = getAPIProvider(thisObj);
 
-        boolean isTenantFlowStarted = false;
-
         try {
-        	String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
-            		isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-
             content = apiProvider.getDocumentationContent(apiId, docName);
         } catch (Exception e) {
             handleException("Error while getting Inline Document Content ", e);
             return null;
-        } finally {
-        	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
         }
+
         NativeObject row = new NativeObject();
         row.put("providerName", row,APIUtil.replaceEmailDomainBack(providerName));
         row.put("apiName", row, apiName);
@@ -2769,8 +2960,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static void jsFunction_addInlineContent(Context cx,
                                                    Scriptable thisObj, Object[] args,
-                                                   Function funObj)
-            throws APIManagementException {
+                                                   Function funObj) throws APIManagementException {
         String apiName;
         String version;
         String providerName;
@@ -2792,31 +2982,21 @@ public class APIProviderHostObject extends ScriptableObject {
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-        boolean isTenantFlowStarted = false;
-        if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-        	isTenantFlowStarted = true;
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        }
         try {
             API api = apiProvider.getAPI(apiId);
             apiProvider.addDocumentationContent(api, docName, docContent);
         } catch (APIManagementException e) {
             handleException("Error occurred while adding the content of the documentation- " + docName, e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
         }
     }
 
     public static boolean jsFunction_addDocumentation(Context cx, Scriptable thisObj,
                                                       Object[] args, Function funObj)
-            throws APIManagementException {
-        if (args == null || args.length==0) {
+            throws APIManagementException, ScriptException {
+        if (args == null || args.length == 0) {
             handleException("Invalid number of parameters or their types.");
         }
-        boolean success;
+        boolean success = false;
         String providerName = (String) args[0];
         String apiName = (String) args[1];
         String version = (String) args[2];
@@ -2824,77 +3004,88 @@ public class APIProviderHostObject extends ScriptableObject {
         String docType = (String) args[4];
         String summary = (String) args[5];
         String sourceType = (String) args[6];
+        String otherTypeName = (String) args[9];
+
+        //validate Source Type
+        if (sourceType == null) {
+            throw new APIManagementException("Invalid Source Type.");
+        }
+        sourceType = sourceType.trim();
+
         String visibility = (String) args[11];
         FileHostObject fileHostObject = null;
-        String sourceURL = null;
+        String sourceURL;
 
-        APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
-        Documentation doc = new Documentation(getDocType(docType), docName);
-        if (doc.getType() == DocumentationType.OTHER) {
-            doc.setOtherTypeName(args[9].toString());
-        }
-
-        if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.URL.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.URL);
-            sourceURL = args[7].toString();
-        } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.FILE);
-            fileHostObject = (FileHostObject) args[8];
-        } else {
-            doc.setSourceType(Documentation.DocumentSourceType.INLINE);
-        }
-
-        doc.setSummary(summary);
-        doc.setSourceUrl(sourceURL);
-        if(visibility==null){visibility=APIConstants.DOC_API_BASED_VISIBILITY;}
-        if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-        } else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
-        } else {
-            doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
-        }
-        APIProvider apiProvider = getAPIProvider(thisObj);
-        try {
-
-            if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-            	String contentType = (String) args[10];
-                Icon icon = new Icon(fileHostObject.getInputStream(), contentType);
-                
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                String fname = fileHostObject.getName();
-                API api = apiProvider.getAPI(apiId);
-                String apiPath=APIUtil.getAPIPath(apiId);
-                String visibleRolesList = api.getVisibleRoles();
-                String[] visibleRoles = new String[0];
-                if (visibleRolesList != null) {
-                    visibleRoles = visibleRolesList.split(",");
-                }
-                APIUtil.setResourcePermissions(api.getId().getProviderName(),
-                                               api.getVisibility(), visibleRoles,filePath);
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
-            } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
-                throw new APIManagementException("Empty File Attachment.");
-            }
-
-        } catch (Exception e) {
-            handleException("Error while creating an attachment for Document- " + docName + "-" + version + ". " +
-                                    e.getMessage(), e);
-            return false;
-        }
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
             if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            		isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-             }
-            apiProvider.addDocumentation(apiId, doc);
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
+            Documentation doc = new Documentation(getDocType(docType), docName);
+            APIProvider apiProvider = getAPIProvider(thisObj);
+
+            //add documentation is allowed only if document name does not already exist for this api
+            if (apiProvider.isDocumentationExist(apiId, docName)) {
+                handleException("Error occurred while adding the document. " + docName +
+                    " already exists for API " + apiName + '-' + version);
+            }
+
+            if (doc.getType() == DocumentationType.OTHER) {
+                //validate otherTypeName
+                if (otherTypeName == null || otherTypeName.trim().isEmpty()) {
+                    throw new APIManagementException("Other Type Name Cannot be Empty.");
+                }
+                doc.setOtherTypeName(otherTypeName.trim());
+            }
+
+            if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.URL);
+                sourceURL = args[7].toString();
+                //validate urls
+                if (sourceURL == null || !isURL(sourceURL.trim())) {
+                    throw new APIManagementException("Invalid Document Url Format.");
+                }
+                sourceURL = sourceURL.trim();
+                doc.setSourceUrl(sourceURL);
+            } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.FILE);
+                fileHostObject = (FileHostObject) args[8];
+            } else if (Documentation.DocumentSourceType.INLINE.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            } else {
+                throw new APIManagementException("Invalid Source Type.");
+            }
+
+            doc.setSummary(summary);
+
+            if (visibility == null) {
+                visibility = APIConstants.DOC_API_BASED_VISIBILITY;
+            }
+            if (Documentation.DocumentVisibility.API_LEVEL.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
+            } else if (Documentation.DocumentVisibility.PRIVATE.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
+            } else {
+                doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
+            }
+
+            if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                String contentType = (String) args[10];
+                apiProvider
+                        .addFileToDocumentation(apiId, doc, fileHostObject.getName(), fileHostObject.getInputStream(),
+                                contentType);
+            } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
+                throw new APIManagementException("Empty File Attachment.");
+            }
+
+           apiProvider.addDocumentation(apiId, doc);
             success = true;
-        } catch (APIManagementException e) {
-            handleException("Error occurred while adding the document- " + docName, e);
-            return false;
+        } catch (ScriptException e) {
+            handleException("The attachment cannot be found for document- " + docName, e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -2903,8 +3094,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_removeDocumentation(Context cx, Scriptable thisObj,
-                                                         Object[] args, Function funObj)
+    public static boolean jsFunction_removeDocumentation(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || !isStringValues(args)) {
             handleException("Invalid number of parameters or their types.");
@@ -2942,8 +3132,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return success;
     }
 
-    public static boolean jsFunction_createNewAPIVersion(Context cx, Scriptable thisObj,
-                                                         Object[] args, Function funObj)
+    public static boolean jsFunction_createNewAPIVersion(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
 
         boolean success;
@@ -2958,7 +3147,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName, version);
         API api = new API(apiId);
-        api.setAsDefaultVersion(defaultVersion.equals("default_version") ? true : false);
+        api.setAsDefaultVersion(defaultVersion.equals("default_version"));
 
         APIProvider apiProvider = getAPIProvider(thisObj);
         boolean isTenantFlowStarted = false;
@@ -3025,8 +3214,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static String jsFunction_isContextExist(Context cx, Scriptable thisObj,
-                                                   Object[] args, Function funObj)
+    public static String jsFunction_isContextExist(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         Boolean contextExist = false;
         if (args != null && isStringValues(args)) {
@@ -3048,8 +3236,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return contextExist.toString();
     }
 
-    public static String jsFunction_isApiNameExist(Context cx, Scriptable thisObj,
-                                                   Object[] args, Function funObj)
+    public static String jsFunction_isApiNameExist(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         Boolean apiExist = false;
         if (args != null && isStringValues(args)) {
@@ -3105,372 +3292,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiStatus;
     }
 
-    public static NativeArray jsFunction_getProviderAPIVersionUsage(Context cx, Scriptable thisObj,
-                                                                    Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIVersionUsageDTO> list = null;
-        if (args == null || args.length==0) {
-            handleException("Invalid input parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String providerName = (String) args[0];
-        String apiName = (String) args[1];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageByAPIVersions(providerName, apiName);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIVersionUsageDTO usage = (APIVersionUsageDTO) usageObject;
-                row.put("version", row, usage.getVersion());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
-                                                             Object[] args, Function funObj)
-            throws APIManagementException {
-
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        List<APIUsageDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageByAPIs(providerName, fromDate, toDate, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIUsageDTO usage = (APIUsageDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-
-
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIUserUsage(Context cx, Scriptable thisObj,
-                                                                 Object[] args, Function funObj)
-            throws APIManagementException {
-        List<PerUserAPIUsageDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String providerName = (String) args[0];
-        String apiName = (String) args[1];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageBySubscribers(providerName, apiName, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsClient for ProviderAPIUserUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                PerUserAPIUsageDTO usage = (PerUserAPIUsageDTO) usageObject;
-                row.put("user", row, usage.getUsername());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIUsageByResourcePath(Context cx, Scriptable thisObj,
-                                                                   Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResourcePathUsageDTO> list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        if (args == null ||  args.length==0) {
-            handleException("Invalid input parameters.");
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-
-        try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIUsageByResourcePath(providerName, fromDate, toDate);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIResourcePathUsageDTO usage = (APIResourcePathUsageDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("version", row, usage.getVersion());
-                row.put("method", row, usage.getMethod());
-                row.put("context", row, usage.getContext());
-                row.put("count", row, usage.getCount());
-                row.put("time", row, usage.getTime());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIUsageByDestination(Context cx, Scriptable thisObj,
-    		            Object[] args, Function funObj) throws APIManagementException {
-    	List<APIDestinationUsageDTO> list = null;
-    	NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-    	if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-    		return myn;
-    	}
-    	if (args == null ||  args.length==0) {
-    		handleException("Invalid input parameters.");
-    	}
-
-    	String providerName = (String) args[0];
-    	String fromDate = (String) args[1];
-    	String toDate = (String) args[2];
-
-    	try {
-    		APIUsageStatisticsClient client =
-    				new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-    		list = client.getAPIUsageByDestination(providerName, fromDate, toDate);
-    	} catch (APIMgtUsageQueryServiceClientException e) {
-    		          log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage ", e);
-    	}
-
-    	Iterator it = null;
-    	if (list != null) {
-    		it = list.iterator();
-    	}
-    	int i = 0;
-    	if (it != null) {
-    		while (it.hasNext()) {
-    			NativeObject row = new NativeObject();
-    		    Object usageObject = it.next();
-    		    APIDestinationUsageDTO usage = (APIDestinationUsageDTO) usageObject;
-    		    row.put("apiName", row, usage.getApiName());
-    		    row.put("version", row, usage.getVersion());
-    		    row.put("destination", row, usage.getDestination());
-    		    row.put("context", row, usage.getContext());
-    		    row.put("count", row, usage.getCount());
-    		    myn.put(i, myn, row);
-    		    i++;
-    		    }
-    	}
-    	return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIUsageByUser(Context cx, Scriptable thisObj,
-                                                           Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIUsageByUserDTO> list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if(!HostObjectUtils.isUsageDataSourceSpecified()){
-            return myn;
-        }
-        if (args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-
-        try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIUsageByUser(providerName,fromDate,toDate);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIUsageByUserDTO usage = (APIUsageByUserDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("version", row, usage.getVersion());
-                row.put("userId", row, usage.getUserID());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIVersionUserUsage(Context cx,
-                                                                        Scriptable thisObj,
-                                                                        Object[] args,
-                                                                        Function funObj)
-            throws APIManagementException {
-        List<PerUserAPIUsageDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String providerName = (String) args[0];
-        String apiName = (String) args[1];
-        String version = (String) args[2];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUsageBySubscribers(providerName, apiName, version, 10);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUserUsage", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                PerUserAPIUsageDTO usage = (PerUserAPIUsageDTO) usageObject;
-                row.put("user", row, usage.getUsername());
-                row.put("count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getProviderAPIVersionUserLastAccess(Context cx,
-                                                                             Scriptable thisObj,
-                                                                             Object[] args,
-                                                                             Function funObj)
-            throws APIManagementException {
-        List<APIVersionLastAccessTimeDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getLastAccessTimesByAPI(providerName, fromDate, toDate, 50);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIVersionLastAccessTimeDTO usage = (APIVersionLastAccessTimeDTO) usageObject;
-                row.put("api_name", row, usage.getApiName());
-                row.put("api_version", row, usage.getApiVersion());
-                row.put("user", row, usage.getUser());
-                Date date = new Date(String.valueOf(usage.getLastAccessTime()));
-                row.put("lastAccess", row, Long.valueOf(date.getTime()).toString());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
     public static NativeArray jsFunction_getUserAgentSummaryForALLAPIs(Context cx,
                                                                        Scriptable thisObj,
                                                                        Object[] args,
@@ -3478,10 +3299,10 @@ public class APIProviderHostObject extends ScriptableObject {
             throws APIManagementException {
         List<APIRequestsByUserAgentsDTO> list = null;
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getUserAgentSummaryForALLAPIs();
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
         }
         NativeArray myn = new NativeArray(0);
         Iterator it = null;
@@ -3514,17 +3335,14 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters.");
         }
         NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            //return myn;
-        }
         String fromDate = (String) args[0];
         String toDate = (String) args[1];
         String apiName = (String)args[2];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getAPIRequestsByHour(fromDate, toDate,apiName);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIVersionLastAccess", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
         }
         Iterator it = null;
         if (list != null) {
@@ -3549,51 +3367,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
-
-
-    public static NativeArray jsFunction_getProviderAPIServiceTime(Context cx, Scriptable thisObj,
-                                                                   Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResponseTimeDTO> list = null;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-
-        try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getResponseTimesByAPIs(providerName, fromDate, toDate, 50);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIServiceTime", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIResponseTimeDTO usage = (APIResponseTimeDTO) usageObject;
-                row.put("apiName", row, usage.getApiName());
-                row.put("serviceTime", row, usage.getServiceTime());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
 
     public static NativeArray jsFunction_searchAPIs(Context cx, Scriptable thisObj,
                                                     Object[] args,
@@ -3691,9 +3464,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
 
-    public static boolean jsFunction_hasCreatePermission(Context cx, Scriptable thisObj,
-                                                         Object[] args,
-                                                         Function funObj) {
+    public static boolean jsFunction_hasCreatePermission(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         APIProvider provider = getAPIProvider(thisObj);
         if (provider instanceof UserAwareAPIProvider) {
             try {
@@ -3706,9 +3477,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return false;
     }
 
-    public static boolean jsFunction_hasManageTierPermission(Context cx, Scriptable thisObj,
-            Object[] args,
-            Function funObj) {
+    public static boolean jsFunction_hasManageTierPermission(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
     	APIProvider provider = getAPIProvider(thisObj);
     	if (provider instanceof UserAwareAPIProvider) {
     		try {
@@ -3721,9 +3490,7 @@ public class APIProviderHostObject extends ScriptableObject {
     	return false;
     }
 
-    public static boolean jsFunction_hasUserPermissions(Context cx, Scriptable thisObj,
-                                                        Object[] args,
-                                                        Function funObj)
+    public static boolean jsFunction_hasUserPermissions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws APIManagementException {
         if (args == null || !isStringValues(args)) {
             handleException("Invalid input parameters.");
@@ -3733,9 +3500,7 @@ public class APIProviderHostObject extends ScriptableObject {
                APIUtil.checkPermissionQuietly(username, APIConstants.Permissions.API_PUBLISH);
     }
 
-    public static boolean jsFunction_hasPublishPermission(Context cx, Scriptable thisObj,
-                                                          Object[] args,
-                                                          Function funObj) {
+    public static boolean jsFunction_hasPublishPermission(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         APIProvider provider = getAPIProvider(thisObj);
         if (provider instanceof UserAwareAPIProvider) {
             try {
@@ -3748,8 +3513,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return false;
     }
 
-    public static void jsFunction_loadRegistryOfTenant(Context cx,
-                                                       Scriptable thisObj, Object[] args, Function funObj){
+    public static void jsFunction_loadRegistryOfTenant(Context cx, Scriptable thisObj, Object[] args, Function funObj){
         String tenantDomain = args[0].toString();
         if(tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
             try {
@@ -3759,6 +3523,8 @@ public class APIProviderHostObject extends ScriptableObject {
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
                         tenantDomain);
+            } catch (RegistryException e) {
+                log.error("Could not load tenant registry for tenant " + tenantDomain);
             }
         }
 
@@ -3778,8 +3544,8 @@ public class APIProviderHostObject extends ScriptableObject {
 		String tenantDomain = args[0].toString();
 		if (tenantDomain != null &&
 		    !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-			APIUtil.loadTenantConfig(tenantDomain);
-		}
+            APIUtil.loadTenantConfig(tenantDomain);
+        }
 	}
 
     public static NativeArray jsFunction_getLifeCycleEvents(Context cx, Scriptable thisObj,
@@ -3862,11 +3628,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static boolean jsFunction_updateDocumentation(Context cx, Scriptable thisObj,
                                                          Object[] args, Function funObj)
-            throws APIManagementException {
-        if (args == null || args.length==0) {
+            throws APIManagementException, ScriptException {
+        if (args == null || args.length == 0) {
             handleException("Invalid number of parameters or their types.");
         }
-        boolean success;
+        boolean success = false;
         String providerName = (String) args[0];
         providerName=APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) args[1];
@@ -3879,64 +3645,70 @@ public class APIProviderHostObject extends ScriptableObject {
         String sourceURL = null;
         FileHostObject fileHostObject = null;
 
-        APIIdentifier apiId = new APIIdentifier(providerName, apiName, version);
-        Documentation doc = new Documentation(getDocType(docType), docName);
-
-        if (doc.getType() == DocumentationType.OTHER) {
-            doc.setOtherTypeName(args[9].toString());
-        }
-
-        if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.URL.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.URL);
-            sourceURL = args[7].toString();
-        } else if (sourceType.equalsIgnoreCase(Documentation.DocumentSourceType.FILE.toString())) {
-            doc.setSourceType(Documentation.DocumentSourceType.FILE);
-            fileHostObject = (FileHostObject) args[8];
-        } else {
-            doc.setSourceType(Documentation.DocumentSourceType.INLINE);
-        }
-        doc.setSummary(summary);
-        doc.setSourceUrl(sourceURL);
-        if(visibility==null){visibility=APIConstants.DOC_API_BASED_VISIBILITY;}
-        if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.API_LEVEL.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
-        } else if (visibility.equalsIgnoreCase(Documentation.DocumentVisibility.PRIVATE.toString())) {
-            doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
-        } else {
-            doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
-        }
-        APIProvider apiProvider = getAPIProvider(thisObj);
-        
-        Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());
-
-        try {
-            if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
-                Icon icon = new Icon(fileHostObject.getInputStream(),
-                                     fileHostObject.getJavaScriptFile().getContentType());
-                String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
-                doc.setFilePath(apiProvider.addIcon(filePath, icon));
-            } else if (oldDoc.getFilePath() != null) {
-                doc.setFilePath(oldDoc.getFilePath());
-            }
-
-        } catch (Exception e) {
-            handleException("Error while creating an attachment for Document- " + docName + "-" + version, e);
-            return false;
-        }
-        
         boolean isTenantFlowStarted = false;
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
-            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            	isTenantFlowStarted = true;
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
+
+            APIIdentifier apiId = new APIIdentifier(providerName, apiName, version);
+            Documentation doc = new Documentation(getDocType(docType), docName);
+            APIProvider apiProvider = getAPIProvider(thisObj);
+
+            //update documentation is allowed only if documentation name already exists for this api
+            if (!apiProvider.isDocumentationExist(apiId, docName)) {
+                handleException("Error occurred while updating the document. " + docName +
+                        " does not exist for API " + apiName + '-' + version);
+            }
+
+            if (doc.getType() == DocumentationType.OTHER) {
+                doc.setOtherTypeName(args[9].toString());
+            }
+
+            if (Documentation.DocumentSourceType.URL.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.URL);
+                sourceURL = args[7].toString();
+            } else if (Documentation.DocumentSourceType.FILE.toString().equalsIgnoreCase(sourceType)) {
+                doc.setSourceType(Documentation.DocumentSourceType.FILE);
+                fileHostObject = (FileHostObject) args[8];
+            } else {
+                doc.setSourceType(Documentation.DocumentSourceType.INLINE);
+            }
+            doc.setSummary(summary);
+            doc.setSourceUrl(sourceURL);
+            if (visibility == null){
+                visibility = APIConstants.DOC_API_BASED_VISIBILITY;
+            }
+            if (Documentation.DocumentVisibility.API_LEVEL.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
+            } else if (Documentation.DocumentVisibility.PRIVATE.toString().equalsIgnoreCase(visibility)) {
+                doc.setVisibility(Documentation.DocumentVisibility.PRIVATE);
+            } else {
+                doc.setVisibility(Documentation.DocumentVisibility.OWNER_ONLY);
+            }
+
+            Documentation oldDoc = apiProvider.getDocumentation(apiId, doc.getType(), doc.getName());            
+
+            try {
+                if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                    ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
+                                         fileHostObject.getJavaScriptFile().getContentType());
+                    String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
+                    doc.setFilePath(apiProvider.addResourceFile(filePath, resourceFile));
+                } else if (oldDoc.getFilePath() != null) {
+                    doc.setFilePath(oldDoc.getFilePath());
+                }
+            } catch (APIManagementException e) {
+                handleException("Failed to add file to document " + doc.getName(), e);
+            }
             apiProvider.updateDocumentation(apiId, doc);
             success = true;
-        } catch (APIManagementException e) {
-            handleException("Error occurred while adding the document- " + docName, e);
-            return false;
+
+        } catch (ScriptException e) {
+            handleException("The attachment cannot be found for document- " + docName, e);
         } finally {
         	if (isTenantFlowStarted) {
         		PrivilegedCarbonContext.endTenantFlow();
@@ -3984,49 +3756,150 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiOlderVersionExist;
     }
 
-	public static String jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args,
-	                                           Function funObj) throws APIManagementException {
-		String response = "";
-		if (args == null || !isStringValues(args)) {
-			handleException("Invalid input parameters.");
-		}
-		String urlVal = (String) args[1];
-		String type = (String) args[0];
-		if (urlVal != null && !urlVal.isEmpty()) {
-			URLConnection conn = null;
-			try {
-				URL url = new URL(urlVal);
-				if (type != null && type.equals("wsdl")) {
-					validateWsdl(urlVal);
-					response = "success";
-				}
-				// checking http,https endpoints up to resource level by doing
-				// http HEAD. And other end point
-				// validation do through basic url connect
-                else if (url.getProtocol().matches("https")) {
-                    ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
-                    String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
-                    String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
-                    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-                    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+    /**
+     * This method is used to edit the endpoint URL provided during the implementation stage in the publisher
+     * based on the resource url patterns provided in the design stage of an API.It is used in jsFunction_isURLValid()
+     */
+    public static NativeObject editEndpointUrlToTest(String urlVal, Context cx, Scriptable thisObj, Object[] args,
+            Function funObj) throws APIManagementException {
 
-                    return sendHttpHEADRequest(urlVal);
-                } else if (url.getProtocol().matches("http")) {
-                    return sendHttpHEADRequest(urlVal);
+        String urlValue = urlVal;
+        boolean isContainUriTemplatesOnly = false;
+        NativeObject data = new NativeObject();
+
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid number of parameters or their types.");
+        }
+
+        String providerName = args.length > 2 ? (String) args[2] : "";
+        String apiName = args.length > 3 ? (String) args[3] : "";
+        String apiVersion = args.length > 4 ? (String) args[4] : "";
+
+        if (providerName != null) {
+            providerName = APIUtil.replaceEmailDomain(providerName);
+        }
+
+        APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+        APIProvider apiProvider = getAPIProvider(thisObj);
+
+        API api = null;
+        try {
+            api = apiProvider.getAPI(apiIdentifier);
+        } catch (APIManagementException e) {
+            handleException("Cannot find the requested API- " + apiName + "-" + apiVersion);
+        }
+
+        if (api != null) {
+
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+
+            if (uriTemplates.size() != 0) {
+
+                Iterator i = uriTemplates.iterator();
+                List<String> urlPatternArray = new ArrayList<String>();
+                while (i.hasNext()) {
+                    URITemplate ut = (URITemplate) i.next();
+                    urlPatternArray.add(ut.getUriTemplate());
+                }
+
+                if(urlPatternArray.contains("/*")) { //Checking whether the urlPatternArray contains /*
+                    data.put("urlValue", data, urlValue);
+                    data.put("isContainUriTemplatesOnly", data, false);
+                    return data;
                 } else {
-                    return "error while connecting";
+                    for (String urlPattern : urlPatternArray) {
+                        //to check whether it is a uri-template
+                        Matcher matcher = pathParamExtractorPattern.matcher(urlPattern);
+
+                        if (matcher.find()) {
+                            isContainUriTemplatesOnly = true;
+                        } else {
+                            urlValue = urlValue + urlPattern;
+                            isContainUriTemplatesOnly = false;
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        data.put("urlValue", data, urlValue);
+        data.put("isContainUriTemplatesOnly", data, isContainUriTemplatesOnly);
+        return data;
+
+    }
+
+    public static NativeObject jsFunction_isURLValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+                                                                                       throws APIManagementException {
+        boolean isConnectionError = true;
+        String response = null;
+        boolean isContainUriTemplatesOnly = false;//To check whether the resources contain only uri templates
+        NativeObject data = new NativeObject();
+
+        if (args == null || !isStringValues(args)) {
+            handleException("Invalid input parameters.");
+        }
+        String urlVal = (String) args[1];
+        String type = (String) args[0];
+        String providerName = args.length > 2 ? (String) args[2] : "";
+        String apiName = args.length > 3 ? (String) args[3] : "";
+        String apiVersion = args.length > 4 ? (String) args[4] : "";
+        String invalidStatusCodesRegex = args.length > 5 ? (String) args[5] : "404";
+        if (urlVal != null && !urlVal.isEmpty()) {
+            urlVal = urlVal.trim();
+
+            try {
+                
+                if (type != null && type.equals("wsdl")) {
+                    validateWsdl(urlVal);
+                    response = "success";
+                    isConnectionError = false;
+                } else {
+                    // checking http,https endpoints up to resource level by doing
+                    // http HEAD. And other end point
+                    // validation do through basic url connect
+                    if (!StringUtils.equals(providerName, "") && !StringUtils.equals(apiName, "") && !StringUtils
+                            .equals(apiVersion, "")) { //To escape editing the url for auto validation of wsdl endpoints
+
+                        NativeObject obj = editEndpointUrlToTest(urlVal, cx, thisObj, args, funObj);
+                        urlVal = (String) obj.get("urlValue");
+
+                        if (obj.get("isContainUriTemplatesOnly").equals(true)) {
+                            isContainUriTemplatesOnly = true;
+                        }
+                    }
+
+                    URL url = new URL(urlVal);
+
+                    if (url.getProtocol().matches("https")) {
+                        ServerConfiguration serverConfig = CarbonUtils.getServerConfiguration();
+                        String trustStorePath = serverConfig.getFirstProperty("Security.TrustStore.Location");
+                        String trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password");
+                        System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+                        System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+
+                        NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                        headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                        return headRequestResult;
+
+                    } else if (url.getProtocol().matches("http")) {
+                        NativeObject headRequestResult = sendHttpHEADRequest(urlVal, invalidStatusCodesRegex);
+                        headRequestResult.put("isContainUriTemplatesOnly", headRequestResult, isContainUriTemplatesOnly);
+                        return headRequestResult;
+                    }
                 }
             } catch (Exception e) {
-				response = e.getMessage();
-			} finally {
-				if (conn != null) {
-					conn = null;
-				}
-			}
-		}
-		return response;
+                response = e.getMessage();
+            }
+        }
 
-	} 
+        data.put("response", data, response);
+        data.put("isConnectionError", data, isConnectionError);
+        data.put("isContainUriTemplatesOnly", data, isContainUriTemplatesOnly);
+        return data;
+
+    }
 
 	private static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
 		public boolean verify(String hostname, SSLSession session) {
@@ -4097,7 +3970,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String searchTerm;
         String searchType;
         APIProvider apiProvider = getAPIProvider(thisObj);
-        Map<Integer, APIKey> tokenData = null;
+        Map<Integer, APIKey> tokenData;
         String loggedInUser = ((APIProviderHostObject) thisObj).getUsername();
 
         if (searchValue.contains(":")) {
@@ -4160,7 +4033,9 @@ public class APIProviderHostObject extends ScriptableObject {
 
         try {
             SubscriberKeyMgtClient keyMgtClient = HostObjectUtils.getKeyManagementClient();
-            keyMgtClient.revokeAccessToken(accessToken, consumerKey, authUser);
+            if (keyMgtClient != null)   {
+                keyMgtClient.revokeAccessToken(accessToken, consumerKey, authUser);
+            }
 
             Set<APIIdentifier> apiIdentifierSet = apiProvider.getAPIByAccessToken(accessToken);
             List<org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping> mappings = new ArrayList<org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping>();
@@ -4191,98 +4066,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
-    public static NativeArray jsFunction_getAPIResponseFaultCount(Context cx, Scriptable thisObj,
-                                                                  Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResponseFaultCountDTO> list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        if (args == null || args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        String fromDate = (String) args[1];
-        String toDate = (String) args[2];
-        try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIResponseFaultCount(providerName,fromDate,toDate);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
 
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object faultObject = it.next();
-                APIResponseFaultCountDTO fault = (APIResponseFaultCountDTO) faultObject;
-                row.put("apiName", row, fault.getApiName());
-                row.put("version", row, fault.getVersion());
-                row.put("context", row, fault.getContext());
-                row.put("count", row, fault.getCount());
-                row.put("faultPercentage", row, fault.getFaultPercentage());
-                row.put("totalRequestCount",row,fault.getRequestCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIFaultyAnalyzeByTime(Context cx, Scriptable thisObj,
-                                                                   Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIResponseFaultCountDTO> list = null;
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        if (args == null || args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        try {
-            APIUsageStatisticsClient client =
-                    new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIFaultyAnalyzeByTime(providerName);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object faultObject = it.next();
-                APIResponseFaultCountDTO fault = (APIResponseFaultCountDTO) faultObject;
-                long faultTime = Long.parseLong(fault.getRequestTime());
-                row.put("apiName", row, fault.getApiName());
-                row.put("version", row, fault.getVersion());
-                row.put("context", row, fault.getContext());
-                row.put("requestTime", row, faultTime);
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
 
     public static NativeArray jsFunction_getFirstAccessTime(Context cx, Scriptable thisObj,
                                                             Object[] args, Function funObj)
@@ -4296,23 +4080,23 @@ public class APIProviderHostObject extends ScriptableObject {
             return myn;
         }
 
-        List<String> list = null;
+        List<APIFirstAccess> list = null;
         if (args.length == 0) {
             handleException("Invalid number of parameters.");
         }
         String providerName = (String) args[0];
         try {
-            APIUsageStatisticsClient client = new APIUsageStatisticsClient(((APIProviderHostObject) thisObj).getUsername());
+            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
             list = client.getFirstAccessTime(providerName,1);
         } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsClient for ProviderAPIUsage", e);
+            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
         }
         NativeObject row = new NativeObject();
 
-        if (!list.isEmpty()) {
-            row.put("year",row,list.get(0).toString());
-            row.put("month",row,list.get(1).toString());
-            row.put("day",row,list.get(2).toString());
+        if (list != null && !list.isEmpty()) {
+            row.put("year",row,list.get(0));
+            row.put("month",row,list.get(1));
+            row.put("day",row,list.get(2));
             myn.put(0,myn,row);
         }
 
@@ -4360,34 +4144,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return valid;
     }
 
-   /* public static NativeArray jsFunction_getExternalAPIStores(Context cx,
-                                                              Scriptable thisObj, Object[] args,
-                                                              Function funObj)
-            throws APIManagementException {
-        Set<APIStore> apistoresList = APIUtil.getExternalAPIStores();
-        NativeArray myn = new NativeArray(0);
-        if (apistoresList == null) {
-            return null;
-        } else {
-            Iterator it = apistoresList.iterator();
-            int i = 0;
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object apistoreObject = it.next();
-                APIStore apiStore = (APIStore) apistoreObject;
-                row.put("displayName", row, apiStore.getDisplayName());
-                row.put("name", row, apiStore.getName());
-                row.put("endpoint", row, apiStore.getEndpoint());
-
-                myn.put(i, myn, row);
-                i++;
-
-            }
-            return myn;
-        }
-
-    }*/
-
     /**
      * Retrieves custom sequences from registry
      * @param cx
@@ -4399,9 +4155,21 @@ public class APIProviderHostObject extends ScriptableObject {
      */
 	public static NativeArray jsFunction_getCustomOutSequences(Context cx, Scriptable thisObj,
 	                                                        Object[] args, Function funObj)
-	                                                                                       throws APIManagementException {
+            throws APIManagementException {
+        if (args == null ||  args.length < 3) {
+            handleException("Invalid input parameters.");
+        }
 		APIProvider apiProvider = getAPIProvider(thisObj);
-		List<String> sequenceList = apiProvider.getCustomOutSequences();
+        String apiName = (String) args[0];
+        String apiVersion = (String) args[1];
+        String provider = (String) args[2];
+
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+
+		List<String> sequenceList = apiProvider.getCustomOutSequences(apiIdentifier);
 
 		NativeArray myn = new NativeArray(0);
 		if (sequenceList == null) {
@@ -4424,23 +4192,36 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return
      * @throws APIManagementException
      */
-	public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
-	                                                        Object[] args, Function funObj)
-	                                                                                       throws APIManagementException {
-		APIProvider apiProvider = getAPIProvider(thisObj);
-		List<String> sequenceList = apiProvider.getCustomInSequences();
+    public static NativeArray jsFunction_getCustomInSequences(Context cx, Scriptable thisObj,
+                                                              Object[] args, Function funObj)
+            throws APIManagementException {
+        if (args == null ||  args.length < 3) {
+            handleException("Invalid input parameters.");
+        }
+        APIProvider apiProvider = getAPIProvider(thisObj);
 
-		NativeArray myn = new NativeArray(0);
-		if (sequenceList == null) {
-			return null;
-		} else {
-			for (int i = 0; i < sequenceList.size(); i++) {
-				myn.put(i, myn, sequenceList.get(i));
-			}
-			return myn;
-		}
+        String apiName = (String) args[0];
+        String apiVersion = (String) args[1];
+        String provider = (String) args[2];
 
-	}
+        if (provider != null) {
+            provider = APIUtil.replaceEmailDomain(provider);
+        }
+        APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+
+        List<String> sequenceList = apiProvider.getCustomInSequences(apiIdentifier);
+
+        NativeArray myn = new NativeArray(0);
+        if (sequenceList == null) {
+            return null;
+        } else {
+            for (int i = 0; i < sequenceList.size(); i++) {
+                myn.put(i, myn, sequenceList.get(i));
+            }
+            return myn;
+        }
+
+    }
 
     /**
      * Retrieves custom fault sequences from registry
@@ -4468,14 +4249,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
     }
 
-	public static boolean jsFunction_isSynapseGateway(Context cx, Scriptable thisObj,
-            Object[] args,
-            Function funObj) throws APIManagementException {
+	public static boolean jsFunction_isSynapseGateway(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
 		APIProvider provider = getAPIProvider(thisObj);
-		if (!provider.isSynapseGateway()) {
-			return false;
-		}
-		return true;
+		return provider.isSynapseGateway();
 	}
 
     public static boolean jsFunction_updateExternalAPIStores(Context cx,Scriptable thisObj, Object[] args,
@@ -4514,7 +4291,16 @@ public class APIProviderHostObject extends ScriptableObject {
 		                for (Object store : externalAPIStores) {
 		                	inputStores.add(APIUtil.getExternalAPIStore((String) store, tenantId));
 		                }
-                        updated = apiProvider.updateAPIsInExternalAPIStores(api,inputStores);
+                        Set<String> versions = apiProvider.getAPIVersions(provider, name);
+                        APIVersionStringComparator comparator = new APIVersionStringComparator();
+                        boolean apiOlderVersionExist = false;
+                        for (String tempVersion : versions) {
+                            if (comparator.compare(tempVersion, version) < 0) {
+                                apiOlderVersionExist = true;
+                                break;
+                            }
+                        }
+                        updated = apiProvider.updateAPIsInExternalAPIStores(api, inputStores, apiOlderVersionExist);
 
                     }
 	                return updated;
@@ -4529,9 +4315,24 @@ public class APIProviderHostObject extends ScriptableObject {
             }
 
     public static String jsFunction_getAPIStoreURL(Context cx,Scriptable thisObj, Object[] args,
-                                                   Function funObj) {
+                                                   Function funObj) throws APIManagementException {
 
 	    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+
+        //if a tenant is passed return the tenant store url
+        if(args != null && args.length > 0 && args[0] != null){
+            String tenantDomain = args[0].toString();
+            APIProvider apiProvider = getAPIProvider(thisObj);
+            Map<String, String> domains = apiProvider.getTenantDomainMappings(tenantDomain, APIConstants.API_DOMAIN_MAPPINGS_STORE);
+            if(domains != null && domains.size() != 0 ){
+                Iterator entries = domains.entrySet().iterator();
+                while (entries.hasNext()) {
+                    Map.Entry thisEntry = (Map.Entry) entries.next();
+                    return "https://" + thisEntry.getValue();
+                }
+            }
+        }
+
 	    if	(config != null)	{
 	    	return config.getFirstProperty(APIConstants.API_STORE_URL);
 	    }	else	{
@@ -4540,34 +4341,27 @@ public class APIProviderHostObject extends ScriptableObject {
 	}
 
     public static boolean jsFunction_isDataPublishingEnabled(Context cx, Scriptable thisObj,
-            Object[] args, Function funObj)
+                                                             Object[] args, Function funObj)
             		throws APIManagementException {
-    	if (HostObjectUtils.checkDataPublishingEnabled()) {
-    		return true;
-    	}
-    	return false;
+        return HostObjectUtils.checkDataPublishingEnabled();
     }
 
     public static boolean jsFunction_showAPIStoreURL(Context cx,Scriptable thisObj, Object[] args,
                                                      Function funObj) {
 
-    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-    if(config!=null){
-    return Boolean.parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
-    }else{
-    return false;
-    }
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+
+        return config != null && Boolean.parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
     }
 
     public static boolean jsFunction_showAPIDocVisibility(Context cx,Scriptable thisObj, Object[] args,
-                                                     Function funObj) {
+                                                          Function funObj) {
 
-    APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
-    if(config!=null){
-    return Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
-    }else{
-    return false;
-    }
+        APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
+
+        return config != null
+               && Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
+
     }
 
     /**
@@ -4587,20 +4381,36 @@ public class APIProviderHostObject extends ScriptableObject {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObject = (JSONObject) parser.parse(endpointConfig);
                 Object epType = jsonObject.get("endpoint_type");
-                if (epType instanceof String && "http".equals(epType)) {
+
+                if(StringUtils.isEmpty(ObjectUtils.toString(epType))) {
+                    handleException("No endpoint type defined.");
+
+                } else if (epType instanceof String && "http".equals(epType)) {
                     // extract production uri from config
-                    Object prodEPs = (JSONObject) jsonObject.get("production_endpoints");
+                    Object prodEPs = jsonObject.get("production_endpoints");
+                    Object sandEPs = jsonObject.get("sandbox_endpoints");
+
+                    if(prodEPs == null && sandEPs == null) {
+                        handleException("No Endpoint is defined");
+                    }
                     if (prodEPs instanceof JSONObject) {
-                        Object url = ((JSONObject) prodEPs).get("url");
+                        Object url = ((JSONObject) prodEPs).get("url");//check whether the URL is null or not
+
+                        if(StringUtils.isBlank(ObjectUtils.toString(url))) {
+                            handleException("URL of production Endpoint is not defined.");
+                        }
                         if (url instanceof String && !isValidURI(url.toString())) {
                             handleException("Invalid Production Endpoint URI. Please refer HTTP Endpoint " +
                                             "documentation of the WSO2 ESB for details.");
                         }
                     }
                     // extract sandbox uri from config
-                    Object sandEPs = (JSONObject) jsonObject.get("sandbox_endpoints");
                     if (sandEPs instanceof JSONObject) {
                         Object url = ((JSONObject) sandEPs).get("url");
+
+                        if(StringUtils.isBlank(ObjectUtils.toString(url))) {
+                            handleException("URL of sandbox Endpoint is not defined.");
+                        }
                         if (url instanceof String && !isValidURI(url.toString())) {
                             handleException("Invalid Sandbox Endpoint URI. Please refer HTTP Endpoint " +
                                             "documentation of the WSO2 ESB for details.");
@@ -4661,11 +4471,15 @@ public class APIProviderHostObject extends ScriptableObject {
      * Validate the backend by sending HTTP HEAD
      *
      * @param urlVal - backend URL
+     * @param invalidStatusCodesRegex - Regex for the invalid status code
      * @return - status of HTTP HEAD Request to backend
      */
-    private static String sendHttpHEADRequest(String urlVal) {
+    private static NativeObject sendHttpHEADRequest(String urlVal, String invalidStatusCodesRegex) {
 
-        String response = "error while connecting";
+        boolean isConnectionError = true;
+        String response = null;
+
+        NativeObject data = new NativeObject();
 
         HttpClient client = new DefaultHttpClient();
         HttpHead head = new HttpHead(urlVal);
@@ -4686,22 +4500,37 @@ public class APIProviderHostObject extends ScriptableObject {
 
         try {
             HttpResponse httpResponse = client.execute(head);
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-
-            //If the endpoint doesn't support HTTP HEAD or if status code is < 400
-            if (statusCode == 405 || statusCode / 100 < 4) {
-                if (log.isDebugEnabled() && statusCode == 405) {
+            String statusCode = String.valueOf(httpResponse.getStatusLine().getStatusCode());
+            String reasonPhrase = String.valueOf(httpResponse.getStatusLine().getReasonPhrase());
+            //If the endpoint doesn't match the regex which specify the invalid status code, it will return success.
+            if (!statusCode.matches(invalidStatusCodesRegex)) {
+                if (log.isDebugEnabled() && statusCode.equals("405")) {
                     log.debug("Endpoint doesn't support HTTP HEAD");
                 }
                 response = "success";
+                isConnectionError = false;
+
+            } else {
+                 //This forms the real backend response to be sent to the client
+                data.put("statusCode", data, statusCode);
+                data.put("reasonPhrase", data, reasonPhrase);
+                response = "";
+                isConnectionError = false;
             }
         } catch (IOException e) {
             // sending a default error message.
-            log.error("Error occurred while connecting backend : " + urlVal + ", reason : " + e.getMessage());
+            log.error("Error occurred while connecting to backend : " + urlVal + ", reason : " + e.getMessage());
+            String[] errorMsg = e.getMessage().split(": ");
+            if (errorMsg.length > 1) {
+                response = errorMsg[errorMsg.length - 1]; //This is to get final readable part of the error message in the exception and send to the client
+                isConnectionError = false;
+            }
         } finally {
             client.getConnectionManager().shutdown();
         }
-        return response;
+        data.put("response", data, response);
+        data.put("isConnectionError", data, isConnectionError);
+        return data;
     }
     /**
      * retrieves active tenant domains and return true or false to display private
@@ -4772,8 +4601,8 @@ public class APIProviderHostObject extends ScriptableObject {
                                                       Object[] args, Function funObj)
             throws ScriptException,
                    APIManagementException {
-        if (args == null || args.length != 1 || !isStringArray(args)) {
-            handleException("Invalid input parameters expected resource Url");
+        if (args == null || args.length != 2 || !isStringArray(args)) {
+            handleException("Invalid input parameters expected resource Url and tenantDomain");
         }
         NativeObject data = new NativeObject();
 
@@ -4782,8 +4611,9 @@ public class APIProviderHostObject extends ScriptableObject {
         if (username == null) {
             username = APIConstants.END_USER_ANONYMOUS;
         }
-        String resource = (String) args[0];
-        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource);
+        String resource = (String) args[1];
+        String tenantDomain = (String) args[0];
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
         if (!docResourceMap.isEmpty()) {
             data.put("Data", data,
                      cx.newObject(thisObj, "Stream", new Object[] { docResourceMap.get("Data") }));
@@ -4792,7 +4622,6 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
             handleException("Resource couldn't found for " + resource);
         }
-
         return data;
     }
 
@@ -4820,6 +4649,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 row.put("name", row, environment.getName());
                 row.put("description", row, environment.getDescription());
                 row.put("type", row, environment.getType());
+                row.put("serverURL", row, environment.getServerURL());
+                row.put("apiConsole", row, environment.isShowInConsole());
                 myn.put(i, myn, row);
                 i++;
             }
@@ -4835,7 +4666,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String scopeKey = (String) args[0];
             String username = (String) args[1];
             
-            if (!ScopesIssuer.getInstance().isWhiteListedScope(scopeKey)) {
+            if (!APIUtil.isWhiteListedScope(scopeKey)) {
                 String tenantDomain = MultitenantUtils.getTenantDomain(username);
                 //update permission cache before validate user
                 int tenantId = -1234;
@@ -4908,4 +4739,20 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return userBrowser;
     }
+
+    /**
+     * Url validator, Allow any url with https and http.
+     * Allow any url without fully qualified domain
+     *
+     * @param url Url as string
+     * @return boolean type stating validated or not
+     */
+    private static boolean isURL(String url) {
+
+        Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(url);
+        return matcher.matches();
+
+    }
+
 }

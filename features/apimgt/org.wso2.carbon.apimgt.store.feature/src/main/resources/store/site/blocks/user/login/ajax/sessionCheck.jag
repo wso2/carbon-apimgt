@@ -1,0 +1,38 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var log=new Log();
+    var action = request.getParameter("action");
+    var msg = require("/site/conf/ui-messages.jag");
+
+    var validation = {
+        "action": { type: "safetext"},
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+            print({
+                error:true,
+                message: msg.error.invalidInputs(validation_errors)
+            });        
+    }else if (action === "sessionCheck") {
+         if (log.isDebugEnabled()) {
+            log.debug("session check for" + jagg.getUser());
+         }
+         if(jagg.getUser() == null){
+            print({
+                error:true,
+                message:'timeout'
+            });
+        }
+    } else {
+        print({
+            error:true,
+            message:msg.error.invalidAction(action)
+        });
+    }
+}());
+%>

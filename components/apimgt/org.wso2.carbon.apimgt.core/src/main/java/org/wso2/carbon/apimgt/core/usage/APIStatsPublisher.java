@@ -32,9 +32,6 @@ public class APIStatsPublisher {
     
     private String hostName;
 
-    /*Private default constructor to force using the overloaded constructor*/
-    private APIStatsPublisher(){}
-
     public APIStatsPublisher(APIMgtUsageDataPublisher publisher, String hostName){
         this.publisher = publisher;
         this.hostName = hostName;
@@ -73,7 +70,7 @@ public class APIStatsPublisher {
 
         try{
             publisher.publishEvent(requestPublisherDTO);
-        }catch (Throwable e){
+        } catch (Throwable e){
             //Log the error and continue since we do not want the message flow to be effected due to stats not being published.
             log.error("Could not publish request event to BAM. " + e.getMessage());
             return false;

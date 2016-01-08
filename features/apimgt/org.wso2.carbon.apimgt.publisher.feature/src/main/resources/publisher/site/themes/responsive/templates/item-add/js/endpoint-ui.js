@@ -206,10 +206,10 @@ $(document).ready(function () {
         },
         form: [{
             key: 'production_endpoints',
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
+            "fieldHtmlClass": "input-xlarge form-control validateEndpoints"
         }, {
             key: 'sandbox_endpoints',
-            "fieldHtmlClass": "input-xlarge validateEndpoints"
+            "fieldHtmlClass": "input-xlarge form-control validateEndpoints"
         }]
     };
 
@@ -220,7 +220,7 @@ $(document).ready(function () {
                 "title": i18n.t("endpointUi.Production WSDL"),
                 "type": "endpoint",
                 "urlType":"wsdl",
-                "fieldHtmlClass": "input-xlarge validateEndpoints"
+                "fieldHtmlClass": "input-xlarge form-control validateEndpoints"
             },
             'wsdlendpointService': {
                 title: i18n.t("endpointUi.Service"),
@@ -249,18 +249,18 @@ $(document).ready(function () {
             'production_endpoints',
             {
                 key : 'wsdlendpointService',
-                "fieldHtmlClass":"validateProdWSDLService"
+                "fieldHtmlClass":"validateProdWSDLService form-control"
             },{
                 key:'wsdlendpointPort',
-                "fieldHtmlClass":"validateProdWSDLPort"
+                "fieldHtmlClass":"validateProdWSDLPort form-control"
             }
             , 'sandbox_endpoints',
             {
                 key : 'wsdlendpointServiceSandbox',
-                "fieldHtmlClass":"validateSandboxWSDLService"
+                "fieldHtmlClass":"validateSandboxWSDLService form-control"
             },{
                 key:'wsdlendpointPortSandbox',
-                "fieldHtmlClass":"validateSandboxWSDLPort"
+                "fieldHtmlClass":"validateSandboxWSDLPort form-control"
             }
         ]
     };
@@ -578,13 +578,13 @@ $(document).ready(function () {
                 var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
                 if(value_index == ''){
                     if(ec[field] != undefined && ec[field] !="")
-                        ec[field] = { url: ec[field] , config: ep_config };
+                        ec[field] = { url: ec[field].trim() , config: ep_config };
                     else
                         ec[field] = undefined;
                 }
                 else{
                     if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                        ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                        ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
                     else{
                         ec[field].splice(value_index,1);
                     }
@@ -610,23 +610,26 @@ $(document).ready(function () {
         }
     );
 
-    APP.update_ep_config = function() {
+    APP.update_ep_config = function(status) {
         var ec = APP.ep_form.getValues();
+        ec.implementation_status = status;
         ec.endpoint_type = $('#endpoint_type').val();
         $('.advance_endpoint_config').each(function(index, el){
-            var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+            if($(el).attr('ep-config-data') && $(el).attr('ep-config-data') != ""){
+                var ep_config = jQuery.parseJSON($(el).attr('ep-config-data'));
+            }
             var name = $(el).attr('field-name');
             var field = name.replace(/\[([0-9]*)\]$/, '');
             var value_index = name.replace(/([a-zA-Z0-9_]*)/, '').replace('[','').replace(']','');
             if(value_index == ''){
                 if(ec[field] != undefined && ec[field] !="")
-                    ec[field] = { url: ec[field] , config: ep_config };
+                    ec[field] = { url: ec[field].trim() , config: ep_config };
                 else
                     ec[field] = undefined;
             }
             else{
                 if(ec[field][value_index] != undefined && ec[field][value_index] !="")
-                    ec[field][value_index] = { url: ec[field][value_index] , config: ep_config };
+                    ec[field][value_index] = { url: ec[field][value_index].trim() , config: ep_config };
                 else{
                     ec[field].splice(value_index,1);
                 }

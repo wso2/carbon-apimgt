@@ -71,3 +71,8 @@ function saveContent(provider, apiName, apiVersion, docName, mode) {
 var hideMsg=function () {
     $('#docAddMessage').hide("fast");
 }
+
+function navigateBack(tabName) {
+  jagg.sessionAwareJS({redirect:'<%= apiUrl%>', e:event})
+  $.cookie("selectedTab", tabName, {path: "/"});
+}

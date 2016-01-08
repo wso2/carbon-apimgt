@@ -20,11 +20,11 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>forum-feature</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion> 
     <artifactId>org.wso2.carbon.forum.server.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Forum Server Feature</name>
@@ -54,7 +54,7 @@
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.forum.server</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
+                            <propertiesFile>../../../etc/feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>
                                     <propertyDef>org.wso2.carbon.p2.category.type:server
@@ -64,7 +64,7 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum:${carbon.forum.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.forum:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <!--<importBundleDef>rhino:js</importBundleDef>-->

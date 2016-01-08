@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.usage.client.dto;
 
-import java.util.Date;
-
 public class APIVersionLastAccessTimeDTO {
     
     private String apiName;

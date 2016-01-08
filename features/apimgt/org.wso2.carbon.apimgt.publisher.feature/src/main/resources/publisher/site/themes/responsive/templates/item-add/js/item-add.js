@@ -5,8 +5,8 @@ $( document ).ready(function() {
         $(btn).buttonLoader('start');
         $('#startFromExistingAPI-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
+                $(btn).buttonLoader('stop');
                 if (!responseText.error) {
-                    $(btn).buttonLoader('stop');
                     window.location = jagg.site.context + "/design"
                 }else {
                     if (responseText.message == "timeout") {
@@ -28,13 +28,33 @@ $( document ).ready(function() {
         });
     });
 
+    $('#wsdl-url').change(function(){
+        $('.wsdlError').hide();
+        $('#wsdl-url').removeClass('error');
+    });
+
+    $('#wsdl-url').keyup(function(){
+        $('.wsdlError').hide();
+        $('#wsdl-url').removeClass('error');
+    });
+
     $("#startFromExistingSOAPEndpoint").click(function(){
+        var wsdlURL = $('#wsdl-url').val();
+        if(wsdlURL!=""){
+            if (wsdlURL.toLowerCase().indexOf("wsdl") < 0) {
+                $('#wsdl-url').addClass('error');
+                $('.wsdlError').show();
+                console.log("Wrong endpoint.");
+                return;
+            }
+        }
+
         var btn = $(this);
         $(btn).buttonLoader('start');
         $('#startFromExistingSOAPEndpoint-form').ajaxSubmit({
             success:function(responseText, statusText, xhr, $form){
-                if (!responseText.error) {
-                    $(btn).buttonLoader('stop');
+                $(btn).buttonLoader('stop');
+                if (!responseText.error) {                    
                     window.location = jagg.site.context + "/design"
                 }else {
                     if (responseText.message == "timeout") {
@@ -64,6 +84,7 @@ $( document ).ready(function() {
 
         $(this).closest('.create-options').addClass('selected');
         $('#designNewAPI').hide();
+        $('.wsdlError').hide();
     });
 
     $('#create-new-api').click(function(){
@@ -84,12 +105,12 @@ $( document ).ready(function() {
        });
     });
 
+    $('.toggleContainers .controls').hide();
     $('.toggleRadios input[type=radio]').prop('checked', false);
     $('.toggleRadios input[type=radio]').click(function(){
         $('.toggleContainers .controls').hide();
-        $('#startFromExistingAPI').css('margin-top','-67px');
         $('.toggleRadios input[type=radio]').prop('checked', false);
-        $('#' + $(this).val()).closest('div').fadeIn();
+        $('#' + $(this).val()).parent().parent().fadeIn();
         $(this).prop('checked', true);
     });
 

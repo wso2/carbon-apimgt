@@ -1,4 +1,9 @@
 <% jagg.template("users-api", function(inputs, outputs, jagg) { %>
+
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/css/nv.d3.css"))%>"/>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/d3.v3.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/nv.d3.js"))%>"></script>
+
 <% var api=outputs.api;
    var subs = jagg.module("subscription");
    var result = subs.getSubscribersOfAPI(api);
@@ -68,11 +73,11 @@
         subscriber = subscribers[i];
         %>
         <tr>
-        <td><i class="icon-user"></i><%=subscriber.username%></td>
+        <td><i class="glyphicon glyphicon-user">&nbsp;</i><%=subscriber.username%></td>
         <td class="dateFull"><%=subscriber.subscribedDate%></td>
-        <!--<td><i class="icon-edit"></i> <a href="#">Stats</a>
-        <i class="icon-trash"></i> <a href="#">Revoke Access</a>
-        <i class="icon-ban-circle"></i> <a href="#">Block</a>-->
+        <!--<td><i class="glyphicon glyphicon-edit"></i> <a href="#">Stats</a>
+        <i class="glyphicon glyphicon-trash"></i> <a href="#">Revoke Access</a>
+        <i class="glyphicon glyphicon-ban-circle"></i> <a href="#">Block</a>-->
         </td>
         </tr>
         <%}%>
@@ -86,48 +91,58 @@
         </div>
 
         <!-- Row -->
-<h3><%=i18n.localize("usageByCurrentSubscribers")%> (v-<%= encode.forHtml(request.getParameter("version"))%>)</h3>
-<div class="well">
-    <div class="row-fluid">
-        <div class="span6">
-            <div id="userVersionChart">
-                <div class="progress progress-striped active">
-                    <div class="bar" style="width: 10%;"></div>
-                </div>
-            </div>
+
+    <h3><%=i18n.localize("usageByCurrentSubscribers")%> (v-<%= encode.forHtml(request.getParameter("version"))%>)</h3>
+
+    <div id="usageByCurrentSubscribersSpinner" class="center-wrapper">
+        <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+    </div>
+
+    <div class="row">
+        <div id="usageByCurrentSubscribersNoData"></div>
+        <div class="col-sm-6">
+            <div id="userVersionChart"></div>
         </div>
-        <div class="span6">
-            <table class="table" id="userVersionTable" style="display:none">
+        <div class="col-sm-6">
+            <br />
+            <br />
+            <table class="display table table-striped table-bordered" cellspacing="0" width="100%" id="userVersionTable" style="display:none">
+                  <thead>
                   <tr>
                     <th><%=i18n.localize("subscriber")%></th>
                     <th><%=i18n.localize("noOfAPICalls")%></th>
                   </tr>
+                  </thead>
             </table>
         </div>
     </div>
-</div>
+
 
 
 <h3><%=i18n.localize("usageByCurrentSubscribersAcrossAll")%></h3>
-<div class="well">
-    <div class="row-fluid">
-        <div class="span6">
-            <div id="userChart">
-                <div class="progress progress-striped active">
-                    <div class="bar" style="width: 10%;"></div>
-                </div>
-            </div>
+
+    <div id="usageByCurrentSubscribersAcrossAllSpinner" class="center-wrapper">
+            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+    </div>
+
+    <div class="row">
+        <div id="usageByCurrentSubscribersAcrossAllNoData"></div>
+        <div class="col-sm-6">
+            <div id="userChart"></div>
         </div>
-        <div class="span6">
-            <table class="table" id="userTable" style="display:none">
+        <div class="col-sm-6">
+            <br />
+            <br />
+            <table class="display table table-striped table-bordered" cellspacing="0" width="100%" id="userTable" style="display:none">
+              <thead>
               <tr>
                 <th><%=i18n.localize("subscriber")%></th>
                 <th><%=i18n.localize("noOfAPICalls")%></th>
               </tr>
+              </thead>
             </table>
         </div>
     </div>
-</div>
 
 
 

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.apache.axis2.engine.ListenerManager;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,7 +30,6 @@ import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
-import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
@@ -37,14 +37,12 @@ import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.RemoteAuthorizationManager;
 import org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
-import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -74,7 +72,6 @@ import org.wso2.carbon.utils.FileUtil;
 import javax.cache.Cache;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -128,30 +125,23 @@ public class APIManagerComponent {
             BundleContext bundleContext = componentContext.getBundleContext();
             addRxtConfigs();
             addTierPolicies();
-            addDefinedSequencesToRegistry();
             addApplicationsPermissionsToRegistry();
             APIUtil.loadTenantExternalStoreConfig(MultitenantConstants.SUPER_TENANT_ID);
             APIUtil.loadTenantGAConfig(MultitenantConstants.SUPER_TENANT_ID);
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            APIUtil.loadTenantConf(tenantId);
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
-            APIUtil.loadTenantAPILifecycle(tenantId);
             //load self sigup configuration to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
-
 
             String filePath = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                               File.separator + "conf" + File.separator + "api-manager.xml";
             configuration.load(filePath);
 
-            //WorkflowExecutorFactory.getInstance().load(filePath);
-
             String gatewayType = configuration.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
-            /*if ("Synapse".equalsIgnoreCase(gatewayType)) {
-                //Register Tenant service creator to deploy tenant specific common synapse configurations
-                TenantServiceCreator listener = new TenantServiceCreator();
-                bundleContext.registerService(
-                        Axis2ConfigurationContextObserver.class.getName(), listener, null);
-            }*/
+            if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
+                addDefinedSequencesToRegistry();
+            }
 
             CommonConfigDeployer configDeployer = new CommonConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
@@ -167,6 +157,12 @@ public class APIManagerComponent {
                     configurationService, null);
             APIStatusObserverList.getInstance().init(configuration);
 
+            log.debug("Reading Analytics Configuration from file...");
+
+            // This method is called in two places. Mostly by the time activate hits,
+            // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
+            // when ServiceDataPublisherAdmin is set.
+            APIUtil.writeAnalyticsConfigurationToRegistry(configuration);
             APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
             analyticsConfiguration.setAPIManagerConfiguration(configuration);
 
@@ -193,8 +189,8 @@ public class APIManagerComponent {
                                                         UserMgtConstants.EXECUTE_ACTION, null);
 
             setupImagePermissions();
-            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-            authorizationManager.init();
+//            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
+//            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Check User add listener enabled or not
             boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
@@ -220,22 +216,6 @@ public class APIManagerComponent {
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
             
-            // loading white listed scopes
-            List<String> whitelist = null;
-
-            // Read scope whitelist from Configuration.
-            if (configuration != null) {
-                whitelist = configuration.getProperty(APIConstants.API_KEY_MANGER_SCOPE_WHITELIST);
-            }
-
-            // If whitelist is null, default scopes will be put.
-            if (whitelist == null) {
-                whitelist = new ArrayList<String>();
-                whitelist.add(APIConstants.OPEN_ID_SCOPE_NAME);
-                whitelist.add(APIConstants.DEVICE_SCOPE_PATTERN);
-            }
-
-            ScopesIssuer.loadInstance(whitelist);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -247,8 +227,7 @@ public class APIManagerComponent {
         }
         registration.unregister();
         APIManagerFactory.getInstance().clearAll();
-        RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-        authorizationManager.destroy();
+        org.wso2.carbon.apimgt.impl.utils.AuthorizationManager.getInstance().destroy();
     }
 
     protected void setRegistryService(RegistryService registryService) {
@@ -326,6 +305,12 @@ public class APIManagerComponent {
             }
         };
         String[] rxtFilePaths = file.list(filenameFilter);
+
+        if(rxtFilePaths == null || rxtFilePaths.length == 0){
+            log.info("No RXTs Found.");
+            return;
+        }
+
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         UserRegistry systemRegistry;
         try {
@@ -377,35 +362,60 @@ public class APIManagerComponent {
     }
 
     private void addTierPolicies() throws APIManagementException {
+
+        String apiTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
+        String appTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
+        String resTierFilePath =
+                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
+
+        addTierPolicy(APIConstants.API_TIER_LOCATION, apiTierFilePath);
+        addTierPolicy(APIConstants.APP_TIER_LOCATION, appTierFilePath);
+        addTierPolicy(APIConstants.RES_TIER_LOCATION, resTierFilePath);
+
+    }
+
+    private void addTierPolicy(String tierLocation,String defaultTierFileName) throws APIManagementException {
+
+        File defaultTiers = new File(defaultTierFileName);
+        if (!defaultTiers.exists()) {
+            log.info("Default tier policies not found in : " + defaultTierFileName);
+            return;
+        }
+
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+        InputStream inputStream = null;
         try {
             UserRegistry registry = registryService.getGovernanceSystemRegistry();
-            if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
+            if (registry.resourceExists(tierLocation)) {
                 log.debug("Tier policies already uploaded to the registry");
                 return;
             }
 
             log.debug("Adding API tier policies to the registry");
-            InputStream inputStream = APIManagerComponent.class.getResourceAsStream("/tiers/default-tiers.xml");
+
+            inputStream = FileUtils.openInputStream(defaultTiers);
             byte[] data = IOUtils.toByteArray(inputStream);
             Resource resource = registry.newResource();
             resource.setContent(data);
 
-            //  Properties descriptions = new Properties();
-            //   descriptions.load(APIManagerComponent.class.getResourceAsStream(
-            //           "/tiers/default-tier-info.properties"));
-            //   Set<String> names = descriptions.stringPropertyNames();
-            //   for (String name : names) {
-            //       resource.setProperty(APIConstants.TIER_DESCRIPTION_PREFIX + name,
-            //              descriptions.getProperty(name));
-            //  }
-            //  resource.setProperty(APIConstants.TIER_DESCRIPTION_PREFIX + APIConstants.UNLIMITED_TIER,
-            //         APIConstants.UNLIMITED_TIER_DESC);
-            registry.put(APIConstants.API_TIER_LOCATION, resource);
+            registry.put(tierLocation, resource);
         } catch (RegistryException e) {
             throw new APIManagementException("Error while saving policy information to the registry", e);
         } catch (IOException e) {
             throw new APIManagementException("Error while reading policy file content", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    log.error("Error when closing input stream", e);
+                }
+            }
         }
     }
 

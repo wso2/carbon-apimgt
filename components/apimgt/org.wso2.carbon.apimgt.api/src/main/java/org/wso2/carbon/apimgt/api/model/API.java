@@ -28,6 +28,10 @@ public class API implements Serializable{
 
     private APIIdentifier id;
 
+    // uuid of registry artifact
+    // this id is provider's username independent
+    private String uuid;
+
     private String description;
     private String url;
     private String sandboxUrl;
@@ -55,12 +59,17 @@ public class API implements Serializable{
     private String businessOwner;
     private String businessOwnerEmail;
 
+    // Used for keeping Production & Sandbox Throttling limits.
+    private String productionMaxTps;
+    private String sandboxMaxTps;
+
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
 
     private boolean endpointSecured = false;
-	private String endpointUTUsername;
+    private boolean endpointAuthDigest = false;
+    private String endpointUTUsername;
     private String endpointUTPassword;
 
     private String transports;
@@ -78,9 +87,8 @@ public class API implements Serializable{
     
     private String subscriptionAvailability;
     private String subscriptionAvailableTenants;
-    private String allowedHeaders;
-    private String allowedOrigins;
-    private String swagger;
+    private Set<String> allowedHeaders;
+    private Set<String> allowedOrigins;
 
     private String endpointConfig;
     
@@ -91,17 +99,14 @@ public class API implements Serializable{
 
     private String implementation = "ENDPOINT";
 
+    private String monetizationCategory;
+
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
     private boolean isPublishedDefaultVersion=false;
 
     private Set<String> environments;
-
-	//Storing image properties
-	private FileData image;
-
-    private String uuid;
 
     public Set<String> getEnvironments() {
         return environments;
@@ -136,6 +141,29 @@ public class API implements Serializable{
 
     //TODO: missing - total user count, up time statistics,tier
 
+    public String getUUID() {
+        return uuid;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getProductionMaxTps() {
+        return productionMaxTps;
+    }
+
+    public void setProductionMaxTps(String productionMaxTps) {
+        this.productionMaxTps = productionMaxTps;
+    }
+
+    public String getSandboxMaxTps() {
+        return sandboxMaxTps;
+    }
+
+    public void setSandboxMaxTps(String sandboxMaxTps) {
+        this.sandboxMaxTps = sandboxMaxTps;
+    }
 
     public boolean isAdvertiseOnly() {
         return advertiseOnly;
@@ -457,6 +485,16 @@ public class API implements Serializable{
  	public void setEndpointSecured(boolean endpointSecured) {
  		this.endpointSecured = endpointSecured;
  	}
+
+    /**
+     * @return the endpointAuthDigest
+     */
+    public boolean isEndpointAuthDigest() { return endpointAuthDigest; }
+
+    /**
+     * @param endpointAuthDigest the endpointAuthDigest to set
+     */
+    public void setEndpointAuthDigest(boolean endpointAuthDigest) { this.endpointAuthDigest = endpointAuthDigest; }
  	
     public String getInSequence() {
  		return inSequence;
@@ -595,64 +633,23 @@ public class API implements Serializable{
         return isPublishedDefaultVersion;
     }
 
-    public String getAllowedOrigins() {
+    public Set<String> getAllowedOrigins() {
         return allowedOrigins;
     }
 
-    public void setAllowedOrigins(String allowedOrigins) {
+    public void setAllowedOrigins(Set<String> allowedOrigins) {
         this.allowedOrigins = allowedOrigins;
     }
 
-    public String getAllowedHeaders() {
+    public Set<String> getAllowedHeaders() {
         return allowedHeaders;
     }
 
-    public void setAllowedHeaders(String allowedHeaders) {
+    public void setAllowedHeaders(Set<String> allowedHeaders) {
         this.allowedHeaders = allowedHeaders;
     }
 
-	public String getTagSetAsString() {
-		StringBuilder tagsSet = new StringBuilder("");
-		if(this.getTags() != null) {
-			for (int k = 0; k < this.getTags().toArray().length; k++) {
-				tagsSet.append(this.getTags().toArray()[k].toString());
-				if (k != this.getTags().toArray().length - 1) {
-					tagsSet.append(",");
-				}
-			}
-		}
-		return tagsSet.toString();
-	}
+    public String getMonetizationCategory() { return this.monetizationCategory; }
 
-	public Tier[] getTierSetAsArray() {
-		Set<Tier> tierSet = this.getAvailableTiers();
-		if( tierSet != null) {
-			return tierSet.toArray(new Tier[tierSet.size()]);
-		}
-		return new Tier[0];
-	}
-
-	public String getSwagger() {
-		return swagger;
-	}
-
-	public void setSwagger(String swagger) {
-		this.swagger = swagger;
-	}
-
-	public FileData getImage() {
-		return image;
-	}
-
-	public void setImage(FileData image) {
-		this.image = image;
-	}
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
+    public void setMonetizationCategory(String monetizationCategory) { this.monetizationCategory = monetizationCategory; }
 }

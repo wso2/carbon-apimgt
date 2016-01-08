@@ -18,21 +18,14 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
-import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -51,7 +44,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 	 * @throws org.wso2.carbon.apimgt.impl.workflow.WorkflowException
 	 */
 
-    public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workFlowDTO) throws WorkflowException {
 
         if (log.isDebugEnabled()) {
             log.info("Executing Application creation Workflow..");
@@ -60,6 +53,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
         workFlowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workFlowDTO);
         super.publishEvents(workFlowDTO);
+		return new GeneralWorkflowResponse();
     }
 
 	/**
@@ -69,7 +63,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 	 * 
 	 * @param workFlowDTO - WorkflowDTO
 	 */
-	public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+	public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
 		if (log.isDebugEnabled()) {
 			log.info("Complete  Application Registration Workflow..");
 		}
@@ -78,25 +72,16 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 		
 
 		ApiMgtDAO dao = new ApiMgtDAO();
-		Connection conn = null;
+
 		try {
-			conn = APIMgtDBUtil.getConnection();
-            dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO)workFlowDTO,false, conn);
-            generateKeysForApplication(regWFDTO, conn);
-            APIMgtDBUtil.transactionCommit(conn);
+            dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO)workFlowDTO,false);
+            generateKeysForApplication(regWFDTO);
 		} catch (APIManagementException e) {
-			APIMgtDBUtil.transactionRollback(conn);
 			String msg = "Error occured when updating the status of the Application creation process";
 			log.error(msg, e);
 			throw new WorkflowException(msg, e);
-		}catch (Exception e) {
-        	APIMgtDBUtil.transactionRollback(conn);
-        	log.error("occured when updating the status of the Application creation process", e);
-            throw new WorkflowException("occured when updating the status of the Application creation process", e);
-		}finally{
-			APIMgtDBUtil.closeConnection(conn);
 		}
-		
+		return new GeneralWorkflowResponse();
 	}
 
 	@Override

@@ -1,17 +1,13 @@
 package org.wso2.carbon.apimgt.gateway.service;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.axiom.om.OMXMLBuilderFactory;
 import org.apache.axiom.om.impl.llom.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.config.xml.OMElementUtils;
-import org.apache.synapse.util.AXIOMUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceClient;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminClient;
@@ -27,7 +23,10 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * Add the API to the gateway
      *
-     * @param builder
+     * @param apiProviderName
+     * @param apiName
+     * @param version
+     * @param apiConfig
      * @param tenantDomain
      * @throws AxisFault
      */
@@ -45,7 +44,10 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * Add the API to the gateway
      *
-     * @param builder
+     * @param apiProviderName
+     * @param apiName
+     * @param version
+     * @param apiConfig
      * @param tenantDomain
      * @throws AxisFault
      */
@@ -113,7 +115,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * Update the API in the Gateway
      *
-     * @param builder
+     * @param apiProviderName
      * @param tenantDomain
      * @throws AxisFault
      */
@@ -131,7 +133,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     /**
      * Update the API in the Gateway
      *
-     * @param builder
+     * @param apiProviderName
      * @param tenantDomain
      * @throws AxisFault
      */
@@ -158,7 +160,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
         restClient.updateDefaultApi(apiConfig);
     }
-    
 
 
     /**
@@ -189,7 +190,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         RESTAPIAdminClient restClient = new RESTAPIAdminClient(apiProviderName, apiName, version);
         restClient.deleteDefaultApi();
     }
-  
+
     private org.wso2.carbon.apimgt.gateway.dto.APIData convert(
             org.wso2.carbon.rest.api.stub.types.carbon.APIData data) {
         if (data == null) {
@@ -340,5 +341,4 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
     }
 
 
-	
 }

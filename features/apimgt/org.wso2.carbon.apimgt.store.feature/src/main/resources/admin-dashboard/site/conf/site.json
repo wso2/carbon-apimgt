@@ -9,11 +9,7 @@
     "allowedRole":"admin",
     "allowedRoles":"admin,subscriber",
     "workflows":{
-     "applicationWorkFlowServerURL": "https://localhost:9445/services/",
-     "subscriptionWorkFlowServerURL": "https://localhost:9445/services/",
-     "signupWorkFlowServerURL": "https://localhost:9445/services/",
-     "appRegistrationWorkFlowServerURL": "https://localhost:9445/services/"
-
+     "workFlowServerURL": "https://<BPSHost>:<BPSPort>/services/",
     },
     "ssoConfiguration" : {
         "enabled" : "false",
@@ -23,7 +19,14 @@
         "identityAlias" : "",
         "responseSigningEnabled":"true",
         "keyStoreName" :""
-    }
+    },
 
+
+    "reverseProxy" : {
+        "enabled" : false,    // values true , false , "auto" - will look for  X-Forwarded-* headers
+        "host" : "sample.proxydomain.com", // If reverse proxy do not have a domain name use IP
+        "context":"",
+      //"regContext":"" // Use only if different path is used for registry
+    },
 
 }

@@ -16,20 +16,19 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.ext;
 
-import org.apache.axis2.AxisFault;
-import org.apache.axis2.description.WSDL2Constants;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.SynapseConstants;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
 
-import java.util.Date;
 import java.util.Map;
-import java.util.TreeMap;
+
 
 /**
  * A simple extension handler for the APIs deployed in the API gateway. This handler first
@@ -68,11 +67,25 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
-        return mediate(messageContext, DIRECTION_IN);
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_IN));
+        Timer.Context context = timer.start();
+        try {
+            return mediate(messageContext, DIRECTION_IN);
+        } finally {
+            context.stop();
+        }
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        return mediate(messageContext, DIRECTION_OUT);
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_OUT));
+        Timer.Context context = timer.start();
+        try {
+            return mediate(messageContext, DIRECTION_OUT);
+        } finally {
+            context.close();
+        }
     }
 }
 

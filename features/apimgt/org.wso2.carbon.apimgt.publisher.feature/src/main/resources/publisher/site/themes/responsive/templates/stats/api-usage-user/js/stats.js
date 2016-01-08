@@ -1,26 +1,7 @@
-var t_on = {
-    'apiChart': 1,
-    'subsChart': 1,
-    'serviceTimeChart': 1,
-    'tempLoadingSpace': 1
-};
 var currentLocation;
-
-var chartColorScheme1 = ["#3da0ea", "#bacf0b", "#e7912a", "#4ec9ce", "#f377ab", "#ec7337", "#bacf0b", "#f377ab", "#3da0ea", "#e7912a", "#bacf0b"];
-//fault colors || shades of red
-var chartColorScheme2 = ["#ED2939", "#E0115F", "#E62020", "#F2003C", "#ED1C24", "#CE2029", "#B31B1B", "#990000", "#800000", "#B22222", "#DA2C43"];
-//fault colors || shades of blue
-var chartColorScheme3 = ["#0099CC", "#436EEE", "#82CFFD", "#33A1C9", "#8DB6CD", "#60AFFE", "#7AA9DD", "#104E8B", "#7EB6FF", "#4981CE", "#2E37FE"];
-currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
-require(["dojo/dom", "dojo/domReady!"], function (dom) {
     currentLocation = window.location.pathname;
-    //Initiating the fake progress bar
-    jagg.fillProgress('apiChart');
-    jagg.fillProgress('subsChart');
-    jagg.fillProgress('serviceTimeChart');
-    jagg.fillProgress('tempLoadingSpace');
 
     jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "getFirstAccessTime", currentLocation: currentLocation  },
         function (json) {
@@ -52,30 +33,28 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         getDateTime(currentDay,currentDay-(604800000*4));
                     });
 
+                    $('#date-range').click(function(){
+                         $(this).removeClass('active');
+                    });
+
                     //date picker
-                    $('#date-range').dateRangePicker(
-                        {
-                            startOfWeek: 'monday',
-                            separator : ' to ',
-                            format: 'YYYY-MM-DD HH:mm',
-                            autoClose: false,
-                            time: {
-                                enabled: true
-                            },
-                            shortcuts:'hide',
-                            endDate:currentDay
-                        })
-                        .bind('datepicker-apply',function(event,obj)
-                        {
-                             btnActiveToggle(this);
-                             var from = convertDate(obj.date1);
-                             var to = convertDate(obj.date2);
-                             var fromStr = from.split(" ");
-                             var toStr = to.split(" ");
-                             var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
-                             $("#date-range").html(dateStr);
-                             drawAPIUsage(from,to);
-                        });
+                    $('#date-range').daterangepicker({
+                          timePicker: true,
+                          timePickerIncrement: 30,
+                          format: 'YYYY-MM-DD h:mm',
+                          opens: 'left',
+                    });
+
+                    $('#date-range').on('apply.daterangepicker', function(ev, picker) {
+                       btnActiveToggle(this);
+                       var from = convertTimeString(picker.startDate);
+                       var to = convertTimeString(picker.endDate);
+                       var fromStr = from.split(" ");
+                       var toStr = to.split(" ");
+                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                       $("#date-range span").html(dateStr);
+                       drawAPIUsage(from,to);
+                    });
 
                     //setting default date
                     var to = new Date();
@@ -93,21 +72,17 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                         $(this).siblings().removeClass('active');
                     });
 
-                    var width = $("#rangeSliderWrapper").width();
-                    //$("#rangeSliderWrapper").affix();
-                    $("#rangeSliderWrapper").width(width);
-
                 }
 
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><img src="../themes/default/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><img src="../themes/responsive/templates/stats/images/statsEnabledThumb.png" alt="Stats Enabled"></div>'));
                 }
 
-                else {
-                    $('#middle').html("");
-                    $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-usage-user/images/statsThumb.png" alt="Smiley face"></div>'));
+                else{
+                    $('.stat-page').html("");
+                    $('.stat-page').append($('<br><div class="errorWrapper"><span class="top-level-warning"><span class="glyphicon glyphicon-warning-sign blue"></span>'
+                        +i18n.t('errorMsgs.checkBAMConnectivity')+'</span><br/><img src="../themes/responsive/templates/stats/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
@@ -117,13 +92,13 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-            t_on['apiChart'] = 0;
+
         }, "json");
 
-});
 
 var subscriberDetails=[];
 var groupData = [];
+
 var drawAPIUsage = function (from,to) {
 
     var fromDate = from;
@@ -135,6 +110,7 @@ var drawAPIUsage = function (from,to) {
                         var newLength=0;
                         subscriberDetails=[];
                         var inputData=[];
+                        groupData = [];
 
                         if (length > 0) {
                             $('#pie-chart').empty();
@@ -146,7 +122,7 @@ var drawAPIUsage = function (from,to) {
 
                              for (var i = 0; i < length; i++) {
 
-                                 var apiData= JSON.parse(json.usage[i].apiName);
+                                 var apiData= json.usage[i].apiName;
 
                                  apiName_Provider=""+apiData[0]+" ("+apiData[2]+")";
                                  inputData.push({
@@ -226,8 +202,8 @@ var drawAPIUsage = function (from,to) {
                         }
                         else{
                                 $('#apiUsageByUserTable').hide();
-                                $('#tempLoadingSpaceUsageByUser').html('');
-                                $('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                                $('#noData').html('');
+                                $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                         }
                     }
@@ -249,20 +225,20 @@ var drawChart = function (from, to) {
     jagg.post("/site/blocks/stats/api-usage-user/ajax/stats.jag", { action: "getAPIUsageByUser", currentLocation: currentLocation, fromDate: fromDate, toDate: toDate},
         function (json) {
             if (!json.error) {
+                $('#spinner').hide();
                 $('#tooltipTable').find("tr:gt(0)").remove();
                 var length = json.usage.length;
-
-                $('#tempLoadingSpaceUsageByUser').empty();
+                $('#noData').empty();
                 $('#chartContainer').empty();
                 $('div#apiSelectTable_wrapper.dataTables_wrapper.no-footer').remove();
 
                 if (length == 0){
                     $('#apiUsageByUserTable').hide();
-                    $('#tempLoadingSpaceUsageByUser').html('');
-                    $('#tempLoadingSpaceUsageByUser').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                    $('#noData').html('');
+                    $('#noData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
 
                 } else {
-                    $('#apiUsage_note').show();
+                    $('#apiUsage_note').removeClass('hide');
                     var inputData=[];
                     for (var i = 0; i < length; i++) {
                         inputData.push({
@@ -272,7 +248,6 @@ var drawChart = function (from, to) {
                             "count": json.usage[i].count
                         } );
                     }
-
                     dataUsage = JSON.parse(JSON.stringify(inputData));
 
                     function orderByCountAscending(a, b) {
@@ -411,13 +386,13 @@ var drawChart = function (from, to) {
                     var sortData=[];
                     var chartData=[];
 
-                    var $dataTable =$('<table class="display defaultTable" width="100%" cellspacing="0" id="apiSelectTable"></table>');
+                    var $dataTable =$('<table class="display table table-striped table-bordered" width="100%" cellspacing="0" id="apiSelectTable"></table>');
 
                     $dataTable.append($('<thead class="tableHead"><tr>'+
                                             '<th width="10%"></th>'+
                                             '<th>API</th>'+
                                             '<th style="text-align:right" width="20%" >Subscriber Count</th>'+
-                                            '<th class="details-control pull-right sorting_disabled"></th>'+
+                                            '<th class="details-control sorting_disabled"></th>'+
                                         '</tr></thead>'));
 
                     sortData = dimple.filterData(data, "API", filterValues);
@@ -433,7 +408,7 @@ var drawChart = function (from, to) {
                                                 +'</td>'
                                                 +'<td style="text-align:left;"><label for='+n+'>'+sortData[n].API_name +'</label></td>'
                                                 +'<td style="text-align:right;"><label for='+n+'>'+sortData[n].SubscriberCount +'</label></td>'
-                                                +'<td class="details-control sorting_disabled" style="text-align:right;padding-right:30px;">Show more details<div style="display :inline"class="showDetail"></div></td></tr>'));
+                                                +'<td class="details-control" style="text-align:right;padding-right:30px;">Show more details<div style="display :inline"class="showDetail"></div></td></tr>'));
                             state_array.push(true);
                             defaultFilterValues.push(sortData[n].API_name);
                             chartData.push(sortData[n].API_name);
@@ -452,7 +427,7 @@ var drawChart = function (from, to) {
                     $('#tableContainer').append($dataTable);
                     $('#tableContainer').show();
 
-                    var table =$('#apiSelectTable').DataTable({
+                    var table = $('#apiSelectTable').DataTable({
                         "order": [[ 2, "desc" ]],
                         "fnDrawCallback": function(){
                             if(this.fnSettings().fnRecordsDisplay()<=$("#apiSelectTable_length option:selected" ).val()
@@ -465,7 +440,7 @@ var drawChart = function (from, to) {
                         { "bSortable": false },
                         null,
                         null,
-                        false,
+                        { "bSortable": false },
                         ],
                     });
                     $('.details-control').removeClass('sorting');
@@ -474,7 +449,7 @@ var drawChart = function (from, to) {
                     var detailRows = [];
                     $('#apiSelectTable tbody').on( 'click', 'tr td.details-control', function () {
                        var tr = $(this).closest('tr');
-                               var row = table.row( tr );
+                               var row = table.row(tr);
                                if ( row.child.isShown() ) {
                                    // This row is already open - close it
                                    $('div.slider', row.child()).slideUp( function () {
@@ -489,7 +464,7 @@ var drawChart = function (from, to) {
                                }
                     } );
 
-                    $('select').css('width','60px');
+                    $('select').css('width','80px');
                     chart.data = dimple.filterData(data, "API", defaultFilterValues);
 
                     var count=20;
@@ -586,12 +561,11 @@ var drawChart = function (from, to) {
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-            t_on['tempLoadingSpaceUsageByUser'] = 0;
         }, "json");
 }
 
 function format ( d ) {
-    var subTable=$('<div class="slider pull-right " ><table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"></table></div>');
+    var subTable=$('<div class="slider pull-right " ><table style="padding-left:50px;"></table></div>');
     subTable.append($('<thead><tr><th>Version</th><th>Subscriber Count</th><th>Hit Count</th></tr></thead>'));
 
     var versions=[];
@@ -636,7 +610,7 @@ function format ( d ) {
             }
 
             for(var k = 0; k < versions.length;k++){
-                subTable.append($('<tr><td >'+versions[k].version +'</td><td style="text-align:right">'+versions[k].SubCount+'</td><td style="text-align:right">'+versions[k].hitCount+'</td></tr>'));
+                subTable.append($('<tr><td >'+versions[k].version +'</td><td style="text-align:left">'+versions[k].SubCount+'</td><td style="text-align:left">'+versions[k].hitCount+'</td></tr>'));
             }
         }
     }
@@ -644,7 +618,7 @@ function format ( d ) {
     for ( var l = 0; l < versions.length; l++) {
         if($(d[0]).attr('data-item')==versions[l].apiName){
             if(versions[l].isChecked==false){
-                   subTable.append($('<tr style="text-align:right"><td >'+versions[l].version +'</td><td >'+versions[l].SubCount+'</td><td style="text-align:right">'+versions[l].hitCount+'</td></tr>'));
+                   subTable.append($('<tr ><td style="text-align:left">'+versions[l].version +'</td><td >'+versions[l].SubCount+'</td><td style="text-align:left">'+versions[l].hitCount+'</td></tr>'));
             }
         }
     }
@@ -685,16 +659,6 @@ var formatTimeChunk = function (t) {
     return t;
 };
 
-function convertDate(date) {
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-    var hour=date.getHours();
-    var minute=date.getMinutes();
-    return date.getFullYear() + '-' + (('' + month).length < 2 ? '0' : '')
-        + month + '-' + (('' + day).length < 2 ? '0' : '') + day +" "+ (('' + hour).length < 2 ? '0' : '')
-        + hour +":"+(('' + minute).length < 2 ? '0' : '')+ minute;
-}
-
 function btnActiveToggle(button){
     $(button).siblings().removeClass('active');
     $(button).addClass('active');
@@ -706,7 +670,8 @@ function getDateTime(currentDay,fromDay){
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
     var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
-    $("#date-range").html(dateStr);
-    $('#date-range').data('dateRangePicker').setDateRange(from,to);
+    $("#date-range span").html(dateStr);
+    $('#date-range').data('daterangepicker').setStartDate(from);
+    $('#date-range').data('daterangepicker').setEndDate(to);
     drawAPIUsage(from,to);
 }

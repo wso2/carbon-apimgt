@@ -50,9 +50,6 @@ public class HandlerConfig {
 
     public boolean hasProperties() {
 
-        if (this.properties.size() > 0) {
-            return true;
-        }
-        return false;
+        return (this.properties.size() > 0);
     }
 }

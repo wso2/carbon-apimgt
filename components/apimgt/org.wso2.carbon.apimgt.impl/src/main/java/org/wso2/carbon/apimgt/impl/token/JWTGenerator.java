@@ -23,9 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.util.*;
 
 public class JWTGenerator extends AbstractJWTGenerator {
@@ -40,7 +38,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         long currentTime = Calendar.getInstance().getTimeInMillis();
         long expireIn = currentTime + 1000 * 60 * getTTL();
 
-        String jwtBody = "";
+        //String jwtBody = "";
         String dialect;
         ClaimsRetriever claimsRetriever = getClaimsRetriever();
         if (claimsRetriever != null) {

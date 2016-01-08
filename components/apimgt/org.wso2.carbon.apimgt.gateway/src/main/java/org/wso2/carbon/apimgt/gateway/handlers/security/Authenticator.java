@@ -32,12 +32,12 @@ public interface Authenticator {
      *
      * @param env Current SynapseEnvironment instance containing the global/tenant configuration
      */
-    public void init(SynapseEnvironment env);
+    void init(SynapseEnvironment env);
 
     /**
      * Destroys this authenticator and releases any resources allocated to it.
      */
-    public void destroy();
+    void destroy();
 
     /**
      * Authenticates the given request to see if an API consumer is allowed to access
@@ -53,7 +53,7 @@ public interface Authenticator {
      * @return true if the authentication is successful (never returns false)
      * @throws APISecurityException If an authentication failure or some other error occurs
      */
-    public boolean authenticate(MessageContext synCtx) throws APISecurityException;
+    boolean authenticate(MessageContext synCtx) throws APISecurityException;
 
     /**
      * Returns a string representation of the authentication challenge imposed by this
@@ -62,8 +62,8 @@ public interface Authenticator {
      *
      * @return A string representation of the authentication challenge
      */
-    public String getChallengeString();
+    String getChallengeString();
     
-    public String getRequestOrigin();
+    String getRequestOrigin();
     
 }

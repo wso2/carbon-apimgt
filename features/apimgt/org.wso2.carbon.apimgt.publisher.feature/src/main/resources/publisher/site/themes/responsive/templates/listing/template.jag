@@ -15,6 +15,11 @@
     if ((outputs.apis != null && outputs.apis.length > 0) || query != null) {
         jagg.includeBlock("search/api-search", null);
     }
+    //Fetch tier information to create sample API
+    var mod = jagg.module("api");
+    var tiers = mod.getTiers().tiers;
+    var defaultTier = tiers[0].tierName;
+    var gatewayURL = mod.getGatewayURL().gatewayURL;
     %>
     <%
     if (outputs.error) { %>
@@ -25,6 +30,7 @@
    	var user = <%=jagg.getUser()%>;
 	var isPublishPermitted = <%=outputs.isPublishPermitted%>;
 	var username = user.username ; 
+	var siteContext = "<%=jagg.getSiteContext()%>";
 
    function hideMsg() {
        $('#apiInfo').hide("fast");
@@ -42,10 +48,12 @@
        });
 
    </script>
+
        <div class="alert alert-info" id="apiInfo" style="display:none;">
            <div style="padding-bottom:10px"><b><%=i18n.localize("aboutAPIs")%></b></div>
        </div>
-
+    <div class="col-md-12">
+    <div class="row">
     <ul class="thumbnails">
         <span class="loading"></span>
         <%
@@ -141,16 +149,20 @@
                 </div>
                 <%} else {%>
         <li>
-            <div class="thumbnail">
+            <%if(outputs.isCreatePermitted){%>
+                <button id="alertClose" title="Delete API" type="button" class="close  btn-api-del" onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;"><%=i18n.localize("times")%></button>
+            <%}%>
+            <div class="thumbnail" >
                     <a href="<%=path%>">
                         <% if(api.thumb == null) { %>
-                        <img class="thumb responsive" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
+                        <img width="150" height="150" style="min-width:150px;min-height:150px" class="thumb responsive" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/api-default.png"))%>" alt=""/>
                         <% } else{ %>
-                        <img class="thumb responsive" src="<%=jagg.getRegistryPath(api.thumb)%>" alt=""/>
+                        <img width="150" height="150" style="min-width:150px;min-height:150px" class="thumb responsive" src="<%=jagg.getRegistryPath(api.thumb)%>" alt=""/>
                         <% } %>
                     </a>
+
                     <div class="caption">
-                        <a href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="link-h1" title="<%=api.name%>">
+                        <a class ="fade-out" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" class="link-h1" title="<%=api.name%>">
                             <%=api.name%>
                         </a>
                         <div class="version-provider-wrapper"><%=api.version%> <a class="link-h2"><%=api.provider%></a></div>
@@ -163,15 +175,14 @@
                             </a>
                         </div>
                         <p><%=api.status%></p>
-                        <%if(outputs.isCreatePermitted){%>
-                            <button title="Delete API" type="button" class="close btn-api-del" onClick="removeAPI('<%=api.name%>','<%=api.version%>','<%=api.provider%>',this);return false;"><%=i18n.localize("times")%></button>
-                        <%}%>
+
                     </div>
                 </div>
         </li>
         <% }} }%>
     </ul>
-
+    </div>
+    </div>
 
    <!--START Pagination links-->
    <% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages}); %>
@@ -189,7 +200,7 @@
         <%if(outputs.isCreatePermitted){ %>
       <div style="padding-bottom:10px"><%=i18n.localize("noAPIsMsg1")%></div>
         <div style="display: inline"><a class="btn btn-primary" href="<%=jagg.getMappedUrl("/add")%>" onclick="jagg.sessionAwareJS({redirect:'<%=jagg.getMappedUrl("/add")%><%=urlPrefix%>',e:event})" ><%=i18n.localize("newAPI")%></a></div>
-        <div style="display: inline"><a class="btn btn-primary" href="#" id="deploy_sample1" ><%=i18n.localize("SampleAPI")%></a></div>
+        <div style="display: inline"><a class="btn btn-primary" href="#" id="deploy_sample1" onclick="deploySampleApi('<%=defaultTier%>', '<%=gatewayURL%>')" ><%=i18n.localize("SampleAPI")%></a></div>
         <%}else{%>
         <div style="padding-bottom:10px"><%=i18n.localize("noAPIsMsg")%></div>
         <%}%>

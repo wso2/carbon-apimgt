@@ -23,14 +23,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ResourceInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -41,7 +39,6 @@ public class APITokenAuthenticator {
 
     private static final Log log = LogFactory.getLog(APITokenAuthenticator.class);
 
-    private boolean isGatewayAPIKeyValidationEnabled = APIUtil.isAPIGatewayKeyCacheEnabled();
 
 
     public APIInfoDTO doGetAPIInfo(String context, String apiVersion) {
@@ -56,7 +53,6 @@ public class APITokenAuthenticator {
 
             ResourceInfoDTO resourceInfoDTO = null;
             VerbInfoDTO verbInfoDTO;
-            int i = 0;
             for (URITemplate uriTemplate : uriTemplates) {
                 if (resourceInfoDTO != null && resourceInfoDTO.getUrlPattern().equalsIgnoreCase(uriTemplate.getUriTemplate())) {
                     HashSet<VerbInfoDTO> verbs = (HashSet<VerbInfoDTO>) resourceInfoDTO.getHttpVerbs();
@@ -85,8 +81,7 @@ public class APITokenAuthenticator {
         return apiInfoDTO;
     }
 
-    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
-    ) throws APIManagementException {
+    public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws APIManagementException {
         try {
             return ApiMgtDAO.getAllURITemplates(context, apiVersion);
         } catch (APIManagementException e) {
@@ -99,7 +94,7 @@ public class APITokenAuthenticator {
 
         String cacheKey = context + ":" + apiVersion;
         APIInfoDTO apiInfoDTO = null;
-        if (isGatewayAPIKeyValidationEnabled) {
+        if (ServiceReferenceHolder.getInstance().isGatewayAPIKeyValidationEnabled()) {
             apiInfoDTO = (APIInfoDTO) getResourceCache().get(cacheKey);
         }
 
@@ -114,7 +109,7 @@ public class APITokenAuthenticator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (isGatewayAPIKeyValidationEnabled) {
+            if (ServiceReferenceHolder.getInstance().isGatewayAPIKeyValidationEnabled()) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
             //On a cache hit
@@ -147,7 +142,7 @@ public class APITokenAuthenticator {
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
-            if (isGatewayAPIKeyValidationEnabled) {
+            if (ServiceReferenceHolder.getInstance().isGatewayAPIKeyValidationEnabled()) {
                 matchingVerb = (VerbInfoDTO) getResourceCache().get(requestCacheKey);
             }
 
@@ -165,7 +160,7 @@ public class APITokenAuthenticator {
                     }
                     //If the urlPattern ends with a '/', remove that as well.
                     //urlPattern = RESTUtils.trimTrailingSlashes(urlPattern);
-                    if (urlPattern != null && urlPattern.endsWith("/")) {
+                    if (urlPattern.endsWith("/")) {
                         urlPattern = urlPattern.substring(0, urlPattern.length() - 1);
                     }
 

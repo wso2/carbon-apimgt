@@ -28,5 +28,5 @@ public interface LoginPostExecutor {
      * @param response login response
      * @return organization identifier
      */
-    public String getGroupingIdentifiers(String response);
+    String getGroupingIdentifiers(String response);
 }

@@ -26,7 +26,6 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;

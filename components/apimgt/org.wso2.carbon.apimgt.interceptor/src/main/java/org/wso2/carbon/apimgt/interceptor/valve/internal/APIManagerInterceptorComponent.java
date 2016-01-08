@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.apimgt.core.APIManagerConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.interceptor.UsageStatConfiguration;
 import org.wso2.carbon.apimgt.interceptor.valve.APIManagerInterceptorValve;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
@@ -79,8 +80,7 @@ public class APIManagerInterceptorComponent {
 		APIMgtUsageDataPublisher publisher = null;
 
 		try {
-			publisher = (APIMgtUsageDataPublisher) Class.forName(statsPublisherClass)
-			                                                                     .newInstance();
+			publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(statsPublisherClass).newInstance();
 		} catch (InstantiationException e) {
 			String msg = "Error instantiating";
 			log.error(msg + statsPublisherClass);

@@ -26,28 +26,19 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -148,7 +139,7 @@ public class APIManagerConfiguration {
             List<String> list = entry.getValue();
             for (int i = 0; i < list.size(); i++) {
                 String text = list.remove(i);
-                list.add(i, replaceSystemProperty(text));
+                list.add(i, APIUtil.replaceSystemProperty(text));
             }
         }
     }
@@ -166,7 +157,7 @@ public class APIManagerConfiguration {
                 if (secretResolver.isInitialized() && secretResolver.isTokenProtected(key)) {
                     value = secretResolver.resolve(key);
                 }
-                addToConfiguration(key, replaceSystemProperty(value));
+                addToConfiguration(key, APIUtil.replaceSystemProperty(value));
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
                 apiGatewayEnvironments = new HashMap<String, Environment>();
@@ -181,12 +172,12 @@ public class APIManagerConfiguration {
                     } else {
                         environment.setShowInConsole(true);
                     }
-                    environment.setName(replaceSystemProperty(
+                    environment.setName(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName("Name")).getText()));
-                    environment.setServerURL(replaceSystemProperty(
+                    environment.setServerURL(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_SERVER_URL)).getText()));
-                    environment.setUserName(replaceSystemProperty(
+                    environment.setUserName(APIUtil.replaceSystemProperty(
 
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_USERNAME)).getText()));
@@ -199,8 +190,8 @@ public class APIManagerConfiguration {
                         value = environmentElem.getFirstChildWithName(new QName(
                                 APIConstants.API_GATEWAY_PASSWORD)).getText();
                     }
-                    environment.setPassword(replaceSystemProperty(value));
-                    environment.setApiGatewayEndpoint(replaceSystemProperty(
+                    environment.setPassword(APIUtil.replaceSystemProperty(value));
+                    environment.setApiGatewayEndpoint(APIUtil.replaceSystemProperty(
                             environmentElem.getFirstChildWithName(new QName(
                                     APIConstants.API_GATEWAY_ENDPOINT)).getText()));
                     OMElement description =
@@ -213,6 +204,9 @@ public class APIManagerConfiguration {
                     if (!apiGatewayEnvironments.containsKey(environment.getName())) {
                         apiGatewayEnvironments.put(environment.getName(), environment);
                     } else {
+                        /*
+                          This will be happen only on server startup therefore we log and continue the startup
+                         */
                         log.error("Duplicate environment name found in api-manager.xml " +
                                   environment.getName());
                     }
@@ -227,18 +221,14 @@ public class APIManagerConfiguration {
                     store.setType(type); //Set Store type [eg:wso2]
                     String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
-                        try {
-                            throw new APIManagementException("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
-                        } catch (APIManagementException e) {
-                            //ignore
-                        }
+                        log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");
                     }
                     store.setName(name); //Set store name
                     OMElement configDisplayName = storeElem.getFirstChildWithName(new QName(APIConstants.EXTERNAL_API_STORE_DISPLAY_NAME));
-                    String displayName = (configDisplayName != null) ? replaceSystemProperty(
+                    String displayName = (configDisplayName != null) ? APIUtil.replaceSystemProperty(
                             configDisplayName.getText()) : name;
                     store.setDisplayName(displayName);//Set store display name
-                    store.setEndpoint(replaceSystemProperty(
+                    store.setEndpoint(APIUtil.replaceSystemProperty(
                             storeElem.getFirstChildWithName(new QName(
                                     APIConstants.EXTERNAL_API_STORE_ENDPOINT)).getText())); //Set store endpoint,which is used to publish APIs
                     store.setPublished(false);
@@ -254,16 +244,12 @@ public class APIManagerConfiguration {
 
                                 value = password.getText();
                             }
-                            store.setPassword(replaceSystemProperty(value));
-                            store.setUsername(replaceSystemProperty(
+                            store.setPassword(APIUtil.replaceSystemProperty(value));
+                            store.setUsername(APIUtil.replaceSystemProperty(
                                     storeElem.getFirstChildWithName(new QName(
                                             APIConstants.EXTERNAL_API_STORE_USERNAME)).getText())); //Set store login username [optional]
                         } else {
-                            try {
-                                throw new APIManagementException("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
-                            } catch (APIManagementException e) {
-                                //ignore
-                            }
+                            log.error("The user-credentials of API Publisher is not defined in the <ExternalAPIStore> config of api-manager.xml.");
                         }
                     }
                     externalAPIStores.add(store);
@@ -318,7 +304,7 @@ public class APIManagerConfiguration {
     }
 
     private String getKey(Stack<String> nameStack) {
-        StringBuffer key = new StringBuffer();
+        StringBuilder key = new StringBuilder();
         for (int i = 0; i < nameStack.size(); i++) {
             String name = nameStack.elementAt(i);
             key.append(name).append(".");
@@ -343,54 +329,7 @@ public class APIManagerConfiguration {
             list.add(value);
         }
     }
-
-    public static String replaceSystemProperty(String text) {
-        int indexOfStartingChars = -1;
-        int indexOfClosingBrace;
-
-        // The following condition deals with properties.
-        // Properties are specified as ${system.property},
-        // and are assumed to be System properties
-        while (indexOfStartingChars < text.indexOf("${")
-               && (indexOfStartingChars = text.indexOf("${")) != -1
-               && (indexOfClosingBrace = text.indexOf('}')) != -1) { // Is a
-            // property
-            // used?
-            String sysProp = text.substring(indexOfStartingChars + 2,
-                                            indexOfClosingBrace);
-            String propValue = System.getProperty(sysProp);
-            if (propValue == null) {
-                if (sysProp.equals("carbon.context")) {
-                    propValue = ServiceReferenceHolder.getContextService().getServerConfigContext().getContextRoot();
-                } else if (sysProp.equals("admin.username") || sysProp.equals("admin.password")) {
-                    try {
-                        RealmConfiguration realmConfig = new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
-                        if (sysProp.equals("admin.username")) {
-                            propValue = realmConfig.getAdminUserName();
-                        } else {
-                            propValue = realmConfig.getAdminPassword();
-                        }
-                    } catch (UserStoreException e) {
-                        //Can't throw an exception because the server is starting and can't be halted.
-                        log.error(e.getMessage());
-                        return null;
-                    }
-                }
-            }
-            if (propValue != null) {
-                text = text.substring(0, indexOfStartingChars) + propValue
-                       + text.substring(indexOfClosingBrace + 1);
-            }
-            if (sysProp.equals("carbon.home") && propValue != null
-                && propValue.equals(".")) {
-
-                text = new File(".").getAbsolutePath() + File.separator + text;
-
-            }
-        }
-        return text;
-    }
-
+    
     public Map<String, Environment> getApiGatewayEnvironments() {
         return apiGatewayEnvironments;
     }
@@ -414,12 +353,21 @@ public class APIManagerConfiguration {
      * return void
      */
     private void addKeyManagerConfigsAsSystemProperties() {
-        URL keyManagerURL = null;
+        URL keyManagerURL;
         try {
             keyManagerURL = new URL(configuration.get(APIConstants.KEYMANAGER_SERVERURL).get(0));
             String hostname = keyManagerURL.getHost();
+            
             int port = keyManagerURL.getPort();
+            if (port == -1) {
+                if (APIConstants.HTTPS_PROTOCOL.equals(keyManagerURL.getProtocol())) {
+                    port = APIConstants.HTTPS_PROTOCOL_PORT;
+                } else {
+                    port = APIConstants.HTTP_PROTOCOL_PORT;
+                }
+            }           
             System.setProperty(APIConstants.KEYMANAGER_PORT, String.valueOf(port));
+            
             if (hostname.equals(System.getProperty(APIConstants.CARBON_LOCALIP))) {
                 System.setProperty(APIConstants.KEYMANAGER_HOSTNAME, "localhost");
             } else {

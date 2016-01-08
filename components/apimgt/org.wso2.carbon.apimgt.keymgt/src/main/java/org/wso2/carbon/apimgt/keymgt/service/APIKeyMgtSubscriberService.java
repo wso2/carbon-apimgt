@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.keymgt.service;
 
-import org.apache.amber.oauth2.common.OAuth;
+import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
@@ -31,7 +31,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.codehaus.jettison.json.JSONObject;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.handlers.security.stub.types.APIKeyMapping;
@@ -43,7 +43,6 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
-import org.wso2.carbon.apimgt.keymgt.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
 import org.wso2.carbon.context.CarbonContext;
@@ -56,19 +55,20 @@ import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
+import org.wso2.carbon.identity.oauth.OAuthUtil;
 import org.wso2.carbon.identity.oauth.cache.CacheKey;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.cache.OAuthCacheKey;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.user.core.UserCoreConstants;
+import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,48 +85,21 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     private static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
 
-    /**
-     * Get the access token for a user per given API. Users/developers can use this access token
-     * to consume the API by directly passing it as a bearer token as per the OAuth 2.0 specification.
-     *
-     * @param userId     User/Developer name
-     * @param apiInfoDTO Information about the API to which the Access token will be issued.
-     *                   Provider name, API name and the version should be provided to uniquely identify
-     *                   an API.
-     * @param tokenType  Type (scope) of the required access token
-     * @return Access Token
-     * @throws APIKeyMgtException Error when getting the AccessToken from the underlying token store.
-     */
-    public String getAccessToken(String userId, APIInfoDTO apiInfoDTO,
-                                 String applicationName, String tokenType, String callbackUrl) throws APIKeyMgtException,
-            APIManagementException, IdentityException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-        String accessToken = apiMgtDAO.getAccessKeyForAPI(userId, applicationName, apiInfoDTO, tokenType);
-        if (accessToken == null) {
-            //get the tenant id for the corresponding domain
-            String tenantAwareUserId = userId;
-            int tenantId = IdentityUtil.getTenantIdOFUser(userId);
 
-            String[] credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
-
-            accessToken = apiMgtDAO.registerAccessToken(credentials[0], applicationName,
-                    tenantAwareUserId, tenantId, apiInfoDTO, tokenType);
-        }
-        return accessToken;
-    }
 
     /**
      * Register an OAuth application for the given user
-     * @param userId
-     * @param applicationName
-     * @param callbackUrl
-     * @return
+     * @param oauthApplicationInfo - An OAuthApplicationInfo object that holds the application details.
+     * @return OAuthApplicationInfo containing the details of the created App.
      * @throws APIKeyMgtException
      * @throws APIManagementException
-     * @throws IdentityException
      */
-    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl)
-            throws APIKeyMgtException, APIManagementException, IdentityException {
+    public OAuthApplicationInfo createOAuthApplicationByApplicationInfo(OAuthApplicationInfo oauthApplicationInfo)
+            throws APIKeyMgtException, APIManagementException {
+
+        String userId = oauthApplicationInfo.getAppOwner();
+        String applicationName = oauthApplicationInfo.getClientName();
+        String callbackUrl = oauthApplicationInfo.getCallBackURL();
 
         if (userId == null || userId.isEmpty()) {
             return null;
@@ -135,6 +108,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         String userName = MultitenantUtils.getTenantAwareUsername(userId);
+        String userNameForSP = userName;
 
         PrivilegedCarbonContext.startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
@@ -145,8 +119,14 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
         try {
 
+            // Replace domain separator by "_" if user is coming from a secondary userstore.
+            String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
+            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            }
+
             // Append the username before Application name to make application name unique across two users.
-            applicationName = APIUtil.replaceEmailDomain(userName) + "_" + applicationName;
+            applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
 
             // Create the Service Provider
             ServiceProvider serviceProvider = new ServiceProvider();
@@ -155,6 +135,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
+            ServiceProvider serviceProviderCreated = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
+            serviceProviderCreated.setSaasApp(oauthApplicationInfo.getIsSaasApplication());
+            appMgtService.updateApplication(serviceProviderCreated, tenantDomain, userName);
 
             ServiceProvider createdServiceProvider = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
 
@@ -164,9 +147,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             // Then Create OAuthApp
             OAuthAdminService oAuthAdminService = new OAuthAdminService();
-
             OAuthConsumerAppDTO oAuthConsumerAppDTO = new OAuthConsumerAppDTO();
-
             oAuthConsumerAppDTO.setApplicationName(applicationName);
             oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
 
@@ -196,7 +177,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
             log.debug("Created OAuth App " + applicationName);
             OAuthConsumerAppDTO createdApp = oAuthAdminService.getOAuthApplicationDataByAppName(oAuthConsumerAppDTO
-                                                                                                        .getApplicationName());
+                    .getApplicationName());
             log.debug("Retrieved Details for OAuth App " + createdApp.getApplicationName());
 
             // Set the OAuthApp in InboundAuthenticationConfig
@@ -222,22 +203,186 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             createdServiceProvider.setInboundAuthenticationConfig(inboundAuthenticationConfig);
 
             // Update the Service Provider app to add OAuthApp as an Inbound Authentication Config
-            appMgtService.updateApplication(createdServiceProvider, tenantDomain, userName);
+            appMgtService.updateApplication(createdServiceProvider,tenantDomain,userName);
 
 
             OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
             oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
             oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
             oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
+            oAuthApplicationInfo.setIsSaasApplication(createdServiceProvider.isSaasApp());
 
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                                                      OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
+                    OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                                                      OAUTH_CLIENT_NAME, createdApp.getApplicationName());
+                    OAUTH_CLIENT_NAME, createdApp.getApplicationName());
             oAuthApplicationInfo.addParameter(ApplicationConstants.
-                                                      OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
+                    OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
 
             return oAuthApplicationInfo;
+
+        } catch (IdentityApplicationManagementException e) {
+            APIUtil.handleException("Error occurred while creating ServiceProvider for app " + applicationName, e);
+        } catch (Exception e) {
+            APIUtil.handleException("Error occurred while creating OAuthApp " + applicationName, e);
+        } finally {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(baseUser);
+        }
+        return null;
+
+    }
+
+    /**
+     * Register an OAuth application for the given user
+     * @param userId - username of the Application owner
+     * @param applicationName - name of the Application
+     * @param callbackUrl - callback url of the Application
+     * @return OAuthApplicationInfo containing the details of the created App.
+     * @throws APIKeyMgtException
+     * @throws APIManagementException
+     */
+    public OAuthApplicationInfo createOAuthApplication(String userId, String applicationName, String callbackUrl)
+            throws APIKeyMgtException, APIManagementException {
+
+        OAuthApplicationInfo oauthApplicationInfo = new OAuthApplicationInfo();
+        oauthApplicationInfo.setClientName(applicationName);
+        oauthApplicationInfo.setCallBackURL(callbackUrl);
+        oauthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, userId);
+        return createOAuthApplicationByApplicationInfo(oauthApplicationInfo);
+    }
+
+    /**
+     * Register an OAuth application for the given user
+     *
+     * @param userId
+     * @param applicationName
+     * @param callbackUrl
+     * @return
+     * @throws APIKeyMgtException
+     * @throws APIManagementException
+     * @throws IdentityException
+     */
+    public OAuthApplicationInfo updateOAuthApplication(String userId, String applicationName, String callbackUrl,
+                                                       String consumerKey, String[] grantTypes)
+            throws APIKeyMgtException, APIManagementException, IdentityException {
+
+        if (userId == null || userId.isEmpty()) {
+            return null;
+        }
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+        String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String userName = MultitenantUtils.getTenantAwareUsername(userId);
+        String userNameForSP = userName;
+
+        if (log.isDebugEnabled()) {
+
+            StringBuilder message = new StringBuilder();
+            message.append("Updating OAuthApplication for ").append(userId).append(" with details : ");
+            if (consumerKey != null) {
+                message.append(" consumerKey = ").append(consumerKey);
+            }
+
+            if (callbackUrl != null) {
+                message.append(", callbackUrl = ").append(callbackUrl);
+            }
+
+            if (applicationName != null) {
+                message.append(", applicationName = ").append(applicationName);
+            }
+
+            if (grantTypes != null && grantTypes.length > 0) {
+                message.append(", grant Types = ");
+                for (String grantType : grantTypes) {
+                    message.append(grantType).append(" ");
+                }
+            }
+            log.debug(message.toString());
+        }
+
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+
+        // Acting as the provided user. When creating Service Provider/OAuth App,
+        // username is fetched from CarbonContext
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userName);
+
+        try {
+
+            // Replace domain separator by "_" if user is coming from a secondary userstore.
+            String domain = UserCoreUtil.extractDomainFromName(userNameForSP);
+            if (domain != null && !domain.isEmpty() && !UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(domain)) {
+                userNameForSP = userNameForSP.replace(UserCoreConstants.DOMAIN_SEPARATOR, "_");
+            }
+
+            if (applicationName != null && !applicationName.isEmpty()) {
+                // Append the username before Application name to make application name unique across two users.
+                applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
+                log.debug("Application Name has changed, hence updating Service Provider Name..");
+
+                // Get ServiceProvider Name by consumer Key.
+                ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
+                String appName = appMgtService.getServiceProviderNameByClientId(consumerKey, "oauth2", tenantDomain);
+                ServiceProvider serviceProvider =
+                                        appMgtService.getApplicationExcludingFileBasedSPs(appName, tenantDomain);
+                if (serviceProvider != null) {
+                    serviceProvider.setApplicationName(applicationName);
+                    serviceProvider.setDescription("Service Provider for application " + applicationName);
+                    appMgtService.updateApplication(serviceProvider, tenantDomain, userName);
+                }
+                log.debug("Service Provider Name Updated to : " + applicationName);
+            }
+
+            OAuthAdminService oAuthAdminService = new OAuthAdminService();
+            OAuthConsumerAppDTO oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
+
+            if (oAuthConsumerAppDTO != null) {
+                // TODO: Make sure that App is only updated by the user who created it.
+                //if(userName.equals(oAuthConsumerAppDTO.getUsername()))
+                if (callbackUrl != null && !callbackUrl.isEmpty()) {
+                    oAuthConsumerAppDTO.setCallbackUrl(callbackUrl);
+                    log.debug("CallbackURL is set to : " + callbackUrl);
+                }
+                oAuthConsumerAppDTO.setOauthConsumerKey(consumerKey);
+                if (applicationName != null && !applicationName.isEmpty()) {
+                    oAuthConsumerAppDTO.setApplicationName(applicationName);
+                    log.debug("Name of the OAuthApplication is set to : " + applicationName);
+                }
+
+                if (grantTypes != null && grantTypes.length > 0) {
+                    StringBuilder builder = new StringBuilder();
+                    for (String grantType : grantTypes) {
+                        builder.append(grantType + " ");
+                    }
+                    builder.deleteCharAt(builder.length() - 1);
+                    oAuthConsumerAppDTO.setGrantTypes(builder.toString());
+                } else {
+                    //update the grant type with respect to callback url
+                    String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
+                    StringBuilder grantTypeString = new StringBuilder();
+
+                    for (String grantType : allowedGrantTypes) {
+                        if (callbackUrl == null || callbackUrl.isEmpty()) {
+                            if ("authorization_code".equals(grantType) || "implicit".equals(grantType)) {
+                                continue;
+                            }
+                        }
+                        grantTypeString.append(grantType).append(" ");
+                    }
+                    oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
+                }               
+                
+                
+                oAuthAdminService.updateConsumerApplication(oAuthConsumerAppDTO);
+                log.debug("Updated the OAuthApplication...");
+
+                oAuthConsumerAppDTO = oAuthAdminService.getOAuthApplicationData(consumerKey);
+                OAuthApplicationInfo oAuthApplicationInfo = createOAuthAppInfoFromDTO(oAuthConsumerAppDTO);
+                return oAuthApplicationInfo;
+            }
+
+            return createOAuthAppInfoFromDTO(oAuthConsumerAppDTO);
 
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while creating ServiceProvider for app " + applicationName, e);
@@ -287,10 +432,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().startTenantFlow();
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(subscriber.getTenantId(), true);
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAwareUsername);
-        String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
         try {
 
+            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
 
             log.debug("Getting OAuth App for " + consumerKey);
@@ -313,66 +458,6 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().endTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(baseUser);
         }
-    }
-
-    /**
-     * Get the access token for the specified application. This token can be used as an OAuth
-     * 2.0 bearer token to access any API in the given application.
-     *
-     * @param userId          User/Developer name
-     * @param applicationName Name of the application
-     * @param tokenType       Type (scope) of the required access token
-     * @param tokenScope      Scope of the token
-     * @return Access token
-     * @throws APIKeyMgtException on error
-     */
-    public ApplicationKeysDTO getApplicationAccessToken(String userId, String applicationName, String tokenType,
-                                                        String callbackUrl, String[] allowedDomains,
-                                                        String validityTime, String tokenScope)
-            throws APIKeyMgtException, APIManagementException, IdentityException {
-
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
-
-        OAuthApplicationInfo oAuthApplicationInfo = null;
-        String accessToken = apiMgtDAO.getAccessKeyForApplication(userId, applicationName, tokenType);
-
-        Application application = apiMgtDAO.getApplicationByName(applicationName, userId, null);
-        oAuthApplicationInfo = apiMgtDAO.getClientOfApplication(application.getId(), tokenType);
-        if (oAuthApplicationInfo == null) {
-            throw new APIKeyMgtException("Unable to locate oAuth Application");
-        } else {
-            if (oAuthApplicationInfo.getClientId() == null) {
-                throw new APIKeyMgtException("Consumer key value is null can not get application access token");
-            } else if (oAuthApplicationInfo.getParameter("client_secret") == null) {
-                throw new APIKeyMgtException("Consumer secret value is null can not get application access token");
-
-            }
-
-            String consumerKey = oAuthApplicationInfo.getClientId();
-            String consumerSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
-            if (accessToken == null) {
-                //get the tenant id for the corresponding domain
-                String tenantAwareUserId = userId;
-
-                String state = apiMgtDAO.getRegistrationApprovalState(application.getId(), tokenType);
-                if (APIConstants.AppRegistrationStatus.REGISTRATION_APPROVED.equals(state)) {
-                    //credentials = apiMgtDAO.addOAuthConsumer(tenantAwareUserId, tenantId, applicationName, callbackUrl);
-
-                    accessToken = apiMgtDAO.registerApplicationAccessToken(oAuthApplicationInfo.getClientId(), application.getId(),
-                            applicationName,
-                            tenantAwareUserId, tokenType, allowedDomains, validityTime,tokenScope);
-                }
-
-            }
-
-            ApplicationKeysDTO keys = new ApplicationKeysDTO();
-            keys.setApplicationAccessToken(accessToken);
-            keys.setConsumerKey(consumerKey);
-            keys.setConsumerSecret(consumerSecret);
-            keys.setValidityTime(validityTime);
-            return keys;
-        }
-
     }
 
     /**
@@ -440,8 +525,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 		int revokeEndpointPort = revokeEndpointURL.getPort();
 	
 
-        HttpClient tokenEPClient =  APIKeyMgtUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
-        HttpClient revokeEPClient = APIKeyMgtUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
+        HttpClient tokenEPClient =  APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
+        HttpClient revokeEPClient = APIUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
         HttpPost httpTokpost = new HttpPost(tokenEndpoint);
         HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
 
@@ -601,11 +686,34 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
     public void clearOAuthCache(String consumerKey, String authorizedUser) {
         OAuthCache oauthCache;
-        CacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
+        OAuthCacheKey cacheKey = new OAuthCacheKey(consumerKey + ":" + authorizedUser);
         if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
-            oauthCache = OAuthCache.getInstance(OAuthServerConfiguration.getInstance().getOAuthCacheTimeout());
+            oauthCache = OAuthCache.getInstance();
             oauthCache.clearCacheEntry(cacheKey);
         }
+    }
+
+    /**
+     * Convert {@link org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO} to an
+     * {@link org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo}
+     *
+     * @param createdApp Response from OAuthAdminService
+     * @return Converted {@link org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo}
+     */
+    private OAuthApplicationInfo createOAuthAppInfoFromDTO(OAuthConsumerAppDTO createdApp) {
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setClientId(createdApp.getOauthConsumerKey());
+        oAuthApplicationInfo.setCallBackURL(createdApp.getCallbackUrl());
+        oAuthApplicationInfo.setClientSecret(createdApp.getOauthConsumerSecret());
+
+        oAuthApplicationInfo.addParameter(ApplicationConstants.
+                OAUTH_REDIRECT_URIS, createdApp.getCallbackUrl());
+        oAuthApplicationInfo.addParameter(ApplicationConstants.
+                OAUTH_CLIENT_NAME, createdApp.getApplicationName());
+        oAuthApplicationInfo.addParameter(ApplicationConstants.
+                OAUTH_CLIENT_GRANT, createdApp.getGrantTypes());
+
+        return oAuthApplicationInfo;
     }
 }
 

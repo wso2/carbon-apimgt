@@ -1,0 +1,74 @@
+<% jagg.template("api/recently-added", function(inputs, outputs, jagg) { %>
+<% 
+
+   var theme = jagg.getUserTheme().base;
+   var themePath = jagg.url('/site/themes/'+theme+"/");
+   var registryPath = jagg.getRegistryPath("");
+%>
+
+<div id="recently-added" class="panel panel-default">
+  <div class="panel-heading"><%=i18n.localize("recentlyAdded")%></div>
+  <div class="panel-body">
+  Loading ....
+  </div>
+  <script id="recently-added-template" type="text/x-handlebars-template">
+    {{#each apis}}
+    {{#if @index}}<hr />{{/if}}
+    <div class="row">
+      <div class="col-md-4">
+        <a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" >
+          <img src="{{ thumbnailurl }}" width="70px" height="70px"/>
+        </a>
+      </div>
+      <div class="col-md-8">
+        <a href="<%=jagg.urlTenanted("/site/pages/item-info.jag?")%>&name={{ name }}&version={{ version }}&provider={{ provider }}" >      
+        <strong class="fade-out">{{ name }}-{{ version }}</strong>
+        </a>
+        <div>{{ displayOwner }}</div>
+        <input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
+      </div>
+    </div>
+    {{else}}      
+          <div class="text-muted" style="padding:15px">No APIs to display.</div>  
+    {{/each}}   
+  </script>  
+</div>
+
+<script type="text/javascript">
+  $(function(){
+    jagg.post("/site/blocks/api/recently-added/ajax/list.jag", {
+      <% if(jagg.getTenantDomain()){ %>
+      tenant: "<%= jagg.getTenantDomain()%>",
+      <% } %>
+      action:"getRecentlyAddedAPIs",
+      limit:5 
+    }, function (result) {
+         if (result.error == false) {
+          for(var i = 0; i < result.apis.length;i++){
+            if(/^images\//.test(result.apis[i].thumbnailurl)){
+              result.apis[i].thumbnailurl = "<%= themePath %>"+result.apis[i].thumbnailurl;
+            }
+            else{
+              result.apis[i].thumbnailurl = "<%= registryPath %>"+result.apis[i].thumbnailurl;  
+            }
+            if(result.apis[i].isAdvertiseOnly != null && result.apis[i].isAdvertiseOnly){
+              result.apis[i].displayOwner = result.apis[i].owner;
+            }
+            else if(result.apis[i].businessOwner != null) {
+              result.apis[i].displayOwner = result.apis[i].businessOwner;
+            }
+            else{
+              result.apis[i].displayOwner = result.apis[i].provider;
+            }
+          } 
+          var source   = $("#recently-added-template").html();
+          var template = Handlebars.compile(source);
+          $("#recently-added .panel-body").html(template(result));
+          $(".recent_rating").rating();
+         } else {
+             jagg.message({content:result.message,type:"error"});
+         }
+    }, "json");
+  });
+</script>
+<% }); %>

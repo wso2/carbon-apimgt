@@ -1,0 +1,59 @@
+<%
+jagg.block("subscription/subscription-list", {
+    initializer:function (data) {
+
+    },
+
+    getInputs:function () {
+        return {
+            "user":null
+        }
+    },
+
+    getOutputs:function (inputs) {
+        /*
+         This will fetch the application information for the given user and the subscription information about the given application,
+         when the store/mysubscriptions web page called.
+        */
+
+        var applications, result, response, selectedApp, totalLength,  user = inputs.user, page;
+        if(request.getParameter('selectedApp')!=null){
+            selectedApp = request.getParameter('selectedApp');
+            if(selectedApp instanceof Array){
+                selectedApp = String(selectedApp[0]);
+            }
+        }else if(session.get('selectedApp') != null){
+            selectedApp = session.get('selectedApp');
+        }else{
+            selectedApp = "";
+        }
+        
+        page = request.getParameter("page");
+         if(page == null){
+				page = 1;
+		}
+
+		var itemsPerPage = 10; //change this to change the number of items per page.
+		var startIndex = (page-1)*itemsPerPage, endIndex = startIndex + itemsPerPage;
+
+		response = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp, startIndex, endIndex);
+
+		applications = response.result.applications;
+		totalLength = response.result.totalLength;
+		return {
+			"applications":applications,
+			"totalLength":totalLength,
+			"page":page,
+			"itemsPerPage":itemsPerPage
+		};
+     },
+
+    getStaticBlocks:function() {
+        return [
+            //"subscription/subscription-list-element"
+        ];
+    }
+
+
+});
+%>

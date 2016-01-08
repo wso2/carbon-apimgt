@@ -1,13 +1,14 @@
 <% jagg.template("overview", function(inputs, outputs, jagg) { %>
 <% var api=outputs.api; var createPermitted=outputs.isCreatePermitted;%>
-<%  if(api.endpointConfig){ 
+<%var tenant= encode.forUriComponent(request.getParameter("tenant"));%>
+<%  if(api.endpointConfig){
     var endpoint_config = parse(api.endpointConfig); 
   } %>
-<div class="row-fluid">
-    <div class="span2">
+<div class="row">
+    <div class="col-md-2">
          <% jagg.includeBlock("item-nav-list",{api:api}); %>
     </div>
-    <div class="span10">
+    <div class="col-md-10">
     <%if(api.description!=''){%>
         <div class="well" id="apiView"><%=api.description%>
         </div>
@@ -15,16 +16,16 @@
         <table class="table table-bordered">
             <tbody>
             <tr>
-                <td class="span3"><%=i18n.localize("visibility")%></td>
+                <td class="col-sm-3"><%=i18n.localize("visibility")%></td>
                 <td id="inUrl"><%if(api.visibility == "restricted"){%> <%="Restricted by roles, only visible to " + api.roles +"."%><%}else{%><%=i18n.localize(api.visibility)%><%}%></td>
             </tr>
             <tr>
-                <td class="span3"><%=i18n.localize("context")%></td>
+                <td class="col-sm-3"><%=i18n.localize("context")%></td>
                 <td id="inUrl"><%=api.context%></td>
             </tr>
             <% if(endpoint_config && (endpoint_config.production_endpoints != undefined)){ %>
             <tr>
-                <td class="span3"><%=i18n.localize("endpoint")%></td>
+                <td class="col-sm-3"><%=i18n.localize("endpoint")%></td>
                 <td id="inUrl">
                 <%
                     if(endpoint_config.production_endpoints instanceof Array){
@@ -101,7 +102,7 @@
             <%if(api.wsdl!=''){%>
             <tr>
                 <td><%=i18n.localize("wsdl")%></td>
-                <td id="wsdl"><a href="/publisher/site/themes/default/templates/documentation/download.jag?resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
+                <td id="wsdl"><a href="/publisher/site/themes/responsive/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
             </tr>
             <%}
             if(api.wadl!=''){%>
@@ -168,7 +169,7 @@
             </tbody>
         </table>
     </div>
-    <div class="span4">
+    <div class="col-sm-4">
         <div id="chart1"></div>
     </div>
 </div>
@@ -179,39 +180,38 @@
             var provider = '<%=api.provider%>';
         </script>
 <div class="row-fluid">
-    <form id="copyApiForm">   
-    <div class="well" id="copy-api">
+    <form id="copyApiForm">
+    <div class="well form-inline" id="copy-api" style="display: none;">
         <input type="hidden" id="overviewAPIVersion" value="<%=api.version%>"/>
         <input type="hidden" id="overviewAPIName" value="<%=api.name%>"/>
-        <label><%=i18n.localize("toVersion")%></label>
-        <input type="text" class="span3 required" id="new-version"/><span class="help-inline"><%=i18n.localize("versionHelpMsg")%></span>
-         <a class="icon-question-sign help_popup" help_data="versionCopy_help"></a>
-         <p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
-        <div class="default-version">
-            <label class="control-label">Default Version</label>
-            <div class="controls">
-                <input type="checkbox" class="default_version_check_cp" id="default_version_cp" name="default_version_cp" value="default_version"/>
+
+            <div class="form-group">
+                <label><%=i18n.localize("toVersion")%></label>
+                <input type="text" class="required form-control" id="new-version"/>
+                <p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
+                <span class="help-inline "><%=i18n.localize("versionHelpMsg")%></span>
+                <a class="glyphicon glyphicon-question-sign help_popup" help_data="versionCopy_help"></a>
+            </div>
+        <br />
+        <div class="default-version form-group">
+            <div class="checkbox">
+                <label class="control-label">Default Version &nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" class="form-control default_version_check_cp" id="default_version_cp" name="default_version_cp" value="default_version"/></label>
+            </div>
                 <input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value=""/>
-                 
                  <%if(api.hasDefaultVersion){%>
                     <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
                 <%}else{%>
                     <p class="help-block">No default version defined for the current API</p>
-                <%}%> 
-               
-            </div>
+                <%}%>
         </div>
        
         
         <div class="copy-buttons">
             <button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("done")%></button>
-            <button type="button" class="btn cancel-button" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("cancel")%></button>
+            <button type="button" class="btn btn-default cancel-button" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("cancel")%></button>
         </div>
 
 
-    </div>
-    <div id="show-copy-api" class="form-actions">
-        <button type="button" class="btn" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("CreateNewVersion")%></button>
     </div>
     </form>
 </div>

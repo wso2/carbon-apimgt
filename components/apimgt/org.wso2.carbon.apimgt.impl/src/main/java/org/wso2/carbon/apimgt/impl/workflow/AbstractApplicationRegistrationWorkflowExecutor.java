@@ -19,12 +19,10 @@
 package org.wso2.carbon.apimgt.impl.workflow;
 
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -36,10 +34,8 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
-import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
-import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 
 public abstract class AbstractApplicationRegistrationWorkflowExecutor extends WorkflowExecutor{
 
@@ -49,32 +45,23 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
        return WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION;
     }
 
-    public void execute(WorkflowDTO workFlowDTO) throws WorkflowException {
+    public WorkflowResponse execute(WorkflowDTO workFlowDTO) throws WorkflowException {
         log.debug("Executing AbstractApplicationRegistrationWorkflowExecutor...");
         ApiMgtDAO dao = new ApiMgtDAO();
-        Connection conn = null;
         try {
             //dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO) workFlowDTO, false);
             ApplicationRegistrationWorkflowDTO appRegDTO = (ApplicationRegistrationWorkflowDTO)workFlowDTO;
-            conn = APIMgtDBUtil.getConnection();
-            dao.createApplicationRegistrationEntry(appRegDTO,false, conn);
+            dao.createApplicationRegistrationEntry(appRegDTO,false);
            // appRegDTO.getAppInfoDTO().saveDTO();
             super.execute(workFlowDTO);
-            APIMgtDBUtil.transactionCommit(conn);
         } catch (APIManagementException e) {
-        	APIMgtDBUtil.transactionRollback(conn);
             log.error("Error while creating Application Registration entry.", e);
             throw new WorkflowException("Error while creating Application Registration entry.", e);
-        } catch (SQLException e) {
-        	APIMgtDBUtil.transactionRollback(conn);
-        	log.error("Error while creating Application Registration entry.", e);
-            throw new WorkflowException("Error while creating Application Registration entry.", e);
-		}finally{
-			APIMgtDBUtil.closeConnection(conn);
-		}
+        }
+        return new GeneralWorkflowResponse();
     }
 
-    public void complete(WorkflowDTO workFlowDTO) throws WorkflowException {
+    public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         log.debug("Completing AbstractApplicationRegistrationWorkflowExecutor...");
         ApiMgtDAO dao = new ApiMgtDAO();
         try {
@@ -91,20 +78,9 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             Application application = ApplicationUtils.populateApplication(workFlowDTO.getWorkflowReference());
             dao.populateAppRegistrationWorkflowDTO(regWorkFlowDTO);
 
-            Connection conn = null;
-            try {
-				conn = APIMgtDBUtil.getConnection();
-				dao.updateApplicationRegistration(status,
-	                    ((ApplicationRegistrationWorkflowDTO) workFlowDTO).getKeyType(),
-	                    ((ApplicationRegistrationWorkflowDTO) workFlowDTO).getApplication().getId(), conn);
-				APIMgtDBUtil.transactionCommit(conn);
-			} catch (SQLException e) {
-				log.error("Error while completing Application Registration entry.", e);
-	            throw new WorkflowException("Error while completing Application Registration entry.", e);
-			}finally{
-				APIMgtDBUtil.closeConnection(conn);
-			}
-            
+            dao.updateApplicationRegistration(status, regWorkFlowDTO.getKeyType(),
+                    regWorkFlowDTO.getApplication().getId());
+
 //            OauthAppRequest appInfoDTO = ApplicationCreator.createAppInfoDTO(null);
 //            appInfoDTO.setMappingId(regWorkFlowDTO.getWorkflowReference());
 //           // appInfoDTO.retrieveDTO();
@@ -129,6 +105,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
             log.error("Error while completing Application Registration entry.", e);
             throw new WorkflowException("Error while completing Application Registration entry.", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     /**
@@ -137,25 +114,20 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
      * @param workflowDTO
      * @throws APIManagementException
      */
-    protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO, final Connection connection) throws
+    protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
                                                                                               APIManagementException {
         ApiMgtDAO dao = new ApiMgtDAO();
         if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-            dogenerateKeysForApplication(workflowDTO, connection);
+            dogenerateKeysForApplication(workflowDTO);
 
             if (workflowDTO.getApplicationInfo() != null && workflowDTO.getApplicationInfo().getClientId() != null) {
-        		try {
-        			dao.addAccessAllowDomains(workflowDTO.getApplicationInfo().getClientId(), workflowDTO.getAllowedDomains(), connection);
-        		} catch (Exception ex) {
-        			APIMgtDBUtil.transactionRollback(connection);
-        			throw new APIManagementException(ex);
-        		}
+                dao.addAccessAllowDomains(workflowDTO.getApplicationInfo().getClientId(), workflowDTO.getAllowedDomains());
             }
 
         }
     }
 
-    public static void dogenerateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO, final Connection connection) throws
+    public static void dogenerateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
                                                                                                     APIManagementException{
         log.debug("Registering Application and creating an Access Token... ");
         Application application = workflowDTO.getApplication();
@@ -181,11 +153,11 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             //update associateApplication
             //application.updateAssociateOAuthApp(workflowDTO.getKeyType(), oAuthApplication);
-            ApplicationUtils.updateOAuthAppAssociation(application,workflowDTO.getKeyType(),oAuthApplication, connection);
+            ApplicationUtils.updateOAuthAppAssociation(application,workflowDTO.getKeyType(),oAuthApplication);
 
             //change create application status in to completed.
             dao.updateApplicationRegistration(APIConstants.AppRegistrationStatus.REGISTRATION_COMPLETED,
-                    workflowDTO.getKeyType(),workflowDTO.getApplication().getId(), connection);
+                    workflowDTO.getKeyType(),workflowDTO.getApplication().getId());
 
             workflowDTO.setApplicationInfo(oAuthApplication);
 

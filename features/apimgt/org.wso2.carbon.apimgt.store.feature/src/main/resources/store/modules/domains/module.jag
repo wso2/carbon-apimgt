@@ -1,0 +1,13 @@
+<%
+jagg.module("domains", {
+
+    getDomainMappings:function () {
+        return jagg.require(jagg.getModulesDir() + "domains/domains.jag").getDomainMappings.apply(this, arguments);
+    },
+
+    getCustomizedGatewayURL:function () {
+                return jagg.require(jagg.getModulesDir() + "domains/domains.jag").getCustomizedGatewayURL.apply(this, arguments);
+    }
+
+});
+%>

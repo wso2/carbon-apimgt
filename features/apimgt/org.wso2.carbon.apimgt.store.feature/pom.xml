@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -49,13 +49,17 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.hostobjects</artifactId>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.hostobjects</groupId>
+            <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -68,6 +72,7 @@
             <plugin>
                 <groupId>org.wso2.maven</groupId>
                 <artifactId>carbon-p2-plugin</artifactId>
+                <version>${carbon.p2.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>4-p2-feature-generation</id>
@@ -89,19 +94,18 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
-                                <!--bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef-->
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${apimgt.handlers.security.stub.version}</bundleDef>
-				<bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${apimgt.gateway.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub:${carbon.apimgt.version}</bundleDef>
+				                <bundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.registry.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.self.registration.server:${carbon.identity.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.user.registration.server:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.hostobjects.sso:${carbon.commons.version}</importBundleDef>
-				<importBundleDef>net.sf.saxon.wso2:saxon.he:${saxon.wso2.version}</importBundleDef>				
+                                <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
                             </importBundles>
                         </configuration>
                     </execution>

@@ -26,8 +26,10 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * This class defined for store data and methods for particular payment plan

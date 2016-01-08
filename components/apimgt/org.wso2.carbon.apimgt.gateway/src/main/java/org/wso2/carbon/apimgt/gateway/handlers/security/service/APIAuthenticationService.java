@@ -16,18 +16,13 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.service;
 
-
-
-import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -151,15 +146,6 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
                 keyCache.remove(cacheEntry.getKey());
             }
         }
-
-        /*Cache cache = PrivilegedCarbonContext.getCurrentContext(getAxisConfig()).getCache("keyCache");
-        for (int i = 0; i < cache.keySet().size(); i++) {
-            String cacheAccessKey = cache.keySet().toArray()[i].toString().split(":")[0];
-            if (cacheAccessKey.equals(accessToken)) {
-                cache.remove(cache.keySet().toArray()[i]);
-            }
-
-        } */
     }
 
     /**
@@ -207,7 +193,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
             String token = tokenObj.toString();
 
             //Get the tenant domain of the access token
-            String tenantDomain = cachedObjects.get(token).toString();
+            String tenantDomain = cachedObjects.get(token);
 
             if(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
                 //Continue to next since we won't have to delete cache entry from the tenant cache.

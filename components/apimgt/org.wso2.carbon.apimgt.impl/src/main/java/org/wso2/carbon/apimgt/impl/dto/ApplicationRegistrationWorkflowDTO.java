@@ -18,12 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
-import org.wso2.carbon.apimgt.keymgt.stub.types.carbon.ApplicationKeysDTO;
 
 /**
  * DTO class for Application Registration workflow.

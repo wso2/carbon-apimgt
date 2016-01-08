@@ -16,11 +16,11 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -41,27 +41,40 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super();
     }
 
-    UserAwareAPIConsumer(String username) throws APIManagementException {
-        super(username);
+    UserAwareAPIConsumer(String username, APIMRegistryService registryService) throws APIManagementException {
+        super(username, registryService);
         this.username = username;
     }
 
     @Override
-    public String addSubscription(APIIdentifier identifier,
+    public SubscriptionResponse addSubscription(APIIdentifier identifier,
                                 String userId, int applicationId) throws APIManagementException {
         checkSubscribePermission();
         return super.addSubscription(identifier, userId, applicationId);
     }
 
     @Override
-    public boolean removeSubscription(APIIdentifier identifier, String userId,
-                                   int applicationId) throws APIManagementException {
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        SubscribedAPI subscribedAPI = super.getSubscriptionByUUID(uuid);
         checkSubscribePermission();
-        return super.removeSubscription(identifier, userId, applicationId);
+        return subscribedAPI;
     }
 
     @Override
-    public String addApplication(Application application, String userId) throws APIManagementException {
+    public void removeSubscription(APIIdentifier identifier, String userId,
+                                   int applicationId) throws APIManagementException {
+        checkSubscribePermission();
+        super.removeSubscription(identifier, userId, applicationId);
+    }
+
+    @Override
+    public void removeSubscription(SubscribedAPI subscription) throws APIManagementException {
+        checkSubscribePermission();
+        super.removeSubscription(subscription);
+    }
+
+    @Override
+    public int addApplication(Application application, String userId) throws APIManagementException {
         checkSubscribePermission();
         return super.addApplication(application, userId);
     }
@@ -84,18 +97,7 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
         super.addComment(identifier, s, user);
     }
 
-    @Override
-    public Application[] getApplications(Subscriber subscriber, String groupingId)  throws APIManagementException {
-        checkSubscribePermission();
-        return super.getApplications(subscriber,groupingId);
-    }
-
     public void checkSubscribePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
-    }
-
-    public JSONArray getSubscriptions(String providerName, String apiName, String version, String user,String groupId) throws APIManagementException{
-        checkSubscribePermission();
-        return super.getSubscriptions(providerName,apiName,version,user,groupId);
     }
 }

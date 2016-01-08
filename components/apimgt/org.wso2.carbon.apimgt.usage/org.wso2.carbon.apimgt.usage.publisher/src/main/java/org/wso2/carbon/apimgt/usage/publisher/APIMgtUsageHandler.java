@@ -25,14 +25,14 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.usage.agent.beans.APIManagerRequestStats;
-import org.wso2.carbon.usage.agent.util.PublisherUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -49,6 +49,10 @@ public class APIMgtUsageHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext mc) {
 
         boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+
+        /*setting global analytic enabled status. Which use at by the by bam mediator in
+        synapse to enable or disable destination based stat publishing*/
+        mc.setProperty("isStatEnabled", Boolean.toString(enabled));
 
         boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                 isSkipEventReceiverConnection();
@@ -68,7 +72,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                     if (publisher == null) {
                         try {
                             log.debug("Instantiating Data Publisher");
-                            publisher = (APIMgtUsageDataPublisher) Class.forName(publisherClass).newInstance();
+                            publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
                             publisher.init();
                         } catch (ClassNotFoundException e) {
                             log.error("Class not found " + publisherClass);
@@ -98,28 +102,28 @@ public class APIMgtUsageHandler extends AbstractHandler {
             org.apache.axis2.context.MessageContext axis2MsgContext = ((Axis2MessageContext) mc).getAxis2MessageContext();
             Map headers = (Map) (axis2MsgContext).
                     getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            String userAgent = (String) headers.get("User-Agent");
+            String userAgent = (String) headers.get(APIConstants.USER_AGENT);
             String context = (String) mc.getProperty(RESTConstants.REST_API_CONTEXT);
             String api_version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
             int tenantDomainIndex = fullRequestPath.indexOf("/t/");
-            String apiPublisher = (String) mc.getProperty(APIMgtUsagePublisherConstants.API_PUBLISHER);
+            String apiPublisher = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
             String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             if (tenantDomainIndex != -1) {
                 String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
                 tenantDomain = temp.substring(0, temp.indexOf("/"));
             }
-            
+
             if (apiPublisher == null) {
                 apiPublisher = getAPIProviderFromRESTAPI(api_version);
             }
-            
+
             if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
                 apiPublisher = apiPublisher + "@" + tenantDomain;
-            } 
-            
+            }
+
             int index = api_version.indexOf("--");
-            
+
             if (index != -1) {
                 api_version = api_version.substring(index + 2);
             }
@@ -137,6 +141,12 @@ public class APIMgtUsageHandler extends AbstractHandler {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(userTenantDomain);
 
+            Object throttleOutProperty = mc.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY);
+            boolean throttleOutHappened = false;
+            if (throttleOutProperty != null && throttleOutProperty instanceof Boolean) {
+                throttleOutHappened = (Boolean) throttleOutProperty;
+            }
+
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setConsumerKey(consumerKey);
             requestPublisherDTO.setContext(context);
@@ -147,16 +157,19 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setMethod(method);
             requestPublisherDTO.setRequestTime(currentTime);
             requestPublisherDTO.setUsername(username);
-            requestPublisherDTO.setTenantDomain(userTenantDomain);
+            requestPublisherDTO.setTenantDomain((MultitenantUtils.getTenantDomain(apiPublisher)));
             requestPublisherDTO.setHostName(hostName);
             requestPublisherDTO.setApiPublisher(apiPublisher);
             requestPublisherDTO.setApplicationName(applicationName);
             requestPublisherDTO.setApplicationId(applicationId);
             requestPublisherDTO.setUserAgent(userAgent);
             requestPublisherDTO.setTier(tier);
+            requestPublisherDTO.setContinuedOnThrottleOut(throttleOutHappened);
 
             publisher.publishEvent(requestPublisherDTO);
-            //We check if usage metering is enabled for billing purpose
+
+            //Metering related publishing is no longer used.
+            /*//We check if usage metering is enabled for billing purpose
             if (DataPublisherUtil.isEnabledMetering()) {
                 //If usage metering enabled create new usage stat object and publish to bam
                 APIManagerRequestStats stats = new APIManagerRequestStats();
@@ -171,20 +184,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                     }
                     log.error("Error occurred while publishing request statistics. Full stacktrace available in debug logs. " + e.getMessage());
                 }
-            }
-
-            mc.setProperty(APIMgtUsagePublisherConstants.CONSUMER_KEY, consumerKey);
-            mc.setProperty(APIMgtUsagePublisherConstants.USER_ID, username);
-            mc.setProperty(APIMgtUsagePublisherConstants.CONTEXT, context);
-            mc.setProperty(APIMgtUsagePublisherConstants.API_VERSION, api_version);
-            mc.setProperty(APIMgtUsagePublisherConstants.API, api);
-            mc.setProperty(APIMgtUsagePublisherConstants.VERSION, version);
-            mc.setProperty(APIMgtUsagePublisherConstants.RESOURCE, resource);
-            mc.setProperty(APIMgtUsagePublisherConstants.HTTP_METHOD, method);
-            mc.setProperty(APIMgtUsagePublisherConstants.HOST_NAME, hostName);
-            mc.setProperty(APIMgtUsagePublisherConstants.API_PUBLISHER, apiPublisher);
-            mc.setProperty(APIMgtUsagePublisherConstants.APPLICATION_NAME, applicationName);
-            mc.setProperty(APIMgtUsagePublisherConstants.APPLICATION_ID, applicationId);
+            }*/
 
         } catch (Throwable e) {
             log.error("Cannot publish event. " + e.getMessage(), e);

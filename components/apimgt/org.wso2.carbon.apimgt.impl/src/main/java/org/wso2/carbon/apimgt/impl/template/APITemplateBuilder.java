@@ -21,12 +21,12 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 
 public interface APITemplateBuilder {
 
-    public String getConfigStringForTemplate(Environment environment) throws APITemplateException;
+    String getConfigStringForTemplate(Environment environment) throws APITemplateException;
 
-    public String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
+    String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
 
-    public OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException;
+    OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException;
 
-    public String getConfigStringForDefaultAPITemplate(String defaultVersion) throws APITemplateException;
+    String getConfigStringForDefaultAPITemplate(String defaultVersion) throws APITemplateException;
 
 }

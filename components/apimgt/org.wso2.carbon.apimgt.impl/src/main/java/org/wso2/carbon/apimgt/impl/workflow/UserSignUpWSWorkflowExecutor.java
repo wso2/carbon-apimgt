@@ -29,6 +29,7 @@ import org.apache.axis2.transport.http.HttpTransportProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.UserRegistrationConfigDTO;
@@ -42,7 +43,7 @@ import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
+public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(UserSignUpWSWorkflowExecutor.class);
 
@@ -60,26 +61,26 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
     }
 
     @Override
-    public void execute(WorkflowDTO workflowDTO) throws WorkflowException {
-    	
-    	 if (log.isDebugEnabled()) {
-             log.debug("Executing User SignUp Webservice Workflow for " + workflowDTO.getWorkflowReference());
-         }       
+    public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Executing User SignUp Webservice Workflow for " + workflowDTO.getWorkflowReference());
+        }
 
         try {
-            ServiceClient client = new ServiceClient(ServiceReferenceHolder.getInstance()
-                    .getContextService().getClientConfigContext(), null);
-            Options options = new Options();           
+            ServiceClient client = new ServiceClient(
+                    ServiceReferenceHolder.getInstance().getContextService().getClientConfigContext(), null);
+            Options options = new Options();
             options.setAction(WorkflowConstants.REGISTER_USER_WS_ACTION);
             options.setTo(new EndpointReference(serviceEndpoint));
-            if(contentType != null){
+            if (contentType != null) {
                 options.setProperty(Constants.Configuration.MESSAGE_TYPE, contentType);
             }
 
             HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
             //Consider this as a secured service if username and password are not null. Unsecured if not.
-            if(username != null && password != null){
+            if (username != null && password != null) {
                 auth.setUsername(username);
                 auth.setPassword(password);
                 auth.setPreemptiveAuthentication(true);
@@ -87,13 +88,12 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
                 authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
                 auth.setAuthSchemes(authSchemes);
 
-                if(contentType == null){
-                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_APPLICATION_XML);
+                if (contentType == null) {
+                    options.setProperty(Constants.Configuration.MESSAGE_TYPE, HTTPConstants.MEDIA_TYPE_TEXT_XML);
                 }
                 options.setProperty(org.apache.axis2.transport.http.HTTPConstants.AUTHENTICATE, auth);
                 options.setManageSession(true);
             }
-
 
             client.setOptions(options);
 
@@ -101,10 +101,9 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
             String payload = WorkflowConstants.REGISTER_USER_PAYLOAD;
 
             String callBackURL = workflowDTO.getCallbackUrl();
-            String tenantAwareUserName =
-                    MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
 
-            payload = payload.replace("$1", tenantAwareUserName) ;
+            payload = payload.replace("$1", tenantAwareUserName);
             payload = payload.replace("$2", workflowDTO.getTenantDomain());
             payload = payload.replace("$3", workflowDTO.getExternalWorkflowReference());
             payload = payload.replace("$4", callBackURL != null ? callBackURL : "?");
@@ -118,68 +117,63 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor{
             log.error("Error converting String to OMElement", e);
             throw new WorkflowException("Error converting String to OMElement", e);
         }
+        return new GeneralWorkflowResponse();
     }
 
     @Override
-	public void complete(WorkflowDTO workflowDTO) throws WorkflowException {
+    public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
 
-    	workflowDTO.setStatus(workflowDTO.getStatus());	
-    	workflowDTO.setUpdatedTime(System.currentTimeMillis());
-    	
-    	if (log.isDebugEnabled()) {
-        	log.debug("User Sign Up [Complete] Workflow Invoked. Workflow ID : " +
-        			workflowDTO.getExternalWorkflowReference() + "Workflow State : " +
-        			workflowDTO.getStatus());
-    	}
+        workflowDTO.setStatus(workflowDTO.getStatus());
+        workflowDTO.setUpdatedTime(System.currentTimeMillis());
 
-    	super.complete(workflowDTO);
-    	
-    	APIManagerConfiguration config =
-    			ServiceReferenceHolder.getInstance()
-    			.getAPIManagerConfigurationService()
-    			.getAPIManagerConfiguration();
-    	String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
+        if (log.isDebugEnabled()) {
+            log.debug("User Sign Up [Complete] Workflow Invoked. Workflow ID : " +
+                    workflowDTO.getExternalWorkflowReference() + "Workflow State : " +
+                    workflowDTO.getStatus());
+        }
 
-    	String tenantDomain = workflowDTO.getTenantDomain();
-    	try {
+        super.complete(workflowDTO);
 
-    		UserRegistrationConfigDTO signupConfig =
-    				SelfSignUpUtil.getSignupConfiguration(tenantDomain);
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
 
-    		String adminUsername = signupConfig.getAdminUserName();
-    		String adminPassword = signupConfig.getAdminPassword();
-    		if (serverURL == null || adminUsername == null || adminPassword == null) {
-    			throw new WorkflowException("Required parameter missing to connect to the"
-    					+ " authentication manager");
-    		}
+        String tenantDomain = workflowDTO.getTenantDomain();
+        try {
 
-    		String tenantAwareUserName =
-    				MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
+            UserRegistrationConfigDTO signupConfig = SelfSignUpUtil.getSignupConfiguration(tenantDomain);
 
-    		if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-    			try {
-    				updateRolesOfUser(serverURL, adminUsername, adminPassword, tenantAwareUserName,
-    				                  SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
-    			} catch (Exception e) {
-    				throw new WorkflowException("Error while assigning role to user", e);
-    			}
-    		} else {
-    			try {
-    				/* Remove created user */
-    				deleteUser(serverURL, adminUsername, adminPassword,
-    				           tenantAwareUserName);
-    			} catch (Exception e) {
-    				throw new WorkflowException("Error while deleting the user", e);
-    			}
-    		}
-    	} catch (APIManagementException e1) {
-    		throw new WorkflowException("Error while accessing signup configuration", e1);
-    	}
-	}
+            String adminUsername = signupConfig.getAdminUserName();
+            String adminPassword = signupConfig.getAdminPassword();
+            if (serverURL == null || adminUsername == null || adminPassword == null) {
+                throw new WorkflowException("Required parameter missing to connect to the" + " authentication manager");
+            }
 
+            String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
+
+            if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+                try {
+                    updateRolesOfUser(serverURL, adminUsername, adminPassword, tenantAwareUserName,
+                            SelfSignUpUtil.getRoleNames(signupConfig), tenantDomain);
+                } catch (Exception e) {
+                    throw new WorkflowException("Error while assigning role to user", e);
+                }
+            } else {
+                try {
+                    /* Remove created user */
+                    deleteUser(serverURL, adminUsername, adminPassword, tenantAwareUserName);
+                } catch (Exception e) {
+                    throw new WorkflowException("Error while deleting the user", e);
+                }
+            }
+        } catch (APIManagementException e1) {
+            throw new WorkflowException("Error while accessing signup configuration", e1);
+        }
+        return new GeneralWorkflowResponse();
+    }
 
     @Override
-    public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException{
+    public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
         return null;
     }
 

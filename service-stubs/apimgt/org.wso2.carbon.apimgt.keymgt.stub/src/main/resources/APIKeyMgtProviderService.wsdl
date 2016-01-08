@@ -1,4 +1,4 @@
-<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ax297="http://base.identity.carbon.wso2.org/xsd" xmlns:ax299="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax293="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax295="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2100="http://util.java/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ax227="http://util.java/xsd" xmlns:ax220="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:ax222="http://api.apimgt.carbon.wso2.org/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:tns="http://service.keymgt.apimgt.carbon.wso2.org" xmlns:ax224="http://base.identity.carbon.wso2.org/xsd" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:ax226="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://service.keymgt.apimgt.carbon.wso2.org">
     <wsdl:documentation>APIKeyMgtProviderService</wsdl:documentation>
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://util.java/xsd">
@@ -8,7 +8,7 @@
                 </xs:sequence>
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax294="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax296="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax2102="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax298="http://base.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
+        <xs:schema xmlns:ax229="http://dto.impl.apimgt.carbon.wso2.org/xsd" xmlns:ax221="http://keymgt.apimgt.carbon.wso2.org/xsd" xmlns:ns="http://org.apache.axis2/xsd" xmlns:ax223="http://api.apimgt.carbon.wso2.org/xsd" xmlns:ax225="http://base.identity.carbon.wso2.org/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://org.apache.axis2/xsd">
             <xs:import namespace="http://keymgt.apimgt.carbon.wso2.org/xsd"/>
             <xs:import namespace="http://api.apimgt.carbon.wso2.org/xsd"/>
             <xs:import namespace="http://base.identity.carbon.wso2.org/xsd"/>
@@ -16,37 +16,21 @@
             <xs:element name="APIKeyMgtProviderServiceAPIKeyMgtException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="APIKeyMgtException" nillable="true" type="ax293:APIKeyMgtException"/>
+                        <xs:element minOccurs="0" name="APIKeyMgtException" nillable="true" type="ax220:APIKeyMgtException"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="APIKeyMgtProviderServiceAPIManagementException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax296:APIManagementException"/>
+                        <xs:element minOccurs="0" name="APIManagementException" nillable="true" type="ax222:APIManagementException"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="APIKeyMgtProviderServiceIdentityException">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="IdentityException" nillable="true" type="ax297:IdentityException"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="activateAccessTokens">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="users" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax2102:APIInfoDTO"/>
-                    </xs:sequence>
-                </xs:complexType>
-            </xs:element>
-            <xs:element name="BlockAccessTokens">
-                <xs:complexType>
-                    <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="users" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax2102:APIInfoDTO"/>
+                        <xs:element minOccurs="0" name="IdentityException" nillable="true" type="ax224:IdentityException"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -54,7 +38,7 @@
                 <xs:complexType>
                     <xs:sequence>
                         <xs:element maxOccurs="unbounded" minOccurs="0" name="users" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax2102:APIInfoDTO"/>
+                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax229:APIInfoDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -68,14 +52,14 @@
             <xs:element name="getIssuedKeyInfo">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax2102:APIInfoDTO"/>
+                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax229:APIInfoDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getIssuedKeyInfoResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2102:APIKeyInfoDTO"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax229:APIKeyInfoDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -90,7 +74,23 @@
             <xs:element name="getAPIsOfUserResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax2102:APIInfoDTO"/>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="return" nillable="true" type="ax229:APIInfoDTO"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="activateAccessTokens">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="users" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax229:APIInfoDTO"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="BlockAccessTokens">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="users" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="0" name="apiInfoDTO" nillable="true" type="ax229:APIInfoDTO"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -100,7 +100,7 @@
                 <xs:sequence/>
             </xs:complexType>
         </xs:schema>
-        <xs:schema xmlns:ax2101="http://util.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.impl.apimgt.carbon.wso2.org/xsd">
+        <xs:schema xmlns:ax228="http://util.java/xsd" attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://dto.impl.apimgt.carbon.wso2.org/xsd">
             <xs:import namespace="http://util.java/xsd"/>
             <xs:complexType name="APIInfoDTO">
                 <xs:sequence>
@@ -108,7 +108,7 @@
                     <xs:element minOccurs="0" name="apiName" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="context" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="0" name="providerId" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="resources" nillable="true" type="ax2101:Set"/>
+                    <xs:element minOccurs="0" name="resources" nillable="true" type="ax228:Set"/>
                     <xs:element minOccurs="0" name="version" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
@@ -420,13 +420,13 @@
     </wsdl:binding>
     <wsdl:service name="APIKeyMgtProviderService">
         <wsdl:port name="APIKeyMgtProviderServiceHttpsSoap11Endpoint" binding="tns:APIKeyMgtProviderServiceSoap11Binding">
-            <soap:address location="https://lalaji-ThinkPad-T530:8243/services/APIKeyMgtProviderService.APIKeyMgtProviderServiceHttpsSoap11Endpoint"/>
+            <soap:address location="https://localhost:8243/services/APIKeyMgtProviderService.APIKeyMgtProviderServiceHttpsSoap11Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIKeyMgtProviderServiceHttpsSoap12Endpoint" binding="tns:APIKeyMgtProviderServiceSoap12Binding">
-            <soap12:address location="https://lalaji-ThinkPad-T530:8243/services/APIKeyMgtProviderService.APIKeyMgtProviderServiceHttpsSoap12Endpoint"/>
+            <soap12:address location="https://localhost:8243/services/APIKeyMgtProviderService.APIKeyMgtProviderServiceHttpsSoap12Endpoint"/>
         </wsdl:port>
         <wsdl:port name="APIKeyMgtProviderServiceHttpsEndpoint" binding="tns:APIKeyMgtProviderServiceHttpBinding">
-            <http:address location="https://lalaji-ThinkPad-T530:8243/services/APIKeyMgtProviderService.APIKeyMgtProviderServiceHttpsEndpoint"/>
+            <http:address location="https://localhost:8243/services/APIKeyMgtProviderService.APIKeyMgtProviderServiceHttpsEndpoint"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

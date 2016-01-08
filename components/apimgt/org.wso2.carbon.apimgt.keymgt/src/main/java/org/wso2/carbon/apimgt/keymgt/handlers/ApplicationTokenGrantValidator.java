@@ -17,7 +17,7 @@
 */
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
-import org.apache.amber.oauth2.common.validators.AbstractValidator;
+import org.apache.oltu.oauth2.common.validators.AbstractValidator;
 
 import javax.servlet.http.HttpServletRequest;
 

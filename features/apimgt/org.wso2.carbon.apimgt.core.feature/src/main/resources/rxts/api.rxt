@@ -26,13 +26,13 @@
         <field type="text" required="true">
             <name>Context</name>
         </field>
-        <field type="text">
+        <field type="text" required="true">
             <name>Context Template</name>
         </field>
         <field type="text" required="true">
             <name>Version</name>
         </field>
-		<field type="text">
+		<field type="text" required="true">
             <name>Version Type</name>
         </field>
         <field type="options">
@@ -62,6 +62,13 @@
             <values>
                 <value>Secured</value>
                 <value>Non Secured</value>             
+            </values>
+        </field>
+        <field type="options">
+            <name label="Endpoint Auth Type">Endpoint Auth Type</name>
+            <values>
+                <value>Basic Auth</value>
+                <value>Digest Auth</value>
             </values>
         </field>
         <field type="text" url="true">
@@ -240,6 +247,18 @@
             </field>
             <field type="text">
                 <name>Mediation Script4</name>
+            </field>
+            <field type="text">
+                <name>URL Pattern5</name>
+            </field>
+            <field type="text">
+                <name>HTTP Verb5</name>
+            </field>
+            <field type="text">
+                <name>Auth Type5</name>
+            </field>
+            <field type="text">
+                <name>Mediation Script5</name>
             </field>
         </table>
 </content>

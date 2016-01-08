@@ -20,8 +20,8 @@
 	<parent>
 		<groupId>org.wso2.carbon.apimgt</groupId>
 		<artifactId>oidc-authenticator-feature</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+		<version>5.0.4-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -37,17 +37,16 @@
 			<artifactId>org.wso2.carbon.apimgt.authenticator.oidc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.wso2.orbit.com.nimbusds</groupId>
+			<groupId>com.nimbusds.wso2</groupId>
 			<artifactId>nimbus-jose-jwt</artifactId>
 		</dependency>
 	</dependencies>
-		
+
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.wso2.maven</groupId>
 				<artifactId>carbon-p2-plugin</artifactId>
-				<version>${carbon.p2.plugin.version}</version>
 				<executions>
 					<execution>
 						<id>4-p2-feature-generation</id>
@@ -57,19 +56,19 @@
 						</goals>
 						<configuration>
 							<id>org.wso2.carbon.apimgt.authenticator.oidc.server</id>
-							<propertiesFile>../../etc/feature.properties</propertiesFile>
+							<propertiesFile>../../../../etc/feature.properties</propertiesFile>
 							<adviceFile>
 								<properties>
 									<propertyDef>org.wso2.carbon.p2.category.type:server</propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>                                                                        
+									<propertyDef>org.eclipse.equinox.p2.type.group:false</propertyDef>
 								</properties>
 							</adviceFile>
 							<bundles>
 								<bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.authenticator.oidc</bundleDef>
-								<bundleDef>org.wso2.orbit.com.nimbusds:nimbus-jose-jwt</bundleDef>
+								<bundleDef>com.nimbusds.wso2:nimbus-jose-jwt</bundleDef>
 							</bundles>
 							<importFeatures>
-								<importFeatureDef>org.wso2.carbon.core.server:${carbon.platform.version}</importFeatureDef>
+								<importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
 							</importFeatures>
 						</configuration>
 					</execution>

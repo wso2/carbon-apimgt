@@ -706,7 +706,7 @@ public class RegistryForumManager implements ForumManager {
 
         Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         listMap.put(ForumConstants.OVERVIEW_RESOURCE_IDENTIFIER, new ArrayList<String>() {{
-            add(resourceIdentifier.replace("@", "-AT-"));
+            add(resourceIdentifier.replace("@", "-AT-").replace(":","%3A"));
         }});
 
         Registry registry = getRegistry(user, tenantDomain);

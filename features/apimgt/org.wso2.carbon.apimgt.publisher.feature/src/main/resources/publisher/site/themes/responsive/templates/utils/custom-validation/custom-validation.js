@@ -39,6 +39,10 @@ $(document).ready(function() {
         return !illegalChars.test(value);
     }, 'Name contains one or more illegal characters  (~ ! @ #  ; % ^ * + = | &lt; &gt;, \' " \\ ) .');
 
+    $.validator.addMethod('validTemplate', function(value, element) {
+        return value.indexOf("{}") == -1
+    }, 'Empty curly brackets "{}" are not allowed in context field.');
+
     $.validator.addMethod('noSpace', function(value, element) {
         return !/\s/g.test(value);
     },'Name contains white spaces.');

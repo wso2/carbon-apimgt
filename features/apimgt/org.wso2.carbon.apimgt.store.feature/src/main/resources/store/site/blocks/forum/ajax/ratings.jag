@@ -1,0 +1,58 @@
+<%
+
+include("/jagg/jagg.jag");
+(function () {
+var site = require("/site/conf/site.json");
+response.contentType = "application/json; charset=UTF-8";
+var verb = request.getMethod();
+
+var user = jagg.getUser();
+var log = new Log();
+
+var action = request.getParameter("action");
+var topicId = request.getParameter("topicId");
+
+var date = new Date();
+var time = date.getTime();
+
+var message = {error:false};
+
+var tenantDomain = jagg.getTenantDomain();
+if (tenantDomain == null) {
+    tenantDomain = "carbon.super";
+}
+
+var storeForum = Packages.org.wso2.carbon.forum.registry.RegistryForumManager;
+var forum = new storeForum();
+var msg = require("/site/conf/ui-messages.jag");
+
+var validation = {
+    "action": { type: "safetext"},
+    "rating": { type: "number"},
+    "topicId": { type:"uuid"},
+};
+
+var validation_errors = jagg.validateInputs(validation);
+
+if(validation_errors != true){
+    message.error = true;
+    message.message = msg.error.invalidInputs(validation_errors);
+}else if( request.getMethod() == 'POST' && !jagg.isCSRFTokenValid()){
+    message.error = true;
+    message.message = msg.error.csrfError;
+}else if(action == "rateTopic"){
+	var rating = parseInt(request.getParameter("rating"), 10);
+	var averageRating = forum.rateTopic(topicId, rating, user.username, tenantDomain);
+    message.averageRating = averageRating;
+}else if(action == "getRating"){
+	var rating = forum.getRating(topicId, user.username, tenantDomain);
+	message.averageRating = rating["averageRating"];
+	message.userRating = rating["userRating"];	
+}else if(action == "removeRating"){
+	var averageRating = forum.rateTopic(topicId, 0, user.username, tenantDomain);
+	message.averageRating = averageRating;
+}
+
+print(message);
+}());
+%>

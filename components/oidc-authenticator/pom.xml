@@ -14,13 +14,13 @@
  ~ See the License for the specific language governing permissions and
  ~ limitations under the License.
 -->
-
+        
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>carbon-apimgt</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -33,7 +33,7 @@
     <modules>
         <module>org.wso2.carbon.apimgt.authenticator.oidc.ui</module>
         <module>org.wso2.carbon.apimgt.authenticator.oidc</module>
-	<module>org.wso2.carbon.apimgt.hostobjects.oidc</module>
+	    <module>org.wso2.carbon.apimgt.hostobjects.oidc</module>
     </modules>
     
 </project>

@@ -189,16 +189,16 @@ var initializeTabs = function (tabs) {
 
 // Twitter bootstrap-friendly HTML boilerplate for standard inputs
 jsonform.fieldTemplate = function(inner) {
-  return '<div class="control-group jsonform-error-<%= keydash %>' +
+  return '<div class="form-group form-inline col-sm-12 jsonform-error-<%= keydash %>' +
     '<%= elt.htmlClass ? " " + elt.htmlClass : "" %>' +
     '<%= (node.schemaElement && node.schemaElement.required && (node.schemaElement.type !== "boolean") ? " jsonform-required" : "") %>' +
     '<%= (node.readOnly ? " jsonform-readonly" : "") %>' +
     '<%= (node.disabled ? " jsonform-disabled" : "") %>' +
     '">' +
     '<% if (node.title && !elt.notitle) { %>' +
-      '<label class="control-label" for="<%= node.id %>"><%= node.title %></label>' +
+      '<label class="col-sm-3 control-label" for="<%= node.id %>"><%= node.title %></label>' +
     '<% } %>' +
-    '<div class="controls">' +
+    '<div class="col-sm-9">' +
       '<% if (node.prepend || node.append) { %>' +
       '<div class="<% if (node.prepend) { %>input-prepend<% } %>' +
         '<% if (node.append) { %> input-append<% } %>">' +
@@ -227,7 +227,7 @@ var fileDisplayTemplate = '<div class="_jsonform-preview">' +
   '<a href="<%= value.url %>"><%= value.name %></a> (<%= Math.ceil(value.size/1024) %>kB)' +
   '<% } %>' +
   '</div>' +
-  '<a href="#" class="btn _jsonform-delete"><i class="icon-remove" title="Remove"></i></a> ';
+  '<a href="#" class="btn _jsonform-delete"><i class="glyphicon glyphicon-remove" title="Remove"></i></a> ';
 
 var inputFieldTemplate = function (type) {
   return {
@@ -306,7 +306,7 @@ jsonform.elementTypes = {
     }
   },
   'color':{
-    'template':'<input type="text" ' +
+    'template':'<input type="text" class="form-control"' +
       '<%= (fieldHtmlClass ? "class=\'" + fieldHtmlClass + "\' " : "") %>' +
       'name="<%= node.name %>" value="<%= escape(value) %>" id="<%= id %>"' +
       '<%= (node.disabled? " disabled" : "")%>' +
@@ -336,9 +336,9 @@ jsonform.elementTypes = {
   'endpoint':{
     'template':
       '<div class="input-append">'+
-      '<input type="text" ' +
+      '<input type="text" class="form-control"' +
       '<%= (fieldHtmlClass ? "class=\'" + fieldHtmlClass + "\' " : "") %>' +
-      ' class="validateEndpoints" '+
+      ' class="validateEndpoints form-control" '+
       'name="<%= node.name %>" value="<%= escape(value) %>" id="<%= id %>"' +
       '<%= (node.disabled? " disabled" : "")%>' +
       '<%= (node.readOnly ? " readonly=\'readonly\'" : "") %>' +
@@ -346,12 +346,12 @@ jsonform.elementTypes = {
       '<%= (node.schemaElement && node.schemaElement.required && (node.schemaElement.type !== "boolean") ? " required=\'required\'" : "") %>' +
       '<%= (node.placeholder? "placeholder=" + \'"\' + escape(node.placeholder) + \'"\' : "")%>' +
       ' />'+
-      '<button class="btn advance_endpoint_config" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
-      '<button class="btn check_url_valid" type="button" >Test</button>'+
-      '<a id="endpoint_tooltip" style="margin-left:3px" class="icon-question-sign help_popup"  help_data="test_help" data-original-title="" title=""></a>'+
+      '<div class="btn-group"><button class="btn btn-default advance_endpoint_config" type="button" field-name="<%= node.name %>">Advanced Options</button>'+
+      '<button class="btn btn-default check_url_valid" type="button" providerName="<%= apiProvider%>" apiName="<%= apiName%>" apiVersion="<%= apiVersion %>" >Test</button></div>'+
+      '<a id="endpoint_tooltip" style="margin-left:3px" class="glyphicon glyphicon-question-sign help_popup"  help_data="test_help" data-original-title="" title=""></a>'+
       '<div id="test_help" class="hide"><p>WSO2 API Manager uses HTTP Head to check the validity of the endpoint.</p></div>' +
       '</div>' +
-      '<p class="help-block">E.g.,: http://appserver/resource</p>',
+      '<p class="help-block">E.g.: http://appserver/resource</p>',
     'fieldtemplate': true,
     'inputfield': true
     },
@@ -637,7 +637,7 @@ jsonform.elementTypes = {
     }
   },
   'select':{
-    'template':'<select name="<%= node.name %>" id="<%= id %>"' +
+    'template':'<select class="form-control" name="<%= node.name %>" id="<%= id %>"' +
       '<%= (fieldHtmlClass ? " class=\'" + fieldHtmlClass + "\'" : "") %>' +
       '<%= (node.disabled? " disabled" : "")%>' +
       '<%= (node.schemaElement && node.schemaElement.required ? " required=\'required\'" : "") %>' +
@@ -794,8 +794,8 @@ jsonform.elementTypes = {
   'array': {
     'template': '<div id="<%= id %>"><ul class="_jsonform-array-ul" style="list-style-type:none;"><%= children %></ul>' +
       '<span class="_jsonform-array-buttons">' +
-        '<a href="#" class="btn _jsonform-array-addmore"><i class="icon-plus-sign" title="Add new"></i></a> ' +
-        '<a href="#" class="btn _jsonform-array-deletelast"><i class="icon-minus-sign" title="Delete last"></i></a>' +
+        '<a href="#" class="btn btn-default _jsonform-array-addmore"><i class="glyphicon glyphicon-plus-sign" title="Add new"></i></a> ' +
+        '<a href="#" class="btn btn-default _jsonform-array-deletelast"><i class="glyphicon glyphicon-minus-sign" title="Delete last"></i></a>' +
       '</span>' +
       '</div>',
     'fieldtemplate': true,
@@ -805,7 +805,7 @@ jsonform.elementTypes = {
         // Insert a "draggable" icon
         // floating to the left of the main element
         return '<li data-idx="<%= node.childPos %>">' +
-          '<span class="draggable line"><i class="icon-list" title="Move item"></i></span>' +
+          '<span class="draggable line"><i class="glyphicon glyphicon-list" title="Move item"></i></span>' +
           inner +
           '</li>';
       }
@@ -938,8 +938,8 @@ jsonform.elementTypes = {
         '<%= children %>' +
       '</div>' +
       '</div>' +
-      '<a href="#" class="btn _jsonform-array-addmore"><i class="icon-plus-sign" title="Add new"></i></a> ' +
-      '<a href="#" class="btn _jsonform-array-deleteitem"><i class="icon-minus-sign" title="Delete item"></i></a></div>',
+      '<a href="#" class="btn _jsonform-array-addmore"><i class="glyphicon glyphicon-plus-sign" title="Add new"></i></a> ' +
+      '<a href="#" class="btn _jsonform-array-deleteitem"><i class="glyphicon glyphicon-minus-sign" title="Delete item"></i></a></div>',
     'fieldtemplate': true,
     'array': true,
     'childTemplate': function (inner) {

@@ -1,6 +1,5 @@
 instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../resources/lifecycles);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.publisher_${feature.version}/extensions/publisher/,target:${installFolder}/../../deployment/server/jaggeryapps/publisher/extensions,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.publisher_${feature.version}/apipublisher/,target:${installFolder}/../../../modules/apipublisher,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.publisher_${feature.version}/publisher/,target:${installFolder}/../../deployment/server/jaggeryapps/api-publisher,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.publisher_${feature.version}/apipublisher/,target:${installFolder}/../../modules/apipublisher,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.publisher_${feature.version}/customTheme/,target:${installFolder}/../../deployment/server/jaggeryapps/api-publisher,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.publisher_${feature.version}/lifecycles/APILifeCycle.xml,target:${installFolder}/../../resources/lifecycles/APILifeCycle.xml,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.publisher_${feature.version}/api_templates/,target:${installFolder}/../../resources/api_templates,overwrite:true);\

@@ -15,21 +15,20 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <groupId>org.wso2</groupId>
-        <artifactId>wso2</artifactId>
-        <version>1</version>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <artifactId>carbon-apimgt</artifactId>
+        <version>5.0.4-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
+
 
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.hostobjects</groupId>
     <artifactId>sso-hostobject</artifactId>
-    <version>4.2.3</version>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Hostobjects Aggregator Module</name>
     <url>http://wso2.org</url>
@@ -37,80 +36,5 @@
     <modules>
         <module>org.wso2.carbon.hostobjects.sso</module>
     </modules>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.2</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <configuration>
-                        <preparationGoals>clean install</preparationGoals>
-                        <autoVersionSubmodules>false</autoVersionSubmodules>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>2.1</version>
-            </extension>
-        </extensions>
-    </build>
-
-    <repositories>
-        <repository>
-            <id>wso2-maven2-repository</id>
-            <name>WSO2 Maven2 Repository</name>
-            <url>http://dist.wso2.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>wso2-maven2-snapshot-repository</id>
-            <name>WSO2 Maven2 Snapshot Repository</name>
-            <url>http://dist.wso2.org/snapshots/maven2/</url>
-        </repository>
-        <repository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-        </repository>
-    </repositories>
-
-    <distributionManagement>
-        <repository>
-            <id>wso2-maven2-repository</id>
-            <name>WSO2 Maven2 Repository</name>
-            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>wso2-maven2-snapshot-repository</id>
-            <name>WSO2 Maven2 Snapshot Repository</name>
-            <url>scp://dist.wso2.org/home/httpd/dist.wso2.org/snapshots/maven2/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
 </project>

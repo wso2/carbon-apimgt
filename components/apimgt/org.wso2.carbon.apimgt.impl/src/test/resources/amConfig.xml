@@ -19,8 +19,8 @@
         <BAMUsername>admin</BAMUsername>
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
-    <APIKeyValidator>
-        <ServerURL>https://${carbon.local.ip}:${mgt.transport.https.port}${carbon.context}/services/</ServerURL>
+    <!--<APIKeyValidator>
+        <ServerURL>https://localhost:9443/services/</ServerURL>
         <Username>${admin.username}</Username>
         <Password>${admin.password}</Password>
         <EnableJWTCache>false</EnableJWTCache>
@@ -33,5 +33,25 @@
         <TokenEndPointName>/oauth2/token</TokenEndPointName>
         <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
         <EncryptPersistedTokens>false</EncryptPersistedTokens>
+    </APIKeyValidator>-->
+
+    <APIKeyValidator>
+        <ServerURL>https://localhost:9443/services/</ServerURL>
+        <Username>admin</Username>
+        <Password>admin</Password>
+        <EnableJWTCache>false</EnableJWTCache>
+        <EnableKeyMgtValidationInfoCache>false</EnableKeyMgtValidationInfoCache>
+        <KeyValidatorClientType>ThriftClient</KeyValidatorClientType>
+        <ThriftClientPort>10397</ThriftClientPort>
+        <ThriftClientConnectionTimeOut>10000</ThriftClientConnectionTimeOut>
+        <ThriftServerPort>10397</ThriftServerPort>
+        <!--ThriftServerHost>localhost</ThriftServerHost-->
+        <EnableThriftServer>true</EnableThriftServer>
+        <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
+        <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
+        <TokenEndPointName>/oauth2/token</TokenEndPointName>
+        <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
+        <EncryptPersistedTokens>false</EncryptPersistedTokens>
     </APIKeyValidator>
+
 </APIManager>

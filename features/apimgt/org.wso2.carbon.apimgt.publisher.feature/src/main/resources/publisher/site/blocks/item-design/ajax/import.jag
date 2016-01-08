@@ -1,0 +1,30 @@
+<%
+include("/jagg/jagg.jag");
+
+if(jagg.getUser() == null){
+    print({
+        error:true,
+        message:'timeout'
+    });
+}
+
+response.contentType = "application/json; charset=UTF-8";
+
+//handle startup page imports
+var action = request.getParameter("action");
+if(action == "session"){
+	var swagger = session.get("swagger");
+	session.put("swagger",null);
+	print(swagger);	
+}else{
+	var url = request.getParameter("swagger_url");
+	url = url.trim();
+	//@todo need to validate returned swagger v2
+	var data = { };
+	var content = get(url, data ,"json");
+	var swaggerJson = content.data;
+	print(swaggerJson);
+	//@todo Error reporting
+
+}
+%>

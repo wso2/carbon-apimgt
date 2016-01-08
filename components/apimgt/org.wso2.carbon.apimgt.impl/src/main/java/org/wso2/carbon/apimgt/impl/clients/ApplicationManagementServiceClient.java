@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.application.mgt.stub.IdentityApplicationManageme
 
 import java.rmi.RemoteException;
 
+@SuppressWarnings("unused")
 public class ApplicationManagementServiceClient {
 
     private static final Log log = LogFactory.getLog(ApplicationManagementServiceClient.class);
@@ -42,7 +43,6 @@ public class ApplicationManagementServiceClient {
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
     private IdentityApplicationManagementServiceStub identityApplicationManagementServiceStub;
-    //String username;
 
     public ApplicationManagementServiceClient() throws APIManagementException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
@@ -57,8 +57,8 @@ public class ApplicationManagementServiceClient {
         try {
 
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-            identityApplicationManagementServiceStub = new IdentityApplicationManagementServiceStub(ctx, serviceURL + "IdentityApplicationManagementService");
-
+            identityApplicationManagementServiceStub = new IdentityApplicationManagementServiceStub(ctx, serviceURL
+                    + "IdentityApplicationManagementService");
             ServiceClient client = identityApplicationManagementServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
@@ -73,7 +73,10 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @param serviceProvider
+     * This method is used to create application according to the given sp and user
+     *
+     * @param serviceProvider Service Provider
+     * @param username        UserName of the user
      * @throws Exception
      */
     public void createApplication(ServiceProvider serviceProvider, String username) throws Exception {
@@ -94,8 +97,11 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @param applicationName
-     * @return
+     * This method is used to get application details for given application name
+     *
+     * @param applicationName Name of the application
+     * @param username        UserName of the user
+     * @return service provider
      * @throws Exception
      */
     public ServiceProvider getApplication(String applicationName, String username) throws Exception {
@@ -113,7 +119,10 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @return
+     * This method is used to get the application information of a given user
+     *
+     * @param username UserName of the user
+     * @return Basic information of the application as an array
      * @throws Exception
      */
     public ApplicationBasicInfo[] getAllApplicationBasicInfo(String username) throws Exception {
@@ -130,7 +139,10 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @param serviceProvider
+     * This method is used to update the application data
+     *
+     * @param serviceProvider Service Provider
+     * @param username        UserName of the user
      * @throws Exception
      */
     public void updateApplicationData(ServiceProvider serviceProvider, String username) throws Exception {
@@ -147,7 +159,10 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @param applicationID
+     * This method is used to delete a given application
+     *
+     * @param applicationID application id
+     * @param username      UserName of the user
      * @throws Exception
      */
     public void deleteApplication(String applicationID, String username) throws Exception {
@@ -165,7 +180,11 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @param identityProviderName
+     * This method is ued to retrieve federated identity providers
+     *
+     * @param identityProviderName Name of the idp
+     * @param username             UserName of the user
+     * @return Identity Provider
      * @throws Exception
      */
     public IdentityProvider getFederatedIdentityProvider(String identityProviderName, String username)
@@ -175,7 +194,10 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @return
+     * This method is used to get all request path authenticators
+     *
+     * @param username UserName of the user
+     * @return request path authenticators
      * @throws Exception
      */
     public RequestPathAuthenticatorConfig[] getAllRequestPathAuthenticators(String username) throws Exception {
@@ -184,7 +206,10 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @return
+     * This method is used to get all local authenticators
+     *
+     * @param username UserName of the user
+     * @return local authenticators
      * @throws Exception
      */
     public LocalAuthenticatorConfig[] getAllLocalAuthenticators(String username) throws Exception {
@@ -193,23 +218,29 @@ public class ApplicationManagementServiceClient {
     }
 
     /**
-     * @return
+     * This method is used to get all federated identity providers
+     *
+     * @param username UserName of the user
+     * @return federated identity providers
      * @throws Exception
      */
     public IdentityProvider[] getAllFederatedIdentityProvider(String username) throws Exception {
-        IdentityProvider[] idps = null;
+        IdentityProvider[] identityProviders;
 
         try {
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
-            idps = identityApplicationManagementServiceStub.getAllIdentityProviders();
+            identityProviders = identityApplicationManagementServiceStub.getAllIdentityProviders();
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new Exception(e.getMessage());
         }
-        return idps;
+        return identityProviders;
     }
 
     /**
-     * @return
+     * This method is used to get all claim uris
+     *
+     * @param username UserName of the user
+     * @return all claim uris
      * @throws Exception
      */
     public String[] getAllClaimUris(String username) throws Exception {

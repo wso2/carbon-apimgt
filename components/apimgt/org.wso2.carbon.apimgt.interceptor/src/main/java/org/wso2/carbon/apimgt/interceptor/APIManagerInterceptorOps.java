@@ -35,8 +35,7 @@ import org.wso2.carbon.apimgt.interceptor.valve.APIThrottleHandler;
 import org.wso2.carbon.apimgt.interceptor.valve.internal.DataHolder;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
-import org.wso2.carbon.identity.base.IdentityException;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 
 /**
  * APIManagement operations
@@ -80,18 +79,13 @@ public class APIManagerInterceptorOps {
 			String userName = apiKeyValidationDTO.getEndUserName();
 			PrivilegedCarbonContext.getThreadLocalCarbonContext()
 			                       .setUsername(apiKeyValidationDTO.getEndUserName());
-			try {
-				PrivilegedCarbonContext.getThreadLocalCarbonContext()
-				                       .setTenantId(IdentityUtil.getTenantIdOFUser(userName));
-			} catch (IdentityException e) {
-				log.error("Error while retrieving Tenant Id", e);
-				return false;
-			}
+			PrivilegedCarbonContext.getThreadLocalCarbonContext()
+					.setTenantId(IdentityTenantUtil.getTenantIdOfUser(userName));
+
 			return true;
 		} else {
 			throw new APIFaultException(apiKeyValidationDTO.getValidationStatus(),
-			                            "Access failure for API: " + context + ", version: " +
-			                                    version + " with key: " + accessToken);
+					"Access failure for API: " + context + ", version: ");
 		}
 	}
 

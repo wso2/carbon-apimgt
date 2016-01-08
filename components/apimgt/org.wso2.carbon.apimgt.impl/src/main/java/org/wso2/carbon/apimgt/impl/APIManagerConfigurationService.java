@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.impl;
  */
 public interface APIManagerConfigurationService {
 
-    public APIManagerConfiguration getAPIManagerConfiguration();
+    APIManagerConfiguration getAPIManagerConfiguration();
 
-    public APIManagerAnalyticsConfiguration getAPIAnalyticsConfiguration();
+    APIManagerAnalyticsConfiguration getAPIAnalyticsConfiguration();
 
 }

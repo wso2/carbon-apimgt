@@ -22,8 +22,8 @@
 
 
   <!--li><span><i class="icon-heart"></i> Up time: 90%</span></li-->
-  <li><a href="#" onclick="showTab('lifecyclesLink')"><span id="status"><i class="icon-pencil"></i>&nbsp;<%=api.status%></span></a></li>
-  <li><span id="version"><i class="icon-th"></i>&nbsp;<%=api.version%></span></li>
-  <li><a href="#"  onclick="showTab('docsLink')"><i class="icon-file"></i> <%=i18n.localize("docs")%></a></li>
+  <li><a href="#" onclick="showTab('lifecyclesLink')"><span id="status"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<%=api.status%></span></a></li>
+  <li><span id="version">&nbsp;&nbsp;&nbsp;&nbsp;<i class="glyphicon glyphicon-th"></i>&nbsp;<%=api.version%></span></li>
+  <li><a href="#"  onclick="showTab('docsLink')"><i class="glyphicon glyphicon-file"></i> <%=i18n.localize("docs")%></a></li>
 </ul>
 <% }); %>

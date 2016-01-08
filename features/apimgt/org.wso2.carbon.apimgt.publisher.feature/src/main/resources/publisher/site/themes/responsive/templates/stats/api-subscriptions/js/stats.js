@@ -1,25 +1,13 @@
-var t_on = {
-    'apiChart': 1,
-    'subsChart': 1,
-    'serviceTimeChart': 1,
-    'tempLoadingSpace': 1
-};
 var currentLocation;
 var chartColorScheme=[];
 var colorRangeArray=[];
-currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 
-require(["dojo/dom", "dojo/domReady!"], function (dom) {
     currentLocation = window.location.pathname;
-    //Initiating the fake progress bar
-    jagg.fillProgress('apiChart');
-    jagg.fillProgress('subsChart');
-    jagg.fillProgress('serviceTimeChart');
-    jagg.fillProgress('tempLoadingSpace');
 
     jagg.post("/site/blocks/stats/api-subscriptions/ajax/stats.jag", { action: "getSubscriberCountByAPIs", currentLocation: currentLocation  },
         function (json) {
+            $('#spinner').hide();
             if (!json.error) {
                 var length = json.usage.length, data = [];
                 var newLength=0;
@@ -35,7 +23,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
 
                      for (var i = 0; i < length; i++) {
 
-                         var apiData= JSON.parse(json.usage[i].apiName);
+                         var apiData= json.usage[i].apiName;
 
                          apiName_Provider=""+apiData[0]+" ("+apiData[2]+")";
                          inputData.push({
@@ -287,7 +275,7 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                             });
 
                             paths.on("click", function(d){
-                            document.location.href="/publisher/info?name="+api_name+"&version="+d.data.version+"&provider="+provider+"/";
+                            document.location.href=jagg.site.context+"/info?name="+api_name+"&version="+d.data.version+"&provider="+provider;
                             });
 
 
@@ -455,7 +443,6 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
                     });
                     }
                 }else{
-                    $('#pie-chart').css("background-color","#f5f5f5");
                     $('#pie-chart').html($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
                 }
             } else {
@@ -467,7 +454,6 @@ require(["dojo/dom", "dojo/domReady!"], function (dom) {
             }
         }, "json");
 
-});
 
 
 function isDataPublishingEnabled(){

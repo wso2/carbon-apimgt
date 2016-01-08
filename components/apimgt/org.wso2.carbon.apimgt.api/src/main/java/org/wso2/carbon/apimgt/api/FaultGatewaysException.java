@@ -17,42 +17,44 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import java.util.List;
 import java.util.Map;
 
 public class FaultGatewaysException extends Exception {
-	private Map<String, List<String>> faultMap;
-
+	private Map<String, Map<String, String>> faultMap;
+	public static final String PUBLISHED = "PUBLISHED";
+	public static final String UN_PUBLISHED = "UNPUBLISHED";
 	public String getFaultGateWayString() {
-		String failedJson = "{\"PUBLISHED\" : \"\" ,\"UNPUBLISHED\":\"\"}";
+		String failedJson = "{\""+PUBLISHED+"\" : \"\" ,"+UN_PUBLISHED+":\"\"}";
 		if (faultMap != null) {
 			if (!faultMap.isEmpty()) {
 				StringBuilder failedToPublish = new StringBuilder();
 				StringBuilder failedToUnPublish = new StringBuilder();
-				for (String environmentName : faultMap.get("PUBLISHED")) {
-					failedToPublish.append(environmentName + ",");
+				Map<String, String> failedToPublishMap = faultMap.get(PUBLISHED);
+				Map<String, String> failedToUnPublishMap = faultMap.get(UN_PUBLISHED);
+				for (String environmentName : failedToPublishMap.keySet()) {
+					failedToPublish.append(environmentName + ":" + failedToPublishMap.get(environmentName) + ",");
 				}
-				for (String environmentName : faultMap.get("UNPUBLISHED")) {
-					failedToUnPublish.append(environmentName + ",");
+				for (String environmentName : failedToUnPublishMap.keySet()) {
+					failedToUnPublish.append(environmentName + ":" + failedToUnPublishMap.get(environmentName) + ",");
 				}
-				if (!"".equals(failedToPublish.toString())) {
+				if (failedToPublish.length() != 0) {
 					failedToPublish.deleteCharAt(failedToPublish.length() - 1);
 				}
-				if (!"".equals(failedToUnPublish.toString())) {
+				if (failedToUnPublish.length() != 0) {
 					failedToUnPublish.deleteCharAt(failedToUnPublish.length() - 1);
 				}
-				failedJson = "{\"PUBLISHED\" : \"" + failedToPublish.toString() + "\" ,\"UNPUBLISHED\":\"" +
+				failedJson = "{\""+PUBLISHED+"\" : \"" + failedToPublish.toString() + "\" ,\""+UN_PUBLISHED+"\":\"" +
 				             failedToUnPublish.toString() + "\"}";
 			}
 		}
 		return failedJson;
 	}
 
-	public void setFaultMap(Map<String, List<String>> faultMap) {
+	public void setFaultMap(Map<String, Map<String, String>> faultMap) {
 		this.faultMap = faultMap;
 	}
 
-	public FaultGatewaysException(Map<String, List<String>> faultMap) {
+	public FaultGatewaysException(Map<String, Map<String, String>> faultMap) {
 		this.faultMap = faultMap;
 	}
 }

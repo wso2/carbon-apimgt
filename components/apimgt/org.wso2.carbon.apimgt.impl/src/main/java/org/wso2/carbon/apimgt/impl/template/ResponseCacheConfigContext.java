@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.impl.template;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 
 /**
  * Set if response caching enabled or not

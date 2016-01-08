@@ -51,7 +51,4 @@ public class APIRequestsByHourDTO {
         this.api_version = api_version;
     }
 
-	public String getDateTierCount() {
-		return this.getDate().concat("|").concat(this.getTier()).concat("|").concat(this.getRequestCount());
-	}
 }

@@ -25,6 +25,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
@@ -124,8 +125,9 @@ public class OAuthAuthenticator implements Authenticator {
             if(log.isDebugEnabled()){
                 log.debug("Found Authentication Scheme: ".concat(authenticationScheme));
             }
-
-            String clientIP = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty(APIConstants.REMOTE_ADDR);
+            //using existing constant in Message context removing the additinal constant in API Constants
+            String clientIP = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext()
+                    .getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
 
             //Create a dummy AuthenticationContext object with hard coded values for
             // Tier and KeyType. This is because we cannot determine the Tier nor Key
@@ -138,7 +140,7 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setApiKey(clientIP);
             authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
             //This name is hardcoded as anonymous because there is no associated user token
-            authContext.setUsername("anonymous");
+            authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
             authContext.setCallerToken(null);
             authContext.setApplicationName(null);
             authContext.setConsumerKey(null);
@@ -173,8 +175,10 @@ public class OAuthAuthenticator implements Authenticator {
             info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
 
-            synCtx.setProperty("APPLICATION_NAME", info.getApplicationName());
-            synCtx.setProperty("END_USER_NAME", info.getEndUserName());
+            synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
+            synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
+            synCtx.setProperty(APIMgtGatewayConstants.SCOPES, info.getScopes() == null ? null : info.getScopes()
+                                                                                                    .toString());
         }
 
         if (info.isAuthorized()) {
@@ -183,7 +187,11 @@ public class OAuthAuthenticator implements Authenticator {
             authContext.setTier(info.getTier());
             authContext.setApiKey(apiKey);
             authContext.setKeyType(info.getType());
-            authContext.setUsername(info.getEndUserName());
+            if (info.getEndUserName() != null) {
+                authContext.setUsername(info.getEndUserName());
+            } else {
+                authContext.setUsername(APIConstants.END_USER_ANONYMOUS);
+            }
             authContext.setCallerToken(info.getEndUserToken());
             authContext.setApplicationId(info.getApplicationId());
             authContext.setApplicationName(info.getApplicationName());
@@ -211,8 +219,7 @@ public class OAuthAuthenticator implements Authenticator {
                 log.debug("User is NOT authorized to access the Resource");
             }
             throw new APISecurityException(info.getValidationStatus(),
-                    "Access failure for API: " + apiContext + ", version: " + apiVersion +
-                            " with key: " + apiKey);
+                    "Access failure for API: " + apiContext + ", version: " + apiVersion);
         }
     }
 

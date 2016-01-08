@@ -44,7 +44,11 @@
 
       var ifEnabled = function (f) {
         return function (e) {
-          if (!$input.prop('disabled') && !$input.prop('readonly')) {
+          // According to the W3C attribute readonly is not allowed on input
+          // elements with type hidden.
+          // Keep readonly prop for legacy but its use should be deprecated.
+          if (!$input.prop('disabled') && !$input.prop('readonly') &&
+              $input.data('readonly') === undefined) {
             f.call(this, e);
           }
         }

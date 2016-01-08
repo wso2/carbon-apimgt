@@ -27,6 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
@@ -61,7 +63,7 @@ public class Utils {
         messageContext.setTo(null);        
         axis2MC.removeProperty("NO_ENTITY_BODY");
         String method = (String) axis2MC.getProperty(Constants.Configuration.HTTP_METHOD);
-        if (method.matches("^(?!.*(POST|PUT)).*$")) {
+        if (method.matches("^(?!.*(POST|PUT|PATCH)).*$")) {
             // If the request was not an entity enclosing request, send a XML response back
             axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/xml");
         }
@@ -94,14 +96,9 @@ public class Utils {
     }
     
     public static void setFaultPayload(MessageContext messageContext, OMElement payload) {
-        Iterator<OMElement> childElements = messageContext.getEnvelope().getBody().getChildElements();
-
-        if(childElements != null){
-            while(childElements.hasNext()){
-                OMElement child = childElements.next();
-                child.detach();
-            }
-        }
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        JsonUtil.removeJsonPayload(axis2MC);
         messageContext.getEnvelope().getBody().addChild(payload);
     }
     
@@ -180,25 +177,6 @@ public class Utils {
             messageContext.setRelatesTo(new RelatesTo[] { relatesTo });
         }
     }
-    
-    public static String getAllowedOrigin(String currentRequestOrigin,String allowedOrigins) {
-    	if (allowedOrigins != null) {
-    		String[] origins = allowedOrigins.split(",");
-    		List<String> originsList = new LinkedList<String>();
-    		for (String origin: origins) {
-    			originsList.add(origin.trim());
-    		}
-    		if(originsList.contains("*")){
-                allowedOrigins="*";
-            }else if (currentRequestOrigin != null && originsList.contains(currentRequestOrigin)) {
-    			allowedOrigins = currentRequestOrigin;
-    		} else {
-    			allowedOrigins = null; 
-    		}
-    	}
-    	
-    	return allowedOrigins;
-    }
 
     public static String getAllowedHeaders() {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
@@ -208,6 +186,12 @@ public class Utils {
     public static String getAllowedMethods() {
     	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
     	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
+    }
+
+    public static boolean isAllowCredentials() {
+        String allowCredentials = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
+        return Boolean.parseBoolean(allowCredentials);
     }
     
     public static boolean isCORSEnabled() {
@@ -275,15 +259,20 @@ public class Utils {
         return requestPath;
     }
 
+    /**
+     * This method used to send the response back from the request.
+     *
+     * @param messageContext messageContext of the request
+     * @param status         HTTP Status to return from the response
+     */
     public static void send(MessageContext messageContext, int status) {
         org.apache.axis2.context.MessageContext axis2MC =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         axis2MC.setProperty(NhttpConstants.HTTP_SC, status);
         messageContext.setResponse(true);
-        messageContext.setProperty("RESPONSE", "true");
+        messageContext.setProperty(SynapseConstants.RESPONSE, "true");
         messageContext.setTo(null);
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
-        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         Axis2Sender.sendBack(messageContext);
     }
 }

@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -12,19 +12,6 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon - API Management Interceptor </name>
 
-
-    <repositories>
-        <repository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>fail</checksumPolicy>
-            </releases>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -66,6 +53,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>1.4.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -73,8 +61,6 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             org.wso2.carbon.apimgt.interceptor.valve.internal
-                            <!--org.wso2.carbon.apimgt.impl.dao.*;version="${carbon.apimgt.version}",-->
-                            <!--org.wso2.carbon.apimgt.impl.utils.*;version="${carbon.apimgt.version}",-->
                         </Private-Package>
                         <Export-Package>
                             !org.wso2.carbon.apimgt.interceptor.valve.internal,
@@ -82,22 +68,39 @@
                             org.wso2.carbon.apimgt.interceptor.*,
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.carbon.core,
+                            org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.impl.*,
+                            org.wso2.carbon.apimgt.*; version="${carbon.apimgt.imp.pkg.version}",
+                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
+                            org.apache.neethi.*,
+                            javax.servlet.*;version="${javax.servlet.imp.pkg.version}",
+                            javax.cache,
+                            javax.xml.*,
+                            org.apache.axiom.*; version="${imp.pkg.version.axiom}",
+                            org.osgi.service.component,
+                            org.wso2.carbon.throttle.*; version="${imp.pkg.version.carbon.throttle}",
+                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
+                            org.apache.catalina.connector,
+                            org.apache.commons.logging,
+                            org.wso2.carbon.base; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.context; version="${carbon.platform.package.import.version.range}",
+                            org.wso2.carbon.identity.base; version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.identity.core.util; version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.tomcat.ext.valves; version="${carbon.platform.package.import.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
                             scribe;scope=compile|runtime;inline=false;
                         </Embed-Dependency>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
+                <version>1.0.10</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>

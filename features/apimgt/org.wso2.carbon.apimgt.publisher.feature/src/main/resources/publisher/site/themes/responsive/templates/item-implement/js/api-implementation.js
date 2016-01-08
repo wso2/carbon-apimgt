@@ -8,17 +8,20 @@ $(document).ready(function(){
     });
 
     $(".implementation_methods").change(function(event){
+        $(".implementation_method_"+$(this).val()).removeClass('hide');
         $(".implementation_method").hide();
         $(".implementation_method_"+$(this).val()).show();
     });
 
 
-    $('#endpointType').on('change',function(){
+    $('#endpointType').on('change', function () {
         var endpointType = $('#endpointType').find(":selected").val();
-        if(endpointType == "secured"){
+        if (endpointType == "secured") {
+            var endpointAuthType = $('#endpointAuthType').find(":selected").val();
+            $('#endpointAuthType').show();
             $('#credentials').show();
-        }
-        else{
+        } else {
+            $('#endpointAuthType').hide();
             $('#credentials').hide();
         }
     });
@@ -42,7 +45,7 @@ $(document).ready(function(){
     var v = $("#implement_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
-        APP.update_ep_config();
+        APP.update_ep_config("managed");
         $('.swagger').val(JSON.stringify(designer.api_doc));
 
         $('#'+thisID).buttonLoader('start');
@@ -77,15 +80,22 @@ $(document).ready(function(){
              }
             }, dataType: 'json'
         });
-        }
+        },
+        errorPlacement: function (error, element) {
+             if (element.parent().hasClass("input-append")){
+                error.insertAfter(element.parent());
+             }else{
+                error.insertAfter(element);
+             }
+        },
     });
 
     var v = $("#prototype_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
-        var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val(),"config":null},"endpoint_type":"http"}
+        var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val(),"config":null},"endpoint_type":"http","implementation_status":"prototyped"}
         $('.swagger').val(JSON.stringify(designer.api_doc));
-        $('.prototype_config').val(JSON.stringify(endpoint_config));        
+        $('.prototype_config').val(JSON.stringify(endpoint_config));
 
         $('#'+thisID).buttonLoader('start');
 
@@ -134,7 +144,7 @@ $(document).ready(function(){
                         name:designer.saved_api.name,
                         version:designer.saved_api.version,
                         provider: designer.saved_api.provider,
-                        status: "PROTOTYPED",
+                        status: "Deploy as a Prototype",
                         publishToGateway:true,
                         requireResubscription:true
                     },
@@ -163,6 +173,18 @@ $(document).ready(function(){
             });
         $("#prototype_form").submit();                        
     });
+
+    // last saved implementation state
+    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+    if ($('#endpoint_config').val()){
+        if(endpoint_config.implementation_status == "managed"){
+            $('#prototype').hide();
+            $('#managed-api').slideDown();
+        }else if(endpoint_config.implementation_status == "prototyped"){
+            $('#managed-api').hide();
+            $('#prototype').slideDown();
+        }
+    }
 
 });
 

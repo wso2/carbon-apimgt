@@ -4,7 +4,6 @@ import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 public class BAMMediatorConfigContext extends ConfigContextDecorator {

@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>oidc-authenticator</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,18 +29,7 @@
     <packaging>bundle</packaging>
     <name>WSO2 Carbon -OIDC HostObject</name>
     <description>Single sign on based on OIDC</description>
-<repositories>
-        <repository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-                <checksumPolicy>warn</checksumPolicy>
-            </releases>
-        </repository>
-    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>rhino.wso2</groupId>
@@ -67,7 +56,7 @@
             <artifactId>commons-lang</artifactId>
         </dependency>
 		<dependency>
-            <groupId>org.wso2.orbit.org.apache.httpcomponents</groupId>
+            <groupId>org.apache.httpcomponents.wso2</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
@@ -75,13 +64,10 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.nimbusds</groupId>
+            <groupId>com.nimbusds.wso2</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
-        <dependency>
-            <groupId>net.minidev</groupId>
-            <artifactId>json-smart</artifactId>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -105,14 +91,9 @@
                             com.nimbusds.*; version="[0.0.0,3.0.0)",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-	<properties>
-		<opensaml2.version>2.4.1.wso2v1</opensaml2.version>
-        <mitreid-connect-version>1.1.10-SNAPSHOT</mitreid-connect-version>
-	</properties>
 </project>

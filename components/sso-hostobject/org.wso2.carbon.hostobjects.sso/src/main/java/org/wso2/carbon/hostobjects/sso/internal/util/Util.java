@@ -18,11 +18,16 @@
 
 package org.wso2.carbon.hostobjects.sso.internal.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.opensaml.Configuration;
 import org.opensaml.DefaultBootstrap;
+import org.opensaml.saml2.core.NameID;
+import org.opensaml.saml2.core.NameIDPolicy;
 import org.opensaml.saml2.core.Response;
+import org.opensaml.saml2.core.impl.NameIDBuilder;
+import org.opensaml.saml2.core.impl.NameIDPolicyBuilder;
 import org.opensaml.xml.ConfigurationException;
 import org.opensaml.xml.XMLObject;
 import org.opensaml.xml.XMLObjectBuilder;
@@ -41,6 +46,7 @@ import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.hostobjects.sso.internal.SSOConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -53,6 +59,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 
@@ -81,7 +89,7 @@ public class Util {
                 bootStrapped = true;
             } catch (ConfigurationException e) {
                 System.err.println("Error in bootstrapping the OpenSAML2 library");
-                e.printStackTrace();
+                log.error("Error in bootstrapping the OpenSAML2 library", e);
             }
         }
     }
@@ -284,6 +292,61 @@ public class Util {
 
     public static RealmService getRealmService() {
         return Util.realmService;
+    }
+
+    /** Build NameIDPolicy object given name ID policy format
+     *
+     * @param nameIdPolicy Name ID policy format
+     * @return
+     */
+    public static NameIDPolicy buildNameIDPolicy(String nameIdPolicy) {
+        NameIDPolicy nameIDPolicyObj = new NameIDPolicyBuilder().buildObject();
+        if (!StringUtils.isEmpty(nameIdPolicy)){
+            nameIDPolicyObj.setFormat(nameIdPolicy);
+        }else {
+            nameIDPolicyObj.setFormat(SSOConstants.NAME_ID_POLICY_DEFAULT);
+        }
+        nameIDPolicyObj.setAllowCreate(true);
+        return nameIDPolicyObj;
+    }
+
+    /** Build NameID object given name ID format
+     *
+     * @param nameIdFormat Name ID format
+     * @param subject
+     * @return
+     */
+    public static NameID buildNameID(String nameIdFormat, String subject) {
+        NameID nameIdObj = new NameIDBuilder().buildObject();
+        if (!StringUtils.isEmpty(nameIdFormat)) {
+            nameIdObj.setFormat(nameIdFormat);
+        } else {
+            nameIdObj.setFormat(SSOConstants.NAME_ID_POLICY_DEFAULT);
+        }
+        nameIdObj.setValue(subject);
+        return nameIdObj;
+    }
+
+    /**
+     * Replaces the ${} in url with system properties and returns
+     *
+     * @param acsUrl
+     * @return
+     */
+    public static String processAcsUrl(String acsUrl){
+        //matches shortest segments that are between '{' and '}'
+        Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
+        Matcher matcher = pattern.matcher(acsUrl);
+        while (matcher.find()) {
+            String match = matcher.group(1);
+            String property = System.getProperty(match);
+            if (property != null) {
+                acsUrl = acsUrl.replace("${" + match + "}", property);
+            } else {
+                log.warn("System Property " + match + " is not set");
+            }
+        }
+        return acsUrl;
     }
 
 }

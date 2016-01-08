@@ -39,7 +39,7 @@ import org.wso2.carbon.utils.CarbonUtils;
  * are properly secured with UsernameToken security. This implementation is not thread safe
  * and hence must not be shared among multiple threads at the same time.
  */
-class RemoteAuthorizationManagerClient {
+public class RemoteAuthorizationManagerClient implements AuthorizationManagerClient {
 
     private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
@@ -49,14 +49,14 @@ class RemoteAuthorizationManagerClient {
     private String password;
     private String cookie;
 
-    public RemoteAuthorizationManagerClient() throws APIManagementException {
+    public RemoteAuthorizationManagerClient() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String serviceURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL);
         username = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
         password = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
         if (serviceURL == null || username == null || password == null) {
-            throw new APIManagementException("Required connection details for authentication " +
+            throw new IllegalArgumentException("Required connection details for authentication " +
                     "manager not provided");
         }
 
@@ -76,8 +76,9 @@ class RemoteAuthorizationManagerClient {
                 options.setManageSession(true);
             }
         } catch (AxisFault axisFault) {
-            throw new APIManagementException("Error while initializing the user management stubs",
-                    axisFault);
+            throw new IllegalArgumentException("Error while initializing the user management stubs. " +
+                    "Invalid parameter values passed into initializing the corresponding service clients might " +
+                    "potentially have been the issue", axisFault);
         }
     }
 
@@ -165,4 +166,5 @@ class RemoteAuthorizationManagerClient {
                                              "getting list of all the roles.", e);
         }
     }
+
 }

@@ -28,7 +28,7 @@ public interface TokenGenerator {
 
 
     @Deprecated
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version) throws APIManagementException;
-    public String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
+    String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version) throws APIManagementException;
+    String generateToken(APIKeyValidationInfoDTO keyValidationInfoDTO, String apiContext, String version,
                                 String accessToken) throws APIManagementException;
 }

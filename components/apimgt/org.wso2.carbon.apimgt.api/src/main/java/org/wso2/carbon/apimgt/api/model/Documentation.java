@@ -27,6 +27,7 @@ import java.util.Date;
  */
 @SuppressWarnings("unused")
 public class Documentation implements Serializable{
+    private String id;
     private DocumentationType type;
     private String name;
     private String summary;
@@ -35,8 +36,6 @@ public class Documentation implements Serializable{
     private DocumentVisibility visibility;
     private Date lastUpdated;
     private String filePath;
-    private FileData file;
-    private String otherTypeName;
 
     public String getOtherTypeName() {
         return otherTypeName;
@@ -45,6 +44,8 @@ public class Documentation implements Serializable{
     public void setOtherTypeName(String otherTypeName) {
         this.otherTypeName = otherTypeName;
     }
+
+    private String otherTypeName;
 
     public String getFilePath() {
         return filePath;
@@ -65,24 +66,6 @@ public class Documentation implements Serializable{
     public Documentation(DocumentationType type, String name) {
         this.type = type;
         this.name = name;
-    }
-    
-    
-
-    public Documentation(DocumentationType type, String name, String summary, DocumentSourceType sourceType,
-	    String sourceUrl, DocumentVisibility visibility, Date lastUpdated, String filePath, FileData file,
-	    String otherTypeName) {
-	super();
-	this.type = type;
-	this.name = name;
-	this.summary = summary;
-	this.sourceType = sourceType;
-	this.sourceUrl = sourceUrl;
-	this.visibility = visibility;
-	this.lastUpdated = lastUpdated;
-	this.filePath = filePath;
-	this.file = file;
-	this.otherTypeName = otherTypeName;
     }
 
     @Override
@@ -153,10 +136,6 @@ public class Documentation implements Serializable{
         private DocumentSourceType(String type) {
             this.type = type;
         }
-
-	    public String getType() {
-		    return this.type;
-	    }
     }
     public enum DocumentVisibility {
         OWNER_ONLY("owner_only"), PRIVATE("private"),API_LEVEL("api_level");
@@ -167,14 +146,12 @@ public class Documentation implements Serializable{
             this.visibility = visibility;
         }
     }
-    public FileData getFile() {
-        return file;
+
+    public String getId() {
+        return id;
     }
 
-    public void setFile(FileData file) {
-        this.file = file;
-        this.filePath = file.getFilePath();
+    public void setId(String id) {
+        this.id = id;
     }
-    
-    
 }

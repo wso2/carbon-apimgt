@@ -1,0 +1,156 @@
+<% jagg.template("api/overview", function(inputs, outputs, jagg) { %>
+<% var api = outputs.api, user = outputs.user, log = new Log(); %>
+<% var domains = jagg.module("domains").getDomainMappings(jagg.getTenantDomain()).domains;%>
+<% var transports = api.transports.split(",");
+ var tenantDomain=request_tenant;
+ var urlPrefix = jagg.getTenantURLPrefix();%>
+<div id="overview">
+	<%if (!api.isAdvertiseOnly) {%>
+
+	    <% 
+        if(domains != null){
+            for (var key in domains) {
+                var re = /\/$/g
+                var domainValue = domains[key].replace(re, ""); // cleaning the tailing slash
+                var contextWithoutTenant = api.context.replace("/t/"+ jagg.getTenantDomain() , "");
+                // since we are using context versioning, we remove the api.version from the URL.
+                // The reason is that the context will have the version now
+                for(var t=0;t < transports.length;t++){
+                %>
+                <div  class="well well-small api_urls"><%= transports[t] %>://<%=domainValue%><%= contextWithoutTenant %>
+                    <%if (api.isDefaultVersion){%>
+                        <br><%= transports[t] %><%= contextWithoutTenant %>
+                    <%}%>
+                </div>
+                <%
+                }
+            }
+        }
+        else{
+    	    var environments = JSON.parse(api.serverURL);
+    	    for(var environmentType in environments){
+    	        var environmentsPerType = environments[environmentType];
+                if(environmentType == "production"){
+                    %>
+                    <h4>Production Endpoints</h4>
+                    <%} else if(environmentType == "sandbox"){
+                        %>
+                    <h4>Sandbox Endpoints</h4>
+                <%}
+                    for( var environmentName in environmentsPerType){
+                        var environmenturls = environmentsPerType[environmentName];
+                %>
+    	            <h5><%=environmentName%> <%=i18n.localize("urls")%>:</h5>
+
+    	        <%
+                // since we are using context versioning, we remove the api.version from the URL.
+                // The reason is that the context will have the version now
+    	        for (var urltype in environmenturls ) {
+                    if(urltype != "showInConsole"){
+                    if(environmenturls[urltype] != ""){
+                    %>
+    	            <div  class="well well-small api_urls"><%=environmenturls[urltype]%><%=api.context%>
+                        <%if (api.isDefaultVersion){
+                            var apiContext = api.context;
+                            apiContext = apiContext.replace(api.version + "/", "");
+                            apiContext = apiContext.replace(api.version, "");%>
+                            <br><%=environmenturls[urltype]%><%=apiContext%>
+                        <%}%>
+                    </div>
+    	            <%}
+    	            }
+                    }
+                    }
+                    }
+                    }%>
+    <%}%>
+    <% if(api.wsdl && api.wsdl != ""){ %>        
+    <p>
+        <a href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wsdl)%>" target="_blank"><h4><%=i18n.localize("wsdl")%></h4></a>
+    </p>
+    <% } %>
+    <% if(api.wadl && api.wadl != ""){ %>
+        <h4><%=i18n.localize("wadl")%>:</h4>
+    <p>
+        <a href="<%=jagg.url("/site/themes/responsive/templates/api/documentation/download.jag?tenant=" + tenantDomain + "&resourceUrl=" + api.wadl)%>" target="_blank"><%=api.wadl%></a>
+    </p>
+        <% } %>
+    <% if(api.description && api.description != ""){ %>
+        <h4><%=i18n.localize("desc")%>:</h4>
+    <p>
+        <%=api.description%>
+    </p>
+        <% } %>
+
+    <% if(api.bizOwner&& api.bizOwner != ""){ %>
+        <h4><%=i18n.localize("busiOwner")%>:</h4>
+    <p>
+        <%=api.bizOwner%> <% if(api.bizOwnerMail && api.bizOwnerMail!=""){%>
+           [<a href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
+        <%}%>
+    </p>
+    <% } %>
+    <% if(api.techOwner && api.techOwner != ""){ %>
+        <h4><%=i18n.localize("techOwner")%>:</h4>
+    <p>
+        <%=api.techOwner%>
+        <% if(api.techOwnerMail && api.techOwnerMail!=""){%>
+           [<a href="mailto:<%=api.techOwnerMail%>"><%=api.techOwnerMail%></a>]
+        <%}%>
+    </p>
+    <% } %>
+    <h4><%=i18n.localize("share")%>:</h4>
+    <div class="btn-group" role="group" aria-label="...">
+      <button type="button" class="btn btn-default share_links" ref="social"><%=i18n.localize("SocialSites")%></button>
+      <button type="button" class="btn btn-default share_links" ref="embed"><%=i18n.localize("embed")%></button>
+      <a href="" id="api_mailto" class="btn btn-default"><i class="fa fa-envelope-o"></i> <%=i18n.localize("email")%></a>
+    </div>
+    <div class="row">    
+    <div id="share_div_embed" class="share_dives col-sm-6" style="display:none">
+        <textarea id="embed_iframe" class="form-control "></textarea>
+    </div>
+    </div>
+    <div id="share_div_social" class="share_dives">
+        <!-- Facebook -->
+        <a class="social_links" id="facebook" href="#" target="_blank"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/facebook.png"))%>" alt="Facebook" /></a>
+        <!-- Twitter -->
+        <a class="social_links" id="twitter" href="#" target="_blank"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/twitter.png"))%>" alt="Twitter" /></a>
+        <!-- Google+ -->
+        <a class="social_links" id="googleplus" href="#" target="_blank"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/google.png"))%>" alt="Google" /></a>
+        <!-- Digg -->
+        <a class="social_links" id="digg" href="#" target="_blank"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/diggit.png"))%>" alt="Digg" /></a>
+        <div class="clearfix">
+    </div>
+
+    </div>
+
+    <h4><%=i18n.localize("comments")%>:</h4>
+    <% if(user) jagg.includeBlock("comment/comment-add", null); %>
+    <% jagg.includeBlock("comment/comment-list", {api:api}); %>
+</div>
+<script language="javascript">
+    $(document).ready(function(){
+        var link = window.location+'';
+        $('#api_mailto').attr('href',"mailto:?Subject="+encodeURIComponent(document.title)+"&body=Link : "+ encodeURIComponent(window.location));
+        $('#embed_iframe').text('<iframe width="450" height="120" src="'+link.replace('info','widget')+'" frameborder="0" allowfullscreen></iframe>');
+
+        $('.share_links').click(function(){
+            $('.share_links').removeClass('disabled');
+            $(this).addClass('disabled');
+            $('.share_dives').hide();
+            $('#share_div_' + $(this).attr('ref')).show('fast');
+            return false;
+        });
+
+        var api_url = encodeURIComponent(window.location+'');
+        var description = document.title + " : try this API at "+window.location;
+
+        $("#facebook").attr("href","http://www.facebook.com/sharer.php?u="+api_url);
+        $("#twitter").attr("href","http://twitter.com/share?url="+api_url+"&text="+encodeURIComponent(description));
+        $("#googleplus").attr("href","https://plus.google.com/share?url="+api_url);
+        $("#digg").attr("href","http://www.digg.com/submit?url="+api_url);
+
+    });
+</script>
+
+<% }); %>

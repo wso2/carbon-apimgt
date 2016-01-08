@@ -51,7 +51,8 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
     private APIAuthenticationServiceStub stub;
 
     public APIAuthenticationAdminClient(Environment environment) throws AxisFault {
-        stub = new APIAuthenticationServiceStub(null, getServiceEndpointToClearCache(environment, "APIAuthenticationService"));
+        stub = new APIAuthenticationServiceStub(ServiceReferenceHolder.getContextService().getClientConfigContext(),
+                                            getServiceEndpointToClearCache(environment, "APIAuthenticationService"));
         setup(stub, environment);
     }
 
@@ -153,8 +154,8 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * @throws AxisFault if an error occurs while logging in
      */
     private String loginGateway(Environment environment) throws AxisFault {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        //APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                //getAPIManagerConfigurationService().getAPIManagerConfiguration();
         String user = environment.getUserName();
         String password = environment.getPassword();
         String url = environment.getServerURL();
@@ -170,7 +171,8 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
             throw new AxisFault("API gateway URL is malformed", e);
         }
 
-        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url + "AuthenticationAdmin");
+        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(
+                    ServiceReferenceHolder.getContextService().getClientConfigContext(), url + "AuthenticationAdmin");
         ServiceClient client = authAdminStub._getServiceClient();
         Options options = client.getOptions();
         options.setManageSession(true);
@@ -178,8 +180,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
             authAdminStub.login(user, password, host);
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
-            String sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-            return sessionCookie;
+            return (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         } catch (RemoteException e) {
             throw new AxisFault("Error while contacting the authentication admin services", e);
         } catch (LoginAuthenticationExceptionException e) {
@@ -219,8 +220,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
             authAdminStub.login(user, password, host);
             ServiceContext serviceContext = authAdminStub.
                     _getServiceClient().getLastOperationContext().getServiceContext();
-            String sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
-            return sessionCookie;
+            return (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         } catch (RemoteException e) {
             throw new AxisFault("Error while contacting the authentication admin services", e);
         } catch (LoginAuthenticationExceptionException e) {

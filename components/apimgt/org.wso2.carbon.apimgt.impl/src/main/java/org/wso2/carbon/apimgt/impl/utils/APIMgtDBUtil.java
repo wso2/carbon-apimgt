@@ -157,34 +157,12 @@ public final class APIMgtDBUtil {
      * Close Connection
      * @param dbConnection Connection
      */
-    public static void closeConnection(Connection dbConnection) {
+    private static void closeConnection(Connection dbConnection) {
         if (dbConnection != null) {
             try {
-            	dbConnection.close();
+                dbConnection.close();
             } catch (SQLException e) {
                 log.warn("Database error. Could not close database connection. Continuing with " +
-                        "others. - " + e.getMessage(), e);
-            }
-        }
-    }
-    
-    public static void transactionRollback(Connection dbConnection) {
-        if (dbConnection != null) {
-            try {
-                dbConnection.rollback();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not rollback transaction. Continuing with " +
-                        "others. - " + e.getMessage(), e);
-            }
-        }
-    }
-    
-    public static void transactionCommit(Connection dbConnection) {
-        if (dbConnection != null) {
-            try {
-                dbConnection.commit();
-            } catch (SQLException e) {
-                log.warn("Database error. Could not commit transaction. Continuing with " +
                         "others. - " + e.getMessage(), e);
             }
         }
@@ -239,8 +217,8 @@ public final class APIMgtDBUtil {
     /**
      * Function converts IS to String
      * Used for handling blobs
-     * @param is
-     * @return
+     * @param is - The Input Stream
+     * @return - The inputStream as a String
      */
     public static String getStringFromInputStream(InputStream is) {
         BufferedReader br = null;
@@ -254,13 +232,13 @@ public final class APIMgtDBUtil {
                 sb.append(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error occurred while reading from buffered reader.", e);
         } finally {
             if (br != null) {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Error occurred while closing the buffered reader.", e);
                 }
             }
         }

@@ -1,0 +1,94 @@
+<% jagg.template("item-add", function(inputs, outputs, jagg) { %>
+
+<div class="title-section">
+   <h2>Let's get started!</h2>
+</div>
+<div class="content-section shadow-up">
+   <div class="content-data">
+      <div class="row-fluid">
+         <div class="span12">
+
+           <label class="radio select-label create-options"><input autocomplete="off" class="create-api" type="radio" name="create-api" data-target="#existingAPI"/>I have an Existing API
+           <p><%=i18n.localize("createFromExistingAPI")%></p>
+            </label>
+
+            <div id="existingAPI" class="slideContainer hide">
+               <div class="well">
+                  <form role="form" id="startFromExistingAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+                     <fieldset>
+                        <div class="form-inline">
+                           <div class="control-group toggleRadios">
+                              <div class="controls">
+                                 <label class="control-label sub-select-label">Import the API definition as</label>
+                                  <label class="radio sub-labels"><input type="radio" class="select-file" name="import-definition" id="" value="swagger-file"/>Swagger file</label>
+                                  <label class="radio sub-labels urlSelect-label"><input type="radio" class="select-url" name="import-definition" value="swagger-url"/>Swagger URL</label>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="control-group toggleContainers">
+                           <div class="controls hide">
+                               <input name="swagger-url" id="swagger-url" class="input-xxlarge" type="text"/>
+                               <p class="help-block" style="margin-top:-3px;">Eg: http://petstore.swagger.io/v2/swagger.json</p>
+                           </div>
+                           <div class="controls hide">
+                              <input name="swagger-file" id="swagger-file" type="file" class="upload" />
+                           </div>
+                        </div>
+                        <input name="action" value="start" type="hidden"/>
+                        <input name="type" value="rest" type="hidden"/>
+                        <button id="startFromExistingAPI" class="btn btn-primary has-spinner" type="button">Start Creating</button>
+               </fieldset>
+               </form>
+            </div>
+         </div>
+
+         <label class="radio select-label create-options"><input autocomplete="off" class="create-api" type="radio" name="create-api" data-target="#soapEndpoint">I have a SOAP Endpoint
+         <p><%=i18n.localize("createFromExistingSOAPEndpoint")%></p></label>
+
+         <div id="soapEndpoint" class="slideContainer hide">
+            <div class="well">
+               <form role="form" id="startFromExistingSOAPEndpoint-form" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+                  <fieldset>
+                     <div class="form-inline">
+                        <div class="control-group">
+                           <div class="controls toggleRadios">
+                              <label class="control-label sub-select-label">Provide the WSDL URL</label>
+                               <!-- label class="radio sub-labels"><input type="radio" name="import-wsdl" id="import-wsdl-file" value="WSDL-file"/>File</label>
+                               <label class="radio sub-labels " ><input type="radio" name="import-wsdl" id="import-wsdl-url" value="WSDL-url"/>URL</label -->
+                           </div>
+                        </div>
+                     </div>
+                     <div class="control-group">
+                        <div class="control-group">
+                           <div class="controls">
+                               <input id="wsdl-url" name="wsdl-url" class="input-xxlarge is_url_valid" type="text"/>
+                               <label for="wsdl-url" class="error wsdlError">Please use a valid wsdl endpoint</label>
+                               <p class="help-block">Eg : http://appserver/services/echo?wsdl</p>
+                           </div>
+                           <div class="controls hide">
+                              <input name="wsdl-file" type="file" />
+                           </div>
+                        </div>
+                        <input name="action" value="start" type="hidden"/>
+                        <input name="type" value="soap" type="hidden"/>
+                        <button id="startFromExistingSOAPEndpoint" class="btn btn-primary has-spinner" type="button">Start Creating</button>
+                     </div>
+                  </fieldset>
+               </form>
+            </div>
+         </div>
+
+            <label class="radio  select-label create-options"><input autocomplete="off" class="create-api" id="create-new-api" type="radio" name="create-api" data-target="#newAPI" />Design new API
+            <p><%=i18n.localize("designNewAPI")%></p></label>
+
+            <div id="newAPI" class="slideContainer hide">
+               <div class="well">
+                    <button onclick="window.location='<%= jagg.url("/design")%>'" id="designNewAPI" class="btn btn-primary hide" type="button">Start Creating</button>
+               </div>
+            </div.
+         </div>
+      </div>
+   </div>
+</div>
+</div>
+<% }); %>

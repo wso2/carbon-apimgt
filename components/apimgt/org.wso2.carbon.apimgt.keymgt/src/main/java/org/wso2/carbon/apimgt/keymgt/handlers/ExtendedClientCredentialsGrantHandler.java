@@ -16,33 +16,31 @@
 
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.ScopesIssuer;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
-import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
+import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.identity.oauth2.token.handlers.grant.ClientCredentialsGrantHandler;
-import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 
 import java.util.ArrayList;
-
+import java.util.Arrays;
 
 public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGrantHandler {
-    private static final Log log = LogFactory.getLog(ExtendedClientCredentialsGrantHandler.class);
-
     private static final String VALIDITY_PERIOD = "validity_period";
 
     @Override
     public boolean authorizeAccessDelegation(OAuthTokenReqMessageContext tokReqMsgCtx) {
+
         RequestParameter[] parameters = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getRequestParameters();
-        long validityPeriod = 0;
+
+        long validityPeriod;
+
         if (parameters == null) {
             return true;
         }
+
         // find out validity period
         for (RequestParameter parameter : parameters) {
             if (VALIDITY_PERIOD.equals(parameter.getKey())) {
@@ -50,12 +48,13 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
                     validityPeriod = Long.valueOf(parameter.getValue()[0]);
                     //set validity time
                     tokReqMsgCtx.setValidityPeriod(validityPeriod);
+
                 }
             }
         }
+
         return true;
     }
-
 
 
     @Override
@@ -63,20 +62,10 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
             throws IdentityOAuth2Exception {
 
         boolean validateResult = super.validateGrant(tokReqMsgCtx);
-        int tenantId = tokReqMsgCtx.getTenantID();
-        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
-            try {
-                tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getDomain
-                        (tenantId);
-            } catch (UserStoreException e) {
-                log.error("Error occurred while obtaining Tenant Domain from Tenant ID", e);
-                throw new IdentityOAuth2Exception(e.getMessage());
-            }
-        }
-        String username = tokReqMsgCtx.getAuthorizedUser();
-        username = username + "@" + tenantDomain;
-        tokReqMsgCtx.setAuthorizedUser(username);
+        AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
+        String username = user.getUserName();
+        user.setUserName(username);
+        tokReqMsgCtx.setAuthorizedUser(user);
 
         return validateResult;
     }
@@ -105,9 +94,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
 
                 // Arrays.asList won't work here, because list.add cannot be called on the returned list.
                 ArrayList<String> scopeList = new ArrayList<String>(scopes.length);
-                for (String scope : scopes) {
-                    scopeList.add(scope);
-                }
+                scopeList.addAll(Arrays.asList(scopes));
                 // Forcefully add application scope if it's not included in the list.
                 if (!scopeList.contains(applicationScope)) {
                     scopeList.add(applicationScope);

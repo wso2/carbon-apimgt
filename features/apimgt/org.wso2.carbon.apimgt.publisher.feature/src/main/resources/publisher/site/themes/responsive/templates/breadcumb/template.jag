@@ -31,7 +31,7 @@
             <ul class="breadcrumb">
                 <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
                     <li>
-                    <%=i18n.localize("apis")%> <span class="divider">/</span>
+                    <%=i18n.localize("apis")%> <span class="divider"></span>
                     </li>
                     <li>
                         <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all")%></a>
@@ -39,14 +39,12 @@
                 <% } %>
                 <% if(reqUrl.indexOf(infoUrl)>=0||reqUrl.indexOf(infoMappedUrl)>=0){%>
                 <li>
-                    <%=i18n.localize("apis")%> <span class="divider">/</span>
+                    <%=i18n.localize("apis")%> <span class="divider"></span>
                 </li>
                 <li>
                     <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all")%></a>
                 </li>
-                <li>
-                    <span class="divider">/</span>
-                </li>
+
                 <li>
                     <%
                         var apiUrl = infoMappedUrl + "?name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
@@ -60,9 +58,7 @@
                 <li>
                     <%=i18n.localize("apis")%>
                 </li>
-                <li>
-                    <span class="divider">/</span>
-                </li>
+
                 <li>
                     <a href="<%=addMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%>',e:event})"><%=i18n.localize("addAPI")%></a>
                 </li>
@@ -71,9 +67,6 @@
                 <% if(reqUrl.indexOf(allStatsUrl)>=0||reqUrl.indexOf(allStatsMappedUrl)>=0){%>
                 <li>
                     <%=i18n.localize("apis")%>
-                </li>
-                <li>
-                    <span class="divider">/</span>
                 </li>
                 <li>
                     <a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("allStats")%></a>
@@ -85,13 +78,13 @@
                 <% if(reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>
 
                 <li>
-                    APIs <span class="divider">/</span>
+                    APIs <span class="divider"></span>
                 </li>
                 <li>
                     <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all", "All")%></a>
                 </li>
                 <li>
-                    <span class="divider">/</span>
+                    <span class="divider"></span>
                 </li>
                 <li>
                     <%
@@ -102,7 +95,7 @@
                 <% } %>
            <% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>
                 <li>
-                    <%=i18n.localize("myAPIs", "My APIs")%> <span class="divider">/</span>
+                    <%=i18n.localize("myAPIs", "My APIs")%> <span class="divider"></span>
                 </li>
                 <li>
                     <a href="<%=subsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
@@ -112,7 +105,7 @@
 
                 <% if(reqUrl.indexOf(statsUrl)>=0||reqUrl.indexOf(statsMappedUrl)>=0){%>
                 <li>
-                    <%=i18n.localize("myAPIs", "My APIs")%><span class="divider">/</span>
+                    <%=i18n.localize("myAPIs", "My APIs")%><span class="divider"></span>
                 </li>
                 <li>
                     <a href="<%=statsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>',e:event})"><%=i18n.localize("statistics", "Statistics")%></a>

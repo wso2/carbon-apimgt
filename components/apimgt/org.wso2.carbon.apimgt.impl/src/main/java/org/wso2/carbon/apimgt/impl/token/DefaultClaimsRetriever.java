@@ -19,13 +19,11 @@ package org.wso2.carbon.apimgt.impl.token;
 
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.ClaimCache;
 import org.wso2.carbon.apimgt.impl.utils.ClaimCacheKey;
 import org.wso2.carbon.apimgt.impl.utils.UserClaims;
-import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.user.api.Claim;
 import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.ClaimManager;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -33,10 +31,11 @@ import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.cache.Cache;
+import javax.cache.CacheConfiguration;
 import javax.cache.Caching;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class is the default implementation of ClaimsRetriever.
@@ -49,8 +48,8 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     //TODO refactor caching implementation
 
     private String dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
-    private Cache claimsLocalCache;
 
+    private  boolean isClaimsCacheInitialized = false;
     /**
      * Reads the DialectURI of the ClaimURIs to be retrieved from api-manager.xml ->
      * APIConsumerAuthentication -> ConsumerDialectURI.
@@ -59,14 +58,25 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     public void init() {
         dialectURI = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(CONSUMER_DIALECT_URI);
-        claimsLocalCache = getClaimsLocalCache();
         if (dialectURI == null) {
             dialectURI = ClaimsRetriever.DEFAULT_DIALECT_URI;
         }
     }
 
     protected Cache getClaimsLocalCache() {
-        return Caching.getCacheManager("API_MANAGER_CACHE").getCache("claimsLocalCache");
+        String apimClaimsCacheExpiry = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(APIConstants.CLAIM_CACHE_EXPIRY);
+        if(!isClaimsCacheInitialized && apimClaimsCacheExpiry != null) {init();
+            isClaimsCacheInitialized = true;
+           return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
+                    createCacheBuilder(APIConstants.CLAIMS_APIM_CACHE)
+                   .setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                           Long.parseLong(apimClaimsCacheExpiry)))
+                   .setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
+                           Long.parseLong(apimClaimsCacheExpiry))).setStoreByValue(false).build();
+        }else {
+           return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.CLAIMS_APIM_CACHE);
+        }
     }
 
     public SortedMap<String, String> getClaims(String endUserName) throws APIManagementException {
@@ -79,7 +89,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
             String key = endUserName + ":" + tenantId;
             ClaimCacheKey cacheKey = new ClaimCacheKey(key);
             //Object result = claimsLocalCache.getValueFromCache(cacheKey);
-            Object result = claimsLocalCache.get(cacheKey);
+            Object result = getClaimsLocalCache().get(cacheKey);
             if (result != null) {
                 claimValues = ((UserClaims) result).getClaimValues();
                 return claimValues;
@@ -97,7 +107,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                         userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
                 UserClaims userClaims = new UserClaims(claimValues);
                 //add to cache
-                claimsLocalCache.put(cacheKey, userClaims);
+                getClaimsLocalCache().put(cacheKey, userClaims);
                 return claimValues;
             }
             }
@@ -122,7 +132,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
     private String[] claimMappingtoClaimURIString(ClaimMapping[] claims) {
         String[] temp = new String[claims.length];
         for (int i = 0; i < claims.length; i++) {
-            temp[i] = claims[i].getClaim().getClaimUri().toString();
+            temp[i] = claims[i].getClaim().getClaimUri();
        
         }
         return temp;

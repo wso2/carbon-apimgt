@@ -21,6 +21,8 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.util.Map;
+
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
  * necessary privileges to execute the operations. Users can use this class as an
@@ -47,10 +49,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public boolean createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
+    public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException,
             APIManagementException {
         checkCreatePermission();
-        return super.createNewAPIVersion(api, newVersion);
+        super.createNewAPIVersion(api, newVersion);
     }
 
     @Override
@@ -72,10 +74,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public boolean deleteAPI(APIIdentifier identifier) throws APIManagementException {
+    public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
         checkCreatePermission();
         super.deleteAPI(identifier);
-	    return true;
     }
 
     @Override
@@ -124,6 +125,12 @@ public class UserAwareAPIProvider extends APIProviderImpl {
         super.copyAllDocumentation(apiId, toVersion);
     }
 
+    @Override
+    public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
+        checkCreatePermission();
+        return super.getSubscriptionByUUID(uuid);
+    }
+
     public void checkCreatePermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
     }
@@ -134,5 +141,21 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     public void checkPublishPermission() throws APIManagementException {
         APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
+    }
+
+    public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
+            throws APIManagementException {
+        checkPublishPermission();
+        return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
+    }
+
+    public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
+            throws APIManagementException {
+        checkPublishPermission();
+        return super.changeAPILCCheckListItems(apiIdentifier, checkItem, checkItemValue);
+    }
+
+    public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
+        return super.getAPILifeCycleData(apiId);
     }
 }

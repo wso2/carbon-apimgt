@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
 import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -33,7 +34,6 @@ public class APIKeyMgtDataHolder {
     private static RegistryService registryService;
     private static RealmService realmService;
     private static APIManagerConfigurationService amConfigService;
-    private static Boolean isJWTCacheEnabledKeyMgt = true;
     private static Boolean isKeyCacheEnabledKeyMgt = true;
     private static Boolean isThriftServerEnabled = true;
     private static TokenGenerator tokenGenerator;
@@ -42,14 +42,6 @@ public class APIKeyMgtDataHolder {
 
     // Scope used for marking Application Tokens
     private static String applicationTokenScope;
-
-    public static Boolean isJWTCacheEnabledKeyMgt() {
-        return isJWTCacheEnabledKeyMgt;
-    }
-
-    public static void setJWTCacheEnabledKeyMgt(Boolean JWTCacheEnabledKeyMgt) {
-        isJWTCacheEnabledKeyMgt = JWTCacheEnabledKeyMgt;
-    }
 
     public static Boolean getKeyCacheEnabledKeyMgt() {
         return isKeyCacheEnabledKeyMgt;
@@ -94,7 +86,6 @@ public class APIKeyMgtDataHolder {
 
     public static void initData() {
         try {
-            APIKeyMgtDataHolder.isJWTCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_VALIDATOR_ENABLE_JWT_CACHE);
             APIKeyMgtDataHolder.isKeyCacheEnabledKeyMgt = getInitValues(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
             APIKeyMgtDataHolder.isThriftServerEnabled = getInitValues(APIConstants.API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER);
 
@@ -118,7 +109,7 @@ public class APIKeyMgtDataHolder {
                         tokenGenerator = new JWTGenerator();
                     } else {
                         try {
-                            tokenGenerator = (TokenGenerator) Class.forName(clazz).newInstance();
+                            tokenGenerator = (TokenGenerator) APIUtil.getClassForName(clazz).newInstance();
                         } catch (InstantiationException e) {
                             log.error("Error while instantiating class " + clazz, e);
                         } catch (IllegalAccessException e) {

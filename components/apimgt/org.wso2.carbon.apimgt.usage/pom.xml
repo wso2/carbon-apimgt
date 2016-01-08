@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -28,7 +28,6 @@
     <name>WSO2 Carbon - API Management Usage Aggregator Module</name>
     <packaging>pom</packaging>
 
-
     <modules>
         <module>org.wso2.carbon.apimgt.usage.publisher</module>
         <module>org.wso2.carbon.apimgt.usage.client</module>
@@ -36,19 +35,11 @@
 
 
     <dependencies>
-
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.logging</artifactId>
         </dependency>
-
     </dependencies>
 
-    <repositories>
-        <repository>
-             <id>wso2-maven2-repository</id>
-	    <url>http://dist.wso2.org/maven2</url>
-	</repository>
-    </repositories>
 
 </project>

@@ -43,7 +43,6 @@ import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.Resource;
@@ -83,24 +82,24 @@ public class WSO2APIPublisher implements APIPublisher {
             throw new APIManagementException(msg);
         }
         else{
-        CookieStore cookieStore = new BasicCookieStore();
-        HttpContext httpContext = new BasicHttpContext();
-        httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
-        boolean authenticated = authenticateAPIM(store,httpContext);
-        if(authenticated){  //First try to login to store
-            boolean added = addAPIToStore(api,store.getEndpoint(), store.getUsername(), httpContext,store.getDisplayName());
-            if (added) {   //If API creation success,then try publishing the API
-                published = publishAPIToStore(api.getId(), store.getEndpoint(), store.getUsername(), httpContext,store.getDisplayName());
+            CookieStore cookieStore = new BasicCookieStore();
+            HttpContext httpContext = new BasicHttpContext();
+            httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+            boolean authenticated = authenticateAPIM(store,httpContext);
+            if(authenticated){  //First try to login to store
+                boolean added = addAPIToStore(api,store.getEndpoint(), store.getUsername(), httpContext,store.getDisplayName());
+                if (added) {   //If API creation success,then try publishing the API
+                    published = publishAPIToStore(api.getId(), store.getEndpoint(), store.getUsername(), httpContext,store.getDisplayName());
+                }
+                logoutFromExternalStore(store, httpContext);
             }
-            logoutFromExternalStore(store, httpContext);
-        }
         }
         return published;
     }
 
     @Override
     public boolean deleteFromStore(APIIdentifier apiId, APIStore store) throws APIManagementException {
-    	boolean deleted = false;
+        boolean deleted = false;
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
             String msg = "External APIStore endpoint URL or credentials are not defined.Cannot proceed with publishing API to the APIStore - " + store.getDisplayName();
             throw new APIManagementException(msg);
@@ -111,8 +110,8 @@ public class WSO2APIPublisher implements APIPublisher {
             httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
             boolean authenticated = authenticateAPIM(store,httpContext);
             if (authenticated) {
-            	deleted = deleteWSO2Store(apiId, store.getUsername(), store.getEndpoint(), httpContext,store.getDisplayName());
-            	logoutFromExternalStore(store, httpContext);
+                deleted = deleteWSO2Store(apiId, store.getUsername(), store.getEndpoint(), httpContext,store.getDisplayName());
+                logoutFromExternalStore(store, httpContext);
             }
             return deleted;
         }
@@ -142,7 +141,7 @@ public class WSO2APIPublisher implements APIPublisher {
             String responseString = EntityUtils.toString(entity, "UTF-8");
             boolean isError=Boolean.parseBoolean(responseString.split(",")[0].split(":")[1].split("}")[0].trim());
             if (!isError) {  //If API deletion success
-            deleted=true;
+                deleted=true;
 
             }else{
                 String errorMsg=responseString.split(",")[1].split(":")[1].split("}")[0].trim();
@@ -210,7 +209,7 @@ public class WSO2APIPublisher implements APIPublisher {
      * @param httpContext  HTTPContext
      */
     private boolean logoutFromExternalStore(APIStore store,HttpContext httpContext) throws APIManagementException {
-    	try {
+        try {
             // create a post request to addAPI.
             HttpClient httpclient = new DefaultHttpClient();
             String storeEndpoint=store.getEndpoint();
@@ -260,13 +259,13 @@ public class WSO2APIPublisher implements APIPublisher {
 
         try {
             if(api.getThumbnailUrl()!=null){
-            MultipartEntity entity=getMultipartEntity(api,externalPublisher,APIConstants.API_ADD_ACTION);
-            httppost.setEntity(entity);
+                MultipartEntity entity=getMultipartEntity(api,externalPublisher,APIConstants.API_ADD_ACTION);
+                httppost.setEntity(entity);
             }
             else{
-            // Request parameters and other properties.
-            List<NameValuePair> params = getParamsList(api, externalPublisher, APIConstants.API_ADD_ACTION);
-            httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+                // Request parameters and other properties.
+                List<NameValuePair> params = getParamsList(api, externalPublisher, APIConstants.API_ADD_ACTION);
+                httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
             }
             //Execute and get the response.
             HttpResponse response = httpclient.execute(httppost,httpContext);
@@ -278,10 +277,10 @@ public class WSO2APIPublisher implements APIPublisher {
                 createdTmpFile.delete();
             }
             if (!isError) { //If API creation success
-            added=true;
+                added=true;
             }else{
-            String errorMsg=responseString.split(",")[1].split(":")[1].split("}")[0].trim();
-            throw new APIManagementException("Error while adding the API-"+ api.getId().getApiName()+" to the external WSO2 APIStore-"+displayName+".Reason -"+errorMsg );
+                String errorMsg=responseString.split(",")[1].split(":")[1].split("}")[0].trim();
+                throw new APIManagementException("Error while adding the API-"+ api.getId().getApiName()+" to the external WSO2 APIStore-"+displayName+".Reason -"+errorMsg );
             }
         } catch (UnsupportedEncodingException e) {
             throw new APIManagementException("Error while adding the API-"+ api.getId().getApiName()+" to the external WSO2 APIStore-"+displayName  + "--"+e.getMessage(),e);
@@ -295,28 +294,28 @@ public class WSO2APIPublisher implements APIPublisher {
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
             throw new APIManagementException("Error while adding the API:"+ api.getId().getApiName()+" to the external WSO2 APIStore:"+displayName + "--"+e.getMessage(),e);
         } catch (UserStoreException e) {
-        	throw new APIManagementException("Error while adding the API:"+ api.getId().getApiName()+" to the external WSO2 APIStore:"+displayName + "--"+e.getMessage(),e);
-		}
+            throw new APIManagementException("Error while adding the API:"+ api.getId().getApiName()+" to the external WSO2 APIStore:"+displayName + "--"+e.getMessage(),e);
+        }
         return added;
     }
 
     public boolean updateToStore(API api, APIStore store) throws APIManagementException {
-    	boolean updated = false;
+        boolean updated = false;
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
             String msg = "External APIStore endpoint URL or credentials are not defined.Cannot proceed with publishing API to the APIStore - " + store.getDisplayName();
             throw new APIManagementException(msg);
 
         }
         else{
-        CookieStore cookieStore = new BasicCookieStore();
-        HttpContext httpContext = new BasicHttpContext();
-        httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
-        boolean authenticated = authenticateAPIM(store, httpContext);
-        if (authenticated) {
-        	updated = updateWSO2Store(api, store.getUsername(), store.getEndpoint(), httpContext,store.getDisplayName());
-        	logoutFromExternalStore(store, httpContext);
-        }
-        return updated;
+            CookieStore cookieStore = new BasicCookieStore();
+            HttpContext httpContext = new BasicHttpContext();
+            httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
+            boolean authenticated = authenticateAPIM(store, httpContext);
+            if (authenticated) {
+                updated = updateWSO2Store(api, store.getUsername(), store.getEndpoint(), httpContext,store.getDisplayName());
+                logoutFromExternalStore(store, httpContext);
+            }
+            return updated;
         }
     }
     private boolean updateWSO2Store(API api, String externalPublisher, String storeEndpoint, HttpContext httpContext,String displayName) throws APIManagementException {
@@ -367,31 +366,31 @@ public class WSO2APIPublisher implements APIPublisher {
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
             throw new APIManagementException("Error while updating the API- "+ api.getId().getApiName()+" in the external WSO2 APIStore- "+displayName + "--"+e.getMessage(),e);
         } catch (UserStoreException e) {
-        	throw new APIManagementException("Error while updating the API- "+ api.getId().getApiName()+" in the external WSO2 APIStore- "+displayName + "--"+e.getMessage(),e);
-		}
+            throw new APIManagementException("Error while updating the API- "+ api.getId().getApiName()+" in the external WSO2 APIStore- "+displayName + "--"+e.getMessage(),e);
+        }
         return updated;
     }
 
 
     public boolean isAPIAvailable(API api, APIStore store) throws APIManagementException {
 
-            boolean available = false;
-            if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
+        boolean available = false;
+        if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
             String msg = "External APIStore endpoint URL or credentials are not defined. Cannot proceed with checking API availabiltiy from the APIStore - "
-                		+ store.getDisplayName();
+                    + store.getDisplayName();
             throw new APIManagementException(msg);
 
-            } else {
+        } else {
             CookieStore cookieStore = new BasicCookieStore();
             HttpContext httpContext = new BasicHttpContext();
             httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
-    		boolean authenticated = authenticateAPIM(store, httpContext);
-    		if (authenticated) {
-    		available = isAPIAvailableInWSO2Store(api, store.getUsername(), store.getEndpoint(), httpContext);
-    		logoutFromExternalStore(store, httpContext);
-    		}
-    		return available;
-    	}
+            boolean authenticated = authenticateAPIM(store, httpContext);
+            if (authenticated) {
+                available = isAPIAvailableInWSO2Store(api, store.getUsername(), store.getEndpoint(), httpContext);
+                logoutFromExternalStore(store, httpContext);
+            }
+            return available;
+        }
     }
 
     @Override public boolean createVersionedAPIToStore(API api, APIStore store, String version) throws APIManagementException {
@@ -400,8 +399,8 @@ public class WSO2APIPublisher implements APIPublisher {
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
             String msg =
                     "External APIStore endpoint URL or credentials are not defined.Cannot proceed with publishing API" +
-                    " to the APIStore - " +
-                    store.getDisplayName();
+                            " to the APIStore - " +
+                            store.getDisplayName();
             throw new APIManagementException(msg);
         } else {
             CookieStore cookieStore = new BasicCookieStore();
@@ -410,10 +409,10 @@ public class WSO2APIPublisher implements APIPublisher {
             boolean authenticated = authenticateAPIM(store, httpContext);
             if (authenticated) {  //First try to login to store
                 boolean added = addVersionedAPIToStore(api, store.getEndpoint(),version, httpContext,
-                                                       store.getDisplayName(),store.getUsername());
+                        store.getDisplayName(),store.getUsername());
                 if (added) {   //If API creation success,then try publishing the API
                     published = publishAPIToStore(api.getId(), store.getEndpoint(), store.getUsername(), httpContext,
-                                                  store.getDisplayName());
+                            store.getDisplayName());
                 }
                 logoutFromExternalStore(store, httpContext);
             }
@@ -452,15 +451,15 @@ public class WSO2APIPublisher implements APIPublisher {
             }
         } catch (UnsupportedEncodingException e) {
             throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
-                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
+                    " in the external WSO2 APIStore: " + storeEndpoint + e);
 
         } catch (ClientProtocolException e) {
             throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
-                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
+                    " in the external WSO2 APIStore: " + storeEndpoint + e);
 
         } catch (IOException e) {
             throw new APIManagementException("Error while checking the API availabilty: " + api.getId().getApiName() +
-                                             " in the external WSO2 APIStore: " + storeEndpoint + e);
+                    " in the external WSO2 APIStore: " + storeEndpoint + e);
 
         }
         return available;
@@ -582,22 +581,23 @@ public class WSO2APIPublisher implements APIPublisher {
         params.add(new BasicNameValuePair("visibility", api.getVisibility()));
         params.add(new BasicNameValuePair("roles", api.getVisibleRoles()));
         params.add(new BasicNameValuePair("endpointType", String.valueOf(api.isEndpointSecured())));
+        params.add(new BasicNameValuePair("endpointAuthType", String.valueOf(api.isEndpointAuthDigest())));
         params.add(new BasicNameValuePair("epUsername", api.getEndpointUTUsername()));
         params.add(new BasicNameValuePair("epPassword", api.getEndpointUTPassword()));
-        
+
         //Setting current API provider as the owner of the externally publishing API
         params.add(new BasicNameValuePair("apiOwner", api.getId().getProviderName()));
         params.add(new BasicNameValuePair("advertiseOnly", "true"));
-        
-        
+
+
         String tenantDomain = MultitenantUtils.getTenantDomain(
-        		APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        
+                APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+
         int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                 getTenantManager().getTenantId(tenantDomain);
 
         params.add(new BasicNameValuePair("redirectURL", getExternalStoreRedirectURL(tenantId)));
-        
+
         if(api.getTransports()==null){
             params.add(new BasicNameValuePair("http_checked",null));
             params.add(new BasicNameValuePair("https_checked",null));
@@ -630,10 +630,10 @@ public class WSO2APIPublisher implements APIPublisher {
         }
         return params;
     }
-    
+
     private String getExternalStoreRedirectURL(int tenantId) throws APIManagementException {
-    	UserRegistry registry;
-    	 String redirectURL;
+        UserRegistry registry;
+        String redirectURL;
         redirectURL = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration()
                 .getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL);
@@ -642,7 +642,7 @@ public class WSO2APIPublisher implements APIPublisher {
             return redirectURL;
         }
         try {
-			registry = ServiceReferenceHolder.getInstance().getRegistryService()
+            registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
                 Resource resource = registry.get(APIConstants.EXTERNAL_API_STORES_LOCATION);
@@ -670,130 +670,127 @@ public class WSO2APIPublisher implements APIPublisher {
 
     }
 
-    private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action) 
-    		throws org.wso2.carbon.registry.api.RegistryException, IOException, UserStoreException, APIManagementException {
+    private MultipartEntity getMultipartEntity(API api,String externalPublisher, String action)
+            throws org.wso2.carbon.registry.api.RegistryException, IOException, UserStoreException, APIManagementException {
 
-		MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 
         try {
 
+            entity.addPart(APIConstants.API_ACTION, new StringBody(action));
 
-			entity.addPart(APIConstants.API_ACTION, new StringBody(action));
+            entity.addPart("name", new StringBody(api.getId().getApiName()));
+            entity.addPart("version", new StringBody(api.getId().getVersion()));
+            entity.addPart("provider", new StringBody(externalPublisher));
+            entity.addPart("description", new StringBody(checkValue(api.getDescription())));
+            entity.addPart("endpoint", new StringBody(checkValue(api.getUrl())));
+            entity.addPart("sandbox", new StringBody(checkValue(api.getSandboxUrl())));
+            entity.addPart("wsdl", new StringBody(checkValue(api.getWsdlUrl())));
+            entity.addPart("wadl", new StringBody(checkValue(api.getWadlUrl())));
+            entity.addPart("endpoint_config", new StringBody(checkValue(api.getEndpointConfig())));
 
-			entity.addPart("name", new StringBody(api.getId().getApiName()));
-			entity.addPart("version", new StringBody(api.getId().getVersion()));
-			entity.addPart("provider", new StringBody(externalPublisher));
-			entity.addPart("description", new StringBody(checkValue(api.getDescription())));
-			entity.addPart("endpoint", new StringBody(checkValue(api.getUrl())));
-			entity.addPart("sandbox", new StringBody(checkValue(api.getSandboxUrl())));
-			entity.addPart("wsdl", new StringBody(checkValue(api.getWsdlUrl())));
-			entity.addPart("wadl", new StringBody(checkValue(api.getWadlUrl())));
-			entity.addPart("endpoint_config", new StringBody(checkValue(api.getEndpointConfig())));
+            String registryIconUrl = getFullRegistryIconUrl(api.getThumbnailUrl());
+            URL url = new URL(getIconUrlWithHttpRedirect(registryIconUrl));
 
-			URL url = new URL(getFullRegistryIconUrl(api.getThumbnailUrl()));
-			File fileToUpload = new File("tmp/icon");
-			if (!fileToUpload.exists()) {
-				fileToUpload.createNewFile();
-			}
-			FileUtils.copyURLToFile(url, fileToUpload);
-			FileBody fileBody = new FileBody(fileToUpload, "application/octet-stream");
-			entity.addPart("apiThumb", fileBody);
-			// fileToUpload.delete();
+            File fileToUpload = new File("tmp/icon");
+            if (!fileToUpload.exists()) {
+                fileToUpload.createNewFile();
+            }
+            FileUtils.copyURLToFile(url, fileToUpload);
+            FileBody fileBody = new FileBody(fileToUpload, "application/octet-stream");
+            entity.addPart("apiThumb", fileBody);
+            // fileToUpload.delete();
 
-			StringBuilder tagsSet = new StringBuilder("");
+            StringBuilder tagsSet = new StringBuilder("");
 
-			Iterator it = api.getTags().iterator();
-			int j = 0;
-			while (it.hasNext()) {
-				Object tagObject = it.next();
-				tagsSet.append((String) tagObject);
-				if (j != api.getTags().size() - 1) {
-					tagsSet.append(",");
-				}
-				j++;
-			}
+            Iterator it = api.getTags().iterator();
+            int j = 0;
+            while (it.hasNext()) {
+                Object tagObject = it.next();
+                tagsSet.append((String) tagObject);
+                if (j != api.getTags().size() - 1) {
+                    tagsSet.append(",");
+                }
+                j++;
+            }
 
-			entity.addPart("tags", new StringBody(checkValue(tagsSet.toString())));
-			StringBuilder tiersSet = new StringBuilder("");
-			Iterator tier = api.getAvailableTiers().iterator();
-			int k = 0;
-			while (tier.hasNext()) {
-				Object tierObject = tier.next();
-				Tier availTier = (Tier) tierObject;
-				tiersSet.append(availTier.getName());
-				if (k != api.getAvailableTiers().size() - 1) {
-					tiersSet.append(",");
-				}
-				k++;
-			}
-			entity.addPart("tiersCollection", new StringBody(checkValue(tiersSet.toString())));
-			entity.addPart("context", new StringBody(api.getContext()));
-			entity.addPart("bizOwner", new StringBody(checkValue(api.getBusinessOwner())));
-			entity.addPart("bizOwnerMail", new StringBody(checkValue(api.getBusinessOwnerEmail())));
-			entity.addPart("techOwnerMail",
-			               new StringBody(checkValue(api.getTechnicalOwnerEmail())));
-			entity.addPart("techOwner", new StringBody(checkValue(api.getTechnicalOwner())));
-			entity.addPart("visibility", new StringBody(api.getVisibility()));
-			entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
-			entity.addPart("endpointType",
-			               new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
-			entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
-			entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
+            entity.addPart("tags", new StringBody(checkValue(tagsSet.toString())));
+            StringBuilder tiersSet = new StringBuilder("");
+            Iterator tier = api.getAvailableTiers().iterator();
+            int k = 0;
+            while (tier.hasNext()) {
+                Object tierObject = tier.next();
+                Tier availTier = (Tier) tierObject;
+                tiersSet.append(availTier.getName());
+                if (k != api.getAvailableTiers().size() - 1) {
+                    tiersSet.append(",");
+                }
+                k++;
+            }
+            entity.addPart("tiersCollection", new StringBody(checkValue(tiersSet.toString())));
+            entity.addPart("context", new StringBody(api.getContext()));
+            entity.addPart("bizOwner", new StringBody(checkValue(api.getBusinessOwner())));
+            entity.addPart("bizOwnerMail", new StringBody(checkValue(api.getBusinessOwnerEmail())));
+            entity.addPart("techOwnerMail",
+                    new StringBody(checkValue(api.getTechnicalOwnerEmail())));
+            entity.addPart("techOwner", new StringBody(checkValue(api.getTechnicalOwner())));
+            entity.addPart("visibility", new StringBody(api.getVisibility()));
+            entity.addPart("roles", new StringBody(checkValue(api.getVisibleRoles())));
+            entity.addPart("endpointType",
+                    new StringBody(checkValue(String.valueOf(api.isEndpointSecured()))));
+            entity.addPart("endpointAuthType", new StringBody(checkValue(String.valueOf(api.isEndpointAuthDigest()))));
+            entity.addPart("epUsername", new StringBody(checkValue(api.getEndpointUTUsername())));
+            entity.addPart("epPassword", new StringBody(checkValue(api.getEndpointUTPassword())));
 
-			entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
-			entity.addPart("advertiseOnly", new StringBody("true"));
+            entity.addPart("apiOwner", new StringBody(api.getId().getProviderName()));
+            entity.addPart("advertiseOnly", new StringBody("true"));
 
-        
-			String tenantDomain =
-			                      MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
-			                                                                                         .getProviderName()));
-			int tenantId =
-			               ServiceReferenceHolder.getInstance().getRealmService()
-			                                     .getTenantManager().getTenantId(tenantDomain);
-			entity.addPart("redirectURL", new StringBody(getExternalStoreRedirectURL(tenantId)));
-			if (api.getTransports() == null) {
-				entity.addPart("http_checked", new StringBody(""));
-				entity.addPart("https_checked", new StringBody(""));
-			} else {
-				String[] transports = api.getTransports().split(",");
-				if (transports.length == 1) {
-					if ("https".equals(transports[0])) {
-						entity.addPart("http_checked", new StringBody(""));
-						entity.addPart("https_checked", new StringBody(transports[0]));
 
-					} else {
-						entity.addPart("https_checked", new StringBody(""));
-						entity.addPart("http_checked", new StringBody(transports[0]));
-					}
-				} else {
-					entity.addPart("http_checked", new StringBody("http"));
-					entity.addPart("https_checked", new StringBody("https"));
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
+                    api.getId().getProviderName()));
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            entity.addPart("redirectURL", new StringBody(getExternalStoreRedirectURL(tenantId)));
+            if (api.getTransports() == null) {
+                entity.addPart("http_checked", new StringBody(""));
+                entity.addPart("https_checked", new StringBody(""));
+            } else {
+                String[] transports = api.getTransports().split(",");
+                if (transports.length == 1) {
+                    if ("https".equals(transports[0])) {
+                        entity.addPart("http_checked", new StringBody(""));
+                        entity.addPart("https_checked", new StringBody(transports[0]));
 
-				}
-			}
-			entity.addPart("resourceCount",
-			               new StringBody(String.valueOf(api.getUriTemplates().size())));
+                    } else {
+                        entity.addPart("https_checked", new StringBody(""));
+                        entity.addPart("http_checked", new StringBody(transports[0]));
+                    }
+                } else {
+                    entity.addPart("http_checked", new StringBody("http"));
+                    entity.addPart("https_checked", new StringBody("https"));
 
-			Iterator urlTemplate = api.getUriTemplates().iterator();
-			int i = 0;
-			while (urlTemplate.hasNext()) {
-				Object templateObject = urlTemplate.next();
-				URITemplate template = (URITemplate) templateObject;
-				entity.addPart("uriTemplate-" + i, new StringBody(template.getUriTemplate()));
-				entity.addPart("resourceMethod-" + i,
-				               new StringBody(template.getMethodsAsString().replaceAll("\\s", ",")));
-				entity.addPart("resourceMethodAuthType-" + i,
-				               new StringBody(String.valueOf(template.getAuthTypeAsString()
-				                                                     .replaceAll("\\s", ","))));
-				entity.addPart("resourceMethodThrottlingTier-" + i,
-				               new StringBody(template.getThrottlingTiersAsString()
-				                                      .replaceAll("\\s", ",")));
-				i++;
-			}
-			return entity;
-		} catch (UnsupportedEncodingException e) {
-			throw new IOException("Error while adding the API to external APIStore :", e);
-		}
+                }
+            }
+            entity.addPart("resourceCount", new StringBody(String.valueOf(api.getUriTemplates().size())));
+
+            Iterator urlTemplate = api.getUriTemplates().iterator();
+            int i = 0;
+            while (urlTemplate.hasNext()) {
+                Object templateObject = urlTemplate.next();
+                URITemplate template = (URITemplate) templateObject;
+                entity.addPart("uriTemplate-" + i, new StringBody(template.getUriTemplate()));
+                entity.addPart("resourceMethod-" + i,
+                        new StringBody(template.getMethodsAsString().replaceAll("\\s", ",")));
+                entity.addPart("resourceMethodAuthType-" + i,
+                        new StringBody(String.valueOf(template.getAuthTypeAsString().replaceAll("\\s", ","))));
+                entity.addPart("resourceMethodThrottlingTier-" + i,
+                        new StringBody(template.getThrottlingTiersAsString().replaceAll("\\s", ",")));
+                i++;
+            }
+            return entity;
+        } catch (UnsupportedEncodingException e) {
+            throw new IOException("Error while adding the API to external APIStore :", e);
+        }
     }
 
     private static String getFullRegistryIconUrl(String postfixUrl) {
@@ -838,18 +835,18 @@ public class WSO2APIPublisher implements APIPublisher {
         String backendPort;
         ConfigurationContext context=ServiceReferenceHolder.getContextService().getServerConfigContext();
 
-            port = CarbonUtils.getTransportProxyPort(context, transport);
-            if (port == -1) {
-                port = CarbonUtils.getTransportPort(context, transport);
-            }
-            backendPort = Integer.toString(port);
-            return backendPort;
+        port = CarbonUtils.getTransportProxyPort(context, transport);
+        if (port == -1) {
+            port = CarbonUtils.getTransportPort(context, transport);
+        }
+        backendPort = Integer.toString(port);
+        return backendPort;
 
     }
-    
+
     /**
      * This method composes and return the publisher URL from the Store URL. 
-     * @param storeEndpoint
+     * @param storeEndpoint - The Store endpoint url
      * @return Publisher URL
      */
     private String getPublisherURLFromStoreURL(String storeEndpoint) {
@@ -891,25 +888,39 @@ public class WSO2APIPublisher implements APIPublisher {
                 String errorMsg = responseString.split(",")[1].split(":")[1].split("}")[0].trim();
                 throw new APIManagementException(
                         "Error while adding the API-" + api.getId().getApiName() + " to the external WSO2 APIStore-" +
-                        displayName + ".Reason -" + errorMsg);
+                                displayName + ".Reason -" + errorMsg);
             }
         } catch (UnsupportedEncodingException e) {
             throw new APIManagementException(
                     "Error while adding the API-" + api.getId().getApiName() + " to the external WSO2 APIStore-" +
-                    displayName + "--" + e.getMessage(), e);
+                            displayName + "--" + e.getMessage(), e);
 
         } catch (ClientProtocolException e) {
             throw new APIManagementException(
                     "Error while adding the API-" + api.getId().getApiName() + " to the external WSO2 APIStore-" +
-                    displayName + "--" + e.getMessage(), e);
+                            displayName + "--" + e.getMessage(), e);
 
         } catch (IOException e) {
             throw new APIManagementException(
                     "Error while adding the API:" + api.getId().getApiName() + " to the external WSO2 APIStore:" +
-                    displayName + "--" + e.getMessage(), e);
+                            displayName + "--" + e.getMessage(), e);
 
         }
         return added;
+    }
+
+    private String getIconUrlWithHttpRedirect(String imageUrl) throws IOException {
+        URL url = new URL(imageUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        int statusCode = conn.getResponseCode();
+
+        if (statusCode == HttpURLConnection.HTTP_MOVED_PERM || statusCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                statusCode == HttpURLConnection.HTTP_SEE_OTHER) {
+            return conn.getHeaderField("Location");
+        } else {
+            return imageUrl;
+        }
     }
 
 }

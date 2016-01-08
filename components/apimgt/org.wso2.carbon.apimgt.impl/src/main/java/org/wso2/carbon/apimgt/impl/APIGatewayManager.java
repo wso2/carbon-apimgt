@@ -16,8 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -28,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -70,20 +70,23 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public List<String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) 
-                                                                                       throws APIManagementException {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+    public Map<String, String> publishToGateway(API api, APITemplateBuilder builder, String tenantDomain) {
+        Map<String, String> failedEnvironmentsList = new HashMap<String, String>(0);
         if (api.getEnvironments() == null) {
             return failedEnvironmentsList;
         }
         for (String environmentName : api.getEnvironments()) {
             Environment environment = environments.get(environmentName);
-            APIGatewayAdminClient client = null;
+            //If the environment is removed from the configuration, continue without publishing
+            if (environment == null) {
+                continue;
+            }
+            APIGatewayAdminClient client;
             try {
                 client = new APIGatewayAdminClient(api.getId(), environment);
 			String operation;
 			// If the API exists in the Gateway
-			if (client.getApi(tenantDomain,api.getId()) != null) {
+			if (client.getApi(tenantDomain, api.getId()) != null) {
 
 				// If the Gateway type is 'production' and the production url
 				// has been removed
@@ -99,13 +102,13 @@ public class APIGatewayManager {
 					// We need to remove the api from the environment since its
 					// relevant url has been removed.
 					operation ="delete";
-					client.deleteApi(tenantDomain,api.getId());
+					client.deleteApi(tenantDomain, api.getId());
                     if(api.isPublishedDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                            client.deleteDefaultApi(tenantDomain,api.getId());
+                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                            client.deleteDefaultApi(tenantDomain, api.getId());
                         }
                     }
-					setSecurevaultProperty(api,tenantDomain,environment,operation);
+					setSecureVaultProperty(api, tenantDomain, environment, operation);
 					undeployCustomSequences(api,tenantDomain, environment);
 				} else {
 					if (debugEnabled) {
@@ -119,19 +122,19 @@ public class APIGatewayManager {
 
                     //Update the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.updateApiForInlineScript(builder, tenantDomain,api.getId());
+                        client.updateApiForInlineScript(builder, tenantDomain, api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.updateApi(builder, tenantDomain,api.getId());
+                        client.updateApi(builder, tenantDomain, api.getId());
                     }
 
                     if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
-                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                            client.updateDefaultApi(builder, tenantDomain, api.getId().getVersion(), api.getId());
                         }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                            client.addDefaultAPI(builder, tenantDomain, api.getId().getVersion(), api.getId());
                         }
                     }
-					setSecurevaultProperty(api,tenantDomain,environment,operation);
+					setSecureVaultProperty(api, tenantDomain, environment, operation);
 
                     //Update the custom sequences of the API
 					updateCustomSequences(api, tenantDomain, environment);
@@ -162,31 +165,40 @@ public class APIGatewayManager {
 
                     //Add the API
                     if(api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)){
-                        client.addPrototypeApiScriptImpl(builder, tenantDomain,api.getId());
+                        client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
-                        client.addApi(builder, tenantDomain,api.getId());
+                        client.addApi(builder, tenantDomain, api.getId());
                     }
 
                     if(api.isDefaultVersion()){
-                        if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                        if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                            client.updateDefaultApi(builder,tenantDomain,api.getId().getVersion(), api.getId());
                         }else{
-                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(),api.getId());
+                            client.addDefaultAPI(builder,tenantDomain,api.getId().getVersion(), api.getId());
                         }
                     }
-					setSecurevaultProperty(api,tenantDomain,environment,operation);
+					setSecureVaultProperty(api, tenantDomain, environment, operation);
 
                     //Deploy the custom sequences of the API.
 					deployCustomSequences(api, tenantDomain, environment);
 				}
 			}
             } catch (AxisFault axisFault) {
-                failedEnvironmentsList.add(environmentName);
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
+                failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 log.error("Error occurred when publish to gateway " + environmentName, axisFault);
-                throw new APIManagementException(axisFault.getMessage(), axisFault);
             } catch (APIManagementException ex) {
+                /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway publishing if one gateway unreachable
+                 */
                 log.error("Error occurred deploying sequences on " + environmentName, ex);
-                throw new APIManagementException(ex);
+                failedEnvironmentsList.put(environmentName, ex.getMessage());
             }
         }
         return failedEnvironmentsList;
@@ -200,35 +212,50 @@ public class APIGatewayManager {
 	 * @param tenantDomain
 	 *            - Tenant Domain of the publisher
 	 */
-    public List<String> removeFromGateway(API api, String tenantDomain) {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+    public Map<String, String> removeFromGateway(API api, String tenantDomain) {
+        Map<String, String> failedEnvironmentsList = new HashMap<String, String>(0);
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
                     Environment environment = environments.get(environmentName);
+                    //If the environment is removed from the configuration, continue without removing
+                    if (environment == null) {
+                        continue;
+                    }
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
 
-                    if (client.getApi(tenantDomain,api.getId()) != null) {
+                    if (client.getApi(tenantDomain, api.getId()) != null) {
                         if (debugEnabled) {
 					log.debug("Removing API " + api.getId().getApiName() + " From environment " +
 					          environment.getName());
 				}
 				String operation ="delete";
-				client.deleteApi(tenantDomain,api.getId());
+				client.deleteApi(tenantDomain, api.getId());
 				undeployCustomSequences(api, tenantDomain,environment);
-				setSecurevaultProperty(api,tenantDomain,environment,operation);
+				setSecureVaultProperty(api, tenantDomain, environment, operation);
 			}
 
             if(api.isPublishedDefaultVersion()){
-                if(client.getDefaultApi(tenantDomain,api.getId())!=null){
-                    client.deleteDefaultApi(tenantDomain,api.getId());
+                if(client.getDefaultApi(tenantDomain, api.getId())!=null){
+                    client.deleteDefaultApi(tenantDomain, api.getId());
                 }
             }
                 } catch (AxisFault axisFault) {
+                 /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                 */
                     log.error("Error occurred when removing from gateway " + environmentName, axisFault);
-                    failedEnvironmentsList.add(environmentName);
+                    failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 } catch (APIManagementException ex) {
+                    /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                 */
                     log.error("Error occurred undeploy sequences on " + environmentName, ex);
+                    failedEnvironmentsList.put(environmentName, ex.getMessage());
                 }
             }
 
@@ -236,24 +263,29 @@ public class APIGatewayManager {
         return failedEnvironmentsList;
     }
 
-    public List<String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
+    public Map<String, String> removeDefaultAPIFromGateway(API api, String tenantDomain) {
+        Map<String, String> failedEnvironmentsList = new HashMap<String, String>(0);
         if (api.getEnvironments() != null) {
             for (String environmentName : api.getEnvironments()) {
                 try {
                     Environment environment = environments.get(environmentName);
             APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-            if(client.getDefaultApi(tenantDomain,api.getId())!=null){
+            if(client.getDefaultApi(tenantDomain, api.getId())!=null){
                 if (debugEnabled) {
                     log.debug("Removing Default API " + api.getId().getApiName() + " From environment " +
                             environment.getName());
                 }
 
-                client.deleteDefaultApi(tenantDomain,api.getId());
+                client.deleteDefaultApi(tenantDomain, api.getId());
             }
                 } catch (AxisFault axisFault) {
+                    /*
+                didn't throw this exception to handle multiple gateway publishing
+                if gateway is unreachable we collect that environments into map with issue and show on popup in ui
+                therefore this didn't break the gateway unpublisihing if one gateway unreachable
+                 */
                     log.error("Error occurred when removing default api from gateway " + environmentName, axisFault);
-                    failedEnvironmentsList.add(environmentName);
+                    failedEnvironmentsList.put(environmentName, axisFault.getMessage());
                 }
             }
         }
@@ -271,19 +303,22 @@ public class APIGatewayManager {
 	 *         available in none.
 	 */
     public boolean isAPIPublished(API api, String tenantDomain)throws APIManagementException {
-        List<String> failedEnvironmentsList = new ArrayList<String>(0);
         for (Environment environment : environments.values()) {
             try {
                 APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
                 // If the API exists in at least one environment, consider as
                 // published and return true.
-                if (client.getApi(tenantDomain,api.getId()) != null) {
+                if (client.getApi(tenantDomain, api.getId()) != null) {
                     return true;
                 }
             } catch (AxisFault axisFault) {
-                log.error("Error occurred when check api is published on gatway" + environment.getName(), axisFault);
-                failedEnvironmentsList.add(environment.getName());
-                throw new APIManagementException(axisFault);
+                /*
+                didn't throw this exception to check api available in all the environments
+                therefore we didn't throw exception to avoid if gateway unreachable affect
+                */
+                if (api.getStatus() != APIStatus.CREATED) {
+                    log.error("Error occurred when check api is published on gateway" + environment.getName(), axisFault);
+                }
             }
         }
         return false;
@@ -292,24 +327,21 @@ public class APIGatewayManager {
 	/**
 	 * Get the specified in/out sequences from api object
 	 * 
-	 * @param api
-	 *            -API object
+	 * @param api -API object
 	 * @param tenantDomain
 	 * @param environment
 	 * @throws APIManagementException
 	 * @throws AxisFault
 	 */
     private void deployCustomSequences(API api, String tenantDomain, Environment environment)
-            throws APIManagementException,
-                   AxisFault {
+            throws APIManagementException, AxisFault {
 
         if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOutSequence())) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
                 if(tenantDomain != null && !tenantDomain.equals("")){
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-                }
-                else{
+                } else    {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
                             (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
                 }
@@ -338,14 +370,15 @@ public class APIGatewayManager {
     private void deployInSequence(API api, int tenantId, String tenantDomain, Environment environment)
             throws APIManagementException, AxisFault {
 
-        String inSeqExt = APIUtil.getSequenceExtensionName(api) + "--In";
         String inSequenceName = api.getInSequence();
-        OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, "in");
-
-        APIGatewayAdminClient sequenceAdminServiceClient = new APIGatewayAdminClient(api.getId(), environment);
+        OMElement inSequence = APIUtil.getCustomSequence(inSequenceName, tenantId, "in", api.getId());
 
         if (inSequence != null) {
-            inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
+            String inSeqExt = APIUtil.getSequenceExtensionName(api) + "--In";
+            if (inSequence.getAttribute(new QName("name")) != null) {
+                inSequence.getAttribute(new QName("name")).setAttributeValue(inSeqExt);
+            }
+            APIGatewayAdminClient sequenceAdminServiceClient = new APIGatewayAdminClient(api.getId(), environment);
             sequenceAdminServiceClient.addSequence(inSequence, tenantDomain);
         }
     }
@@ -353,14 +386,15 @@ public class APIGatewayManager {
     private void deployOutSequence(API api, int tenantId, String tenantDomain, Environment environment)
             throws APIManagementException, AxisFault {
 
-        String outSeqExt  = APIUtil.getSequenceExtensionName(api) + "--Out";
         String outSequenceName = api.getOutSequence();
-        OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, "out");
-
-        APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+        OMElement outSequence = APIUtil.getCustomSequence(outSequenceName, tenantId, "out", api.getId());
 
         if (outSequence != null) {
-            outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);
+            String outSeqExt  = APIUtil.getSequenceExtensionName(api) + "--Out";
+            if (outSequence.getAttribute(new QName("name")) != null)    {
+                outSequence.getAttribute(new QName("name")).setAttributeValue(outSeqExt);
+            }
+            APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
             client.addSequence(outSequence, tenantDomain);
         }
     }
@@ -498,7 +532,7 @@ public class APIGatewayManager {
                     client.deleteSequence(faultSequenceName, tenantDomain);
                 }
                 //Get the fault sequence xml
-                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, "fault");
+                OMElement faultSequence = APIUtil.getCustomSequence(faultSequenceName, tenantId, "fault", api.getId());
 
                 if (faultSequence != null) {
                     //Deploy the fault sequence
@@ -516,10 +550,7 @@ public class APIGatewayManager {
     }
 
     private boolean isSequenceDefined(String sequence){
-        if(sequence != null && !"none".equals(sequence)){
-            return true;
-        }
-        return false;
+        return sequence != null && !"none".equals(sequence);
     }
        
     /**
@@ -530,19 +561,19 @@ public class APIGatewayManager {
      * @param operation -add,delete,update operations for an API
      * @throws APIManagementException
      */
-	private void setSecurevaultProperty(API api, String tenantDomain, Environment environment,String operation)
-	                                                                                          throws APIManagementException {
+	private void setSecureVaultProperty(API api, String tenantDomain, Environment environment, String operation)
+            throws APIManagementException {
 		boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
 		                                                    getAPIManagerConfiguration().getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
 		if (api.isEndpointSecured() && isSecureVaultEnabled) {
 			try {							
-				APIGatewayAdminClient securityAdminclient = new APIGatewayAdminClient(api.getId(), environment);
-				if("add".equals(operation.toString())){                                                                                                 
-				securityAdminclient.addSecureVaultProperty(api, tenantDomain);
-				} else if("update".equals(operation.toString())){
-					securityAdminclient.updateSecureVaultProperty(api, tenantDomain);
-				} else if("delete".equals(operation.toString())){
-					securityAdminclient.deleteSecureVaultProperty(api, tenantDomain);
+				APIGatewayAdminClient securityAdminClient = new APIGatewayAdminClient(api.getId(), environment);
+				if("add".equals(operation)){
+				securityAdminClient.addSecureVaultProperty(api, tenantDomain);
+				} else if("update".equals(operation)){
+					securityAdminClient.updateSecureVaultProperty(api, tenantDomain);
+				} else if("delete".equals(operation)){
+					securityAdminClient.deleteSecureVaultProperty(api, tenantDomain);
 				}
 
 			} catch (Exception e) {

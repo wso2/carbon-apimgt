@@ -11,12 +11,12 @@
 
 			}
 		</script>
+		<div id="col-sm-12">
         <div id="userKey">
             <div class="title-section">
                 <h2><%=i18n.localize("subscriptions")%></h2>
             </div>
-            <div class="content-section shadow-up">
-                <div class="content-data">
+
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -24,7 +24,7 @@
                                 <th class="appSpecialCell"><%=i18n.localize("application")%></th>
 
                                 <th class="appSpecialCell">Subscribed APIs</th>
-                                <th class="userSpecialCell">Actions</th>
+                                <th class="userSpecialCell col-sm-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="users">
@@ -129,12 +129,12 @@
 	                if(existingStatus=='BLOCKED' || existingStatus=='PROD_ONLY_BLOCKED'){
 		                status='Unblock';
 		                newStatus='UNBLOCKED';
-		                className='icon-ok-circle';
+		                className='glyphicon glyphicon-ok-circle';
 	                }
 	                else{
 		                status='Block';
 		                newStatus='BLOCKED';
-		                className='icon-ban-circle';
+		                className='glyphicon glyphicon-ban-circle';
 	                }
                     listCount ++;
         	        var radioInputName = "blockType" + listCount;
@@ -142,22 +142,27 @@
                                 <td style="width:300px">
 
                     <%if (existingStatus=='PROD_ONLY_BLOCKED') { %>
-       		                        <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction"
-       		                            checked="true" disabled/>
-       		                        <label class="radio-label-class"><%=i18n.localize("blockProduction")%></label>
-       		                        <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll"  disabled/>
+       		                        <label class="radio-inline">
+       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" checked="true" disabled/><%=i18n.localize("blockProduction")%>
+       		                        </label>
+       		                        <label  class="radio-inline">
+       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll"  disabled/><%=i18n.localize("blockAll")%>
+                                    </label>
                         <%} else if (existingStatus=='BLOCKED'){%>
-       		                        <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction"
-       		                            disabled/>
-       		                        <label class="radio-label-class"><%=i18n.localize("blockProduction")%></label>
-       		                        <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll"
-       		                            checked="true" disabled/>
+
+       		                        <label class="radio-inline">
+       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" disabled/><%=i18n.localize("blockProduction")%>
+       		                        </label>
+       		                        <label  class="radio-inline">
+       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll" checked="true" disabled/><%=i18n.localize("blockAll")%>
+       		                        </label>
                         <%} else {%>
-       		                        <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" />
-       		                        <label class="radio-label-class"><%=i18n.localize("blockProduction")%></label>
-       		                        <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll"  />
+
+                                        <label class="radio-inline"><input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" /><%=i18n.localize("blockProduction")%></label>
+                                        <label  class="radio-inline"><input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll"  /><%=i18n.localize("blockAll")%></label>
+
                         <% }%>
-                                    <label  class="radio-label-class"><%=i18n.localize("blockAll")%></label>
+
                         <%if(existingStatus == 'ON_HOLD'){
                             var tip = i18n.localize("subsPendingApproval");
                         %>
@@ -188,8 +193,7 @@
                         </tbody>
                     </table>
                 <% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages}); %>
-                </div>
-            </div>
+        </div>
         </div>
 
 

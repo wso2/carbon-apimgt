@@ -1,0 +1,2495 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.9.0",
+    "title": "WSO2 API Manager - Publisher",
+    "description": "This document specifies a **RESTful API** for WSO2 **API Manager** - Publisher.\n\nIt is written with [swagger 2](http://swagger.io/).\n",
+    "contact": {
+      "name": "WSO2",
+      "url": "http://wso2.com/products/api-manager/",
+      "email": "architecture@wso2.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "schemes": [
+    "https"
+  ],
+  "host": "apis.wso2.com",
+  "basePath": "/api/am/publisher/v0.9",
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "x-wso2-security": {
+    "apim": {
+      "x-wso2-scopes": [
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:api_view",
+          "key": "apim:api_view"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:api_create",
+          "key": "apim:api_create"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:api_publish",
+          "key": "apim:api_publish"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:tier_view",
+          "key": "apim:tier_view"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:tier_manage",
+          "key": "apim:tier_manage"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:subscription_view",
+          "key": "apim:subscription_view"
+        },
+        {
+          "description": "",
+          "roles": "admin",
+          "name": "apim:subscription_block",
+          "key": "apim:subscription_block"
+        }
+      ]
+    }
+  },
+  "paths": {
+    "/apis": {
+      "get": {
+        "x-scope": "apim:api_view",
+        "summary": "Retrieving APIs\n",
+        "description": "Get a list of available APIs qualifying under a given search condition.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "**Search condition**.\n\nYou can search in attributes by using an **\"attribute:\"** modifier.\n\nEg. \"provider:wso2\" will match an API if the provider of the API contains \"wso2\".\n\nSupported attribute modifiers are [**version, context, status,\ndescription, subcontext, doc, provider, tag **]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n",
+            "type": "string"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          }
+        ],
+        "tags": [
+          "API Collection",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nList of qualifying APIs is returned.\n",
+            "schema": {
+              "$ref": "#/definitions/APIList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "x-scope": "apim:api_create",
+        "description": "Create a new API\n",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "API object that needs to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          }
+        ],
+        "tags": [
+          "API Collection",
+          "Create"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created. \nSuccessful response with the newly created object as entity in the body. \nLocation header contains URL of newly created entity.\n",
+            "schema": {
+              "$ref": "#/definitions/API"
+            },
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created resource.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional request\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type. \nThe entity of the request was in a not supported format.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}": {
+      "get": {
+        "x-scope": "apim:api_view",
+        "description": "Get details of an API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nRequested API is returned\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "x-scope": "apim:api_create",
+        "description": "Update an existing API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "API object that needs to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/API"
+            }
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Update"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSuccessful response with updated API object\n",
+            "schema": {
+              "$ref": "#/definitions/API"
+            },
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created resource.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden. \nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-scope": "apim:api_create",
+        "description": "Delete an existing API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Delete"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nResource successfully deleted.\n"
+          },
+          "403": {
+            "description": "Forbidden. \nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/swagger": {
+      "get": {
+        "x-scope": "apim:api_view",
+        "description": "Get the swagger of an API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nRequested swagger document of the API is returned\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-scope": "apim:api_create",
+        "description": "Update an existing swagger definition of an API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "in": "formData",
+            "name": "apiDefinition",
+            "description": "Swagger definition of the API",
+            "type": "string",
+            "required": true
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Update"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSuccessful response with updated Swagger definition\n",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created resource.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden. \nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/copy-api": {
+      "post": {
+        "x-scope": "apim:api_create",
+        "description": "Create a new API by copying an existing API\n",
+        "parameters": [
+          {
+            "name": "newVersion",
+            "description": "Version of the new API.",
+            "type": "string",
+            "in": "query",
+            "required": true
+          },
+          {
+            "$ref": "#/parameters/apiId-Q"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Copy"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created. \nSuccessful response with the newly created API as entity in the body. Location header contains URL of newly created API.\n",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created API.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nAPI to copy does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/change-lifecycle": {
+      "post": {
+        "x-scope": "apim:api_publish",
+        "description": "Change the lifecycle of an API\n",
+        "parameters": [
+          {
+            "name": "action",
+            "description": "The action to demote or promote the state of the API.\n\nSupported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Demote to Prototyped, Block, Deprecate, Re-Publish, Retire **]\n",
+            "in": "query",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "Publish",
+              "Deploy as a Prototype",
+              "Demote to Created",
+              "Demote to Prototyped",
+              "Block",
+              "Deprecate",
+              "Re-Publish",
+              "Retire"
+            ]
+          },
+          {
+            "name": "lifecycleChecklist",
+            "description": "\nYou can specify additional checklist items by using an **\"attribute:\"** modifier.\n\nEg: \"Deprecate Old Versions:true\" will deprecate older versions of a particular API when it is promoted to \nPublished state from Created state. Multiple checklist items can be given in \"attribute1:true, attribute2:false\"\nformat.\n\nSupported checklist items are as follows.\n1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.\n2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.\n",
+            "type": "string",
+            "in": "query"
+          },
+          {
+            "$ref": "#/parameters/apiId-Q"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Change Lifecycle"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nLifecycle changed successfully.\n",
+            "headers": {
+              "ETag": {
+                "description": "Entity Tag of the changed API. Used by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the API lifecycle has been modified the last time. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/documents": {
+      "get": {
+        "x-scope": "apim:api_view",
+        "description": "Get a list of documents belonging to an API.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Retrieve Documents"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nDocument list is returned.\n",
+            "schema": {
+              "$ref": "#/definitions/DocumentList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "x-scope": "apim:api_create",
+        "description": "Add a new document to an API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Document object that needs to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Add Document"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created. \nSuccessful response with the newly created Document object as entity in the body. \nLocation header contains URL of newly added document.\n",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            },
+            "headers": {
+              "Location": {
+                "description": "Location to the newly created Document.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional request.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "415": {
+            "description": "Unsupported media type. \nThe entity of the request was in a not supported format.\n"
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/documents/{documentId}": {
+      "get": {
+        "x-scope": "apim:api_view",
+        "description": "Get a particular document associated with an API.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Retrieve Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nDocument returned.\n",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested Document does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "x-scope": "apim:api_create",
+        "description": "Update document details.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Document object that needs to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Update Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nDocument updated\n",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            },
+            "headers": {
+              "Location": {
+                "description": "The URL of the updated document.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-scope": "apim:api_create",
+        "description": "Delete a document of an API\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Delete Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nResource successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found. \nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/documents/{documentId}/content": {
+      "get": {
+        "x-scope": "apim:api_view",
+        "description": "Downloads a FILE type document/get the inline content or source url of a certain document.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Retrieve Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nFile or inline content returned.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "303": {
+            "description": "See Other.\nSource can be retrived from the URL specified at the Location header.\n",
+            "headers": {
+              "Location": {
+                "description": "The Source URL of the document.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested Document does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-scope": "apim:api_create",
+        "description": "Upload a file to a document or add inline content to the document.\n\nDocument's source type should be **FILE** in order to upload a file to the document using **file** parameter.\nDocument's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.\n\nOnly one of **file** or **inlineContent** can be specified at one time.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/documentId"
+          },
+          {
+            "in": "formData",
+            "name": "file",
+            "description": "Document to upload",
+            "type": "file",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "inlineContent",
+            "description": "Inline content of the document",
+            "type": "string",
+            "required": false
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (individual)",
+          "Update Document"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nDocument updated\n",
+            "schema": {
+              "$ref": "#/definitions/Document"
+            },
+            "headers": {
+              "Location": {
+                "description": "The URL of the updated content of the document.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}": {
+      "get": {
+        "x-scope": "apim:api_create",
+        "description": "Get application details\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/applicationId"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "Application (individual)",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nApplication returned.\n",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested application does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions": {
+      "get": {
+        "x-scope": "apim:subscription_view",
+        "description": "Get subscription list.\nThe API Identifier and corresponding Application Identifier\nthe subscriptions of which are to be returned are passed as parameters.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId-Q"
+          },
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          }
+        ],
+        "tags": [
+          "Subscription Collection",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSubscription list returned.\n",
+            "schema": {
+              "$ref": "#/definitions/SubscriptionList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "406": {
+            "description": "Not Acceptable. The requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{subscriptionId}": {
+      "get": {
+        "x-scope": "apim:subscription_view",
+        "description": "Get subscription details\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/subscriptionId"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "Subscription (individual)",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSubscription returned\n",
+            "schema": {
+              "$ref": "#/definitions/Subscription"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. Used by caches, or in conditional reuquests.",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested Subscription does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/block-subscription": {
+      "post": {
+        "x-scope": "apim:subscription_block",
+        "parameters": [
+          {
+            "$ref": "#/parameters/subscriptionId-Q"
+          },
+          {
+            "name": "blockState",
+            "in": "query",
+            "description": "Subscription block state.\n",
+            "type": "string",
+            "required": true,
+            "enum": [
+              "BLOCKED",
+              "PROD_ONLY_BLOCKED"
+            ]
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "description": "Block a subscription.\n",
+        "tags": [
+          "Subscription (individual)",
+          "Block"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSubscription was blocked successfully.\n",
+            "headers": {
+              "ETag": {
+                "description": "Entity Tag of the blocked subscription. \nUsed by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the subscription has been blocked. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nRequested subscription does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/unblock-subscription": {
+      "post": {
+        "x-scope": "apim:subscription_block",
+        "parameters": [
+          {
+            "$ref": "#/parameters/subscriptionId-Q"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "description": "Unblock a subscription.\n",
+        "tags": [
+          "Subscription (individual)",
+          "Unblock Subscription"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSubscription was unblocked successfully.\n",
+            "headers": {
+              "ETag": {
+                "description": "Entity Tag of the unblocked subscription. \nUsed by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the subscription has been unblocked. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nRequested subscription does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/tiers/{tierLevel}": {
+      "get": {
+        "x-scope": "apim:tier_view",
+        "description": "Get available tiers\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/limit"
+          },
+          {
+            "$ref": "#/parameters/offset"
+          },
+          {
+            "$ref": "#/parameters/tierLevel"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          }
+        ],
+        "tags": [
+          "Tier Collection",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nList of tiers returned.\n",
+            "schema": {
+              "$ref": "#/definitions/TierList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "x-scope": "apim:tier_manage",
+        "description": "Add a new tier\n",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Tier object that should to be added\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Tier"
+            }
+          },
+          {
+            "$ref": "#/parameters/tierLevel"
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          }
+        ],
+        "tags": [
+          "Tier (individual)",
+          "Create"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created. \nSuccessful response with the newly created object as entity in the body. \nLocation header contains URL of newly created entity.\n",
+            "schema": {
+              "$ref": "#/definitions/Tier"
+            },
+            "headers": {
+              "Location": {
+                "description": "Location of the newly created tier.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional request'\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "415": {
+            "description": "Unsupported media type. \nThe entity of the request was in a not supported format.\n"
+          }
+        }
+      }
+    },
+    "/tiers/{tierLevel}/{tierName}": {
+      "get": {
+        "x-scope": "apim:tier_view",
+        "description": "Get tier details\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/tierName"
+          },
+          {
+            "$ref": "#/parameters/tierLevel"
+          },
+          {
+            "$ref": "#/parameters/Accept"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "Tier (individual)",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nTier returned\n",
+            "schema": {
+              "$ref": "#/definitions/Tier"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested Tier does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable. \nThe requested media type is not supported.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "x-scope": "apim:tier_manage",
+        "description": "Update tier details\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/tierName"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Tier object that needs to be modified\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Tier"
+            }
+          },
+          {
+            "$ref": "#/parameters/tierLevel"
+          },
+          {
+            "$ref": "#/parameters/Content-Type"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "Tier (individual)",
+          "Update"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSubscription updated.\n",
+            "schema": {
+              "$ref": "#/definitions/Tier"
+            },
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created resource.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time. \nUsed by caches, or in conditional reuquests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "x-scope": "apim:tier_manage",
+        "description": "Remove a tier\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/tierName"
+          },
+          {
+            "$ref": "#/parameters/tierLevel"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "Tier (individual)",
+          "Delete"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nResource successfully deleted.\n"
+          },
+          "404": {
+            "description": "Not Found. \nResource to be deleted does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/tiers/update-permission": {
+      "post": {
+        "x-scope": "apim:tier_manage",
+        "description": "Update tier permission\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/tierName-Q"
+          },
+          {
+            "$ref": "#/parameters/tierLevel-Q"
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          },
+          {
+            "in": "body",
+            "name": "permissions",
+            "schema": {
+              "$ref": "#/definitions/TierPermission"
+            }
+          }
+        ],
+        "tags": [
+          "Tier (individual)",
+          "Update Permission"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nSuccessfully updated tier permissions\n",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Tier"
+              }
+            },
+            "headers": {
+              "ETag": {
+                "description": "Entity Tag of the modified tier.\n Used by caches, or in conditional request.\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the tier has been modified. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. \nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden. \nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found. \nRequested tier does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed. \nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/environments": {
+      "get": {
+        "x-scope": "apim:api_view",
+        "description": "Get a list of gateway environments configured previously.\n",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "apiId",
+            "description": "Will return environment list for the provided API.\n",
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Environment Collection",
+          "Retrieve"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. \nEnvironment list is returned.\n",
+            "schema": {
+              "$ref": "#/definitions/EnvironmentList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. \nUsed by caches, or in conditional requests.\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified. \nEmpty body because the client has already the latest version of the requested resource.\n"
+          },
+          "404": {
+            "description": "Not Found. \nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "apiId": {
+      "name": "apiId",
+      "in": "path",
+      "description": "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",
+      "required": true,
+      "type": "string"
+    },
+    "apiId-Q": {
+      "name": "apiId",
+      "in": "query",
+      "description": "**API ID** consisting of the **UUID** of the API. \nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+      "required": true,
+      "type": "string"
+    },
+    "documentId": {
+      "name": "documentId",
+      "in": "path",
+      "description": "**Document Identifier**\n",
+      "required": true,
+      "type": "string"
+    },
+    "applicationId": {
+      "name": "applicationId",
+      "in": "path",
+      "description": "**Application Identifier** consisting of the UUID of the Application.\n",
+      "required": true,
+      "type": "string"
+    },
+    "subscriptionId": {
+      "name": "subscriptionId",
+      "in": "path",
+      "description": "Subscription Id\n",
+      "required": true,
+      "type": "string"
+    },
+    "subscriptionId-Q": {
+      "name": "subscriptionId",
+      "in": "query",
+      "description": "Subscription Id\n",
+      "required": true,
+      "type": "string"
+    },
+    "tierName": {
+      "name": "tierName",
+      "in": "path",
+      "description": "Tier name\n",
+      "required": true,
+      "type": "string"
+    },
+    "tierName-Q": {
+      "name": "tierName",
+      "in": "query",
+      "description": "Name of the tier\n",
+      "required": true,
+      "type": "string"
+    },
+    "tierLevel": {
+      "name": "tierLevel",
+      "in": "path",
+      "description": "List API or Application or Resource type tiers.\n",
+      "type": "string",
+      "enum": [
+        "api",
+        "application",
+        "resource"
+      ],
+      "required": true
+    },
+    "tierLevel-Q": {
+      "name": "tierLevel",
+      "in": "query",
+      "description": "List API or Application or Resource type tiers.\n",
+      "type": "string",
+      "enum": [
+        "api",
+        "application",
+        "resource"
+      ],
+      "required": true
+    },
+    "limit": {
+      "name": "limit",
+      "in": "query",
+      "description": "Maximum size of resource array to return.\n",
+      "default": 25,
+      "type": "integer"
+    },
+    "offset": {
+      "name": "offset",
+      "in": "query",
+      "description": "Starting point within the complete list of items qualified.  \n",
+      "default": 0,
+      "type": "integer"
+    },
+    "Accept": {
+      "name": "Accept",
+      "in": "header",
+      "description": "Media types acceptable for the response. Default is JSON.\n",
+      "default": "JSON",
+      "type": "string"
+    },
+    "Content-Type": {
+      "name": "Content-Type",
+      "in": "header",
+      "description": "Media type of the entity in the body. Default is JSON.\n",
+      "default": "JSON",
+      "required": true,
+      "type": "string"
+    },
+    "If-None-Match": {
+      "name": "If-None-Match",
+      "in": "header",
+      "description": "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n",
+      "type": "string"
+    },
+    "If-Modified-Since": {
+      "name": "If-Modified-Since",
+      "in": "header",
+      "description": "Validator for conditional requests; based on Last Modified header of the \nformerly retrieved variant of the resource.\n",
+      "type": "string"
+    },
+    "If-Match": {
+      "name": "If-Match",
+      "in": "header",
+      "description": "Validator for conditional requests; based on ETag.\n",
+      "type": "string"
+    },
+    "If-Unmodified-Since": {
+      "name": "If-Unmodified-Since",
+      "in": "header",
+      "description": "Validator for conditional requests; based on Last Modified header.\n",
+      "type": "string"
+    }
+  },
+  "definitions": {
+    "APIList": {
+      "title": "API List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of APIs returned.\n"
+        },
+        "next": {
+          "type": "string",
+          "description": "Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.\n"
+        },
+        "previous": {
+          "type": "string",
+          "description": "Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.\n"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/APIInfo"
+          }
+        }
+      }
+    },
+    "APIInfo": {
+      "title": "API Info object with basic API details.",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "provider": {
+          "description": "If the provider value is not given, the user invoking the API will be used as the provider.\n",
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "API": {
+      "title": "API object",
+      "required": [
+        "name",
+        "context",
+        "version",
+        "apiDefinition",
+        "tiers",
+        "isDefaultVersion",
+        "transport",
+        "endpointConfig",
+        "visibility"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the api registry artifact\n"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "provider": {
+          "description": "If the provider value is not given user invoking the api will be used as the provider.\n",
+          "type": "string"
+        },
+        "apiDefinition": {
+          "description": "Swagger definition of the API which contains details about URI templates and scopes\n",
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "responseCaching": {
+          "type": "string"
+        },
+        "cacheTimeout": {
+          "type": "integer"
+        },
+        "destinationStatsEnabled": {
+          "type": "string"
+        },
+        "isDefaultVersion": {
+          "type": "boolean"
+        },
+        "transport": {
+          "description": "Supported transports for the API (http and/or https).\n",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tiers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "thumbnailUrl": {
+          "type": "string"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "PUBLIC",
+            "PRIVATE",
+            "RESTRICTED",
+            "CONTROLLED"
+          ]
+        },
+        "visibleRoles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visibleTenants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "endpointConfig": {
+          "type": "string"
+        },
+        "gatewayEnvironments": {
+          "description": "Comma separated list of gateway environments.\n",
+          "type": "string"
+        },
+        "sequences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Sequence"
+          }
+        },
+        "subscriptionAvailability": {
+          "type": "string",
+          "enum": [
+            "current_tenant",
+            "all_tenants",
+            "specific_tenants"
+          ]
+        },
+        "subscriptionAvailableTenants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "businessInformation": {
+          "properties": {
+            "businessOwner": {
+              "type": "string"
+            },
+            "businessOwnerEmail": {
+              "type": "string"
+            },
+            "technicalOwner": {
+              "type": "string"
+            },
+            "technicalOwnerEmail": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "Application": {
+      "title": "Application",
+      "required": [
+        "name",
+        "throttlingTier"
+      ],
+      "properties": {
+        "applicationId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "subscriber": {
+          "type": "string"
+        },
+        "throttlingTier": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "groupId": {
+          "type": "string"
+        }
+      }
+    },
+    "DocumentList": {
+      "title": "Document List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of Documents returned.\n"
+        },
+        "next": {
+          "type": "string",
+          "description": "Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.\n"
+        },
+        "previous": {
+          "type": "string",
+          "description": "Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.\n"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Document"
+          }
+        }
+      }
+    },
+    "Document": {
+      "title": "Document",
+      "required": [
+        "name",
+        "type",
+        "sourceType",
+        "visibility"
+      ],
+      "properties": {
+        "documentId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "HOWTO",
+            "SAMPLES",
+            "PUBLIC_FORUM",
+            "SUPPORT_FORUM",
+            "API_MESSAGE_FORMAT",
+            "SWAGGER_DOC",
+            "OTHER"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "sourceType": {
+          "type": "string",
+          "enum": [
+            "INLINE",
+            "URL",
+            "FILE"
+          ]
+        },
+        "sourceUrl": {
+          "type": "string"
+        },
+        "otherTypeName": {
+          "type": "string"
+        },
+        "visibility": {
+          "type": "string",
+          "enum": [
+            "OWNER_ONLY",
+            "PRIVATE",
+            "API_LEVEL"
+          ]
+        }
+      }
+    },
+    "TierList": {
+      "title": "Tier List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of Tiers returned.\n"
+        },
+        "next": {
+          "type": "string",
+          "description": "Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.\n"
+        },
+        "previous": {
+          "type": "string",
+          "description": "Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.\n"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Tier"
+          }
+        }
+      }
+    },
+    "Tier": {
+      "title": "Tier",
+      "required": [
+        "name",
+        "tierPlan",
+        "requestCount",
+        "unitTime",
+        "stopOnQuotaReach"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tierLevel": {
+          "type": "string",
+          "enum": [
+            "api",
+            "application",
+            "resource"
+          ]
+        },
+        "attributes": {
+          "description": "Custom attributes added to the tier policy\n",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "requestCount": {
+          "description": "Maximum number of requests which can be sent within a provided unit time\n",
+          "type": "integer",
+          "format": "int64"
+        },
+        "unitTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "tierPlan": {
+          "description": "This attribute declares whether this tier is available under commercial or free\n",
+          "type": "string",
+          "enum": [
+            "FREE",
+            "COMMERCIAL"
+          ]
+        },
+        "stopOnQuotaReach": {
+          "description": "By making this attribute to false, you are capabale of sending requests \neven if the request count exceeded within a unit time\n",
+          "type": "boolean"
+        }
+      }
+    },
+    "TierPermission": {
+      "title": "tierPermission",
+      "required": [
+        "permissionType",
+        "roles"
+      ],
+      "properties": {
+        "permissionType": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "SubscriptionList": {
+      "title": "Subscription List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of Subscriptions returned.\n"
+        },
+        "next": {
+          "type": "string",
+          "description": "Link to the next subset of resources qualified. \nEmpty if no more resources are to be returned.\n"
+        },
+        "previous": {
+          "type": "string",
+          "description": "Link to the previous subset of resources qualified. \nEmpty if current subset is the first subset returned.\n"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Subscription"
+          }
+        }
+      }
+    },
+    "Subscription": {
+      "title": "Subscription",
+      "required": [
+        "applicationId",
+        "apiIdentifier",
+        "tier"
+      ],
+      "properties": {
+        "subscriptionId": {
+          "type": "string"
+        },
+        "applicationId": {
+          "type": "string"
+        },
+        "apiIdentifier": {
+          "type": "string"
+        },
+        "tier": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "BLOCKED",
+            "PROD_ONLY_BLOCKED",
+            "UNBLOCKED",
+            "ON_HOLD",
+            "REJECTED"
+          ]
+        }
+      }
+    },
+    "Sequence": {
+      "title": "Sequence",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "config": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
+    "Error": {
+      "title": "Error object returned with 4XX HTTP status",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detail description about the error message.\n"
+        },
+        "moreInfo": {
+          "type": "string",
+          "description": "Preferably an url with more details about the error.\n"
+        },
+        "error": {
+          "type": "array",
+          "description": "If there are more than one error list them out. \nFor example, list out validation errors by each field.\n",
+          "items": {
+            "$ref": "#/definitions/ErrorListItem"
+          }
+        }
+      }
+    },
+    "ErrorListItem": {
+      "title": "Description of individual errors that may have occurred during a request.",
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "description": "Description about individual errors occurred\n"
+        }
+      }
+    },
+    "Environment": {
+      "title": "Environment",
+      "required": [
+        "name",
+        "type",
+        "serverUrl",
+        "endpoints",
+        "showInApiConsole"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "serverUrl": {
+          "type": "string"
+        },
+        "showInApiConsole": {
+          "type": "boolean"
+        },
+        "endpoints": {
+          "$ref": "#/definitions/EnvironmentEndpoints"
+        }
+      }
+    },
+    "EnvironmentList": {
+      "title": "Environment List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of Environments returned.\n"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Environment"
+          }
+        }
+      }
+    },
+    "EnvironmentEndpoints": {
+      "title": "Environment Endpoints",
+      "properties": {
+        "http": {
+          "type": "string",
+          "description": "HTTP environment URL"
+        },
+        "https": {
+          "type": "string",
+          "description": "HTTPS environment URL"
+        }
+      }
+    }
+  }
+}

@@ -18,9 +18,9 @@ public class DefaultGroupIDExtractorImpl implements LoginPostExecutor {
 
     public String getGroupingIdentifiers(String loginResponse){
         
-        JSONObject obj = null;
+        JSONObject obj;
         String username  = null;
-        Boolean isSuperTenant = false;
+        Boolean isSuperTenant;
         int tenantId = MultitenantConstants.SUPER_TENANT_ID;
         String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         String claim = "http://wso2.org/claims/organization";

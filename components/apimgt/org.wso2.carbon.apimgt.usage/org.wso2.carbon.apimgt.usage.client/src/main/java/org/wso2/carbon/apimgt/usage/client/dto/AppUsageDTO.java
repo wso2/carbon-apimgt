@@ -18,38 +18,44 @@
 
 package org.wso2.carbon.apimgt.usage.client.dto;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AppUsageDTO {
 
 
     private String appName;
-    private String userid;
-    private String consumerKey;
-    private long count;
+    private List<UserCountArray> userCountArray=new ArrayList<UserCountArray>();
 
-    public String getconsumerKey() {
-        return consumerKey;
-    }
-
-    public void setconsumerKey(String consumerKey) {
-        this.consumerKey = consumerKey;
-    }
-
-    public String getappName() {
+    public String getAppName() {
         return appName;
     }
 
-    public void setappName(String appName) {
+    public void setAppName(String appName) {
         this.appName = appName;
     }
 
-    public String getUserid() {
-        return userid;
+    public List<UserCountArray> getUserCountArray() {
+        return userCountArray;
     }
 
-    public void setUserid(String userid) {
-        this.userid = userid;
+    public void addToUserCountArray(String user,long count) {
+        UserCountArray usage=new UserCountArray();
+        usage.setUser(user);
+        usage.setCount(count);
+        this.userCountArray.add(usage);
+    }
+}
+class UserCountArray{
+    String user;
+    long count;
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public long getCount() {
@@ -59,21 +65,4 @@ public class AppUsageDTO {
     public void setCount(long count) {
         this.count = count;
     }
-
-
-    public static Comparator<AppUsageDTO> compareCount =
-            new Comparator<AppUsageDTO>() {
-                private AppUsageDTO ap1;
-                private AppUsageDTO ap2;
-
-                public int compare(AppUsageDTO ap1, AppUsageDTO ap2) {
-                    this.ap1 = ap1;
-                    this.ap2 = ap2;
-                    return (int) (ap2.getCount() - ap1.getCount());
-
-                }
-            };
-
-
-
 }

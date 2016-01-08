@@ -117,6 +117,15 @@ code {
     line-height: 15px;
 }
 
+.sidebar-nav li.active {
+    background: #337ab7;
+    color: white !important;
+}
+
+.sidebar-nav li.active a{
+  color: #FFF;
+}
+
 .sidebar-nav .nav-header{
     display: block;
     font-weight: bolder;
@@ -126,13 +135,18 @@ code {
 .sidebar-nav li a {
     display: block;
     text-decoration: none;
-    color: #999999;
+    color: #777;
 }
 
 .sidebar-nav li a:hover {
-    text-decoration: none;
-    color: #fff;
+    text-decoration: underline;
+    color: #000;
     background: rgba(255,255,255,0.2);
+}
+
+.sidebar-nav li.active a:hover {
+    text-decoration: none;
+    color: #FFF;
 }
 
 .sidebar-nav li a:active,
@@ -153,6 +167,15 @@ code {
 .sidebar-nav > .sidebar-brand a:hover {
     color: #fff;
     background: none;
+}
+
+.child-nodesw li{
+  padding-left: 10px;
+}
+
+.sidebar-nav li.statsActive a{
+  color:#337ab7 !important;
+  border-right: 5px solid #337ab7;
 }
 
 @media(min-width:1200px) {
@@ -229,6 +252,11 @@ code {
 
 #sidebar-wrapper .panel{
   margin: 20px 20px 10px 10px;
+}
+
+#login_page_logo{
+  background: url('../images/wso2-logo.png'); background-size: 100px ; background-repeat: no-repeat; 
+  width: 330px; padding-left: 100px;
 }
 
 
@@ -423,3 +451,186 @@ a.remove_rating:hover{ color: #C00}
     display:inline-block;
 }
 
+.blue{
+    color:#337ab7;
+}
+
+/* donut chart Styles */
+#pie-chart .total{
+  font-size: 10px;
+  font-weight: bold;
+}
+#pie-chart .units{
+  width:10px;
+  word-wrap: break-word;
+  fill: gray;
+  font-size: 10px;
+}
+#pie-chart .label{
+  fill: #CCC;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+#pie-chart .value{
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.toolTip {
+    position: absolute;
+    display: none;
+    width: auto;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    border: 0 none;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: -3px 3px 15px #888888;
+    color: black;
+    font: 12px sans-serif;
+    padding: 5px;
+    text-align: left;
+}
+
+
+/* Scatter chart Styles */
+#tooltipTable{
+    padding: 0;
+    margin-top:10px;
+    border-left: 1px solid #dbdbdb;
+    border-top: 1px solid #dbdbdb;
+}
+
+#tooltipTable th {
+       font: 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+       color: #666;
+       border-right: 1px solid #dbdbdb;
+       border-bottom: 1px solid #dbdbdb;
+       border-top: 1px solid #dbdbdb;
+       letter-spacing: 2px;
+       text-align: left;
+       padding: 2px 2px 2px 4px;
+       background: #eee;
+}
+
+#tooltipTable td {
+       border-right: 1px solid #dbdbdb;
+       border-bottom: 1px solid #dbdbdb;
+       background: #fff;
+       padding: 2px 2px 2px 4px;
+       color: #4f6b72;
+       text-align: left;
+}
+
+.dimple-bubble{
+    cursor:pointer;
+}
+
+#apiUsage_note{
+    margin-right:20px;
+    color:#7d7d7d;
+}
+
+
+/* Statistics API Usage table Styles */
+td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content: "\f13a";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}
+td.details-control{
+    cursor:pointer;
+}
+
+div.slider{
+    display:none;
+}
+tr.shown td.details-control> div.showDetail:before {
+    font-family: FontAwesome;
+    content:  "\f139";
+    display: inline;
+    padding-left: 10px !important;
+    vertical-align: middle;
+    cursor:pointer;
+}
+
+/* error message style*/
+.errorMsg{
+    color:#d10000;
+    font-size:12px;
+    font-weight: 100;
+}
+
+label.error{
+    color:#d10000 !important;
+    padding:5px;
+    font-size:13px;
+    font-weight: normal;
+}
+input.error{
+    border-color: rgba(228, 38, 38, 0.8);
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(218, 68, 74, 0.6);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(218, 68, 74, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(218, 68, 74, 0.6);
+}
+
+/* delete api button */
+.btn-api-del{
+    margin-left: 181px;
+    margin-top: 2px;
+    position: absolute;
+    color:black;
+}
+
+/* api listing api name */
+.link-h1{
+    font-weight: bold;
+    display: block;
+    width: 100%;
+    font-size: 1.2em;
+}
+
+/* lifecycle icon image */
+.icon-lifecycle{
+    background:transparent url(../images/lifecycle.png) no-repeat 0 0;
+    width:14px;
+    height:14px;
+}
+
+/* api Thumbnail image */
+#apiThumb{
+    width:150px;
+    height:150px;
+    min-width:150px;
+    min-height:150px;
+}
+
+/* help block */
+.help-block{
+    color: #747474;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.goTo_api_overview {
+    font-weight: normal;
+    font-size: 0.7em;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+.help_popup {
+    vertical-align: top;
+    margin-top: 5px;
+}
+
+.publishCheckBoxes {
+    display: table;
+}
+
+[id^="itemsDivfromLCXML"] {
+    margin-left: -150px;
+}

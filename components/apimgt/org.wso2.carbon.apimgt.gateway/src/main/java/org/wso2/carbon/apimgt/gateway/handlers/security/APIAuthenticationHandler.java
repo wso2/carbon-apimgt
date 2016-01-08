@@ -20,6 +20,7 @@ import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,18 +31,25 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.metrics.manager.MetricManager;
+import org.wso2.carbon.metrics.manager.Timer;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Authentication handler for REST APIs exposed in the API gateway. This handler will
@@ -93,7 +101,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             authenticatorType = OAuthAuthenticator.class.getName();
         }
         try {
-            authenticator = (Authenticator) Class.forName(authenticatorType).newInstance();
+            authenticator = (Authenticator) APIUtil.getClassForName(authenticatorType).newInstance();
         } catch (Exception e) {
             // Just throw it here - Synapse will handle it
             throw new SynapseException("Error while initializing authenticator of " +
@@ -103,13 +111,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
+        Timer.Context context = timer.start();
+
         long startTime = System.nanoTime();
         long endTime;
         long difference;
 
-        endTime = System.nanoTime();
-        difference = (endTime - startTime) / 1000000;
-        String messageDetails = logMessageDetails(messageContext, difference);
         try {
             if (Utils.isStatsEnabled()) {
                 long currentTime = System.currentTimeMillis();
@@ -120,15 +129,28 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
             if (authenticator.authenticate(messageContext)) {
                 if (log.isDebugEnabled()) {
-                   log.debug("Authenticated API, authentication response relieved: " + messageDetails +
+                    // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
+                    // to all the gateway calls that is happening.
+                    endTime = System.nanoTime();
+                    difference = (endTime - startTime) / 1000000;
+                    String messageDetails = logMessageDetails(messageContext);
+
+                    log.debug("Authenticated API, authentication response relieved: " + messageDetails +
                             ", elapsedTimeInMilliseconds=" + difference / 1000000);
                 }
+                setAPIParametersToMessageContext(messageContext);
                 return true;
             }
         } catch (APISecurityException e) {
 
             if (log.isDebugEnabled()) {
-              log.debug("Call to API gateway : " + messageDetails);
+                // We do the calculations only if the debug logs are enabled. Otherwise this would be an overhead
+                // to all the gateway calls that is happening.
+                endTime = System.nanoTime();
+                difference = (endTime - startTime) / 1000000;
+                String messageDetails = logMessageDetails(messageContext);
+                log.debug("Call to API gateway : " + messageDetails + ", elapsedTimeInMilliseconds=" +
+                        difference / 1000000 );
             }
             // We do not need to log authentication failures as errors since these are not product errors.
             log.warn("API authentication failure due to " +
@@ -137,6 +159,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 log.debug("API authentication failed with error " + e.getErrorCode(), e);
             }
             handleAuthFailure(messageContext, e);
+        } finally {
+            context.stop();
         }
         return false;
     }
@@ -165,14 +189,14 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         // By default we send a 401 response back
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
-        try{
-            RelayUtils.buildMessage(axis2MC);
-        }
-        catch (IOException ex){        //In case of an exception, it won't be propagated up, instead, will be logged; because we're setting a fault message in the payload.
-            log.error("Error occurred while building the message", ex);
-        }
-        catch (XMLStreamException ex) {
-            log.error("Error occurred while building the message", ex);
+        // This property need to be set to avoid sending the content in pass-through pipe (request message)
+        // as the response.
+        axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
+        try {
+            RelayUtils.consumeAndDiscardMessage(axis2MC);
+        } catch (AxisFault axisFault) {
+            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            log.error("Error occurred while consuming and discarding the message", axisFault);
         }
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");
         int status;
@@ -186,8 +210,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             status = HttpStatus.SC_UNAUTHORIZED;
             Map<String, String> headers =
                     (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-            headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
-            axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+            if (headers != null) {
+                headers.put(HttpHeaders.WWW_AUTHENTICATE, authenticator.getChallengeString());
+                axis2MC.setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, headers);
+            }
         }
 
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
@@ -217,10 +243,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return payload;
     }
 
-    private String logMessageDetails(MessageContext messageContext, long elapsedTime) {
+    private String logMessageDetails(MessageContext messageContext) {
         //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
-        String applicationName = (String) messageContext.getProperty("APPLICATION_NAME");
-        String endUserName = (String) messageContext.getProperty("END_USER_NAME");
+        String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
+        String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
         Date incomingReqTime = new Date();
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         String logMessage = "API call failed reason=API_authentication_failure"; //"app-name=" + applicationName + " " + "user-name=" + endUserName;
@@ -234,11 +260,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (logID != null) {
             logMessage = logMessage + " transactionId=" + logID;
         }
-        String userAgent = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("User-Agent");
+        String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
         if (userAgent != null) {
             logMessage = logMessage + " with userAgent=" + userAgent;
         }
-        String accessToken = (String) ((TreeMap) axisMC.getProperty("TRANSPORT_HEADERS")).get("Authorization");
+        String accessToken = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
+                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.AUTHORIZATION);
         if (accessToken != null) {
             logMessage = logMessage + " with accessToken=" + accessToken;
         }
@@ -247,19 +275,105 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             logMessage = logMessage + " for requestURI=" + requestURI;
         }
         long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext().getProperty("wso2statistics.request.received.time"));
+                getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
         incomingReqTime = new Date(reqIncomingTimestamp);
         if (incomingReqTime != null) {
             logMessage = logMessage + " at time=" + incomingReqTime;
         }
-        String remoteIP = (String) axisMC.getProperty("REMOTE_ADDR");
+        String remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         if (remoteIP != null) {
             logMessage = logMessage + " from clientIP=" + remoteIP;
-        }
-        if(elapsedTime > 0){
-            logMessage = logMessage + " elapsedTimeInMilliseconds=" + elapsedTime;
         }
         return logMessage;
     }
 
+    private void setAPIParametersToMessageContext(MessageContext messageContext) {
+
+        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(messageContext);
+        org.apache.axis2.context.MessageContext axis2MsgContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+        String consumerKey = "";
+        String username = "";
+        String applicationName = "";
+        String applicationId = "";
+        if (authContext != null) {
+            consumerKey = authContext.getConsumerKey();
+            username = authContext.getUsername();
+            applicationName = authContext.getApplicationName();
+            applicationId = authContext.getApplicationId();
+        }
+
+        String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
+        String api_version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+
+        String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
+
+        if (apiPublisher == null) {
+            apiPublisher = getAPIProviderFromRESTAPI(api_version);
+        }
+
+        int index = api_version.indexOf("--");
+
+        if (index != -1) {
+            api_version = api_version.substring(index + 2);
+        }
+
+        String api = api_version.split(":")[0];
+        String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
+
+        String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        int tenantDomainIndex = fullRequestPath.indexOf("/t/");
+
+        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if (tenantDomainIndex != -1) {
+            String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
+            tenantDomain = temp.substring(0, temp.indexOf("/"));
+        }
+
+        if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
+            apiPublisher = apiPublisher + "@" + tenantDomain;
+        }
+
+        String resource = extractResource(messageContext);
+        String method = (String) (axis2MsgContext.getProperty(
+                Constants.Configuration.HTTP_METHOD));
+        String hostName = APIUtil.getHostAddress();
+
+        messageContext.setProperty(APIMgtGatewayConstants.CONSUMER_KEY, consumerKey);
+        messageContext.setProperty(APIMgtGatewayConstants.USER_ID, username);
+        messageContext.setProperty(APIMgtGatewayConstants.CONTEXT, context);
+        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, api_version);
+        messageContext.setProperty(APIMgtGatewayConstants.API, api);
+        messageContext.setProperty(APIMgtGatewayConstants.VERSION, version);
+        messageContext.setProperty(APIMgtGatewayConstants.RESOURCE, resource);
+        messageContext.setProperty(APIMgtGatewayConstants.HTTP_METHOD, method);
+        messageContext.setProperty(APIMgtGatewayConstants.HOST_NAME, hostName);
+        messageContext.setProperty(APIMgtGatewayConstants.API_PUBLISHER, apiPublisher);
+        messageContext.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, applicationName);
+        messageContext.setProperty(APIMgtGatewayConstants.APPLICATION_ID, applicationId);
+    }
+
+    private String extractResource(MessageContext mc) {
+        String resource = "/";
+        Pattern pattern = Pattern.compile("^/.+?/.+?([/?].+)$");
+        Matcher matcher = pattern.matcher((String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
+        if (matcher.find()) {
+            resource = matcher.group(1);
+        }
+        return resource;
+    }
+
+    private String getAPIProviderFromRESTAPI(String api_version) {
+        int index = api_version.indexOf("--");
+        if (index != -1) {
+            String apiProvider = api_version.substring(0, index);
+            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
+                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+            return apiProvider;
+        }
+        return null;
+    }
 }

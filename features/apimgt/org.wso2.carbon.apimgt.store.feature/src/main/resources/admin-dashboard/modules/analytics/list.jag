@@ -11,6 +11,12 @@ var getAnalyticsConfig = function (analyticsData) {
                 buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var service_url = 'https://' + process.getProperty('carbon.local.ip') + ':' +
                 process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.bam.service.data.publisher.stub.
@@ -25,7 +31,8 @@ var getAnalyticsConfig = function (analyticsData) {
         client.setOptions(client_options);
 
         var eventingConfig = stub.getEventingConfigData();
-        var analyzingConfigData = stub.getAnalyzingConfigData();
+        var analyzingConfigData = stub.getAnalyzingConfigData();         //Commented due to Current component not support this
+
         var conf = null;
         if (eventingConfig.getUrl() == '') {
             conf = {
@@ -37,7 +44,7 @@ var getAnalyticsConfig = function (analyticsData) {
                 eventAnalyserUsername: username,
                 eventAnalyserPassword: password
             };
-        } else if (eventingConfig.getServiceStatsEnable()) {
+        } else {
             conf = {
                 enableAnalytics: eventingConfig.getServiceStatsEnable(),
                 eventReceiverURL: eventingConfig.getUrl(),
@@ -47,11 +54,7 @@ var getAnalyticsConfig = function (analyticsData) {
                 eventAnalyserUsername: analyzingConfigData.getUserName(),
                 eventAnalyserPassword: analyzingConfigData.getPassword()
             };
-        }else{
-	         conf = {
-              	enableAnalytics:eventingConfig.getServiceStatsEnable(),
-            };
-	}
+        }
         return {
             error: false,
             analytics: conf
@@ -74,6 +77,12 @@ var getDatasourceConfig = function () {
         var realmConfiguration = new org.wso2.carbon.user.core.config.RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
         var username = realmConfiguration.getAdminUserName();
         var password = realmConfiguration.getAdminPassword();
+        var carbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;        
+        var isEmailLoginEnabled = carbonUtils.getServerConfiguration().getFirstProperty("EnableEmailUserName");
+        var MultitenantConstants = Packages.org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+        if(isEmailLoginEnabled) {
+            username = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         var url = 'https://' + process.getProperty('carbon.local.ip') + ':' + process.getProperty('mgt.transport.https.port');
         var stub = new org.wso2.carbon.ndatasource.ui.stub.NDataSourceAdminStub(url + '/services/NDataSourceAdmin');
         var client = stub._getServiceClient();
@@ -146,4 +155,5 @@ var getDatasourceConfig = function () {
         };
     }
 };
+
 %>

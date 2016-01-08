@@ -34,7 +34,7 @@ You can disable the rating control simply disabling its associated input control
 
 Make it read only:
 
-    <input type="hidden" class="rating" readonly="readonly"/>
+    <input type="hidden" class="rating" data-readonly/>
 
 Set its initial value:
 

@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>2.0.2-SNAPSHOT</version>
+        <version>5.0.4-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -39,16 +39,8 @@
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.core</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.mediation.initializer</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.throttle.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
@@ -71,23 +63,29 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.ui</artifactId>
         </dependency>
         <dependency>
-             <groupId>org.wso2.carbon</groupId>
-             <artifactId>org.wso2.carbon.utils</artifactId>       			 
-         </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.identity</groupId>
             <artifactId>org.wso2.carbon.identity.oauth.stub</artifactId>
         </dependency>
         <dependency>
+             <groupId>org.wso2.carbon</groupId>
+             <artifactId>org.wso2.carbon.utils</artifactId>       			 
+         </dependency>
+        <dependency>
            <groupId>org.wso2.carbon.mediation</groupId>
             <artifactId>org.wso2.carbon.sequences.stub</artifactId>
-        </dependency> 
+        </dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.mediation</groupId>
 			<artifactId>org.wso2.carbon.mediation.security.stub</artifactId>
@@ -99,12 +97,24 @@
 		<dependency>
 			<groupId>org.wso2.carbon.mediation</groupId>
 			<artifactId>org.wso2.carbon.mediation.registry</artifactId>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.mediation</groupId>
 			<artifactId>org.wso2.carbon.rest.api.stub</artifactId>
 		</dependency>
-		
+        <dependency>
+            <groupId>org.apache.axis2</groupId>
+            <artifactId>axis2-kernel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.statsupdate.stub</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.metrics</groupId>
+            <artifactId>org.wso2.carbon.metrics.manager</artifactId>
+            <version>${carbon.metrics.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -119,22 +129,22 @@
                 </configuration>
             </plugin>
             <plugin>
-                                <groupId>org.apache.axis2</groupId>
-                                <artifactId>axis2-java2wsdl-maven-plugin</artifactId>
-                                <executions>
-                                        <execution>
-                                                <goals>
-                                                        <goal>java2wsdl</goal>
-                                                </goals>
-                                        </execution>
-                                </executions>
-                                <configuration>
-                                        <className>
-                                                org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin
-                                        </className>
-                                </configuration>
-                        </plugin>
-            
+                <groupId>org.apache.axis2</groupId>
+                <artifactId>axis2-java2wsdl-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java2wsdl</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                     <className>
+                         org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin
+                     </className>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
@@ -155,9 +165,9 @@
                             !javax.servlet,
                             !javax.servlet.http,
                             !org.wso2.carbon.apimgt.gateway.internal,
+                            !org.wso2.carbon.apimgt.gateway.stub.*,
                             org.wso2.carbon.apimgt.gateway.*;version="${carbon.apimgt.version}",
-                            org.wso2.throttle.*,
-                            org.wso2.carbon.apimgt.gateway.dto
+                            org.wso2.throttle.*
                         </Export-Package>
                         <Import-Package>
                             !javax.xml.soap,
@@ -178,13 +188,38 @@
                             org.apache.synapse.endpoints.*,
                             org.apache.synapse.mediators.base,
                             org.apache.axis2.transport.base,
-                            org.wso2.carbon.core,
+                            org.wso2.carbon.core; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.service; version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.impl.*,
+                            org.wso2.carbon.registry.api; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.impl.*; version="${carbon.apimgt.imp.pkg.version}",
                             javax.xml.soap; version="${javax.xml.soap.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.api.*; version="${carbon.apimgt.imp.pkg.version}",
+                            edu.emory.mathcs.backport.*,
+                            org.apache.axis2.*; version="${imp.pkg.version.axis2}",
+                            javax.activation.*; version="[0.0.0, 1.0.0)",
+                            javax.cache,
+                            javax.net.ssl,
+                            javax.xml.namespace,
+                            org.apache.http.*,
+                            org.apache.commons.*,
+                            org.apache.synapse.*,
+                            org.apache.thrift.*,
+                            org.apache.neethi.*; version="2.0.4.wso2v4",
+                            org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.throttle.core.*; version="${imp.pkg.version.carbon.throttle}",
+                            org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
+                            org.osgi.service.component,
+                            org.slf4j,
+                            org.wso2.carbon.apimgt.keymgt.stub.validator; version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.base.*; version="${imp.pkg.version.carbon.base}",
+                            org.osgi.framework.*,
+                            org.wso2.carbon.bam.service.data.publisher.*,
+                            org.wso2.carbon.rest.api.stub.*,
+                            org.wso2.carbon.sequences.stub.types,
+                            org.wso2.carbon.context,
+                            org.wso2.carbon.mediation.*; version="${carbon.mediation.imp.pkg.version}",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>org.wso2.throttle.*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

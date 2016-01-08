@@ -85,10 +85,6 @@ public class HostObjectUtils {
     protected static SubscriberKeyMgtClient getKeyManagementClient() throws APIManagementException {
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        if (url == null) {
-            handleException("API key manager URL unspecified");
-        }
-
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         if (username == null || password == null) {
@@ -111,22 +107,14 @@ public class HostObjectUtils {
     protected static ProviderKeyMgtClient getProviderClient() throws APIManagementException {
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
         String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
-        if (url == null) {
-            handleException("API key manager URL unspecified");
-        }
-
         String username = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         String password = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         if (username == null || password == null) {
             handleException("Authentication credentials for API Provider manager unspecified");
         }
 
-        try {
-            return new ProviderKeyMgtClient(url, username, password);
-        } catch (APIManagementException e) {
-            handleException("Error while initializing the provider  management client", e);
-            return null;
-        }
+        return new ProviderKeyMgtClient(url, username, password);
+
     }
 
     private static void handleException(String msg) throws APIManagementException {
@@ -192,7 +180,7 @@ public class HostObjectUtils {
     }
 
     /**
-    *This methos is to check whether stat publishing is enabled
+    *This methods is to check whether stat publishing is enabled
     * @return boolean
      */
     protected static boolean checkDataPublishingEnabled() {

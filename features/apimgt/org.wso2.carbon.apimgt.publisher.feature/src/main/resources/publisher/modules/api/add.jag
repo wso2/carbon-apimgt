@@ -1,0 +1,535 @@
+<%
+user = jagg.getUser();
+
+var manageAPI = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.manageAPI(api);
+        if (log.isDebugEnabled()) {
+            log.debug("manageAPI : " + api.name + "-" + api.version);
+        }
+        if(success){
+               return {
+                           error:false
+                     };
+        }else{
+        return {
+            error:true
+        }; }
+    } catch (e) {
+     if(e.javaException instanceof org.wso2.carbon.apimgt.api.FaultGatewaysException){
+                     return {
+                                error:true,
+                                message:e.javaException.getFaultGateWayString() + '||warning'
+                            };
+                    }else{
+                                    return {
+                                error:true,
+                                message:e.message.split(":")[1]
+                            };
+                    }
+     }
+};
+
+var checkIfResourceExists = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.checkIfResourceExists(api);
+        if (log.isDebugEnabled()) {
+            log.debug("checkIfResourceExists : " + api.name + "-" + api.version);
+        }
+        return success;
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var updateAPIImplementation = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.updateAPIImplementation(api);
+        if (log.isDebugEnabled()) {
+            log.debug("updateAPIImplementation : " + api.name + "-" + api.version);
+        }
+        if(success){
+        return {
+            error:false
+        };
+        }else{
+        return {
+            error:true
+        }; }
+    }  catch (e) {
+     if (e.javaException instanceof org.wso2.carbon.apimgt.api.FaultGatewaysException){
+        return {
+            error:true,
+            message:e.javaException.getFaultGateWayString() + '||warning'
+        };
+     } else {
+        return {
+            error:true,
+            message:e.message.replace(e.message.split(":")[0] + ":", "")
+        };
+     }
+
+    }
+};
+
+var getSwagger12Resource = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.getSwagger12Resource(api);
+        if (log.isDebugEnabled()) {
+            log.debug("getSwagger12Resource : " + api.name + "-" + api.version);
+        }
+        return success;        
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var createAPI = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.createAPI(api);
+
+        if (log.isDebugEnabled()) {
+            log.debug("createAPI : " + api.name + "-" + api.version);
+        }
+        if(success){
+        return {
+            error:false
+        };
+        }else{
+        return {
+            error:true
+        }; }
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var updateAPIDesign = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.updateAPIDesign(api);
+        if (log.isDebugEnabled()) {
+            log.debug("updateAPIDesign : " + api.name + "-" + api.version);
+        }
+        if(success){
+        return {
+            error:false
+        };
+        }else{
+        return {
+            error:true
+        }; }
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var addAPI = function (api) {
+    var success, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        success = provider.addAPI(api);
+        if (log.isDebugEnabled()) {
+            log.debug("addAPI : " + api.name + "-" + api.version);
+        }
+        if(success){
+            return {
+                error:false
+            };
+        } else  {
+            return {
+                error:true
+            };
+        }
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+            message:e.message.split(":")[1]
+        };
+    }
+};
+
+var isContextExist = function (context,oldContext) {
+    var exists, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        exists = provider.isContextExist(context,oldContext);
+        if (log.isDebugEnabled()) {
+            log.debug("isContext exist for : " + context + " : " + exists);
+        }
+        return {
+            error:false,
+            exist:exists
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
+var isApiNameExist = function (apiName) {
+        var exists, log = new Log(),
+        provider = jagg.module("manager").getAPIProviderObj();
+        try {
+        exists = provider.isApiNameExist(apiName);
+        if (log.isDebugEnabled()) {
+        log.debug("isApiName exist for : " + apiName + " : " + exists);
+        }
+return {
+        error:false,
+        exist:exists
+        };
+} catch (e) {
+        log.error(e.message);
+        return {
+        error:e
+        };
+}
+};
+
+var isURLValid = function (type,url,providerName,apiName,apiVersion,invalidStatusCodesRegex) {
+    var result, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isURLValid(type,url,providerName,apiName,apiVersion,invalidStatusCodesRegex);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke isURLValid" );
+        }
+        return {
+            error:false,
+            response:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
+var getTiers = function () {
+    var tier,tiers,list=[],log = new Log();
+    var tier;
+    var tierArray = [];
+    var i;
+    var username = user.username;
+
+    try {
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var tiers = apiProvider.getTiers(org.wso2.carbon.apimgt.impl.APIConstants.TIER_API_TYPE, username);
+        var tierList = org.wso2.carbon.apimgt.impl.utils.APIUtil.sortTiers(tiers);
+
+        for(i = 0; i < tierList.size(); i++) {
+            tier = {};
+            tier.tierName = tierList.get(i).getName();
+            tier.tierDisplayName = tierList.get(i).getDisplayName();
+            tier.tierDescription = tierList.get(i).getDescription() != null ? tierList.get(i).getDescription() : "";
+            tier.defaultTier = (i == 0);
+            tierArray[i] = tier;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("getTiers " +  " : " + stringify(tierArray));
+        }
+
+        return {
+            error:false,
+            tiers:tierArray
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            tiers:null
+        };
+    }
+};
+
+var getResourceTiers = function () {
+    var tier,tiers,list=[],log = new Log();
+    var tier;
+    var tierArray = [];
+    var i;
+    var username = user.username;
+
+    try {
+
+        var apiProvider = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIProvider(username);
+        var tiers = apiProvider.getTiers(org.wso2.carbon.apimgt.impl.APIConstants.TIER_RESOURCE_TYPE, username);
+        var tierList = org.wso2.carbon.apimgt.impl.utils.APIUtil.sortTiers(tiers);
+
+        for(i = 0; i < tierList.size(); i++) {
+            tier = {};
+            tier.tierName = tierList.get(i).getName();
+            tier.tierDisplayName = tierList.get(i).getDisplayName();
+            tier.tierDescription = tierList.get(i).getDescription() != null ? tierList.get(i).getDescription() : "";
+            tier.defaultTier = (i == 0);
+            tierArray[i] = tier;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("getTiers " +  " : " + stringify(tierArray));
+        }
+
+        return {
+            error:false,
+            tiers:tierArray
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            tiers:null
+        };
+    }
+};
+
+var validateRoles = function(roles,username) {
+    var validRole, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        validRole = provider.validateRoles(roles,username);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke validateRoles function.");
+        }
+        return {
+            error:false,
+            valid: validRole
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
+var getCustomInSequences = function (apiName, apiVersion, apiProvider) {
+        var sequence,sequences,list=[],log = new Log(),
+        provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	sequences = provider.getCustomInSequences(apiName, apiVersion, apiProvider);
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomInSequences " +  " : " + stringify(sequences));
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
+var getCustomOutSequences = function (apiName, apiVersion, apiProvider) {
+    var sequence,sequences,list=[],log = new Log(),
+    provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	sequences = provider.getCustomOutSequences(apiName, apiVersion, apiProvider);
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomOutSequences " +  " : " + stringify(sequences));
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
+var getCustomFaultSequences = function () {
+    var sequence,sequences,list=[],log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+    	sequences = provider.getCustomFaultSequences();
+        if (log.isDebugEnabled()) {
+            log.debug("getCustomFaultSequences " +  " : " + stringify(sequences));
+        }
+
+        return {
+            error:false,
+            sequences:sequences
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e,
+            sequences:null
+        };
+    }
+};
+
+var isSynapseGateway = function () {
+    var result, isSynapseGateway,log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isSynapseGateway();
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke getExternalAPIStores()" );
+        }
+        return {
+            error:false,
+            isSynapseGateway:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
+var isDataPublishingEnabled = function () {
+    var result, isDataPublishingEnabled,log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isDataPublishingEnabled();
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke isDataPublishingEnabled()" );
+        }
+        return {
+            error:false,
+            isDataPublishingEnabled:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+
+
+var isMultipleTenantsAvailable = function(){
+    var result, status ,log = new Log(),
+    provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isMultipleTenantsAvailable();       
+	if (log.isDebugEnabled()) {
+            log.debug("Invoke isMultipleTenantsAvailable()" );
+        }
+        return {
+            error:false,
+            status:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:true,
+	    message:e
+        };
+    }
+};
+
+var isScopeExist = function (scope, username) {
+    var result, log = new Log(),
+           provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isScopeExist(scope, username);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke isScopeExist()" );
+        }
+        return {
+            error:false,
+            isScopeExist:result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+var getGatewayURL = function (api) {
+    var carbon = require('carbon');
+    var gatewayURL, envs, result, log = new Log(),
+            provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        envs = provider.getEnvironments();
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke getEnvironments()" );
+        }
+        for(var i = 0; i < envs.length; i++) {
+            if(envs[i].apiConsole == true) {
+                result = envs[i].serverURL;
+            }
+        }
+        // Check if carbon.server.address url and gateway url is the same and use gateway url as 'localhost'
+        // to avoid ssl host name verification error on localhost
+        var resultComponents = result.split(/:\/{2}|:|\//);
+        var carbonServerAddr = carbon.server.address(resultComponents[0]);
+        var serverComponents = carbonServerAddr.split(/:\/{2}|:|\//);
+        //check whether gateway url has a port
+        var hasPort = false;
+        if(!isNaN(parseFloat(resultComponents[2])) && isFinite(resultComponents[2])){
+                hasPort = true;
+        }
+
+        if(serverComponents[1] == resultComponents[1]) {
+            if(hasPort){
+                gatewayURL = resultComponents[0] + "://localhost:" + resultComponents[2];
+            } else {
+                 gatewayURL = resultComponents[0] + "://localhost";
+            }
+            
+        } else {
+            if(hasPort){
+                gatewayURL = resultComponents[0] + "://" + resultComponents[1] + ":" + resultComponents[2];
+            } else {
+                gatewayURL = resultComponents[0] + "://" + resultComponents[1];
+            }
+           
+        }
+        return {
+            error:false,
+            "gatewayURL":gatewayURL
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+};
+%>

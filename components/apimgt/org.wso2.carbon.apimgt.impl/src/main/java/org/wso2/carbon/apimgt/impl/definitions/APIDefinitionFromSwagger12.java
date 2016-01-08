@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -28,18 +31,14 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.registry.api.Resource;
 
 import java.util.*;
 
@@ -54,18 +53,19 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
         try {
             resourceConfigs = (JSONObject) parser.parse(resourceConfigsJSON);
-            JSONArray resources = (JSONArray) resourceConfigs.get("resources");
+            JSONArray resources = (JSONArray) resourceConfigs.get(APIConstants.SWAGGER_RESOURCES);
             //Iterating each resourcePath config
             for (Object resource : resources) {
                 JSONObject resourceConfig = (JSONObject) resource;
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
                 Map<String, Environment> environments = config.getApiGatewayEnvironments();
                 Environment environment = null;
                 String endpoint = null;
                 if (environments != null) {
                     Set<String> publishedEnvironments = api.getEnvironments();
-                    if (publishedEnvironments.isEmpty() || publishedEnvironments.contains("none")) {
+                    if (publishedEnvironments.isEmpty() || publishedEnvironments.contains(APIConstants.ENVIRONMENTS_NONE)) {
                         environment = environments.values()
                                 .toArray(new Environment[environments.size()])[0];
                         String gatewayEndpoint = environment.getApiGatewayEndpoint();
@@ -95,54 +95,51 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                         }
                     }
                 }
-                //String apiPath = APIUtil.getAPIPath(apiIdentifier);
-                if (endpoint.endsWith(RegistryConstants.PATH_SEPARATOR)) {
-                    endpoint.substring(0, endpoint.length() - 1);
-                }
+
                 // We do not need the version in the base path since with the context version strategy, the version is
                 // embedded in the context
                 String basePath = endpoint + api.getContext();
-                resourceConfig.put("basePath", basePath);
+                resourceConfig.put(APIConstants.SWAGGER_BASEPATH, basePath);
 
-                JSONArray resource_configs = (JSONArray) resourceConfig.get("apis");
+                JSONArray resource_configs = (JSONArray) resourceConfig.get(APIConstants.API_ARRAY_NAME);
 
                 //Iterating each Sub resourcePath config
                 int subResCount = 0;
                 while (subResCount < resource_configs.size()) {
                     JSONObject subResource = (JSONObject) resource_configs.get(subResCount);
-                    String uriTempVal = (String) subResource.get("path");
+                    String uriTempVal = (String) subResource.get(APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD);
                     uriTempVal = uriTempVal.startsWith("/") ? uriTempVal : ("/" + uriTempVal);
 
-                    JSONArray operations = (JSONArray) subResource.get("operations");
+                    JSONArray operations = (JSONArray) subResource.get(APIConstants.SWAGGER_OPERATIONS);
                     //Iterating each operation config
-                    for (Object operation1 : operations) {
-                        JSONObject operation = (JSONObject) operation1;
-                        String httpVerb = (String) operation.get("method");
-                        /* Right Now PATCH is not supported. Need to remove this check when PATCH is supported*/
-                        if (!"PATCH".equals(httpVerb)) {
-                            URITemplate template = new URITemplate();
-                            Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON), (String) operation.get("scope"));
+                    for (Object operation : operations) {
+                        JSONObject jsonObjectOperation = (JSONObject) operation;
+                        String httpVerb = (String) jsonObjectOperation.get(APIConstants.SWAGGER_HTTP_METHOD);
 
-                            String authType = (String) operation.get("auth_type");
-                            if (authType != null) {
-                                if (authType.equals("Application & Application User")) {
-                                    authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
-                                }
-                                if (authType.equals("Application User")) {
-                                    authType = "Application_User";
-                                }
-                            } else {
-                                authType = APIConstants.AUTH_NO_AUTHENTICATION;
+                        URITemplate template = new URITemplate();
+                        Scope scope = APIUtil.findScopeByKey(getScopes(resourceConfigsJSON),
+                                (String) jsonObjectOperation.get(APIConstants.SWAGGER_SCOPE));
+
+                        String authType = (String) jsonObjectOperation.get(APIConstants.SWAGGER_AUTH_TYPE);
+                        if (authType != null) {
+                            if (authType.equals("Application & Application User")) {
+                                authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
-                            template.setThrottlingTier((String) operation.get("throttling_tier"));
-                            template.setMediationScript((String) operation.get("mediation_script"));
-                            template.setUriTemplate(uriTempVal);
-                            template.setHTTPVerb(httpVerb);
-                            template.setAuthType(authType);
-                            template.setScope(scope);
-
-                            uriTemplates.add(template);
+                            if (authType.equals("Application User")) {
+                                authType = "Application_User";
+                            }
+                        } else {
+                            authType = APIConstants.AUTH_NO_AUTHENTICATION;
                         }
+                        template.setThrottlingTier((String) jsonObjectOperation.get(APIConstants.API_THROTTLING_TIER));
+                        template.setMediationScript((String) jsonObjectOperation.get(APIConstants.API_MEDIATION_SCRIPT));
+                        template.setUriTemplate(uriTempVal);
+                        template.setHTTPVerb(httpVerb);
+                        template.setAuthType(authType);
+                        template.setScope(scope);
+
+                        uriTemplates.add(template);
+
                     }
 
                     subResCount++;
@@ -162,23 +159,23 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         JSONParser parser = new JSONParser();
         try {
             resourceConfigs = (JSONObject) parser.parse(resourceConfigsJSON);
-            JSONObject api_doc = (JSONObject) resourceConfigs.get("api_doc");
-            if (api_doc.get("authorizations") != null) {
-                JSONObject authorizations = (JSONObject) api_doc.get("authorizations");
-                if (authorizations.get("oauth2") != null) {
-                    JSONObject oauth2 = (JSONObject) authorizations.get("oauth2");
-                    if (oauth2.get("scopes") != null) {
-                        JSONArray scopes = (JSONArray) oauth2.get("scopes");
+            JSONObject api_doc = (JSONObject) resourceConfigs.get(APIConstants.API_SWAGGER_DOC);
+            if (api_doc.get(APIConstants.SWAGGER_12_AUTH) != null) {
+                JSONObject authorizations = (JSONObject) api_doc.get(APIConstants.SWAGGER_12_AUTH);
+                if (authorizations.get(APIConstants.SWAGGER_12_OAUTH2) != null) {
+                    JSONObject oauth2 = (JSONObject) authorizations.get(APIConstants.SWAGGER_12_OAUTH2);
+                    if (oauth2.get(APIConstants.SWAGGER_12_SCOPES) != null) {
+                        JSONArray scopes = (JSONArray) oauth2.get(APIConstants.SWAGGER_12_SCOPES);
 
                         if (scopes != null) {
                             for (Object scopeObj : scopes) {
                                 Map scopeMap = (Map) scopeObj;
-                                if (scopeMap.get("key") != null) {
+                                if (scopeMap.get(APIConstants.SWAGGER_SCOPE_KEY) != null) {
                                     Scope scope = new Scope();
-                                    scope.setKey((String) scopeMap.get("key"));
-                                    scope.setName((String) scopeMap.get("name"));
-                                    scope.setRoles((String) scopeMap.get("roles"));
-                                    scope.setDescription((String) scopeMap.get("description"));
+                                    scope.setKey((String) scopeMap.get(APIConstants.SWAGGER_SCOPE_KEY));
+                                    scope.setName((String) scopeMap.get(APIConstants.SWAGGER_NAME));
+                                    scope.setRoles((String) scopeMap.get(APIConstants.SWAGGER_ROLES));
+                                    scope.setDescription((String) scopeMap.get(APIConstants.SWAGGER_DESCRIPTION));
                                     scopeList.add(scope);
                                 }
                             }
@@ -214,8 +211,6 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
         } catch (RegistryException e) {
             handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
-        } catch (APIManagementException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
         }
     }
 
@@ -232,17 +227,17 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                 Resource apiDocResource = registry.get(resourcePath + APIConstants.API_DOC_1_2_RESOURCE_NAME);
                 String apiDocContent = new String((byte[]) apiDocResource.getContent());
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
-                JSONArray pathConfigs = (JSONArray) apiJSON.get("apis");
+                JSONArray pathConfigs = (JSONArray) apiJSON.get(APIConstants.API_ARRAY_NAME);
 
-                for (int k = 0; k < pathConfigs.size(); k++) {
-                    JSONObject pathConfig = (JSONObject) pathConfigs.get(k);
-                    String pathName = (String) pathConfig.get("path");
+                for (Object pathConfig : pathConfigs) {
+                    JSONObject jsonObjPathConfig = (JSONObject) pathConfig;
+                    String pathName = (String) jsonObjPathConfig.get(APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD);
                     pathName = pathName.startsWith("/") ? pathName : ("/" + pathName);
 
                     Resource pathResource = registry.get(resourcePath + pathName);
                     String pathContent = new String((byte[]) pathResource.getContent());
                     JSONObject pathJSON = (JSONObject) parser.parse(pathContent);
-                    pathConfig.put("file", pathJSON);
+                    jsonObjPathConfig.put(APIConstants.SWAGGER_FILE, pathJSON);
                 }
             }
         } catch (RegistryException e) {
@@ -252,8 +247,11 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
             handleException("Error while parsing Swagger Definition for " + apiIdentifier.getApiName() + "-" +
                     apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
-        return apiJSON.toJSONString();
 
+        if (apiJSON != null) {
+            return apiJSON.toJSONString();
+        }
+        return null;
     }
 
     @Override
@@ -261,8 +259,16 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         JSONParser parser = new JSONParser();
         String pathJsonTemplate = "{\n    \"path\": \"\",\n    \"operations\": []\n}";
         String operationJsonTemplate = "{\n    \"method\": \"\",\n    \"parameters\": []\n}";
-        String apiJsonTemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
-        String apiResourceJsontemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    \"resourcePath\":\"\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+        String apiJsonTemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    " +
+            "\"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        \"description\": \"\",\n       " +
+            " \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        \"license\": \"\",\n        " +
+            "\"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n        \"oauth2\": {\n           " +
+            " \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
+        String apiResourceJsontemplate = "{\n    \"apiVersion\": \"\",\n    \"swaggerVersion\": \"1.2\",\n    " +
+            "\"resourcePath\":\"\",\n    \"apis\": [],\n    \"info\": {\n        \"title\": \"\",\n        " +
+            "\"description\": \"\",\n        \"termsOfServiceUrl\": \"\",\n        \"contact\": \"\",\n        " +
+            "\"license\": \"\",\n        \"licenseUrl\": \"\"\n    },\n    \"authorizations\": {\n       " +
+            " \"oauth2\": {\n            \"type\": \"oauth2\",\n            \"scopes\": []\n        }\n    }\n}";
 
 
         APIIdentifier identifier = api.getId();
@@ -313,15 +319,15 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                 List<String> resourcePaths;
                 int resourceNameEndIndex = path.indexOf("/", 1);
                 String resourceName = "/default";
-                if(resourceNameEndIndex != -1) {
+                if (resourceNameEndIndex != -1) {
                     resourceName = path.substring(1, resourceNameEndIndex);
                 }
 
-                if(!resourceName.startsWith("/")) {
+                if (!resourceName.startsWith("/")) {
                     resourceName = "/" + resourceName;
                 }
 
-                if(resourceNamepaths.get(resourceName) != null) {
+                if (resourceNamepaths.get(resourceName) != null) {
                     resourcePaths = resourceNamepaths.get(resourceName);
                     if (!resourcePaths.contains(path)) {
                         resourcePaths.add(path);
@@ -330,11 +336,11 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                     String[] httpVerbs = httpVerbsStrng.split(" ");
                     for (String httpVerb : httpVerbs) {
                         final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
-                        operationJson.put("method", httpVerb);
-                        operationJson.put("auth_type", template.getAuthType());
-                        operationJson.put("throttling_tier", template.getThrottlingTier());
+                        operationJson.put(APIConstants.SWAGGER_HTTP_METHOD, httpVerb);
+                        operationJson.put(APIConstants.SWAGGER_AUTH_TYPE, template.getAuthType());
+                        operationJson.put(APIConstants.API_THROTTLING_TIER, template.getThrottlingTier());
 
-                        if(resourcePathJSONs.get(path) != null) {
+                        if (resourcePathJSONs.get(path) != null) {
                             resourcePathJSONs.get(path).add(operationJson);
 
                         } else {
@@ -347,8 +353,8 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                 } else {
                     JSONObject resourcePathJson = (JSONObject) parser.parse(apiResourceJsontemplate);
 
-                    resourcePathJson.put("apiVersion", version);
-                    resourcePathJson.put("resourcePath", resourceName);
+                    resourcePathJson.put(APIConstants.API_VERSION, version);
+                    resourcePathJson.put(APIConstants.SWAGGER_RESOURCE_PATH, resourceName);
                     resourceNameJSONs.put(resourceName, resourcePathJson);
 
                     resourcePaths = new ArrayList<String>();
@@ -358,11 +364,11 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                     String[] httpVerbs = httpVerbsStrng.split(" ");
                     for (String httpVerb : httpVerbs) {
                         final JSONObject operationJson = (JSONObject) parser.parse(operationJsonTemplate);
-                        operationJson.put("method", httpVerb);
-                        operationJson.put("auth_type", template.getAuthType());
-                        operationJson.put("throttling_tier", template.getThrottlingTier());
+                        operationJson.put(APIConstants.SWAGGER_HTTP_METHOD, httpVerb);
+                        operationJson.put(APIConstants.SWAGGER_AUTH_TYPE, template.getAuthType());
+                        operationJson.put(APIConstants.API_THROTTLING_TIER, template.getThrottlingTier());
 
-                        if(resourcePathJSONs.get(path) != null) {
+                        if (resourcePathJSONs.get(path) != null) {
                             resourcePathJSONs.get(path).add(operationJson);
 
                         } else {
@@ -381,32 +387,33 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                 List<String> pathItems = entry.getValue();
                 for (String pathItem : pathItems) {
                     JSONObject pathJson = (JSONObject) parser.parse(pathJsonTemplate);
-                    pathJson.put("path", pathItem);
+                    pathJson.put(APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, pathItem);
                     List<JSONObject> methodJsons = resourcePathJSONs.get(pathItem);
                     for (JSONObject methodJson : methodJsons) {
-                        JSONArray operations = (JSONArray) pathJson.get("operations");
+                        JSONArray operations = (JSONArray) pathJson.get(APIConstants.SWAGGER_OPERATIONS);
                         operations.add(methodJson);
                     }
-                    JSONArray apis1 = (JSONArray) jsonOb.get("apis");
-                    apis1.add(pathJson);
+                    JSONArray apiArray = (JSONArray) jsonOb.get(APIConstants.API_ARRAY_NAME);
+                    apiArray.add(pathJson);
                 }
             }
 
-            mainAPIJson.put("apiVersion", version);
-            ((JSONObject)mainAPIJson.get("info")).put("description", description);
+            mainAPIJson.put(APIConstants.API_VERSION, version);
+            ((JSONObject) mainAPIJson.get(APIConstants.SWAGGER_INFO)).put(APIConstants.SWAGGER_DESCRIPTION, description);
             for (Map.Entry<String, List<String>> entry : resourceNamepaths.entrySet()) {
                 String resourcePath = entry.getKey();
                 JSONObject jsonOb = resourceNameJSONs.get(resourcePath);
-                JSONArray apis1 = (JSONArray) mainAPIJson.get("apis");
+                JSONArray apiArray = (JSONArray) mainAPIJson.get(APIConstants.API_ARRAY_NAME);
                 JSONObject pathjob = new JSONObject();
-                pathjob.put("path",resourcePath);
-                pathjob.put("description","");
-                pathjob.put("file",jsonOb);
-                apis1.add(pathjob);
+                pathjob.put(APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, resourcePath);
+                pathjob.put(APIConstants.SWAGGER_DESCRIPTION, "");
+                pathjob.put(APIConstants.SWAGGER_FILE, jsonOb);
+                apiArray.add(pathjob);
 
             }
-        } catch(ParseException e) {
-            throw new APIManagementException("Error while generating swagger 1.2 resource for api " + api.getId().getProviderName()
+        } catch (ParseException e) {
+            throw new APIManagementException("Error while generating swagger 1.2 resource for api "
+                    + api.getId().getProviderName()
                     + "-" + api.getId().getApiName()
                     + "-" + api.getId().getVersion(), e);
         }

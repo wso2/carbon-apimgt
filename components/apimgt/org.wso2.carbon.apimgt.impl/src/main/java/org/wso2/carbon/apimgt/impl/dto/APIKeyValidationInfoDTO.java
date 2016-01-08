@@ -45,9 +45,6 @@ public class APIKeyValidationInfoDTO implements Serializable {
     private int validationStatus;
     private long validityPeriod;
     private long issuedTime;
-	private long refreshTokenIssuedTime;
-	private long refreshTokenValidityPeriod;
-
     private List<String> authorizedDomains;
 
     private Set<String> scopes;
@@ -246,21 +243,5 @@ public class APIKeyValidationInfoDTO implements Serializable {
 
         return builder.toString();
     }
-
-	public long getRefreshTokenIssuedTime() {
-		return refreshTokenIssuedTime;
-	}
-
-	public void setRefreshTokenIssuedTime(long refreshTokenIssuedTime) {
-		this.refreshTokenIssuedTime = refreshTokenIssuedTime;
-	}
-
-	public long getRefreshTokenValidityPeriod() {
-		return refreshTokenValidityPeriod;
-	}
-
-	public void setRefreshTokenValidityPeriod(long refreshTokenValidityPeriod) {
-		this.refreshTokenValidityPeriod = refreshTokenValidityPeriod;
-	}
 }
 

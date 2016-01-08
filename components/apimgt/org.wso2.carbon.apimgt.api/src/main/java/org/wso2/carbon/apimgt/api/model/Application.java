@@ -28,6 +28,7 @@ public class Application {
 
     private int id;
     private String name;
+    private String uuid;
     private Subscriber subscriber;
     private Set<SubscribedAPI> subscribedAPIs = new LinkedHashSet<SubscribedAPI>();
     private List<APIKey> keys = new ArrayList<APIKey>();
@@ -37,7 +38,6 @@ public class Application {
     private String description;
     private String status;
     private String groupId;
-    private int subsCount;
 
     /**Holds workflow status**/
     private String applicationWorkFlowStatus; 
@@ -49,6 +49,11 @@ public class Application {
 
     public Application(int appId) {
         id = appId;
+        this.subscriber = new Subscriber(null);
+    }
+
+    public Application(String uuid) {
+        this.uuid = uuid;
         this.subscriber = new Subscriber(null);
     }
 
@@ -66,14 +71,6 @@ public class Application {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public int getSubsCount() {
-        return subsCount;
-    }
-
-    public void setSubsCount(int count) {
-        this.subsCount = subsCount;
     }
 
     public String getName() {
@@ -175,5 +172,13 @@ public class Application {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public void setUUID(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUUID() {
+        return uuid;
     }
 }

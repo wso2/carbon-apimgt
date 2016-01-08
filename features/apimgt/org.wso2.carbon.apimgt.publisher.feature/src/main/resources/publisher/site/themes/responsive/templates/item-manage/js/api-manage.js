@@ -98,12 +98,12 @@ $('.js_hidden_section_title').click(function(){
         var $i = $('i',this);
         if($next.is(":visible")){
             $next.hide();
-            $i.removeClass('icon-chevron-down');
-            $i.addClass('icon-chevron-right');
+            $i.removeClass('glyphicon glyphicon-chevron-down');
+            $i.addClass('glyphicon glyphicon-chevron-right');
         }else{
             $next.show();
-            $i.removeClass('icon-chevron-right');
-            $i.addClass('icon-chevron-down');
+            $i.removeClass('glyphicon glyphicon-chevron-right');
+            $i.addClass('glyphicon glyphicon-chevron-down');
         }
     });
 
@@ -241,20 +241,19 @@ function loadFaultSequences() {
             }, "json");
 }
 
-
-
-$("#toggleSequence").change(function(e){
+$("#toggleSequence").on('click',function(e){
     if($(this).is(":checked")){
-        $(this).parent().next().show();
+        $(this).parent().parent().next().show();
         loadInSequences();
         loadOutSequences();
         loadFaultSequences();
     }else{
-        $(this).parent().next().hide();
+        $(this).parent().parent().next().hide();
         $('#faultSequence').val('');
         $('#inSequence').val('') ;
         $('#outSequence').val('');
     }
+    //$('select').selectpicker();
 });
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
