@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -41,6 +42,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
 
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            APIUtil.loadTenantRegistry(tenantId);
 
             if (registry.resourceExists(registryLocation)) {
                 Resource resource = registry.get(registryLocation);
