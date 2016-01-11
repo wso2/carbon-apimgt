@@ -31,7 +31,7 @@ public class JwtConfigContext extends ConfigContextDecorator {
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
 
-        if (ApiMgtDAO.tokenGenerator != null) {
+        if (ApiMgtDAO.getTokenGenerator() != null) {
             context.put("jwtIsEnabled", true);
         } else {
             context.put("jwtIsEnabled", false);

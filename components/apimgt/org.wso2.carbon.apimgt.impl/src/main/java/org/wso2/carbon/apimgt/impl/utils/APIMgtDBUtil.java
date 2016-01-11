@@ -187,7 +187,7 @@ public final class APIMgtDBUtil {
      * Close PreparedStatement
      * @param preparedStatement PreparedStatement
      */
-    private static void closeStatement(PreparedStatement preparedStatement) {
+    public static void closeStatement(PreparedStatement preparedStatement) {
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
