@@ -100,8 +100,10 @@ function triggerSubscribe() {
                  $('#messageModal').html($('#confirmation-data').html());
                  $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
                  if (result.status == 'ON_HOLD') {
+                    $('#application-list :selected').remove();
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
                  } else {
+                    $('#application-list :selected').remove();
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionSuccess'));
                  }
                  $('#messageModal a.btn-primary').html(i18n.t('info.gotoSubsPage'));
