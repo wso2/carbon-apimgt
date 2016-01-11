@@ -68,6 +68,7 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -449,6 +450,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             log.debug("Removing Service Provider with name : " + spAppName);
             appMgtService.deleteApplication(spAppName, tenantDomain, tenantAwareUsername);
 
+            if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
+                OAuthCache oAuthCache = OAuthCache.getInstance();
+                oAuthCache.clearCacheEntry(new OAuthCacheKey(consumerKey));
+            }
 
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while deleting ServiceProvider", e);
