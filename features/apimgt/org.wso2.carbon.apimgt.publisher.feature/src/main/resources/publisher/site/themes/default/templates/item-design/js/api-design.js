@@ -697,6 +697,10 @@ $(document).ready(function(){
         $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge" name="apiThumb" />');
     });
 
+    $("#clearOutSeqFile").on("click", function () {
+            $('#outSeqFile').val('');
+    });
+
     $('#import_swagger').attr('disabled','disabled');
     $('.toggleRadios input[type=radio]').click(function(){
         if (($(this).val() == 'swagger_import_file' &&
