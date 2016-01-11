@@ -69,7 +69,8 @@
                             javax.cache.*,
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.usage.publisher.*;version="${carbon.apimgt.imp.pkg.version}"
+                            org.wso2.carbon.apimgt.usage.publisher.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.utils.multitenancy.*;version="${carbon.kernel.package.import.version.range}
                         </Import-Package>
                     </instructions>
                 </configuration>
