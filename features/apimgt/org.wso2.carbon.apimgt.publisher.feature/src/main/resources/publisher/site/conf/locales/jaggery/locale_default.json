@@ -225,6 +225,7 @@
     "versionsHelpMsg":"E.g.: v1.0.0, v1.0, 1.0.0, 1.0",
     "tagsHelpLabel":"Type a tag and Enter",
     "tagsHelpMsg":"Use keywords and common search terms as tags to group APIs that have similar characteristics. After publishing the API, consumers can click these tags to jump to a group of similar APIs.",
+    "descriptionHelpLable":"maximum 20000 characters support",
     "optionsHelpMsg": "Select Options method to send OPTIONS calls to backed. If not selected API gateway will return OPTIONS call with the allowed methods in gateway.",
     "rolesHelpMsg":"Comma-separated list (e.g.: role1,role2,role3)",
     "allowTenantsHelpMsg":"Comma separated list (e.g.,: tenant1.com,tenant2.com). Your API will be accessible to those defined Tenants as well.",
