@@ -564,6 +564,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
                     //check for the permission for access
                     if (info != null && !info.isAccessAllowed()) {
+                        log.info("Exceeded the allocated quota in Application level.");
                         //In the case of both of concurrency throttling and
                         //rate based throttling have enabled ,
                         //if the access rate less than maximum concurrent access ,
@@ -642,7 +643,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
                         //check for the permission for access
                         if (info != null && !info.isAccessAllowed()) {
-
+                            log.info("Exceeded the allocated quota in Resource level.");
                             //In the case of both of concurrency throttling and
                             //rate based throttling have enabled ,
                             //if the access rate less than maximum concurrent access ,
@@ -719,6 +720,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
                 //check for the permission for access
                 if (info != null && !info.isAccessAllowed()) {
+                    log.info("Exceeded the allocated quota in API level.");
                     //In the case of both of concurrency throttling and
                     //rate based throttling have enabled ,
                     //if the access rate less than maximum concurrent access ,
@@ -789,6 +791,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
                 if (info != null && !info.isAccessAllowed()) {
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+                    log.info("Hard Throttling limit exceeded.");
                     return false;
                 }
             }
