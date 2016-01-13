@@ -1531,8 +1531,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
             if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchType)) {
-            	Map<Documentation, API> apiDocMap = APIUtil.searchAPIsByDoc(userRegistry, tenantIDLocal, userNameLocal, searchTerm, searchType);
-            	result.put("apis", apiDocMap);
+                Map<Documentation, API> apiDocMap =
+                        APIUtil.searchAPIsByDoc(userRegistry, tenantIDLocal, userNameLocal, searchTerm,
+                                                APIConstants.STORE_CLIENT);
+                result.put("apis", apiDocMap);
             	/*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
             	if (apiDocMap.size() == 0 ) {
             		result.put("length", 0);
