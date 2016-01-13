@@ -1,14 +1,16 @@
 <%
 var log = new Log();
 
-var addIPRange = function ( startingIP , endingIP) {
+var addPolicy = function ( startingIP , endingIP ,name , HTTPVerb) {
     try{
         var starting_ip = startingIP;
         var ending_ip = endingIP;
+        var rule_name = rule;
+        var http_verb = HTTPVerb;
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        apiProvider.addIPRange(starting_ip , ending_ip);
+        apiProvider.addPolicy(starting_ip , ending_ip,rule_name, http_verb);
 
         var iprangeAddedSuccess = "IP Range added from :"+starting_ip+" to ending ip:"+ending_ip;
         log.info(iprangeAddedSuccess);
@@ -19,56 +21,6 @@ var addIPRange = function ( startingIP , endingIP) {
         return{
           error:true,
           message: ex.message.split(":")[1]
-        };
-    }
-
-
-};
-
-var addHTTPVerb = function (HTTPVerb){
-
-    try{
-        var provider = jagg.getUser().username;
-        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-        var apiProvider = new APIProviderImpl(provider);
-        var http_verb =  HTTPVerb;
-        apiProvider.addHTTPVerb(http_verb);
-
-        var addhttpverbSuccess = "Http verb: "+http_verb+" added";
-
-        log.info(addhttpverbSuccess);
-        return{
-          error: false
-        };
-
-    }catch(ex){
-        return {
-          error: true,
-          message: ex.message.split(":")[1]
-        };
-    }
-
-};
-
-var addRequestAndTime = function(request , time){
-    try{
-        var provider = jagg.getUser().username;
-        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-        var apiProvider = new APIProviderImpl(provider);
-        var http_verb =  HTTPVerb;
-        apiProvider.addRequestAndTime(request, time);
-
-        var addRequestTimeSuccess = "Request: "+request+"time:"+time;
-
-        log.info(addRequestTimeSuccess);
-        return{
-            error: false
-        };
-
-    }catch(ex){
-        return {
-            error: true,
-            message: ex.message.split(":")[1]
         };
     }
 };
