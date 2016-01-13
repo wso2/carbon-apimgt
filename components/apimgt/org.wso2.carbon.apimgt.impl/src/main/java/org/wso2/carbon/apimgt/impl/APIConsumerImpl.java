@@ -2593,6 +2593,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            } else {
+                throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
             }
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.
