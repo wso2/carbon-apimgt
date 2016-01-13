@@ -38,6 +38,17 @@ jagg.block("subscription/subscription-list", {
 
 		response = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp, startIndex, endIndex);
 
+		//If there is a error when retrieving applications check whether it's application not found exception, if so
+		//switch to default application view without the selecte application
+		if (response.error) {
+			if (response.result.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {
+				//Given application is not available. Hence go with default applications
+				selectedApp = "";
+				response = jagg.module("subscription").getAllSubscriptions(user.username, selectedApp, startIndex, endIndex);
+				session.put("selectedApp", null);
+			}
+		}
+
 		applications = response.result.applications;
 		totalLength = response.result.totalLength;
 		return {
