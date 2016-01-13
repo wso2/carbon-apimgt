@@ -2,12 +2,7 @@ package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.commons.exception.*;
 
-import java.net.MalformedURLException;
-import java.util.UUID;
 
 /**
  * This class contains the data needed to be published to CEP server for the throttling purpose.
