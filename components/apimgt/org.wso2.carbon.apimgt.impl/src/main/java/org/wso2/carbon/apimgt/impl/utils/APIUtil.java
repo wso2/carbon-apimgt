@@ -3983,9 +3983,19 @@ public final class APIUtil {
         }
     }
 
-    public static Map<Documentation, API> searchAPIsByDoc(Registry registry, int tenantID, String username, String searchTerm, String searchType) throws APIManagementException {
-        List<API> apiSortedList = new ArrayList<API>();
-
+    /**
+     * Search Apis by Doc Content
+     *
+     * @param registry - Registry which is searched
+     * @param tenantID - Tenant id of logged in domain
+     * @param username - Logged in username
+     * @param searchTerm - Search value for doc
+     * @param searchClient - Search client
+     * @return - Documentation to APIs map
+     * @throws APIManagementException - If failed to get ArtifactManager for given tenant
+     */
+    public static Map<Documentation, API> searchAPIsByDoc(Registry registry, int tenantID, String username,
+                                                          String searchTerm, String searchClient) throws APIManagementException {
         Map<Documentation, API> apiDocMap = new HashMap<Documentation, API>();
 
         try {
@@ -4054,7 +4064,6 @@ public final class APIUtil {
                                 if (apiArtifactId != null) {
                                     GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
                                     api = APIUtil.getAPI(apiArtifact, registry);
-                                    apiSortedList.add(api);
                                 } else {
                                     throw new GovernanceException("artifact id is null of " + apiPath);
                                 }
@@ -4063,7 +4072,14 @@ public final class APIUtil {
                     }
 
                     if (doc != null && api != null) {
-                        apiDocMap.put(doc, api);
+                        if (APIConstants.STORE_CLIENT.equals(searchClient)) {
+                            if (api.getStatus().equals(getApiStatus(APIConstants.PUBLISHED)) ||
+                                api.getStatus().equals(getApiStatus(APIConstants.PROTOTYPED))) {
+                                apiDocMap.put(doc, api);
+                            }
+                        } else {
+                            apiDocMap.put(doc, api);
+                        }
                     }
                 }
             }
