@@ -30,6 +30,14 @@
     <url>http://wso2.org</url>
 
     <dependencies>
+
+        <dependency>
+            <artifactId>throttler-core</artifactId>
+            <groupId>org.wso2.throttle</groupId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-extensions</artifactId>

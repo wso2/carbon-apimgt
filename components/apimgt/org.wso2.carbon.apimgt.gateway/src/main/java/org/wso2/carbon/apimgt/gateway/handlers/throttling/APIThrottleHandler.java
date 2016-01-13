@@ -827,7 +827,7 @@ public class APIThrottleHandler extends AbstractHandler {
         throttleDataPublisherDTO.setIPAddress(clientIP);
 
         //publish the event to CEP
-        try {
+        /*try {
             publishEvent(throttleDataPublisherDTO);
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -843,7 +843,7 @@ public class APIThrottleHandler extends AbstractHandler {
             e.printStackTrace();
         } catch (DifferentStreamDefinitionAlreadyDefinedException e) {
             e.printStackTrace();
-        }
+        } */
         return canAccess;
     }
 
