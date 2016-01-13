@@ -115,7 +115,7 @@
                      <div class="controls">
                         <input type="checkbox" class="default_version_check" id="default_version" name="default_version" value="default_version" <%if(api.isDefaultVersion=="true"){%>checked<%}%>/>
 
-                        <a class="icon-question-sign help_popup" help_data="default_api_help"></a>
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="default_api_help"></a>
             
                         <p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
 
@@ -144,7 +144,7 @@
                         <script type="text/javascript">
 
                         </script> 
-                        <a class="icon-question-sign help_popup" help_data="tier_help"></a>
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="tier_help"></a>
                         <p id="tier_help" class="hide"><%=i18n.localize("tierHelpMsg")%></p>
                     </div>
                 </div>
@@ -163,7 +163,7 @@
                          
                             <%=i18n.localize("httpTransport")%>
                         </label>
-                        <a class="icon-question-sign help_popup" help_data="http_help"></a>
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="http_help"></a>
                         <p id="http_help" class="hide"><%=i18n.localize("httpHelpMsg")%></p>
                     </div>
                 </div>
@@ -218,7 +218,7 @@
                             <option value="disabled" <%if(api.responseCache != "Enabled"){%> selected="selected" <%}%>><%=i18n.localize("disabled")%></option>
                             <option value="enabled" <%if(api.responseCache=="Enabled"){%> selected="selected" <%}%>><%=i18n.localize("enabled")%></option>
                         </select>                                
-                        <a class="icon-question-sign help_popup" help_data="cache_help"></a>
+                        <a class="icon-question-sign help_popup" data-trigger="hover" help_data="cache_help"></a>
                         <p id="cache_help" class="hide"><%=i18n.localize("cacheHelpMsg")%></p>           
                      </div>
                 </div>
@@ -250,7 +250,7 @@
                                 	<% } %>
                             	</select> 
                         	<%}%>     
-                            	<a class="icon-question-sign help_popup" help_data="subscriptions_help"></a>
+                            	<a class="icon-question-sign help_popup" data-trigger="hover" help_data="subscriptions_help"></a>
                            	<div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
                        </div>
 

@@ -691,6 +691,7 @@ $(document).ready(function(){
 
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
+        $("#apiEditThumb").attr("src", "") ;
     });
 
     $("#clearSeqFile").on("click", function () {
@@ -886,6 +887,9 @@ $(document).ready(function(){
         if (imageFileSize > 1){
           $('#error-invalidImageFileSize').modal('show');
           $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
+        }else{
+            var output = document.getElementById('apiEditThumb');
+            output.src = URL.createObjectURL(this.files[0]);
         }
     });
 });
