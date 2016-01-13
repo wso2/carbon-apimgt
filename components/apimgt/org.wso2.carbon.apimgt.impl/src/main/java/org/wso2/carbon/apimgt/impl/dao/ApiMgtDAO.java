@@ -789,7 +789,7 @@ public class ApiMgtDAO {
                 apiName = rs.getString(APIConstants.FIELD_API_NAME);
                 consumerKey = rs.getString(APIConstants.FIELD_CONSUMER_KEY);
                 apiPublisher = rs.getString(APIConstants.FIELD_API_PUBLISHER);
-                
+
                 String endUsernameWithDomain = UserCoreUtil.addDomainToName(endUserName, domainName);
 
                 keyValidationInfoDTO.setApiName(apiName);
@@ -1401,7 +1401,7 @@ public class ApiMgtDAO {
     }
 
     /** Removes a subscription specified by SubscribedAPI object
-     * 
+     *
      * @param subscription SubscribedAPI object
      * @param conn database connection object
      * @throws APIManagementException
@@ -1433,8 +1433,8 @@ public class ApiMgtDAO {
                     " WHERE" +
                     " UUID = ?";
 
-            String deleteQuery = "DELETE FROM AM_SUBSCRIPTION" + 
-                    " WHERE" + 
+            String deleteQuery = "DELETE FROM AM_SUBSCRIPTION" +
+                    " WHERE" +
                     " UUID = ?";
 
             if(APIConstants.SubscriptionStatus.BLOCKED.equals(subStatus)
@@ -1459,7 +1459,7 @@ public class ApiMgtDAO {
 
 
     /** Removes a subscription by id by force without considering the subscription blocking state of the user
-     * 
+     *
      * @param subscription_id id of subscription
      * @throws APIManagementException
      */
@@ -1549,10 +1549,10 @@ public class ApiMgtDAO {
     }
 
     /** returns the SubscribedAPI object which is related to the subscriptionId
-     * 
+     *
      * @param subscriptionId subscription id
      * @return
-     * @throws APIManagementException 
+     * @throws APIManagementException
      */
     public SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException {
 
@@ -1562,7 +1562,7 @@ public class ApiMgtDAO {
 
         try {
             conn = APIMgtDBUtil.getConnection();
-            String getSubscriptionQuery = 
+            String getSubscriptionQuery =
                     "SELECT " +
                     "SUBS.SUBSCRIPTION_ID AS SUBSCRIPTION_ID, " +
                     "API.API_PROVIDER AS API_PROVIDER, " +
@@ -1587,9 +1587,9 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 APIIdentifier apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(resultSet.getString("API_PROVIDER")),
                         resultSet.getString("API_NAME"), resultSet.getString("API_VERSION"));
-                
+
                 int applicationId = resultSet.getInt("APPLICATION_ID");
-                Application application = getApplicationById(applicationId);               
+                Application application = getApplicationById(applicationId);
                 subscribedAPI = new SubscribedAPI(application.getSubscriber(), apiIdentifier);
                 subscribedAPI.setSubscriptionId(resultSet.getInt("SUBSCRIPTION_ID"));
                 subscribedAPI.setSubStatus(resultSet.getString("SUB_STATUS"));
@@ -1791,10 +1791,10 @@ public class ApiMgtDAO {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet result = null;
-        String sqlQuery = "SELECT " + 
+        String sqlQuery = "SELECT " +
                 "   SUBS.SUBSCRIPTION_ID AS SUBS_ID" +
                 "   ,API.API_PROVIDER AS API_PROVIDER" +
-                "   ,API.API_NAME AS API_NAME" + 
+                "   ,API.API_NAME AS API_NAME" +
                 "   ,API.API_VERSION AS API_VERSION" +
                 "   ,SUBS.TIER_ID AS TIER_ID" +
                 "   ,APP.APPLICATION_ID AS APP_ID" +
@@ -1805,12 +1805,12 @@ public class ApiMgtDAO {
                 "   ,APP.CALLBACK_URL AS CALLBACK_URL " +
                 "   ,SUBS.UUID AS SUB_UUID " +
                 "   ,APP.UUID AS APP_UUID " +
-                "FROM " + 
+                "FROM " +
                 "   AM_SUBSCRIBER SUB," +
                 "   AM_APPLICATION APP, " +
                 "   AM_SUBSCRIPTION SUBS, " +
                 "   AM_API API " +
-                "WHERE "+ 
+                "WHERE "+
                 "   SUB.TENANT_ID = ? " +
                 "   AND APP.APPLICATION_ID=SUBS.APPLICATION_ID " +
                 "   AND API.API_ID=SUBS.API_ID" +
@@ -2451,13 +2451,13 @@ public class ApiMgtDAO {
             if (result.next()) {
 
                 String decryptedAccessToken = APIUtil.decryptToken(result.getString("ACCESS_TOKEN")); // todo - check redundant decryption
-                
+
                 String endUserName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER);
                 String domainName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_USER_DOMAIN);
                 String endUsernameWithDomain = UserCoreUtil.addDomainToName(endUserName, domainName);
                 apiKey.setAuthUser(endUsernameWithDomain);
-                
-                apiKey.setAccessToken(decryptedAccessToken);                
+
+                apiKey.setAccessToken(decryptedAccessToken);
                 apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                 String consumerKey = result.getString("CONSUMER_KEY");
                 apiKey.setConsumerKey(consumerKey);
@@ -2519,12 +2519,12 @@ public class ApiMgtDAO {
                 if (matcher.matches()) {
                     APIKey apiKey = new APIKey();
                     apiKey.setAccessToken(accessToken);
-                    
+
                     String username = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER);
                     String domainName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_USER_DOMAIN);
                     String endUsernameWithDomain = UserCoreUtil.addDomainToName(username, domainName);
                     apiKey.setAuthUser(endUsernameWithDomain);
-                    
+
                     apiKey.setCreatedDate(result.getTimestamp("TIME_CREATED").toString().split("\\.")[0]);
                     String consumerKey = result.getString("CONSUMER_KEY");
                     apiKey.setConsumerKey(consumerKey);
@@ -2605,7 +2605,7 @@ public class ApiMgtDAO {
                 String username = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER);
                 String domainName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_USER_DOMAIN);
                 String authorizedUserWithDomain = UserCoreUtil.addDomainToName(username, domainName);
-                
+
                 if (APIUtil.isLoggedInUserAuthorizedToRevokeToken(loggedInUser, authorizedUserWithDomain)) {
                     String accessToken = APIUtil.decryptToken(result.getString("ACCESS_TOKEN"));
                     APIKey apiKey = new APIKey();
@@ -2687,7 +2687,7 @@ public class ApiMgtDAO {
             boolean accessTokenRowBreaker = false;
             while (accessTokenRowBreaker || result.next()) {
                 accessTokenRowBreaker = true;
-                
+
                 String username = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_AUTHORIZED_USER);
                 String domainName = result.getString(APIConstants.IDENTITY_OAUTH2_FIELD_USER_DOMAIN);
                 String authorizedUserWithDomain = UserCoreUtil.addDomainToName(username, domainName);
@@ -3643,7 +3643,7 @@ public class ApiMgtDAO {
 
     /**
      * This method is used to update the subscription
-     * 
+     *
      * @param subscribedAPI subscribedAPI object that represents the new subscription detals
      * @throws APIManagementException if failed to update subscription
      */
@@ -4986,7 +4986,7 @@ public class ApiMgtDAO {
     }
 
     /** get the status of the Application creation process given the application Id
-     * 
+     *
      * @param applicationId Id of the Application
      * @return
      * @throws APIManagementException
@@ -5412,7 +5412,7 @@ public class ApiMgtDAO {
         return consumerKeys.toArray(new String[consumerKeys.size()]);
     }
 
-    /** Deletes an Application along with subscriptions, keys and registration data 
+    /** Deletes an Application along with subscriptions, keys and registration data
      *
      * @param application Application object to be deleted from the database which consists of Id
      * @throws APIManagementException
@@ -5902,7 +5902,7 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(null, conn, null);
         }
     }
-    
+
     public void recordAPILifeCycleEvent(APIIdentifier identifier, String oldStatus, String newStatus,
             String userId) throws APIManagementException {
         Connection conn = null;
@@ -6763,7 +6763,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
     }
 
     /** Retrieves the Application which is corresponding to the given UUID String
-     * 
+     *
      * @param uuid UUID of Application
      * @return
      * @throws APIManagementException
@@ -8002,7 +8002,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 " ASUB.APPLICATION_ID=? AND" +
                 " AW.WF_REFERENCE=ASUB.SUBSCRIPTION_ID AND" +
                 " AW.WF_TYPE=?";
-        
+
         String postgreSQL =  "SELECT AW.WF_EXTERNAL_REFERENCE FROM" +
                 " AM_WORKFLOWS AW, AM_SUBSCRIPTION ASUB  WHERE" +
                 " ASUB.API_ID=? AND" +
@@ -8041,7 +8041,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Retries the WorkflowExternalReference for a subscription.
      *
      * @param subscriptionId ID of the subscription
-     * @return External workflow reference for the subscription with subscriptionId
+     * @return External workflow reference for the subscription <code>subscriptionId</code>
      * @throws APIManagementException
      */
     public String getExternalWorkflowReferenceForSubscription(int subscriptionId)
@@ -8073,6 +8073,46 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } catch (SQLException e) {
             handleException("Error occurred while getting workflow entry for " +
                     "Subscription : " + subscriptionId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return workflowExtRef;
+    }
+
+    /**
+     * Retries the WorkflowExternalReference for an user signup by DOMAIN/username.
+     *
+     * @param usernameWithDomain username of the signed up user inthe format of DOMAIN/username
+     * @return External workflow reference for the signup workflow entry
+     * @throws APIManagementException
+     */
+    public String getExternalWorkflowReferenceForUserSignup(String usernameWithDomain) throws APIManagementException {
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT WF_EXTERNAL_REFERENCE FROM " +
+                "AM_WORKFLOWS WHERE " +
+                "WF_REFERENCE=? AND " +
+                "WF_TYPE=?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, usernameWithDomain);
+            ps.setString(2, WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while(rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "User signup : " + usernameWithDomain, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
