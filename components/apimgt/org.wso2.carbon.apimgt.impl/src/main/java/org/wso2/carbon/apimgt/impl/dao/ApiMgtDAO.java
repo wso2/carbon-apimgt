@@ -278,10 +278,13 @@ public class ApiMgtDAO {
 
         Connection conn = null;
         PreparedStatement ps = null;
+        PreparedStatement queryPs = null;
         Application application = dto.getApplication();
         Subscriber subscriber = application.getSubscriber();
         String jsonString = dto.getAppInfoDTO().getOAuthApplicationInfo().getJsonString();
 
+        String registrationQuery = "SELECT REG_ID FROM AM_APPLICATION_REGISTRATION WHERE " +
+                                   "SUBSCRIBER_ID = ? AND APP_ID = ? AND TOKEN_TYPE = ?";
 
         String registrationEntry = "INSERT INTO " +
                 " AM_APPLICATION_REGISTRATION (SUBSCRIBER_ID,WF_REF,APP_ID,TOKEN_TYPE,ALLOWED_DOMAINS,VALIDITY_PERIOD,TOKEN_SCOPE,INPUTS) " +
@@ -294,6 +297,16 @@ public class ApiMgtDAO {
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
+
+            queryPs = conn.prepareStatement(registrationQuery);
+            queryPs.setInt(1, subscriber.getId());
+            queryPs.setInt(2, application.getId());
+            queryPs.setString(3, dto.getKeyType());
+            ResultSet resultSet = queryPs.executeQuery();
+
+            if (resultSet.next()) {
+                throw new APIManagementException("Application '" + application.getName() + "' is already registered.");
+            }
 
             if (!onlyKeyMappingEntry) {
                 ps = conn.prepareStatement(registrationEntry);
@@ -327,6 +340,7 @@ public class ApiMgtDAO {
             handleException("Error occurred while creating an " +
                     "Application Registration Entry for Application : " + application.getName(), e);
         } finally {
+            APIMgtDBUtil.closeAllConnections(queryPs, null, null);
             APIMgtDBUtil.closeAllConnections(ps, conn, null);
         }
 
