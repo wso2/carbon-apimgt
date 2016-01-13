@@ -17,6 +17,9 @@ jagg.module("tier", {
     },
     addHTTPVerb:function(){
         return jagg.require(jagg.getModulerDir() + "tier/throttle-attributes.jag").addHTTPVerb.apply(this,arguments);
+    },
+    addRequestAndTime: function(){
+        return jagg.require(jagg.getModulerDir() + "tier/throttle-attributes.jag").addRequestAndTime.apply(this,arguments);
     }
 });
 %>

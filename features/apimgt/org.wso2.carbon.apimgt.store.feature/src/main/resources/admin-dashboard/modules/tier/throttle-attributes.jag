@@ -34,7 +34,7 @@ var addHTTPVerb = function (HTTPVerb){
         var http_verb =  HTTPVerb;
         apiProvider.addHTTPVerb(http_verb);
 
-        var addhttpverbSuccess = "Http verb: "+http_verb+" added )";
+        var addhttpverbSuccess = "Http verb: "+http_verb+" added";
 
         log.info(addhttpverbSuccess);
         return{
@@ -49,4 +49,28 @@ var addHTTPVerb = function (HTTPVerb){
     }
 
 };
+
+var addRequestAndTime = function(request , time){
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+        var http_verb =  HTTPVerb;
+        apiProvider.addRequestAndTime(request, time);
+
+        var addRequestTimeSuccess = "Request: "+request+"time:"+time;
+
+        log.info(addRequestTimeSuccess);
+        return{
+            error: false
+        };
+
+    }catch(ex){
+        return {
+            error: true,
+            message: ex.message.split(":")[1]
+        };
+    }
+};
+
 %>
