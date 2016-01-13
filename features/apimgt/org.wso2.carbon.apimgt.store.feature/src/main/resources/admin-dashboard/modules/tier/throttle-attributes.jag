@@ -12,8 +12,8 @@ var addPolicy = function ( startingIP , endingIP ,name , HTTPVerb) {
         var apiProvider = new APIProviderImpl(provider);
         apiProvider.addPolicy(starting_ip , ending_ip,rule_name, http_verb);
 
-        var iprangeAddedSuccess = "IP Range added from :"+starting_ip+" to ending ip:"+ending_ip;
-        log.info(iprangeAddedSuccess);
+        var policyAddedSuccess = "Name: "+rule_name+" HTTP Verb :"+http_verb+"IP Range added from :"+starting_ip+" to ending ip:"+ending_ip;
+        log.info(policyAddedSuccess);
         return {
             error:false
         }
