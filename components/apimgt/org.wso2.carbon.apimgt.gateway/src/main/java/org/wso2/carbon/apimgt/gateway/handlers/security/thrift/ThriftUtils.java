@@ -34,7 +34,7 @@ public class ThriftUtils {
     private static String remoteServerIP;
     private static String thriftServerHost;
     private static String remoteServerPort;
-    private static String sessionId;
+    private String sessionId;
     private static int thriftPort;
     private static int thriftClientConnectionTimeOut;
     private static ThriftAuthClient thriftAuthClient = null;
@@ -84,7 +84,7 @@ public class ThriftUtils {
         } catch (AuthenticationException e) {
             thriftAuthClient=null;
             sessionId=null;
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
     }
 

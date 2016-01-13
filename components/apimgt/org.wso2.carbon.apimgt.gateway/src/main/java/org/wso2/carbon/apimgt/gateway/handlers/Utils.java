@@ -249,10 +249,7 @@ public class Utils {
         if(VersionStrategyFactory.TYPE_URL.equals(versionStrategy)){
             // most used strategy. server:port/context/version/resource
             requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
-        }else if(VersionStrategyFactory.TYPE_CONTEXT.equals(versionStrategy)){
-            // version in context. server:port/contextWithVersion/resource
-            requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
-        }else{
+         }else{
             // default version. assume there is no version is used
             requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
         }

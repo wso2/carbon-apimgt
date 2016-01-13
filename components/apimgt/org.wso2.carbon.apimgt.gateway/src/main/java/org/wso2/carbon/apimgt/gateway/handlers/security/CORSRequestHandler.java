@@ -34,9 +34,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
@@ -45,7 +43,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	private String apiImplementationType;
 	private String allowHeaders;
 	private boolean allowCredentials;
-	private List<String> allowedOrigins;
+	private Set<String> allowedOrigins;
 	private boolean initializeHeaderValues;
 
 	public void init(SynapseEnvironment synapseEnvironment) {
@@ -71,7 +69,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 			String allowedOriginsList = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
 					getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
 			if (!allowedOriginsList.isEmpty()) {
-				allowedOrigins = Arrays.asList(allowedOriginsList.split(","));
+				allowedOrigins = new HashSet<String>(Arrays.asList(allowedOriginsList.split(",")));
 			}
 		}
 
@@ -110,22 +108,25 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     break;
                 }
             }
-            String subPath;
+            String subPath = null;
             String path = RESTUtils.getFullRequestPath(messageContext);
-            if (selectedApi.getVersionStrategy().getVersionType().equals(VersionStrategyFactory.TYPE_URL)) {
-                subPath = path.substring(
-                        selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
-            } else {
-                subPath = path.substring(selectedApi.getContext().length());
-            }
+			if(selectedApi != null) {
+				if (VersionStrategyFactory.TYPE_URL.equals(selectedApi.getVersionStrategy().getVersionType())) {
+					subPath = path.substring(
+							selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
+				} else {
+					subPath = path.substring(selectedApi.getContext().length());
+				}
+			}
             if ("".equals(subPath)) {
                 subPath = "/";
             }
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
 
-            if (selectedApi.getResources().length > 0) {
+			Resource[] selectedAPIResources = selectedApi.getResources();
+            if (selectedApi != null && selectedAPIResources.length > 0) {
                 for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedApi.getResources()));
+                    Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
                     if (resource != null) {
                         selectedResource = resource;
                         if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
@@ -185,17 +186,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
 		//Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
 		//and the allowed origin is not the wildcard (*)
-		if (allowCredentials && !allowedOrigin.equals("*")) {
-			messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, true);
+		if (allowCredentials && ! "*".equals(allowedOrigin)) {
+			messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
 		}
 
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
 		String allowedMethods = "";
+		StringBuffer allowedMethodsBuffer = new StringBuffer();
 		if (selectedResource != null) {
-			for (String method : selectedResource.getMethods()) {
-				allowedMethods += method + ",";
-			}
-			if (!allowedMethods.isEmpty()) {
+			String[] methods = selectedResource.getMethods();
+			for (String method : methods) {
+				allowedMethodsBuffer.append(method).append(',');
+				}
+			allowedMethods = allowedMethodsBuffer.toString();
+			if (methods.length != 0) {
 				allowedMethods = allowedMethods.substring(0, allowedMethods.length() - 1);
 			}
 		} else {
@@ -230,7 +234,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
     public void setAllowedOrigins(String allowedOrigins) {
-        this.allowedOrigins = Arrays.asList(allowedOrigins.split(","));
+        this.allowedOrigins = new HashSet<String>(Arrays.asList(allowedOrigins.split(",")));
     }
 
 	public String getApiImplementationType() {

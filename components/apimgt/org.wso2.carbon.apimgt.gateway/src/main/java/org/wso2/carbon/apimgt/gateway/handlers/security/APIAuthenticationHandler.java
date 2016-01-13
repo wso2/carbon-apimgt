@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import edu.umd.cs.findbugs.annotations.*;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -90,6 +91,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "LEST_LOST_EXCEPTION_STACK_TRACE", justification = "The exception needs to thrown for fault sequence invocation")
     private void initializeAuthenticator() {
         String authenticatorType = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
                 getFirstProperty(APISecurityConstants.API_SECURITY_AUTHENTICATOR);
@@ -110,6 +112,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authenticator.init(synapseEnvironment);
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
+            justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
@@ -150,12 +154,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 difference = (endTime - startTime) / 1000000;
                 String messageDetails = logMessageDetails(messageContext);
                 log.debug("Call to API gateway : " + messageDetails + ", elapsedTimeInMilliseconds=" +
-                        difference / 1000000 );
+                        difference / 1000000);
             }
             // We do not need to log authentication failures as errors since these are not product errors.
             log.warn("API authentication failure due to " +
-                     APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
-            if(log.isDebugEnabled()){
+                    APISecurityConstants.getAuthenticationFailureMessage(e.getErrorCode()));
+            if (log.isDebugEnabled()) {
                 log.debug("API authentication failed with error " + e.getErrorCode(), e);
             }
             handleAuthFailure(messageContext, e);
@@ -247,7 +251,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
         String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
         String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
-        Date incomingReqTime = new Date();
+        Date incomingReqTime = null;
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         String logMessage = "API call failed reason=API_authentication_failure"; //"app-name=" + applicationName + " " + "user-name=" + endUserName;
         String logID = axisMC.getOptions().getMessageId();
@@ -277,9 +281,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
         incomingReqTime = new Date(reqIncomingTimestamp);
-        if (incomingReqTime != null) {
-            logMessage = logMessage + " at time=" + incomingReqTime;
-        }
+        logMessage = logMessage + " at time=" + incomingReqTime;
+
         String remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         if (remoteIP != null) {
             logMessage = logMessage + " from clientIP=" + remoteIP;
@@ -328,11 +331,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         if (tenantDomainIndex != -1) {
             String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
-            tenantDomain = temp.substring(0, temp.indexOf("/"));
+            tenantDomain = temp.substring(0, temp.indexOf('/'));
         }
 
         if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
-            apiPublisher = apiPublisher + "@" + tenantDomain;
+            apiPublisher = apiPublisher + '@' + tenantDomain;
         }
 
         String resource = extractResource(messageContext);

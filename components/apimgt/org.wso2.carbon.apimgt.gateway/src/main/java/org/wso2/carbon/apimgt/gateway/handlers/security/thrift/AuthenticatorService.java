@@ -168,7 +168,7 @@ public class AuthenticatorService {
 
   }
 
-  public static class authenticate_args implements org.apache.thrift.TBase<authenticate_args, authenticate_args._Fields>, java.io.Serializable, Cloneable   {
+  public static class authenticate_args implements org.apache.thrift.TBase<authenticate_args, authenticate_args._Fields>, java.io.Serializable   {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("authenticate_args");
 
     private static final org.apache.thrift.protocol.TField USER_NAME_FIELD_DESC = new org.apache.thrift.protocol.TField("userName", org.apache.thrift.protocol.TType.STRING, (short)1);
@@ -528,7 +528,7 @@ public class AuthenticatorService {
         sb.append(this.password);
       }
       first = false;
-      sb.append(")");
+      sb.append(')');
       return sb.toString();
     }
 
@@ -560,7 +560,7 @@ public class AuthenticatorService {
 
   }
 
-  public static class authenticate_result implements org.apache.thrift.TBase<authenticate_result, authenticate_result._Fields>, java.io.Serializable, Cloneable   {
+  public static class authenticate_result implements org.apache.thrift.TBase<authenticate_result, authenticate_result._Fields>, java.io.Serializable  {
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("authenticate_result");
 
     private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.STRING, (short)0);
@@ -919,7 +919,7 @@ public class AuthenticatorService {
         sb.append(this.ae);
       }
       first = false;
-      sb.append(")");
+      sb.append(')');
       return sb.toString();
     }
 
