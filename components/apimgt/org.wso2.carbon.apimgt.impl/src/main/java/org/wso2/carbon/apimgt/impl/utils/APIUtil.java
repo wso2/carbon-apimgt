@@ -4021,7 +4021,10 @@ public final class APIUtil {
             fields.put(APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, "*" + APIConstants.API_ROOT_LOCATION + "*");
             fields.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "*");
 
-
+            if (tenantID == -1) {
+                tenantID = MultitenantConstants.SUPER_TENANT_ID;
+            }
+            //PaginationContext.init(0, 10000, "ASC", APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, Integer.MAX_VALUE);
             SolrDocumentList documentList = client.query(searchTerm, tenantID, fields);
 
             org.wso2.carbon.user.api.AuthorizationManager manager = ServiceReferenceHolder.getInstance().
