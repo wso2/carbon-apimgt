@@ -24,6 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -51,12 +52,14 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.ConstraintViolation;
@@ -190,6 +193,31 @@ public class RestApiUtil {
 
     public static String getLoggedInUserTenantDomain() {
         return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    /**
+     * Returns the current logged in consumer's group id
+     * @return group id of the current logged in user.
+     */
+    @SuppressWarnings("unchecked")
+    public static String getLoggedInUserGroupId() {
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        JSONObject loginInfoJsonObj = new JSONObject();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            loginInfoJsonObj.put("user", username);
+            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                loginInfoJsonObj.put("isSuperTenant", true);
+            } else {
+                loginInfoJsonObj.put("isSuperTenant", false);
+            }
+            String loginInfoString = loginInfoJsonObj.toJSONString();
+            return apiConsumer.getGroupIds(loginInfoString);
+        } catch (APIManagementException e) {
+            log.error("Unable to get groupIds of user " + username);
+            throw new InternalServerErrorException(e);
+        }
     }
 
     /**

@@ -86,7 +86,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
         // As a improvement, we can check admin privileges of the user and honor groupId.
-        groupId = RestAPIStoreUtils.getLoggedInUserGroupId();
+        groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
