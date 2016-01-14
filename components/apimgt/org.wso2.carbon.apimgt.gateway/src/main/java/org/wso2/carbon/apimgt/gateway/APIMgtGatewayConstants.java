@@ -46,5 +46,6 @@ public class APIMgtGatewayConstants {
     public static final String AUTHORIZED_USER = "AuthorizedUser";
     public static final String SCOPES = "Scopes";
 
+    public static final String RESOURCE_PATTERN = "^/.+?/.+?([/?].+)$";
 }
 

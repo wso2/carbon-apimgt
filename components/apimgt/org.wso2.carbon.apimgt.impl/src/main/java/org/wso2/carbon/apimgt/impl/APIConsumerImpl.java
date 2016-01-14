@@ -1116,7 +1116,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
 
         //if the tenantDomain is not specified super tenant domain is used
-        if (tenantDomain == null || "".equals(tenantDomain.trim())) {
+        if (StringUtils.isBlank(tenantDomain)) {
             try {
                 tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
             } catch (org.wso2.carbon.user.core.UserStoreException e) {
@@ -1148,7 +1148,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 } catch (RegistryException e) {
                     //warn and proceed to the next tag
-                    log.warn(String.format("Error while querying the existence of the description for the tag '%s'", tag.getName()));
+                    log.warn(String.format("Error while querying the existence of the description for the tag '%s'",
+                            tag.getName()), e);
                 }
                 // The resource is assumed to be a byte array since its the content
                 // of a text file.
@@ -1531,8 +1532,10 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
             if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchType)) {
-            	Map<Documentation, API> apiDocMap = APIUtil.searchAPIsByDoc(userRegistry, tenantIDLocal, userNameLocal, searchTerm, searchType);
-            	result.put("apis", apiDocMap);
+                Map<Documentation, API> apiDocMap =
+                        APIUtil.searchAPIsByDoc(userRegistry, tenantIDLocal, userNameLocal, searchTerm,
+                                                APIConstants.STORE_CLIENT);
+                result.put("apis", apiDocMap);
             	/*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
             	if (apiDocMap.size() == 0 ) {
             		result.put("length", 0);
@@ -2593,6 +2596,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            } else {
+                throw new APIManagementException("Invalid Token Type '" + tokenType + "' requested.");
             }
             // Build key manager instance and create oAuthAppRequest by
             // jsonString.

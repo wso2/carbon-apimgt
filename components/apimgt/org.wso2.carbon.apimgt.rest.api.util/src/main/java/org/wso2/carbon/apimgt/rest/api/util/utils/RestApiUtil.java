@@ -747,9 +747,9 @@ public class RestApiUtil {
                 //Get URL templates from swagger content we created
                 storeResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName());
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName());
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
             }
             return storeResourceMappings;
         }
@@ -780,9 +780,9 @@ public class RestApiUtil {
                 //Get URL templates from swagger content we created
                 publisherResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName());
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName());
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
             }
             return publisherResourceMappings;
         }

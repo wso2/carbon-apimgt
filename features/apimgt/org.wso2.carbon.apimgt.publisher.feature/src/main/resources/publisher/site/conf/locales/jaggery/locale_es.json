@@ -181,6 +181,7 @@
     "tenantRoleHelpMsg" : "Esta opción controla la visibilidad de la API en función del usuario." ,
     "aboutAPIs" : "The following APIs have been created. APIs that are marked as PUBLISHED can be subscribed through the API Store. ",
     "tagsHelpMsg":"Lista separada por comas (Ex: tag1, tag2, tag3)",
+    "descriptionHelpLable":"el máximo apoyo 20000 caracteres",
     "optionsHelpMsg": "Elija un método para Opciones para enviar OPCIONES llama a respaldados. Si la puerta de enlace de la API no seleccionado volverá llamada de opciones con los métodos permitidos en pasarela.",
     "rolesHelpMsg":"Lista separada por comas (Ex: role1,role2,role3)",
     "allowTenantsHelpMsg":"Lista separada por comas (Ex: tenant1.com,tenant2.com). La API será accesible a los usuarios definidos en esta lista..",
