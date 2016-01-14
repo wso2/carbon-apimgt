@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 /**
@@ -39,7 +40,7 @@ import java.util.Comparator;
  * numbers are compared in the conventional manner and the suffixes are compared
  * lexicographically.</p>
  */
-public class APIVersionStringComparator implements Comparator<String> {
+public class APIVersionStringComparator implements Comparator<String>, Serializable{
 
     @Override
     public int compare(String o1, String o2) {
