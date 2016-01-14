@@ -55,7 +55,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 RestApiUtil.unsetThreadLocalRequestedTenant();
             }*/
             if(logger.isDebugEnabled()) {
-                logger.debug("User logged into Web app using Basic Authentication");
+                logger.debug("User logged into Web app using OAuth Authentication");
             }
         }
         else{
@@ -103,9 +103,6 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 }
                 if (authenticator.authenticate(message)) {
                     return true;
-                } else {
-                    //TODO generate authentication failure response if we get auth failure
-                    //handle oauth failure
                 }
             } catch (APIManagementException e) {
                 logger.error("Error while authenticating incoming request to API Manager REST API");
