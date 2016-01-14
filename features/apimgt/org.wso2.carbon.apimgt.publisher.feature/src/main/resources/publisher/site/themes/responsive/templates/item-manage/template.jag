@@ -586,7 +586,7 @@
         var v = $("#manage_form").validate({
             submitHandler: function(form) {
             var tiersValidated = validate_tiers();
-            var subscriptionValidated = validate_subscription();
+            var subscriptionValidated = validateSubscription();
             if(!tiersValidated || !subscriptionValidated){
                 return false;
             }

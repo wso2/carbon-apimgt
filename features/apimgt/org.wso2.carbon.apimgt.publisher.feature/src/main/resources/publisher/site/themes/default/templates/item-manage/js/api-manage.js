@@ -13,12 +13,12 @@ function validate_tiers(){
     return false;
 }
 
-function validate_subscription(){
+function validateSubscription() {
     var subscriptionType = $('#subscriptions').val();
-    if(subscriptionType == 'specific_tenants'){
+    if (subscriptionType == 'specific_tenants') {
         var tenants = $('#tenants').val().trim();
         $("#subscriptions_error").remove();
-        if(tenants.length > 0){
+        if (tenants.length > 0) {
             return true;
         }
         //set error
