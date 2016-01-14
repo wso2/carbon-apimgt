@@ -1116,7 +1116,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String thumbnailPathPattern = APIConstants.TAGS_INFO_ROOT_LOCATION + "/%s/thumbnail.png";
 
         //if the tenantDomain is not specified super tenant domain is used
-        if (tenantDomain == null || "".equals(tenantDomain.trim())) {
+        if (StringUtils.isBlank(tenantDomain)) {
             try {
                 tenantDomain = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getSuperTenantDomain();
             } catch (org.wso2.carbon.user.core.UserStoreException e) {
@@ -1148,7 +1148,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     }
                 } catch (RegistryException e) {
                     //warn and proceed to the next tag
-                    log.warn(String.format("Error while querying the existence of the description for the tag '%s'", tag.getName()));
+                    log.warn(String.format("Error while querying the existence of the description for the tag '%s'",
+                            tag.getName()), e);
                 }
                 // The resource is assumed to be a byte array since its the content
                 // of a text file.
