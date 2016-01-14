@@ -305,21 +305,21 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         }
 
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String api_version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+        String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
 
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
 
         if (apiPublisher == null) {
-            apiPublisher = getAPIProviderFromRESTAPI(api_version);
+            apiPublisher = getAPIProviderFromRESTAPI(apiVersion);
         }
 
-        int index = api_version.indexOf("--");
+        int index = apiVersion.indexOf("--");
 
         if (index != -1) {
-            api_version = api_version.substring(index + 2);
+            apiVersion = apiVersion.substring(index + 2);
         }
 
-        String api = api_version.split(":")[0];
+        String api = apiVersion.split(":")[0];
         String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
         String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
@@ -343,7 +343,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         messageContext.setProperty(APIMgtGatewayConstants.CONSUMER_KEY, consumerKey);
         messageContext.setProperty(APIMgtGatewayConstants.USER_ID, username);
         messageContext.setProperty(APIMgtGatewayConstants.CONTEXT, context);
-        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, api_version);
+        messageContext.setProperty(APIMgtGatewayConstants.API_VERSION, apiVersion);
         messageContext.setProperty(APIMgtGatewayConstants.API, api);
         messageContext.setProperty(APIMgtGatewayConstants.VERSION, version);
         messageContext.setProperty(APIMgtGatewayConstants.RESOURCE, resource);
@@ -356,7 +356,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private String extractResource(MessageContext mc) {
         String resource = "/";
-        Pattern pattern = Pattern.compile("^/.+?/.+?([/?].+)$");
+        Pattern pattern = Pattern.compile(APIMgtGatewayConstants.RESOURCE_PATTERN);
         Matcher matcher = pattern.matcher((String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH));
         if (matcher.find()) {
             resource = matcher.group(1);
@@ -364,10 +364,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return resource;
     }
 
-    private String getAPIProviderFromRESTAPI(String api_version) {
-        int index = api_version.indexOf("--");
+    private String getAPIProviderFromRESTAPI(String apiVersion) {
+        int index = apiVersion.indexOf("--");
         if (index != -1) {
-            String apiProvider = api_version.substring(0, index);
+            String apiProvider = apiVersion.substring(0, index);
             if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
                 apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
                         APIConstants.EMAIL_DOMAIN_SEPARATOR);
