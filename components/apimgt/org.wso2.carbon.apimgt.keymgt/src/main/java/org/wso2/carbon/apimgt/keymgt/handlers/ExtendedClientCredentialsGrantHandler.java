@@ -45,7 +45,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
         for (RequestParameter parameter : parameters) {
             if (VALIDITY_PERIOD.equals(parameter.getKey())) {
                 if (parameter.getValue() != null && parameter.getValue().length > 0) {
-                    validityPeriod = Long.valueOf(parameter.getValue()[0]);
+                    validityPeriod = Long.parseLong(parameter.getValue()[0]);
                     //set validity time
                     tokReqMsgCtx.setValidityPeriod(validityPeriod);
 

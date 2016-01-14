@@ -303,7 +303,8 @@
                 <div class="form-group">
                    <label class="col-md-4 control-label" for="description"><%=i18n.localize("description")%>:</label>
                    <div class="col-md-8">
-                       <textarea class="form-control" id="description" name="description" rows="3"><%= _description %></textarea>
+                       <textarea class="form-control validateDescriptionLength" id="description" name="description" rows="3"><%= _description %></textarea>
+                       <p class="help-block"><%=i18n.localize("descriptionHelpLable")%></p>
                    </div>
                </div>
 

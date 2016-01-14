@@ -134,4 +134,7 @@ $(document).ready(function() {
         return !regexForwardSlashAtEnd.test(value);
     }, 'Name or Context contains / at the end');
 
+    $.validator.addMethod('validateDescriptionLength', function(value, element) {
+        return value.length <= 20000;
+    }, 'maximum support 20000 charactors only');
 });

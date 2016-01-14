@@ -25,17 +25,14 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
-//import java.util.concurrent.ScheduledExecutorService;
-//import java.util.concurrent.ScheduledFuture;
+
 
 public class AuthorizationManager {
 
-    private static AuthorizationManager instance;
+    private static volatile AuthorizationManager instance;
 
     private ObjectPool clientPool;
-
-    //private ScheduledExecutorService exec;
-    //private ScheduledFuture future;
+   
 
     private static final Log log = LogFactory.getLog(AuthorizationManager.class);
 

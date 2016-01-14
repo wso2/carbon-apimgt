@@ -96,11 +96,11 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      * @param apiInfoDTO API Information
      * @throws APIKeyMgtException Error has occurred when processing updating the key Info from the database.
      */
-    public void BlockAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
+    public void blockAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException, IdentityException {
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
         for (String userId : users) {
-            ApiMgtDAO.changeAccessTokenStatus(userId, apiInfoDTO, APIConstants.TokenStatus.BLOCKED);
+            apiMgtDAO.changeAccessTokenStatus(userId, apiInfoDTO, APIConstants.TokenStatus.BLOCKED);
         }
     }
 

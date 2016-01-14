@@ -346,6 +346,10 @@ public final class APIConstants {
         public static final String BLOCKED = "BLOCKED";
         public static final String REVOKED = "REVOKED";
         public static final String INACTIVE = "INACTIVE";
+        
+        private TokenStatus(){
+            
+        }
     }
     public static class SubscriptionStatus {
         public static final String BLOCKED = "BLOCKED";
@@ -353,15 +357,23 @@ public final class APIConstants {
         public static final String UNBLOCKED = "UNBLOCKED";
         public static final String ON_HOLD = "ON_HOLD";
         public static final String REJECTED = "REJECTED";
+        
+        private SubscriptionStatus(){
+            
+        }
     }
 
-    public static enum OAuthAppMode {
+    public enum OAuthAppMode {
         CREATED, MAPPED
     }
 
     public static class SubscriptionCreatedStatus   {
         public static final String SUBSCRIBE = "SUBSCRIBE";
         public static final String UN_SUBSCRIBE = "UN_SUBSCRIBE";
+        
+        private SubscriptionCreatedStatus(){
+            
+        }
     }
 
     public static final String RXT_MEDIA_TYPE = "application/vnd.wso2.registry-ext-type+xml";
@@ -373,6 +385,10 @@ public final class APIConstants {
         public static final String API_SUBSCRIBE = "/permission/admin/manage/api/subscribe";
         public static final String API_WORKFLOWADMIN = "/permission/admin/manage/workflowadmin";
         public static final String MANAGE_TIERS = "/permission/admin/manage/manage_tiers";
+        
+        private Permissions(){
+            
+        }
     }
     
     public static final String API_GATEWAY = "APIGateway.";
@@ -639,6 +655,9 @@ public final class APIConstants {
         public static final int API_AUTH_RESOURCE_FORBIDDEN = 900908;
         public static final int SUBSCRIPTION_INACTIVE = 900909;
         public static final int INVALID_SCOPE = 900910;
+        
+        private KeyValidationStatus(){            
+        }
     }
 
     public static final String EMAIL_DOMAIN_SEPARATOR = "@";
@@ -714,6 +733,9 @@ public final class APIConstants {
     	public static final String QUERY_PARAM_NAME = "Query Parameters";
     	public static final String QUERY_PARAM_DESCRIPTION = "Request Query Parameters";
     	public static final String PAYLOAD_PARAM_TYPE = "body";
+    	
+    	private OperationParameter(){    	    
+    	}
     }
     
     public static class CORSHeaders {
@@ -724,6 +746,8 @@ public final class APIConstants {
     	
     	public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
     	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,PATCH,OPTIONS";
+    	private CORSHeaders(){    	    
+    	}
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
@@ -742,6 +766,9 @@ public final class APIConstants {
        public static final String APPLICATION_APPROVED = "APPROVED"; 
        public static final String APPLICATION_REJECTED = "REJECTED"; 
        public static final String APPLICATION_ONHOLD = "ON_HOLD"; 
+       
+       private ApplicationStatus(){           
+       }
           
     }
 
@@ -750,6 +777,9 @@ public final class APIConstants {
         public static final String REGISTRATION_APPROVED = "APPROVED";
         public static final String REGISTRATION_REJECTED = "REJECTED";
         public static final String REGISTRATION_COMPLETED = "COMPLETED";
+        private AppRegistrationStatus(){
+            
+        }
 
     }
 
@@ -773,6 +803,9 @@ public final class APIConstants {
         public static final String CLIENT_DETAILS = "appDetails";
         public static final String CALLBACK_URL = "callbackUrl";
         public static final String KEY_STATE = "keyState";
+        
+        private FrontEndParameterNames(){            
+        }
     }
 
     public static class AccessTokenConstants {
@@ -782,6 +815,9 @@ public final class APIConstants {
         public static final String TOKEN_DETAILS = "tokenDetails";
         public static final String TOKEN_STATE = "tokenState";
         public static final String TOKEN_SCOPES = "tokenScope";
+        
+        private AccessTokenConstants(){            
+        }
     }
     
     //key  of the endpoint securevault
@@ -822,6 +858,9 @@ public final class APIConstants {
         public static final String AUTH_HEADER = "AuthHeader";
         public static final String BACKEND_URL = "BACKEND_URL";
         public static final String CHARSET = "UTF-8";
+        
+        private DigestAuthConstants(){            
+        }
     }
     
     // Primary/Secondary Login configuration
@@ -859,7 +898,7 @@ public final class APIConstants {
 
     public static final String VERSION_PLACEHOLDER = "{version}";
 
-    public static enum SupportedHTTPVerbs {
+    public enum SupportedHTTPVerbs {
         GET,
         POST,
         PUT,
@@ -870,10 +909,10 @@ public final class APIConstants {
     }
 
     public static class ConfigParameters {
+        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
         private ConfigParameters() {
             throw new AssertionError();
-        }
-        public static final String CHECK_PERMISSIONS_REMOTELY = AUTH_MANAGER + "CheckPermissionsRemotely";
+        }        
     }
 
     public static final String CORS_SEQUENCE_NAME = "_cors_request_handler_";
@@ -949,21 +988,26 @@ public final class APIConstants {
     public static final String REST_API_SCOPES_CONFIG = "RESTAPIScopes";
 
     public static final String HTTPS_PROTOCOL = "https";
+    public static final String HTTP_PROTOCOL = "http";
     public static final int HTTPS_PROTOCOL_PORT = 443;
     public static final int HTTP_PROTOCOL_PORT = 80;
     
 
     public static final long MAX_FILE_SIZE = 1024L;
 
-    public static final String REGISTRY_RESOURCE_PREFIX="/registry/resource";
+    public static final String REGISTRY_RESOURCE_PREFIX = "/registry/resource";
 
-    public static enum RegistryResourceTypesForUI {
+    public enum RegistryResourceTypesForUI {
         TAG_THUMBNAIL
     }
     
     public static final String API_LC_ACTION_DEPRECATE = "Deprecate";
 
     public static final String METRICS_PREFIX = "org.wso2.am";
+    
+    public static final String MSG_JSON_PARSE_ERROR = "Unable to parse endpoint config JSON";
+    public static final String MSG_TIER_RET_ERROR = "Error while retrieving API tiers from registry";
+    public static final String MSG_MALFORMED_XML_ERROR = "Malformed XML found in the API tier policy resource";
 
     //Doc search related constants
 

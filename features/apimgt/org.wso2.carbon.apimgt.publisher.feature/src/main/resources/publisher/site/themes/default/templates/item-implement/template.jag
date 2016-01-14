@@ -115,7 +115,7 @@
                                         <option value="load_balance">Load balanced Endpoint</option>
                                         <option value="default">Default Endpoint</option>
                                     </select>
-                                    <a class="icon-question-sign help_popup" help_data="endpoint_help"></a>
+                                    <a class="icon-question-sign help_popup" data-trigger="hover" help_data="endpoint_help"></a>
                                 </div>
                         </div>
 
@@ -147,7 +147,7 @@
                                 <option value="nonsecured" <%if( api.endpointTypeSecured=="false"){%> selected="selected" <%}%>><%=i18n.localize("nonsecured")%></option>
                                 <option value="secured" <%if(api.endpointTypeSecured=="true"){%> selected="selected" <%}%>><%=i18n.localize("secured")%></option>
                             </select>
-                            <a class="icon-question-sign help_popup" help_data="endpointSec_help"></a>
+                            <a class="icon-question-sign help_popup" data-trigger="hover" help_data="endpointSec_help"></a>
                             <p id="endpointSec_help" class="hide"><%=i18n.localize("endpointSecHelpMsg")%></p>
                             </div>
                         </div>
@@ -159,7 +159,7 @@
                                 <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("basicAuth")%></option>
                                 <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("digestAuth")%></option>
                             </select>
-                            <a class="icon-question-sign help_popup" help_data="endpointAuth_help"></a>
+                            <a class="icon-question-sign help_popup" data-trigger="hover" help_data="endpointAuth_help"></a>
                             <p id="endpointAuth_help" class="hide"><%=i18n.localize("endpointAuthHelpMsg")%></p>
                             </div>
                         </div>
@@ -181,7 +181,7 @@
                                     <option value="disabled" <%if(api.destinationStats != "Enabled"){%> selected <%}%>><%=i18n.localize("disabled")%></option>
                                     <option value="enabled" <%if(api.destinationStats == "Enabled"){%> selected <%}%>><%=i18n.localize("enabled")%></option>
                                 </select>
-                                <a class="icon-question-sign help_popup" help_data="stats_help"></a>
+                                <a class="icon-question-sign help_popup" data-trigger="hover" help_data="stats_help"></a>
                                 <p id="stats_help" class="hide"><%=i18n.localize("statsHelpMsg")%></p>
                              </div>
                         </div>
@@ -313,7 +313,7 @@
                             <input type="text" id="prototype_endpoint" value="http://localhost" name="prototype_endpoint" class="required validateUrl">
                             <button type="button" class="btn check_url_valid" id="prototype_test" providerName="<%= api.provider %>" apiName="<%= api.name %>" apiVersion="<%= api.version %>">Test</button>
 
-                            <a style="margin-left:3px" class="icon-question-sign help_popup" help_data="endpoint_test_help"></a>
+                            <a style="margin-left:3px" class="icon-question-sign help_popup" data-trigger="hover" help_data="endpoint_test_help"></a>
                             <div id="endpoint_test_help" class="hide">
                                 <p><%=i18n.localize("validityCheckMessage")%></p>
                             </div>
