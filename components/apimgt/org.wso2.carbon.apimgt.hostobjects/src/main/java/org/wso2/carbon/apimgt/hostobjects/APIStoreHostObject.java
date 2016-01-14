@@ -2849,28 +2849,19 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_addSubscriber(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException, UserStoreException {
+            throws ScriptException, APIManagementException{
 
         if (args != null && isStringArray(args)) {
-            Subscriber subscriber = new Subscriber((String) args[0]);
+            String username = (String) args[0];
             String groupId = (String) args[1];
-            subscriber.setSubscribedDate(new Date());
-            //TODO : need to set the proper email
-            subscriber.setEmail("");
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(MultitenantUtils.getTenantDomain((String) args[0]));
-                subscriber.setTenantId(tenantId);
-                apiConsumer.addSubscriber(subscriber, groupId);
+                apiConsumer.addSubscriber(username, groupId);
+                return true;
             } catch (APIManagementException e) {
-                handleException("Error while adding the subscriber" + subscriber.getName(), e);
-                return false;
-            } catch (Exception e) {
-                handleException("Error while adding the subscriber" + subscriber.getName(), e);
+                handleException("Error while adding the subscriber " + username, e);
                 return false;
             }
-            return true;
         }
         return false;
     }
