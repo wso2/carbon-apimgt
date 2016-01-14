@@ -123,7 +123,7 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
 
-        workflowDTO.setStatus(workflowDTO.getStatus());
+//        workflowDTO.setStatus(workflowDTO.getStatus());
         workflowDTO.setUpdatedTime(System.currentTimeMillis());
 
         if (log.isDebugEnabled()) {

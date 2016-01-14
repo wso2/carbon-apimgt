@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -131,7 +132,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     private UserRegistry getRegistry(String tenantDomain) throws APIManagementException {
         PrivilegedCarbonContext.startTenantFlow();
-        if (tenantDomain != null && !tenantDomain.equals("")) {
+        if (StringUtils.isNotEmpty(tenantDomain)) {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
                                                                                   true);
         } else {
@@ -183,7 +184,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
             String apiConfig = builder.getConfigStringForTemplate(environment);
             if (tenantDomain != null && !("").equals(tenantDomain)
-                && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiGatewayAdminStub.addApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), apiConfig, tenantDomain);
             } else {
                 apiGatewayAdminStub.addApi(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), apiConfig);
@@ -206,7 +207,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
             String apiConfig = builder.getConfigStringForPrototypeScriptAPI(environment);
             if (tenantDomain != null && !("").equals(tenantDomain)
-                && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiGatewayAdminStub.addApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), apiConfig, tenantDomain);
             } else {
                 apiGatewayAdminStub.addApi(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), apiConfig);
@@ -222,7 +223,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             String apiConfig = builder.getConfigStringForDefaultAPITemplate(defaultVersion);
             if (tenantDomain != null && !("").equals(tenantDomain)
-                && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiGatewayAdminStub.addDefaultAPIForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), apiConfig,
                                                            tenantDomain);
             } else {
@@ -244,7 +245,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             APIData apiData;
             if (tenantDomain != null && !("").equals(tenantDomain)
-                && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiData = apiGatewayAdminStub.getApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), tenantDomain);
             } else {
                 apiData = apiGatewayAdminStub.getApi(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
@@ -259,7 +260,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             APIData apiData;
             if (tenantDomain != null && !("").equals(tenantDomain)
-                && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiData = apiGatewayAdminStub.getDefaultApiForTenant(apiId.getProviderName(), apiId.getApiName(),
                                                                      apiId.getVersion(), tenantDomain);
             } else {
@@ -282,7 +283,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             String apiConfig = builder.getConfigStringForTemplate(environment);
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
 
                 apiGatewayAdminStub.updateApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), apiConfig, tenantDomain);
             } else {
@@ -305,7 +306,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             String apiConfig = builder.getConfigStringForPrototypeScriptAPI(environment);
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
 
                 apiGatewayAdminStub.updateApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), apiConfig, tenantDomain);
             } else {
@@ -321,7 +322,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         try {
             String apiConfig = builder.getConfigStringForDefaultAPITemplate(defaultVersion);
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
 
                 apiGatewayAdminStub.updateDefaultApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(),
                                                               apiConfig,
@@ -344,7 +345,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     public void deleteApi(String tenantDomain, APIIdentifier apiId) throws AxisFault {
         try {
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiGatewayAdminStub.deleteApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), tenantDomain);
             } else {
                 apiGatewayAdminStub.deleteApi(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
@@ -358,7 +359,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     public void deleteDefaultApi(String tenantDomain, APIIdentifier apiId) throws AxisFault {
         try {
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiGatewayAdminStub.deleteDefaultApiForTenant(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion(), tenantDomain);
             } else {
                 apiGatewayAdminStub.deleteDefaultApi(apiId.getProviderName(), apiId.getApiName(), apiId.getVersion());
@@ -381,7 +382,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             StringWriter writer = new StringWriter();
             sequence.serializeAndConsume(writer);
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiGatewayAdminStub.addSequenceForTenant(writer.toString(), tenantDomain);
             } else {
                 apiGatewayAdminStub.addSequence(writer.toString());
@@ -402,7 +403,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     public void deleteSequence(String sequenceName, String tenantDomain) throws AxisFault {
         try {
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 apiGatewayAdminStub.deleteSequenceForTenant(sequenceName, tenantDomain);
             } else {
                 apiGatewayAdminStub.deleteSequence(sequenceName);
@@ -423,7 +424,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     public OMElement getSequence(String sequenceName, String tenantDomain) throws AxisFault {
         try {
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 return (OMElement) apiGatewayAdminStub.getSequenceForTenant(sequenceName, tenantDomain);
             } else {
                 return (OMElement) apiGatewayAdminStub.getSequence(sequenceName);
@@ -437,7 +438,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
     public boolean isExistingSequence(String sequenceName, String tenantDomain) throws AxisFault {
         try {
             if (tenantDomain != null && !("").equals(tenantDomain) &&
-                !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 return apiGatewayAdminStub.isExistingSequenceForTenant(sequenceName, tenantDomain);
             } else {
                 return apiGatewayAdminStub.isExistingSequence(sequenceName);

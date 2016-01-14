@@ -29,7 +29,7 @@ public class SimpleLoggingObserver implements APIStatusObserver {
     public boolean statusChanged(APIStatus previous, APIStatus current, API api) {
         log.info("API status updated from: " + previous.getStatus() + " to: " +
                 current.getStatus() + " for the API: " + api.getId().getApiName() + " (" +
-                api.getId().getVersion() + ")");
+                api.getId().getVersion() + ')');
         return true;
     }
 }

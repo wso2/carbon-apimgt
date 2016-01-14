@@ -51,14 +51,14 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
     private transient SecretResolver secretResolver;
 
-    private String tenantDomain;
+//    private String tenantDomain;
 
     private int tenantId;
 
     private Map<String, WorkflowExecutor> workflowExecutorMap;
 
     public TenantWorkflowConfigHolder(String tenantDomain,int tenantId){
-        this.tenantDomain = tenantDomain;
+//        this.tenantDomain = tenantDomain;
         this.tenantId = tenantId;
     }
 
@@ -168,15 +168,14 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
     private void loadProperties(OMElement executorElem, Object workflowClass) throws WorkflowException {
 
-        String securevaultKey = WorkflowConstants.API_MANAGER + "." + WorkflowConstants.WORKFLOW_EXTENSIONS + "." +
-                executorElem.getLocalName() + "." + WorkflowConstants.PASSWORD;
+        String secureVaultKey = WorkflowConstants.API_MANAGER + '.' + WorkflowConstants.WORKFLOW_EXTENSIONS + '.' +
+                executorElem.getLocalName() + '.' + WorkflowConstants.PASSWORD;
 
         for (Iterator it = executorElem.getChildrenWithName(PROP_Q); it.hasNext(); ) {
             OMElement propertyElem = (OMElement) it.next();
             String propName = propertyElem.getAttribute(ATT_NAME).getAttributeValue();
             if (propName == null) {
-                handleException(
-                        "An Executor class property must specify the name attribute");
+                handleException("An Executor class property must specify the name attribute");
             } else {
                 OMNode omElt = propertyElem.getFirstElement();
                 if (omElt != null) {
@@ -184,18 +183,16 @@ public class TenantWorkflowConfigHolder implements Serializable {
                 } else if (propertyElem.getText() != null) {
                     String value;
                     if (WorkflowConstants.PASSWORD_.equals(propName)) {
-                        if (secretResolver.isInitialized() && secretResolver.isTokenProtected(securevaultKey)) {
-                            value = secretResolver.resolve(securevaultKey);
+                        if (secretResolver.isInitialized() && secretResolver.isTokenProtected(secureVaultKey)) {
+                            value = secretResolver.resolve(secureVaultKey);
                         } else {
                             value = propertyElem.getText();
                         }
                     } else {
                         value = propertyElem.getText();
                     }
-
                     setInstanceProperty(propName, value, workflowClass);
                 } else {
-
                     handleException("An Executor class property must specify " +
                             "name and text value, or a name and a child XML fragment");
                 }
@@ -234,10 +231,10 @@ public class TenantWorkflowConfigHolder implements Serializable {
                             method.invoke(obj, new String[]{value});
                         } else if (int.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, int.class);
-                            method.invoke(obj, new Integer[]{new Integer(value)});
+                            method.invoke(obj, new Integer[]{Integer.valueOf(value)});
                         } else if (long.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, long.class);
-                            method.invoke(obj, new Long[]{new Long(value)});
+                            method.invoke(obj, new Long[]{Long.valueOf(value)});
                         } else if (float.class.equals(params[0])) {
                             method = obj.getClass().getMethod(mName, float.class);
                             method.invoke(obj, new Float[]{new Float(value)});
@@ -260,13 +257,11 @@ public class TenantWorkflowConfigHolder implements Serializable {
                     break;
                 }
             }
-
             if (!invoked) {
                 handleException("Did not find a setter method named : " + mName +
                         "() that takes a single String, int, long, float, double " +
                         "or boolean parameter");
             }
-
         } catch (Exception e) {
             handleException("Error invoking setter method named : " + mName +
                     "() that takes a single String, int, long, float, double " +

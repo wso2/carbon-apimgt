@@ -49,19 +49,19 @@ import java.util.Map;
 
 /**
  * This class is used to read the WSDL file using WSDL4J library.
- * 
+ *
  */
 
-public class APIMWSDLReader {	
-	
+public class APIMWSDLReader {
+
 	private static WSDLFactory wsdlFactoryInstance;
-	
+
 	private String baseURI; //WSDL Original URL
-	
+
 	private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
 
 	private static final Log log = LogFactory.getLog(APIMWSDLReader.class);
-	
+
 	public APIMWSDLReader(String baseURI) {
 		this.baseURI = baseURI;
 	}
@@ -76,12 +76,12 @@ public class APIMWSDLReader {
 	/**
 	 * Read the wsdl and clean the actual service endpoint instead of that set
 	 * the gateway endpoint.
-	 * 
+	 *
 	 * @return {@link OMElement} - the OMElemnt of the new WSDL content
-	 * @throws APIManagementException 
-	 * 
+	 * @throws APIManagementException
+	 *
 	 */
-	
+
 	public OMElement readAndCleanWsdl(API api) throws APIManagementException {
 
 		try {
@@ -148,93 +148,63 @@ public class APIMWSDLReader {
         return null;
     }
 
-    private void setServiceDefinitionForWSDL2(org.apache.woden.wsdl20.Description definition, API api) throws APIManagementException {
+    private void setServiceDefinitionForWSDL2(org.apache.woden.wsdl20.Description definition, API api)
+            throws APIManagementException {
         org.apache.woden.wsdl20.Service[] serviceMap = definition.getServices();
-        URL addressURI;
+        // URL addressURI;
         try {
-            for(org.apache.woden.wsdl20.Service svc : serviceMap){
+            for (org.apache.woden.wsdl20.Service svc : serviceMap) {
                 Endpoint[] portMap = svc.getEndpoints();
-                for (Endpoint endpoint:portMap){
+                for (Endpoint endpoint : portMap) {
                     EndpointElement element = endpoint.toElement();
-
-
-                    addressURI = endpoint.getAddress().toURL();
-                    if (addressURI == null) {
-                        break;
-                    } else {
-                        String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(), api.getTransports());
-                        setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) + api.getContext() + "/" + api.getId().getVersion()));
-                    }
+                    // addressURI = endpoint.getAddress().toURL();
+                    // if (addressURI == null) {
+                    //    break;
+                    // } else {
+                    String endpointTransport = determineURLTransport(endpoint.getAddress().getScheme(),
+                                                                     api.getTransports());
+                    setAddressUrl(element, new URI(APIUtil.getGatewayendpoint(endpointTransport) +
+                                                   api.getContext() + '/' + api.getId().getVersion()));
+                    //}
                 }
             }
-
         } catch (Exception e) {
-            log.error("Error occured while getting the wsdl address location", e);
+            log.error("Error occurred while getting the wsdl address location", e);
             throw new APIManagementException(e);
         }
-
     }
-	/**
+
+    /**
 	 * Create the WSDL definition <javax.wsdl.Definition> from the baseURI of
 	 * the WSDL
-	 * 
+	 *
 	 * @return {@link Definition} - WSDL4j definition constructed form the wsdl
 	 *         original baseuri
 	 * @throws APIManagementException
 	 * @throws WSDLException
 	 */
-	
+
 	private Definition readWSDLFile() throws APIManagementException, WSDLException {
 		WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
 		// switch off the verbose mode
 		reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
 		reader.setFeature("javax.wsdl.importDocuments", false);
 
-		Definition wsdlDefinition;
 		if (log.isDebugEnabled()) {
 			log.debug("Reading  the WSDL. Base uri is " + baseURI);
 		}
-		wsdlDefinition = reader.readWSDL(baseURI);
-		return wsdlDefinition;
-
+		return reader.readWSDL(baseURI);
 	}
-
-
-
-    /**
-     * Create the WSDL definition <javax.wsdl.Definition> from the baseURI of
-     * the WSDL
-     *
-     * @return {@link Definition} - WSDL4j definition constructed form the wsdl
-     *         original baseuri
-     * @throws APIManagementException
-     * @throws WSDLException
-     */
-
-    private Definition readWSDLFile(API api) throws APIManagementException, WSDLException {
-        WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
-        // switch off the verbose mode
-        reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-        reader.setFeature("javax.wsdl.importDocuments", false);
-
-        Definition wsdlDefinition;
-        if (log.isDebugEnabled()) {
-            log.debug("Reading  the WSDL. Base uri is " + baseURI);
-        }
-        wsdlDefinition = reader.readWSDL(api.getWsdlUrl());
-        return wsdlDefinition;
-
-    }
 
 	/**
 	 * Clear the actual service Endpoint and use Gateway Endpoint instead of the
 	 * actual Endpoint.
-	 * 
+	 *
 	 * @param definition
 	 *            - {@link Definition} - WSDL4j wsdl definition
 	 * @throws APIManagementException
 	 */
-	
+
 	private void setServiceDefinition(Definition definition, API api) throws APIManagementException {
 
 		Map serviceMap = definition.getAllServices();
@@ -245,34 +215,23 @@ public class APIMWSDLReader {
 				Map.Entry svcEntry = (Map.Entry) serviceItr.next();
 				Service svc = (Service) svcEntry.getValue();
 				Map portMap = svc.getPorts();
-				Iterator portItr = portMap.entrySet().iterator();
-				while (portItr.hasNext()) {
-					Map.Entry portEntry = (Map.Entry) portItr.next();
+				for (Object o : portMap.entrySet()) {
+					Map.Entry portEntry = (Map.Entry) o;
 					Port port = (Port) portEntry.getValue();
 
 					List<ExtensibilityElement> extensibilityElementList = port.getExtensibilityElements();
-					for (int i = 0; i < extensibilityElementList.size(); i++) {
-						
-						ExtensibilityElement extensibilityElement = (ExtensibilityElement) port.getExtensibilityElements()
-						                                                                       .get(i);
-
+					for (ExtensibilityElement extensibilityElement : extensibilityElementList) {
 						addressURI = new URL(getAddressUrl(extensibilityElement));
-						if (addressURI == null) {
-							break;
-						} else {
-							String endpointTransport = determineURLTransport(addressURI.getProtocol(), api.getTransports());
-                            setAddressUrl(extensibilityElement, endpointTransport, api);
-						}
+						String endpointTransport = determineURLTransport(addressURI.getProtocol(), api.getTransports());
+						setAddressUrl(extensibilityElement, endpointTransport, api);
 					}
 				}
 			}
 		} catch (Exception e) {
-			log.error("Error occured while getting the wsdl address location", e);
+			log.error("Error occurred while getting the wsdl address location", e);
 			throw new APIManagementException(e);
 		}
-
 	}
-
 
 	/**
 	 * Get the addressURl from the Extensibility element
@@ -280,9 +239,7 @@ public class APIMWSDLReader {
 	 * @return {@link String}
 	 * @throws APIManagementException
 	 */
-
 	private String getAddressUrl(ExtensibilityElement exElement) throws APIManagementException {
-
 		if (exElement instanceof SOAP12AddressImpl) {
 			return ((SOAP12AddressImpl) exElement).getLocationURI();
 		} else if (exElement instanceof SOAPAddressImpl) {
@@ -301,7 +258,6 @@ public class APIMWSDLReader {
 	 * @param exElement - {@link ExtensibilityElement}
 	 * @throws APIManagementException
 	 */
-
 	private void setAddressUrl(ExtensibilityElement exElement, String transports, API api) throws APIManagementException {
 
         if (exElement instanceof SOAP12AddressImpl) {
@@ -316,7 +272,7 @@ public class APIMWSDLReader {
 			throw new APIManagementException(msg);
 		}
 	}
-	
+
 	private void setAddressUrl(EndpointElement endpoint,URI uri) throws APIManagementException {
         endpoint.setAddress(uri);
     }
@@ -336,8 +292,8 @@ public class APIMWSDLReader {
     private String determineURLTransport(String scheme, String transports) {
         // If transports is defined as "http,https" consider the actual transport
         // protocol of the url, else give priority to the transport defined at API level
-        if (transports.equals("http,https") || transports.equals("https,http")) {
-            if (scheme.equals("http")) {
+        if ("http,https".equals(transports) || "https,http".equals(transports)) {
+            if ("http".equals(scheme)) {
                 return "http";
             }
             else if (scheme.startsWith("https")) {
@@ -347,5 +303,5 @@ public class APIMWSDLReader {
 
         return transports;
     }
-	
+
 }

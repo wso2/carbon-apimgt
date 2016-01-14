@@ -40,7 +40,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
-import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
@@ -85,7 +84,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             log.debug("Trying to create OAuth application :" + applicationName);
         }
 
-        String callBackURL = oAuthApplicationInfo.getCallBackURL();
+//        String callBackURL = oAuthApplicationInfo.getCallBackURL();
 
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
@@ -276,9 +275,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String tokenEndpoint = configuration.getParameter(APIConstants.TOKEN_URL);
         //To revoke tokens we should call revoke API deployed in API gateway.
         String revokeEndpoint = configuration.getParameter(APIConstants.REVOKE_URL);
-        URL keymgtURL = new URL(tokenEndpoint);
-        int keyMgtPort = keymgtURL.getPort();
-        String keyMgtProtocol = keymgtURL.getProtocol();
+        URL keyMgtURL = new URL(tokenEndpoint);
+        int keyMgtPort = keyMgtURL.getPort();
+        String keyMgtProtocol = keyMgtURL.getProtocol();
 
         // Call the /revoke only if there's a token to be revoked.
         try {
@@ -289,7 +288,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
                 HttpClient revokeEPClient = APIUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
 
-                HttpPost httpRevokepost = new HttpPost(revokeEndpoint);
+                HttpPost httpRevokePost = new HttpPost(revokeEndpoint);
 
                 // Request parameters.
                 List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
@@ -299,12 +298,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
 
                 //Revoke the Old Access Token
-                httpRevokepost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
-                HttpResponse revokeResponse = revokeEPClient.execute(httpRevokepost);
+                httpRevokePost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
+                int statusCode;
+                try {
+                    HttpResponse revokeResponse = revokeEPClient.execute(httpRevokePost);
+                    statusCode = revokeResponse.getStatusLine().getStatusCode();
+                } finally {
+                    httpRevokePost.reset();
+                }
 
-                if (revokeResponse.getStatusLine().getStatusCode() != 200) {
-                    throw new RuntimeException("Token revoke failed : HTTP error code : " +
-                            revokeResponse.getStatusLine().getStatusCode());
+                if (statusCode != 200) {
+                    throw new RuntimeException("Token revoke failed : HTTP error code : " + statusCode);
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
@@ -336,30 +340,33 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             builder.append(applicationTokenScope);
 
             for (String scope : tokenRequest.getScope()) {
-                builder.append(" ").append(scope);
+                builder.append(' ').append(scope);
             }
 
             tokParams.add(new BasicNameValuePair("scope", builder.toString()));
 
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
-            HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
-            HttpEntity tokEntity = tokResponse.getEntity();
+            try {
+                HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
+                HttpEntity tokEntity = tokResponse.getEntity();
 
-            if (tokResponse.getStatusLine().getStatusCode() != 200) {
-                throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
-                        tokResponse.getStatusLine().getStatusCode());
-            } else {
-                tokenInfo = new AccessTokenInfo();
-                String responseStr = EntityUtils.toString(tokEntity);
-                JSONObject obj = new JSONObject(responseStr);
-                newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
-                validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                if (obj.has("scope")) {
-                    tokenInfo.setScope(((String) obj.get("scope")).split(" "));
+                if (tokResponse.getStatusLine().getStatusCode() != 200) {
+                    throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
+                            tokResponse.getStatusLine().getStatusCode());
+                } else {
+                    tokenInfo = new AccessTokenInfo();
+                    String responseStr = EntityUtils.toString(tokEntity);
+                    JSONObject obj = new JSONObject(responseStr);
+                    newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
+                    validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
+                    if (obj.has("scope")) {
+                        tokenInfo.setScope(((String) obj.get("scope")).split(" "));
+                    }
+                    tokenInfo.setAccessToken(newAccessToken);
+                    tokenInfo.setValidityPeriod(validityPeriod);
                 }
-                tokenInfo.setAccessToken(newAccessToken);
-                tokenInfo.setValidityPeriod(validityPeriod);
-
+            } finally {
+                httpTokpost.reset();
             }
         } catch (ClientProtocolException e) {
             handleException("Error while creating token - Invalid protocol used", e);
@@ -492,7 +499,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
             }
         }
-        if (info.getClientId() == null) {
+        if (info != null && info.getClientId() == null) {
             return null;
         }
 

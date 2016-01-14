@@ -32,7 +32,7 @@ public class WSDLIndexer implements Indexer {
 		if(log.isDebugEnabled()){
 			log.debug("Indexing string " + xmlAsStr);
 		}
-		final StringBuffer contentOnly = new StringBuffer();
+		final StringBuilder contentOnly = new StringBuilder();
         
         IndexDocument indexDocument = new IndexDocument(fileData.path, xmlAsStr,
                 contentOnly.toString());

@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -307,7 +308,7 @@ public class APIManagerConfiguration {
         StringBuilder key = new StringBuilder();
         for (int i = 0; i < nameStack.size(); i++) {
             String name = nameStack.elementAt(i);
-            key.append(name).append(".");
+            key.append(name).append('.');
         }
         key.deleteCharAt(key.lastIndexOf("."));
 
@@ -316,7 +317,7 @@ public class APIManagerConfiguration {
 
     private boolean elementHasText(OMElement element) {
         String text = element.getText();
-        return text != null && text.trim().length() != 0;
+        return !StringUtils.isEmpty(text);
     }
 
     private void addToConfiguration(String key, String value) {

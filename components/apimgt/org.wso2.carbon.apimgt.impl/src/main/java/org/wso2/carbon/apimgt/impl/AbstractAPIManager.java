@@ -64,6 +64,7 @@ import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -92,7 +93,7 @@ public abstract class AbstractAPIManager implements APIManager {
             5);
 
     // API definitions from swagger v2.0
-    protected static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    protected static final APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     public AbstractAPIManager() throws APIManagementException {
     }
@@ -174,7 +175,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } catch (UserStoreException e) {
                 handleException("Error while setting the permissions", e);
             }
-        }else if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+        }else if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             int tenantId;
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().
@@ -327,7 +328,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             int apiTenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(apiTenantDomain);
-            if (!apiTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
                 APIUtil.loadTenantRegistry(apiTenantId);
             }
 
@@ -380,14 +381,14 @@ public abstract class AbstractAPIManager implements APIManager {
     public API getAPIbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Registry registry;
-            if (requestedTenantDomain != null && !requestedTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
+                    (requestedTenantDomain)) {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(requestedTenantDomain);
                 registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceSystemRegistry(id);
             } else {
-                if (this.tenantDomain != null && !this.tenantDomain
-                        .equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
                     registry = ServiceReferenceHolder.getInstance().
                             getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
@@ -426,15 +427,14 @@ public abstract class AbstractAPIManager implements APIManager {
     public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
         try {
             Registry registry;
-            if (requestedTenantDomain != null && !requestedTenantDomain.equals(
-                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
+                    (requestedTenantDomain)) {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(requestedTenantDomain);
                 registry = ServiceReferenceHolder.getInstance().
                         getRegistryService().getGovernanceSystemRegistry(id);
             } else {
-                if (this.tenantDomain != null && !this.tenantDomain
-                        .equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
                     registry = ServiceReferenceHolder.getInstance().
                             getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
@@ -493,7 +493,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
                 return APIUtil.getAPIInformation(apiArtifact, registry);
             } else {
-                handleException("Failed to get registry from api identifier: " + identifier.toString());
+                handleException("Failed to get registry from api identifier: " + identifier);
                 return null;
             }
         } catch (RegistryException e) {
@@ -526,7 +526,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
                 // explicitly load the tenant's registry
@@ -534,8 +534,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 passRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
                         .getGovernanceSystemRegistry(id);
             } else {
-                if (this.tenantDomain != null && !this.tenantDomain
-                        .equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     // explicitly load the tenant's registry
                     APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
                     passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
@@ -634,10 +633,8 @@ public abstract class AbstractAPIManager implements APIManager {
                 registryType = registry;
             }
             swaggerDoc = definitionFromSwagger20.getAPIDefinition(apiId, registryType);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Failed to get swagger documentation of API : " + apiId.toString(), e);
-        } catch (RegistryException e) {
-            handleException("Failed to get swagger documentation of API : " + apiId.toString(), e);
+        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException e) {
+            handleException("Failed to get swagger documentation of API : " + apiId, e);
         }
         return swaggerDoc;
     }
@@ -648,7 +645,7 @@ public abstract class AbstractAPIManager implements APIManager {
             thumb.setContentStream(resourceFile.getContent());
             thumb.setMediaType(resourceFile.getContentType());
             registry.put(resourcePath, thumb);
-            if(tenantDomain.equalsIgnoreCase(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)){
+            if(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(tenantDomain)){
             return RegistryConstants.PATH_SEPARATOR + "registry"
                    + RegistryConstants.PATH_SEPARATOR + "resource"
                    + RegistryConstants.PATH_SEPARATOR + "_system"
@@ -861,12 +858,12 @@ public abstract class AbstractAPIManager implements APIManager {
             }
 
 	        /* If the API provider is a tenant, load tenant registry*/
-	        if (tenantDomain != null && !tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+	        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
 	            int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
 	            registry = ServiceReferenceHolder.getInstance().
 	                    getRegistryService().getGovernanceSystemRegistry(id);
             } else {
-                if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     registry = ServiceReferenceHolder.getInstance().
                             getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
                 } else {
@@ -878,7 +875,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 Resource docContent = registry.get(contentPath);
                 Object content = docContent.getContent();
                 if (content != null) {
-                    return new String((byte[]) docContent.getContent());
+                    return new String((byte[]) docContent.getContent(), Charset.defaultCharset());
                 }
             }
         } catch (RegistryException e) {
@@ -1016,22 +1013,22 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getSubscriptionByUUID(uuid);
     }
 
-    protected void handleException(String msg, Exception e) throws APIManagementException {
+    protected final void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
     }
 
-    protected void handleException(String msg) throws APIManagementException {
+    protected final void handleException(String msg) throws APIManagementException {
         log.error(msg);
         throw new APIManagementException(msg);
     }
 
-    protected void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
+    protected final void handleResourceAlreadyExistsException(String msg) throws APIMgtResourceAlreadyExistsException {
         log.error(msg);
         throw new APIMgtResourceAlreadyExistsException(msg);
     }
 
-    protected void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
+    protected final void handleResourceNotFoundException(String msg) throws APIMgtResourceNotFoundException {
         log.error(msg);
         throw new APIMgtResourceNotFoundException(msg);
     }
@@ -1054,11 +1051,11 @@ public abstract class AbstractAPIManager implements APIManager {
         if (searchType == null) {
             return apiMgtDAO.getAccessTokens(searchTerm);
         } else {
-            if (searchType.equalsIgnoreCase("User")) {
+            if ("User".equalsIgnoreCase(searchType)) {
                 return apiMgtDAO.getAccessTokensByUser(searchTerm, loggedInUser);
-            } else if (searchType.equalsIgnoreCase("Before")) {
+            } else if ("Before".equalsIgnoreCase(searchType)) {
                 return apiMgtDAO.getAccessTokensByDate(searchTerm, false, loggedInUser);
-            }  else if (searchType.equalsIgnoreCase("After")) {
+            }  else if ("After".equalsIgnoreCase(searchType)) {
                 return apiMgtDAO.getAccessTokensByDate(searchTerm, true, loggedInUser);
             } else {
                 return apiMgtDAO.getAccessTokens(searchTerm);
@@ -1194,8 +1191,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return Map<String, String>
      */
     public Map<String,String> getTenantDomainMappings(String tenantDomain, String apiType) throws APIManagementException {
-        Map<String,String> domains = APIUtil.getDomainMappings(tenantDomain, apiType);
-        return domains;
+        return APIUtil.getDomainMappings(tenantDomain, apiType);
     }
 
 
