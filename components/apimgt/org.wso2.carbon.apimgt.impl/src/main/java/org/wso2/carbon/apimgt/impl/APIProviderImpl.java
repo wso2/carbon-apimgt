@@ -2439,7 +2439,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
   
     public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException {
-    	return APIUtil.searchAPIsByDoc(registry, tenantId, username, searchTerm, searchType);
+        return APIUtil.searchAPIsByDoc(registry, tenantId, username, searchTerm, APIConstants.PUBLISHER_CLIENT);
     }
     
     /**

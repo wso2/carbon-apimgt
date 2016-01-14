@@ -596,6 +596,8 @@ public class APIProviderHostObject extends ScriptableObject {
         	api.setEndpointUTPassword(endpointUTPassword);
             if ("digestAuth".equals(endpointAuthDigest)) {
                 api.setEndpointAuthDigest(true);
+            } else {
+                api.setEndpointAuthDigest(false);
             }
         } else {
             api.setEndpointSecured(false);
@@ -1365,6 +1367,8 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointUTPassword(endpointUTPassword);
             if ("digestAuth".equals(endpointAuthDigest)) {
                 api.setEndpointAuthDigest(true);
+            } else {
+                api.setEndpointAuthDigest(false);
             }
         }
 
@@ -1851,6 +1855,8 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setEndpointUTPassword(endpointUTPassword);
             if("digestAuth".equals(endpointAuthDigest)){
                 api.setEndpointAuthDigest(true);
+            } else {
+                api.setEndpointAuthDigest(false);
             }
         }
 

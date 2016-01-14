@@ -965,4 +965,9 @@ public final class APIConstants {
 
     public static final String METRICS_PREFIX = "org.wso2.am";
 
+    //Doc search related constants
+
+    public static final String PUBLISHER_CLIENT = "Publisher";
+    public static final String STORE_CLIENT = "Store";
+
 }

@@ -16,8 +16,8 @@ var getAllSubscriptions = function (username, selectedAppName, startSubIndex, en
     } catch (e) {
         log.error(e);
         return {
-            error:e,
-            result:null
+            error:true,
+            result:e
         };
     }
 };

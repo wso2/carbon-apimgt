@@ -321,21 +321,22 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
+        Registry registry;
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            Registry registry;
-            if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                APIUtil.loadTenantRegistry(id);
-                registry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceSystemRegistry(id);                
+            String apiTenantDomain = MultitenantUtils.getTenantDomain(
+                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            int apiTenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(apiTenantDomain);
+            if (!apiTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                APIUtil.loadTenantRegistry(apiTenantId);
+            }
+
+            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
+                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                        MultitenantUtils.getTenantAwareUsername(
+                                APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
             } else {
-                if (this.tenantDomain != null && !this.tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                    registry = ServiceReferenceHolder.getInstance().
-                            getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
-                } else {
-                    registry = this.registry;
-                }
+                registry = this.registry;
             }
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
                                                                                 APIConstants.API_KEY);
@@ -345,7 +346,19 @@ public abstract class AbstractAPIManager implements APIManager {
                 throw new APIManagementException("artifact id is null for : " + apiPath);
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return APIUtil.getAPIForPublishing(apiArtifact, registry);
+
+            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
+
+            //check for API visibility
+            if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
+                return api;
+            }
+            if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) {
+                throw new APIManagementException("User " + username + " does not have permission to view API : "
+                                                 + api.getId().getApiName());
+            }
+
+            return api;
 
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);

@@ -177,7 +177,7 @@
         <label class="control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
         <div class="controls">
             <input type="text" class="input-xlarge required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>
-            <a class="icon-question-sign help_popup" help_data="name_help"></a>
+            <a class="icon-question-sign help_popup" data-trigger="hover" help_data="name_help"></a>
             <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>
         </div>
     </div>
@@ -186,7 +186,7 @@
         <label class="control-label" for="context"><%=i18n.localize("context")%>:<span class="requiredAstrix">*</span></label>
         <div class="controls">
             <input type="text" class="input-xlarge required validContextTemplate validateForwardSlashAtEnd validInput contextExists noSpace validTemplate" id="context" name="context" onchange="getContextValue()"  onkeyup="updateContextPattern()"  />
-            <a class="icon-question-sign help_popup" help_data="context_help"></a>
+            <a class="icon-question-sign help_popup" data-trigger="hover" help_data="context_help"></a>
             <p id="context_help" class="hide"><%=i18n.localize("contextHelpMsg")%></p>
         </div>
     </div>
@@ -232,7 +232,7 @@
                     <% } %> 
                 <%}%>
             </select>
-                <a class="icon-question-sign help_popup" help_data="role_help"></a>
+                <a class="icon-question-sign help_popup" data-trigger="hover" help_data="role_help"></a>
                 <p id="role_help" class="hide"><%=i18n.localize("roleHelpMsg")%></p>
         </div>
     </div>
