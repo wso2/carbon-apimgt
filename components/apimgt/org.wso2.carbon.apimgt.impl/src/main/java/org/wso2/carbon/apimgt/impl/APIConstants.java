@@ -476,7 +476,7 @@ public final class APIConstants {
     public static final String API_PUBLISHER_USERNAME = "APIPublisher."+"Username";
     public static final String API_PUBLISHER_PASSWORD = "APIPublisher."+"Password";
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS= "APIPublisher."+"EnableAPIDocVisibilityLevels";
-
+    public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
     public static final String EXTERNAL_API_STORES = "ExternalAPIStores";

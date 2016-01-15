@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -539,5 +540,15 @@ public interface APIProvider extends APIManager {
       * @throws APIManagementException
       */
      String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
-    
+
+    /**
+     * Get the paginated APIs from publisher
+     *
+     * @param tenantDomain tenant domain
+     * @param start        starting number
+     * @param end          ending number
+     * @return set of API
+     * @throws APIManagementException if failed to get Apis
+     */
+    Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
 }
