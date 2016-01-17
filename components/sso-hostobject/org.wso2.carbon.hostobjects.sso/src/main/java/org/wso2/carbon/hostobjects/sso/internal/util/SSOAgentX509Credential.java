@@ -24,10 +24,10 @@ import java.security.cert.X509Certificate;
 
 public interface SSOAgentX509Credential {
 
-    PublicKey getPublicKey() throws Exception;
+    PublicKey getPublicKey();
 
-    PrivateKey getPrivateKey() throws Exception;
+    PrivateKey getPrivateKey();
 
-    X509Certificate getEntityCertificate() throws Exception;
+    X509Certificate getEntityCertificate();
 
 }

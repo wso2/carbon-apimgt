@@ -18,8 +18,11 @@
 
 package org.wso2.carbon.hostobjects.sso.internal.util;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
+import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -28,6 +31,8 @@ import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 
 public class SSOAgentCarbonX509Credential implements SSOAgentX509Credential {
+
+    private static Log log = LogFactory.getLog(SSOAgentCarbonX509Credential.class);
 
     private PublicKey publicKey = null;
     private PrivateKey privateKey = null;
@@ -49,12 +54,12 @@ public class SSOAgentCarbonX509Credential implements SSOAgentX509Credential {
     }
 
     public SSOAgentCarbonX509Credential(int tenantId, String tenantDomain)
-            throws Exception {
+            throws SSOHostObjectException {
 
         readCarbonX509Credentials(tenantId, tenantDomain);
     }
 
-    protected void readCarbonX509Credentials(int tenantId, String tenantDomain) throws Exception {
+    protected void readCarbonX509Credentials(int tenantId, String tenantDomain) throws SSOHostObjectException {
 
         KeyStoreManager tenantKSM = KeyStoreManager.getInstance(tenantId);
         if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
@@ -66,14 +71,13 @@ public class SSOAgentCarbonX509Credential implements SSOAgentX509Credential {
             try {
                 keyStore = tenantKSM.getKeyStore(jksName);
             } catch (Exception e) { // getKeyStore() method throws a generic Exception
-                throw new Exception("Error occurred while retrieving " +
-                        "key store of tenant " + tenantDomain, e);
+                handleException("Error occurred while retrieving key store of tenant " + tenantDomain, e);
+                return;
             }
             try {
                 entityCertificate = (X509Certificate) keyStore.getCertificate(tenantDomain);
             } catch (KeyStoreException e) {
-                throw new Exception("Error occurred while retrieving " +
-                        "public certificate with alias " + tenantDomain +
+                handleException("Error occurred while retrieving public certificate with alias " + tenantDomain +
                         " of tenant " + tenantDomain, e);
             }
             privateKey = (PrivateKey) tenantKSM.getPrivateKey(jksName, tenantDomain);
@@ -81,16 +85,21 @@ public class SSOAgentCarbonX509Credential implements SSOAgentX509Credential {
             try {
                 entityCertificate = tenantKSM.getDefaultPrimaryCertificate();
             } catch (Exception e) { // getDefaultPrimaryCertificate() method throws a generic Exception
-                throw new Exception("Error retrieving default primary certificate of " +
+                handleException("Error retrieving default primary certificate of " +
                         MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, e);
             }
             try {
                 privateKey = tenantKSM.getDefaultPrivateKey();
             } catch (Exception e) { //getDefaultPrivateKey() method throws a generic Exception
-                throw new Exception("Error retrieving default private key of " +
+                handleException("Error retrieving default private key of " +
                         MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, e);
             }
         }
         publicKey = entityCertificate.getPublicKey();
+    }
+
+    private void handleException(String errorMessage, Throwable e) throws SSOHostObjectException {
+        log.error(errorMessage);
+        throw new SSOHostObjectException(errorMessage, e);
     }
 }
