@@ -87,6 +87,13 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
             return ((MethodNotAllowedException) e).getResponse();
         }
 
+        if (e instanceof InternalServerErrorException) {
+            String errorMessage = "The server encountered an internal error : " + e.getMessage();
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Content-Type", "application/json")
+                    .entity(e500).build();
+        }
+
         if (e instanceof JsonParseException) {
             String errorMessage = "Malformed request body.";
             log.error(errorMessage, e);
