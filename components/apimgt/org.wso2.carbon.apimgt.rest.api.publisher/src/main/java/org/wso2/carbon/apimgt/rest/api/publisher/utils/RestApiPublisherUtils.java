@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.File;
@@ -85,7 +84,7 @@ public class RestApiPublisherUtils {
 
         boolean folderCreated = docFile.mkdirs();
         if (!folderCreated) {
-            handleException("Failed to add content to the document " + documentId);
+            RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
         }
 
         InputStream docInputStream = null;
@@ -109,7 +108,7 @@ public class RestApiPublisherUtils {
             apiProvider.updateDocumentation(apiIdentifier, documentation);
             docFile.deleteOnExit();
         } catch (FileNotFoundException e) {
-            handleException("Unable to read the file from path ", e);
+            RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
         } finally {
             IOUtils.closeQuietly(docInputStream);
         }
@@ -125,18 +124,8 @@ public class RestApiPublisherUtils {
         try {
             TierDTO.TierLevelEnum.valueOf(tierLevel);
         } catch (IllegalArgumentException e) {
-            throw RestApiUtil.buildNotFoundException(
-                    "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+            RestApiUtil.handleResourceNotFoundError(
+                    "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), e, log);
         }
-    }
-
-    private static void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(msg, t);
-    }
-
-    private static void handleException(String msg) throws InternalServerErrorException {
-        log.error(msg);
-        throw new InternalServerErrorException(msg);
     }
 }
