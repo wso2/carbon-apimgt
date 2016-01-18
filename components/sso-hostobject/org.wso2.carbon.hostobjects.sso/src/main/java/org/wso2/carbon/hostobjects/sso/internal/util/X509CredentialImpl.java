@@ -67,7 +67,7 @@ public class X509CredentialImpl implements X509Credential {
         signingCert = cert;
     }
 
-    public X509CredentialImpl(SSOAgentX509Credential credential) throws Exception {
+    public X509CredentialImpl(SSOAgentX509Credential credential) {
         publicKey = credential.getPublicKey();
         this.entityCertificate = credential.getEntityCertificate();
         this.privateKey = credential.getPrivateKey();

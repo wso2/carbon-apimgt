@@ -72,8 +72,9 @@ public class RestAPIStoreUtils {
             String loginInfoString = loginInfoJsonObj.toJSONString();
             return apiConsumer.getGroupIds(loginInfoString);
         } catch (APIManagementException e) {
-            log.error("Unable to get groupIds of user " + username);
-            throw new InternalServerErrorException(e);
+            String errorMsg = "Unable to get groupIds of user " + username;
+            log.error(errorMsg, e);
+            throw new InternalServerErrorException(errorMsg, e);
         }
     }
 

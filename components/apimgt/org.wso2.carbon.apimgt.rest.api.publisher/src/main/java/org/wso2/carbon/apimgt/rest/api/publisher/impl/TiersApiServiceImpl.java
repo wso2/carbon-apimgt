@@ -282,9 +282,9 @@ public class TiersApiServiceImpl extends TiersApiService {
             return Response.ok().entity(updatedTierDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating tier " + tierName;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            handleException(errorMessage, e);
         }
+        return null;
     }
 
     /** Deletes a tier specified by the name
@@ -321,7 +321,7 @@ public class TiersApiServiceImpl extends TiersApiService {
 
     private void handleException(String msg, Throwable t) throws InternalServerErrorException {
         log.error(msg, t);
-        throw new InternalServerErrorException(t);
+        throw new InternalServerErrorException(msg, t);
     }
 
 }

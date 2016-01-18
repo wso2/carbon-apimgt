@@ -70,11 +70,11 @@ public class AuthReqBuilder {
      * Generate an Signed authentication request with a custom consumer url.
      *
      * @return AuthnRequest Object
-     * @throws Exception error when bootstrapping
+     * @throws SSOHostObjectException error when bootstrapping
      */
 
     public AuthnRequest buildSignedAuthRequest(String issuerId, String destination, String acsUrl, boolean isPassive,
-            int tenantId, String tenantDomain, String nameIdPolicy) throws Exception {
+            int tenantId, String tenantDomain, String nameIdPolicy) throws SSOHostObjectException {
         Util.doBootstrap();
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
@@ -150,15 +150,19 @@ public class AuthReqBuilder {
             Signer.signObjects(signatureList);
             return authnRequest;
         } catch (CertificateEncodingException e) {
-            throw new SSOHostObjectException("Error getting certificate", e);
+            handleException("Error getting certificate", e);
         } catch (MarshallingException e) {
-            throw new SSOHostObjectException("Error while marshalling auth request", e);
+            handleException("Error while marshalling auth request", e);
         } catch (SignatureException e) {
-            throw new SSOHostObjectException("Error while signing the SAML Request message", e);
+            handleException("Error while signing the SAML Request message", e);
         } catch (SSOHostObjectException e) {
-            throw new SSOHostObjectException("Error while signing the SAML Request message", e);
+            handleException("Error while signing the SAML Request message", e);
         }
+        return null;
     }
 
-
+    private static void handleException(String errorMessage, Throwable e) throws SSOHostObjectException {
+        log.error(errorMessage);
+        throw new SSOHostObjectException(errorMessage, e);
+    }
 }
