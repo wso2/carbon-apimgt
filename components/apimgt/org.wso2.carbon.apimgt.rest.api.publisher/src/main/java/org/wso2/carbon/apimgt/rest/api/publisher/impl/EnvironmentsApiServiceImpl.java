@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.EnvironmentMappingUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.util.List;
@@ -75,18 +74,13 @@ public class EnvironmentsApiServiceImpl extends EnvironmentsApiService {
             } catch (APIManagementException e) {
                 //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
                 if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
                 } else {
                     String errorMessage = "Error while retrieving API : " + apiId;
-                    handleException(errorMessage, e);
+                    RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             }
         }
         return Response.ok().entity(environmentListDTO).build();
-    }
-
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(msg, t);
     }
 }

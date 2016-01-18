@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -86,10 +85,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String msg = "Error while retrieving subscriptions of API " + apiId;
-                handleException(msg, e);
+                RestApiUtil.handleInternalServerError(msg, e, log);
             }
         }
         return null;
@@ -115,7 +114,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             //validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
             if (currentSubscription == null) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
@@ -127,7 +126,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             String msg = "Error while blocking the subscription " + subscriptionId;
-            handleException(msg, e);
+            RestApiUtil.handleInternalServerError(msg, e, log);
         }
         return null;
     }
@@ -151,7 +150,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             //validates the subscriptionId if it exists
             SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
             if (currentSubscription == null) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
 
             SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
@@ -163,7 +162,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             return Response.ok().entity(subscriptionDTO).build();
         } catch (APIManagementException e) {
             String msg = "Error while unblocking the subscription " + subscriptionId;
-            handleException(msg, e);
+            RestApiUtil.handleInternalServerError(msg, e, log);
         }
         return null;
     }
@@ -189,17 +188,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
                 return Response.ok().entity(subscriptionDTO).build();
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
         } catch (APIManagementException e) {
             String msg = "Error while getting the subscription " + subscriptionId;
-            handleException(msg, e);
+            RestApiUtil.handleInternalServerError(msg, e, log);
         }
         return null;
-    }
-
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(msg, t);
     }
 }
