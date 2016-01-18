@@ -132,11 +132,11 @@ public class RestApiPublisherUtils {
 
     private static void handleException(String msg, Throwable t) throws InternalServerErrorException {
         log.error(msg, t);
-        throw new InternalServerErrorException(t);
+        throw new InternalServerErrorException(msg, t);
     }
 
     private static void handleException(String msg) throws InternalServerErrorException {
         log.error(msg);
-        throw new InternalServerErrorException();
+        throw new InternalServerErrorException(msg);
     }
 }

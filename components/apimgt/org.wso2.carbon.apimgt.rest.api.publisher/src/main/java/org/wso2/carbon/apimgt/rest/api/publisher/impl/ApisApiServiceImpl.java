@@ -871,6 +871,6 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     private void handleException(String msg, Throwable t) throws InternalServerErrorException {
         log.error(msg, t);
-        throw new InternalServerErrorException(t);
+        throw new InternalServerErrorException(msg, t);
     }
 }
