@@ -2952,6 +2952,13 @@ public final class APIUtil {
         return propertyMap;
     }
 
+    /**
+     * Add all the custom sequences of given type to registry 
+     * 
+     * @param registry Registry instance
+     * @param customSequenceType Custom sequence type which is in/out or fault
+     * @throws APIManagementException
+     */
     public static void addDefinedAllSequencesToRegistry(UserRegistry registry,
                                                         String customSequenceType)
             throws APIManagementException {
