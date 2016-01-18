@@ -21,19 +21,22 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.throttle.api.Request;
+import org.wso2.carbon.h2.osgi.utils.CarbonUtils;
 import org.wso2.throttle.core.Throttler;
 
 
 import java.util.Map;
 import java.util.TreeMap;
 
-
+/**
+ * This class is implemented to handle
+ */
 public class CEPBasedThrottleHandler extends AbstractHandler {
 
     private static final Log log = LogFactory.getLog(CEPBasedThrottleHandler.class);
@@ -114,23 +117,19 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             apiContext = apiContext != null ? apiContext : "";
             apiVersion = apiVersion != null ? apiVersion : "";
             apiKey = apiContext + ':' + apiVersion + ':' + consumerKey + ':' + authorizedUser;
-
-
-            /*ThrottleContext context = throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY);
-            if (context == null) {
-                log.warn("Unable to load throttle context");
-                ThrottleConfiguration config = context.getThrottleConfiguration();
-                apiTier = config.getConfigurationKeyOfCaller(roleID);
-
+            apiTier = authContext.getTier();
+            String remoteIP = "127.0.0.1";//(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
+                    //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+            if (remoteIP != null) {
+                if (remoteIP.indexOf(",") > 0) {
+                    remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
+                }
             } else {
-                log.warn("No authentication context information found on the request - " +
-                        "Throttling not applied");
-                return true;
-            } */
-            apiTier = "Gold";
+                remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
+            }
+            Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, resourceKey, appTier, apiTier, resourceTier, verbInfoDTO.getHttpVerb(), remoteIP};
 
-            Request request = new Request(appKey, apiKey, resourceKey, appTier, apiTier, resourceTier);
-            canAccess = throttler.isThrottled(request);
+            canAccess = throttler.isThrottled(objects);
         }
         return canAccess;
     }
@@ -164,43 +163,8 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
 
         this.throttler = Throttler.getInstance();
-        throttler.addRule("Gold");
+        //throttler.addRule("Gold", null);
 
-        /*if (policyKey == null) {
-            throw new SynapseException("Throttle policy unspecified for the API");
-        }
-        Entry entry = synCtx.getConfiguration().getEntryDefinition(policyKey);
-        if (entry == null) {
-            handleException("Cannot find throttling policy using key: " + policyKey);
-            return;
-        }
-        Object entryValue = null;
-        boolean reCreate = false;
-        if (entry.isDynamic()) {
-            if ((!entry.isCached()) || (entry.isExpired()) || throttle == null) {
-                entryValue = synCtx.getEntry(this.policyKey);
-                if (this.version != entry.getVersion()) {
-                    reCreate = true;
-                }
-            }
-        } else if (this.throttle == null) {
-            entryValue = synCtx.getEntry(this.policyKey);
-        }
-        if (reCreate || throttle == null) {
-            if (entryValue == null || !(entryValue instanceof OMElement)) {
-                handleException("Unable to load throttling policy using key: " + policyKey);
-                return;
-            }
-            version = entry.getVersion();
-            try {
-                // Creates the throttle from the policy
-                throttle = ThrottleFactory.createMediatorThrottle(
-                        PolicyEngine.getPolicy((OMElement) entryValue));
-
-            } catch (ThrottleException e) {
-                handleException("Error processing the throttling policy", e);
-            }
-        } */
     }
 
     public void setId(String id) {
