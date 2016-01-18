@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -50,13 +52,15 @@ import java.util.Set;
 
 public class APIMappingUtil {
 
+    private static final Log log = LogFactory.getLog(APIMappingUtil.class);
+
     public static APIIdentifier getAPIIdentifierFromApiId(String apiId) {
         //if apiId contains -AT-, that need to be replaced before splitting
         apiId = APIUtil.replaceEmailDomainBack(apiId);
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
 
         if (apiIdDetails.length < 3) {
-            throw RestApiUtil.buildBadRequestException("Provided API identifier '" + apiId + "' is invalid");
+            RestApiUtil.handleBadRequest("Provided API identifier '" + apiId + "' is invalid", log);
         }
 
         // apiId format: provider-apiName-version

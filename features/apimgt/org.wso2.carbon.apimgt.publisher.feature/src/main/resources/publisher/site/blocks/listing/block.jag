@@ -15,16 +15,17 @@ jagg.block("listing", {
     },
 
     getOutputs:function () {
-        var apis, result,query,error,message, mod,mode,user = jagg.getUser();
+        var apis, result,query,error,message, mod,mode,length,user = jagg.getUser();
 
         query = request.getParameter("query");
         var page = request.getParameter("page");
+        var tenantDomain = String(jagg.getTenantDomain());
         if (page == null) {
             page = 1;
         }
         var itemsPerPage = 10;
         var currentPage = page;
-
+        var start = itemsPerPage*(page-1);
         if (query) {
             mod = jagg.module("search");
             result = mod.searchAPIs(null,query);
@@ -34,15 +35,16 @@ jagg.block("listing", {
             mode="search"
         } else {
             mod = jagg.module("api");
-            result = mod.getAllAPIs();
-            apis = result.apis;
+            result = mod.getAllPaginatedAPIs(tenantDomain,String(start),String(itemsPerPage));
+            apis = result.response.apis;
+            length = result.response.totalLength;
             error=result.error,
             message=result.message
             mode="listing"
         }
         var itemCount;
         if (apis != null) {
-            itemCount = apis.length;
+            itemCount = result.response.totalLength;
             var numberOfPages = itemCount / itemsPerPage;
             if (itemCount % itemsPerPage != 0) {
                 numberOfPages++;
@@ -58,10 +60,11 @@ jagg.block("listing", {
             "error":error,
             "message":message,
             "currentPage":currentPage,
-            "numberOfPages":numberOfPages,
+            "numberOfPages":parseInt(numberOfPages),
             "isCreatePermitted":isCreatePermitted,
-	    "isPublishPermitted":isPublishPermitted,
-            "mode":mode
+	        "isPublishPermitted":isPublishPermitted,
+            "mode":mode,
+            "totalLength" : parseInt(length)
         }
     },
 

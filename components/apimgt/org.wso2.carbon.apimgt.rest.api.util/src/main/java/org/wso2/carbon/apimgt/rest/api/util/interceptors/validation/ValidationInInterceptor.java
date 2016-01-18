@@ -91,7 +91,6 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
     }
 
     public <T> void validate(final Method method, final Object[] arguments, final T instance) {
-        try {
             if (validator == null) {
                 log.warn("Bean Validation provider could not be found, no validation will be performed");
                 return;
@@ -104,14 +103,9 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
             if (!violations.isEmpty()) {
                 throw new ConstraintViolationException(violations);
             }
-
-        } catch (ValidationException ex) {
-            throw new InternalServerErrorException(ex);
-        }
     }
 
     public <T> void validate(final T object) {
-        try {
             if (validator == null) {
                 log.warn("Bean Validation provider could be found, no validation will be performed");
                 return;
@@ -122,10 +116,6 @@ public class ValidationInInterceptor extends AbstractPhaseInterceptor<Message> {
             if (!violations.isEmpty()) {
                 throw new ConstraintViolationException(violations);
             }
-
-        } catch (ValidationException ex) {
-            throw new InternalServerErrorException(ex);
-        }
     }
 
     public void handleFault(Message messageParam) {

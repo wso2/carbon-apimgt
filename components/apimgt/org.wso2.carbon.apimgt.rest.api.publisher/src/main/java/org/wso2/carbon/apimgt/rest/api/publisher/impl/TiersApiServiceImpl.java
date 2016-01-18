@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.TierMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -72,7 +71,7 @@ public class TiersApiServiceImpl extends TiersApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
 
             if (StringUtils.isBlank(tierLevel)) {
-                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+                RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
             }
 
             //retrieves the tier based on the given tier-level
@@ -93,15 +92,15 @@ public class TiersApiServiceImpl extends TiersApiService {
                     tierList.addAll(resourceTiersMap.values());
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(
-                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+                RestApiUtil.handleResourceNotFoundError(
+                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), log);
             }
             TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, tierLevel, limit, offset);
             TierMappingUtil.setPaginationParams(tierListDTO, tierLevel , limit, offset, tierList.size());
             return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -126,7 +125,8 @@ public class TiersApiServiceImpl extends TiersApiService {
 
             Tier foundTier = APIUtil.getTierFromCache(body.getName(), tenantDomain);
             if (foundTier != null) {
-                throw RestApiUtil.buildConflictException("Requested tier '" + body.getName() + "' already exists");
+                RestApiUtil.handleResourceAlreadyExistsError("Requested tier '" + body.getName() + "' already exists",
+                        log);
             }
 
             Tier newTier = TierMappingUtil.fromDTOtoTier(body);
@@ -137,7 +137,7 @@ public class TiersApiServiceImpl extends TiersApiService {
             return Response.created(createdTierUri).entity(addedTierDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
             String errorMessage = "Error while adding tier " + body.getName();
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -160,13 +160,13 @@ public class TiersApiServiceImpl extends TiersApiService {
             RestApiPublisherUtils.validateTierLevels(tierLevel);
             //we currently support updating tier permission only for API tiers
             if (!TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
-                throw RestApiUtil.buildBadRequestException("Allowed tierLevel(s) for update permission is [api]");
+                RestApiUtil.handleBadRequest("Allowed tierLevel(s) for update permission is [api]", log);
             }
 
             //check whether the requested tier exists
             Tier foundTier = APIUtil.getTierFromCache(tierName, tenantDomain);
             if (foundTier == null) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, tierName, log);
             }
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
@@ -176,11 +176,11 @@ public class TiersApiServiceImpl extends TiersApiService {
                 apiProvider.updateTierPermissions(tierName, permissionType, roles);
                 return Response.ok().build();
             } else {
-                throw RestApiUtil.buildBadRequestException("roles should be specified");
+                RestApiUtil.handleBadRequest("roles should be specified", log);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while adding tier permissions for " + tierName;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -204,7 +204,7 @@ public class TiersApiServiceImpl extends TiersApiService {
             Tier foundTier = null;
 
             if (StringUtils.isBlank(tierLevel)) {
-                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+                RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
             }
 
             //retrieves the tier based on the given tier-level
@@ -225,8 +225,9 @@ public class TiersApiServiceImpl extends TiersApiService {
                     foundTier = RestApiUtil.findTier(resourceTiersMap.values(), tierName);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(
-                        "type should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+                RestApiUtil.handleResourceNotFoundError(
+                        "type should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), log);
+                return null;
             }
 
             //returns if the tier is found, otherwise send 404
@@ -235,11 +236,11 @@ public class TiersApiServiceImpl extends TiersApiService {
                         .entity(TierMappingUtil.fromTierToDTO(foundTier, tierType.toString()))
                         .build();
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, tierName, log);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -268,7 +269,7 @@ public class TiersApiServiceImpl extends TiersApiService {
             //check whether the requested tier exists
             Tier foundTier = APIUtil.getTierFromCache(tierName, tenantDomain);
             if (foundTier == null) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, tierName, log);
             }
 
             //overriding some properties
@@ -282,9 +283,9 @@ public class TiersApiServiceImpl extends TiersApiService {
             return Response.ok().entity(updatedTierDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating tier " + tierName;
-            log.error(errorMessage, e);
-            throw new InternalServerErrorException(e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
+        return null;
     }
 
     /** Deletes a tier specified by the name
@@ -310,18 +311,12 @@ public class TiersApiServiceImpl extends TiersApiService {
                 apiProvider.removeTier(tier);
                 return Response.ok().build();
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, tierName, log);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while deleting tier " + tierName;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
-
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(t);
-    }
-
 }

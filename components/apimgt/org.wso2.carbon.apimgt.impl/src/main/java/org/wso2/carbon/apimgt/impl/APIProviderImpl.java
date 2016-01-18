@@ -32,24 +32,12 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Provider;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -59,12 +47,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
-import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
+import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
@@ -80,15 +63,11 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.registry.common.CommonConstants;
-import org.wso2.carbon.registry.core.ActionConstants;
-import org.wso2.carbon.registry.core.Association;
-import org.wso2.carbon.registry.core.CollectionImpl;
-import org.wso2.carbon.registry.core.Registry;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
+import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
@@ -101,23 +80,11 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-
 import java.io.File;
 import java.io.InputStream;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -3410,4 +3377,111 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
+    public Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end)
+            throws APIManagementException {
+        Map<String, Object> result = new HashMap<String, Object>();
+        List<API> apiSortedList = new ArrayList<API>();
+        int totalLength = 0;
+        boolean isTenantFlowStarted = false;
+
+        try {
+            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                                                           .getAPIManagerConfiguration()
+                                                           .getFirstProperty(APIConstants.API_PUBLISHER_APIS_PER_PAGE);
+
+            // If the Config exists use it to set the pagination limit
+            final int maxPaginationLimit;
+            if (paginationLimit != null) {
+                // The additional 1 added to the maxPaginationLimit is to help us determine if more
+                // APIs may exist so that we know that we are unable to determine the actual total
+                // API count. We will subtract this 1 later on so that it does not interfere with
+                // the logic of the rest of the application
+                int pagination = Integer.parseInt(paginationLimit);
+                // Because the store jaggery pagination logic is 10 results per a page we need to set pagination
+                // limit to at least 11 or the pagination done at this level will conflict with the store pagination
+                // leading to some of the APIs not being displayed
+                if (pagination < 11) {
+                    pagination = 11;
+                    log.warn(
+                            "Value of '" + APIConstants.API_PUBLISHER_APIS_PER_PAGE + "' is too low, defaulting to 11");
+                }
+
+                maxPaginationLimit = start + pagination + 1;
+            }
+            // Else if the config is not specifed we go with default functionality and load all
+            else {
+                maxPaginationLimit = Integer.MAX_VALUE;
+            }
+            Registry userRegistry;
+            boolean isTenantMode = (tenantDomain != null);
+            if ((isTenantMode && this.tenantDomain == null) ||
+                (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                                     .getTenantId(tenantDomain);
+                APIUtil.loadTenantRegistry(tenantId);
+                userRegistry = ServiceReferenceHolder.getInstance().
+                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME,
+                                                                       tenantId);
+                PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                                       .setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+            } else {
+                userRegistry = registry;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+            }
+            PaginationContext.init(start, end, "ASC", APIConstants.PROVIDER_OVERVIEW_NAME, maxPaginationLimit);
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
+            Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+
+            if (artifactManager != null) {
+                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+                totalLength = PaginationContext.getInstance().getLength();
+                if (genericArtifacts == null || genericArtifacts.length == 0) {
+                    result.put("apis", apiSortedList);
+                    result.put("totalLength", totalLength);
+                    return result;
+                }
+                // Check to see if we can speculate that there are more APIs to be loaded
+                if (maxPaginationLimit == totalLength) {
+                    // performance hit
+                    --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
+                }
+                int tempLength = 0;
+                for (GenericArtifact artifact : genericArtifacts) {
+
+                    API api = APIUtil.getAPI(artifact);
+
+                    if (api != null) {
+                        apiSortedList.add(api);
+                    }
+                    tempLength++;
+                    if (tempLength >= totalLength) {
+                        break;
+                    }
+                }
+                Collections.sort(apiSortedList, new APINameComparator());
+            }
+
+        } catch (RegistryException e) {
+            handleException("Failed to get all APIs", e);
+        } catch (UserStoreException e) {
+            handleException("Failed to get all APIs", e);
+        } finally {
+            PaginationContext.destroy();
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+
+        result.put("apis", apiSortedList);
+        result.put("totalLength", totalLength);
+        return result;
+    }
+
+    private boolean isTenantDomainNotMatching(String tenantDomain) {
+        if (this.tenantDomain != null) {
+            return !(this.tenantDomain.equals(tenantDomain));
+        }
+        return true;
+    }
 }

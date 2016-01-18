@@ -282,6 +282,17 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns a new InternalServerErrorException
+     *
+     * @return a new InternalServerErrorException with default details as a response DTO
+     */
+    public static InternalServerErrorException buildInternalServerErrorException() {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500l,
+                RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT);
+        return new InternalServerErrorException(errorDTO);
+    }
+
+    /**
      * Returns a new NotFoundException
      * 
      * @param resource Resource type
@@ -438,6 +449,198 @@ public class RestApiUtil {
     }
 
     /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     * 
+     * @param msg error message
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     * 
+     * @param resource Resource type
+     * @param id id of resource
+     * @param t Throwable
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleAuthorizationFailure(String resource, String id, Throwable t, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
+        log.error(forbiddenException.getMessage(), t);
+        throw forbiddenException;
+    }
+
+    /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     * 
+     * @param resource requested resource
+     * @param id id of resource
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleAuthorizationFailure(String resource, String id, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
+        log.error(forbiddenException.getMessage());
+        throw forbiddenException;
+    }
+
+    /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     * 
+     * @param description description of the error
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleAuthorizationFailure(String description, Throwable t, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(description);
+        log.error(description, t);
+        throw forbiddenException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     * 
+     * @param resource requested resource
+     * @param id id of resource
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String resource, String id, Throwable t, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        log.error(notFoundException.getMessage(), t);
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     * 
+     * @param resource requested resource
+     * @param id id of resource
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String resource, String id, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        log.error(notFoundException.getMessage());
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String description, Throwable t, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(description);
+        log.error(description, t);
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String description, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(description);
+        log.error(description);
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     * 
+     * @param description description of the error
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handleResourceAlreadyExistsError(String description, Log log)
+            throws ConflictException {
+        ConflictException conflictException = buildConflictException(description);
+        log.error(description);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     * 
+     * @param description description of the error
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handleResourceAlreadyExistsError(String description, Throwable t, Log log)
+            throws ConflictException {
+        ConflictException conflictException = buildConflictException(description);
+        log.error(description, t);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a MethodNotAllowedException with specified details and throws it
+     * 
+     * @param method http method
+     * @param resource requested resource
+     * @param log Log instance
+     * @throws MethodNotAllowedException
+     */
+    public static void handleMethodNotAllowedError(String method, String resource, Log log)
+            throws MethodNotAllowedException {
+        MethodNotAllowedException methodNotAllowedException = buildMethodNotAllowedException(method, resource);
+        log.error(methodNotAllowedException.getMessage());
+        throw methodNotAllowedException;
+    }
+
+    /**
+     * Logs the error, builds a internalServerErrorException with specified details and throws it
+     * 
+     * @param msg error message
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws InternalServerErrorException
+     */
+    public static void handleInternalServerError(String msg, Throwable t, Log log)
+            throws InternalServerErrorException {
+        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
+        log.error(msg, t);
+        throw internalServerErrorException;
+    }
+
+    /**
+     * Logs the error, builds a internalServerErrorException with specified details and throws it
+     *
+     * @param msg error message
+     * @param log Log instance
+     * @throws InternalServerErrorException
+     */
+    public static void handleInternalServerError(String msg, Log log)
+            throws InternalServerErrorException {
+        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
+        log.error(msg);
+        throw internalServerErrorException;
+    }
+
+    /**
      * Checks whether the specified tenant domain is available
      * 
      * @param tenantDomain tenant domain
@@ -461,7 +664,7 @@ public class RestApiUtil {
         if (RestApiConstants.RESOURCE_PATH_TIERS_APPLICATION.equals(resource)
                 || RestApiConstants.RESOURCE_PATH_TIERS_RESOURCE.equals(resource)) {
             if (!"GET".equals(method)) {
-                throw RestApiUtil.buildMethodNotAllowedException(method, resource);
+                RestApiUtil.handleMethodNotAllowedError(method, resource, log);
             }
         }
     }

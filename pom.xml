@@ -32,7 +32,7 @@
         <module>features/apimgt</module>
         <module>features/forum</module>
         <module>features/oidc-authenticator</module>
-        <module>features/nested-categories</module>
+        <module>features/categories</module>
     </modules>
 
     <build>

@@ -17,10 +17,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 public class InternalServerErrorException extends WebApplicationException {
+
+    private String message;
 
     public InternalServerErrorException(Throwable e) {
         super(e, Response.Status.INTERNAL_SERVER_ERROR);
@@ -28,5 +33,20 @@ public class InternalServerErrorException extends WebApplicationException {
 
     public InternalServerErrorException() {
         super(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    public InternalServerErrorException(String message, Throwable e) {
+        super(message, e, Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    public InternalServerErrorException(String message) {
+        super(message, Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    public InternalServerErrorException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(errorDTO)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .build());
     }
 }
