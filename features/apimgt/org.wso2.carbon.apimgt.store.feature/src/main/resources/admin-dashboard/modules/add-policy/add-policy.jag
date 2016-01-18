@@ -1,0 +1,27 @@
+<%
+var log = new Log();
+
+var addTier = function (tierName, requestCount, unitTime, startingIP, endingIP, httpVerb) {
+    try {
+       //var provider = jagg.getUser().username;
+       // var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+       // var apiProvider = new APIProviderImpl(provider);
+
+        //var tier = constructTierObject(tierName, requestCount, unitTime, statingIP, endingIP, httpVerb);
+        //apiProvider.addTier(tier);
+        var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb;
+        log.info(tierAddedMsg);
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while saving tier (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+%>

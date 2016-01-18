@@ -1,0 +1,7 @@
+<%
+jagg.initializer("add-policy", {
+    preInitialize:function () {
+        jagg.addHeaderJS("add-policy", "jagg", "templates/add-policy/js/add.js");
+    }
+});
+%>
