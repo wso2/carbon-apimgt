@@ -66,10 +66,8 @@ public class DASRestClient {
      * @param pass DAs rest api password
      */
     public DASRestClient(String url, String user, String pass) {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();       
-       
-        URL dasURL = new URL(url);      
-        //httpClient = HttpClients.custom().setConnectionManager(cm).build();
+           
+        URL dasURL = new URL(url);          
         httpClient = (CloseableHttpClient) APIUtil.getHttpClient(dasURL.getPort(), dasURL.getProtocol());
         this.dasUrl = url;
         this.user = user;
