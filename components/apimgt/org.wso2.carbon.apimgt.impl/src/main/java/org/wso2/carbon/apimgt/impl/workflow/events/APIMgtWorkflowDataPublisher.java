@@ -89,7 +89,13 @@ public class APIMgtWorkflowDataPublisher {
                                                   wfStreamName,
                                                   wfStreamVersion);
             }
-        } catch (MalformedURLException | AgentException | AuthenticationException | TransportException e) {
+        } catch (MalformedURLException e) {
+            log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
+        }catch ( AgentException e) {
+            log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
+        }catch ( AuthenticationException e) {
+            log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
+        }catch ( TransportException  e) {
             log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
         }
     }

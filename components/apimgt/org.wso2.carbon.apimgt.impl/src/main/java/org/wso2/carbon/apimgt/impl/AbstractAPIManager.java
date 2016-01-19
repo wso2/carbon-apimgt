@@ -226,16 +226,6 @@ public abstract class AbstractAPIManager implements APIManager {
         if (!registry.resourceExists(latestAPIsQueryPath)) {
             //Recently added APIs
             Resource resource = registry.newResource();
-//            String sql =
-//                    "SELECT " +
-//                    "   RR.REG_PATH_ID," +
-//                    "   RR.REG_NAME " +
-//                    "FROM " +
-//                    "   REG_RESOURCE RR " +
-//                    "WHERE " +
-//                    "   RR.REG_MEDIA_TYPE = 'application/vnd.wso2-api+xml' " +
-//                    "ORDER BY " +
-//                    "   RR.REG_LAST_UPDATED_TIME DESC ";
             String sql =
                     "SELECT " +
                     "   RR.REG_PATH_ID AS REG_PATH_ID, " +
@@ -633,7 +623,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 registryType = registry;
             }
             swaggerDoc = definitionFromSwagger20.getAPIDefinition(apiId, registryType);
-        } catch (org.wso2.carbon.user.api.UserStoreException | RegistryException e) {
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Failed to get swagger documentation of API : " + apiId, e);
+        } catch (RegistryException e) {
             handleException("Failed to get swagger documentation of API : " + apiId, e);
         }
         return swaggerDoc;

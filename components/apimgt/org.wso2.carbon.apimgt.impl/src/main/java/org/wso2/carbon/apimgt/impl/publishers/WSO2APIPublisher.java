@@ -843,12 +843,12 @@ public class WSO2APIPublisher implements APIPublisher {
     private static String getFullRegistryIconUrl(String postfixUrl) {
         String proxyContext = CarbonUtils.getServerConfiguration().getFirstProperty("ProxyContextPath");
         String tmpPostfixUrl = "";
-        if (!"/".equals(proxyContext)) {
+        if (proxyContext != null &&  !"/".equals(proxyContext)) {
             tmpPostfixUrl = proxyContext;
         }
 
         String webContext = CarbonUtils.getServerConfiguration().getFirstProperty("WebContextRoot");
-        if (!"/".equals(webContext)) {
+        if (webContext != null &&  !"/".equals(webContext)) {
             tmpPostfixUrl = tmpPostfixUrl + webContext;
         }
 

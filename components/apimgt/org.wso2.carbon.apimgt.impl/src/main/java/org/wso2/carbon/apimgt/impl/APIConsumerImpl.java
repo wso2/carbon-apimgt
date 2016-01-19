@@ -322,7 +322,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return apiVersionsSortedSet;
                 }
             }
-        } catch (RegistryException | UserStoreException e) {
+        } catch (RegistryException e) {
+            handleException("Failed to get all published APIs", e);
+        } catch (UserStoreException e) {
             handleException("Failed to get all published APIs", e);
         }
         return apiSortedSet;
@@ -427,7 +429,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return result;
                 }
             }
-        } catch (RegistryException | UserStoreException e) {
+        } catch (RegistryException e) {
+            handleException("Failed to get all published APIs", e);
+        } catch (UserStoreException e) {
             handleException("Failed to get all published APIs", e);
         } finally {
             PaginationContext.destroy();
@@ -590,7 +594,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                     return result;
                 }
             }
-        } catch (RegistryException | UserStoreException e) {
+        } catch (RegistryException e) {
+            handleException("Failed to get all published APIs", e);
+        } catch (UserStoreException e) {
             handleException("Failed to get all published APIs", e);
         } finally {
             PaginationContext.destroy();
@@ -955,7 +961,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         			return recentlyAddedAPIsWithMultipleVersions;
         		}
         	 }
-        } catch (RegistryException | UserStoreException e) {
+        } catch (RegistryException e) {
+        	handleException("Failed to get all published APIs", e);
+        } catch (UserStoreException e) {
         	handleException("Failed to get all published APIs", e);
         } finally {
         	PaginationContext.destroy();
@@ -1427,33 +1435,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return false;
     }
-
-/*
-    private void getAPIsByBusinessOwner(Registry registry, final String businessOwner) throws APIManagementException {
-
-        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-        listMap.put(APIConstants.API_OVERVIEW_BUSS_OWNER, new ArrayList<String>() {{
-            add(businessOwner);
-        }});
-
-        try {
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
-            GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-
-            if(genericArtifacts != null && genericArtifacts.length > 0){
-                //Set<API>
-                for(GenericArtifact artifact : genericArtifacts){
-                    artifact.getPath();
-                }
-            }
-
-        } catch (APIManagementException e) {
-            handleException("Failed to read artifact manager for the key : " + APIConstants.API_KEY, e);
-        } catch (GovernanceException e) {
-            handleException("Failed to read APIs from the registry", e);
-        }
-    }
-*/
 
     @Override
     public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end, boolean isLazyLoad)
@@ -2361,138 +2342,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * @param userId Subscriber name.
-     * @param applicationName of the Application.
-     * @param tokenType Token type (PRODUCTION | SANDBOX)
-     * @param jsonString oAuthApplication parameters as a json string.
-     * @return
-     * @throws APIManagementException
-
-    @Override
-    public Map<String, Object> requestApprovalForApplicationRegistration(String userId, String applicationName,
-                                                                         String tokenType, String callbackUrl,
-                                                                         String[] allowedDomains, String validityTime,
-                                                                         String tokenScope, String groupingId,
-                                                                         String jsonString)
-            throws APIManagementException {
-
-        boolean isTenantFlowStarted = false;
-        // we should have unique names for applications. There for we will
-        // append, the word 'production' or 'sandbox'
-        // according to the token type.
-        StringBuilder applicationNameAfterAppend = new StringBuilder(applicationName);
-
-        try {
-            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            }
-            // initiate WorkflowExecutor
-            WorkflowExecutor appRegistrationWorkflow = null;
-            // initiate ApplicationRegistrationWorkflowDTO
-            ApplicationRegistrationWorkflowDTO appRegWFDto = null;
-
-            ApplicationKeysDTO appKeysDto = new ApplicationKeysDTO();
-
-            // get APIM application by Application Name and userId.
-            Application application = ApplicationUtils.retrieveApplication(applicationName, userId, groupingId);
-
-            // if its a PRODUCTION application.
-            if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(tokenType)) {
-                // initiate workflow type. By default simple work flow will be
-                // executed.
-                appRegistrationWorkflow =
-                        WorkflowExecutorFactory.getInstance()
-                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-                appRegWFDto =
-                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-
-            }// if it is a sandBox application.
-            else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(tokenType)) { // if
-                // its
-                // a
-                // SANDBOX
-                // application.
-                appRegistrationWorkflow =
-                        WorkflowExecutorFactory.getInstance()
-                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-                appRegWFDto =
-                        (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
-                                .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-            } else{
-                // This block is there to validate whether someone is passing an invalid token type to the API.
-                log.error("Invalid token type found. Token type should be " + APIConstants.API_KEY_TYPE_PRODUCTION +
-                          " or " + APIConstants.API_KEY_TYPE_SANDBOX + ". Found : " + tokenType);
-                return Collections.emptyMap();
-            }
-            // Build key manager instance and create oAuthAppRequest by
-            // jsonString.
-            OAuthAppRequest request =
-                    ApplicationUtils.createOauthAppRequest(applicationNameAfterAppend.toString(), null,
-                                                           callbackUrl, tokenScope, jsonString);
-            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
-
-            // Setting request values in WorkflowDTO - In future we should keep
-            // Application/OAuthApplication related
-            // information in the respective entities not in the workflowDTO.
-            appRegWFDto.setStatus(WorkflowStatus.CREATED);
-            appRegWFDto.setCreatedTime(System.currentTimeMillis());
-            appRegWFDto.setTenantDomain(tenantDomain);
-            appRegWFDto.setTenantId(tenantId);
-            appRegWFDto.setExternalWorkflowReference(appRegistrationWorkflow.generateUUID());
-            appRegWFDto.setWorkflowReference(appRegWFDto.getExternalWorkflowReference());
-            appRegWFDto.setApplication(application);
-            request.setMappingId(appRegWFDto.getWorkflowReference());
-            if (!application.getSubscriber().getName().equals(userId)) {
-                appRegWFDto.setUserName(application.getSubscriber().getName());
-            } else {
-                appRegWFDto.setUserName(userId);
-            }
-
-            appRegWFDto.setCallbackUrl(appRegistrationWorkflow.getCallbackURL());
-            appRegWFDto.setAppInfoDTO(request);
-            appRegWFDto.setDomainList(allowedDomains);
-
-            appRegWFDto.setKeyDetails(appKeysDto);
-            appRegistrationWorkflow.execute(appRegWFDto);
-
-            Map<String, Object> keyDetails = new HashMap<String, Object>();
-            keyDetails.put("keyState", appRegWFDto.getStatus().toString());
-            OAuthApplicationInfo applicationInfo = appRegWFDto.getApplicationInfo();
-
-            if (applicationInfo != null) {
-                keyDetails.put("consumerKey", applicationInfo.getClientId());
-                keyDetails.put("consumerSecret", applicationInfo.getClientSecret());
-                keyDetails.put("appDetails", applicationInfo.getJsonString());
-            }
-
-            // There can be instances where generating the Application Token is
-            // not required. In those cases,
-            // token info will have nothing.
-            AccessTokenInfo tokenInfo = appRegWFDto.getAccessTokenInfo();
-            if (tokenInfo != null) {
-                keyDetails.put("accessToken", tokenInfo.getAccessToken());
-                keyDetails.put("validityTime", tokenInfo.getValidityPeriod());
-                keyDetails.put("tokenDetails", tokenInfo.getJSONString());
-                keyDetails.put("tokenScope", tokenInfo.getScopes());
-            }
-            return keyDetails;
-        } catch (WorkflowException e) {
-            log.error("Could not execute Workflow", e);
-            throw new APIManagementException("Could not execute Workflow", e);
-        } finally {
-            if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
-            }
-        }
-
-    }
-    */
-
-    //==================================================================================================================
-    /**
      * This method specifically implemented for REST API by removing application and data access logic
      * from host object layer. So as per new implementation we need to pass requested scopes to this method
      * as tokenScope. So we will do scope related other logic here in this method.
@@ -2512,7 +2361,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         // append, the word 'production' or 'sandbox'
         // according to the token type.
         StringBuilder applicationNameAfterAppend = new StringBuilder(applicationName);
-        //-------------------------------------------------------------------------------
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         int tenantId = MultitenantConstants.INVALID_TENANT_ID;
         try {
@@ -2540,8 +2388,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } else {
             authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
         }
-        //-------------------------------------------------------------------------------
-
 
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -2690,7 +2536,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         return authorizedScopes;
     }
-    //=================================================================================================================
 
     @Override
     public Map<String, String> completeApplicationRegistration(String userId, String applicationName, String tokenType,
@@ -2764,7 +2609,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             APIManagementException {
 
         return apiMgtDAO.getApplicationByName(ApplicationName, userId, groupingId);
-
     }
 
     /**
@@ -2900,103 +2744,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return false;
     }
 
-    /**
-     * Returned an API set from a set of registry paths
-     *
-     * @param registry Registry object from which the APIs retrieving,
-     * @param limit    Specifies the number of APIs to add.
-     * @param apiPaths Array of API paths.
-     * @return Set<API> set of APIs
-     * @throws RegistryException
-     * @throws APIManagementException
-     */
-/*    private Set<API> getAPIs(Registry registry, int limit, String[] apiPaths)
-            throws RegistryException, APIManagementException,
-            org.wso2.carbon.user.api.UserStoreException {
-
-        SortedSet<API> apiSortedSet = new TreeSet<API>(new APINameComparator());
-        SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
-        Boolean allowMultipleVersions =APIUtil.isAllowDisplayMultipleVersions();
-        Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
-        Map<String, API> latestPublishedAPIs = new HashMap<String, API>();
-        List<API> multiVersionedAPIs = new ArrayList<API>();
-        Comparator<API> versionComparator = new APIVersionComparator();
-
-        //Find UUID
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
-        for (String apiPath : apiPaths) {
-            Resource resource = registry.get(apiPath);
-            if (resource != null && artifactManager != null) {
-                GenericArtifact genericArtifact = artifactManager.getGenericArtifact(resource.getUUID());
-                API api = null;
-                String status = genericArtifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
-                //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
-                if (!showAllAPIs) {
-                    // then we are only interested in published APIs here...
-                    if (APIConstants.PUBLISHED.equals(status)) {
-                        api = APIUtil.getAPI(genericArtifact, registry);
-                    }
-                } else {   // else we are interested in both deprecated/published APIs here...
-                    if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
-                        api = APIUtil.getAPI(genericArtifact, registry);
-
-                    }
-
-                }
-                if (api != null) {
-                    String key;
-                    //Check the configuration to allow showing multiple versions of an API true/false
-                    if (!allowMultipleVersions) { //If allow only showing the latest version of an API
-                        key = api.getId().getProviderName() + ':' + api.getId().getApiName();
-                        API existingAPI = latestPublishedAPIs.get(key);
-                        if (existingAPI != null) {
-                            // If we have already seen an API with the same name, make sure
-                            // this one has a higher version number
-                            if (versionComparator.compare(api, existingAPI) > 0) {
-                                latestPublishedAPIs.put(key, api);
-                            }
-                        } else {
-                            // We haven't seen this API before
-                            latestPublishedAPIs.put(key, api);
-                        }
-                    } else { //If allow showing multiple versions of an API
-                        //                        key = api.getId().getProviderName() + ":" + api.getId().getApiName
-                        // () + ":" + api.getId()
-                        //                                .getVersion();
-                        multiVersionedAPIs.add(api);
-                    }
-                }
-
-            }
-        }
-        if (!allowMultipleVersions) {
-            for (API api : latestPublishedAPIs.values()) {
-                apiSortedSet.add(api);
-            }
-            return apiSortedSet;
-        } else {
-            apiVersionsSortedSet.addAll(multiVersionedAPIs);
-//            for (API api : multiVersionedAPIs) {
-//                apiVersionsSortedSet.add(api);
-//            }
-            return apiVersionsSortedSet;
-        }
-
-    }*/
-
-/*    private boolean isAllowDisplayAllAPIs() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String displayAllAPIs = config.getFirstProperty(APIConstants.API_STORE_DISPLAY_ALL_APIS);
-        if (displayAllAPIs == null) {
-            log.warn("The configurations related to show deprecated APIs in APIStore " +
-                    "are missing in api-manager.xml.");
-            return false;
-        }
-        return Boolean.parseBoolean(displayAllAPIs);
-    }*/
-
     private boolean isTenantDomainNotMatching(String tenantDomain) {
     	if (this.tenantDomain != null) {
     		return !(this.tenantDomain.equals(tenantDomain));
@@ -3007,7 +2754,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	@Override
 	public Set<API> searchAPI(String searchTerm, String searchType, String tenantDomain)
 	                                                                                    throws APIManagementException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -3196,7 +2942,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         return row;
     }
 
-
     @Override
     public boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException {
         JSONObject apiTenantConfig = null;
@@ -3232,5 +2977,4 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return false;
     }
-
 }

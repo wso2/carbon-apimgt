@@ -842,11 +842,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             if(resourceVerbs != null){
                                 for(URITemplate resourceVerb : resourceVerbs){
                                     String resourceURLContext = resourceVerb.getUriTemplate();
-                                    //If url context ends with the '*' character.
-                                    //if(resourceURLContext.endsWith("*")){
-                                        //Remove the ending '*'
-                                    //    resourceURLContext = resourceURLContext.substring(0, resourceURLContext.length() - 1);
-                                    //}
                                     client.invalidateResourceCache(api.getContext(),api.getId().getVersion(),resourceURLContext,resourceVerb.getHTTPVerb());
                                     if (log.isDebugEnabled()) {
                                         log.debug("Calling invalidation cache");
@@ -2506,8 +2501,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	 
 	private List<API> searchAPIs(String searchTerm, String searchType) throws APIManagementException {
 		List<API> apiList = new ArrayList<API>();
-//		final String searchValue = searchTerm.trim();
-		
+
 		Pattern pattern;
 		Matcher matcher;
 		String searchCriteria = APIConstants.API_OVERVIEW_NAME;
@@ -2537,19 +2531,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 					searchCriteria = APIConstants.API_OVERVIEW_STATUS;
 				} 
 				
-//				Map<String, List<String>> listMap = new HashMap<String, List<String>>();
-//				listMap.put(searchCriteria, new ArrayList<String>() {
-//					{
-//						add(searchValue);
-//					}
-//				});
-//				GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
-//				if (genericArtifacts == null || genericArtifacts.length == 0) {
-//					return apiList;
-//				}
-//				for (GenericArtifact artifact : genericArtifacts) {
-//					apiList.add(APIUtil.getAPI(artifact, registry));
-//				}
 				String regex = "(?i)[\\w.|-]*" + searchTerm.trim() + "[\\w.|-]*";
 				pattern = Pattern.compile(regex);
 				
@@ -2618,7 +2599,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
                 extensionHandlerPosition = (String) tenantConf.get(APIConstants.EXTENSION_HANDLER_POSITION);
             }
-        } catch (RegistryException | UserStoreException e) {
+        } catch (RegistryException e) {
+            handleException("Couldn't read tenant configuration from tenant registry", e);
+        }catch (UserStoreException  e) {
             handleException("Couldn't read tenant configuration from tenant registry", e);
         } catch (ParseException e) {
             handleException("Couldn't parse tenant configuration for reading extension handler position", e);

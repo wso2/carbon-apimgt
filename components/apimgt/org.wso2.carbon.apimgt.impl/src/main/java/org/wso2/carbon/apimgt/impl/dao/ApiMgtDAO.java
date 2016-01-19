@@ -3754,7 +3754,16 @@ public class ApiMgtDAO {
             prepStmt.execute();
             connection.commit();
 
-        } catch (SQLException | CryptoException e) {
+        } catch (SQLException e) {
+            log.error(e.getMessage(), e);
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add access token ", e);
+                }
+            }
+        } catch (CryptoException e) {
             log.error(e.getMessage(), e);
             if (connection != null) {
                 try {
@@ -7806,7 +7815,6 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         ResultSet rs = null;
 
         ApplicationRegistrationWorkflowDTO workflowDTO = null;
-
 
         //TODO: Need to create a different Entity for holding Registration Info.
         String registrationEntry = "SELECT " +

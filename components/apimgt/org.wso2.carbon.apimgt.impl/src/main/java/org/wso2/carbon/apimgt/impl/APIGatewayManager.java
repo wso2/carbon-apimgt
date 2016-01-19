@@ -336,7 +336,7 @@ public class APIGatewayManager {
         if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOutSequence())) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                if(!"".equals(tenantDomain)){
+                if(tenantDomain != null && !"".equals(tenantDomain)){
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 } else    {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain
@@ -409,7 +409,7 @@ public class APIGatewayManager {
         if (isSequenceDefined(api.getInSequence()) || isSequenceDefined(api.getOutSequence())) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                if(!"".equals(tenantDomain)){
+                if(tenantDomain != null && !"".equals(tenantDomain)){
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
                 else{
@@ -451,7 +451,7 @@ public class APIGatewayManager {
 
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                if(!"".equals(tenantDomain)){
+                if(tenantDomain != null && !"".equals(tenantDomain)){
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 }
                 else{
@@ -513,7 +513,7 @@ public class APIGatewayManager {
         if (isSequenceDefined(faultSequenceName)) {
             try {
                 PrivilegedCarbonContext.startTenantFlow();
-                if (!"".equals(tenantDomain)) {
+                if (tenantDomain != null && !"".equals(tenantDomain)) {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 } else {
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain

@@ -317,7 +317,7 @@ public class APIManagerConfiguration {
 
     private boolean elementHasText(OMElement element) {
         String text = element.getText();
-        return !StringUtils.isEmpty(text);
+        return text != null && text.trim().length() != 0;
     }
 
     private void addToConfiguration(String key, String value) {

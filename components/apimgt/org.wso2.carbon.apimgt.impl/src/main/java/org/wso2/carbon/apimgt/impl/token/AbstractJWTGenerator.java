@@ -246,7 +246,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
                 if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     //derive key store name
-                    String ksName = tenantDomain.trim().replace(".", "-");
+                    String ksName = tenantDomain.trim().replace('.', '-');
                     String jksName = ksName + ".jks";
                     //obtain private key
                     //TODO: maintain a hash map with tenants' private keys after first initialization
@@ -339,7 +339,7 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
                 KeyStore keyStore;
                 if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                     //derive key store name
-                    String ksName = tenantDomain.trim().replace(".", "-");
+                    String ksName = tenantDomain.trim().replace('.', '-');
                     String jksName = ksName + ".jks";
                     keyStore = tenantKSM.getKeyStore(jksName);
                     publicCert = keyStore.getCertificate(tenantDomain);

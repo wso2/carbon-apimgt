@@ -86,14 +86,13 @@ public class ApplicationManagementServiceClient {
             }
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             identityApplicationManagementServiceStub.createApplication(serviceProvider);
-        } catch (RemoteException | IdentityApplicationManagementServiceIdentityApplicationManagementException e ) {
+        } catch (RemoteException  e ) {
             log.error(e.getMessage(), e);
             throw new Exception(e.getMessage(), e);
-//        } catch (IdentityApplicationManagementServiceIdentityApplicationManagementException e) {
-//            log.error(e.getMessage(), e);
-//            throw new Exception(e.getMessage());
+        } catch (IdentityApplicationManagementServiceIdentityApplicationManagementException e) {
+            log.error(e.getMessage(), e);
+            throw new Exception(e.getMessage());
         }
-
     }
 
     /**
@@ -169,7 +168,10 @@ public class ApplicationManagementServiceClient {
         try {
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             identityApplicationManagementServiceStub.deleteApplication(applicationID);
-        } catch (RemoteException | IdentityApplicationManagementServiceIdentityApplicationManagementException e) {
+        } catch (RemoteException e) {
+            log.error(e.getMessage(), e);
+            throw new Exception(e.getMessage(), e);
+        } catch (IdentityApplicationManagementServiceIdentityApplicationManagementException e) {
             log.error(e.getMessage(), e);
             throw new Exception(e.getMessage(), e);
         }

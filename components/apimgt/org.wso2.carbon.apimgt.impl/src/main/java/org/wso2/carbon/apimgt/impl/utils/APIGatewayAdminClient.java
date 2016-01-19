@@ -132,7 +132,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     private UserRegistry getRegistry(String tenantDomain) throws APIManagementException {
         PrivilegedCarbonContext.startTenantFlow();
-        if (StringUtils.isNotEmpty(tenantDomain)) {
+        if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain,
                                                                                   true);
         } else {

@@ -24,22 +24,13 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 public class URLSafeJWTGenerator extends JWTGenerator {
 
     private static final Log log = LogFactory.getLog(URLSafeJWTGenerator.class);
 
-
     public String encode(String stringToBeEncoded) throws APIManagementException {
-
-        try {
-            return Base64.encodeBase64URLSafeString(stringToBeEncoded.getBytes("UTF-8"));
-
-        } catch (UnsupportedEncodingException e) {
-            String error = "Unsupported encoding : " + e;
-            throw new APIManagementException(error);
-        }
-
+            return Base64.encodeBase64URLSafeString(stringToBeEncoded.getBytes(Charset.defaultCharset()));
     }
-
 }
