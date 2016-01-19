@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.rest.api.util.interceptors;
 /*
  * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -15,6 +14,8 @@ package org.wso2.carbon.apimgt.rest.api.util.interceptors;
  * limitations under the License.
  */
 
+package org.wso2.carbon.apimgt.rest.api.util.interceptors;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.interceptor.Fault;
@@ -26,7 +27,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
@@ -62,8 +62,8 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 }
             }
         } catch (APIManagementException e) {
-            logger.error("Unable to add the subscriber " + username, e);
-            throw new InternalServerErrorException(e);
+            String errorMsg = "Unable to add the subscriber " + username;
+            RestApiUtil.handleInternalServerError(errorMsg, e, logger);
         }
     }
 }
