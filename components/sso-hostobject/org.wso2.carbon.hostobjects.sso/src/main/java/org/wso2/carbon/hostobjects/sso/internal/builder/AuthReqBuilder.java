@@ -32,6 +32,7 @@ import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.*;
 import org.opensaml.xml.util.Base64;
+import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.util.*;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
@@ -44,10 +45,10 @@ public class AuthReqBuilder {
      * Generate an authentication request.
      *
      * @return AuthnRequest Object
-     * @throws Exception error when bootstrapping
+     * @throws SSOHostObjectException error when bootstrapping
      */
     public AuthnRequest buildAuthenticationRequest(String issuerId, String acsUrl, boolean isPassive,
-            String nameIdPolicy) throws Exception {
+            String nameIdPolicy) throws SSOHostObjectException {
         Util.doBootstrap();
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
@@ -69,11 +70,11 @@ public class AuthReqBuilder {
      * Generate an Signed authentication request with a custom consumer url.
      *
      * @return AuthnRequest Object
-     * @throws Exception error when bootstrapping
+     * @throws SSOHostObjectException error when bootstrapping
      */
 
     public AuthnRequest buildSignedAuthRequest(String issuerId, String destination, String acsUrl, boolean isPassive,
-            int tenantId, String tenantDomain, String nameIdPolicy) throws Exception {
+            int tenantId, String tenantDomain, String nameIdPolicy) throws SSOHostObjectException {
         Util.doBootstrap();
         AuthnRequest authnRequest = (AuthnRequest) Util.buildXMLObject(AuthnRequest.DEFAULT_ELEMENT_NAME);
         authnRequest.setID(Util.createID());
@@ -111,13 +112,13 @@ public class AuthReqBuilder {
     /**
      * Sign the SAML AuthnRequest message
      *
-     * @param authnRequest
-     * @param signatureAlgorithm
-     * @param cred
-     * @return
+     * @param authnRequest SAML Authentication request
+     * @param signatureAlgorithm Signature algorithm
+     * @param cred X.509 credential object
+     * @return SAML Authentication request including the signature
      */
     public static AuthnRequest setSignature(AuthnRequest authnRequest, String signatureAlgorithm,
-            X509Credential cred) throws SignatureException {
+            X509Credential cred) throws SSOHostObjectException {
         try {
             Signature signature = (Signature) Util.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
             signature.setSigningCredential(cred);
@@ -149,15 +150,19 @@ public class AuthReqBuilder {
             Signer.signObjects(signatureList);
             return authnRequest;
         } catch (CertificateEncodingException e) {
-            throw new SignatureException("Error getting certificate", e);
+            handleException("Error getting certificate", e);
         } catch (MarshallingException e) {
-            throw new SignatureException("Error while marshalling auth request", e);
+            handleException("Error while marshalling auth request", e);
         } catch (SignatureException e) {
-            throw new SignatureException("Error while signing the SAML Request message", e);
-        } catch (Exception e) { //buildXMLObject() throws a generic Exception
-            throw new SignatureException("Error while signing the SAML Request message", e);
+            handleException("Error while signing the SAML Request message", e);
+        } catch (SSOHostObjectException e) {
+            handleException("Error while signing the SAML Request message", e);
         }
+        return null;
     }
 
-
+    private static void handleException(String errorMessage, Throwable e) throws SSOHostObjectException {
+        log.error(errorMessage);
+        throw new SSOHostObjectException(errorMessage, e);
+    }
 }

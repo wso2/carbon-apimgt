@@ -32,6 +32,9 @@ jagg.module("api", {
     getTiers:function () {
         return jagg.require(jagg.getModulesDir() + "api/api.jag").getTiers.apply(this, arguments);
     },
+    getResourceTiers:function () {
+        return jagg.require(jagg.getModulesDir() + "api/api.jag").getResourceTiers.apply(this, arguments);
+    },
     hasUserPermissions:function () {
         return jagg.require(jagg.getModulesDir() + "api/permissions.jag").hasUserPermissions.apply(this, arguments);
     },

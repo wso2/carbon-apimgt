@@ -1,4 +1,3 @@
-package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
 /*
  * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -15,6 +14,8 @@ package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
  * limitations under the License.
  */
 
+package org.wso2.carbon.apimgt.rest.api.util.interceptors.auth;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,12 +28,14 @@ import org.apache.cxf.jaxrs.model.ClassResourceInfo;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
+import org.wso2.carbon.CarbonException;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.AnonymousSessionUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -148,8 +151,14 @@ public class BasicAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 logger.error(String.format("Authentication failed. Please check your username/password"));
                 return false;
             }
-        } catch (Exception e) {
-            logger.error("Authentication failed: ", e);
+        } catch (CarbonException e) {
+            logger.error("Authentication failed for user: " + username, e);
+            return false;
+        } catch (UserStoreException e) {
+            logger.error("Authentication failed for user: " + username, e);
+            return false;
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            logger.error("Authentication failed for user: " + username, e);
             return false;
         }
     }

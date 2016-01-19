@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -81,7 +80,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             //if query parameter is not specified, This will search by name
@@ -96,7 +95,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 } else if (querySplit.length == 1) {
                     searchContent = query;
                 } else {
-                    throw RestApiUtil.buildBadRequestException("Provided query parameter '" + query + "' is invalid");
+                    RestApiUtil.handleBadRequest("Provided query parameter '" + query + "' is invalid", log);
                 }
             }
 
@@ -137,11 +136,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                 return Response.ok().entity(apiListDTO).build();
             } else {
                 String errorMessage = "Error while retrieving APIs";
-                handleException(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -165,7 +164,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             API api;
@@ -179,16 +178,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
-                handleException(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -218,7 +217,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             //this will fail if user doesn't have access to the API or the API does not exist
@@ -232,15 +231,15 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                handleException("Error while getting API " + apiId, e);
+                RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -266,11 +265,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(apiId, requestedTenantDomain)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
             documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
@@ -278,17 +277,17 @@ public class ApisApiServiceImpl extends ApisApiService {
                 DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
                 return Response.ok().entity(documentDTO).build();
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                handleException("Error while getting API " + apiId, e);
+                RestApiUtil.handleInternalServerError("Error while getting API " + apiId, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -315,7 +314,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             //this will fail if user does not have access to the API or the API does not exist
@@ -323,7 +322,8 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             documentation = apiConsumer.getDocumentation(documentId, requestedTenantDomain);
             if (documentation == null) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
+                return null;
             }
 
             if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
@@ -348,17 +348,17 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
-                handleException(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving source URI location of " + documentId;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -381,7 +381,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             //this will fail if user does not have access to the API or the API does not exist
@@ -391,23 +391,18 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
-                handleException(errorMessage, e);
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-    }
-
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(t);
     }
 
 }

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.hostobjects.sso.internal.builder;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.LogoutRequest;
@@ -30,6 +32,7 @@ import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.security.x509.X509Credential;
 import org.opensaml.xml.signature.*;
 import org.opensaml.xml.util.Base64;
+import org.wso2.carbon.hostobjects.sso.exception.SSOHostObjectException;
 import org.wso2.carbon.hostobjects.sso.internal.util.*;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
@@ -39,6 +42,8 @@ import java.util.List;
  * This class is used to generate the Logout Requests.
  */
 public class LogoutRequestBuilder {
+
+    private static Log log = LogFactory.getLog(LogoutRequestBuilder.class);
 
     /**
      * Build the logout request
@@ -80,7 +85,7 @@ public class LogoutRequestBuilder {
      */
     public LogoutRequest buildSignedLogoutRequest(String subject,String sessionIndexId, String reason,
             String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
-            throws Exception {
+            throws SSOHostObjectException {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -113,10 +118,11 @@ public class LogoutRequestBuilder {
 
     /**
      * Overload Logout request for sessionIndexId is not exist case
-     * @param subject
-     * @param reason
-     * @param issuerId
-     * @return
+     *
+     * @param subject Subject
+     * @param reason Reason for logout
+     * @param issuerId id of issuer
+     * @return SAML logout request
      */
     public LogoutRequest buildLogoutRequest(String subject, String reason,
                                             String issuerId, String nameIdFormat) {
@@ -142,14 +148,15 @@ public class LogoutRequestBuilder {
 
     /**
      * Overload Logout request for sessionIndexId is not exist case
-     * @param subject
-     * @param reason
-     * @param issuerId
-     * @return
+     *
+     * @param subject Subject
+     * @param reason Reason for logout
+     * @param issuerId id of issuer
+     * @return Signed SAML logout request
      */
     public LogoutRequest buildSignedLogoutRequest(String subject, String reason,
             String issuerId, int tenantId, String tenantDomain, String destination, String nameIdFormat)
-            throws Exception {
+            throws SSOHostObjectException {
         Util.doBootstrap();
         LogoutRequest logoutReq = new org.opensaml.saml2.core.impl.LogoutRequestBuilder().buildObject();
         logoutReq.setID(Util.createID());
@@ -179,15 +186,13 @@ public class LogoutRequestBuilder {
     /**
      * Sign the SAML LogoutRequest message
      *
-     * @param logoutRequest
-     * @param signatureAlgorithm
-     * @param cred
-     * @return
+     * @param logoutRequest SAML logout request
+     * @param signatureAlgorithm Signature algorithm
+     * @param cred X.509 credential object
+     * @return SAML logout request including the signature
      */
-
-
     public static LogoutRequest setSignature(LogoutRequest logoutRequest, String signatureAlgorithm,
-            X509Credential cred) throws SignatureException {
+            X509Credential cred) throws SSOHostObjectException {
         try {
             Signature signature = (Signature) Util.buildXMLObject(Signature.DEFAULT_ELEMENT_NAME);
             signature.setSigningCredential(cred);
@@ -220,14 +225,20 @@ public class LogoutRequestBuilder {
             Signer.signObjects(signatureList);
             return logoutRequest;
         } catch (CertificateEncodingException e) {
-            throw new SignatureException("Error getting certificate", e);
+            handleException("Error getting certificate", e);
         } catch (MarshallingException e) {
-            throw new SignatureException("Error while marshalling logout request", e);
+            handleException("Error while marshalling logout request", e);
         } catch (SignatureException e) {
-            throw new SignatureException("Error while signing the SAML logout request", e);
-        } catch (Exception e) { //buildXMLObject() throws a generic Exception
-            throw new SignatureException("Error while signing the SAML logout request", e);
+            handleException("Error while signing the SAML logout request", e);
+        } catch (SSOHostObjectException e) {
+            handleException("Error while signing the SAML logout request", e);
         }
+        return null;
+    }
+
+    private static void handleException(String errorMessage, Throwable e) throws SSOHostObjectException {
+        log.error(errorMessage);
+        throw new SSOHostObjectException(errorMessage, e);
     }
 
 }

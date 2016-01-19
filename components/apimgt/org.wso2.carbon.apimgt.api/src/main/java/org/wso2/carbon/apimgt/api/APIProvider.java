@@ -539,5 +539,15 @@ public interface APIProvider extends APIManager {
       * @throws APIManagementException
       */
      String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
-    
+
+    /**
+     * Get the paginated APIs from publisher
+     *
+     * @param tenantDomain tenant domain
+     * @param start        starting number
+     * @param end          ending number
+     * @return set of API
+     * @throws APIManagementException if failed to get Apis
+     */
+    Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
 }

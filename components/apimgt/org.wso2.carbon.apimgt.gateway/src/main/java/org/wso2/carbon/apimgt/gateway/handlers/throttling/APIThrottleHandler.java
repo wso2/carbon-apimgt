@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
@@ -188,8 +189,7 @@ public class APIThrottleHandler extends AbstractHandler {
             }
 
         if ((throttle == null && !isResponse) || (isResponse && concurrentAccessController == null)) {
-            ClusteringAgent clusteringAgent = cc.getAxisConfiguration().getClusteringAgent();
-            if (clusteringAgent != null) {
+            if (GatewayUtils.isClusteringEnabled()) {
                 isClusteringEnable = true;
             }
         }

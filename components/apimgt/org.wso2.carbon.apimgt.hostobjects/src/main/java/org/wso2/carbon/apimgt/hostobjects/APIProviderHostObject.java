@@ -23,6 +23,7 @@ import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -46,10 +47,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.*;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
+import org.wso2.carbon.apimgt.api.*;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
@@ -4510,7 +4508,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String reasonPhrase = String.valueOf(httpResponse.getStatusLine().getReasonPhrase());
             //If the endpoint doesn't match the regex which specify the invalid status code, it will return success.
             if (!statusCode.matches(invalidStatusCodesRegex)) {
-                if (log.isDebugEnabled() && statusCode.equals("405")) {
+                if (log.isDebugEnabled() && statusCode.equals(String.valueOf(HttpStatus.SC_METHOD_NOT_ALLOWED))) {
                     log.debug("Endpoint doesn't support HTTP HEAD");
                 }
                 response = "success";
@@ -4760,5 +4758,76 @@ public class APIProviderHostObject extends ScriptableObject {
         return matcher.matches();
 
     }
+    public static NativeObject jsFunction_getAllPaginatedAPIs(Context cx, Scriptable thisObj,
+                                                                       Object[] args, Function funObj)
+            throws APIManagementException {
 
+        APIProvider provider = getAPIProvider(thisObj);
+        String tenantDomain;
+
+        if (args[0] != null) {
+            tenantDomain = (String) args[0];
+        } else {
+            tenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        int start = Integer.parseInt((String) args[1]);
+        int end = Integer.parseInt((String) args[2]);
+
+
+
+        return getPaginatedAPIs(provider, tenantDomain, start, end, thisObj);
+
+
+    }
+
+    private static NativeObject getPaginatedAPIs(APIProvider apiProvider, String tenantDomain, int start,
+                                                 int end, Scriptable thisObj) throws APIManagementException {
+
+        List<API> apiList;
+        Map<String, Object> resultMap;
+        NativeArray myn = new NativeArray(0);
+        NativeObject result = new NativeObject();
+
+        try {
+            if (tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            } else {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
+                        org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+
+            }
+            resultMap = apiProvider.getAllPaginatedAPIs(tenantDomain, start, end);
+
+        }  finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+        if (resultMap != null) {
+            apiList = (List<API>) resultMap.get("apis");
+            if (apiList != null) {
+                Iterator it = apiList.iterator();
+                int i = 0;
+                while (it.hasNext()) {
+                    NativeObject row = new NativeObject();
+                    Object apiObject = it.next();
+                    API api = (API) apiObject;
+                    APIIdentifier apiIdentifier = api.getId();
+                    row.put("name", row, apiIdentifier.getApiName());
+                    row.put("version", row, apiIdentifier.getVersion());
+                    row.put("provider", row, APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+                    row.put("status", row, checkValue(api.getStatus().toString()));
+                    row.put("thumb", row, getWebContextRoot(api.getThumbnailUrl()));
+                    row.put("subs", row, getSubscriberCount(apiIdentifier, thisObj));
+                    myn.put(i, myn, row);
+                    i++;
+                }
+                result.put("apis", result, myn);
+                result.put("totalLength", result, resultMap.get("totalLength"));
+                result.put("isMore", result, resultMap.get("isMore"));
+            }
+        }
+        return result;
+    }
 }

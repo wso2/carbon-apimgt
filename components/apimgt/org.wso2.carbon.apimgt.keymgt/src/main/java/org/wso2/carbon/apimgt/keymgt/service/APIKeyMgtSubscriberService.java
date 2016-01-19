@@ -383,8 +383,6 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 return oAuthApplicationInfo;
             }
 
-            return createOAuthAppInfoFromDTO(oAuthConsumerAppDTO);
-
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while creating ServiceProvider for app " + applicationName, e);
         } catch (Exception e) {
@@ -633,15 +631,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             apiSet = dao.getSubscribedAPIs(application.getSubscriber(), null);
         }
         List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
-        for (String key : keys) {
-            dao.revokeAccessToken(key);
-            for (SubscribedAPI api : apiSet) {
-                APIKeyMapping mapping = new APIKeyMapping();
-                API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
-                mapping.setApiVersion(api.getApiId().getVersion());
-                mapping.setContext(apiDefinition.getContext());
-                mapping.setKey(key);
-                mappings.add(mapping);
+        if(keys != null) {
+            for (String key : keys) {
+                dao.revokeAccessToken(key);
+                if (apiSet != null) {
+                    for (SubscribedAPI api : apiSet) {
+                        APIKeyMapping mapping = new APIKeyMapping();
+                        API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
+                        mapping.setApiVersion(api.getApiId().getVersion());
+                        mapping.setContext(apiDefinition.getContext());
+                        mapping.setKey(key);
+                        mappings.add(mapping);
+                    }
+                }
             }
         }
         if (mappings.size() > 0) {

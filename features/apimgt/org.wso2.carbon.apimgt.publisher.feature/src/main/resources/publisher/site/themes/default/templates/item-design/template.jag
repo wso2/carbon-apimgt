@@ -326,8 +326,9 @@
                 <div class="control-group">
                    <label class="control-label" for="description"><%=i18n.localize("description")%>:</label>
                    <div class="controls">
-                       <textarea class="input-xlarge" id="description" name="description" rows="3"
+                       <textarea class="input-xlarge validateDescriptionLength" id="description" name="description" rows="3"
                                  style="margin-left: 0px; margin-right: 0px; width: 501px; "><%= _description %></textarea>
+                       <p class="help-block"><%=i18n.localize("descriptionHelpLable")%></p>
                    </div>
                </div>
 
