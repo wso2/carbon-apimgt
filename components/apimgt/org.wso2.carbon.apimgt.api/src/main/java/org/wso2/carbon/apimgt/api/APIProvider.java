@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 
@@ -473,7 +474,8 @@ public interface APIProvider extends APIManager {
      * @param  action  Action which need to execute from registry lifecycle
      *
      * */
-     boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action) throws APIManagementException;
+     boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+             throws APIManagementException, FaultGatewaysException;
 
     /**
     * This method is to set checklist item values for a particular life-cycle state of an API

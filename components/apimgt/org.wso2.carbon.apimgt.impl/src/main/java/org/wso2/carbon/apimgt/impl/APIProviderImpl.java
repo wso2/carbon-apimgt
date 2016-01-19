@@ -27,6 +27,7 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -3096,7 +3097,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
-            throws APIManagementException {
+            throws APIManagementException, FaultGatewaysException{
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
@@ -3124,8 +3125,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 return true;
             }
         } catch (GovernanceException e) {
-            handleException("Failed to change the life cycle status : " + e.getMessage(), e);
-        } finally {
+            String cause = e.getCause().getMessage();
+            if (!StringUtils.isEmpty(cause)) {
+                if (cause.contains("FaultGatewaysException:")) {
+                    Map<String, Map<String, String>> faultMap = new HashMap<String, Map<String, String>>();
+                    String faultJsonString;
+                    if (!StringUtils.isEmpty(cause) && cause.split("FaultGatewaysException:").length > 1) {
+                        faultJsonString = cause.split("FaultGatewaysException:")[1];
+                        try {
+                            JSONObject faultGatewayJson = (JSONObject) new JSONParser().parse(faultJsonString);
+                            faultMap.putAll(faultGatewayJson);
+                            throw new FaultGatewaysException(faultMap);
+                        } catch (ParseException e1) {
+                            handleException("Couldn't parse the Failed Environment json : " + e.getMessage(), e);
+                        }
+                    }
+                }else if (cause.contains("APIManagementException:")) {
+                        handleException(
+                                "Failed to change the life cycle status : " + cause.split("APIManagementException:")[1], e);
+                    } else {
+                        handleException("Failed to change the life cycle status : " + e.getMessage(), e);
+                    }
+                }
+            return false;
+        }
+         finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
         return false;
