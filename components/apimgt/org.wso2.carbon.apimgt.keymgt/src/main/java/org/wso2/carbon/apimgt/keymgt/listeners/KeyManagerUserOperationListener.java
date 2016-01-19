@@ -38,8 +38,8 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.listener.IdentityOathEventListener;
 import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
-import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -75,7 +75,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
      * the gateway key chache.
      */
     @Override
-    public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager) throws UserStoreException {
+    public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager) {
 
         boolean isTenantFlowStarted = false;
         ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
@@ -83,8 +83,8 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
 
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -105,10 +105,13 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForUserSignup(username);
             userSignupWFExecutor.cleanUpPendingTask(workflowExtRef);
         } catch (WorkflowException e) {
+            // exception is not thrown to the caller since this is a event Identity(IS) listener
             log.error("Error while cleaning up workflow task for the user: " + username, e);
         } catch (APIManagementException e) {
+            // exception is not thrown to the caller since this is a event Identity(IS) listener
             log.error("Error while cleaning up workflow task for the user: " + username, e);
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
+            // exception is not thrown to the caller since this is a event Identity(IS) listener
             log.error("Error while cleaning up workflow task for the user: " + username, e);
         } finally {
             if (isTenantFlowStarted) {
