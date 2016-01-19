@@ -30,7 +30,7 @@ import java.util.Date;
  */
 public class RestClientUtil {
 
-    private final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+   private final static String DATE_PATTERN = "yyyy-MM-dd";
 
     /**
      * conversion from date to long value
@@ -40,6 +40,7 @@ public class RestClientUtil {
      * @throws ParseException throw when error in parsing date
      */
     public static long dateToLong(String date) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
         Date fDate = dateFormat.parse(date);
         Long lDate = fDate.getTime();
         return lDate;
@@ -53,6 +54,7 @@ public class RestClientUtil {
      * @throws ParseException throw when error in parsing date
      */
     public static long getCeilingDateAsLong(String date) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
         Date fDate = dateFormat.parse(date);
         Calendar calender = Calendar.getInstance();
         calender.setTime(fDate);
@@ -71,6 +73,7 @@ public class RestClientUtil {
      * @throws ParseException throw when error in parsing date
      */
     public static long getFloorDateAsLong(String date) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN);
         Date fDate = dateFormat.parse(date);
         Calendar calender = Calendar.getInstance();
         calender.setTime(fDate);

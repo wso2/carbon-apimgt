@@ -138,16 +138,16 @@ public class APIMgtResponseHandler extends AbstractMediator {
                         log.error("Error occurred while building the message to calculate the response" +
                                   " body size", ex);
                     }
-                    if (mc != null) {
-                        SOAPEnvelope env = mc.getEnvelope();
-                        if (env != null) {
-                            SOAPBody soapbody = env.getBody();
-                            if (soapbody != null) {
-                                byte[] size = soapbody.toString().getBytes();
-                                responseSize = size.length;
-                            }
+                    
+                    SOAPEnvelope env = mc.getEnvelope();
+                    if (env != null) {
+                        SOAPBody soapbody = env.getBody();
+                        if (soapbody != null) {
+                            byte[] size = soapbody.toString().getBytes();
+                            responseSize = size.length;
                         }
                     }
+                    
                 }
             }
             //When start time not properly set
