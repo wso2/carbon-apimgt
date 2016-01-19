@@ -51,7 +51,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     public void invalidateOAuthKeys(String consumerKey, String authorizedUser) {
         Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
-        String cacheKey = consumerKey + ":" + authorizedUser;
+        String cacheKey = consumerKey + ':' + authorizedUser;
         cache.remove(cacheKey);
 
     }
@@ -62,7 +62,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
         String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         if (tenantDomainIndex != -1) {
             String temp = apiContext.substring(tenantDomainIndex + 3, apiContext.length());
-            tenantDomain = temp.substring(0, temp.indexOf("/"));
+            tenantDomain = temp.substring(0, temp.indexOf('/'));
         }
 
         try {

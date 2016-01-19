@@ -37,7 +37,7 @@ public class ThriftKeyValidatorClient {
 
     private ThriftUtils thriftUtils = null;
     private String sessionId = null;
-    private static final Log log = LogFactory.getLog(ThriftKeyValidatorClientPool.class);
+    private static final Log log = LogFactory.getLog(ThriftKeyValidatorClient.class);
     private APIKeyValidationService.Client keyValClient = null;
 
     public ThriftKeyValidatorClient() throws APISecurityException {
@@ -50,7 +50,7 @@ public class ThriftKeyValidatorClient {
             param.setTrustStore(thriftUtils.getTrustStorePath(), thriftUtils.getTrustStorePassword());
 
             TTransport transport = TSSLTransportFactory.getClientSocket(
-                    thriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
+                    ThriftUtils.getThriftServerHost(), thriftUtils.getThriftPort(),
                     thriftUtils.getThriftClientConnectionTimeOut(), param);
 
             //TProtocol protocol = new TCompactProtocol(transport);
@@ -61,7 +61,7 @@ public class ThriftKeyValidatorClient {
             keyValClient = new APIKeyValidationService.Client(protocol);
 
         } catch (TTransportException e) {
-            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage());
+            throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
     }
 
@@ -88,7 +88,7 @@ public class ThriftKeyValidatorClient {
                                                      clientDomain, matchingResource, httpVerb);
 
             } catch (Exception e1) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage());
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage(), e1);
             }
         }
         //do the conversion other side
@@ -132,7 +132,7 @@ public class ThriftKeyValidatorClient {
                 uriTemplates = keyValClient.getAllURITemplates(context, apiVersion, sessionId);
 
             } catch (Exception e1) {
-                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage());
+                throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e1.getMessage(), e1);
             }
         }
         for (org.wso2.carbon.apimgt.impl.generated.thrift.URITemplate aDto : uriTemplates) {

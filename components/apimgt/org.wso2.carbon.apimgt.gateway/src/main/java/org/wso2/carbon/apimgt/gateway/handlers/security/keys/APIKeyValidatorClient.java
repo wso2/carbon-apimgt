@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import edu.umd.cs.findbugs.annotations.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -49,7 +50,9 @@ public class APIKeyValidatorClient {
     private String username;
     private String password;
     private String cookie;
-    
+
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS",
+            justification = "It is required to set two options on the Options object")
     public APIKeyValidatorClient() throws APISecurityException {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
         String serviceURL = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
