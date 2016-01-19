@@ -79,6 +79,8 @@ public class WorkflowConstants {
     public static final String DELETE_REGISTRATION_WS_ACTION = "http://workflow.application.apimgt.carbon.wso2" +
             ".org/cancel";
 
+    public static final String DELETE_USER_WS_ACTION = "http://workflow.registeruser.apimgt.carbon.wso2.org/cancel";
+
     public static final String REGISTER_USER_PAYLOAD =
             "	  <wor:UserSignupProcessRequest xmlns:wor=\"http://workflow.registeruser.apimgt.carbon.wso2.org\">\n" +
                     "         <wor:userName>$1</wor:userName>\n" +

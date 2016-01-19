@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.rest.api.store.TiersApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TierMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -69,11 +68,11 @@ public class TiersApiServiceImpl extends TiersApiService {
             List<Tier> tierList = new ArrayList<>();
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             if (StringUtils.isBlank(tierLevel)) {
-                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+                RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
             }
 
             //retrieves the tier based on the given tier-level
@@ -89,8 +88,8 @@ public class TiersApiServiceImpl extends TiersApiService {
                     tierList.addAll(appTierMap.values());
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(
-                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+                RestApiUtil.handleResourceNotFoundError(
+                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), log);
             }
 
             TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, tierLevel, limit, offset);
@@ -98,10 +97,10 @@ public class TiersApiServiceImpl extends TiersApiService {
             return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -123,14 +122,14 @@ public class TiersApiServiceImpl extends TiersApiService {
         try {
 
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             TierDTO.TierLevelEnum tierType;
             Tier foundTier = null;
 
             if (StringUtils.isBlank(tierLevel)) {
-                throw RestApiUtil.buildBadRequestException("tierLevel cannot be empty");
+                RestApiUtil.handleBadRequest("tierLevel cannot be empty", log);
             }
 
             //retrieves the tier based on the given tier-level
@@ -145,8 +144,9 @@ public class TiersApiServiceImpl extends TiersApiService {
                     foundTier = RestApiUtil.findTier(appTierMap.values(), tierName);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(
-                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()));
+                RestApiUtil.handleResourceNotFoundError(
+                        "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), log);
+                return null;
             }
 
             //returns if the tier is found, otherwise send 404
@@ -155,20 +155,16 @@ public class TiersApiServiceImpl extends TiersApiService {
                         .entity(TierMappingUtil.fromTierToDTO(foundTier, tierType.toString()))
                         .build();
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_TIER, tierName);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_TIER, tierName, log);
             }
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving the tier with name " + tierName;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(msg, t);
-    }
 }

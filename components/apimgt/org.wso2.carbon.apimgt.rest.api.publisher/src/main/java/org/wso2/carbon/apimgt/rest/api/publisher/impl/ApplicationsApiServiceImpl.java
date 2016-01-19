@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -58,19 +57,15 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = apiProvider.getApplicationByUUID(applicationId);
 
             if (application == null) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
 
             ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
             return Response.ok().entity(applicationDTO).build();
         } catch (APIManagementException e) {
-            handleException("Error while retrieving application " + applicationId, e);
+            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
             return null;
         }
     }
 
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(msg, t);
-    }
 }

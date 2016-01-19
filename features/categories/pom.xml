@@ -24,9 +24,9 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.apimgt.nested.categories</artifactId>
+    <artifactId>feature-categories</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 APIManager - Nested Feature Categories</name>
+    <name>WSO2 APIManager - Feature Categories</name>
     <url>http://wso2.org</url>
 
 
