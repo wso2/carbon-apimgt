@@ -1,7 +1,7 @@
 <%
 var log = new Log();
 
-var addTier = function (tierName, requestCount, unitTime, startingIP, endingIP, httpVerb) {
+var addTier = function (tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit) {
     try {
        //var provider = jagg.getUser().username;
        // var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
@@ -9,7 +9,9 @@ var addTier = function (tierName, requestCount, unitTime, startingIP, endingIP, 
 
         //var tier = constructTierObject(tierName, requestCount, unitTime, statingIP, endingIP, httpVerb);
         //apiProvider.addTier(tier);
-        var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb;
+        
+        var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
+        +" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
         log.info(tierAddedMsg);
         return {
             error: false
