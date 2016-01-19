@@ -22,35 +22,42 @@
             <div class="row-fluid">
                 <form class="form-horizontal" method="POST" id="tier_form" enctype="multipart/form-data"
                     action="/admin-dashboard/site/blocks/add-policy/ajax/add-policy.jag">
-                    <fieldset>
-                        <legend>Throttling Parameters</legend>
-
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("tierName")%></label>
+                    <div class="control-group cnl-group">
+                            <label class="control-label cnl-label">Policy Name</label>
                             <div class="controls cnls">
                                 <input type="text" id="tierName" name="tierName" <%=nameFieldDisableStatus%>/>
                             </div>
-                        </div>
-                        <div class="control-group cnl-group">
+                     </div>
+                    <fieldset>
+
+                        <legend>Throttling Parameters</legend>
+
+
+                        <div class="control-group cnl-group" >
                             <label class="control-label cnl-label"><%=i18n.localize("requestCount")%> </label>
                             <div class="controls cnls">
                                 <input type="text" id="requestCount" name="requestCount" />
                             </div>
                         </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label"><%=i18n.localize("unitTime")%> </label>
+
+                        <div class="control-group cnl-group" >
+                            <label class="control-label cnl-label"> Unit Time </label>
                             <div class="controls cnls">
                                 <input type="text" id="unitTime" name="unitTime" />
+                                <select class="select required" id="timeUnit" name="timeUnit" style="width:15%">
+                                    <option value="sec" selected="true">Second(s)</option>
+                                    <option value="min">Minute(s)</option>
+                                    <option value="hour">Hour(s)</option>
+                                </select>
                             </div>
-                        </div>
 
+                        </div>
                         <div class="control-group cnl-group">
                              <label class="control-label cnl-label">Starting IP Address </label>
                              <div class="controls cnls">
                              <input type="text" id="startingIP" name="startingIP" <%=nameFieldDisableStatus%>/>
                             </div>
                         </div>
-
                         <div class="control-group cnl-group">
                             <label class="control-label cnl-label">Ending IP Address </label>
                             <div class="controls cnls">
@@ -78,18 +85,23 @@
                     </fieldset>
 
                     <fieldset>
-                        <legend>Else Conditions</legend>
+                        <legend>Default Policy</legend>
 
                         <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">Request Count (else) </label>
+                            <label class="control-label cnl-label">Request Count (default) </label>
                             <div class="controls cnls">
-                                <input type="text" id="elseRequestCount" name="elseRequestCount" />
+                                <input type="text" id="defaultRequestCount" name="defaultRequestCount" />
                             </div>
                         </div>
                         <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">Unit Time (else) </label>
+                            <label class="control-label cnl-label">Unit Time (default) </label>
                             <div class="controls cnls">
-                                <input type="text" id="elseUnitTime" name="elseUnitTime" />
+                                <input type="text" id="defaultUnitTime" name="defaultUnitTime" />
+                                <select class="select required" id="defaultTimeUnit" name="defaultTimeUnit" style="width:15%">
+                                    <option value="sec" selected="true">Second(s)</option>
+                                    <option value="min">Minute(s)</option>
+                                    <option value="hour">Hour(s)</option>
+                                </select>
                             </div>
                         </div>
                     </fieldset>
@@ -110,7 +122,7 @@
 
 
         $('#cancel-tier-btn').on('click',function(){
-             location.href = "<%= jagg.url('/tier-manage')%>";
+             location.reload(true);
         });
     });
 </script>
