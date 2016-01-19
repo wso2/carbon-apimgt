@@ -166,6 +166,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      * @param preparedStatement prepared statement used in the database query
      * @param connection        DB connection used to get data from the database
      */
+    
     public void closeDatabaseLinks(ResultSet resultSet, PreparedStatement preparedStatement,
                                    Connection connection) {
 
