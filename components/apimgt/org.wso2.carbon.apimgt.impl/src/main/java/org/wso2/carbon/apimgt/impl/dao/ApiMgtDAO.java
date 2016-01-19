@@ -8041,7 +8041,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
      * Retries the WorkflowExternalReference for a subscription.
      *
      * @param subscriptionId ID of the subscription
-     * @return External workflow reference for the subscription with subscriptionId
+     * @return External workflow reference for the subscription <code>subscriptionId</code>
      * @throws APIManagementException
      */
     public String getExternalWorkflowReferenceForSubscription(int subscriptionId)
@@ -8073,6 +8073,46 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
         } catch (SQLException e) {
             handleException("Error occurred while getting workflow entry for " +
                     "Subscription : " + subscriptionId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+
+        return workflowExtRef;
+    }
+
+    /**
+     * Retries the WorkflowExternalReference for an user signup by DOMAIN/username.
+     *
+     * @param usernameWithDomain username of the signed up user inthe format of DOMAIN/username
+     * @return External workflow reference for the signup workflow entry
+     * @throws APIManagementException
+     */
+    public String getExternalWorkflowReferenceForUserSignup(String usernameWithDomain) throws APIManagementException {
+        String workflowExtRef = null;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = "SELECT WF_EXTERNAL_REFERENCE FROM " +
+                "AM_WORKFLOWS WHERE " +
+                "WF_REFERENCE=? AND " +
+                "WF_TYPE=?";
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, usernameWithDomain);
+            ps.setString(2, WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+            rs = ps.executeQuery();
+
+            // returns only one row
+            while(rs.next()) {
+                workflowExtRef = rs.getString("WF_EXTERNAL_REFERENCE");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error occurred while getting workflow entry for " +
+                    "User signup : " + usernameWithDomain, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
         }
