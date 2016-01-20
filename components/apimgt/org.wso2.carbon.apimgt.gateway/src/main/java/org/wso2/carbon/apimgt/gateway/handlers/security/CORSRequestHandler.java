@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -150,8 +151,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 status = true;
             } else if (selectedResource != null && selectedResourceWithVerb == null) {
                 if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
-                    messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
-                    Utils.send(messageContext, HttpStatus.SC_OK);
+	                Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+	                if (corsSequence != null) {
+		                corsSequence.mediate(messageContext);
+	                }
+	                Utils.send(messageContext, HttpStatus.SC_OK);
                     status = false;
                 } else {
                     status = true;
@@ -166,7 +170,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
 	public boolean handleResponse(MessageContext messageContext) {
-		messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
+		Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+		if (corsSequence != null) {
+			corsSequence.mediate(messageContext);
+		}
 		return true;
 	}
 
