@@ -9,7 +9,6 @@ var addTier = function (tierName, requestCount, unitTime,timeUnit, startingIP, e
 
         //var tier = constructTierObject(tierName, requestCount, unitTime, statingIP, endingIP, httpVerb);
         //apiProvider.addTier(tier);
-        
         var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
         +" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
         log.info(tierAddedMsg);

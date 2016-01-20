@@ -10,9 +10,13 @@ var addTier = function () {
         tierName:$('#tierName').val(),
         requestCount:$('#requestCount').val(),
         unitTime:$('#unitTime').val(),
+            timeUnit:$('#timeUnit').val(),
             startingIP:$('#startingIP').val(),
             endingIP:$('#endingIP').val(),
-            httpVerb:$('#httpVerb').val()
+            httpVerb:$('#httpVerb').val(),
+            defaultRequestCount:$('#defaultRequestCount').val(),
+            defaultUnitTime:$('#defaultUnitTime').val(),
+            defaultTimeUnit:$('#defaultTimeUnit').val()
         }, function (result) {
             if (result.error == false) {
                 location.reload(true)
@@ -134,6 +138,20 @@ function validateInputs(){
         var endingIPTxt = endingIP.val();
 
         if(!validateIPAddressInput(endingIPTxt,endingIP, invalidErrorMsg)){
+            return false;
+        }
+
+        var defaultRequestCount = $('#defaultRequestCount');
+        var defaultRequestCountTxt = defaultRequestCount.val();
+
+        if(!validateNumbersInput(defaultRequestCountTxt,defaultRequestCount,requiredMsg, invalidErrorMsg)){
+            return false;
+        }
+
+        var defaultUnitTime = $('#defaultUnitTime');
+        var defaultUnitTimeTxt = defaultUnitTime.val();
+
+        if(!validateNumbersInput(defaultUnitTimeTxt,defaultUnitTime,requiredMsg, invalidErrorMsg)){
             return false;
         }
 
