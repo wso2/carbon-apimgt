@@ -80,7 +80,7 @@ public class UserAddListener extends AbstractUserStoreManagerListener {
             String temp = client.sendReceive(getPayload(userName)).toString();
         } catch (Exception e) {
             String message = "Error while invoking external business process";
-            log.error(message + e.toString());
+            log.error(message, e);
         }
         return true;
     }

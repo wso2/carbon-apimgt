@@ -52,7 +52,7 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     // When user does not have subscribe permission we will log it and continue flow.
                     // This happens when user tries to access anonymous apis although he does not have subscribe permission. It should be allowed.
                     if (logger.isDebugEnabled()) {
-                        logger.debug("User " + username + " does not have subscribe permission");
+                        logger.debug("User " + username + " does not have subscribe permission", e);
                     }
                     return;
                 }

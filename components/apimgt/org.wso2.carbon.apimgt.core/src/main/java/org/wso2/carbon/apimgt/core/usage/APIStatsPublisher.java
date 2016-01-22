@@ -70,9 +70,9 @@ public class APIStatsPublisher {
 
         try{
             publisher.publishEvent(requestPublisherDTO);
-        } catch (Throwable e){
+        } catch (Exception e){
             //Log the error and continue since we do not want the message flow to be effected due to stats not being published.
-            log.error("Could not publish request event to BAM. " + e.getMessage());
+            log.error("Could not publish request event to BAM. " + e.getMessage(), e);
             return false;
         }
 
@@ -116,9 +116,9 @@ public class APIStatsPublisher {
 
         try{
             publisher.publishEvent(responsePublisherDTO);
-        }catch (Throwable e){
+        } catch (Exception e){
             //Log the error and continue since we do not want the message flow to be effected due to stats not being published.
-            log.error("Could not publish response event to BAM. " + e.getMessage());
+            log.error("Could not publish response event to BAM. " + e.getMessage(), e);
             return false;
         }
 

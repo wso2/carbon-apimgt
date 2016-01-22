@@ -123,7 +123,7 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                // createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
             //}
         } catch (Exception e) {
-            log.error("Failed to create Tenant's synapse sequences.");
+            log.error("Failed to create Tenant's synapse sequences.", e);
         }
     }
 

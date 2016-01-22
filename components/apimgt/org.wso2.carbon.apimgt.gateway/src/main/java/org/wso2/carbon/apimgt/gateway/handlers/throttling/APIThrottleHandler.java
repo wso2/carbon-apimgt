@@ -1022,7 +1022,7 @@ public class APIThrottleHandler extends AbstractHandler {
         try {
             parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
         } catch (XMLStreamException e) {
-            log.error("Error occurred while creating policy file for Hard Throttling.");
+            log.error("Error occurred while creating policy file for Hard Throttling.", e);
         }
         return parsedPolicy;
     }
@@ -1066,7 +1066,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 logMessage = logMessage + " with userAgent=" + userAgent;
             }
         } catch (Exception e) {
-            log.debug("Error while getting User Agent for request");
+            log.error("Error while getting User Agent for request", e);
         }
 
         long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).

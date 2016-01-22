@@ -75,11 +75,11 @@ public class APIMgtUsageHandler extends AbstractHandler {
                             publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
                             publisher.init();
                         } catch (ClassNotFoundException e) {
-                            log.error("Class not found " + publisherClass);
+                            log.error("Class not found " + publisherClass, e);
                         } catch (InstantiationException e) {
-                            log.error("Error instantiating " + publisherClass);
+                            log.error("Error instantiating " + publisherClass, e);
                         } catch (IllegalAccessException e) {
-                            log.error("Illegal access to " + publisherClass);
+                            log.error("Illegal access to " + publisherClass, e);
                         }
                     }
                 }
@@ -186,7 +186,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 }
             }*/
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);
         }
         return true;

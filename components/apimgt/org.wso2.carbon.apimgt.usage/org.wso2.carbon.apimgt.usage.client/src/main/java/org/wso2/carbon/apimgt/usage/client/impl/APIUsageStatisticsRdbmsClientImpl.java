@@ -141,7 +141,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             
         } catch (NamingException e) {
             throw new APIMgtUsageQueryServiceClientException("Error while looking up the data " +
-                    "source: " + DATA_SOURCE_NAME);
+                    "source: " + DATA_SOURCE_NAME, e);
         }
     }
 

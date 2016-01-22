@@ -240,7 +240,7 @@ public class APIKeyValidator {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
             }
         } catch (ResourceNotFoundException e) {
-            log.error("Could not find matching resource for request");
+            log.error("Could not find matching resource for request", e);
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
         }
 

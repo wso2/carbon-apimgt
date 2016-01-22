@@ -93,7 +93,7 @@ public class WorkflowExecutorFactory {
                 return holder.getWorkflowExecutor(workflowExecutorType);
             }
         } catch (WorkflowException e) {
-            handleException("Error while creating WorkFlowDTO for " + workflowExecutorType);
+            handleException("Error while creating WorkFlowDTO for " + workflowExecutorType, e);
         }
         return null;
     }
