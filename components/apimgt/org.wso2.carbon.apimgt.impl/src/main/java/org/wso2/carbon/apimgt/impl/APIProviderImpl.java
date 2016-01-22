@@ -3422,9 +3422,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-    public void addPolicy(Map<String, String> policy){
+    public void addPolicy(HashMap<String, String> policy) throws APIManagementException{
         Map<String, String> policyDetails = policy;
         policy.get("policyName");
+        policy.get("requestCount");
+        policy.get("unitTime");
+        policy.get("timeUnit");
+        policy.get("startingIp");
+        policy.get("endingIp");
+        policy.get("httpVerb");
+        policy.get("defaultRequestCount");
+        policy.get("defaultUnitTime");
+        policy.get("defaultTimeUnit");
+
 
     }
 

@@ -21,7 +21,6 @@ var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP,
         policy.put("defaultUnitTime",defaultUnitTime);
         policy.put("defaultTimeUnit",defaultTimeUnit);
 
-        //apiProvider.addTier(tier);
         apiProvider.addPolicy(policy);
         
         var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb

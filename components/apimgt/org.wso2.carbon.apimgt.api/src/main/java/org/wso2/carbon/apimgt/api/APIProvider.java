@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -544,6 +545,9 @@ public interface APIProvider extends APIManager {
       */
      String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
 
-    void addPolicy(Map<String, String> policy);
+    /**
+     * @param policy
+     */
+    void addPolicy(HashMap<String, String> policy) throws APIManagementException;
 
 }

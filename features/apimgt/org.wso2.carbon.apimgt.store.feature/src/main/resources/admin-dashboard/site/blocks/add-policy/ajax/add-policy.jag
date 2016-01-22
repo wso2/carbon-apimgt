@@ -29,7 +29,7 @@ include("/jagg/jagg.jag");
 
             mod = jagg.module("add-policy");
 
-            result = mod.addTier(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
+            result = mod.addPolicy(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
 
             if (result.error) {
                 obj = {
