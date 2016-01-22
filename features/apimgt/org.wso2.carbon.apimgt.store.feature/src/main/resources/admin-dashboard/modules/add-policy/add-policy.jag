@@ -1,14 +1,28 @@
 <%
 var log = new Log();
 
-var addTier = function (tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit) {
+var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit) {
     try {
-       //var provider = jagg.getUser().username;
-       // var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-       // var apiProvider = new APIProviderImpl(provider);
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+        var Map = Packages.java.util.Map;
+        var HashMap=Packages.java.util.Hashmap;
 
-        //var tier = constructTierObject(tierName, requestCount, unitTime, statingIP, endingIP, httpVerb);
+        var policy = new HashMap();
+        policy.put("policyName",tierName);
+        policy.put("requestCount", requestCount);
+        policy.put("unitTime",unitTime);
+        policy.put("timeUnit",timeUnit);
+        policy.put("startingIp", startingIP);
+        policy.put("endingIp", endingIP);
+        policy.put("httpVerb",httpVerb);
+        policy.put("defaultRequestCount",defaultRequestCount);
+        policy.put("defaultUnitTime",defaultUnitTime);
+        policy.put("defaultTimeUnit",defaultTimeUnit);
+
         //apiProvider.addTier(tier);
+        apiProvider.addPolicy(policy);
         
         var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
         +" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
