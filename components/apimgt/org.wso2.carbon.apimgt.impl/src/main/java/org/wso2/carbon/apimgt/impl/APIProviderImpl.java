@@ -367,6 +367,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return count;
     }
 
+    public void addPolicy(HashMap<String,String> policyParametersMap) throws APIManagementException{
+        System.out.println("Policy: " + policyParametersMap.get("tierName"));
+
+    }
+
     public void addTier(Tier tier) throws APIManagementException {
         addOrUpdateTier(tier, false);
     }

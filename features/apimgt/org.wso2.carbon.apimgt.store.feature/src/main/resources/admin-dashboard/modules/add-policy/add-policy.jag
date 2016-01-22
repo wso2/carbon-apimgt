@@ -6,26 +6,22 @@ var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP,
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        var Map = Packages.java.util.Map;
-        var HashMap=Packages.java.util.Hashmap;
 
-        var policy = new HashMap();
-        policy.put("policyName",tierName);
-        policy.put("requestCount", requestCount);
-        policy.put("unitTime",unitTime);
-        policy.put("timeUnit",timeUnit);
-        policy.put("startingIp", startingIP);
-        policy.put("endingIp", endingIP);
-        policy.put("httpVerb",httpVerb);
-        policy.put("defaultRequestCount",defaultRequestCount);
-        policy.put("defaultUnitTime",defaultUnitTime);
-        policy.put("defaultTimeUnit",defaultTimeUnit);
+        //var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
+        //+" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
+        var policyParametersMap = constructPolicyParametersMap(tierName, requestCount, unitTime,timeUnit, startingIP,
+                endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
+        var tierAddedMsg = "\nAdded Tier: "+ policyParametersMap.get("tierName") + "\nRequest Count: " +
+                policyParametersMap.get("requestCount") + " \nUnit Time: " + policyParametersMap.get("unitTime")
+                + " "+policyParametersMap.get("timeUnit")+"\nStarting IP: " + policyParametersMap.get("startingIP") +
+                "\nEnding IP: " + policyParametersMap.get("requestCount") + "\nHTTP Verb: " + policyParametersMap.get("httpVerb")
+                +"\nDefault Request Count: "+policyParametersMap.get("defaultRequestCount")+"\nDefault Unit Time: "+
+                policyParametersMap.get("defaultUnitTime")+" "+policyParametersMap.get("defaultTimeUnit");
 
-        apiProvider.addPolicy(policy);
-        
-        var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
-        +" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
         log.info(tierAddedMsg);
+
+        apiProvider.addPolicy(policyParametersMap);
+
         return {
             error: false
         };
@@ -39,4 +35,22 @@ var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP,
     }
 };
 
+var constructPolicyParametersMap  = function(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP,
+                                             httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit){
+    var Map = Packages.java.util.HashMap;
+    var policyParametersMap = new Map();
+    policyParametersMap.put("tierName",tierName);
+    policyParametersMap.put("requestCount",requestCount);
+    policyParametersMap.put("unitTime",unitTime);
+    policyParametersMap.put("timeUnit",timeUnit);
+    policyParametersMap.put("startingIP",startingIP);
+    policyParametersMap.put("endingIP",endingIP);
+    policyParametersMap.put("httpVerb",httpVerb);
+    policyParametersMap.put("defaultRequestCount",defaultRequestCount);
+    policyParametersMap.put("defaultUnitTime",defaultUnitTime);
+    policyParametersMap.put("defaultTimeUnit",defaultTimeUnit);
+
+    return policyParametersMap;
+}
 %>
+

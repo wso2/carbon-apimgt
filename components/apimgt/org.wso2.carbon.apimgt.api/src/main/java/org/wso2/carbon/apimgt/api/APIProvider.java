@@ -137,6 +137,8 @@ public interface APIProvider extends APIManager {
     void addTier(String tierName, String requestCount,String unitTime, String startingIp, String endingIp,
                  String httpverb);
 
+    void addPolicy(HashMap<String,String> policyParametersMap) throws APIManagementException;
+    
     void updateTier(Tier tier) throws APIManagementException;
     
     void removeTier(Tier tier) throws APIManagementException;
@@ -548,6 +550,5 @@ public interface APIProvider extends APIManager {
     /**
      * @param policy
      */
-    void addPolicy(HashMap<String, String> policy) throws APIManagementException;
 
 }

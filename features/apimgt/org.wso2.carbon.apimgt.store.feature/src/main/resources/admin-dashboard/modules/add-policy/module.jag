@@ -2,6 +2,7 @@
 jagg.module("add-policy", {
 
 	addPolicy:function () {
+
         return jagg.require(jagg.getModulesDir() + "add-policy/add-policy.jag").addPolicy.apply(this, arguments);
     },
 
