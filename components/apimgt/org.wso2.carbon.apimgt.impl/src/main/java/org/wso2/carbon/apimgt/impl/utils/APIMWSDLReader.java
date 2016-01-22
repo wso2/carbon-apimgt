@@ -169,7 +169,7 @@ public class APIMWSDLReader {
                 }
             }
         } catch (Exception e) {
-	        String errorMsg = "Error occurred while getting the wsdl address location";
+            String errorMsg = "Error occurred while getting the wsdl address location";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
         }
