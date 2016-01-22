@@ -21,8 +21,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 public class APIThrottleConstants {
 
     public static final int API_THROTTLE_OUT_ERROR_CODE = 900800;
-    public static final int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900801;
-    public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900802;
+    public static final int RESOURCE_THROTTLE_OUT_ERROR_CODE = 900802;
+    public static final int APPLICATION_THROTTLE_OUT_ERROR_CODE = 900803;
 
     public static final int HARD_LIMIT_EXCEEDED_ERROR_CODE = 900801;
 
