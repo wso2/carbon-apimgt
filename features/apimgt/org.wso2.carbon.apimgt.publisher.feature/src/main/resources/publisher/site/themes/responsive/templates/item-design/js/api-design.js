@@ -837,6 +837,12 @@ $(document).ready(function(){
                         return '';
                 }));
             }
+
+            if(tagName.length > 30){
+                $tag.val(tagName.substring(0, 30));
+                $('.tags-error').html('The tag can have only 30 characters maximum.');
+            }
+
         });
         $('.tags-error').html('');
         $("#tags").on('itemAdded', function(event) {

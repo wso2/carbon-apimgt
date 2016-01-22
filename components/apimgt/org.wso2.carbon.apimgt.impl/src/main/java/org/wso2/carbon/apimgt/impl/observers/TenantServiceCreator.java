@@ -127,9 +127,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
         }
     }
 
-    public void terminatingConfigurationContext(ConfigurationContext configurationContext) {
-
-    }
+//    public void terminatingConfigurationContext(ConfigurationContext configurationContext) {
+//
+//    }
 
 /*    private void initPersistence(String configName, ConfigurationContext configurationContext, ServerContextInformation contextInfo)
             throws RegistryException, AxisFault {
@@ -238,9 +238,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     /**
      * No need to implement
      */
-    private void addDeployers(ConfigurationContext configurationContext) {
-
-    }
+//    private void addDeployers(ConfigurationContext configurationContext) {
+//
+//    }
 
     public static boolean isRunningSamplesMode() {
         return true;

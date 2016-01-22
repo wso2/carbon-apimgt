@@ -247,6 +247,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
             }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating the API in Gateway " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }

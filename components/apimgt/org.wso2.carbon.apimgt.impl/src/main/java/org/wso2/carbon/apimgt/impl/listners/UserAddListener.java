@@ -106,7 +106,7 @@ public class UserAddListener extends AbstractUserStoreManagerListener {
         String password = "admin";
         String url = "https://localhost:9444/services/";
 
-        if (url == null || user == null || password == null) {
+        if (url == null) {
             throw new AxisFault("Required API gateway admin configuration unspecified");
         }
 

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -35,6 +36,7 @@ import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.registry.extensions.aspects.utils.LifecycleConstants;
 import org.wso2.carbon.governance.registry.extensions.interfaces.Execution;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
@@ -189,12 +191,19 @@ public class APIExecutor implements Execution {
             context.setResource(apiResource);
         } catch (RegistryException e) {
             log.error("Failed to get the generic artifact while executing APIExecutor. ", e);
+            context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
+                                "APIManagementException:" + e.getMessage());
         } catch (APIManagementException e) {
             log.error("Failed to publish service to API store while executing APIExecutor. ", e);
+            context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
+                                "APIManagementException:" + e.getMessage());
         } catch (FaultGatewaysException e) {
-            log.error("Failed to publish service gateway while executing APIExecutor. ", e);
+            context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
+                                "FaultGatewaysException:" + e.getFaultMap());
         } catch (UserStoreException e) {
             log.error("Failed to publish service gateway while executing APIExecutor. ", e);
+            context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
+                                "APIManagementException:" + e.getMessage());
         }
         return executed;
     }

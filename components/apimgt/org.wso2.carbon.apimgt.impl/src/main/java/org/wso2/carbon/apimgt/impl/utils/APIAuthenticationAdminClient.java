@@ -44,9 +44,10 @@ import java.util.Set;
  * by the API gateway).
  */
 //TODO need to refactor code after design review
-public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminClient {
+public class APIAuthenticationAdminClient {
 
     private static final Log log = LogFactory.getLog(APIAuthenticationAdminClient.class);
+    public static final int TIME_OUT_IN_MILLI_SECONDS = 15 * 60 * 1000;
 
     private APIAuthenticationServiceStub stub;
 
@@ -105,7 +106,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
      * @param stub A client stub to be setup
      * @throws AxisFault if an error occurs when logging into the API gateway
      */
-    protected void setup(Stub stub, Environment environment) throws AxisFault {
+    protected final void setup(Stub stub, Environment environment) throws AxisFault {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
@@ -117,7 +118,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
 
         //If keyMgt server key cache enabled we login to KM
         if (keyMgtKeyCacheEnabledString != null) {
-            Boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);
+            boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);
             if (keyMgtKeyCacheEnabled) {
                 loggedIn = true;
                 cookie = loginKeyMgt();
@@ -140,9 +141,9 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
 
         ServiceClient client = stub._getServiceClient();
         Options options = client.getOptions();
-        options.setTimeOutInMilliSeconds(15 * 60 * 1000);
-        options.setProperty(HTTPConstants.SO_TIMEOUT, 15 * 60 * 1000);
-        options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, 15 * 60 * 1000);
+        options.setTimeOutInMilliSeconds(TIME_OUT_IN_MILLI_SECONDS);
+        options.setProperty(HTTPConstants.SO_TIMEOUT, TIME_OUT_IN_MILLI_SECONDS);
+        options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIME_OUT_IN_MILLI_SECONDS);
         options.setManageSession(true);
         options.setProperty(HTTPConstants.COOKIE_STRING, cookie);
     }
@@ -241,7 +242,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
         String gatewayKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
         //If gateway key cache enabled we return gateway URL
         if (gatewayKeyCacheEnabledString != null) {
-            Boolean gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
+            boolean gatewayKeyCacheEnabled = Boolean.parseBoolean(gatewayKeyCacheEnabledString);
             if (gatewayKeyCacheEnabled) {
                 return environment.getServerURL() + serviceName;
             }
@@ -249,7 +250,7 @@ public class APIAuthenticationAdminClient { // extends AbstractAPIGatewayAdminCl
         String keyMgtKeyCacheEnabledString = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE);
         //If keyMgt server key cache enabled we return gateway URL
         if (keyMgtKeyCacheEnabledString != null) {
-            Boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);
+            boolean keyMgtKeyCacheEnabled = Boolean.parseBoolean(keyMgtKeyCacheEnabledString);
             if (keyMgtKeyCacheEnabled) {
                 String url = config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL);
                 return url + serviceName;

@@ -65,7 +65,7 @@ public class AuthorizationManager {
                     boolean checkPermRemotely = Boolean.parseBoolean(strChekPermRemotely);
 
                     if (log.isDebugEnabled()) {
-                        log.debug("IsExternal attribute is set to '" + checkPermRemotely + "'");
+                        log.debug("IsExternal attribute is set to '" + checkPermRemotely + '\'');
                         if (checkPermRemotely) {
                             log.debug("Remote Authorization Manager Client implementation will be used");
                         } else {
@@ -111,6 +111,7 @@ public class AuthorizationManager {
                     clientPool.returnObject(client);
                 }
             } catch (Exception ignored) {
+                //Ignore
             }
         }
     }
@@ -129,6 +130,7 @@ public class AuthorizationManager {
                     clientPool.returnObject(client);
                 }
             } catch (Exception ignored) {
+                //Ignore
             }
         }
     }
@@ -147,6 +149,7 @@ public class AuthorizationManager {
                     clientPool.returnObject(client);
                 }
             } catch (Exception ignored) {
+                //Ignore
             }
         }
     }

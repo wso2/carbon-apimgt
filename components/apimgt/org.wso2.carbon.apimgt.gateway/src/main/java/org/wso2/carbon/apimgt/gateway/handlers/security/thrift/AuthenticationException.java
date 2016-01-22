@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AuthenticationException extends Exception implements org.apache.thrift.TBase<AuthenticationException,
-        AuthenticationException._Fields>, java.io.Serializable, Cloneable {
+        AuthenticationException._Fields>, java.io.Serializable {
 
     private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("AuthenticationException");
 
@@ -96,6 +96,11 @@ public class AuthenticationException extends Exception implements org.apache.thr
             String message)
     {
         this();
+        this.message = message;
+    }
+    public AuthenticationException(String message, Throwable e)
+    {
+        super(message, e.getCause());
         this.message = message;
     }
 
@@ -284,7 +289,7 @@ public class AuthenticationException extends Exception implements org.apache.thr
             sb.append(this.message);
         }
         first = false;
-        sb.append(")");
+        sb.append(')');
         return sb.toString();
     }
 

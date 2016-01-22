@@ -756,6 +756,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-rt-rs-service-description</artifactId>
+                <version>${cxf.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>1.10.19</version>
