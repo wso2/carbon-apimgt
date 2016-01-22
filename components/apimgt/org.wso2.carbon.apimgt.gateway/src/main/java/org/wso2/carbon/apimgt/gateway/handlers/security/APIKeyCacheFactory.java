@@ -50,7 +50,7 @@ public class APIKeyCacheFactory {
      * @return an APIKeyCache object
      */
     public APIKeyCache getAPIKeyCache(String context, String version) {
-        String identifier = context + ":" + version;
+        String identifier = context + ':' + version;
         APIKeyCache cache = cacheMap.get(identifier);
         if (cache == null) {
             synchronized (this) {
@@ -75,7 +75,7 @@ public class APIKeyCacheFactory {
      * @return an APIKeyCache object or null
      */
     public APIKeyCache getExistingAPIKeyCache(String context, String version) {
-        String identifier = context + ":" + version;
+        String identifier = context + ':' + version;
         return cacheMap.get(identifier);
     }
 

@@ -1,4 +1,3 @@
-
 /*
 *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
@@ -222,23 +221,21 @@ public class APIKeyValidationInfoDTO implements Serializable {
         if (authorizedDomains != null && !authorizedDomains.isEmpty()) {
             builder.append(" , authorizedDomains:[");
             for (String domain : authorizedDomains) {
-                builder.append(domain + ",");
+                builder.append(domain).append(',');
             }
             builder.replace(builder.length() - 1, builder.length() - 1, "]");
-
         } else {
-            builder.append("]");
+            builder.append(']');
         }
 
         if (scopes != null && !scopes.isEmpty()) {
             builder.append(" , scopes:[");
             for (String scope : scopes) {
-                builder.append(scope + ",");
+                builder.append(scope).append(',');
             }
             builder.replace(builder.length() - 1, builder.length() - 1, "]");
-
         } else {
-            builder.append("]");
+            builder.append(']');
         }
 
         return builder.toString();

@@ -35,7 +35,7 @@ import java.util.List;
 
 public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
 
-	private static final Log log = LogFactory.getLog(UserSignUpWSWorkflowExecutor.class);
+	private static final Log log = LogFactory.getLog(UserSignUpWorkflowExecutor.class);
 
 	/**
 	 * Method updates Roles users with subscriber role
@@ -125,9 +125,7 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
 					}
 				}
 			}
-			for (String role : roleList) {
-				roles.add(role);
-			}
+			roles.addAll(roleList);
 			userAdminStub.updateRolesOfUser(userName, roles.toArray(new String[roles.size()]));
 		} else {
 			log.error("User does not exist. Unable to approve user " + userName);
@@ -145,16 +143,15 @@ public abstract class UserSignUpWorkflowExecutor extends WorkflowExecutor {
 	 */
 	protected static void deleteUser(String serverURL, String adminUsername,
 	                                 String adminPassword, String userName) throws Exception {
-
 		if (log.isDebugEnabled()) {
 			log.debug("Remove the rejected user :" + userName);
 		}		
 		String url = serverURL + "UserAdmin";
 		
 		int index = userName.indexOf(UserCoreConstants.DOMAIN_SEPARATOR);
-		//remove the PRIMARY part from the user name		
+		//remove the PRIMARY part from the user name
 		if (index > 0) {
-			if(userName.substring(0, index).equalsIgnoreCase(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME)){
+			if(UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equalsIgnoreCase(userName.substring(0, index))){
 				userName = userName.substring(index + 1);
 			}			
 		} 

@@ -52,7 +52,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
         Map localRegistry = messageContext.getConfiguration().getLocalRegistry();
 
         Object sequence = localRegistry.get(EXT_SEQUENCE_PREFIX + direction);
-        if (sequence != null && sequence instanceof Mediator) {
+        if (sequence instanceof Mediator) {
             if (!((Mediator) sequence).mediate(messageContext)) {
                 return false;
             }
@@ -60,7 +60,7 @@ public class APIManagerExtensionHandler extends AbstractHandler {
 
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         sequence = localRegistry.get(apiName + "--" + direction);
-        if (sequence != null && sequence instanceof Mediator) {
+        if (sequence instanceof Mediator) {
             return ((Mediator) sequence).mediate(messageContext);
         }
         return true;

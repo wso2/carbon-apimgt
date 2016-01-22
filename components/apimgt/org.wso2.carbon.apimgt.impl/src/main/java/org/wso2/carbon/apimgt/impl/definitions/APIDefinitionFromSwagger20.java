@@ -36,6 +36,7 @@ import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,7 +46,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class APIDefinitionFromSwagger20 extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionFromSwagger20.class);
-    private final String SWAGGER_2_0_FILE_NAME = "swagger.json";
+    private static final String SWAGGER_2_0_FILE_NAME = "swagger.json";
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -65,8 +66,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             swagger = (JSONObject) parser.parse(resourceConfigsJSON);
             if (swagger.get("paths") != null) {
                 JSONObject paths = (JSONObject) swagger.get("paths");
-                for (Iterator pathsIterator = paths.keySet().iterator(); pathsIterator.hasNext(); ) {
-                    String uriTempVal = (String) pathsIterator.next();
+                for (Object o : paths.keySet()) {
+                    String uriTempVal = (String) o;
                     //if url template is a custom attribute "^x-" ignore.
                     if (uriTempVal.startsWith("x-") || uriTempVal.startsWith("X-")) {
                         continue;
@@ -75,18 +76,19 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                     // Following code check is done to handle $ref objects supported by swagger spec
                     // See field types supported by "Path Item Object" in swagger spec.
                     if (path.containsKey("$ref")) {
-                        log.info("Reference " + uriTempVal + " path object was ignored when generating URL template for api \""
-                                + api.getId().getApiName() + "\"");
+                        log.info("Reference " + uriTempVal + " path object was ignored when generating URL template " +
+                                 "for api \"" + api.getId().getApiName() + '\"');
                         continue;
                     }
-                    for (Iterator pathIterator = path.keySet().iterator(); pathIterator.hasNext(); ) {
-                        String httpVerb = (String) pathIterator.next();
+                    for (Object o1 : path.keySet()) {
+                        String httpVerb = (String) o1;
 
                         //Only continue for supported operations
                         if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())) {
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
-                            Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants.SWAGGER_X_SCOPE));
+                            Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants
+                                                                                                        .SWAGGER_X_SCOPE));
                             String authType = (String) operation.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -101,9 +103,10 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                             }
                             template.setThrottlingTier((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
                             template.setThrottlingTiers((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
-                            template.setMediationScript((String) operation.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
-                            template.setMediationScripts(httpVerb.toUpperCase(), 
-                                                      (String) operation.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+                            template.setMediationScript((String) operation.get(APIConstants
+                                                                                       .SWAGGER_X_MEDIATION_SCRIPT));
+                            template.setMediationScripts(httpVerb.toUpperCase(), (String) operation.get(
+                                    APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
                             template.setUriTemplate(uriTempVal);
                             template.setHTTPVerb(httpVerb.toUpperCase());
                             template.setHttpVerbs(httpVerb.toUpperCase());
@@ -141,9 +144,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             //Check whether security definitions are defined or not
             if (swaggerObject.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
                 JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
-                Iterator<JSONObject> definitionIterator = securityDefinitionsObjects.values().iterator();
-                while (definitionIterator.hasNext()) {
-                    JSONObject securityDefinition = definitionIterator.next();
+
+                for (JSONObject securityDefinition : (Iterable<JSONObject>) securityDefinitionsObjects.values()) {
                     //Read scopes from custom wso2 scopes
 
                     if (securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES) != null) {
@@ -198,7 +200,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
             APIUtil.setResourcePermissions(apiProviderName, null, null, resourcePath);
 
         } catch (RegistryException e) {
-            handleException("Error while adding Swagger Definition for " + apiName + "-" + apiVersion, e);
+            handleException("Error while adding Swagger Definition for " + apiName + '-' + apiVersion, e);
         }
     }
 
@@ -222,7 +224,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         try {
             if (registry.resourceExists(resourcePath + SWAGGER_2_0_FILE_NAME)) {
                 Resource apiDocResource = registry.get(resourcePath + SWAGGER_2_0_FILE_NAME);
-                String apiDocContent = new String((byte[]) apiDocResource.getContent());
+                String apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
                 apiJSON = (JSONObject) parser.parse(apiDocContent);
                 apiDefinition = apiJSON.toJSONString();
             } else {
@@ -231,10 +233,10 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 }
             }
         } catch (RegistryException e) {
-            handleException("Error while retrieving Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
+            handleException("Error while retrieving Swagger v2.0 Definition for " + apiIdentifier.getApiName() + '-' +
                     apiIdentifier.getVersion(), e);
         } catch (ParseException e) {
-            handleException("Error while parsing Swagger v2.0 Definition for " + apiIdentifier.getApiName() + "-" +
+            handleException("Error while parsing Swagger v2.0 Definition for " + apiIdentifier.getApiName() + '-' +
                     apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDefinition;

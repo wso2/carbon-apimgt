@@ -24,7 +24,7 @@ public class XMLIndexer implements Indexer {
         // we register both the content as it is and only text content
         String xmlAsStr = RegistryUtils.decodeBytes(fileData.data);
 
-        final StringBuffer contentOnly = new StringBuffer();
+        final StringBuilder contentOnly = new StringBuilder();
         
         IndexDocument indexDocument = new IndexDocument(fileData.path, xmlAsStr,
                 contentOnly.toString());

@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
 
+import java.nio.charset.Charset;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.util.ArrayList;
@@ -69,7 +70,7 @@ public class Util {
             signedJWT.sign(signer);
 
             // generate authorization header value
-            return "Bearer " + Base64Utils.encode(signedJWT.serialize().getBytes());
+            return "Bearer " + Base64Utils.encode(signedJWT.serialize().getBytes(Charset.defaultCharset()));
         } catch (SignatureException e) {
             String msg = "Failed to sign with signature instance";
             log.error(msg, e);
