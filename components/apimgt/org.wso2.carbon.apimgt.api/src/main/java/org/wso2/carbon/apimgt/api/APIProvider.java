@@ -131,7 +131,11 @@ public interface APIProvider extends APIManager {
     long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException;
 
     void addTier(Tier tier) throws APIManagementException;
-    
+
+
+    void addTier(String tierName, String requestCount,String unitTime, String startingIp, String endingIp,
+                 String httpverb);
+
     void updateTier(Tier tier) throws APIManagementException;
     
     void removeTier(Tier tier) throws APIManagementException;
@@ -539,5 +543,7 @@ public interface APIProvider extends APIManager {
       * @throws APIManagementException
       */
      String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
-    
+
+    void addPolicy(Map<String, String> policy);
+
 }
