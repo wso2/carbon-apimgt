@@ -97,6 +97,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -368,6 +369,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public void addTier(Tier tier) throws APIManagementException {
         addOrUpdateTier(tier, false);
+    }
+
+    public void addTier(String tierName, String requestCount,String unitTime, String startingIp, String endingIp,
+                        String httpverb){
+        //   Throttler throttler = Throttler.getInstance();
+        log.info("Testing add policy");
+        String sip = startingIp;
+        String eip = endingIp;
+        String rule_ = tierName;
+        String http = httpverb;
+
+
     }
 
     public void updateTier(Tier tier) throws APIManagementException {
@@ -3408,5 +3421,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
+
+    public void addPolicy(Map<String, String> policy){
+        Map<String, String> policyDetails = policy;
+        policy.get("policyName");
+
+    }
+
 
 }

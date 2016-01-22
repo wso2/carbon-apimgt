@@ -18,13 +18,19 @@ include("/jagg/jagg.jag");
             var tierName =  request.getParameter("tierName", "UTF-8");
             var requestCount =  request.getParameter("requestCount", "UTF-8");
             var unitTime =  request.getParameter("unitTime", "UTF-8");
+            var timeUnit =  request.getParameter("timeUnit", "UTF-8");
             var startingIP =  request.getParameter("startingIP", "UTF-8");
             var endingIP =  request.getParameter("endingIP", "UTF-8");
             var httpVerb =  request.getParameter("httpVerb", "UTF-8");
-	
+            var defaultRequestCount =  request.getParameter("defaultRequestCount", "UTF-8");
+            var defaultUnitTime =  request.getParameter("defaultUnitTime", "UTF-8");
+            var defaultTimeUnit =  request.getParameter("defaultTimeUnit", "UTF-8");
+
+
             mod = jagg.module("add-policy");
 
-            result = mod.addPolicy(tierName, requestCount, unitTime, startingIP, endingIP, httpVerb, defaultRequestCount, defaultUnitTime, defaultTimeUnit);
+            result = mod.addTier(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
+
             if (result.error) {
                 obj = {
                     error:true,

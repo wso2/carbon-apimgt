@@ -1,8 +1,8 @@
 <%
 jagg.module("add-policy", {
 
-	addTier:function () {
-        return jagg.require(jagg.getModulesDir() + "add-policy/add-policy.jag").addTier.apply(this, arguments);
+	addPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "add-policy/add-policy.jag").addPolicy.apply(this, arguments);
     },
 
 

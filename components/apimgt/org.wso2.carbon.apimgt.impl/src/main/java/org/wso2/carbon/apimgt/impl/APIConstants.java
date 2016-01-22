@@ -74,6 +74,8 @@ public final class APIConstants {
 
     public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
 
+    public static final String ADD_POLICY_LOCATION = API_APPLICATION_DATA_LOCATION + "/add-policy.xml";
+
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
     public static final int TIER_API_TYPE = 0;
