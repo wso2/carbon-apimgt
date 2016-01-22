@@ -1,4 +1,3 @@
-var attributeCount = 0;
 
 var addPolicy = function () {
     if(!validateInputs()){

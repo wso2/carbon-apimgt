@@ -43,7 +43,6 @@ include("/jagg/jagg.jag");
             }
             print(obj);
 
-            //code to save tier, call the module
         }
     }
  }());

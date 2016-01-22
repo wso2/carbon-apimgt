@@ -6,10 +6,8 @@ var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP,
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
-        //var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
-        //+" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
         var policyParametersMap = constructPolicyParametersMap(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
-        var tierAddedMsg = "\nAdded Tier: "+ policyParametersMap.get("tierName") + "\nRequest Count: " + policyParametersMap.get("requestCount") + " \nUnit Time: " + policyParametersMap.get("unitTime") + " "+policyParametersMap.get("timeUnit")+"\nStarting IP: " + policyParametersMap.get("startingIP") + "\nEnding IP: " + policyParametersMap.get("requestCount") + "\nHTTP Verb: " + policyParametersMap.get("httpVerb")
+        var tierAddedMsg = "\nAdded Tier: "+ policyParametersMap.get("tierName") + "\nRequest Count: " + policyParametersMap.get("requestCount") + " \nUnit Time: " + policyParametersMap.get("unitTime") + " "+policyParametersMap.get("timeUnit")+"\nStarting IP: " + policyParametersMap.get("startingIP") + "\nEnding IP: " + policyParametersMap.get("endingIP") + "\nHTTP Verb: " + policyParametersMap.get("httpVerb")
                 +"\nDefault Request Count: "+policyParametersMap.get("defaultRequestCount")+"\nDefault Unit Time: "+policyParametersMap.get("defaultUnitTime")+" "+policyParametersMap.get("defaultTimeUnit");
 
         log.info(tierAddedMsg);
