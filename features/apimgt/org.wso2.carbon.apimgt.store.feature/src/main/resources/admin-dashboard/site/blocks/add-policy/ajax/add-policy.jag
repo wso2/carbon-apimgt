@@ -14,7 +14,7 @@ include("/jagg/jagg.jag");
             message:'timeout'
         });
     } else if (request.getMethod() == 'POST') {
-        if (action == "addTier" ) {
+        if (action == "addPolicy" ) {
             var tierName =  request.getParameter("tierName", "UTF-8");
             var requestCount =  request.getParameter("requestCount", "UTF-8");
             var unitTime =  request.getParameter("unitTime", "UTF-8");
@@ -29,7 +29,7 @@ include("/jagg/jagg.jag");
 
             mod = jagg.module("add-policy");
 
-            result = mod.addTier(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
+            result = mod.addPolicy(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
             if (result.error) {
                 obj = {
                     error:true,

@@ -1,12 +1,12 @@
 var attributeCount = 0;
 
-var addTier = function () {
+var addPolicy = function () {
     if(!validateInputs()){
         return;
     }
 
     jagg.post("/site/blocks/add-policy/ajax/add-policy.jag", {
-        action:"addTier",
+        action:"addPolicy",
         tierName:$('#tierName').val(),
         requestCount:$('#requestCount').val(),
         unitTime:$('#unitTime').val(),
