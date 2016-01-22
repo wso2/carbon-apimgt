@@ -1,12 +1,11 @@
 <%
 var log = new Log();
 
-var addTier = function (tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit) {
+var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit) {
     try {
-        //var provider = jagg.getUser().username;
-        //var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
-        //var apiProvider = new APIProviderImpl(provider);
-        //apiProvider.addTier(tier);
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
         //var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
         //+" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
         var policyParametersMap = constructPolicyParametersMap(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
@@ -15,7 +14,7 @@ var addTier = function (tierName, requestCount, unitTime,timeUnit, startingIP, e
 
         log.info(tierAddedMsg);
 
-        //apiProvider.addPolicy(tierAddedMsg);
+        apiProvider.addPolicy(policyParametersMap);
 
         return {
             error: false
@@ -47,3 +46,4 @@ var constructPolicyParametersMap  = function(tierName, requestCount, unitTime,ti
     return policyParametersMap;
 }
 %>
+
