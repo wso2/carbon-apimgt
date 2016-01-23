@@ -71,7 +71,7 @@ var getResourceTiers = function () {
             store = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIConsumer(username);
         } else {
             var tenant = jagg.getTenantDomain();
-            username = "anonymous@" + tenant;
+            username = "anonymous";
             store = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIConsumer();
         }
 
