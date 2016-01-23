@@ -128,7 +128,7 @@ public class APIMgtThrottleUsageHandler extends AbstractMediator {
             }
 
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Cannot publish throttling event. " + e.getMessage(), e);
         }
         return true; // Should never stop the message flow

@@ -186,7 +186,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 }
             }*/
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);
         }
         return true;
