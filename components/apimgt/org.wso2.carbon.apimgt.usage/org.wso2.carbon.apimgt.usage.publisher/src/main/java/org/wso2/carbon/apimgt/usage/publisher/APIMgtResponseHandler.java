@@ -210,7 +210,7 @@ public class APIMgtResponseHandler extends AbstractMediator {
             responsePublisherDTO.setProtocol(protocol);
             publisher.publishEvent(responsePublisherDTO);
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Cannot publish response event. " + e.getMessage(), e);
         }
         return true; // Should never stop the message flow
