@@ -3011,15 +3011,7 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading defined sequence ", e);
         } finally {
-            if (inSeqStream != null) {
-                try {
-                    inSeqStream.close();
-                } catch (IOException e) {
-                    log.error(
-                            "Error while closing input stream in path " + seqFolderLocation + " " +
-                                    e);
-                }
-            }
+            IOUtils.closeQuietly(inSeqStream);
         }
 
     }
