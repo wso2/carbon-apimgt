@@ -50,7 +50,7 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         try {
             APIUtil.loadTenantAPIPolicy(tenantDomain, tenantId);
         } catch (Exception e) {
-            log.error("Failed to load tiers.xml to tenant's registry");
+            log.error("Failed to load tiers.xml to tenant's registry", e);
         }
 
         try {
@@ -66,33 +66,33 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         }
         // Need to continue the execution even if we encounter an error.
         catch (Exception e) {
-            log.error("Failed to write defined sequences to tenant " + tenantDomain + "'s registry");
+            log.error("Failed to write defined sequences to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
             APIUtil.loadTenantExternalStoreConfig(tenantId);
         } catch (Exception e) {
-            log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry");
+            log.error("Failed to load external-stores.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
             APIUtil.loadTenantGAConfig(tenantId);
         } catch (Exception e) {
-            log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry");
+            log.error("Failed to load ga-config.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
             //load workflow-extension configuration to the registry
             APIUtil.loadTenantWorkFlowExtensions(tenantId);
         } catch (Exception e) {
-            log.error("Failed to load workflow-extension.xml to tenant " + tenantDomain + "'s registry");
+            log.error("Failed to load workflow-extension.xml to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {
             //load self signup configurations to the registry
             APIUtil.loadTenantSelfSignUpConfigurations(tenantId);
         } catch (Exception e) {
-            log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry");
+            log.error("Failed to load sign-up-config.xml to tenant " + tenantDomain + "'s registry", e);
         }
         try {
             APIManagerAnalyticsConfiguration configuration = ServiceReferenceHolder.getInstance().
@@ -105,7 +105,7 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
                 APIUtil.addBamServerProfile(bamServerURL, bamServerUser, bamServerPassword, tenantId);
             }
         } catch (APIManagementException e) {
-            log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry");
+            log.error("Failed to load bam profile configuration to tenant " + tenantDomain + "'s registry", e);
         }
 
         try {

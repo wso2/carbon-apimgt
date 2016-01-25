@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -123,19 +124,22 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
 
-			Resource[] selectedAPIResources = selectedApi.getResources();
-            if (selectedApi != null && selectedAPIResources.length > 0) {
-                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
-                    if (resource != null) {
-                        selectedResource = resource;
-                        if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                            selectedResourceWithVerb = resource;
-                            break;
+            if(selectedApi != null){
+                Resource[] selectedAPIResources = selectedApi.getResources();
+                if (selectedAPIResources.length > 0) {
+                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                        Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
+                        if (resource != null) {
+                            selectedResource = resource;
+                            if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                                selectedResourceWithVerb = resource;
+                                break;
+                            }
                         }
                     }
                 }
             }
+			
             String resourceString =
                     selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
             String resourceCacheKey = APIUtil
@@ -150,8 +154,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 status = true;
             } else if (selectedResource != null && selectedResourceWithVerb == null) {
                 if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
-                    messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
-                    Utils.send(messageContext, HttpStatus.SC_OK);
+	                Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+	                if (corsSequence != null) {
+		                corsSequence.mediate(messageContext);
+	                }
+	                Utils.send(messageContext, HttpStatus.SC_OK);
                     status = false;
                 } else {
                     status = true;
@@ -166,7 +173,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     }
 
 	public boolean handleResponse(MessageContext messageContext) {
-		messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
+		Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+		if (corsSequence != null) {
+			corsSequence.mediate(messageContext);
+		}
 		return true;
 	}
 

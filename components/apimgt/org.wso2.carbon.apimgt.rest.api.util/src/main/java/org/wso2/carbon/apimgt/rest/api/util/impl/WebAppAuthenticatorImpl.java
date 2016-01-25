@@ -64,7 +64,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         try {
             tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(accessToken);
         } catch (APIManagementException e) {
-            log.error("Error while retrieving token information for token: " + accessToken + e.getMessage());
+            log.error("Error while retrieving token information for token: " + accessToken, e);
         }
         // if we got valid access token we will proceed with next
         if (tokenInfo != null && tokenInfo.isTokenValid()) {
@@ -93,7 +93,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                     }
                     return true;
                 } catch (UserStoreException e) {
-                    log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain);
+                    log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
                 }
             } else {
                 log.error("You cannot access API as scope validation failed");
@@ -136,7 +136,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
             } catch (URITemplateException e) {
                 log.error("Error while creating URI Template object to validate request. Template pattern: " +
-                        templateString);
+                        templateString, e);
             }
             if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
                     && verb != null && verb.equalsIgnoreCase(((URITemplate)template).getHTTPVerb())) {

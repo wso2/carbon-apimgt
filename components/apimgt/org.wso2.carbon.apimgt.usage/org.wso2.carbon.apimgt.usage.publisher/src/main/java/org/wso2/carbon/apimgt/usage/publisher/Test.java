@@ -17,7 +17,6 @@
 */
 package org.wso2.carbon.apimgt.usage.publisher;
 
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
@@ -28,7 +27,6 @@ public class Test {
 
     public static void main(String[] args) throws Exception {
 
-        APIManagerConfiguration config = new APIManagerConfiguration();
 
         //TODO: Populate the config with required BAM parameters - config.load(testFilePath)
 
@@ -36,8 +34,10 @@ public class Test {
 
         RequestPublisherDTO testRequestPublisherDTO = new RequestPublisherDTO();
         ResponsePublisherDTO testResponsePublisherDTO = new ResponsePublisherDTO();
-        DataBridgeRequestPublisherDTO testDataBridgeRequestPublisherDTO = new DataBridgeRequestPublisherDTO(testRequestPublisherDTO);
-        DataBridgeResponsePublisherDTO testDataBridgeResponsePublisherDTO = new DataBridgeResponsePublisherDTO(testResponsePublisherDTO);
+        DataBridgeRequestPublisherDTO testDataBridgeRequestPublisherDTO = new DataBridgeRequestPublisherDTO(
+                testRequestPublisherDTO);
+        DataBridgeResponsePublisherDTO testDataBridgeResponsePublisherDTO = new DataBridgeResponsePublisherDTO(
+                testResponsePublisherDTO);
 
         //Only the properties needed for the test are set
         testRequestPublisherDTO.setApi("DeliciousAPI");

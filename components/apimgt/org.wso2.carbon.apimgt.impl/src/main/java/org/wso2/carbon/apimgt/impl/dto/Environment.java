@@ -118,7 +118,6 @@ public class Environment implements Serializable {
     @Override
     public int hashCode() {
         int result = type.hashCode();
-        result = 31 * result + name.hashCode();
-        return result;
+        return  31 * result + name.hashCode();
     }
 }

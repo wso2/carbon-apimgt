@@ -61,11 +61,10 @@ public class APIConfigContext extends ConfigContext {
         context.put("apiObj", api);
 
         if (api.getStatus().equals(APIStatus.BLOCKED)) {
-            context.put("apiIsBlocked", true);
+            context.put("apiIsBlocked", Boolean.TRUE);
         } else {
-            context.put("apiIsBlocked", false);
+            context.put("apiIsBlocked", Boolean.FALSE);
         }
-
         return context;
     }
 

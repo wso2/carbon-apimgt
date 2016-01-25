@@ -80,7 +80,7 @@ public class UserAddListener extends AbstractUserStoreManagerListener {
             String temp = client.sendReceive(getPayload(userName)).toString();
         } catch (Exception e) {
             String message = "Error while invoking external business process";
-            log.error(message + e.toString());
+            log.error(message, e);
         }
         return true;
     }
@@ -106,7 +106,7 @@ public class UserAddListener extends AbstractUserStoreManagerListener {
         String password = "admin";
         String url = "https://localhost:9444/services/";
 
-        if (url == null || user == null || password == null) {
+        if (url == null) {
             throw new AxisFault("Required API gateway admin configuration unspecified");
         }
 

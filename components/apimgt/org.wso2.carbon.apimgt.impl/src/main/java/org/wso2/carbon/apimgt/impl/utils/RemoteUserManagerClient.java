@@ -42,8 +42,8 @@ public class RemoteUserManagerClient {
 			String clientAxisConf = CarbonUtils.getCarbonHome() + File.separator + "repository" +
                     File.separator + "conf" + File.separator + "axis2"+ File.separator +"axis2_client.xml";
 			
-			ConfigurationContext configContext =   ConfigurationContextFactory. createConfigurationContextFromFileSystem(clientRepo,clientAxisConf);
-			userStoreManagerStub =  new RemoteUserStoreManagerServiceStub(configContext, serviceURL +
+			ConfigurationContext configContext = ConfigurationContextFactory. createConfigurationContextFromFileSystem(clientRepo,clientAxisConf);
+			userStoreManagerStub = new RemoteUserStoreManagerServiceStub(configContext, serviceURL +
 			                                                                   "RemoteUserStoreManagerService");
 			ServiceClient svcClient = userStoreManagerStub._getServiceClient();
 			CarbonUtils.setBasicAccessSecurityHeaders(username, password, true,svcClient);
@@ -71,12 +71,10 @@ public class RemoteUserManagerClient {
 	 * @throws APIManagementException
 	 */
 	public String[] getUserList(String claim, String claimValue) throws APIManagementException {
-		String[] user ;
 		try {
-			user = userStoreManagerStub.getUserList(claim, claimValue, null);
-			return user;
+			return userStoreManagerStub.getUserList(claim, claimValue, null);
 		} catch (Exception e) {
-			throw new APIManagementException("Error when retriving userlist", e);
+			throw new APIManagementException("Error when retrieving user list", e);
 		}
 	
 	}

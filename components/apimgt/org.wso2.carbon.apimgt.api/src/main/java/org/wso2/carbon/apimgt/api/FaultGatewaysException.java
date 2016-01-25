@@ -17,6 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import java.util.Map;
 
 public class FaultGatewaysException extends Exception {
@@ -56,5 +59,9 @@ public class FaultGatewaysException extends Exception {
 
 	public FaultGatewaysException(Map<String, Map<String, String>> faultMap) {
 		this.faultMap = faultMap;
+	}
+
+	public String getFaultMap() {
+		return JSONObject.toJSONString(faultMap);
 	}
 }

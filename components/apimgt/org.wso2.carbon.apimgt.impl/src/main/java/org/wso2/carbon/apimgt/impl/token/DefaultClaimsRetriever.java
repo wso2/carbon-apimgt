@@ -86,34 +86,31 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                 int tenantId = APIUtil.getTenantId(endUserName);
                 String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(endUserName);
                 //check in local cache
-            String key = endUserName + ":" + tenantId;
-            ClaimCacheKey cacheKey = new ClaimCacheKey(key);
-            //Object result = claimsLocalCache.getValueFromCache(cacheKey);
-            Object result = getClaimsLocalCache().get(cacheKey);
-            if (result != null) {
-                claimValues = ((UserClaims) result).getClaimValues();
-                return claimValues;
-            } else {
-                ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantUserRealm(tenantId).getClaimManager();
-                //Claim[] claims = claimManager.getAllClaims(dialectURI);
-                ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
-                String[] claimURIs = claimMappingtoClaimURIString(claims);
-                UserStoreManager userStoreManager =
-                        ServiceReferenceHolder.getInstance().getRealmService().
-                                getTenantUserRealm(tenantId).getUserStoreManager();
+                String key = endUserName + ':' + tenantId;
+                ClaimCacheKey cacheKey = new ClaimCacheKey(key);
+                //Object result = claimsLocalCache.getValueFromCache(cacheKey);
+                Object result = getClaimsLocalCache().get(cacheKey);
+                if (result != null) {
+                    return ((UserClaims) result).getClaimValues();
+                } else {
+                    ClaimManager claimManager = ServiceReferenceHolder.getInstance().getRealmService().
+                            getTenantUserRealm(tenantId).getClaimManager();
+                    //Claim[] claims = claimManager.getAllClaims(dialectURI);
+                    ClaimMapping[] claims = claimManager.getAllClaimMappings(dialectURI);
+                    String[] claimURIs = claimMappingtoClaimURIString(claims);
+                    UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
+                            getTenantUserRealm(tenantId).getUserStoreManager();
 
-                claimValues = new TreeMap(
-                        userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs, null));
-                UserClaims userClaims = new UserClaims(claimValues);
-                //add to cache
-                getClaimsLocalCache().put(cacheKey, userClaims);
-                return claimValues;
-            }
+                    claimValues = new TreeMap(userStoreManager.getUserClaimValues(tenantAwareUserName, claimURIs,
+                                                                                  null));
+                    UserClaims userClaims = new UserClaims(claimValues);
+                    //add to cache
+                    getClaimsLocalCache().put(cacheKey, userClaims);
+                    return claimValues;
+                }
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving user claim values from "
-                    + "user store");
+            throw new APIManagementException("Error while retrieving user claim values from " + "user store", e);
         }
         return null;
     }

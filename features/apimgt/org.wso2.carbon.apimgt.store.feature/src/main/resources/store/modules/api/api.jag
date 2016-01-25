@@ -62,13 +62,16 @@ var getResourceTiers = function () {
     var tierArray = [];
     var store;
     var i;
-    var username = user.username;
+    var username;
 
     try {
 
-        if (username != null) {
+        if (user != null) {
+            username = user.username;
             store = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIConsumer(username);
         } else {
+            var tenant = jagg.getTenantDomain();
+            username = "anonymous";
             store = org.wso2.carbon.apimgt.impl.APIManagerFactory.getInstance().getAPIConsumer();
         }
 

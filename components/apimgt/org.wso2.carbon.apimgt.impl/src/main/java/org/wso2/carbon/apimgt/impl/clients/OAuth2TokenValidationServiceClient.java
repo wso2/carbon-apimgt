@@ -51,7 +51,7 @@ public class OAuth2TokenValidationServiceClient {
         String serviceURL = config.getParameter(APIConstants.AUTHSERVER_URL);
         username = "admin";
         password = "admin";
-        if (serviceURL == null || username == null || password == null) {
+        if (serviceURL == null) {
             throw new APIManagementException("Required connection details for the key management " +
                     "server not provided. Failed to create OAuth2 token validation service client");
         }

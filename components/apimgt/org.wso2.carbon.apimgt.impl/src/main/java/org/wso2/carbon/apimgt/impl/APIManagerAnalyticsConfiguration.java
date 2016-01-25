@@ -27,6 +27,9 @@ import java.util.Map;
 
 public class APIManagerAnalyticsConfiguration {
 
+    private static APIManagerAnalyticsConfiguration instance;
+
+    private static final Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
     private String bamServerUrlGroups;
     private String bamServerUser;
     private String bamServerPassword;
@@ -34,20 +37,18 @@ public class APIManagerAnalyticsConfiguration {
     private boolean skipEventReceiverConnection;
     private boolean buildMsg;
     private String publisherClass;
-	private String requestStreamName;
-	private String requestStreamVersion;
-	private String responseStreamName;
-	private String responseStreamVersion;
-	private String faultStreamName;
-	private String faultStreamVersion;
+    private String requestStreamName;
+    private String requestStreamVersion;
+    private String responseStreamName;
+    private String responseStreamVersion;
+    private String faultStreamName;
+    private String faultStreamVersion;
     private String throttleStreamName;
-	private String throttleStreamVersion;
-    public static APIManagerAnalyticsConfiguration instance = new APIManagerAnalyticsConfiguration();
-	private static Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
+    private String throttleStreamVersion;
 
     private APIManagerAnalyticsConfiguration() {
         analyticsEnabled = APIUtil.isAnalyticsEnabled();
-        if(analyticsEnabled) {
+        if (analyticsEnabled) {
             Map<String, String> analyticsConfigs = APIUtil.getAnalyticsConfigFromRegistry();
             bamServerUrlGroups = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
             bamServerUser = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_USER);
@@ -55,23 +56,17 @@ public class APIManagerAnalyticsConfiguration {
         }
     }
 
-    public static synchronized APIManagerAnalyticsConfiguration getInstance(){
-        if(instance == null){
+    public static synchronized APIManagerAnalyticsConfiguration getInstance() {
+        if (instance == null) {
             instance = new APIManagerAnalyticsConfiguration();
         }
         return instance;
     }
-    public static synchronized APIManagerAnalyticsConfiguration createNewInstance(){
-            log.debug("Writing Analytics Configuration to Registry...");
-            APIUtil.writeAnalyticsConfigurationToRegistry(ServiceReferenceHolder.getInstance()
-                                                                  .getAPIManagerConfigurationService().getAPIManagerConfiguration());
-            instance = new APIManagerAnalyticsConfiguration();
-        return instance;
-    }
+
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
         String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
-        skipEventReceiverConnection = skipEventReceiverConnStr != null &&
-                JavaUtils.isTrueExplicitly(skipEventReceiverConnStr);
+        skipEventReceiverConnection = skipEventReceiverConnStr != null && JavaUtils.isTrueExplicitly
+                (skipEventReceiverConnStr);
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
         requestStreamName = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
         requestStreamVersion = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_VERSION);
@@ -121,29 +116,29 @@ public class APIManagerAnalyticsConfiguration {
         return publisherClass;
     }
 
-	public String getRequestStreamName() {
-		return requestStreamName;
-	}
+    public String getRequestStreamName() {
+        return requestStreamName;
+    }
 
-	public String getRequestStreamVersion() {
-		return requestStreamVersion;
-	}
+    public String getRequestStreamVersion() {
+        return requestStreamVersion;
+    }
 
-	public String getResponseStreamName() {
-		return responseStreamName;
-	}
+    public String getResponseStreamName() {
+        return responseStreamName;
+    }
 
-	public String getResponseStreamVersion() {
-		return responseStreamVersion;
-	}
+    public String getResponseStreamVersion() {
+        return responseStreamVersion;
+    }
 
-	public String getFaultStreamName() {
-		return faultStreamName;
-	}
+    public String getFaultStreamName() {
+        return faultStreamName;
+    }
 
-	public String getFaultStreamVersion() {
-		return faultStreamVersion;
-	}
+    public String getFaultStreamVersion() {
+        return faultStreamVersion;
+    }
 
     public String getThrottleStreamName() {
         return throttleStreamName;

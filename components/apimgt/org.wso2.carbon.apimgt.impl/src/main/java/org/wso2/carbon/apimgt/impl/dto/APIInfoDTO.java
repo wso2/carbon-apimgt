@@ -79,7 +79,7 @@ public class APIInfoDTO implements Serializable{
      */
     public String getAPIIdentifier() {
         if (providerId != null && apiName != null && version != null) {
-            return providerId + "_" + apiName + "_" + version;
+            return providerId + '_' + apiName + '_' + version;
         } else {
             return null;
         }

@@ -447,15 +447,13 @@ public class RegistryForumManager implements ForumManager {
         GenericArtifactManager topicArtifactManager = getArtifactManager(registry, TOPIC_RXT_KEY);
 
         try {
-            GenericArtifact replyArtifact = artifactManager.getGenericArtifact(replyId);
-
-            if(!isOwnerOfReply(username, replyArtifact)){
-                throw new ForumException(String.format("'%s' is not the owner of this reply.", username));
-            }
-
+            GenericArtifact replyArtifact = artifactManager.getGenericArtifact(replyId);           
             String topicId = null;
-
             if(replyArtifact != null){
+                if(!isOwnerOfReply(username, replyArtifact)){
+                    throw new ForumException(String.format("'%s' is not the owner of this reply.", username));
+                }
+                
                 topicId = replyArtifact.getAttribute(ForumConstants.OVERVIEW_REPLY_TOPIC_ID);
                 artifactManager.removeGenericArtifact(replyId);
 
