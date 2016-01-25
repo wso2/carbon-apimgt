@@ -349,7 +349,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 int index = 1;
                 statement.setString(index++, keyString);
                 statement.setString(index++, fromDate);
-                statement.setString(index++, toDate);
+                statement.setString(index, toDate);
 
                 resultSet = statement.executeQuery();
                 AppUsageDTO appUsageDTO;
@@ -798,7 +798,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                             " FROM " + tableName + " GROUP BY " + APIUsageStatisticsClientConstants.API + "," +
                             APIUsageStatisticsClientConstants.CONTEXT + "," + APIUsageStatisticsClientConstants.VERSION;
                     statement = connection.prepareStatement(query);
-                    statement.setString(1, tableName);
                 } else {
                     query = "SELECT " +
                             APIUsageStatisticsClientConstants.API + "," +
@@ -1931,8 +1930,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         " GROUP BY api,version,apiPublisher,context";
 
                 statement = connection.prepareStatement(query);
-                statement.setString(1,apiName);
-                statement.setString(2,fromDate);
+                statement.setString(1, apiName);
+                statement.setString(2, fromDate);
                 statement.setString(3, toDate);
             } else {
                 query = "SELECT api,version,apiPublisher,context,SUM(total_request_count) as total_request_count" +
@@ -1941,7 +1940,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         " GROUP BY api,version,apiPublisher,context";
 
                 statement = connection.prepareStatement(query);
-                statement.setString(1,apiName);
+                statement.setString(1, apiName);
             }
 
             rs = statement.executeQuery();
@@ -1963,7 +1962,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     private List<APIUsageByUserName> queryBetweenTwoDaysForAPIUsageByUser(String providerName, String fromDate,
-            String toDate, Integer limit) throws APIMgtUsageQueryServiceClientException {
+                                                                          String toDate, Integer limit) throws APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
                     + "that the data source is properly configured in the APIUsageTracker configuration.");
@@ -1975,7 +1974,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         Connection connection = null;
-        PreparedStatement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet rs = null;
         try {
             connection = dataSource.getConnection();
@@ -1991,19 +1990,19 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 oracleQuery =
                         "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
-                        +
-                        "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME
-                        + " BETWEEN " +
-                        "? AND ? " +
-                        " GROUP BY API, API_VERSION, VERSION, USERID, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
+                                +
+                                "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME
+                                + " BETWEEN " +
+                                "? AND ? " +
+                                " GROUP BY API, API_VERSION, VERSION, USERID, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
 
                 mssqlQuery =
                         "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
-                        +
-                        "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME
-                        + " BETWEEN " +
-                        "? AND ? " +
-                        " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
+                                +
+                                "FROM API_REQUEST_SUMMARY" + " WHERE " + APIUsageStatisticsClientConstants.TIME
+                                + " BETWEEN " +
+                                "? AND ? " +
+                                " GROUP BY API, API_VERSION, USERID, VERSION, APIPUBLISHER, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC";
             } else {
                 query = "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
                         +
@@ -2012,15 +2011,15 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
                 oracleQuery =
                         "SELECT API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
-                        +
-                        "FROM API_REQUEST_SUMMARY" +
-                        " GROUP BY API, API_VERSION, VERSION, APIPUBLISHER, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
+                                +
+                                "FROM API_REQUEST_SUMMARY" +
+                                " GROUP BY API, API_VERSION, VERSION, APIPUBLISHER, USERID, CONTEXT ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
                 mssqlQuery =
                         "SELECT  API, API_VERSION, VERSION, APIPUBLISHER, USERID, SUM(TOTAL_REQUEST_COUNT) AS TOTAL_REQUEST_COUNT, CONTEXT "
-                        +
-                        "FROM API_REQUEST_SUMMARY" +
-                        " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
+                                +
+                                "FROM API_REQUEST_SUMMARY" +
+                                " GROUP BY API, API_VERSION, APIPUBLISHER, USERID ORDER BY TOTAL_REQUEST_COUNT DESC ";
 
             }
             if ((connection.getMetaData().getDriverName()).contains("Oracle")) {
@@ -2030,13 +2029,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 query = mssqlQuery;
             }
 
-            statement = connection.prepareStatement(query);
-            if (fromDate != null && toDate != null) {
-                statement.setString(1, fromDate);
-                statement.setString(2, toDate);
+            preparedStatement = connection.prepareStatement(query);
+            if(query.contains("?")){
+                preparedStatement.setString(1, fromDate);
+                preparedStatement.setString(2, toDate);
             }
 
-            rs = statement.executeQuery();
+            rs = preparedStatement.executeQuery();
             List<APIUsageByUserName> usageByName = new ArrayList<APIUsageByUserName>();
             String apiName;
             String apiVersion;
@@ -2054,7 +2053,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 publisher = rs.getString("apipublisher");
                 if (publisher != null) {
                     APIUsageByUserName usage = new APIUsageByUserName(apiName, apiVersion, context, userID, publisher,
-                                                                      requestCount);
+                            requestCount);
                     usageByName.add(usage);
                 }
             }
