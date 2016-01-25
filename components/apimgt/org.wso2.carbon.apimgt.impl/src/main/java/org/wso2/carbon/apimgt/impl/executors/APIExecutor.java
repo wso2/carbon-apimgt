@@ -198,10 +198,11 @@ public class APIExecutor implements Execution {
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
                                 "APIManagementException:" + e.getMessage());
         } catch (FaultGatewaysException e) {
+            log.error("Failed to publish service gateway while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
                                 "FaultGatewaysException:" + e.getFaultMap());
         } catch (UserStoreException e) {
-            log.error("Failed to publish service gateway while executing APIExecutor. ", e);
+            log.error("Failed to get tenant Id while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
                                 "APIManagementException:" + e.getMessage());
         }

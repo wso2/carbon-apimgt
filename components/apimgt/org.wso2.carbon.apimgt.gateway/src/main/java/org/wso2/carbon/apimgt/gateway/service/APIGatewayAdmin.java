@@ -252,7 +252,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 element = AXIOMUtil.stringToOM(sequence);
                 client.addSequence(element);
             } catch (XMLStreamException e) {
-                log.error("Exception occurred while converting String to an OM.");
+                log.error("Exception occurred while converting String to an OM.", e);
             }
         }
     }
@@ -271,7 +271,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                 element = AXIOMUtil.stringToOM(sequence);
                 client.addSequenceForTenant(element, tenantDomain);
             } catch (XMLStreamException e) {
-                log.error("Exception occurred while converting String to an OM.");
+                log.error("Exception occurred while converting String to an OM.", e);
             }
         }
     }

@@ -106,7 +106,7 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
                     return true;
                 }
             } catch (APIManagementException e) {
-                logger.error("Error while authenticating incoming request to API Manager REST API");
+                logger.error("Error while authenticating incoming request to API Manager REST API", e);
             }
         return false;
     }

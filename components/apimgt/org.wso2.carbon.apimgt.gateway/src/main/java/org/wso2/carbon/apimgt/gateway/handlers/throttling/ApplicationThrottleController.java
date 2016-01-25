@@ -82,7 +82,7 @@ public class ApplicationThrottleController {
         try {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
-            handleException("Unable to Find the tenant ID using tenant: " + tenantDomain);
+            handleException("Unable to Find the tenant ID using tenant: " + tenantDomain, e);
             return null;
         }
 
@@ -213,7 +213,7 @@ public class ApplicationThrottleController {
         try {
             registry = registryService.getGovernanceSystemRegistry(tenantId);
         } catch (RegistryException e) {
-            log.error("Error while fetching Governance Registry of Super Tenant");
+            log.error("Error while fetching Governance Registry of Super Tenant", e);
             return null;
         }
 

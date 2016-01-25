@@ -870,7 +870,7 @@ public class RestApiUtil {
         try {
             uriTemplates = definitionFromSwagger20.getURITemplates(api, swagger);
         } catch (APIManagementException e) {
-            log.error("Error while parsing swagger content to get URI Templates" + e.getMessage());
+            log.error("Error while parsing swagger content to get URI Templates", e);
         }
         api.setUriTemplates(uriTemplates);
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
@@ -878,7 +878,7 @@ public class RestApiUtil {
         try {
             registeredResource = keyManager.getResourceByApiId(api.getId().toString());
         } catch (APIManagementException e) {
-            log.error("Error while getting registered resources for API: " + api.getId().toString() + e.getMessage());
+            log.error("Error while getting registered resources for API: " + api.getId().toString(), e);
         }
         //Add new resource if not exist
         if (registeredResource == null) {
@@ -886,7 +886,7 @@ public class RestApiUtil {
             try {
                 isNewResourceRegistered = keyManager.registerNewResource(api, null);
             } catch (APIManagementException e) {
-                log.error("Error while registering new resource for API: " + api.getId().toString() + e.getMessage());
+                log.error("Error while registering new resource for API: " + api.getId().toString(), e);
             }
             if (!isNewResourceRegistered) {
                 log.error("New resource not registered for API: " + api.getId());
@@ -897,7 +897,7 @@ public class RestApiUtil {
             try {
                 keyManager.updateRegisteredResource(api, registeredResource);
             } catch (APIManagementException e) {
-                log.error("Error while updating resource");
+                log.error("Error while updating resource", e);
             }
         }
         return true;
@@ -911,7 +911,7 @@ public class RestApiUtil {
             returnedAPP = impl.createApplication(appRequest);
         } catch (APIManagementException e) {
             log.error("Cannot create OAuth application from provided information, for APP name: " +
-                    appRequest.getOAuthApplicationInfo().getClientName());
+                    appRequest.getOAuthApplicationInfo().getClientName(), e);
         }
         return returnedAPP;
     }
@@ -923,7 +923,7 @@ public class RestApiUtil {
         try {
             returnedAPP = impl.retrieveApplication(consumerKey);
         } catch (APIManagementException e) {
-            log.error("Error while retrieving OAuth application information for Consumer Key: " + consumerKey);
+            log.error("Error while retrieving OAuth application information for Consumer Key: " + consumerKey, e);
         }
         return returnedAPP;
     }

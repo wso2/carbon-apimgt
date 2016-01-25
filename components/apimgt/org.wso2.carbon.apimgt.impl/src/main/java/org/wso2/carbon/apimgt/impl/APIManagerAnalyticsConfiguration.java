@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class APIManagerAnalyticsConfiguration {
 
-    public static APIManagerAnalyticsConfiguration instance;
+    private static APIManagerAnalyticsConfiguration instance;
 
     private static final Log log = LogFactory.getLog(APIManagerAnalyticsConfiguration.class);
     private String bamServerUrlGroups;

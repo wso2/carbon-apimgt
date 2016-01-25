@@ -126,9 +126,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 APIUtil.loadTenantRegistry(tenantId);
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
-                        tenantDomain);
+                        tenantDomain, e);
             } catch (RegistryException e) {
-                log.error("Could not load tenant registry for tenant " + tenantDomain);
+                log.error("Could not load tenant registry for tenant " + tenantDomain, e);
             }
         }
 
@@ -2086,7 +2086,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiIdentifier.setTier(tier);
             addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
         } catch (APIManagementException e) {
-            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());
+            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage(), e);
             return null;
         } finally {
             if (isTenantFlowStarted) {
@@ -3372,7 +3372,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                                              .getTenantId(tenantDomain);
                         signUpWFDto.setTenantId(tenantId);
                     } catch (org.wso2.carbon.user.api.UserStoreException e) {
-                        log.error("Error while loading Tenant ID for given tenant domain :" + tenantDomain);
+                        log.error("Error while loading Tenant ID for given tenant domain :" + tenantDomain, e);
                     }
 
                     signUpWFDto.setExternalWorkflowReference(userSignUpWFExecutor.generateUUID());
@@ -3606,7 +3606,7 @@ public class APIStoreHostObject extends ScriptableObject {
 			status = false;
 		} catch (UserAdminUserAdminException e) {
 			log.error("Error in checking admin credentials. Please check credentials in "
-						+ "the signup-config.xml in the registry. ");
+						+ "the signup-config.xml in the registry. ", e);
 			status = false;
 		}		
 		return status;
@@ -3638,7 +3638,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 exists = true;
             }
         } catch (UserStoreException e) {
-            handleException("Error while checking user existence for " + username);
+            handleException("Error while checking user existence for " + username, e);
         }
         return exists;
     }
@@ -3808,7 +3808,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     errorMessage = "Error while renewing Access Token for Consumer Key " + clientId
                             + " and user " + args[0];
                 }
-                handleException(errorMessage);
+                handleException(errorMessage, e);
             }
 
 
@@ -4317,7 +4317,7 @@ public class APIStoreHostObject extends ScriptableObject {
         } catch (APIManagementException e) {
         	//This is actually not an exception, that should abort the user flow. If the groupId is not available then 
         	//the flow for which the group id is not required will be run.
-            log.error("Error occurred while getting group id");
+            log.error("Error occurred while getting group id", e);
         }
         return groupId;
 

@@ -80,7 +80,7 @@ public final class APIMgtDBUtil {
                         dataSource = (DataSource) ctx.lookup(dataSourceName);
                     } catch (NamingException e) {
                         throw new APIManagementException("Error while looking up the data " +
-                                "source: " + dataSourceName);
+                                "source: " + dataSourceName, e);
                     }
                 } else {
                     DBConfiguration configuration = getDBConfig(config);

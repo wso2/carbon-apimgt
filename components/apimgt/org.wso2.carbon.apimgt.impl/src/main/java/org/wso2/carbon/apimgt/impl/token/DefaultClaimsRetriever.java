@@ -110,7 +110,7 @@ public class DefaultClaimsRetriever implements ClaimsRetriever {
                 }
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while retrieving user claim values from " + "user store");
+            throw new APIManagementException("Error while retrieving user claim values from " + "user store", e);
         }
         return null;
     }

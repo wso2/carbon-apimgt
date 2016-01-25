@@ -664,6 +664,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             } catch (RegistryException ex) {
                 handleException("Error occurred while saving the wsdl in the registry.", ex);
             }
+            handleException("Error while performing registry transaction operation", e);
         }
     }
 
@@ -1031,7 +1032,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
         } catch (FaultGatewaysException e) {
-            handleException("Error while publishing to/un-publishing from  API gateway");
+            handleException("Error while publishing to/un-publishing from  API gateway", e);
             return false;
         } finally {
             if (isTenantFlowStarted) {

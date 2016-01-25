@@ -69,8 +69,8 @@ public class APIDescriptionGenUtil {
         } catch (NullPointerException npe) {
             String msg = "Policy could not be parsed correctly based on http://schemas.xmlsoap.org/ws/2004/09/policy " +
                          "specification";
-            log.warn(msg);
-            throw new APIManagementException(msg);
+            log.error(msg, npe);
+            throw new APIManagementException(msg, npe);
         }
     }
 
@@ -213,8 +213,8 @@ public class APIDescriptionGenUtil {
         } catch (OMException e) {
             String errorMessage = "Policy could not be parsed correctly based on " +
                                   "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
-            log.warn(errorMessage);
-            throw new APIManagementException(errorMessage);
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (NumberFormatException e) {
             String message = "Error in retrieving time duration from the tiers xml";
             log.error(message, e);
