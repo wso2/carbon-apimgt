@@ -386,16 +386,19 @@ public class APIKeyValidator {
                 }
             }
 
-            Resource[] selectedAPIResources = selectedApi.getResources();
-            if (selectedApi != null && selectedAPIResources.length > 0) {
-                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedAPIResources));
-                    if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                        selectedResource = resource;
-                        break;
+            if (selectedApi != null){
+                Resource[] selectedAPIResources = selectedApi.getResources();
+                if (selectedAPIResources.length > 0) {
+                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                        Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedAPIResources));
+                        if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                            selectedResource = resource;
+                            break;
+                        }
                     }
                 }
             }
+           
 
             if (selectedResource == null) {
                 //No matching resource found.
