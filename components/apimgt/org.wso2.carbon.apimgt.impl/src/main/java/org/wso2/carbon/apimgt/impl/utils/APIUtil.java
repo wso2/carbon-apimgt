@@ -2980,11 +2980,14 @@ public final class APIUtil {
                                     customSequenceType + '/' + sequenceFileName;
                     if (registry.resourceExists(regResourcePath)) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Defined sequences have already been added to the registry");
+                            log.debug("The sequence file with the name " + sequenceFileName
+                                    + " already exists in the registry path " + regResourcePath);
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Adding defined sequences to the registry.");
+                            log.debug(
+                                    "Adding sequence file with the name " + sequenceFileName + " to the registry path "
+                                            + regResourcePath);
                         }
 
                         inSeqStream = new FileInputStream(sequenceFile);
