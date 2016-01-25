@@ -97,6 +97,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -366,8 +367,56 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return count;
     }
 
+    public String addPolicy(HashMap<String,String> policyParametersMap) throws APIManagementException{
+        //System.out.println("Policy: " + policyParametersMap.get("tierName"));
+        String policy;
+        policy = "<policy level=\"api\" tier=\"gold\" name=\"abc\">\n" +
+                "<description></description>\n" +
+                "<eligibilityQuery>\n" +
+                "FROM RequestStream\n" +
+                "SELECT api_"+policyParametersMap.get("tierName")+" AS rule, messageID, ( not(api_key is null ) AND " +
+                "api_tier=="+policyParametersMap.get("tierName")+" ) AS isEligible, str:concat(api_"+policyParametersMap.get("tierName")+"_, api_key,'_key') AS key, verb, ip\n" +
+                "INSERT INTO EligibilityStream;\n" +
+                "</eligibilityQuery>\n" +
+                "<decisionQuery>\n" +
+                "FROM EligibilityStream[isEligible==true AND rule == api_"+policyParametersMap.get("tierName")+"]\n" +
+                "select key as throttle_key, (verb=="+policyParametersMap.get("httpVerb")+") as isEligible, messageID\n" +
+                "INSERT into Api"+policyParametersMap.get("tierName")+"Stream;\n" +
+                "\n" +
+                "FROM Api$"+policyParametersMap.get("tierName")+"Stream[isEligible==true]#window.time("+policyParametersMap.get("unitTime")+" "+policyParametersMap.get("timeUnit")+")\n" +
+                "select throttle_key, (count($messageID) >= "+policyParametersMap.get("requestCount")+") as isThrottled\n" +
+                "group by throttle_key\n" +
+                "INSERT ALL EVENTS into ResultStream;\n" +
+                "\n" +
+                "FROM Api"+policyParametersMap.get("tierName")+"Stream[isEligible==false]#window.time("+policyParametersMap.get("defaultUnitTime")+" "+policyParametersMap.get("defaultTimeUnit")+")\n" +
+                "select throttle_key, (count($messageID) >= "+policyParametersMap.get("defaultRequestCount")+") as isThrottled\n" +
+                "group by throttle_key\n" +
+                "INSERT ALL EVENTS into ResultStream;\n" +
+                "</decisionQuery>\n" +
+                "</policy>";
+        System.out.println(policy);
+        return policy;
+
+    }
+
+    public void appendPolicy(String policy){
+        OMFactory factory = OMAbstractFactory.getOMFactory();
+
+    }
     public void addTier(Tier tier) throws APIManagementException {
         addOrUpdateTier(tier, false);
+    }
+
+    public void addTier(String tierName, String requestCount,String unitTime, String startingIp, String endingIp,
+                        String httpverb){
+        //   Throttler throttler = Throttler.getInstance();
+        log.info("Testing add policy");
+        String sip = startingIp;
+        String eip = endingIp;
+        String rule_ = tierName;
+        String http = httpverb;
+
+
     }
 
     public void updateTier(Tier tier) throws APIManagementException {
@@ -422,7 +471,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void saveTiers(Collection<Tier> tiers) throws APIManagementException {
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMElement root = fac.createOMElement(APIConstants.POLICY_ELEMENT);
-        OMElement assertion = fac.createOMElement(APIConstants.ASSERTION_ELEMENT);
+        OMElement assertion = fac.createOMElement(APIConstants.ASSERTI  ON_ELEMENT);
         boolean isTenantFlowStarted = false;
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
@@ -3408,5 +3457,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.endTenantFlow();
         }
     }
+
+
+
 
 }

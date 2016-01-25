@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -131,6 +132,12 @@ public interface APIProvider extends APIManager {
     long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException;
 
     void addTier(Tier tier) throws APIManagementException;
+
+
+    void addTier(String tierName, String requestCount,String unitTime, String startingIp, String endingIp,
+                 String httpverb);
+
+    void addPolicy(HashMap<String,String> policyParametersMap) throws APIManagementException;
     
     void updateTier(Tier tier) throws APIManagementException;
     
@@ -539,5 +546,9 @@ public interface APIProvider extends APIManager {
       * @throws APIManagementException
       */
      String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
-    
+
+    /**
+     * @param policy
+     */
+
 }
