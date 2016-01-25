@@ -140,7 +140,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        return doThrottle(messageContext);
+        return true;//return doThrottle(messageContext);
     }
 
     private boolean doThrottle(MessageContext messageContext) {
@@ -163,6 +163,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
 
         this.throttler = Throttler.getInstance();
+        throttler.deployLocalCEPRules();
         //throttler.addRule("Gold", null);
 
     }
