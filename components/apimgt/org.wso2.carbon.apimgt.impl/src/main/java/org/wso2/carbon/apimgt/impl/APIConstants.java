@@ -74,7 +74,7 @@ public final class APIConstants {
 
     public static final String RES_TIER_LOCATION = API_APPLICATION_DATA_LOCATION + "/res-tiers.xml";
 
-    public static final String ADD_POLICY_LOCATION = API_APPLICATION_DATA_LOCATION + "/add-policy.xml";
+    public static final String ADD_POLICY_LOCATION = API_APPLICATION_DATA_LOCATION + "/throtte-policy.xml";
 
     public static final String COMMERCIAL_TIER_PLAN = "COMMERCIAL";
 
@@ -554,7 +554,7 @@ public final class APIConstants {
             "</wsp:Policy>";
 
     public static final String THROTTLE_POLICY_ATTRIBUTE_TEMPLATE =
-            "<throttle:%s xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">%s</throttle:%s>";
+                "<throttle:%s xmlns:throttle=\"http://www.wso2.org/products/wso2commons/throttle\">%s</throttle:%s>";
 
     // This property is used to indicate whether a throttle out event has happened
     // There is a property added to the message context when such an event happens.
