@@ -22,6 +22,29 @@ var getAllSubscriptions = function (username, selectedAppName, startSubIndex, en
     }
 };
 
+var getAllSubscriptionsOfApplication = function (username, selectedAppName, startSubIndex, endSubIndex)  {
+    var result,
+            log = new Log(),
+            store = jagg.module("manager").getAPIStoreObj();
+    try {
+			var groupingId = session.get("groupId");
+			result = store.getAllSubscriptionsOfApplication(username , selectedAppName, String(startSubIndex), String(endSubIndex),groupingId);
+			if (log.isDebugEnabled()) {
+				log.debug("getAllSubscriptionsOfApplication : " + stringify(result));
+		}
+        return {
+            error:false,
+            result:result
+        };
+    } catch (e) {
+        log.error(e);
+        return {
+            error:true,
+            result:e
+        };
+    }
+};
+
 var getAPISubscriptions = function (api, username) {
     var subscriptions,
             log = new Log(),

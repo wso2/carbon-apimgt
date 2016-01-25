@@ -2447,7 +2447,8 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeObject jsFunction_getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj,
+                                                   boolean isFirstOnly)
             throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -2507,7 +2508,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Set<Scope> scopeSet = new LinkedHashSet<Scope>();
                     NativeArray scopesArray = new NativeArray(0);
 
-                    if (((appName == null || appName.isEmpty()) && i == 0) ||
+                    if (((appName == null || appName.isEmpty()) && !(isFirstOnly && i > 0)) ||
                         appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.
@@ -2743,6 +2744,21 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
         return result;
+    }
+
+    public static NativeObject jsFunction_getAllSubscriptionsOfApplication(Context cx,
+                                                                           Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
+        return getAllSubscriptions(cx, thisObj, args, funObj, true);
+    }
+
+    /**
+     * Please note that this method is there for backward compatibility.
+     */
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
+                                                              Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
+        return getAllSubscriptions(cx, thisObj, args, funObj, false);
     }
 
     private static void addAPIObj(SubscribedAPI subscribedAPI, NativeArray apisArray,
