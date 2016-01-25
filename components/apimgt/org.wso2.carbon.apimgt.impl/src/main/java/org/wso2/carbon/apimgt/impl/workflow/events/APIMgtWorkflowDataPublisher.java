@@ -91,11 +91,11 @@ public class APIMgtWorkflowDataPublisher {
             }
         } catch (MalformedURLException e) {
             log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
-        } catch (AgentException e) {
+        }catch ( AgentException e) {
             log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
-        } catch (AuthenticationException e) {
+        }catch ( AuthenticationException e) {
             log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
-        } catch (TransportException e) {
+        }catch ( TransportException  e) {
             log.error("Error initializing APIMgtWorkflowDataPublisher." + e.getMessage(), e);
         }
     }
@@ -188,21 +188,15 @@ public class APIMgtWorkflowDataPublisher {
                                           System.currentTimeMillis(), new Object[]{"external"},
                                           null,
                                           (Object[]) createPayload(workflowDTO));
-
                 } catch (AgentException e) {
                     log.error("Error while publishing workflow event" +
                               workflowDTO.getWorkflowReference(), e);
                 }
-
-
             }
-
-
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Cannot publish workflow event. " + e.getMessage(), e);
         }
         return true;
-
     }
 
     public Object createPayload(WorkflowDTO workflowDTO) {

@@ -33,7 +33,7 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
         Map localRegistry = messageContext.getConfiguration().getLocalRegistry();
 
         Object sequence = localRegistry.get(EXT_SEQUENCE_PREFIX + direction);
-        if (sequence != null && sequence instanceof Mediator) {
+        if (sequence instanceof Mediator) {
             if (!((Mediator) sequence).mediate(messageContext)) {
                 return false;
             }
@@ -41,7 +41,7 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
 
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         sequence = localRegistry.get(apiName + "--" + direction);
-        if (sequence != null && sequence instanceof Mediator) {
+        if (sequence instanceof Mediator) {
             return ((Mediator) sequence).mediate(messageContext);
         }
         return true;
@@ -50,13 +50,10 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
     private void clearCacheForAccessToken(MessageContext messageContext) {
 
         org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        String revokedToken = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.REVOKED_ACCESS_TOKEN);
-        String renewedToken = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.DEACTIVATED_ACCESS_TOKEN);
-        String authorizedUser = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.AUTHORIZED_USER);
-
+        TreeMap transportHeaders =
+                ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+        String revokedToken = (String) transportHeaders.get(APIMgtGatewayConstants.REVOKED_ACCESS_TOKEN);
+        String renewedToken = (String) transportHeaders.get(APIMgtGatewayConstants.DEACTIVATED_ACCESS_TOKEN);
         if (revokedToken != null) {
 
             //Find the actual tenant domain on which the access token was cached. It is stored as a reference in

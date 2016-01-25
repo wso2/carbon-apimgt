@@ -202,8 +202,6 @@ public final class APIConstants {
     public static final String API_OVERVIEW_CONTEXT = "overview_context";
     public static final String API_OVERVIEW_CONTEXT_TEMPLATE = "overview_contextTemplate";
     public static final String API_OVERVIEW_DESCRIPTION = "overview_description";
-    public static final String API_OVERVIEW_ENDPOINT_URL = "overview_endpointURL";
-    public static final String API_OVERVIEW_SANDBOX_URL = "overview_sandboxURL";
     public static final String API_OVERVIEW_WSDL = "overview_wsdl";
     public static final String API_OVERVIEW_WADL = "overview_wadl";
     public static final String API_OVERVIEW_PROVIDER = "overview_provider";

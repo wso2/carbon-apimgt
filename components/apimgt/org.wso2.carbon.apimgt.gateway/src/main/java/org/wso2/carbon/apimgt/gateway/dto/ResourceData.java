@@ -29,11 +29,15 @@ private String[] methods = new String[4];
     private String faultSeqXml;
 
 	public String[] getMethods() {
-		return methods;
+		String[] copy = new String[methods.length];
+		System.arraycopy(methods, 0, copy, 0, methods.length);
+		return copy;
 	}
 
 	public void setMethods(String[] methods) {
-		this.methods = methods;
+		String[] copy = new String[methods.length];
+		System.arraycopy(methods, 0, copy, 0, methods.length);
+		this.methods = copy;
 	}
 
 	public String getContentType() {

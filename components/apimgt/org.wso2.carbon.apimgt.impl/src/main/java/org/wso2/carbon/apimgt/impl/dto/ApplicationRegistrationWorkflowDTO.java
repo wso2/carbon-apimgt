@@ -56,9 +56,9 @@ public class ApplicationRegistrationWorkflowDTO extends WorkflowDTO {
 
     public void setDomainList(String[] accessAllowDomains) {
         StringBuilder builder = new StringBuilder();
-        if (accessAllowDomains != null && !accessAllowDomains[0].trim().equals("")) {
+        if (accessAllowDomains != null && !"".equals(accessAllowDomains[0].trim())) {
             for (String domain : accessAllowDomains) {
-                builder.append(domain).append(",");
+                builder.append(domain).append(',');
             }
             builder.deleteCharAt(builder.length() - 1);
             domainList = builder.toString();

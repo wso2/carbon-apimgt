@@ -46,11 +46,15 @@ private String name;
 	}
 
 	public ResourceData[] getResources() {
-		return resources;
+		ResourceData[] copy = new ResourceData[resources.length];
+		System.arraycopy(resources, 0, copy, 0, resources.length);
+		return copy;
 	}
 
 	public void setResources(ResourceData[] resources) {
-		this.resources = resources;
+		ResourceData[] copy = new ResourceData[resources.length];
+		System.arraycopy(resources, 0, copy, 0, resources.length);
+		this.resources = copy;
 	}
 	
 	public String getFileName() {

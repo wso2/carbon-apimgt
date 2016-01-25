@@ -86,14 +86,13 @@ public class ApplicationManagementServiceClient {
             }
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             identityApplicationManagementServiceStub.createApplication(serviceProvider);
-        } catch (RemoteException e) {
+        } catch (RemoteException  e ) {
             log.error(e.getMessage(), e);
-            throw new Exception(e.getMessage());
+            throw new Exception(e.getMessage(), e);
         } catch (IdentityApplicationManagementServiceIdentityApplicationManagementException e) {
             log.error(e.getMessage(), e);
             throw new Exception(e.getMessage());
         }
-
     }
 
     /**
@@ -113,7 +112,7 @@ public class ApplicationManagementServiceClient {
             return identityApplicationManagementServiceStub.getApplication(applicationName);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            throw new Exception(e.getMessage());
+            throw new Exception(e.getMessage(), e);
         }
 
     }
@@ -171,10 +170,10 @@ public class ApplicationManagementServiceClient {
             identityApplicationManagementServiceStub.deleteApplication(applicationID);
         } catch (RemoteException e) {
             log.error(e.getMessage(), e);
-            throw new Exception(e.getMessage());
+            throw new Exception(e.getMessage(), e);
         } catch (IdentityApplicationManagementServiceIdentityApplicationManagementException e) {
             log.error(e.getMessage(), e);
-            throw new Exception(e.getMessage());
+            throw new Exception(e.getMessage(), e);
         }
 
     }
@@ -231,6 +230,7 @@ public class ApplicationManagementServiceClient {
             Util.setAuthHeaders(identityApplicationManagementServiceStub._getServiceClient(), username);
             identityProviders = identityApplicationManagementServiceStub.getAllIdentityProviders();
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             throw new Exception(e.getMessage());
         }
         return identityProviders;

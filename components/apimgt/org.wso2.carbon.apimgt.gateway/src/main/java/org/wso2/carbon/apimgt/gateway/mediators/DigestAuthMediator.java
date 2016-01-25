@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +32,7 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.impl.APIConstants.DigestAuthConstants;
 
 import java.net.URI;
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
@@ -64,8 +66,8 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
 
         for (String keyval : wwwHeaderValueArray) {
 
-            String key = keyval.substring(0, keyval.indexOf("="));
-            String value = keyval.substring(keyval.indexOf("=") + 1);
+            String key = keyval.substring(0, keyval.indexOf('='));
+            String value = keyval.substring(keyval.indexOf('=') + 1);
 
             if (DigestAuthConstants.REALM.equals(key.trim())) {
                 realm = value;
@@ -217,9 +219,10 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
      */
     public String generateClientNonce() {
 
-        Random rand = new Random();
-        int num = rand.nextInt();
-        return String.format("%016x", num);
+        SecureRandom secRandom = new SecureRandom();
+        byte[] result = new byte[32];
+        secRandom.nextBytes(result);
+        return new String(Hex.encodeHex(result));
     }
 
     /**
@@ -304,31 +307,31 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
             String[] serverResponseArray, String qop, String opaque, String clientNonce, String algorithm) {
 
         StringBuilder header = new StringBuilder("Digest ");
-        header.append("username=\"" + userName + "\"" + ", ");
-        header.append("realm=\"" + realm + "\"" + ", ");
-        header.append("nonce=\"" + serverNonce + "\"" + ", ");
-        header.append("uri=\"" + digestUri + "\"" + ", ");
+        header.append("username=\"").append(userName).append("\"").append( ", ");
+        header.append("realm=\"" ).append(realm).append("\"").append(", ");
+        header.append("nonce=\"").append(serverNonce).append("\"").append(", ");
+        header.append("uri=\"").append(digestUri).append("\"").append(", ");
 
         if (qop != null) {
 
             String nonceCount = serverResponseArray[1];
-            header.append("qop=" + qop + ", ");
-            header.append("nc=" + nonceCount + ", ");
-            header.append("cnonce=\"" + clientNonce + "\"" + ", ");
+            header.append("qop=").append(qop).append(", ");
+            header.append("nc=").append(nonceCount).append(", ");
+            header.append("cnonce=\"").append(clientNonce).append("\"").append(", ");
 
         }
 
         String serverResponse = serverResponseArray[0];
 
         if (algorithm != null) {
-            header.append("algorithm=" + algorithm + ", ");
+            header.append("algorithm=").append(algorithm).append(", ");
         }
 
         if (opaque != null) {
-            header.append("response=\"" + serverResponse + "\"" + ", ");
-            header.append("opaque=" + opaque);
+            header.append("response=\"").append(serverResponse).append("\"").append(", ");
+            header.append("opaque=").append(opaque);
         } else {
-            header.append("response=\"" + serverResponse + "\"");
+            header.append("response=\"").append(serverResponse).append("\"");
         }
         return header;
     }

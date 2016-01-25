@@ -193,7 +193,7 @@ public class APIProviderHostObject extends ScriptableObject {
            //      handleException("Domain not specified. Please provide your username as domain/username");
            // }
         } catch (Exception e) {
-            log.error("Error occurred while checking for multiple user stores");
+            log.error("Error occurred while checking for multiple user stores", e);
         }
 
         try {
@@ -239,7 +239,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
             boolean displayStoreUrlFromPublisher =false;
             if(config!=null){
-                displayStoreUrlFromPublisher = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
+                displayStoreUrlFromPublisher = Boolean.parseBoolean(
+                        config.getFirstProperty(APIConstants.SHOW_API_STORE_URL_FROM_PUBLISHER));
             }
             if (authorized) {
 
@@ -338,7 +339,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         String subscriptionAvailability = (String) apiData.get("subscriptionAvailability", apiData);
         String subscriptionAvailableTenants = "";
-        if (subscriptionAvailability != null && subscriptionAvailability.equals(APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS)) {
+        if (subscriptionAvailability != null && subscriptionAvailability.equals(
+                APIConstants.SUBSCRIPTION_TO_SPECIFIC_TENANTS)) {
         	subscriptionAvailableTenants = (String) apiData.get("subscriptionTenants", apiData);
         }
         
@@ -610,7 +612,8 @@ public class APIProviderHostObject extends ScriptableObject {
             //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
 
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, (String) apiData.get("swagger", apiData));
+            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                    (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
@@ -642,8 +645,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 OMElement seqElment = APIUtil.buildOMElement(inSeqFile.getInputStream());
                 inSeqFileName = seqElment.getAttributeValue(new QName("name"));
             } catch (Exception e) {
-                log.error("An Error has occurred while reading custom sequence file");
-                throw new APIManagementException("An Error has occurred while reading custom sequence file");
+                String errorMsg = "An Error has occurred while reading custom sequence file";
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e);
             }
             String inSeqPath = APIUtil.getSequencePath(api.getId(), "in") + RegistryConstants.PATH_SEPARATOR
                                + inSeqFileName;
@@ -659,8 +663,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 OMElement seqElment = APIUtil.buildOMElement(outSeqFile.getInputStream());
                 outSeqFileName = seqElment.getAttributeValue(new QName("name"));
             } catch (Exception e) {
-                log.error("An Error has occurred while reading custom sequence file");
-                throw new APIManagementException("An Error has occurred while reading custom sequence file");
+                String errorMsg = "An Error has occurred while reading custom sequence file";
+                log.error(errorMsg, e);
+                throw new APIManagementException(errorMsg, e);
             }
             String outSeqPath = APIUtil.getSequencePath(api.getId(), "out") + RegistryConstants.PATH_SEPARATOR
                                 + outSeqFileName;
@@ -1445,7 +1450,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
             try {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                                     .getTenantId(tenantDomain);
+                        .getTenantId(tenantDomain);
                 for (URITemplate uriTemplate : uriTemplates) {
                     Scope scope = uriTemplate.getScope();
                     if (scope != null && !(APIUtil.isWhiteListedScope(scope.getKey()))) {
@@ -2296,7 +2301,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 api = apiProvider.getAPI(apiId);
             } catch (APIManagementException e) {
                 handleException("Cannot find the requested API- " + apiName +
-                        "-" + version);
+                        "-" + version, e);
             }
 
             if (api != null) {
@@ -3526,9 +3531,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 APIUtil.loadTenantRegistry(tenantId);
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
-                        tenantDomain);
+                        tenantDomain, e);
             } catch (RegistryException e) {
-                log.error("Could not load tenant registry for tenant " + tenantDomain);
+                log.error("Could not load tenant registry for tenant " + tenantDomain, e);
             }
         }
 
@@ -3790,7 +3795,7 @@ public class APIProviderHostObject extends ScriptableObject {
         try {
             api = apiProvider.getAPI(apiIdentifier);
         } catch (APIManagementException e) {
-            handleException("Cannot find the requested API- " + apiName + "-" + apiVersion);
+            handleException("Cannot find the requested API- " + apiName + "-" + apiVersion, e);
         }
 
         if (api != null) {
@@ -4364,7 +4369,7 @@ public class APIProviderHostObject extends ScriptableObject {
         APIManagerConfiguration config = HostObjectComponent.getAPIManagerConfiguration();
 
         return config != null
-               && Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
+                && Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS));
 
     }
 
@@ -4523,7 +4528,7 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         } catch (IOException e) {
             // sending a default error message.
-            log.error("Error occurred while connecting to backend : " + urlVal + ", reason : " + e.getMessage());
+            log.error("Error occurred while connecting to backend : " + urlVal + ", reason : " + e.getMessage(), e);
             String[] errorMsg = e.getMessage().split(": ");
             if (errorMsg.length > 1) {
                 response = errorMsg[errorMsg.length - 1]; //This is to get final readable part of the error message in the exception and send to the client
@@ -4644,7 +4649,7 @@ public class APIProviderHostObject extends ScriptableObject {
         NativeArray myn = new NativeArray(1);
         APIManagerConfiguration config =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                      .getAPIManagerConfiguration();
+                        .getAPIManagerConfiguration();
         Map<String, Environment> environments = config.getApiGatewayEnvironments();
         int i = 0;
         if (environments != null) {

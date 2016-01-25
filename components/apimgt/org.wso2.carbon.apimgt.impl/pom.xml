@@ -165,7 +165,6 @@
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.lcm</artifactId>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
@@ -256,6 +255,7 @@
                             org.apache.axiom.*; version="${imp.pkg.version.axiom}",
                             org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
+                            org.wso2.carbon.registry.common.*,
                             org.wso2.carbon.registry.indexing.*; version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${orbit.version.pdfbox}",
                             org.apache.poi.*,

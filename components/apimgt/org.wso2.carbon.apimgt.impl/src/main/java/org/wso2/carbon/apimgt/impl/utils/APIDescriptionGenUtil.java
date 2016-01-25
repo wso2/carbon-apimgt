@@ -55,8 +55,8 @@ public class APIDescriptionGenUtil {
                     getFirstChildWithName(APIConstants.THROTTLE_UNIT_TIME_ELEMENT);
             //Here we will assume time unit provided as milli second and do calculation to get requests per minute.
             if (maxCount.getText().isEmpty() || timeUnit.getText().isEmpty()) {
-                String msg = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT.toString() + "or"
-                             + APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() + " element data found empty in " +
+                String msg = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT + " or "
+                             + APIConstants.THROTTLE_UNIT_TIME_ELEMENT + " element data found empty in " +
                              "the policy.";
                 log.warn(msg);
                 throw new APIManagementException(msg);
@@ -69,8 +69,8 @@ public class APIDescriptionGenUtil {
         } catch (NullPointerException npe) {
             String msg = "Policy could not be parsed correctly based on http://schemas.xmlsoap.org/ws/2004/09/policy " +
                          "specification";
-            log.warn(msg);
-            throw new APIManagementException(msg);
+            log.error(msg, npe);
+            throw new APIManagementException(msg, npe);
         }
     }
 
@@ -171,15 +171,14 @@ public class APIDescriptionGenUtil {
                     getFirstChildWithName(APIConstants.THROTTLE_UNIT_TIME_ELEMENT);
             //Here we will assume time unit provided as milli second and do calculation to get requests per minute.
             if (maxCount.getText().isEmpty() || timeUnit.getText().isEmpty()) {
-                String errorMessage = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT.toString() + "or"
-                        + APIConstants.THROTTLE_UNIT_TIME_ELEMENT.toString() + " element data found empty in " +
+                String errorMessage = APIConstants.THROTTLE_MAXIMUM_COUNT_ELEMENT + "or"
+                        + APIConstants.THROTTLE_UNIT_TIME_ELEMENT + " element data found empty in " +
                         "the policy.";
                 log.warn(errorMessage);
                 throw new APIManagementException(errorMessage);
             }
-            requestPerMinute = (Long.parseLong(maxCount.getText().trim()) * 60000) /
+            return (Long.parseLong(maxCount.getText().trim()) * 60000) /
                                                                 (Long.parseLong(timeUnit.getText().trim()));
-            return requestPerMinute;
         } catch (NullPointerException e) {
             String errorMessage = "Policy could not be parsed correctly based on " +
                     "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
@@ -214,8 +213,8 @@ public class APIDescriptionGenUtil {
         } catch (OMException e) {
             String errorMessage = "Policy could not be parsed correctly based on " +
                                   "http://schemas.xmlsoap.org/ws/2004/09/policy specification";
-            log.warn(errorMessage);
-            throw new APIManagementException(errorMessage);
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         } catch (NumberFormatException e) {
             String message = "Error in retrieving time duration from the tiers xml";
             log.error(message, e);

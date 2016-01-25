@@ -99,7 +99,7 @@ public class ParameterElement {
             this.costPerUnit =Double.valueOf(
                     dataElementOM.getFirstChildWithName(new javax.xml.namespace.QName(nameSpace,"value")).getText());
         } catch (Exception e) {
-            log.error("Error while initializing parameter element from the OMElement") ;
+            log.error("Error while initializing parameter element from the OMElement", e) ;
         }
 
     }

@@ -126,9 +126,9 @@ public class APIStoreHostObject extends ScriptableObject {
                 APIUtil.loadTenantRegistry(tenantId);
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
                 log.error("Could not load tenant registry. Error while getting tenant id from tenant domain " +
-                        tenantDomain);
+                        tenantDomain, e);
             } catch (RegistryException e) {
-                log.error("Could not load tenant registry for tenant " + tenantDomain);
+                log.error("Could not load tenant registry for tenant " + tenantDomain, e);
             }
         }
 
@@ -2086,7 +2086,7 @@ public class APIStoreHostObject extends ScriptableObject {
             apiIdentifier.setTier(tier);
             addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
         } catch (APIManagementException e) {
-            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage());
+            handleException("Error while adding subscription for user: " + userId + ". Reason: " + e.getMessage(), e);
             return null;
         } finally {
             if (isTenantFlowStarted) {
@@ -2447,7 +2447,8 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeObject jsFunction_getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj,
+                                                   boolean isFirstOnly)
             throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -2507,7 +2508,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Set<Scope> scopeSet = new LinkedHashSet<Scope>();
                     NativeArray scopesArray = new NativeArray(0);
 
-                    if (((appName == null || appName.isEmpty()) && i == 0) ||
+                    if (((appName == null || appName.isEmpty()) && !(isFirstOnly && i > 0)) ||
                         appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.
@@ -2745,6 +2746,21 @@ public class APIStoreHostObject extends ScriptableObject {
         return result;
     }
 
+    public static NativeObject jsFunction_getAllSubscriptionsOfApplication(Context cx,
+                                                                           Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
+        return getAllSubscriptions(cx, thisObj, args, funObj, true);
+    }
+
+    /**
+     * Please note that this method is there for backward compatibility.
+     */
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
+                                                              Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
+        return getAllSubscriptions(cx, thisObj, args, funObj, false);
+    }
+
     private static void addAPIObj(SubscribedAPI subscribedAPI, NativeArray apisArray,
                                   Scriptable thisObj, Application appObject) throws APIManagementException {
         NativeObject apiObj = new NativeObject();
@@ -2849,28 +2865,19 @@ public class APIStoreHostObject extends ScriptableObject {
     }
 
     public static boolean jsFunction_addSubscriber(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws ScriptException, APIManagementException, UserStoreException {
+            throws ScriptException, APIManagementException{
 
         if (args != null && isStringArray(args)) {
-            Subscriber subscriber = new Subscriber((String) args[0]);
+            String username = (String) args[0];
             String groupId = (String) args[1];
-            subscriber.setSubscribedDate(new Date());
-            //TODO : need to set the proper email
-            subscriber.setEmail("");
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
             try {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(MultitenantUtils.getTenantDomain((String) args[0]));
-                subscriber.setTenantId(tenantId);
-                apiConsumer.addSubscriber(subscriber, groupId);
+                apiConsumer.addSubscriber(username, groupId);
+                return true;
             } catch (APIManagementException e) {
-                handleException("Error while adding the subscriber" + subscriber.getName(), e);
-                return false;
-            } catch (Exception e) {
-                handleException("Error while adding the subscriber" + subscriber.getName(), e);
+                handleException("Error while adding the subscriber " + username, e);
                 return false;
             }
-            return true;
         }
         return false;
     }
@@ -3381,7 +3388,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                                              .getTenantId(tenantDomain);
                         signUpWFDto.setTenantId(tenantId);
                     } catch (org.wso2.carbon.user.api.UserStoreException e) {
-                        log.error("Error while loading Tenant ID for given tenant domain :" + tenantDomain);
+                        log.error("Error while loading Tenant ID for given tenant domain :" + tenantDomain, e);
                     }
 
                     signUpWFDto.setExternalWorkflowReference(userSignUpWFExecutor.generateUUID());
@@ -3615,7 +3622,7 @@ public class APIStoreHostObject extends ScriptableObject {
 			status = false;
 		} catch (UserAdminUserAdminException e) {
 			log.error("Error in checking admin credentials. Please check credentials in "
-						+ "the signup-config.xml in the registry. ");
+						+ "the signup-config.xml in the registry. ", e);
 			status = false;
 		}		
 		return status;
@@ -3647,7 +3654,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 exists = true;
             }
         } catch (UserStoreException e) {
-            handleException("Error while checking user existence for " + username);
+            handleException("Error while checking user existence for " + username, e);
         }
         return exists;
     }
@@ -3817,7 +3824,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     errorMessage = "Error while renewing Access Token for Consumer Key " + clientId
                             + " and user " + args[0];
                 }
-                handleException(errorMessage);
+                handleException(errorMessage, e);
             }
 
 
@@ -4326,7 +4333,7 @@ public class APIStoreHostObject extends ScriptableObject {
         } catch (APIManagementException e) {
         	//This is actually not an exception, that should abort the user flow. If the groupId is not available then 
         	//the flow for which the group id is not required will be run.
-            log.error("Error occurred while getting group id");
+            log.error("Error occurred while getting group id", e);
         }
         return groupId;
 

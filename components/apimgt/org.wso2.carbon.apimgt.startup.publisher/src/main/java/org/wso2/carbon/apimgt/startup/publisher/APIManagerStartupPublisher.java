@@ -135,7 +135,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 						createAPIAtServerStartup(apiName, apiProvider, apiVersion,
 								apiEndpoint, apiContext, iconPath, documentURL, authType);
 					} catch (IndexOutOfBoundsException e) {
-						log.error("Invalid StartupAPIPublisher configuration");
+						log.error("Invalid StartupAPIPublisher configuration", e);
 					}
 				}
 			}
@@ -177,7 +177,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 						createAPIAtServerStartup(apiName, apiProvider, apiVersion,
 								apiEndpoint, apiContext, iconPath, documentURL, authType);
 					} catch (IndexOutOfBoundsException e) {
-						log.error("Invalid StartupAPIPublisher configuration");
+						log.error("Invalid StartupAPIPublisher configuration", e);
 					}
 				}
 			}

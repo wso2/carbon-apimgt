@@ -66,7 +66,7 @@ public class EntitlementServiceClient {
             option.setProperty(HTTPConstants.AUTHENTICATE, auth);
             option.setManageSession(true);
         } catch (Exception e) {
-            logger.error("Error while initiating entitlement service client " + e.getMessage());
+            logger.error("Error while initiating entitlement service client ", e);
         }
     }
 
@@ -88,9 +88,9 @@ public class EntitlementServiceClient {
                     .getProperty(HTTPConstants.COOKIE_STRING);
             System.out.println("\nCookie is received for subsequent communication :  " + authCookie);
         } catch (RemoteException e) {
-            logger.error("Error while connecting PDP " + e.getMessage());
+            logger.error("Error while connecting PDP ", e);
         } catch (EntitlementServiceException e) {
-            logger.error("Error while validating XACML policy for given request " + e.getMessage());
+            logger.error("Error while validating XACML policy for given request ", e);
         }
         return decision;
     }
