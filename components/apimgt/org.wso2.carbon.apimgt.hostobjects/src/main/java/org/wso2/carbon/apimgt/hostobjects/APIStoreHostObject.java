@@ -2868,6 +2868,10 @@ public class APIStoreHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException{
 
         if (args != null && isStringArray(args)) {
+            if (args.length < 2) {
+                handleException(
+                        "Expected 2 arguments for adding a subscriber (username, groupId), but found " + args.length);
+            }
             String username = (String) args[0];
             String groupId = (String) args[1];
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
