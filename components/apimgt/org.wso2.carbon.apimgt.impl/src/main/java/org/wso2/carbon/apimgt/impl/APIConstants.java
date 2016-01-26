@@ -899,7 +899,8 @@ public final class APIConstants {
     
     public static final String API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION = API_STORE + "GroupingExtractor";
 
-    public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION = "repository/resources/customsequences";
+    public static final String API_CUSTOM_SEQUENCES_FOLDER_LOCATION =
+            "repository" + File.separator + "resources" + File.separator + "customsequences";
     public static final String API_CUSTOM_SEQUENCE_TYPE_IN = "in";
     public static final String API_CUSTOM_SEQUENCE_TYPE_OUT = "out";
     public static final String API_CUSTOM_SEQUENCE_TYPE_FAULT = "fault";

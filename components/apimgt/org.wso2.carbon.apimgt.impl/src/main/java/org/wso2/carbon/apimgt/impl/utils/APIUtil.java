@@ -2951,6 +2951,13 @@ public final class APIUtil {
         return propertyMap;
     }
 
+    /**
+     * Add all the custom sequences of given type to registry 
+     * 
+     * @param registry Registry instance
+     * @param customSequenceType Custom sequence type which is in/out or fault
+     * @throws APIManagementException
+     */
     public static void addDefinedAllSequencesToRegistry(UserRegistry registry,
                                                         String customSequenceType)
             throws APIManagementException {
@@ -2973,11 +2980,14 @@ public final class APIUtil {
                                     customSequenceType + '/' + sequenceFileName;
                     if (registry.resourceExists(regResourcePath)) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Defined sequences have already been added to the registry");
+                            log.debug("The sequence file with the name " + sequenceFileName
+                                    + " already exists in the registry path " + regResourcePath);
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Adding defined sequences to the registry.");
+                            log.debug(
+                                    "Adding sequence file with the name " + sequenceFileName + " to the registry path "
+                                            + regResourcePath);
                         }
 
                         inSeqStream = new FileInputStream(sequenceFile);
@@ -3001,15 +3011,7 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading defined sequence ", e);
         } finally {
-            if (inSeqStream != null) {
-                try {
-                    inSeqStream.close();
-                } catch (IOException e) {
-                    log.error(
-                            "Error while closing input stream in path " + seqFolderLocation + " " +
-                                    e);
-                }
-            }
+            IOUtils.closeQuietly(inSeqStream);
         }
 
     }
