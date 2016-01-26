@@ -564,6 +564,7 @@ this["Handlebars"]["templates"]["main"] = Handlebars.template({"1":function(dept
     + escapeExpression(lambda(((stack1 = (depth0 != null ? depth0.info : depth0)) != null ? stack1.title : stack1), depth0))
     + "</div>\n  <div class=\"info_description markdown\">";
   stack1 = lambda(((stack1 = (depth0 != null ? depth0.info : depth0)) != null ? stack1.description : stack1), depth0);
+  if (stack1 != null) { stack1 = stack1.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');}
   if (stack1 != null) { buffer += stack1; }
   buffer += "</div>\n";
   stack1 = helpers['if'].call(depth0, (depth0 != null ? depth0.externalDocs : depth0), {"name":"if","hash":{},"fn":this.program(2, data),"inverse":this.noop,"data":data});
