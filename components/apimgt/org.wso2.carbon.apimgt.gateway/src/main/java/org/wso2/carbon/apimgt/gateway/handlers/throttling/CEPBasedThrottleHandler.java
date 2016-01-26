@@ -162,8 +162,10 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
     private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
 
-        this.throttler = Throttler.getInstance();
-        throttler.deployLocalCEPRules();
+        if(this.throttler==null) {
+            this.throttler = Throttler.getInstance();
+            throttler.deployLocalCEPRules();
+        }
         //throttler.addRule("Gold", null);
 
     }
