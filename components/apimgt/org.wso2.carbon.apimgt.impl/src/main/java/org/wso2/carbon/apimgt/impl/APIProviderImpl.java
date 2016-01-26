@@ -25,6 +25,7 @@ import org.apache.axis2.Constants;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
+import org.apache.axis2.util.FileWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
@@ -99,10 +100,11 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -388,7 +390,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 "select throttle_key, (count(messageID) >= "+policyParametersMap.get("defaultRequestCount")+") as isThrottled\n" +
                 "group by throttle_key\n" +
                 "INSERT ALL EVENTS into ResultStream;\n" ;
-      //  System.out.println(policy+eligibilityQuery+decisionQuery);
         appendPolicy(eligibilityQuery,decisionQuery,tierName);
     }
 
@@ -402,19 +403,38 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         OMElement decision_query = factory.createOMElement(QName.valueOf("decisionQuery"));
         OMText eligibilityQueryText = factory.createOMText(eligibilityQuery);
         OMText decisionQueryText = factory.createOMText(decisionQuery);
-
+        File file =new File("repository/conf/throttle-policy.xml");
+        FileOutputStream fos = null;
         try {
-            Resource resource = registry.newResource();
             eligibility_query.addChild(eligibilityQueryText);
             decision_query.addChild(decisionQueryText);
             policyTag.addChild(eligibility_query);
             policyTag.addChild(decision_query);
             root.addChild(policyTag);
-            resource.setContent(root.toString());
+            root.build();
+            String policy = root.toString();
             System.out.println(root.toString());
-            registry.put(APIConstants.ADD_POLICY_LOCATION,resource);
-        } catch (RegistryException e) {
+            fos = new FileOutputStream(file);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            byte[] contentInBytes = policy.getBytes();
+
+            fos.write(contentInBytes);
+            fos.flush();
+            fos.close();
+
+        } catch (IOException e) {
             e.printStackTrace();
+        }finally{
+            try{
+                if(fos!=null){
+                    fos.close();
+                }
+            }catch(IOException e){
+                e.printStackTrace();
+            }
         }
 
     }
