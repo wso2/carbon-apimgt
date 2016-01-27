@@ -325,6 +325,8 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Overview constants for CORS configuration
+    public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
     public static final String LC_NEXT_STATES="nextStates";

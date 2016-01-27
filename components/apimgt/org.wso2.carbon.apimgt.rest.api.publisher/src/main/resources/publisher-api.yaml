@@ -2048,6 +2048,25 @@ definitions:
             type: string
           technicalOwnerEmail:
             type: string
+      corsConfiguration:
+        properties:
+          corsConfigurationEnabled:
+            type: boolean
+          accessControlAllowOrigins:
+            type: array
+            items:
+               type: string
+          accessControlAllowCredentials:
+            type: boolean
+          accessControlAllowHeaders:
+            type: array
+            items:
+              type: string
+          accessControlAllowMethods:
+            type: array
+            items:
+              type: string
+
 
 #-----------------------------------------------------
 # The Application resource

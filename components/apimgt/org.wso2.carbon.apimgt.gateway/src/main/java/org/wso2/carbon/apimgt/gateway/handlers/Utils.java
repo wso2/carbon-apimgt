@@ -185,35 +185,7 @@ public class Utils {
             messageContext.setRelatesTo(new RelatesTo[] { relatesTo });
         }
     }
-
-    public static String getAllowedHeaders() {
-    	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
-    }
-    
-    public static String getAllowedMethods() {
-    	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
-    }
-
-    public static boolean isAllowCredentials() {
-        String allowCredentials = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
-        return Boolean.parseBoolean(allowCredentials);
-    }
-    
-    public static boolean isCORSEnabled() {
-    	String corsEnabled = config.
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
-    	    	    	
-    	return Boolean.parseBoolean(corsEnabled);
-    }
-
-    public static boolean isStatsEnabled() {
-        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
-                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
-    }
-
+//// moving methods to Util
     /**
      * validates if an accessToken has expired or not
      *

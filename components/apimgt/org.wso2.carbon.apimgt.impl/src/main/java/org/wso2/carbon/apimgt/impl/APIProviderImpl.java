@@ -1411,27 +1411,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
         corsProperties.put("apiImplementationType", api.getImplementation());
-        if (api.getAllowedHeaders() != null && !api.getAllowedHeaders().isEmpty()) {
-            StringBuilder allowHeaders = new StringBuilder();
-            for (String header : api.getAllowedHeaders()) {
-                allowHeaders.append(header).append(',');
+
+        if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
+            CORSConfiguration corsConfiguration = api.getCorsConfiguration();
+            if (corsConfiguration.getAccessControlAllowHeaders() != null &&
+                !corsConfiguration.getAccessControlAllowHeaders().isEmpty()) {
+                StringBuilder allowHeaders = new StringBuilder();
+                for (String header : corsConfiguration.getAccessControlAllowHeaders()) {
+                    allowHeaders.append(header).append(',');
+                }
+                if (!allowHeaders.toString().isEmpty()) {
+                    allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+                }
+                corsProperties.put("allowHeaders", allowHeaders.toString());
             }
-            if (!allowHeaders.toString().isEmpty()) {
-                allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+            if (corsConfiguration.getAccessControlAllowOrigins() != null &&
+                !corsConfiguration.getAccessControlAllowOrigins().isEmpty()) {
+                StringBuilder allowOrigins = new StringBuilder();
+                for (String origin : corsConfiguration.getAccessControlAllowOrigins()) {
+                    allowOrigins.append(origin).append(',');
+                }
+                if (!allowOrigins.toString().isEmpty()) {
+                    allowOrigins.deleteCharAt(allowOrigins.length() - 1);
+                }
+                corsProperties.put("allowedOrigins", allowOrigins.toString());
             }
-            corsProperties.put("allowHeaders", allowHeaders.toString());
+            if (corsConfiguration.getAccessControlAllowMethods() != null &&
+                !corsConfiguration.getAccessControlAllowMethods().isEmpty()) {
+                StringBuilder allowedMethods = new StringBuilder();
+                for (String methods : corsConfiguration.getAccessControlAllowMethods()) {
+                    allowedMethods.append(methods).append(',');
+                }
+                if (!allowedMethods.toString().isEmpty()) {
+                    allowedMethods.deleteCharAt(allowedMethods.length() - 1);
+                }
+                corsProperties.put("allowedMethods", allowedMethods.toString());
+            }
+            if (corsConfiguration.isAccessControlAllowCredentials()) {
+                corsProperties.put("allowCredentials",
+                                   String.valueOf(corsConfiguration.isAccessControlAllowCredentials()));
+            }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
+        }else if (APIUtil.isCORSEnabled()){
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         }
-        if (api.getAllowedOrigins() != null && !api.getAllowedOrigins().isEmpty()) {
-            StringBuilder allowOrigins = new StringBuilder();
-            for (String origin : api.getAllowedOrigins()) {
-                allowOrigins.append(origin).append(',');
-            }
-            if (!allowOrigins.toString().isEmpty()) {
-                allowOrigins.deleteCharAt(allowOrigins.length() - 1);
-            }
-            corsProperties.put("allowedOrigins", allowOrigins.toString());
-        }
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
