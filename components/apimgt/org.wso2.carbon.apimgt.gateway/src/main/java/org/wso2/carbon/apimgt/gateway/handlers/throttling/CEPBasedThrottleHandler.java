@@ -145,19 +145,21 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
     private boolean doThrottle(MessageContext messageContext) {
         boolean canAccess = true;
-        boolean isResponse = messageContext.isResponse();
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        ConfigurationContext cc = axis2MC.getConfigurationContext();
-        synchronized (this) {
+        if (!messageContext.isResponse()) {
+            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                    getAxis2MessageContext();
+            ConfigurationContext cc = axis2MC.getConfigurationContext();
 
-            if (!isResponse) {
-                if (this.throttler == null) {
-                    initThrottle(messageContext, cc);
+            if (this.throttler == null) {
+                synchronized (this) {
+                    if (this.throttler == null) {
+                        initThrottle(messageContext, cc);
+                    }
                 }
             }
+
+            doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         }
-        doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         return canAccess;
     }
 
