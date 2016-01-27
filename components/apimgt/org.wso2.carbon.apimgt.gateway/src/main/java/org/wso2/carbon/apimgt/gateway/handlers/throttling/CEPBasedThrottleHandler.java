@@ -119,7 +119,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             apiKey = apiContext + ':' + apiVersion + ':' + consumerKey + ':' + authorizedUser;
             apiTier = authContext.getTier();
             String remoteIP = "127.0.0.1";//(String) ((TreeMap) synCtx.getProperty(org.apache.axis2.context.MessageContext
-                    //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
+            //.TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
             if (remoteIP != null) {
                 if (remoteIP.indexOf(",") > 0) {
                     remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
@@ -140,7 +140,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        return doThrottle(messageContext);
+        return true;//return doThrottle(messageContext);
     }
 
     private boolean doThrottle(MessageContext messageContext) {
@@ -152,7 +152,9 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
         synchronized (this) {
 
             if (!isResponse) {
-                initThrottle(messageContext, cc);
+                if (this.throttler == null) {
+                    initThrottle(messageContext, cc);
+                }
             }
         }
         doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
@@ -162,7 +164,9 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
     private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
 
+
         this.throttler = Throttler.getInstance();
+        throttler.deployLocalCEPRules();
         //throttler.addRule("Gold", null);
 
     }
