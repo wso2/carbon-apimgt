@@ -83,7 +83,7 @@
 		            			
 		            			
 		            			<div class="form-actions" id="saveButtons">
-                    				<button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tierPermissions[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
+                    				<button type="submit" id="addNewAPIButton-<%=String(i)%>" name="addNewAPIButton" onclick="updatePermissions('<%=tierPermissions[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
                 				</div>
                 				
                 				<div class="alert alert-success" id="<%=statusUpdateMsgName%>" style="display:none;">
