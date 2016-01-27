@@ -127,19 +127,22 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
 
-			Resource[] selectedAPIResources = selectedApi.getResources();
-            if (selectedApi != null && selectedAPIResources.length > 0) {
-                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
-                    if (resource != null) {
-                        selectedResource = resource;
-                        if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                            selectedResourceWithVerb = resource;
-                            break;
+            if(selectedApi != null){
+                Resource[] selectedAPIResources = selectedApi.getResources();
+                if (selectedAPIResources.length > 0) {
+                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                        Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
+                        if (resource != null) {
+                            selectedResource = resource;
+                            if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                                selectedResourceWithVerb = resource;
+                                break;
+                            }
                         }
                     }
                 }
             }
+			
             String resourceString =
                     selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
             String resourceCacheKey = APIUtil

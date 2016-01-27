@@ -131,7 +131,7 @@ $(document).ready(function () {
          */
 
 
-
+        $(this).prop('disabled', true);//disable button to prevent double clicking
         jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
 
             action: "generateApplicationKey",

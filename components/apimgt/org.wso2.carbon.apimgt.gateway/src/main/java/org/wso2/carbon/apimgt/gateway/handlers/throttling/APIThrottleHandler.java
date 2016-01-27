@@ -178,15 +178,17 @@ public class APIThrottleHandler extends AbstractHandler {
         ConfigurationContext cc = axis2MC.getConfigurationContext();
 
         ThrottleDataHolder dataHolder = null;
+        if (cc == null) {
+            handleException("Error while retrieving ConfigurationContext from messageContext");
+        }
 
-           synchronized (cc) {
-                dataHolder =
-                        (ThrottleDataHolder) cc.getProperty(ThrottleConstants.THROTTLE_INFO_KEY);
-                if (dataHolder == null) {
-                    dataHolder = new ThrottleDataHolder();
-                    cc.setNonReplicableProperty(ThrottleConstants.THROTTLE_INFO_KEY, dataHolder);
-                }
+        synchronized (cc) {
+            dataHolder = (ThrottleDataHolder) cc.getProperty(ThrottleConstants.THROTTLE_INFO_KEY);
+            if (dataHolder == null) {
+                dataHolder = new ThrottleDataHolder();
+                cc.setNonReplicableProperty(ThrottleConstants.THROTTLE_INFO_KEY, dataHolder);
             }
+        }
 
         if ((throttle == null && !isResponse) || (isResponse && concurrentAccessController == null)) {
             if (GatewayUtils.isClusteringEnabled()) {
@@ -220,13 +222,13 @@ public class APIThrottleHandler extends AbstractHandler {
         // All the replication functionality of the access rate based throttling handled by itself
         // Just replicate the current state of ConcurrentAccessController
         if (isClusteringEnable && concurrentAccessController != null) {
-            if (cc != null) {
-                try {
-                    Replicator.replicate(cc);
-                } catch (ClusteringFault clusteringFault) {
-                    handleException("Error during the replicating  states ", clusteringFault);
-                }
+
+            try {
+                Replicator.replicate(cc);
+            } catch (ClusteringFault clusteringFault) {
+                handleException("Error during the replicating  states ", clusteringFault);
             }
+
         }
 
         if (!canAccess) {

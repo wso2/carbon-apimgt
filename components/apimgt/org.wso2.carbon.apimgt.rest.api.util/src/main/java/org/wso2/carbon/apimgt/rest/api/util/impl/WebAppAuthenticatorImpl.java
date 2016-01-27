@@ -148,15 +148,14 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                             if (log.isDebugEnabled()) {
                                 log.debug("Scope validation successful for access token: " +
                                         tokenInfo.getAccessToken().toString() + " with scope: " + scp.getKey() +
-                                        " for resource path: " + path);
+                                        " for resource path: " + path + " and verb " + verb);
                             }
                             return true;
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug(
-                                    "Scope not defined in swagger for matching resource. So consider as anonymous permission and"
-                                            + "let request to");
+                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
+                                    + verb + " . So consider as anonymous permission and let request to continue.");
                         }
                         return true;
                     }

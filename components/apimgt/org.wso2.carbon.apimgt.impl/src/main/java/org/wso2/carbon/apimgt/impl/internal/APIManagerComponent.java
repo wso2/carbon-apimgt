@@ -28,7 +28,12 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
@@ -71,7 +76,10 @@ import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -427,25 +435,20 @@ public class APIManagerComponent {
         }
     }
 
-	private void addDefinedSequencesToRegistry() throws APIManagementException {
-		try {
-			RegistryService registryService =
-					ServiceReferenceHolder.getInstance().getRegistryService();
-			UserRegistry registry = registryService.getGovernanceSystemRegistry();
+    private void addDefinedSequencesToRegistry() throws APIManagementException {
+        try {
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            UserRegistry registry = registryService.getGovernanceSystemRegistry();
 
-			//Add all custom in,out and fault sequences to registry
-			APIUtil.addDefinedAllSequencesToRegistry(registry,
-			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-			APIUtil.addDefinedAllSequencesToRegistry(registry,
-			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-			APIUtil.addDefinedAllSequencesToRegistry(registry,
-			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            //Add all custom in,out and fault sequences to registry
+            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
-		} catch (RegistryException e) {
-			throw new APIManagementException(
-					"Error while saving defined sequences to the registry ", e);
-		}
-	}
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving defined sequences to the registry ", e);
+        }
+    }
 
     private void setupSelfRegistration(APIManagerConfiguration config) throws APIManagementException {
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));

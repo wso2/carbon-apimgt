@@ -2447,7 +2447,8 @@ public class APIStoreHostObject extends ScriptableObject {
 		return prodKeyScope;
 	}
 
-    public static NativeObject jsFunction_getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+    public static NativeObject getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj,
+                                                   boolean isFirstOnly)
             throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
         if (args == null || args.length == 0 || !isStringArray(args)) {
@@ -2507,7 +2508,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Set<Scope> scopeSet = new LinkedHashSet<Scope>();
                     NativeArray scopesArray = new NativeArray(0);
 
-                    if (((appName == null || appName.isEmpty()) && i == 0) ||
+                    if (((appName == null || appName.isEmpty()) && !(isFirstOnly && i > 0)) ||
                         appName.equals(application.getName())) {
 
                         //get Number of subscriptions for the given application by the subscriber.
@@ -2743,6 +2744,21 @@ public class APIStoreHostObject extends ScriptableObject {
         }
 
         return result;
+    }
+
+    public static NativeObject jsFunction_getAllSubscriptionsOfApplication(Context cx,
+                                                                           Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
+        return getAllSubscriptions(cx, thisObj, args, funObj, true);
+    }
+
+    /**
+     * Please note that this method is there for backward compatibility.
+     */
+    public static NativeObject jsFunction_getAllSubscriptions(Context cx,
+                                                              Scriptable thisObj, Object[] args, Function funObj)
+            throws ScriptException, APIManagementException, ApplicationNotFoundException {
+        return getAllSubscriptions(cx, thisObj, args, funObj, false);
     }
 
     private static void addAPIObj(SubscribedAPI subscribedAPI, NativeArray apisArray,
@@ -2998,25 +3014,20 @@ public class APIStoreHostObject extends ScriptableObject {
 
     public static boolean jsFunction_removeApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-
         if (args != null && args.length > 2 && isStringArray(args)) {
             String name = (String) args[0];
             String username = (String) args[1];
             String groupingId = (String) args[2];
-            Subscriber subscriber = new Subscriber(username);
             APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            Application[] apps;
-           	apps = apiConsumer.getApplications(subscriber, groupingId);
-            
-            if (apps == null || apps.length == 0) {
-                return false;
+            Application app = apiConsumer.getApplicationsByName(username, name, groupingId);
+
+            if (app != null) {
+                apiConsumer.removeApplication(app);
+            } else {
+                handleException("Application " + name + " doesn't exists");
             }
-            for (Application app : apps) {
-                if (app.getName().equals(name)) {
-                    apiConsumer.removeApplication(app);
-                    return true;
-                }
-            }
+
+            return true;
         }
         return false;
     }
@@ -3073,10 +3084,8 @@ public class APIStoreHostObject extends ScriptableObject {
         return myn;
     }
 
-    public static boolean jsFunction_updateApplication(Context cx, Scriptable thisObj,
-                                                       Object[] args, Function funObj)
+    public static boolean jsFunction_updateApplication(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException {
-
         if (args != null && args.length > 5 && isStringArray(args)) {
             String newName = (String) args[0];
             String oldName = (String) args[1];
@@ -3085,39 +3094,35 @@ public class APIStoreHostObject extends ScriptableObject {
             String callbackUrl = (String) args[4];
             String description = (String) args[5];
             String groupingId = null;
-            if(args.length > 6 && args[6] != null){
+            APIConsumer apiConsumer = getAPIConsumer(thisObj);
+
+            if (args.length > 6 && args[6] != null) {
                 groupingId = (String) args[6];
             }
-           
-            Subscriber subscriber = new Subscriber(username);
-            APIConsumer apiConsumer = getAPIConsumer(thisObj);
-            Application[] apps;
-           	apps = apiConsumer.getApplications(subscriber, groupingId);
-           if (apps == null || apps.length == 0) {
-                return false;
-            }
 
-            Map appsMap = new HashMap();
-            for (Application app : apps) {
-                appsMap.put(app.getName(), app);
-            }
-            
-            // check whether there is an app with same name
-            if (!newName.equals(oldName) && appsMap.containsKey(newName)) {
-                handleException("An application already exist by the name " + newName);
-            }
+            // get application with new name if exists
+            Application application = apiConsumer.getApplicationsByName(username, newName, groupingId);
+            if (!newName.equals(oldName)) {
 
-            for (Application app : apps) {
-                if (app.getName().equals(oldName)) {
-                    Application application = new Application(newName, subscriber);
-                    application.setId(app.getId());
-                    application.setTier(tier);
-                    application.setCallbackUrl(callbackUrl);
-                    application.setDescription(description);
-                    apiConsumer.updateApplication(application);
-                    return true;
+                // check whether there is an app with new name and throw error if exists
+                if (application != null) {
+                    handleException("An application already exist by the name " + newName);
+                } else {
+
+                    // get the application by old name
+                    application = apiConsumer.getApplicationsByName(username, oldName, groupingId);
                 }
             }
+
+            // update application details
+            Subscriber subscriber = new Subscriber(username);
+            Application updatedApplication = new Application(newName, subscriber);
+            updatedApplication.setId(application.getId());
+            updatedApplication.setTier(tier);
+            updatedApplication.setCallbackUrl(callbackUrl);
+            updatedApplication.setDescription(description);
+            apiConsumer.updateApplication(updatedApplication);
+            return true;
         }
 
         return false;

@@ -106,19 +106,23 @@ public class WorkflowExecutorFactory {
         WorkflowDTO workflowDTO = null;
         if(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType)){
             workflowDTO = new ApplicationWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
         }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)){
             workflowDTO = new ApplicationRegistrationWorkflowDTO();
             ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+            workflowDTO.setWorkflowType(wfType);
         }else if(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX.equals(wfType)){
             workflowDTO = new ApplicationRegistrationWorkflowDTO();
             ((ApplicationRegistrationWorkflowDTO)workflowDTO).setKeyType(APIConstants.API_KEY_TYPE_SANDBOX);
+            workflowDTO.setWorkflowType(wfType);
         }else if(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(wfType)){
             workflowDTO = new SubscriptionWorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
         }else if(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP.equals(wfType)){
             workflowDTO = new WorkflowDTO();
+            workflowDTO.setWorkflowType(wfType);
         }
-
-        workflowDTO.setWorkflowType(wfType);
+        
         return workflowDTO;
     }
 }
