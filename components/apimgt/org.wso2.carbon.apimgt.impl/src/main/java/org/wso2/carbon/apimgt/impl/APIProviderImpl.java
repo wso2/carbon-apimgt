@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.*;
+import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -28,6 +29,8 @@ import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.util.FileWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.velocity.anakia.NodeList;
+import org.eclipse.wst.xml.core.internal.encoding.XMLDocumentLoader;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -100,9 +103,10 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.*;
 
 import java.io.*;
 import java.rmi.RemoteException;
@@ -393,6 +397,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         appendPolicy(eligibilityQuery,decisionQuery,tierName);
     }
 
+    private static boolean fileCreated =false;
+    private static File file=null;
     public void appendPolicy( String eligibilityQuery, String decisionQuery, String tierName){
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement root = factory.createOMElement(QName.valueOf("policies"));
@@ -403,31 +409,64 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         OMElement decision_query = factory.createOMElement(QName.valueOf("decisionQuery"));
         OMText eligibilityQueryText = factory.createOMText(eligibilityQuery);
         OMText decisionQueryText = factory.createOMText(decisionQuery);
-        File file =new File("repository/conf/throttle-policy.xml");
+        boolean firstWrtie = false;
+        if(!fileCreated){
+            file = new File("repository/conf/throttle-policy.xml");
+            fileCreated=true;
+            firstWrtie = true;
+
+        }
+
         FileOutputStream fos = null;
         try {
-            eligibility_query.addChild(eligibilityQueryText);
-            decision_query.addChild(decisionQueryText);
-            policyTag.addChild(eligibility_query);
-            policyTag.addChild(decision_query);
-            root.addChild(policyTag);
-            root.build();
-            String policy = root.toString();
-            System.out.println(root.toString());
-            fos = new FileOutputStream(file);
-            if (!file.exists()) {
-                file.createNewFile();
+
+           // fos = new FileOutputStream(file);
+            if (firstWrtie) {
+                fos = new FileOutputStream(file);
+                eligibility_query.addChild(eligibilityQueryText);
+                decision_query.addChild(decisionQueryText);
+                policyTag.addChild(eligibility_query);
+                policyTag.addChild(decision_query);
+                root.addChild(policyTag);
+                root.build();
+                String policy = root.toString();
+                System.out.println(root.toString());
+                byte[] contentInBytes = policy.getBytes();
+
+                fos.write(contentInBytes);
+                fos.flush();
+                fos.close();
+            }
+            else{
+
+                FileInputStream inputStream = new FileInputStream(file);
+                XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+                inputStream.close();
+                StAXOMBuilder builder = new StAXOMBuilder(parser);
+                OMElement newroot = builder.getDocumentElement();
+                System.out.println(builder.getDocumentElement());
+                eligibility_query.addChild(eligibilityQueryText);
+                decision_query.addChild(decisionQueryText);
+                policyTag.addChild(eligibility_query);
+                policyTag.addChild(decision_query);
+                newroot.addChild(policyTag);
+                newroot.build();
+                String policy = newroot.toString();
+                fos = new FileOutputStream(file);
+                byte[] contentInBytes = policy.getBytes();
+
+                fos.write(contentInBytes);
+                fos.flush();
+                fos.close();
+
             }
 
-            byte[] contentInBytes = policy.getBytes();
-
-            fos.write(contentInBytes);
-            fos.flush();
-            fos.close();
 
         } catch (IOException e) {
             e.printStackTrace();
-        }finally{
+        }   catch (XMLStreamException e) {
+            e.printStackTrace();
+        } finally{
             try{
                 if(fos!=null){
                     fos.close();
