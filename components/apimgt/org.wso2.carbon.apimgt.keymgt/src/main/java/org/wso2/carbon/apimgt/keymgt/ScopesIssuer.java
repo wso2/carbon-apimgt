@@ -1,17 +1,19 @@
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.apimgt.keymgt;
@@ -49,16 +51,16 @@ public class ScopesIssuer {
      * Singleton of ScopeIssuer.*
      */
     private static ScopesIssuer scopesIssuer;
+    
+    private ScopesIssuer() {
+    }
 
     public static void loadInstance(List<String> whitelist) {
         scopesIssuer = new ScopesIssuer();
         if (whitelist != null && !whitelist.isEmpty()) {
             scopesIssuer.scopeSkipList.addAll(whitelist);
         }
-    }
-
-    private ScopesIssuer() {
-    }
+    }  
 
     public static ScopesIssuer getInstance() {
         return scopesIssuer;
@@ -94,7 +96,8 @@ public class ScopesIssuer {
             if (restAPIScopesOfCurrentTenant!= null) {
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
             }else {
-                restAPIScopesOfCurrentTenant = APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                restAPIScopesOfCurrentTenant = APIUtil
+                        .getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
                 //call load tenant config for rest API.
                 //then put cache
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
@@ -160,9 +163,10 @@ public class ScopesIssuer {
                         authorizedScopes.add(scope);
                     }
                 }
-                //The requested scope is defined for the context of the App but no roles have been associated with the scope
-                //OR
-                //The scope string starts with 'device_'.
+                // The requested scope is defined for the context of the App but no roles have been associated with the
+                // scope
+                // OR
+                // The scope string starts with 'device_'.
                 else if (appScopes.containsKey(scope) || isWhiteListedScope(scope)) {
                     authorizedScopes.add(scope);
                 }
@@ -174,7 +178,7 @@ public class ScopesIssuer {
                 tokReqMsgCtx.setScope(defaultScope);
             }
         } catch (APIManagementException e) {
-            log.error("Error while getting scopes of application " + e.getMessage());
+            log.error("Error while getting scopes of application " + e.getMessage(), e);
             return false;
         }
         return true;
