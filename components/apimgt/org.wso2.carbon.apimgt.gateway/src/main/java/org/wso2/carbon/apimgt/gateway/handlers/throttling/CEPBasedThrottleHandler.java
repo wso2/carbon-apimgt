@@ -9,31 +9,24 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-import org.apache.neethi.PolicyEngine;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.commons.throttle.core.*;
-import org.apache.synapse.config.Entry;
+import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
+import org.apache.synapse.commons.throttle.core.Throttle;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.h2.osgi.utils.CarbonUtils;
 import org.wso2.throttle.core.Throttler;
-
-
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * This class is implemented to handle
@@ -62,7 +55,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
      */
     private long version;
 
-    private Throttler throttler;
+    private Throttler throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     public CEPBasedThrottleHandler() {
         this.applicationRoleBasedAccessController = new RoleBasedAccessRateController();
@@ -151,13 +144,13 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
                     getAxis2MessageContext();
             ConfigurationContext cc = axis2MC.getConfigurationContext();
 
-            if (this.throttler == null) {
+            /*if (this.throttler == null) {
                 synchronized (this) {
                     if (this.throttler == null) {
                         initThrottle(messageContext, cc);
                     }
                 }
-            }
+            } */
 
             doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         }
@@ -170,12 +163,12 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setPolicyKey(String policyKey) {
