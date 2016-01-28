@@ -92,6 +92,7 @@ import javax.net.ssl.SSLSession;
 import javax.xml.namespace.QName;
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -707,7 +708,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         FileHostObject fileHostObject = (FileHostObject) apiData.get("imageUrl", apiData);
-        String contextVal = (String) apiData.get("context", apiData);
+//        String contextVal = (String) apiData.get("context", apiData);
         String description = (String) apiData.get("description", apiData);
         
         /* Business Information*/
@@ -716,12 +717,14 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
         
-        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
-        String providerDomain = MultitenantUtils.getTenantDomain(provider);
-        if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
+//        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
+//        String providerDomain = MultitenantUtils.getTenantDomain(provider);
+
+        //TODO: check and remove
+      /*  if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(providerDomain)) {
             //Create tenant aware context for API
             context= "/t/"+ providerDomain+context;
-        }
+        }*/
         
         String tags = (String) apiData.get("tags", apiData);                
         Set<String> tag = new HashSet<String>();
@@ -894,7 +897,7 @@ public class APIProviderHostObject extends ScriptableObject {
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
-        APIProvider apiProvider = getAPIProvider(thisObj);
+//        APIProvider apiProvider = getAPIProvider(thisObj);
         
         boolean isTenantFlowStarted = false;
         String apiJSON = null;
@@ -1433,7 +1436,9 @@ public class APIProviderHostObject extends ScriptableObject {
                 String imageType = url.openConnection().getContentType();
                 File fileToUploadFromUrl = new File(ICON_PATH);
                 if (!fileToUploadFromUrl.exists()) {
-                    fileToUploadFromUrl.createNewFile();
+                    if(!fileToUploadFromUrl.createNewFile()){
+                        log.error("Unable to create new file under : " + ICON_PATH);
+                    }
                 }
                 FileUtils.copyURLToFile(url, fileToUploadFromUrl);
                 FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
@@ -1452,8 +1457,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
-                                                                     String.valueOf(apiData.get("swagger", apiData)));
+            Set<URITemplate> uriTemplates =
+                    definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             // scopes
@@ -1900,7 +1905,9 @@ public class APIProviderHostObject extends ScriptableObject {
 
                     File fileToUploadFromUrl = new File("tmp/icon");
                     if (!fileToUploadFromUrl.exists()) {
-                        fileToUploadFromUrl.createNewFile();
+                        if(!fileToUploadFromUrl.createNewFile()){
+                            log.error("Unable to create new file under tmp/icon");
+                        }
                     }
                     FileUtils.copyURLToFile(url, fileToUploadFromUrl);
                     FileBody fileBody = new FileBody(fileToUploadFromUrl, imageType);
@@ -2201,7 +2208,6 @@ public class APIProviderHostObject extends ScriptableObject {
                                                 Object[] args,
                                                 Function funObj) throws APIManagementException {
         boolean result = false;
-        NativeArray myn = new NativeArray(0);
 
         if (args == null || args.length == 0) {
             handleException("Invalid number of parameters or their types.");
@@ -2210,7 +2216,7 @@ public class APIProviderHostObject extends ScriptableObject {
         NativeObject apiData = (NativeObject) args[0];
 
         String providerName = String.valueOf(apiData.get("provider", apiData));
-        String providerNameTenantFlow = args[0].toString();
+//        String providerNameTenantFlow = args[0].toString();
         providerName = APIUtil.replaceEmailDomain(providerName);
         String apiName = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
@@ -2249,7 +2255,7 @@ public class APIProviderHostObject extends ScriptableObject {
             handleException("Invalid number of parameters or their types.");
         }
         String providerName = args[0].toString();
-        String providerNameTenantFlow = args[0].toString();
+//        String providerNameTenantFlow = args[0].toString();
         providerName = APIUtil.replaceEmailDomain(providerName);
         String scopeKey = args[1].toString();
 
@@ -2652,7 +2658,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 for (Map.Entry<String, Long> entry : subscriptions.entrySet()) {
                     NativeObject row = new NativeObject();
                     row.put("apiVersion", row, entry.getKey());
-                    row.put("count", row, entry.getValue().longValue());
+                    row.put("count", row, entry.getValue());
                     myn.put(i, myn, row);
                     i++;
                 }
@@ -3015,7 +3021,7 @@ public class APIProviderHostObject extends ScriptableObject {
         APIIdentifier apiId = new APIIdentifier(APIUtil.replaceEmailDomain(providerName), apiName,
                                                 version);
         APIProvider apiProvider = getAPIProvider(thisObj);
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
+//        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerName));
         try {
             API api = apiProvider.getAPI(apiId);
             apiProvider.addDocumentationContent(api, docName, docContent);
@@ -3957,7 +3963,7 @@ public class APIProviderHostObject extends ScriptableObject {
     private static void validateWsdl(String url) throws Exception {
 
         URL wsdl = new URL(url);
-        BufferedReader in = new BufferedReader(new InputStreamReader(wsdl.openStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
         String inputLine;
         boolean isWsdl2 = false;
         boolean isWsdl10 = false;
@@ -4529,7 +4535,7 @@ public class APIProviderHostObject extends ScriptableObject {
             String proxyHost = System.getProperty(APIConstants.HTTP_PROXY_HOST);
             String proxyPort = System.getProperty(APIConstants.HTTP_PROXY_PORT);
             client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,
-                        new HttpHost(proxyHost, new Integer(proxyPort)));
+                        new HttpHost(proxyHost, Integer.parseInt(proxyPort)));
         }
 
         try {
@@ -4611,7 +4617,7 @@ public class APIProviderHostObject extends ScriptableObject {
 	* here return boolean with checking all objects in array is string
 	*/
     public static boolean isStringArray(Object[] args) {
-        int argsCount = args.length;
+//        int argsCount = args.length;
         for (Object arg : args) {
             if (!(arg instanceof String)) {
                 return false;
