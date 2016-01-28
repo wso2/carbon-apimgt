@@ -122,7 +122,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
                 try {
 
-                    if (requiredHeaderClaimUris != null) {
+                    if (requiredHeaderClaimUris != null && !requiredHeaderClaimUris.isEmpty()) {
                         // Get user's claim values from the default profile.
                         String userStoreDomain = tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain();
 
