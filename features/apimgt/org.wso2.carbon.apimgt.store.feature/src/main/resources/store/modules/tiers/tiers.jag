@@ -25,8 +25,7 @@ var getTiers = function () {
 };
 
 var getApplicationTiers = function () {
-    var tiers,
-            log = new Log();
+    var tiers, log = new Log();
     var tier;
     var tierArray = [];
     var store;
