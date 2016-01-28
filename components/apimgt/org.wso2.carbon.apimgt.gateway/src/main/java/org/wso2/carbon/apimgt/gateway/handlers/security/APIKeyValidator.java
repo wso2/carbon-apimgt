@@ -67,8 +67,6 @@ public class APIKeyValidator {
     protected Log log = LogFactory.getLog(getClass());
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
-        AxisConfiguration axisConfiguration = axisConfig;
-
         //check the client type from config
         String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
         if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
