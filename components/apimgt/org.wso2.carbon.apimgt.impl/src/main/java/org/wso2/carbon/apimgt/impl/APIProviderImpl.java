@@ -3396,6 +3396,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean isTenantMode = (tenantDomain != null);
             if ((isTenantMode && this.tenantDomain == null) ||
                 (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    isTenantFlowStarted = true;
+                }
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                                                      .getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
