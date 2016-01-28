@@ -2392,7 +2392,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * Given API name and Application, returns throttling request counts over time for a given time span
+     * Given API name and Application, returns throttling request counts over time for a given time span.
      *
      * @param apiName  Name of the API
      * @param provider Provider name
@@ -2409,7 +2409,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+                    + "that the datasource is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2498,7 +2498,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     /**
      * Given Application name and the provider, returns throttle data for the APIs of the provider invoked by the
-     * given application
+     * given application.
      *
      * @param appName  Application name
      * @param provider Provider name
@@ -2512,7 +2512,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
-                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+                    + "that the datasource is properly configured in the APIUsageTracker configuration.");
         }
 
         Connection connection = null;
@@ -2576,7 +2576,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     /**
-     * Get APIs of the provider that consist of throttle data
+     * Get APIs of the provider that consist of throttle data.
      *
      * @param provider Provider name
      * @return List of APIs of the provider that consist of throttle data
@@ -2637,7 +2637,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     /**
      * Given provider name and the API name, returns a list of applications through which the corresponding API is
-     * invoked and which consist of success/throttled requests
+     * invoked and which consist of success/throttled requests.
      *
      * @param provider Provider name
      * @param apiName  Name of th API
