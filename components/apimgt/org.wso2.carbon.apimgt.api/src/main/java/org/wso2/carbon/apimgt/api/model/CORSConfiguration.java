@@ -17,20 +17,20 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
-import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
+import java.util.List;
 
-public class CORSConfiguration implements Serializable {
+public class CORSConfiguration {
 
 	private boolean corsConfigurationEnabled;
-	private Set<String> accessControlAllowOrigins;
+	private List<String> accessControlAllowOrigins;
 	private boolean accessControlAllowCredentials;
-	private Set<String> accessControlAllowHeaders;
-	private Set<String> accessControlAllowMethods;
+	private List<String> accessControlAllowHeaders;
+	private List<String> accessControlAllowMethods;
 
-	public CORSConfiguration(boolean corsConfigurationEnabled, Set<String> accessControlAllowOrigins,
+	public CORSConfiguration(boolean corsConfigurationEnabled, List<String> accessControlAllowOrigins,
 	                         boolean accessControlAllowCredentials,
-	                         Set<String> accessControlAllowHeaders, Set<String> accessControlAllowMethods) {
+	                         List<String> accessControlAllowHeaders, List<String> accessControlAllowMethods) {
 		this.corsConfigurationEnabled = corsConfigurationEnabled;
 		this.accessControlAllowOrigins = accessControlAllowOrigins;
 		this.accessControlAllowCredentials = accessControlAllowCredentials;
@@ -47,11 +47,11 @@ public class CORSConfiguration implements Serializable {
 		this.corsConfigurationEnabled = corsConfigurationEnabled;
 	}
 
-	public Set<String> getAccessControlAllowOrigins() {
+	public List<String> getAccessControlAllowOrigins() {
 		return accessControlAllowOrigins;
 	}
 
-	public void setAccessControlAllowOrigins(Set<String> accessControlAllowOrigins) {
+	public void setAccessControlAllowOrigins(List<String> accessControlAllowOrigins) {
 		this.accessControlAllowOrigins = accessControlAllowOrigins;
 	}
 
@@ -63,19 +63,19 @@ public class CORSConfiguration implements Serializable {
 		this.accessControlAllowCredentials = accessControlAllowCredentials;
 	}
 
-	public Set<String> getAccessControlAllowHeaders() {
+	public List<String> getAccessControlAllowHeaders() {
 		return accessControlAllowHeaders;
 	}
 
-	public void setAccessControlAllowHeaders(Set<String> accessControlAllowHeaders) {
+	public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
 		this.accessControlAllowHeaders = accessControlAllowHeaders;
 	}
 
-	public Set<String> getAccessControlAllowMethods() {
+	public List<String> getAccessControlAllowMethods() {
 		return accessControlAllowMethods;
 	}
 
-	public void setAccessControlAllowMethods(Set<String> accessControlAllowMethods) {
+	public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
 		this.accessControlAllowMethods = accessControlAllowMethods;
 	}
 }

@@ -222,15 +222,15 @@ public class APIMappingUtil {
         dto.setGatewayEnvironments(gatewayEnvironments);
         APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
         CORSConfiguration corsConfiguration = model.getCorsConfiguration();
-        if(corsConfiguration == null){
+        if (corsConfiguration == null) {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         apiCorsConfigurationDTO
-                .setAccessControlAllowOrigins(new ArrayList<>(corsConfiguration.getAccessControlAllowOrigins()));
+                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
         apiCorsConfigurationDTO
-                .setAccessControlAllowHeaders(new ArrayList<>(corsConfiguration.getAccessControlAllowHeaders()));
+                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
         apiCorsConfigurationDTO
-                .setAccessControlAllowMethods(new ArrayList<>(corsConfiguration.getAccessControlAllowMethods()));
+                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
         apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isCorsConfigurationEnabled());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
@@ -360,15 +360,15 @@ public class APIMappingUtil {
         }
         APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
         CORSConfiguration corsConfiguration;
-        if (apiCorsConfigurationDTO != null){
-             corsConfiguration =
+        if (apiCorsConfigurationDTO != null) {
+            corsConfiguration =
                     new CORSConfiguration(apiCorsConfigurationDTO.getCorsConfigurationEnabled(),
-                                          new HashSet<>(apiCorsConfigurationDTO.getAccessControlAllowOrigins()),
+                                          apiCorsConfigurationDTO.getAccessControlAllowOrigins(),
                                           apiCorsConfigurationDTO.getAccessControlAllowCredentials(),
-                                          new HashSet<>(apiCorsConfigurationDTO.getAccessControlAllowHeaders()),
-                                          new HashSet<>(apiCorsConfigurationDTO.getAccessControlAllowMethods()));
+                                          apiCorsConfigurationDTO.getAccessControlAllowHeaders(),
+                                          apiCorsConfigurationDTO.getAccessControlAllowMethods());
 
-        }else{
+        } else {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);

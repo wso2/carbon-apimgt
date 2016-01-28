@@ -1,0 +1,131 @@
+<% jagg.template("cors-configuration", function(inputs, outputs, jagg) {
+if(outputs.isCreatePermitted){
+        var api = outputs.api;
+        var corsJson = JSON.parse(api.corsConfiguration);
+ %>
+         <div id="corsConfigs">
+            
+            <input type="hidden" value='<%=corsJson%>' name="corsConfiguration" id="corsConfiguration"/>        
+            <div class="control-group">
+                            <label class="control-label" for="corsConfiguration"><%=i18n.localize("corsConfiguration")%></label>
+                            <div class="controls">
+                            <label class="checkbox">
+                                <input type="checkbox" id="toggleCors" name="cors_check" id="cors_check"
+                            <%
+                            if(corsJson != null && corsJson.corsConfigurationEnabled){
+                             %>
+                            checked="checked"<%}%>><%=i18n.localize("corsMsg")%>
+                            </label>
+                            <table class="table table-bordered table-striped" id="corsTable"
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("accessControlOrigin")%>
+                                        </td>
+                                        <td>
+                                        <%
+                                        var accessOrigin ="";
+                                        for (var origin in corsJson.accessControlAllowOrigins){
+                                            accessOrigin += corsJson.accessControlAllowOrigins[origin]+",";
+                                        }
+                                        if(accessOrigin != ""){
+                                        accessOrigin=accessOrigin.substr(0,(accessOrigin.length-1));
+                                        }
+                                         var accessHeaders ="";
+                                        for (var headers in corsJson.accessControlAllowHeaders){
+                                            accessHeaders += corsJson.accessControlAllowHeaders[headers]+",";
+                                        }
+                                        if(accessHeaders != ""){
+                                        accessHeaders=accessHeaders.substr(0,(accessHeaders.length-1));
+                                        }
+                                        accessMethods="";
+                                        for (var methods in corsJson.accessControlAllowMethods){
+                                        accessMethods += corsJson.accessControlAllowMethods[methods]+",";
+                                        }
+                                        if(accessMethods != ""){
+                                        accessMethods=accessMethods.substr(0,(accessMethods.length-1));
+                                        }
+                                        %>
+                    <div class="controls originContainer">
+                        <input type="text" placeholder="Access Control Allow Origins" id="accessOrigin" name="accessOrigin" value="<%=encode.forHtml(accessOrigin)%>" data-role="tagsinput"/>
+                    </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("accessControlHeaders")%>
+                                        </td>
+                                        <td>
+                    <div class="controls headerContainer">
+                        <input type="text" placeholder="Access Control Allow Headers" id="allowHeaders" name="allowHeaders" value="<%=encode.forHtml(accessHeaders)%>" data-role="tagsinput"/>
+                    </div>     
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                     <td>
+                                            <%=i18n.localize("accessControlMethods")%>
+                                     </td>
+                                     <td>
+                    <div class="controls headerContainer">
+                       <input type="text" placeholder="Access Control Allow Methods" id="allowMethods" name="allowMethods" value="<%=encode.forHtml(accessMethods)%>" data-role="tagsinput"/>
+                    </div>
+                                    </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <%=i18n.localize("accessControlCredentials")%>
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" id="allowCredentials" name="allowCredentials" placeholder="Access Control Allow Credentials"     
+                                             <%
+                            if(corsJson != null && corsJson.accessControlAllowCredentials){ %>
+                            checked="checked"<%}%>>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+               </div>
+                   </fieldset>
+                    <script>
+                    $('input').on('change', function() {
+                      var corsenable;
+                      var accessControlAllowMethods;
+                      var enableAllowCredentials;
+                      if($('#toggleCors').attr('checked')) {
+                        corsenable = true;
+                        } else {
+                        corsenable = false;
+                        } 
+                        if($('#allowCredentials').attr('checked')) {
+                        enableAllowCredentials = true;
+                        } else {
+                        enableAllowCredentials = false;
+                        }
+                        var allowOrigins = $('#accessOrigin').val();
+                        var allowHeadersValues = $('#allowHeaders').val(); 
+                        var allowMethodsValues = $('#allowMethods').val();
+                        if(allowOrigins!=""){
+                          allowOrigins = allowOrigins.replace(/,/g,"','");
+                          allowOrigins= "['"+allowOrigins+"']";  
+                        }else{
+                           allowOrigins = "[]"; 
+                        }
+                        if(allowHeadersValues!=""){
+                          allowHeadersValues = allowHeadersValues.replace(/,/g,"','");
+                          allowHeadersValues= "['"+allowHeadersValues+"']";  
+                        }else{
+                           allowHeadersValues = "[]"; 
+                        }
+                         if(allowMethodsValues != ""){
+                                                  allowMethodsValues = allowMethodsValues.replace(/,/g,"','");
+                                                  allowMethodsValues = "['" + allowMethodsValues + "']";
+                                                }else{
+                                                   allowMethodsValues = "[]";
+                                                }
+  var corsJsonString = "{'corsConfigurationEnabled':"+corsenable+",'accessControlAllowOrigins':"+allowOrigins+",'accessControlAllowCredentials':"+enableAllowCredentials+",'accessControlAllowHeaders':"+allowHeadersValues+",'accessControlAllowMethods':"+allowMethodsValues+"}";
+                    $('#corsConfiguration').val(corsJsonString);
+                    });
+                    </script>
+
+<% }}); %>

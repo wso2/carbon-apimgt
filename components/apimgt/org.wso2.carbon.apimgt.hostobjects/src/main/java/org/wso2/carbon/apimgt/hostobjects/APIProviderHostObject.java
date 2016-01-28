@@ -429,7 +429,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
 
-        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDaoFromJson(corsConfiguraion);
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
@@ -535,7 +535,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String implementationType = (String) apiData.get("implementation_type", apiData);
-
+        String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }        
@@ -680,6 +680,10 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setOutSequence(outSeqFileName);
         }
 
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
+        if (corsConfiguration != null) {
+            api.setCorsConfiguration(corsConfiguration);
+        }
         return saveAPI(apiProvider, api, null, false);
     	
     }
@@ -1367,7 +1371,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
-        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDaoFromJson(corsConfiguraion);
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
@@ -1810,7 +1814,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
-        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDaoFromJson(corsConfiguraion);
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
@@ -2491,8 +2495,8 @@ public class APIProviderHostObject extends ScriptableObject {
                 CORSConfiguration corsConfigurationDao =api.getCorsConfiguration();
                 if (corsConfigurationDao == null){
                     corsConfigurationDao =
-                            new CORSConfiguration(false, Collections.EMPTY_SET, false, Collections.EMPTY_SET,
-                                                  Collections.EMPTY_SET);
+                            new CORSConfiguration(false, Collections.EMPTY_LIST, false, Collections.EMPTY_LIST,
+                                                  Collections.EMPTY_LIST);
                 }
                 String corsJson = APIUtil.getCorsConfigurationJsonFromDao(corsConfigurationDao);
                 myn.put(49, myn,corsJson);

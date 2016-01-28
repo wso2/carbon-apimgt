@@ -5019,12 +5019,8 @@ public final class APIUtil {
         return false;
     }
 
-    public static CORSConfiguration getCorsConfigurationDaoFromJson(String jsonString) {
-
-        Gson gson = new Gson();
-        CORSConfiguration corsConfiguration = gson.fromJson(jsonString, CORSConfiguration.class);
-
-        return corsConfiguration;
+    public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
+        return new Gson().fromJson(jsonString, CORSConfiguration.class);
 
     }
 
@@ -5069,7 +5065,7 @@ public final class APIUtil {
     }
     public static CORSConfiguration getCorsConfigurationFromArtifact(GovernanceArtifact artifact)
             throws GovernanceException {
-        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDaoFromJson(
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(
                 artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION));
         if (corsConfiguration == null){
          corsConfiguration = getDefaultCorsConfiguration();
@@ -5078,9 +5074,9 @@ public final class APIUtil {
     }
 
     public static CORSConfiguration getDefaultCorsConfiguration() {
-        Set<String> allowHeadersStringSet = new HashSet<String>(Arrays.asList(getAllowedHeaders().split(",")));
-        Set<String> allowMethodsStringSet = new HashSet<String>(Arrays.asList(getAllowedMethods().split(",")));
-        Set<String> allowOriginsStringSet = new HashSet<String>(Arrays.asList(getAllowedOrigins().split(",")));
+        List<String> allowHeadersStringSet = Arrays.asList(getAllowedHeaders().split(","));
+        List<String> allowMethodsStringSet = Arrays.asList(getAllowedMethods().split(","));
+        List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
         return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet,
                                      allowMethodsStringSet);
     }

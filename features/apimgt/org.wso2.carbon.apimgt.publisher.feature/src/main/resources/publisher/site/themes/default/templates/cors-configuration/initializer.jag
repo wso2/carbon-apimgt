@@ -1,0 +1,10 @@
+<%
+jagg.initializer("cors-configuration", {
+
+    preInitialize:function () {
+        jagg.addFooterJS("tagsjs", "jagg", "templates/item-design/js/bootstrap-tagsinput.min.js");
+        jagg.addHeaderJS("tagsjs", "jagg", "templates/cors-configuration/js/cors-configuration.js");
+        jagg.addHeaderCSS("tagscss", "jagg", "templates/item-design/css/bootstrap-tagsinput.css");
+    }
+});
+%>

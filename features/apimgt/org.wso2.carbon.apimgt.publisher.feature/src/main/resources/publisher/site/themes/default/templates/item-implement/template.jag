@@ -249,6 +249,8 @@
                                     </table>
                                 </div>
                             </div>
+                        <legend style="margin-left:0px;text-indent:10px">CORS configuration</legend>  
+                        <% jagg.includeBlock("cors-configuration", {api:api,isCreatePermitted:isCreatePermitted}); %>                          
                         <%}%>
                     </fieldset>
 

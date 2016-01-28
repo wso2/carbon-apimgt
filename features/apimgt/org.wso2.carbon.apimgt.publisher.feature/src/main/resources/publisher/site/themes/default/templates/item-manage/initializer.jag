@@ -14,8 +14,6 @@ jagg.initializer("item-manage", {
         jagg.addFooterJS("jquery-ace", "jagg", "templates/item-design/js/jquery-ace.min.js");
         //jagg.addFooterJS("bootstrap-min", "jagg", "lib/bootstrap/js/bootstrap.min.js");
         //jagg.addFooterJS("bootstrap-editable.min", "jagg", "templates/item-design/js/bootstrap-editable.js"); 
-        jagg.addHeaderCSS("tagscss", "jagg", "templates/item-design/css/bootstrap-tagsinput.css");
-        jagg.addFooterJS("tagsjs", "jagg", "templates/item-design/js/bootstrap-tagsinput.min.js");
         jagg.addFooterJS("multiselect", "jagg", "lib/bootstrap-multiselect.js");               
         jagg.addFooterJS("jsonpath-0.8.0", "jagg", "templates/item-design/js/jsonpath-0.8.0.js");        
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
