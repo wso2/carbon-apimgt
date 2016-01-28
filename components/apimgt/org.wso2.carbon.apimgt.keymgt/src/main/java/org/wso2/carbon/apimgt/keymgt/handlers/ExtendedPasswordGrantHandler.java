@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.apache.axiom.om.OMElement;
@@ -99,7 +117,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
                 try {
 
-                    if (requiredHeaderClaimUris != null && requiredHeaderClaimUris.size() > 0) {
+                    if (requiredHeaderClaimUris != null) {
                         // Get user's claim values from the default profile.
                         String userStoreDomain = tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain();
 
@@ -220,7 +238,7 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
             RealmConfiguration config = new RealmConfiguration();
             UserRealm realm = realmSvc.getUserRealm(config);
             org.wso2.carbon.user.core.UserStoreManager storeManager = realm.getUserStoreManager();
-            String user[] = storeManager.getUserList(claimURI, login, null);
+            String[] user = storeManager.getUserList(claimURI, login, null);
             if (user.length > 0) {
                 username = user[0];
             }
@@ -255,8 +273,8 @@ public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {
 
         Iterator claimUris = requiredClaimUrisElem.getChildrenWithLocalName(CLAIM_URI);
         if (claimUris != null) {
-            for (; claimUris.hasNext();) {
-                OMElement claimUri = ((OMElement) claimUris.next());
+            while (claimUris.hasNext()) {
+                OMElement claimUri = (OMElement) claimUris.next();
                 if (claimUri != null) {
                     requiredHeaderClaimUris.add(claimUri.getText());
                 }
