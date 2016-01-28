@@ -80,9 +80,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-
         query = query == null ? "" : query;
-
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
 
@@ -134,20 +132,17 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
-
             if (apiProvider.isDuplicateContextTemplate(body.getContext())) {
                 RestApiUtil.handleResourceAlreadyExistsError(
                         "Error occurred while adding the API. A duplicate API context already exists for " + body
                                 .getContext(), log);
             }
-
             List<String> tiersFromDTO = body.getTiers();
             //If tiers are not defined, the api should be a PROTOTYPED one,
             if (!APIStatus.PROTOTYPED.toString().equals(body.getStatus()) && 
                     (tiersFromDTO == null || tiersFromDTO.isEmpty())) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
             }
-
             //check whether the added API's tiers are all valid
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
@@ -155,7 +150,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
-
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, username);
 
             if (apiProvider.isAPIAvailable(apiToAdd.getId())) {
@@ -163,17 +157,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                         "Error occurred while adding the API. A duplicate API already exists for " + apiToAdd.getId()
                                 .getApiName() + "-" + apiToAdd.getId().getVersion(), log);
             }
-
             //Overriding some properties:
             //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
             if (!APIStatus.PROTOTYPED.equals(apiToAdd.getStatus())) {
                 apiToAdd.setStatus(APIStatus.CREATED);
             }
-
             //we are setting the api owner as the logged in user until we support checking admin privileges and assigning
             //  the owner as a different user
             apiToAdd.setApiOwner(username);
-
 
             //adding the api
             apiProvider.addAPI(apiToAdd);
@@ -219,7 +210,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
             Map<String, Object> apiLCData = apiProvider.getAPILifeCycleData(apiIdentifier);
             String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
             if (!ArrayUtils.contains(nextAllowedStates, action)) {
@@ -237,7 +227,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                     apiProvider.checkAndChangeAPILCCheckListItem(apiIdentifier, checkListItemName, checkListItemValue);
                 }
             }
-
             apiProvider.changeLifeCycleStatus(apiIdentifier, action);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -265,11 +254,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisCopyApiPost(String newVersion, String apiId){
         URI newVersionedApiUri;
         APIDTO newVersionedApi;
-
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
             APIIdentifier apiIdentifier = api.getId();
 
@@ -283,9 +270,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
                     new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
-
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
-
         } catch (APIManagementException | DuplicateAPIException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
                 String errorMessage = "Requested new version " + newVersion + " of API " + apiId + " already exists";
@@ -319,7 +304,6 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             API api = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
-
             apiToReturn = APIMappingUtil.fromAPItoDTO(api);
             return Response.ok().entity(apiToReturn).build();
         } catch (APIManagementException e) {
@@ -361,11 +345,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setContext(apiInfo.getContextTemplate());
             body.setStatus(apiInfo.getStatus().getStatus());
 
+            //validation for tiers
             List<String> tiersFromDTO = body.getTiers();
             if (tiersFromDTO == null || tiersFromDTO.isEmpty()) {
                 RestApiUtil.handleBadRequest("No tier defined for the API", log);
             }
-
             //check whether the added API's tiers are all valid
             Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = RestApiUtil.getInvalidTierNames(definedTiers, tiersFromDTO);
@@ -373,9 +357,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
-
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
-
             apiProvider.updateAPI(apiToUpdate);
             API updatedApi = apiProvider.getAPI(apiIdentifier);
             updatedApiDTO = APIMappingUtil.fromAPItoDTO(updatedApi);
@@ -410,10 +392,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIProvider apiProvider = RestApiUtil.getProvider(username);
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
+            //deletes the API
             apiProvider.deleteAPI(apiIdentifier);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-            
             keyManager.deleteRegisteredResourceByAPIId(apiId);
             return Response.ok().build();
         } catch (APIManagementException e) {
@@ -449,10 +430,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
             List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiIdentifier);
             DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
                     offset, limit);
@@ -486,33 +465,27 @@ public class ApisApiServiceImpl extends ApisApiService {
             Documentation documentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             String documentName = body.getName();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
                 //check otherTypeName for not null if doc type is OTHER
                 RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
             }
-
             String sourceUrl = body.getSourceUrl();
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
                     (StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
                 RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
             }
-
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
             if (apiProvider.isDocumentationExist(apiIdentifier, documentName)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
             }
-
             apiProvider.addDocumentation(apiIdentifier, documentation);
-            String newDocumentId = documentation.getId();
 
             //retrieve the newly added document
+            String newDocumentId = documentation.getId();
             documentation = apiProvider.getDocumentation(newDocumentId, tenantDomain);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
-
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
                     .replace(RestApiConstants.APIID_PARAM, apiId)
                     .replace(RestApiConstants.DOCUMENTID_PARAM, newDocumentId);
@@ -552,7 +525,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             documentation = apiProvider.getDocumentation(documentId, tenantDomain);
-
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
@@ -588,20 +560,19 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
+            String sourceUrl = body.getSourceUrl();
             Documentation oldDocument = apiProvider.getDocumentation(documentId, tenantDomain);
+
+            //validation checks for existence of the document
             if (oldDocument == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
             }
-
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
                 //check otherTypeName for not null if doc type is OTHER
                 RestApiUtil.handleBadRequest("otherTypeName cannot be empty if type is OTHER.", log);
                 return null;
             }
-
-            String sourceUrl = body.getSourceUrl();
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.URL &&
                     (StringUtils.isBlank(sourceUrl) || !RestApiUtil.isURL(sourceUrl))) {
                 RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
@@ -614,8 +585,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(body);
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
             apiProvider.updateDocumentation(apiIdentifier, newDocumentation);
+
             //retrieve the updated documentation
             newDocumentation = apiProvider.getDocumentation(documentId, tenantDomain);
             return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
@@ -650,15 +621,12 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
             documentation = apiProvider.getDocumentation(documentId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
-
             apiProvider.removeDocumentation(apiIdentifier, documentId);
             return Response.ok().build();
-
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -693,13 +661,13 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
             documentation = apiProvider.getDocumentation(documentId, tenantDomain);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
             }
 
+            //gets the content depending on the type of the document
             if (documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                 String resource = documentation.getFilePath();
                 Map<String, Object> docResourceMap = APIUtil.getDocument(username, resource, tenantDomain);
@@ -819,10 +787,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-
             String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
@@ -853,11 +819,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier  = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             apiProvider.saveSwagger20Definition(apiIdentifier, apiDefinition);
-
             //retrieves the updated swagger definition
             String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
