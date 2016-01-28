@@ -563,7 +563,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     boolean found = false;
                     for (AppCallTypeDTO dto : appApiCallTypeList) {
                         if (dto.getAppName().equals(appName)) {
-                            dto.addGToApiCallTypeArray(apiName, callTypeList);
+                            dto.addToApiCallTypeArray(apiName, callTypeList);
                             found = true;
                             break;
                         }
@@ -572,7 +572,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     if (!found) {
                         appCallTypeDTO = new AppCallTypeDTO();
                         appCallTypeDTO.setAppName(appName);
-                        appCallTypeDTO.addGToApiCallTypeArray(apiName, callTypeList);
+                        appCallTypeDTO.addToApiCallTypeArray(apiName, callTypeList);
                         appApiCallTypeList.add(appCallTypeDTO);
                     }
 
@@ -847,7 +847,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<APIUsage> usageData = this
                 .queryBetweenTwoDaysForAPIUsageByVersion(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
                         null, null, apiName);
-        //        Collection<APIUsage> usageData = getUsageData(omElement);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
 
@@ -886,7 +885,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         List<APIUsage> usageData = this
                 .queryBetweenTwoDaysForAPIUsageByVersion(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY,
                         fromDate, toDate, apiName);
-        //        Collection<APIUsage> usageData = getUsageData(omElement);
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
 
@@ -1008,7 +1006,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         }
 
         List<APIUsageByUserDTO> usage = usageByName;
-        //        return gson.toJson(usage);
         return usage;
     }
 
@@ -1031,27 +1028,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         NumberFormat numberFormat = NumberFormat.getInstance(Locale.getDefault());
         List<APIResponseTimeDTO> apiResponseTimeUsage = new ArrayList<APIResponseTimeDTO>();
 
-       // Map<String, Double> apiCumulativeServiceTimeMap = new HashMap<String, Double>();
-       // Map<String, Long> apiUsageMap = new TreeMap<String, Long>();
         for (APIResponseTime responseTime : responseTimes) {
             for (API providerAPI : providerAPIs) {
                 if (providerAPI.getId().getApiName().equals(responseTime.getApiName()) &&
                         providerAPI.getId().getVersion().equals(responseTime.getApiVersion()) &&
                         providerAPI.getContext().equals(responseTime.getContext())) {
 
-                    /*String apiName = responseTime.getApiName() + " (" + providerAPI.getId().getProviderName() + ")";
-                    Double cumulativeResponseTime = apiCumulativeServiceTimeMap.get(apiName);
-
-                    if (cumulativeResponseTime != null) {
-                        apiCumulativeServiceTimeMap.put(apiName,
-                                cumulativeResponseTime + responseTime.getResponseTime() * responseTime
-                                        .getResponseCount());
-                        apiUsageMap.put(apiName, apiUsageMap.get(apiName) + responseTime.getResponseCount());
-                    } else {
-                        apiCumulativeServiceTimeMap
-                                .put(apiName, responseTime.getResponseTime() * responseTime.getResponseCount());
-                        apiUsageMap.put(apiName, responseTime.getResponseCount());
-                    }*/
                     APIResponseTimeDTO responseTimeDTO = new APIResponseTimeDTO();
                     responseTimeDTO.setApiName(responseTime.getApiName());
 
@@ -1068,15 +1050,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             }
         }
 
-        /*Map<String, APIResponseTimeDTO> responseTimeByAPI = new TreeMap<String, APIResponseTimeDTO>();
-        DecimalFormat format = new DecimalFormat("#.##");
-        for (String key : apiUsageMap.keySet()) {
-            APIResponseTimeDTO responseTimeDTO = new APIResponseTimeDTO();
-            responseTimeDTO.setApiName(key);
-            double responseTime = apiCumulativeServiceTimeMap.get(key) / apiUsageMap.get(key);
-            responseTimeDTO.setServiceTime(Double.parseDouble(format.format(responseTime)));
-            responseTimeByAPI.put(key, responseTimeDTO);
-        }*/
         List<APIResponseTimeDTO> usage = getResponseTimeTopEntries(apiResponseTimeUsage, limit);
         return usage;
     }
@@ -2425,15 +2398,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (isTableExist(APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY, connection)) { //Table exists
 
                 groupByStmt = "year, month, day";
-
-                /*if (APIUsageStatisticsClientConstants.GROUP_BY_DAY.equals(groupBy)) {
-                    groupByStmt = "year, month, day";
-                } else if (APIUsageStatisticsClientConstants.GROUP_BY_HOUR.equals(groupBy)) {
-                    groupByStmt = "year, month, day, time";
-                } else {
-                    throw new APIMgtUsageQueryServiceClientException("Unsupported group by parameter " + groupBy +
-                            " for retrieving throttle data of API and app.");
-                }*/
 
                 query = "SELECT " + groupByStmt + " ," +
                         "SUM(COALESCE(success_request_count,0)) AS success_request_count, " +

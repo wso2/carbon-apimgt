@@ -208,41 +208,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getFirstAccessTime(Context cx, Scriptable thisObj,
-                                                            Object[] args, Function funObj)
-            throws APIManagementException {
-
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        List<APIFirstAccess> list = null;
-        if (args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String subscriberName = (String) args[0];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getFirstAccessTime(subscriberName,1);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for StoreAPIUsage", e);
-        }
-        NativeObject row = new NativeObject();
-
-        if (list != null && !list.isEmpty()) {
-            row.put("year", row, list.get(0));
-            row.put("month", row, list.get(1));
-            row.put("day", row, list.get(2));
-            myn.put(0, myn, row);
-        }
-
-        return myn;
-    }
-
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
                                                              Object[] args, Function funObj)
             throws APIManagementException {

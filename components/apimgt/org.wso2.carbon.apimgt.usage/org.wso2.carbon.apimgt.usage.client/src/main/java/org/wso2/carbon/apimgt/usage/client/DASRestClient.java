@@ -100,16 +100,8 @@ public class DASRestClient {
         input.setContentType(APIUsageStatisticsClientConstants.APPLICATION_JSON);
         postRequest.setEntity(input);
 
-        CloseableHttpResponse response;
-        try {
-            //send the request
-            response = httpClient.execute(postRequest, context);
-        } finally {
-            //            httpClient.getConnectionManager().shutdown();
-        }
-
-        return response;
-
+        //send the request
+        return httpClient.execute(postRequest, context);
     }
 
     /**
@@ -221,7 +213,7 @@ public class DASRestClient {
      */
     public TableExistResponseBean isTableExist(String name) throws JsonSyntaxException, IOException {
 
-        //crete the http get request method to RETS API
+        //crete the http get request method to REST API
         HttpGet getRequest = new HttpGet(
                 dasUrl + APIUsageStatisticsClientConstants.DAS_TABLE_EXIST_REST_API_URL + "?table=" + name);
 

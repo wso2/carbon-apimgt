@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.usage.client;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -360,7 +361,7 @@ public abstract class APIUsageStatisticsClient {
 
             //check is it shared application
             boolean sharedApp;
-            if (groupId != null && !"".equals(groupId)) {
+            if (StringUtils.isEmpty(groupId)) {
                 query = query + "AM_APPLICATION.GROUP_ID = ? ";
                 sharedApp = true;
             } else {

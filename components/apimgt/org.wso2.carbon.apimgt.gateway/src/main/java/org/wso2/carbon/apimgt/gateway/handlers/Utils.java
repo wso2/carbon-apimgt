@@ -64,12 +64,6 @@ public class Utils {
         axis2MC.removeProperty("NO_ENTITY_BODY");
         String method = (String) axis2MC.getProperty(Constants.Configuration.HTTP_METHOD);
 
-        /* commented due to, fault message type need to be request accept type */
-        /*if (method.matches("^(?!.*(POST|PUT|PATCH)).*$")) {
-            // If the request was not an entity enclosing request, send a XML response back
-            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/xml");
-        }*/
-
         // Always remove the ContentType - Let the formatter do its thing
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
@@ -87,12 +81,6 @@ public class Utils {
             /*  if (messageContext.getProperty("error_message_type") != null &&
                     messageContext.getProperty("error_message_type").toString().equalsIgnoreCase("application/json")) {
                 axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/json");
-            }*/
-
-            /* commented due to, fault message type need to be request accept type */
-            //adding this fix to support any message type as error message type
-            /*if (messageContext.getProperty("error_message_type") != null) {
-                axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, messageContext.getProperty("error_message_type"));
             }*/
 
             headers.remove(HttpHeaders.HOST);

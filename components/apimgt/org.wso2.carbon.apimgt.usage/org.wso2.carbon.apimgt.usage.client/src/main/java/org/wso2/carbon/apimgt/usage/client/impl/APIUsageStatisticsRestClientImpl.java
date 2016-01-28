@@ -531,7 +531,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             boolean found = false;
             for (AppCallTypeDTO dto : appApiCallTypeList) {
                 if (dto.getAppName().equals(appName)) {
-                    dto.addGToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
+                    dto.addToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
                     found = true;
                     break;
                 }
@@ -540,7 +540,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (!found) {
                 appCallTypeDTO = new AppCallTypeDTO();
                 appCallTypeDTO.setAppName(appName);
-                appCallTypeDTO.addGToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
+                appCallTypeDTO.addToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
                 appApiCallTypeList.add(appCallTypeDTO);
             }
 
@@ -864,7 +864,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
             query = new StringBuilder(query)
                     .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
@@ -1117,7 +1117,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
             query = new StringBuilder(query)
                     .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
@@ -1244,7 +1244,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
             query = new StringBuilder(query)
                     .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
@@ -1389,7 +1389,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
             query = new StringBuilder(query)
                     .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
@@ -1538,7 +1538,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
             query = new StringBuilder(query)
                     .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
@@ -2234,12 +2234,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public void deployArtifacts(String url, String user, String pass) throws Exception {
-
-        if (url.trim().equals("")) {
-            String message = "Data Analyzer URL is empty. cApp will not be deployed.";
-            log.warn(message);
-            return;
-        }
 
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics_REST.car";
