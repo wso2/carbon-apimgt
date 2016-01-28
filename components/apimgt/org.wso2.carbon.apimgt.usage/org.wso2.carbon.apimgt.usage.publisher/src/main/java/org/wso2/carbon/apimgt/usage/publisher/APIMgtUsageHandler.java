@@ -143,7 +143,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
             Object throttleOutProperty = mc.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY);
             boolean throttleOutHappened = false;
-            if (throttleOutProperty != null && throttleOutProperty instanceof Boolean) {
+            if (throttleOutProperty instanceof Boolean) {
                 throttleOutHappened = (Boolean) throttleOutProperty;
             }
 
