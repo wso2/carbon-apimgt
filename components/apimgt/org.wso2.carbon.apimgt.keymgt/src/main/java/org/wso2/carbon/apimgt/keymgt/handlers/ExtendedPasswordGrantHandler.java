@@ -42,7 +42,12 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 
 import javax.xml.namespace.QName;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ExtendedPasswordGrantHandler extends PasswordGrantHandler {

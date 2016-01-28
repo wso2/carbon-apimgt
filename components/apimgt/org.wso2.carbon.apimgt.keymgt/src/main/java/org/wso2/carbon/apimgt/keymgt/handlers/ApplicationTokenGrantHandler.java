@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.wso2.carbon.identity.oauth2.model.*;
+import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 
 /**
