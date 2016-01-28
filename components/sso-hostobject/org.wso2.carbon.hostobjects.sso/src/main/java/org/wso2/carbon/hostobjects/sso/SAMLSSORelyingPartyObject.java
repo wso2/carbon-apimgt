@@ -414,13 +414,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String nameIdPolicy = relyingPartyObject.getSSOProperty(SSOConstants.NAME_ID_POLICY);
 
         //check if request signing is required
-        if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
-            //builds an unsigned authentication request
-            return Util.marshall(new AuthReqBuilder().
-                    buildAuthenticationRequest(
-                            relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), acsUrl, isPassiveAuthRequired,
-                            nameIdPolicy));
-        } else {
+        if (Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
             //builds a signed authentication request
             return Util.marshall(new AuthReqBuilder().
                     buildSignedAuthRequest(
@@ -428,6 +422,12 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                             relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL),
                             acsUrl, isPassiveAuthRequired, MultitenantConstants.SUPER_TENANT_ID,
                             MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, nameIdPolicy));
+        } else {
+            //builds an unsigned authentication request
+            return Util.marshall(new AuthReqBuilder().
+                    buildAuthenticationRequest(
+                            relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), acsUrl, isPassiveAuthRequired,
+                            nameIdPolicy));
         }
     }
 

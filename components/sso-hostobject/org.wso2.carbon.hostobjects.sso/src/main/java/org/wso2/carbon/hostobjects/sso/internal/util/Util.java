@@ -338,10 +338,10 @@ public class Util {
     /**
      * Replaces the ${} in url with system properties and returns
      *
-     * @param acsUrl
-     * @return
+     * @param acsUrl assertion consumer service url
+     * @return acsUrl with system properties replaced
      */
-    public static String processAcsUrl(String acsUrl){
+    public static String processAcsUrl(String acsUrl) {
         //matches shortest segments that are between '{' and '}'
         Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
         Matcher matcher = pattern.matcher(acsUrl);
