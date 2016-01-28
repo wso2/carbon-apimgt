@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.h2.osgi.utils.CarbonUtils;
@@ -163,11 +164,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
 
     private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
-
-
-        this.throttler = Throttler.getInstance();
-        throttler.deployLocalCEPRules();
-        //throttler.addRule("Gold", null);
+        this.throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     }
 
