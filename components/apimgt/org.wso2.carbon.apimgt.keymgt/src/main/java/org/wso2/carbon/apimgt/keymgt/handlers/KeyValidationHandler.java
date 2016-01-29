@@ -17,12 +17,8 @@
  */
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
-import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
-import org.wso2.carbon.identity.oauth2.validators.OAuth2TokenValidationMessageContext;
-
 
 public interface KeyValidationHandler {
     /**

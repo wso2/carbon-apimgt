@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.impl.executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
@@ -87,11 +86,9 @@ public class APIExecutor implements Execution {
         boolean executed = false;
         String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
         String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-        //String userWithDomain = APIUtil.appendDomainWithUser(user, domain);
-        
+     
         String userWithDomain = user;
         if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)){
-             //userWithDomain = APIUtil.appendDomainWithUser(user, domain);
             userWithDomain = user + APIConstants.EMAIL_DOMAIN_SEPARATOR + domain;
         }       
         
@@ -114,55 +111,62 @@ public class APIExecutor implements Execution {
             API api = APIUtil.getAPI(apiArtifact);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
 
-            APIStatus oldStatus = api.getStatus();
+            APIStatus oldStatus = APIUtil.getApiStatus(apiArtifact.getLifecycleState());
             APIStatus newStatus = APIUtil.getApiStatus(targetState);
-            if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
-                    && newStatus.equals(APIStatus.PUBLISHED)) {
-                Set<Tier> tiers = api.getAvailableTiers();
-                String endPoint = api.getEndpointConfig();
-                if (endPoint != null && endPoint.trim().length() > 0) {
-                    if (tiers == null || tiers.size() <= 0) {
-                        throw new APIManagementException("Failed to publish service to API store while executing " +
-                                                         "APIExecutor. No Tiers selected");
+            
+            if(newStatus != null){ //only allow the executor to be used with default LC states transition
+                                   //check only the newStatus so this executor can be used for LC state change from 
+                                   //custom state to default api state
+                if ((APIStatus.CREATED.equals(oldStatus) || APIStatus.PROTOTYPED.equals(oldStatus))
+                        && APIStatus.PUBLISHED.equals(newStatus)) {
+                    Set<Tier> tiers = api.getAvailableTiers();
+                    String endPoint = api.getEndpointConfig();
+                    if (endPoint != null && endPoint.trim().length() > 0) {
+                        if (tiers == null || tiers.size() <= 0) {
+                            throw new APIManagementException("Failed to publish service to API store while executing " +
+                                                             "APIExecutor. No Tiers selected");
+                        }
+                    } else {
+                        throw new APIManagementException("Failed to publish service to API store while executing"
+                                + " APIExecutor. No endpoint selected");
                     }
-                } else {
-                    throw new APIManagementException("Failed to publish service to API store while executing APIExecutor." +
-                                                     " No endpoint selected");
                 }
+            
+                //push the state change to gateway
+                Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api.getId(), newStatus);
+
+                if (log.isDebugEnabled()) {
+                    String logMessage = "Publish changed status to the Gateway. API Name: " + api.getId().getApiName()
+                            + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
+                            + ", New Status : " + newStatus;
+                    log.debug(logMessage);
+                }
+
+                //update api related information for state change
+                executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
+
+                if (log.isDebugEnabled()) {
+                    String logMessage =
+                            "API related information successfully updated. API Name: " + api.getId().getApiName()
+                                    + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
+                                    + ", New Status : " + newStatus;
+                    log.debug(logMessage);
+                }
+            } else {
+                throw new APIManagementException("Invalid Lifecycle status for default APIExecutor :" + targetState);
             }
+           
+            
             boolean deprecateOldVersions = false;
             boolean makeKeysForwardCompatible = false;
             //If the API status is CREATED ,check for check list items of lifecycle
-            if (oldStatus.equals(APIStatus.CREATED)) {
+            if (APIStatus.CREATED.equals(oldStatus)) {
                 deprecateOldVersions = apiArtifact.isLCItemChecked(0, APIConstants.API_LIFE_CYCLE);
                 makeKeysForwardCompatible = !(apiArtifact.isLCItemChecked(1, APIConstants.API_LIFE_CYCLE));
             }
             
-            //executed = apiProvider.updateAPIStatus(api.getId(), targetState, true, deprecateOldVersions, makeKeysForwardCompatible);
-            
-            //push the state change to gateway
-            Map<String, String> failedGateways = apiProvider.propergateAPIStatusChangeToGateways(api.getId(), newStatus);
-
-            if (log.isDebugEnabled()) {
-                String logMessage = "Publish changed status to the Gateway. API Name: " + api.getId().getApiName()
-                        + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
-                        + ", New Status : " + newStatus;
-                log.debug(logMessage);
-            }
-
-            //update api related information for state change
-            executed = apiProvider.updateAPIforStateChange(api.getId(), newStatus, failedGateways);
-
-            if (log.isDebugEnabled()) {
-                String logMessage =
-                        "API related information successfully updated. API Name: " + api.getId().getApiName()
-                                + ", API Version " + api.getId().getVersion() + ", API Context: " + api.getContext()
-                                + ", New Status : " + newStatus;
-                log.debug(logMessage);
-            }
-            
-            if ((oldStatus.equals(APIStatus.CREATED) || oldStatus.equals(APIStatus.PROTOTYPED))
-                    && newStatus.equals(APIStatus.PUBLISHED)) {
+            if ((APIStatus.CREATED.equals(oldStatus) || APIStatus.PROTOTYPED.equals(oldStatus))
+                    && APIStatus.PUBLISHED.equals(newStatus)) {
                 if (makeKeysForwardCompatible) {
                     apiProvider.makeAPIKeysForwardCompatible(api);
                 }                
@@ -181,8 +185,7 @@ public class APIExecutor implements Execution {
                     }            
                 }            
             }
-            
-            
+                       
             
             //Setting resource again to the context as it's updated within updateAPIStatus method
             String apiPath = APIUtil.getAPIPath(api.getId());
@@ -198,10 +201,11 @@ public class APIExecutor implements Execution {
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
                                 "APIManagementException:" + e.getMessage());
         } catch (FaultGatewaysException e) {
+            log.error("Failed to publish service gateway while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
                                 "FaultGatewaysException:" + e.getFaultMap());
         } catch (UserStoreException e) {
-            log.error("Failed to publish service gateway while executing APIExecutor. ", e);
+            log.error("Failed to get tenant Id while executing APIExecutor. ", e);
             context.setProperty(LifecycleConstants.EXECUTOR_MESSAGE_KEY,
                                 "APIManagementException:" + e.getMessage());
         }

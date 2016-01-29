@@ -63,4 +63,8 @@ public class APIStartupPublisherConstants {
     public static final String API_ICON_PATH_AND_DOCUMENT_URL_DEFAULT = "none";
     
     public static final String API_DOCUMENTATION_NAME = "Wiki Documentation";
+    
+    private APIStartupPublisherConstants(){
+        
+    }
 }

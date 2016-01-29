@@ -67,8 +67,6 @@ public class APIKeyValidator {
     protected Log log = LogFactory.getLog(getClass());
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
-        AxisConfiguration axisConfiguration = axisConfig;
-
         //check the client type from config
         String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
         if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
@@ -240,7 +238,7 @@ public class APIKeyValidator {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
             }
         } catch (ResourceNotFoundException e) {
-            log.error("Could not find matching resource for request");
+            log.error("Could not find matching resource for request", e);
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
         }
 
@@ -386,16 +384,19 @@ public class APIKeyValidator {
                 }
             }
 
-            Resource[] selectedAPIResources = selectedApi.getResources();
-            if (selectedApi != null && selectedAPIResources.length > 0) {
-                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedAPIResources));
-                    if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                        selectedResource = resource;
-                        break;
+            if (selectedApi != null){
+                Resource[] selectedAPIResources = selectedApi.getResources();
+                if (selectedAPIResources.length > 0) {
+                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                        Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedAPIResources));
+                        if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                            selectedResource = resource;
+                            break;
+                        }
                     }
                 }
             }
+           
 
             if (selectedResource == null) {
                 //No matching resource found.

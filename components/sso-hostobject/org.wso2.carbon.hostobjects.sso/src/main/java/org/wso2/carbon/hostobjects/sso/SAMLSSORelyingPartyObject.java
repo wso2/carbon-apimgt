@@ -414,7 +414,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         String nameIdPolicy = relyingPartyObject.getSSOProperty(SSOConstants.NAME_ID_POLICY);
 
         //check if request signing is required
-        if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+        if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
             //builds an unsigned authentication request
             return Util.marshall(new AuthReqBuilder().
                     buildAuthenticationRequest(
@@ -458,7 +458,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (relyingPartyObject.getSessionInfo((String) args[1]) != null) {
             String sessionIndexId = relyingPartyObject.getSessionInfo((String) args[1]).getSessionIndex();
             if (sessionIndexId != null && sessionIndexId.length() > 0) {
-                if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+                if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildLogoutRequest((String) args[0], sessionIndexId,
                                     SSOConstants.LOGOUT_USER,
@@ -473,7 +473,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                     relyingPartyObject.getSSOProperty(SSOConstants.IDP_URL), nameIdFormat));
                 }
             } else {
-                if (!Boolean.valueOf(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
+                if (!Boolean.parseBoolean(relyingPartyObject.getSSOProperty(SSOConstants.SIGN_REQUESTS))) {
                     return Util.marshall(new LogoutRequestBuilder().
                             buildLogoutRequest((String) args[0], SSOConstants.LOGOUT_USER,
                                     relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID), nameIdFormat));
