@@ -4809,21 +4809,21 @@ public class APIProviderHostObject extends ScriptableObject {
         Map<String, Object> resultMap;
         NativeArray myn = new NativeArray(0);
         NativeObject result = new NativeObject();
-
+        boolean isTenantFlowStarted = false;
         try {
-            if (tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if (tenantDomain != null &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            } else {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                        org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-
+                isTenantFlowStarted = true;
             }
             resultMap = apiProvider.getAllPaginatedAPIs(tenantDomain, start, end);
 
-        }  finally {
-            PrivilegedCarbonContext.endTenantFlow();
+        } finally {
+            if (isTenantFlowStarted) {
+
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         if (resultMap != null) {
             apiList = (List<API>) resultMap.get("apis");
