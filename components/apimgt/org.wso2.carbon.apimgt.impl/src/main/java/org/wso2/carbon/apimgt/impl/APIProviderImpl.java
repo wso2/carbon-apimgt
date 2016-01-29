@@ -372,17 +372,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void addPolicy(HashMap<String,String> policyParametersMap) throws APIManagementException{
-        //System.out.println("Policy: " + policyParametersMap.get("tierName"));
-        String policy;
         String tierName = policyParametersMap.get("tierName");
       /*  policy = "<policy level=\"api\" tier=\""+policyParametersMap.get("tierName")+"\" name=\""+policyParametersMap.get("tierName")+"\">\n" +
                 "<description></description>\n";// +*/
-        String eligibilityQuery = "FROM RequestStream\n" +
+        long startingIP = ipToLong(policyParametersMap.get("startingIP"));
+        long endingIP = ipToLong(policyParametersMap.get("endingIP"));
+        String eligibilityQuery =     "FROM RequestStream\n" +
                 "SELECT 'api_"+policyParametersMap.get("tierName")+"' AS rule, messageID, ( not(api_key is null ) AND " +
                 "api_tier=='"+policyParametersMap.get("tierName")+"' ) AS isEligible, str:concat('api_"+policyParametersMap.get("tierName")+"_', api_key,'_key') AS key, verb, ip\n" +
-                "INSERT INTO EligibilityStream;\n";
-        String decisionQuery ="FROM EligibilityStream[isEligible==true AND rule == 'api_"+policyParametersMap.get("tierName")+"']\n" +
-                "select key as throttle_key, (verb=='"+policyParametersMap.get("httpVerb")+"') as isEligible, messageID\n" +
+                "INSERT INTO EligibilityStream;\n" ;
+        String decisionQuery = "FROM EligibilityStream[isEligible==true AND rule == 'api_"+policyParametersMap.get("tierName")+"']\n" +
+                "select key as throttle_key, (verb=='"+policyParametersMap.get("httpVerb")+" AND ip>="+startingIP+"  AND "+endingIP+" >=ip) as isEligible, messageID\n" +
                 "INSERT into Api"+policyParametersMap.get("tierName")+"Stream;\n" +
                 "\n" +
                 "FROM Api"+policyParametersMap.get("tierName")+"Stream[isEligible==true]#window.time("+policyParametersMap.get("unitTime")+" "+policyParametersMap.get("timeUnit")+")\n" +
@@ -397,6 +397,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         appendPolicy(eligibilityQuery,decisionQuery,tierName);
     }
 
+    public long ipToLong(String ip){
+        long ipAddressinLong = 0;
+        if(ip!=null){
+            //convert ipaddress into a long
+            String[] ipAddressArray = ip.split("\\.");    //split by "." and add to an array
+
+            for(int i=0; i< ipAddressArray.length;i++){
+                int power = 3 -i;
+                long ipAddress  = Long.parseLong(ipAddressArray[i]);   //parse to long
+                ipAddressinLong += ipAddress*Math.pow(256,power);
+            }
+        }
+        return ipAddressinLong;
+    }
     private static boolean fileCreated =false;
     private static File file=null;
     public void appendPolicy( String eligibilityQuery, String decisionQuery, String tierName){
@@ -414,12 +428,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             file = new File("repository/conf/throttle-policy.xml");
             fileCreated=true;
             firstWrtie = true;
-
         }
 
         FileOutputStream fos = null;
         try {
-
            // fos = new FileOutputStream(file);
             if (firstWrtie) {
                 fos = new FileOutputStream(file);
@@ -438,7 +450,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 fos.close();
             }
             else{
-
                 FileInputStream inputStream = new FileInputStream(file);
                 XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
                 inputStream.close();
@@ -458,24 +469,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 fos.write(contentInBytes);
                 fos.flush();
                 fos.close();
-
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }   catch (XMLStreamException e) {
             e.printStackTrace();
-        } finally{
-            try{
-                if(fos!=null){
-                    fos.close();
-                }
-            }catch(IOException e){
-                e.printStackTrace();
-            }
         }
-
     }
     public void addTier(Tier tier) throws APIManagementException {
         addOrUpdateTier(tier, false);
@@ -489,8 +488,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String eip = endingIp;
         String rule_ = tierName;
         String http = httpverb;
-
-
     }
 
     public void updateTier(Tier tier) throws APIManagementException {
