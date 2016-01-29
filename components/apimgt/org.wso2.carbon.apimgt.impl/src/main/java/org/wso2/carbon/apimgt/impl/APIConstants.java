@@ -753,22 +753,20 @@ public final class APIConstants {
     	private OperationParameter(){    	    
     	}
     }
-    
+
     public static class CORSHeaders {
-    	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-    	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+        public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+        public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+        public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-    	public static final String ALLOW_HEADERS_HANDLER_VALUE = "allowHeaders";
+        public static final String ALLOW_HEADERS_HANDLER_VALUE = "allowHeaders";
         public static final String ALLOW_METHODS_HANDLER_VALUE = "allowedMethods";
         public static final String ALLOW_ORIGIN_HANDLER_VALUE = "allowedOrigins";
         public static final String ALLOW_CREDENTIALS_HANDLER_VALUE = "allowCredentials";
         public static final String IMPLEMENTATION_TYPE_HANDLER_VALUE = "apiImplementationType";
 
-        public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,PATCH,OPTIONS";
-    	private CORSHeaders(){    	    
-    	}
+        private CORSHeaders() {
+        }
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";

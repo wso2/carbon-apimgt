@@ -46,7 +46,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	private Set<String> allowedOrigins;
 	private boolean initializeHeaderValues;
 	private String allowedMethods;
-
+	private boolean allowCredentialsEnabled;
 	public void init(SynapseEnvironment synapseEnvironment) {
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing CORSRequest Handler instance");
@@ -63,8 +63,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	 */
 	void initializeHeaders() {
 		if (allowHeaders == null) {
-			allowHeaders = APIUtil
-					.getAllowedHeaders();
+			allowHeaders = APIUtil.getAllowedHeaders();
 		}
 		if (allowedOrigins == null) {
 			String allowedOriginsList = APIUtil.getAllowedOrigins();
@@ -73,7 +72,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 			}
 		}
 		if (allowCredentials == null) {
-			allowCredentials = String.valueOf(APIUtil.isAllowCredentials());
+			allowCredentialsEnabled = APIUtil.isAllowCredentials();
 		}
 		if (allowedMethods == null) {
 			allowedMethods = APIUtil.getAllowedMethods();
@@ -142,7 +141,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     }
                 }
             }
-			
+
             String resourceString =
                     selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
             String resourceCacheKey = APIUtil
@@ -199,9 +198,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
 		//Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
 		//and the allowed origin is not the wildcard (*)
-		if (Boolean.parseBoolean(allowCredentials) && !"*".equals(allowedOrigin)) {
-			messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
-		}
+        if (allowCredentialsEnabled && !"*".equals(allowedOrigin)) {
+            messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
+        }
 
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
 		String allowedMethods = "";
@@ -271,6 +270,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public void setAllowCredentials(String allowCredentials) {
+		this.allowCredentialsEnabled = Boolean.parseBoolean(allowCredentials);
 		this.allowCredentials = allowCredentials;
 	}
 

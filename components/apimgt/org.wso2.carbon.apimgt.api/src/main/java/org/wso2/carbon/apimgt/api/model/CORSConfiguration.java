@@ -21,64 +21,63 @@ import java.util.List;
 import java.util.List;
 
 /**
- * API Cors Configuration
+ * API CORS Configuration
  */
 public class CORSConfiguration {
 
-	private boolean corsConfigurationEnabled;
-	private List<String> accessControlAllowOrigins;
-	private boolean accessControlAllowCredentials;
-	private List<String> accessControlAllowHeaders;
-	private List<String> accessControlAllowMethods;
+    private boolean corsConfigurationEnabled;
+    private List<String> accessControlAllowOrigins;
+    private boolean accessControlAllowCredentials;
+    private List<String> accessControlAllowHeaders;
+    private List<String> accessControlAllowMethods;
 
-	public CORSConfiguration(boolean corsConfigurationEnabled, List<String> accessControlAllowOrigins,
-	                         boolean accessControlAllowCredentials,
-	                         List<String> accessControlAllowHeaders, List<String> accessControlAllowMethods) {
-		this.corsConfigurationEnabled = corsConfigurationEnabled;
-		this.accessControlAllowOrigins = accessControlAllowOrigins;
-		this.accessControlAllowCredentials = accessControlAllowCredentials;
-		this.accessControlAllowHeaders = accessControlAllowHeaders;
-		this.accessControlAllowMethods = accessControlAllowMethods;
-	}
+    public CORSConfiguration(boolean corsConfigurationEnabled, List<String> accessControlAllowOrigins,
+                             boolean accessControlAllowCredentials,
+                             List<String> accessControlAllowHeaders, List<String> accessControlAllowMethods) {
+        this.corsConfigurationEnabled = corsConfigurationEnabled;
+        this.accessControlAllowOrigins = accessControlAllowOrigins;
+        this.accessControlAllowCredentials = accessControlAllowCredentials;
+        this.accessControlAllowHeaders = accessControlAllowHeaders;
+        this.accessControlAllowMethods = accessControlAllowMethods;
+    }
 
-	public boolean isCorsConfigurationEnabled() {
+    public boolean isCorsConfigurationEnabled() {
+        return corsConfigurationEnabled;
+    }
 
-		return corsConfigurationEnabled;
-	}
+    public void setCorsConfigurationEnabled(boolean corsConfigurationEnabled) {
+        this.corsConfigurationEnabled = corsConfigurationEnabled;
+    }
 
-	public void setCorsConfigurationEnabled(boolean corsConfigurationEnabled) {
-		this.corsConfigurationEnabled = corsConfigurationEnabled;
-	}
+    public List<String> getAccessControlAllowOrigins() {
+        return accessControlAllowOrigins;
+    }
 
-	public List<String> getAccessControlAllowOrigins() {
-		return accessControlAllowOrigins;
-	}
+    public void setAccessControlAllowOrigins(List<String> accessControlAllowOrigins) {
+        this.accessControlAllowOrigins = accessControlAllowOrigins;
+    }
 
-	public void setAccessControlAllowOrigins(List<String> accessControlAllowOrigins) {
-		this.accessControlAllowOrigins = accessControlAllowOrigins;
-	}
+    public boolean isAccessControlAllowCredentials() {
+        return accessControlAllowCredentials;
+    }
 
-	public boolean isAccessControlAllowCredentials() {
-		return accessControlAllowCredentials;
-	}
+    public void setAccessControlAllowCredentials(boolean accessControlAllowCredentials) {
+        this.accessControlAllowCredentials = accessControlAllowCredentials;
+    }
 
-	public void setAccessControlAllowCredentials(boolean accessControlAllowCredentials) {
-		this.accessControlAllowCredentials = accessControlAllowCredentials;
-	}
+    public List<String> getAccessControlAllowHeaders() {
+        return accessControlAllowHeaders;
+    }
 
-	public List<String> getAccessControlAllowHeaders() {
-		return accessControlAllowHeaders;
-	}
+    public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
+        this.accessControlAllowHeaders = accessControlAllowHeaders;
+    }
 
-	public void setAccessControlAllowHeaders(List<String> accessControlAllowHeaders) {
-		this.accessControlAllowHeaders = accessControlAllowHeaders;
-	}
+    public List<String> getAccessControlAllowMethods() {
+        return accessControlAllowMethods;
+    }
 
-	public List<String> getAccessControlAllowMethods() {
-		return accessControlAllowMethods;
-	}
-
-	public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
-		this.accessControlAllowMethods = accessControlAllowMethods;
-	}
+    public void setAccessControlAllowMethods(List<String> accessControlAllowMethods) {
+        this.accessControlAllowMethods = accessControlAllowMethods;
+    }
 }

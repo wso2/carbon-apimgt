@@ -2508,7 +2508,7 @@ public class APIProviderHostObject extends ScriptableObject {
                             new CORSConfiguration(false, Collections.EMPTY_LIST, false, Collections.EMPTY_LIST,
                                                   Collections.EMPTY_LIST);
                 }
-                String corsJson = APIUtil.getCorsConfigurationJsonFromDao(corsConfigurationDao);
+                String corsJson = APIUtil.getCorsConfigurationJsonFromDto(corsConfigurationDao);
                 myn.put(49, myn,corsJson);
 
             } else {

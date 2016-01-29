@@ -62,7 +62,20 @@ import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIPublisher;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -370,8 +383,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
-            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
-            api.setCorsConfiguration(corsConfiguration);
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -571,8 +583,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
-            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
-            api.setCorsConfiguration(corsConfiguration);
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -670,8 +681,7 @@ public final class APIUtil {
             api.setUriTemplates(uriTemplates);
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
-            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
-            api.setCorsConfiguration(corsConfiguration);
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -821,7 +831,7 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
 
             artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
-                                  APIUtil.getCorsConfigurationJsonFromDao(api.getCorsConfiguration()));
+                                  APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -2208,8 +2218,7 @@ public final class APIUtil {
 
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
-            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
-            api.setCorsConfiguration(corsConfiguration);
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
@@ -3839,8 +3848,7 @@ public final class APIUtil {
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
-            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
-            api.setCorsConfiguration(corsConfiguration);
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
@@ -5019,12 +5027,24 @@ public final class APIUtil {
         return false;
     }
 
+    /**
+     * This Method used to generate CORS Configuration object from CORS Configuration Json
+     *
+     * @param jsonString json representation of CORS configuration
+     * @return CORSConfiguration Object
+     */
     public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
         return new Gson().fromJson(jsonString, CORSConfiguration.class);
 
     }
 
-    public static String getCorsConfigurationJsonFromDao(CORSConfiguration corsConfiguration) {
+    /**
+     * This Method used to generate Json string from CORS Configuration object
+     *
+     * @param corsConfiguration
+     * @return
+     */
+    public static String getCorsConfigurationJsonFromDto(CORSConfiguration corsConfiguration) {
         return new Gson().toJson(corsConfiguration);
     }
 
@@ -5063,12 +5083,13 @@ public final class APIUtil {
                 getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
 
     }
+
     public static CORSConfiguration getCorsConfigurationFromArtifact(GovernanceArtifact artifact)
             throws GovernanceException {
         CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(
                 artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION));
-        if (corsConfiguration == null){
-         corsConfiguration = getDefaultCorsConfiguration();
+        if (corsConfiguration == null) {
+            corsConfiguration = getDefaultCorsConfiguration();
         }
         return corsConfiguration;
     }
