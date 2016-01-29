@@ -366,6 +366,8 @@ public class APIProviderHostObject extends ScriptableObject {
         String technicalOwnerEmail = (String) apiData.get("techOwnerMail", apiData);
         String environments = (String) apiData.get("environments", apiData);
         String responseCache = (String) apiData.get("responseCache", apiData);
+        String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
+
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
         	responseCache = APIConstants.ENABLED;
@@ -437,6 +439,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
 
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
+        if (corsConfiguration != null) {
+            api.setCorsConfiguration(corsConfiguration);
+        }
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
         if (tier != null) {
@@ -539,7 +545,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String name = (String) apiData.get("apiName", apiData);
         String version = (String) apiData.get("version", apiData);
         String implementationType = (String) apiData.get("implementation_type", apiData);
-
+        String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         if (provider != null) {
             provider = APIUtil.replaceEmailDomain(provider);
         }        
@@ -684,6 +690,10 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setOutSequence(outSeqFileName);
         }
 
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
+        if (corsConfiguration != null) {
+            api.setCorsConfiguration(corsConfiguration);
+        }
         return saveAPI(apiProvider, api, null, false);
     	
     }
@@ -1018,6 +1028,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String sandboxUrl = (String) apiData.get("sandbox", apiData);
         String visibility = (String) apiData.get("visibility", apiData);
         String thumbUrl = (String) apiData.get("thumbUrl", apiData);
+        String environments = (String) apiData.get("environments", apiData);
         String visibleRoles = "";
         
         if (name != null) {
@@ -1137,6 +1148,8 @@ public class APIProviderHostObject extends ScriptableObject {
         String faultSequence = (String) apiData.get("faultSequence", apiData);
 
         String responseCache = (String) apiData.get("responseCache", apiData);
+        String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
+
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
         	responseCache = APIConstants.ENABLED;
@@ -1367,7 +1380,11 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setTechnicalOwnerEmail(techOwnerEmail);
         api.setVisibility(visibility);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
-
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
+        if (corsConfiguration != null) {
+            api.setCorsConfiguration(corsConfiguration);
+        }
         String endpointConfig = (String) apiData.get("endpoint_config", apiData);
         if(StringUtils.isEmpty(endpointConfig)) {
             handleException("Endpoint Configuration is missing");
@@ -1566,6 +1583,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibility = (String) apiData.get("visibility", apiData);
         String thumbUrl = (String) apiData.get("thumbUrl", apiData);
         String environments = (String) apiData.get("environments", apiData);
+        String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String visibleRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
         	visibleRoles = (String) apiData.get("visibleRoles", apiData);
@@ -1806,7 +1824,10 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
-
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
+        if (corsConfiguration != null) {
+            api.setCorsConfiguration(corsConfiguration);
+        }
         api.setDescription(StringEscapeUtils.escapeHtml(description));
         api.setLastUpdated(new Date());
         api.setUrl(endpoint);
@@ -2481,6 +2502,14 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(46, myn, checkValue(api.getProductionMaxTps()));
                 myn.put(47, myn, checkValue(api.getSandboxMaxTps()));
                 myn.put(48, myn, checkValue(Boolean.toString(api.isEndpointAuthDigest())));
+                CORSConfiguration corsConfigurationDao =api.getCorsConfiguration();
+                if (corsConfigurationDao == null){
+                    corsConfigurationDao =
+                            new CORSConfiguration(false, Collections.EMPTY_LIST, false, Collections.EMPTY_LIST,
+                                                  Collections.EMPTY_LIST);
+                }
+                String corsJson = APIUtil.getCorsConfigurationJsonFromDao(corsConfigurationDao);
+                myn.put(49, myn,corsJson);
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
