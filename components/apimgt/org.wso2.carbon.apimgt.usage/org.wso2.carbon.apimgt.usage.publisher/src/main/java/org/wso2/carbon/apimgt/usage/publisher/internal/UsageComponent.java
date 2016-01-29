@@ -54,7 +54,7 @@ public class UsageComponent {
             dataPublisherMap = new ConcurrentHashMap<String, LoadBalancingDataPublisher>();
 
             log.debug("API Management Usage Publisher bundle is activated ");
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("API Management Usage Publisher bundle ", e);
         }
     }

@@ -83,7 +83,7 @@ public class APILogMessageHandler extends AbstractHandler {
                 }
             } catch (AxisFault axisFault) {
                 //Ignore Axis fault to continue logging
-                log.error("Cannot get Transport headers from Gateway");
+                log.error("Cannot get Transport headers from Gateway", axisFault);
             }
         }
         if (logID != null) {

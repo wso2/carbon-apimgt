@@ -140,7 +140,6 @@ public class TenantManagerHostObject extends ScriptableObject {
                         //create all non exists folders
                         //else you will hit FileNotFoundException for compressed folder
                         new File(newFile.getParent()).mkdirs();
-
                         FileOutputStream fos = new FileOutputStream(newFile);
 
                         int len;

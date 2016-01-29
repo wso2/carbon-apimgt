@@ -54,7 +54,6 @@ import javax.xml.namespace.QName;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,28 +77,43 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 		APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
 												.getAPIManagerConfiguration();
 		
-		if (Boolean.parseBoolean(configuration.getFirstProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_ENABLED))) {
-			List<String> apiContexts = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_CONTEXT);
-			List<String> apiProviders = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_PROVIDER);
-			List<String> apiVersions = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_VERSION);
-			List<String> apiEndpoints = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_ENDPOINT);
-			List<String> apiIconPaths = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_ICONPATH);
-			List<String> apiDocumentURLs = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_DOCUMENTURL);
-			List<String> apiAuthTypes = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_AUTHYTPE);
-			
-			List<String> localAPIContexts = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_CONTEXT);
-			List<String> localAPIProviders = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_PROVIDER);
-			List<String> localAPIVersions = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_VERSION);
-			List<String> localAPIIconPaths = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_ICONPATH);
-			List<String> localAPIDocumentURLs = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_DOCUMENTURL);
-			List<String> localAPIAuthTypes = configuration.getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_AUTHYTPE);
-			
-			
-			if (!isValidLocalAPIConfig(localAPIContexts, localAPIProviders, localAPIVersions, localAPIIconPaths, localAPIDocumentURLs, localAPIAuthTypes) && 
-					!isValidAPIConfig(apiProviders, apiVersions, apiEndpoints, apiContexts, apiIconPaths, apiDocumentURLs, apiAuthTypes)) {
-				log.error("Invalid StartupAPIPublisher configuration");
-				return;
-			}
+        if (Boolean.parseBoolean(
+                configuration.getFirstProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_ENABLED))) {
+            List<String> apiContexts = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_CONTEXT);
+            List<String> apiProviders = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_PROVIDER);
+            List<String> apiVersions = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_VERSION);
+            List<String> apiEndpoints = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_ENDPOINT);
+            List<String> apiIconPaths = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_ICONPATH);
+            List<String> apiDocumentURLs = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_DOCUMENTURL);
+            List<String> apiAuthTypes = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_AUTHYTPE);
+
+            List<String> localAPIContexts = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_CONTEXT);
+            List<String> localAPIProviders = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_PROVIDER);
+            List<String> localAPIVersions = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_VERSION);
+            List<String> localAPIIconPaths = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_ICONPATH);
+            List<String> localAPIDocumentURLs = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_DOCUMENTURL);
+            List<String> localAPIAuthTypes = configuration
+                    .getProperty(APIStartupPublisherConstants.API_STARTUP_PUBLISHER_API_LOCAL_AUTHYTPE);
+
+            if (!isValidLocalAPIConfig(localAPIContexts, localAPIProviders, localAPIVersions, localAPIIconPaths,
+                    localAPIDocumentURLs, localAPIAuthTypes)
+                    && !isValidAPIConfig(apiProviders, apiVersions, apiEndpoints, apiContexts, apiIconPaths,
+                            apiDocumentURLs, apiAuthTypes)) {
+                log.error("Invalid StartupAPIPublisher configuration");
+                return;
+            }
 			
 			if (apiContexts != null) {
 				/* Create APIs*/
@@ -113,7 +127,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 						String documentURL = apiDocumentURLs.get(i);
 						String authType = apiAuthTypes.get(i);
 						
-						String apiName = null;
+						String apiName;
 
 						if (apiProvider == null || apiVersion == null || apiContext == null || apiEndpoint == null
 								|| iconPath == null || documentURL == null || authType == null) {
@@ -135,7 +149,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 						createAPIAtServerStartup(apiName, apiProvider, apiVersion,
 								apiEndpoint, apiContext, iconPath, documentURL, authType);
 					} catch (IndexOutOfBoundsException e) {
-						log.error("Invalid StartupAPIPublisher configuration");
+						log.error("Invalid StartupAPIPublisher configuration", e);
 					}
 				}
 			}
@@ -151,7 +165,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 						String documentURL = localAPIDocumentURLs.get(i);
 						String authType = localAPIAuthTypes.get(i);
 						
-						String apiName = null;
+						String apiName;
 
 						if (apiProvider == null || apiVersion == null || apiContext == null || iconPath == null
 								|| documentURL == null || authType == null) {
@@ -177,15 +191,15 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 						createAPIAtServerStartup(apiName, apiProvider, apiVersion,
 								apiEndpoint, apiContext, iconPath, documentURL, authType);
 					} catch (IndexOutOfBoundsException e) {
-						log.error("Invalid StartupAPIPublisher configuration");
+						log.error("Invalid StartupAPIPublisher configuration", e);
 					}
 				}
 			}
 		}
 	}
 
-	private void createAPIAtServerStartup(String apiName, String apiProvider,
-			String apiVersion, String apiEndpoint, String apiContext, String iconPath, String documentURL, String authType) {
+    private void createAPIAtServerStartup(String apiName, String apiProvider, String apiVersion, String apiEndpoint,
+            String apiContext, String iconPath, String documentURL, String authType) {
 		/* Check whether API already published */
 		if (contextCache.get(apiContext) != null
 				|| ApiMgtDAO.isContextExist(apiContext)) {
@@ -209,10 +223,11 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 		}
 	}
 
-	private API createAPIModel(String apiName, String apiProvider,
-			String apiVersion, String apiEndpoint, String apiContext, String iconPath, String documentURL, String authType)
-			throws APIManagementException {
+    private API createAPIModel(String apiName, String apiProvider, String apiVersion, String apiEndpoint,
+            String apiContext, String iconPath, String documentURL, String authType) throws APIManagementException {
 		API api = null;
+		RandomAccessFile randomAccessFile = null;
+        FileInputStream fileInputStream = null;
 		try {
 			provider = APIManagerFactory.getInstance().getAPIProvider(
 					apiProvider);
@@ -229,11 +244,16 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
             api.setTransports(Constants.TRANSPORT_HTTP+","+Constants.TRANSPORT_HTTPS);
             
             /* Adding Icon*/
-            File file = null;
+            File file ;
+           
             if (!APIStartupPublisherConstants.API_ICON_PATH_AND_DOCUMENT_URL_DEFAULT.equals(iconPath)) {
-                file =new File(iconPath);
+                file = new File(iconPath);
                 String absolutePath = file.getAbsolutePath();
-                ResourceFile icon = new ResourceFile(getImageInputStream(absolutePath), getImageContentType(absolutePath));
+                randomAccessFile = new RandomAccessFile(absolutePath, "r");
+                fileInputStream = new FileInputStream(randomAccessFile.getFD());
+                
+                ResourceFile icon = new ResourceFile(fileInputStream,
+                        getImageContentType(absolutePath));
                 String thumbPath = APIUtil.getIconPath(identifier);
                 String thumbnailUrl = provider.addResourceFile(thumbPath, icon);
                 api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, apiProvider));
@@ -247,6 +267,23 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			handleException("Error while initializing API Provider", e);
 		} catch (IOException e) {
 			handleException("Error while reading image from icon path", e);
+		} finally {
+		         
+		    if(randomAccessFile != null){		        
+                try {
+                    randomAccessFile.close();
+                } catch (IOException ignored) {
+                    
+                }              
+		    }
+		    
+		    if(fileInputStream != null){
+		        try {
+                    fileInputStream.close();
+                } catch (IOException ignored) {
+                    
+                }
+		    }
 		}
 		return api;
 	}
@@ -260,13 +297,10 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			createAPIArtifact(api);
 
 			int tenantId = -1234;
-			String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-			try {
-				tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-			} catch (UserStoreException e) {
-				throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
-						+api.getId().getApiName(),e);
-			}
+            String tenantDomain = MultitenantUtils
+                    .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
 
 			apiMgtDAO.addAPI(api, tenantId);
 			
@@ -295,7 +329,10 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 					+ api.getId().getApiName(), e);
 		} catch (RegistryException e) {
 			throw e;
-		}
+        } catch (UserStoreException e) {
+            throw new APIManagementException(
+                    "Error in retrieving Tenant Information while adding api :" + api.getId().getApiName(), e);
+        }
 	}
 
 	/**
@@ -323,7 +360,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 			registry.addAssociation(providerPath, artifactPath,
 					APIConstants.PROVIDER_ASSOCIATION);
 			Set<String> tagSet = api.getTags();
-			if (tagSet != null && tagSet.size() > 0) {
+			if (tagSet != null) {
 				for (String tag : tagSet) {
 					registry.applyTag(artifactPath, tag);
 				}
@@ -352,7 +389,6 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 
 			// Generate API Definition for Swagger. 
 			//TO DO: Need to re-write this method to generate swagger 2.0 resource
-			//createUpdateAPIDefinition(api);
 
 		} catch (RegistryException e) {
 			try {
@@ -472,35 +508,27 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 		throw new APIManagementException(msg, e);
 	}
 	
-	private InputStream getImageInputStream(String imageAbsolutePath) throws IOException {
-		RandomAccessFile file1 = new RandomAccessFile(imageAbsolutePath, "r");
-        return new FileInputStream(file1.getFD());
-    }
 	
 	private String getImageContentType(String imageAbsolutePath) {
 		String fileName = new File(imageAbsolutePath).getName();
         return FileTypeMap.getDefaultFileTypeMap().getContentType(fileName);
 	}
 	
-	private boolean isValidLocalAPIConfig(List<String> localAPIContexts, List<String> localAPIProviders, 
-			List<String> localApiVersions, List<String> localAPIIconPaths, List<String> localAPIDocumentURLs, List<String> localAPIAuthTypes) {
-		if ((localAPIContexts == null || localAPIProviders == null || localApiVersions == null || localAPIIconPaths == null 
-					|| localAPIDocumentURLs == null || localAPIAuthTypes == null)) {
-			return false;
-		}else {
-			return true;
-		}
-	}
-	
-	private boolean isValidAPIConfig(List<String> apiProviders, List<String> apiVersions, 
-			List<String>  apiEndpoints, List<String> apiContexts, List<String> apiIconPaths, List<String> apiDocumentURLs, List<String> apiAuthTypes) {
-		if ((apiProviders == null || apiVersions == null || apiEndpoints == null || apiContexts == null || apiIconPaths == null 
-					|| apiDocumentURLs == null || apiAuthTypes == null)) {
-			return false;
-		}else {
-			return true;
-		}
-	}
+    private boolean isValidLocalAPIConfig(List<String> localAPIContexts, List<String> localAPIProviders,
+            List<String> localApiVersions, List<String> localAPIIconPaths, List<String> localAPIDocumentURLs,
+            List<String> localAPIAuthTypes) {
+
+        return !(localAPIContexts == null || localAPIProviders == null || localApiVersions == null
+                || localAPIIconPaths == null || localAPIDocumentURLs == null || localAPIAuthTypes == null);
+    }
+
+    private boolean isValidAPIConfig(List<String> apiProviders, List<String> apiVersions, List<String> apiEndpoints,
+            List<String> apiContexts, List<String> apiIconPaths, List<String> apiDocumentURLs,
+            List<String> apiAuthTypes) {  
+        
+        return !(apiProviders == null || apiVersions == null || apiEndpoints == null || apiContexts == null
+                || apiIconPaths == null || apiDocumentURLs == null || apiAuthTypes == null);
+    }
 	
 	private static DocumentationType getDocType(String docType) {
         DocumentationType docsType = null;

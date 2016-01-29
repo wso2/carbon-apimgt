@@ -102,11 +102,11 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
             } catch (ClassNotFoundException e) {
                 log.error("Cannot find class: " + claimsRetrieverImplClass, e);
             } catch (InstantiationException e) {
-                log.error("Error instantiating " + claimsRetrieverImplClass);
+                log.error("Error instantiating " + claimsRetrieverImplClass, e);
             } catch (IllegalAccessException e) {
-                log.error("Illegal access to " + claimsRetrieverImplClass);
+                log.error("Illegal access to " + claimsRetrieverImplClass, e);
             } catch (APIManagementException e) {
-                log.error("Error while initializing " + claimsRetrieverImplClass);
+                log.error("Error while initializing " + claimsRetrieverImplClass, e);
             }
         }
     }
@@ -279,19 +279,19 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
         } catch (NoSuchAlgorithmException e) {
             String error = "Signature algorithm not found.";
             //do not log
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         } catch (InvalidKeyException e) {
             String error = "Invalid private key provided for the signature";
             //do not log
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         } catch (SignatureException e) {
             String error = "Error in signature";
             //do not log
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         } catch (RegistryException e) {
             String error = "Error in loading tenant registry for " + tenantDomain;
             //do not log
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         }
     }
 
@@ -385,16 +385,16 @@ public abstract class AbstractJWTGenerator implements TokenGenerator {
 
         } catch (KeyStoreException e) {
             String error = "Error in obtaining tenant's keystore";
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         } catch (CertificateEncodingException e) {
             String error = "Error in generating public cert thumbprint";
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         } catch (NoSuchAlgorithmException e) {
             String error = "Error in generating public cert thumbprint";
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         } catch (Exception e) {
             String error = "Error in obtaining tenant's keystore";
-            throw new APIManagementException(error);
+            throw new APIManagementException(error, e);
         }
     }
 

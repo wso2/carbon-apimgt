@@ -30,6 +30,10 @@ public class DataHolder {
     
     private static RegistryService registryService;
     
+    private DataHolder(){
+        
+    }
+    
     public static void setServerConfigContext(ConfigurationContext serverConfigContext) {
         DataHolder.serverConfigContext = serverConfigContext;
     }

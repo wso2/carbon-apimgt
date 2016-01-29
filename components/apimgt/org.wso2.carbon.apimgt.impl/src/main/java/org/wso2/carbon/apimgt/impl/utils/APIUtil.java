@@ -250,8 +250,6 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -434,8 +432,6 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -754,8 +750,6 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, api.getDescription());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL, api.getUrl());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL, api.getSandboxUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_WADL, api.getWadlUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, api.getThumbnailUrl());
@@ -2143,8 +2137,6 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -2959,6 +2951,13 @@ public final class APIUtil {
         return propertyMap;
     }
 
+    /**
+     * Add all the custom sequences of given type to registry 
+     * 
+     * @param registry Registry instance
+     * @param customSequenceType Custom sequence type which is in/out or fault
+     * @throws APIManagementException
+     */
     public static void addDefinedAllSequencesToRegistry(UserRegistry registry,
                                                         String customSequenceType)
             throws APIManagementException {
@@ -2981,11 +2980,14 @@ public final class APIUtil {
                                     customSequenceType + '/' + sequenceFileName;
                     if (registry.resourceExists(regResourcePath)) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Defined sequences have already been added to the registry");
+                            log.debug("The sequence file with the name " + sequenceFileName
+                                    + " already exists in the registry path " + regResourcePath);
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Adding defined sequences to the registry.");
+                            log.debug(
+                                    "Adding sequence file with the name " + sequenceFileName + " to the registry path "
+                                            + regResourcePath);
                         }
 
                         inSeqStream = new FileInputStream(sequenceFile);
@@ -3009,15 +3011,7 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading defined sequence ", e);
         } finally {
-            if (inSeqStream != null) {
-                try {
-                    inSeqStream.close();
-                } catch (IOException e) {
-                    log.error(
-                            "Error while closing input stream in path " + seqFolderLocation + " " +
-                                    e);
-                }
-            }
+            IOUtils.closeQuietly(inSeqStream);
         }
 
     }

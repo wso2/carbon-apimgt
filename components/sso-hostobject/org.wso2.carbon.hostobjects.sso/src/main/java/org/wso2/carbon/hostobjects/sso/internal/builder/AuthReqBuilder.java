@@ -26,6 +26,7 @@ import org.opensaml.common.SAMLVersion;
 import org.opensaml.saml2.core.AuthnRequest;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.impl.IssuerBuilder;
+import org.opensaml.xml.Configuration;
 import org.opensaml.xml.io.Marshaller;
 import org.opensaml.xml.io.MarshallerFactory;
 import org.opensaml.xml.io.MarshallingException;
@@ -126,9 +127,7 @@ public class AuthReqBuilder {
             signature.setCanonicalizationAlgorithm(SignatureConstants.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
             KeyInfo keyInfo = (KeyInfo) Util.buildXMLObject(KeyInfo.DEFAULT_ELEMENT_NAME);
             X509Data data = (X509Data) Util.buildXMLObject(X509Data.DEFAULT_ELEMENT_NAME);
-            org.opensaml.xml.signature.X509Certificate cert =
-                    (org.opensaml.xml.signature.X509Certificate) Util.buildXMLObject(
-                            org.opensaml.xml.signature.X509Certificate.DEFAULT_ELEMENT_NAME);
+            X509Certificate cert = (X509Certificate) Util.buildXMLObject(X509Certificate.DEFAULT_ELEMENT_NAME);
             String value = Base64.encodeBytes(cred.getEntityCertificate().getEncoded());
             cert.setValue(value);
             data.getX509Certificates().add(cert);
@@ -141,8 +140,7 @@ public class AuthReqBuilder {
             signatureList.add(signature);
 
             // Marshall and Sign
-            MarshallerFactory marshallerFactory =
-                    org.opensaml.xml.Configuration.getMarshallerFactory();
+            MarshallerFactory marshallerFactory = Configuration.getMarshallerFactory();
             Marshaller marshaller = marshallerFactory.getMarshaller(authnRequest);
 
             marshaller.marshall(authnRequest);

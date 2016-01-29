@@ -133,9 +133,9 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 createTenantSynapseConfigHierarchy(synapseConfigDir, tenantDomain);
             }
         } catch (RemoteException e) {
-            log.error("Failed to create Tenant's synapse sequences.");
+            log.error("Failed to create Tenant's synapse sequences.", e);
         } catch (Exception e) {
-            log.error("Failed to create Tenant's synapse sequences.");
+            log.error("Failed to create Tenant's synapse sequences.", e);
         }
     }
 
@@ -147,93 +147,97 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
      */
     @SuppressWarnings({"ResultOfMethodCallIgnored"})
     private void createTenantSynapseConfigHierarchy(File synapseConfigDir, String tenantDomain) {
-        boolean makedirSuccess = synapseConfigDir.mkdir();
-        if(makedirSuccess) {
-            File sequencesDir = new File(
-                    synapseConfigDir, MultiXMLConfigurationBuilder.SEQUENCES_DIR);
 
-            if (!sequencesDir.mkdir()) {
-                log.warn("Could not create " + sequencesDir);
-            }
+        //The directory could be created before hand. Hence check if the directory exists before proceeding to copying the
+        //sequences.
+           if(!synapseConfigDir.exists()) {
+               if (synapseConfigDir.mkdir()) {
+                   File sequencesDir = new File(
+                           synapseConfigDir, MultiXMLConfigurationBuilder.SEQUENCES_DIR);
 
-            SynapseConfiguration initialSynCfg = SynapseConfigurationBuilder.getDefaultConfiguration();
+                   if (!sequencesDir.mkdir()) {
+                       log.warn("Could not create " + sequencesDir);
+                   }
+               } else {
+                   log.warn("Could not create " + synapseConfigDir);
+               }
+           }else {
+               SynapseConfiguration initialSynCfg = SynapseConfigurationBuilder.getDefaultConfiguration();
 
-            //SequenceMediator mainSequence = (SequenceMediator) initialSynCfg.getMainSequence();
-            //SequenceMediator faultSequence = (SequenceMediator) initialSynCfg.getFaultSequence();
-            InputStream in = null;
-            StAXOMBuilder builder = null;
-            SequenceMediatorFactory factory = new SequenceMediatorFactory();
-            try {
-                if (authFailureHandlerSequence == null) {
-                    in = FileUtils.openInputStream(new File(synapseConfigRootPath + authFailureHandlerSequenceName + ".xml"));
-                    builder = new StAXOMBuilder(in);
-                    authFailureHandlerSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                    authFailureHandlerSequence.setFileName(authFailureHandlerSequenceName + ".xml");
-                }
-                if (resourceMisMatchSequence == null) {
-                    in = FileUtils.openInputStream(new File(synapseConfigRootPath + resourceMisMatchSequenceName + ".xml"));
-                    builder = new StAXOMBuilder(in);
-                    resourceMisMatchSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                    resourceMisMatchSequence.setFileName(resourceMisMatchSequenceName + ".xml");
-                }
-                if (throttleOutSequence == null) {
-                    in = FileUtils.openInputStream(new File(synapseConfigRootPath + throttleOutSequenceName + ".xml"));
-                    builder = new StAXOMBuilder(in);
-                    throttleOutSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                    throttleOutSequence.setFileName(throttleOutSequenceName + ".xml");
-                }
-                if (sandboxKeyErrorSequence == null) {
-                    in = FileUtils.openInputStream(new File(synapseConfigRootPath + sandboxKeyErrorSequenceName + ".xml"));
-                    builder = new StAXOMBuilder(in);
-                    sandboxKeyErrorSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                    sandboxKeyErrorSequence.setFileName(sandboxKeyErrorSequenceName + ".xml");
-                }
-                if (productionKeyErrorSequence == null) {
-                    in = FileUtils.openInputStream(new File(synapseConfigRootPath + productionKeyErrorSequenceName + ".xml"));
-                    builder = new StAXOMBuilder(in);
-                    productionKeyErrorSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                    productionKeyErrorSequence.setFileName(productionKeyErrorSequenceName + ".xml");
-                }
-                if (corsSequence == null) {
-                    in = FileUtils.openInputStream(new File(synapseConfigRootPath + corsSequenceName + ".xml"));
-                    builder = new StAXOMBuilder(in);
-                    corsSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
-                    corsSequence.setFileName(corsSequenceName + ".xml");
-                }
-                FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
-                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + mainSequenceName + ".xml"));
+               //SequenceMediator mainSequence = (SequenceMediator) initialSynCfg.getMainSequence();
+               //SequenceMediator faultSequence = (SequenceMediator) initialSynCfg.getFaultSequence();
+               InputStream in = null;
+               StAXOMBuilder builder = null;
+               SequenceMediatorFactory factory = new SequenceMediatorFactory();
+               try {
+                   if (authFailureHandlerSequence == null) {
+                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + authFailureHandlerSequenceName + ".xml"));
+                       builder = new StAXOMBuilder(in);
+                       authFailureHandlerSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
+                       authFailureHandlerSequence.setFileName(authFailureHandlerSequenceName + ".xml");
+                   }
+                   if (resourceMisMatchSequence == null) {
+                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + resourceMisMatchSequenceName + ".xml"));
+                       builder = new StAXOMBuilder(in);
+                       resourceMisMatchSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
+                       resourceMisMatchSequence.setFileName(resourceMisMatchSequenceName + ".xml");
+                   }
+                   if (throttleOutSequence == null) {
+                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + throttleOutSequenceName + ".xml"));
+                       builder = new StAXOMBuilder(in);
+                       throttleOutSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
+                       throttleOutSequence.setFileName(throttleOutSequenceName + ".xml");
+                   }
+                   if (sandboxKeyErrorSequence == null) {
+                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + sandboxKeyErrorSequenceName + ".xml"));
+                       builder = new StAXOMBuilder(in);
+                       sandboxKeyErrorSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
+                       sandboxKeyErrorSequence.setFileName(sandboxKeyErrorSequenceName + ".xml");
+                   }
+                   if (productionKeyErrorSequence == null) {
+                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + productionKeyErrorSequenceName + ".xml"));
+                       builder = new StAXOMBuilder(in);
+                       productionKeyErrorSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
+                       productionKeyErrorSequence.setFileName(productionKeyErrorSequenceName + ".xml");
+                   }
+                   if (corsSequence == null) {
+                       in = FileUtils.openInputStream(new File(synapseConfigRootPath + corsSequenceName + ".xml"));
+                       builder = new StAXOMBuilder(in);
+                       corsSequence = (SequenceMediator) factory.createMediator(builder.getDocumentElement(), new Properties());
+                       corsSequence.setFileName(corsSequenceName + ".xml");
+                   }
+                   FileUtils.copyFile(new File(synapseConfigRootPath + mainSequenceName + ".xml"),
+                           new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + mainSequenceName + ".xml"));
 
-                FileUtils.copyFile(new File(synapseConfigRootPath + faultSequenceName + ".xml"),
-                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + faultSequenceName + ".xml"));
+                   FileUtils.copyFile(new File(synapseConfigRootPath + faultSequenceName + ".xml"),
+                           new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences" + File.separator + faultSequenceName + ".xml"));
 
-            } catch (IOException e) {
-                log.error("Error while reading API manager specific synapse sequences" + e);
+               } catch (IOException e) {
+                   log.error("Error while reading API manager specific synapse sequences" + e);
 
-            } catch (XMLStreamException e) {
-                log.error("Error while parsing API manager specific synapse sequences" + e);
-            } finally {
-                IOUtils.closeQuietly(in);
-            }
+               } catch (XMLStreamException e) {
+                   log.error("Error while parsing API manager specific synapse sequences" + e);
+               } finally {
+                   IOUtils.closeQuietly(in);
+               }
 
-            Registry registry = new WSO2Registry();
-            initialSynCfg.setRegistry(registry);
-            MultiXMLConfigurationSerializer serializer
-                    = new MultiXMLConfigurationSerializer(synapseConfigDir.getAbsolutePath());
-            try {
-                serializer.serializeSequence(authFailureHandlerSequence, initialSynCfg, null);
-                serializer.serializeSequence(sandboxKeyErrorSequence, initialSynCfg, null);
-                serializer.serializeSequence(productionKeyErrorSequence, initialSynCfg, null);
-                serializer.serializeSequence(throttleOutSequence, initialSynCfg, null);
-                serializer.serializeSequence(resourceMisMatchSequence, initialSynCfg, null);
-                serializer.serializeSequence(corsSequence, initialSynCfg, null);
-                serializer.serializeSynapseRegistry(registry, initialSynCfg, null);
-            } catch (Exception e) {
-                handleException("Couldn't serialise the initial synapse configuration " +
-                        "for the domain : " + tenantDomain, e);
-            }
-        }else{
-            log.warn("Could not create " + synapseConfigDir);
-        }
+               Registry registry = new WSO2Registry();
+               initialSynCfg.setRegistry(registry);
+               MultiXMLConfigurationSerializer serializer
+                       = new MultiXMLConfigurationSerializer(synapseConfigDir.getAbsolutePath());
+               try {
+                   serializer.serializeSequence(authFailureHandlerSequence, initialSynCfg, null);
+                   serializer.serializeSequence(sandboxKeyErrorSequence, initialSynCfg, null);
+                   serializer.serializeSequence(productionKeyErrorSequence, initialSynCfg, null);
+                   serializer.serializeSequence(throttleOutSequence, initialSynCfg, null);
+                   serializer.serializeSequence(resourceMisMatchSequence, initialSynCfg, null);
+                   serializer.serializeSequence(corsSequence, initialSynCfg, null);
+                   serializer.serializeSynapseRegistry(registry, initialSynCfg, null);
+               } catch (Exception e) {
+                   handleException("Couldn't serialise the initial synapse configuration " +
+                           "for the domain : " + tenantDomain, e);
+               }
+           }
     }
 
     /**

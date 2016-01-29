@@ -78,11 +78,11 @@ public class APIMgtResponseHandler extends AbstractMediator {
                         publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
                         publisher.init();
                     } catch (ClassNotFoundException e) {
-                        log.error("Class not found " + publisherClass);
+                        log.error("Class not found " + publisherClass, e);
                     } catch (InstantiationException e) {
-                        log.error("Error instantiating " + publisherClass);
+                        log.error("Error instantiating " + publisherClass, e);
                     } catch (IllegalAccessException e) {
-                        log.error("Illegal access to " + publisherClass);
+                        log.error("Illegal access to " + publisherClass, e);
                     } finally {
                         PrivilegedCarbonContext.endTenantFlow();
                     }
@@ -210,7 +210,7 @@ public class APIMgtResponseHandler extends AbstractMediator {
             responsePublisherDTO.setProtocol(protocol);
             publisher.publishEvent(responsePublisherDTO);
 
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Cannot publish response event. " + e.getMessage(), e);
         }
         return true; // Should never stop the message flow
