@@ -99,8 +99,9 @@ function triggerSubscribe() {
                }else {
                  $('#messageModal').html($('#confirmation-data').html());
                  $('#messageModal h3.modal-title').html(i18n.t('info.subscription'));
-                 if (result.status == 'ON_HOLD') {
+                 if (result.status.subscriptionStatus == 'ON_HOLD') {
                     $('#application-list :selected').remove();
+                    $('#messageModal h3.modal-title').html(i18n.t('info.subscriptionPendingTitle'));
                     $('#messageModal div.modal-body').html('\n\n' + i18n.t('info.subscriptionPending'));
                  } else {
                     $('#application-list :selected').remove();
