@@ -232,7 +232,7 @@ public class APIMappingUtil {
         apiCorsConfigurationDTO
                 .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
         apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
-        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isCorsConfigurationEnabled());
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
         dto.setCorsConfiguration(apiCorsConfigurationDTO);
         return dto;
     }

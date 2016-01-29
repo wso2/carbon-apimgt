@@ -9,7 +9,10 @@ import javax.validation.constraints.NotNull;
 
 
 
-@ApiModel(description = "")
+/**
+ * CORS configuration for the API
+ **/
+@ApiModel(description = "CORS configuration for the API")
 public class APICorsConfigurationDTO  {
   
   

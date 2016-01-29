@@ -23,6 +23,15 @@ $(document).ready(function(){
       else {
         $('#toggleCors').parent().next().hide();
       }
+   if($('#toggleallOrigin').attr('checked')) {
+       $('#allowCredentials').attr("checked",false);
+       $('#allowCredentials').hide();
+       $('.originContainer').hide();
+      } else {
+        $('#allowCredentials').show();
+        $('#allOriginContainer').hide();
+        $('.originContainer').show();
+        } 
  
      $('#endpointType').on('change',function(){
         var endpointType = $('#endpointType').find(":selected").val();

@@ -90,12 +90,7 @@ $(document).ready(function(){
     else {
     $('#toggleThrottle').parent().next().hide();
     }
-    if( $("#toggleCors").attr('checked') ) {
-    $('#toggleCors').parent().next().show();
-    } 
-    else {
-    $('#toggleCors').parent().next().hide();
-    }
+
 });
 
 $('.js_hidden_section_title').click(function(){
@@ -119,13 +114,7 @@ $("#toggleThrottle").change(function(e){
         $(this).parent().next().hide();
     }
 });
-$("#toggleCors").change(function(e){
-    if($(this).is(":checked")){
-        $(this).parent().next().show();
-    }else{
-        $(this).parent().next().hide();
-    }
-});
+
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
     var checkedHttpsTransport=$('#transport_https').is(":checked");
@@ -137,10 +126,3 @@ function validate_Transports(){
     $( "div.checkbox" ).addClass('error-multiselect').after('<div id="transport_error" class="error">This field is required.</div>');
     return false;
 }
-
-    $("#manage_form").keypress(function(e){
-        $('.originContainer .bootstrap-tagsinput input').keyup(function(e) {
-            var tagName = $(this).val();
-            $tag = $(this);
-        });
-     });

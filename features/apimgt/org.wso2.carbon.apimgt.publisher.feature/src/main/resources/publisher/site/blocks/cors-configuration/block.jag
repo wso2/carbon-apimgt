@@ -20,8 +20,6 @@ jagg.block("cors-configuration", {
         mod = jagg.module("api");
         isCreatePermitted = jagg.getCreatePermitted().permitted;
         result = mod.getAPI({name:name, version:version, provider:provider});
-        var log = new Log();
-        log.info("block.jag");
         api = result.api;
         return {
             "api":api,

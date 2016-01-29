@@ -1417,49 +1417,46 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
-        corsProperties.put("apiImplementationType", api.getImplementation());
+        corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE, api.getImplementation());
 
         if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
             CORSConfiguration corsConfiguration = api.getCorsConfiguration();
-            if (corsConfiguration.getAccessControlAllowHeaders() != null &&
-                !corsConfiguration.getAccessControlAllowHeaders().isEmpty()) {
+            if (corsConfiguration.getAccessControlAllowHeaders() != null) {
                 StringBuilder allowHeaders = new StringBuilder();
                 for (String header : corsConfiguration.getAccessControlAllowHeaders()) {
                     allowHeaders.append(header).append(',');
                 }
-                if (!allowHeaders.toString().isEmpty()) {
+                if (allowHeaders.length() != 0) {
                     allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE, allowHeaders.toString());
                 }
-                corsProperties.put("allowHeaders", allowHeaders.toString());
             }
-            if (corsConfiguration.getAccessControlAllowOrigins() != null &&
-                !corsConfiguration.getAccessControlAllowOrigins().isEmpty()) {
+            if (corsConfiguration.getAccessControlAllowOrigins() != null) {
                 StringBuilder allowOrigins = new StringBuilder();
                 for (String origin : corsConfiguration.getAccessControlAllowOrigins()) {
                     allowOrigins.append(origin).append(',');
                 }
-                if (!allowOrigins.toString().isEmpty()) {
+                if (allowOrigins.length() != 0) {
                     allowOrigins.deleteCharAt(allowOrigins.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE, allowOrigins.toString());
                 }
-                corsProperties.put("allowedOrigins", allowOrigins.toString());
             }
-            if (corsConfiguration.getAccessControlAllowMethods() != null &&
-                !corsConfiguration.getAccessControlAllowMethods().isEmpty()) {
+            if (corsConfiguration.getAccessControlAllowMethods() != null) {
                 StringBuilder allowedMethods = new StringBuilder();
                 for (String methods : corsConfiguration.getAccessControlAllowMethods()) {
                     allowedMethods.append(methods).append(',');
                 }
-                if (!allowedMethods.toString().isEmpty()) {
+                if (allowedMethods.length() != 0) {
                     allowedMethods.deleteCharAt(allowedMethods.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE, allowedMethods.toString());
                 }
-                corsProperties.put("allowedMethods", allowedMethods.toString());
             }
             if (corsConfiguration.isAccessControlAllowCredentials()) {
-                corsProperties.put("allowCredentials",
+                corsProperties.put(APIConstants.CORSHeaders.ALLOW_CREDENTIALS_HANDLER_VALUE,
                                    String.valueOf(corsConfiguration.isAccessControlAllowCredentials()));
             }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
-        }else if (APIUtil.isCORSEnabled()){
+        } else if (APIUtil.isCORSEnabled()) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         }
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {

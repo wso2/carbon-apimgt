@@ -1,3 +1,4 @@
+$(document).ready(function(){
                     $('input').on('change', function() {
                       var corsenable;
                       var accessControlAllowMethods;
@@ -36,3 +37,4 @@
   var corsJsonString = "{'corsConfigurationEnabled':"+corsenable+",'accessControlAllowOrigins':"+allowOrigins+",'accessControlAllowCredentials':"+enableAllowCredentials+",'accessControlAllowHeaders':"+allowHeadersValues+",'accessControlAllowMethods':"+allowMethodsValues+"}";
                     $('#corsConfiguration').val(corsJsonString);
                     });
+});
