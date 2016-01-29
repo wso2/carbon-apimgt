@@ -1554,7 +1554,7 @@ public class ApiMgtDAO {
     /** returns the SubscribedAPI object which is related to the subscriptionId
      * 
      * @param subscriptionId subscription id
-     * @return
+     * @return SubscribedAPI specified by subscription id
      * @throws APIManagementException 
      */
     public SubscribedAPI getSubscriptionById(int subscriptionId) throws APIManagementException {
@@ -1614,7 +1614,7 @@ public class ApiMgtDAO {
     /** returns the SubscribedAPI object which is related to the UUID
      *
      * @param uuid UUID of Application
-     * @return
+     * @return SubscribedAPI specified by uuid
      * @throws APIManagementException
      */
     public SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException {
