@@ -62,19 +62,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIPublisher;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.Provider;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -250,8 +238,6 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -384,6 +370,8 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
+            api.setCorsConfiguration(corsConfiguration);
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -434,8 +422,6 @@ public final class APIUtil {
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -585,6 +571,8 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
+            api.setCorsConfiguration(corsConfiguration);
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -682,6 +670,8 @@ public final class APIUtil {
             api.setUriTemplates(uriTemplates);
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
+            api.setCorsConfiguration(corsConfiguration);
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -754,8 +744,6 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, api.getDescription());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL, api.getUrl());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL, api.getSandboxUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_WADL, api.getWadlUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, api.getThumbnailUrl());
@@ -831,6 +819,9 @@ public final class APIUtil {
 
             }
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
+                                  APIUtil.getCorsConfigurationJsonFromDao(api.getCorsConfiguration()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -2143,8 +2134,6 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -2219,6 +2208,8 @@ public final class APIUtil {
 
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
+            api.setCorsConfiguration(corsConfiguration);
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
@@ -2959,6 +2950,13 @@ public final class APIUtil {
         return propertyMap;
     }
 
+    /**
+     * Add all the custom sequences of given type to registry 
+     * 
+     * @param registry Registry instance
+     * @param customSequenceType Custom sequence type which is in/out or fault
+     * @throws APIManagementException
+     */
     public static void addDefinedAllSequencesToRegistry(UserRegistry registry,
                                                         String customSequenceType)
             throws APIManagementException {
@@ -2981,11 +2979,14 @@ public final class APIUtil {
                                     customSequenceType + '/' + sequenceFileName;
                     if (registry.resourceExists(regResourcePath)) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Defined sequences have already been added to the registry");
+                            log.debug("The sequence file with the name " + sequenceFileName
+                                    + " already exists in the registry path " + regResourcePath);
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Adding defined sequences to the registry.");
+                            log.debug(
+                                    "Adding sequence file with the name " + sequenceFileName + " to the registry path "
+                                            + regResourcePath);
                         }
 
                         inSeqStream = new FileInputStream(sequenceFile);
@@ -3009,15 +3010,7 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading defined sequence ", e);
         } finally {
-            if (inSeqStream != null) {
-                try {
-                    inSeqStream.close();
-                } catch (IOException e) {
-                    log.error(
-                            "Error while closing input stream in path " + seqFolderLocation + " " +
-                                    e);
-                }
-            }
+            IOUtils.closeQuietly(inSeqStream);
         }
 
     }
@@ -3846,6 +3839,9 @@ public final class APIUtil {
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            CORSConfiguration corsConfiguration = getCorsConfigurationFromArtifact(artifact);
+            api.setCorsConfiguration(corsConfiguration);
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
             throw new APIManagementException(msg, e);
@@ -5021,5 +5017,67 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
+        return new Gson().fromJson(jsonString, CORSConfiguration.class);
+
+    }
+
+    public static String getCorsConfigurationJsonFromDao(CORSConfiguration corsConfiguration) {
+        return new Gson().toJson(corsConfiguration);
+    }
+
+    public static String getAllowedHeaders() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
+    }
+
+    public static String getAllowedMethods() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
+    }
+
+    public static boolean isAllowCredentials() {
+        String allowCredentials =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
+        return Boolean.parseBoolean(allowCredentials);
+    }
+
+    public static boolean isCORSEnabled() {
+        String corsEnabled =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
+
+        return Boolean.parseBoolean(corsEnabled);
+    }
+
+    public static boolean isStatsEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
+    }
+
+    public static String getAllowedOrigins() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+
+    }
+    public static CORSConfiguration getCorsConfigurationFromArtifact(GovernanceArtifact artifact)
+            throws GovernanceException {
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION));
+        if (corsConfiguration == null){
+         corsConfiguration = getDefaultCorsConfiguration();
+        }
+        return corsConfiguration;
+    }
+
+    public static CORSConfiguration getDefaultCorsConfiguration() {
+        List<String> allowHeadersStringSet = Arrays.asList(getAllowedHeaders().split(","));
+        List<String> allowMethodsStringSet = Arrays.asList(getAllowedMethods().split(","));
+        List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
+        return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet,
+                                     allowMethodsStringSet);
     }
 }

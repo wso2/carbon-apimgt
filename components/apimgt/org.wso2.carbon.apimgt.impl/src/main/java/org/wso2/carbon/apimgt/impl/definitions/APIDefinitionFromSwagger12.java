@@ -122,11 +122,11 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
                         String authType = (String) jsonObjectOperation.get(APIConstants.SWAGGER_AUTH_TYPE);
                         if (authType != null) {
-                            if (authType.equals("Application & Application User")) {
+                            if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
                             }
-                            if (authType.equals("Application User")) {
-                                authType = "Application_User";
+                            if ("Application User".equals(authType)) {
+                                authType = APIConstants.AUTH_APPLICATION_USER_LEVEL_TOKEN;
                             }
                         } else {
                             authType = APIConstants.AUTH_NO_AUTHENTICATION;
@@ -278,8 +278,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
 
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
-        String[] endpointsSet = endpoints.split(",");
-        String apiContext = api.getContext();
+        String[] endpointsSet = endpoints.split(",");       
         String version = identifier.getVersion();
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         String description = api.getDescription();
@@ -287,7 +286,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         if (endpointsSet.length < 1) {
             throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
         }
-        if (description == null || description.equals("")) {
+        if (description == null) {
             description = "";
         } else {
             description = description.trim();
@@ -299,8 +298,7 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
         Map<String, JSONObject> resourceNameJSONs = new HashMap<String, JSONObject>();
 
         Map<String, List<JSONObject>> resourcePathJSONs = new HashMap<String, List<JSONObject>>();
-
-        List<APIResource> apis = new ArrayList<APIResource>();
+       
 
         JSONObject mainAPIJson = null;
 
@@ -308,12 +306,10 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
             mainAPIJson = (JSONObject) parser.parse(apiJsonTemplate);
 
             for (URITemplate template : uriTemplates) {
-                List<Operation> ops;
-                List<Parameter> parameters = null;
 
                 String path = template.getUriTemplate();
 
-                if (path != null && (path.equals("/*") || (path.equals("/")))) {
+                if (path != null && ("/*".equals(path) || ("/".equals(path)))) {
                     path = "/*";
                 }
                 List<String> resourcePaths;
@@ -344,9 +340,11 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                             resourcePathJSONs.get(path).add(operationJson);
 
                         } else {
-                            resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
-                                add(operationJson);
-                            }});
+                            resourcePathJSONs.put(path, new ArrayList<JSONObject>() {
+                                {
+                                    add(operationJson);
+                                }
+                            });
                         }
                     }
                     resourceNamepaths.put(resourceName, resourcePaths);
@@ -372,9 +370,11 @@ public class APIDefinitionFromSwagger12 extends APIDefinition {
                             resourcePathJSONs.get(path).add(operationJson);
 
                         } else {
-                            resourcePathJSONs.put(path, new ArrayList<JSONObject>() {{
-                                add(operationJson);
-                            }});
+                            resourcePathJSONs.put(path, new ArrayList<JSONObject>() {
+                                {
+                                    add(operationJson);
+                                }
+                            });
                         }
                     }
                     resourceNamepaths.put(resourceName, resourcePaths);

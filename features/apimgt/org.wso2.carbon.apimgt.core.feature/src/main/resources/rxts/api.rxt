@@ -57,22 +57,11 @@
         <field type="text-area">
             <name>Description</name>
         </field>
-		<field type="options">
-            <name label="Endpoint Type">Endpoint Type</name>
-            <values>
-                <value>Secured</value>
-                <value>Non Secured</value>             
-            </values>
+	<field type="text">
+            <name>Endpoint Secured</name>
         </field>
-        <field type="options">
-            <name label="Endpoint Auth Type">Endpoint Auth Type</name>
-            <values>
-                <value>Basic Auth</value>
-                <value>Digest Auth</value>
-            </values>
-        </field>
-        <field type="text" url="true">
-            <name>Endpoint URL</name>
+        <field type="text">
+            <name>Endpoint Auth Digest</name>
         </field>
         <field type="text">
             <name>Implementation</name>
@@ -86,10 +75,7 @@
 		<field type="text" url="true">
             <name>Endpoint Password</name>
         </field>
-        <field type="text" url="true">
-            <name>Sandbox URL</name>
-        </field>
-		 <field type="text">
+	<field type="text">
             <name>InSequence</name>
         </field>
         <field type="text">
@@ -163,6 +149,9 @@
          <field type="text">
             <name>Environments</name>
          </field>
+ <field type="text-area">
+            <name>Cors Configuration</name>
+         </field>
         <field type="options">
             <name label="Response Caching">Response Caching</name>
             <values>
@@ -179,6 +168,12 @@
                 <value>Enabled</value>
                 <value>Disabled</value>             
             </values>
+        </field>
+	<field type="text">
+            <name>Production Tps</name>
+        </field>
+	<field type="text">
+            <name>Sandbox Tps</name>
         </field>
     </table>
     <table name="URITemplate" columns="4">

@@ -140,7 +140,7 @@ public class APIMWSDLReader {
             return wReader.readWSDL(baseURI);
         } catch (org.apache.woden.WSDLException e) {
             String error = "Error occurred reading wsdl document.";
-            log.error(error);
+            log.error(error, e);
         }
         if (log.isDebugEnabled()) {
             log.debug("Reading  the WSDL. Base uri is " + baseURI);
@@ -169,8 +169,9 @@ public class APIMWSDLReader {
                 }
             }
         } catch (Exception e) {
-            log.error("Error occurred while getting the wsdl address location", e);
-            throw new APIManagementException(e);
+            String errorMsg = "Error occurred while getting the wsdl address location";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
         }
     }
 
@@ -228,8 +229,9 @@ public class APIMWSDLReader {
 				}
 			}
 		} catch (Exception e) {
-			log.error("Error occurred while getting the wsdl address location", e);
-			throw new APIManagementException(e);
+			String errorMsg = "Error occurred while getting the wsdl address location";
+			log.error(errorMsg, e);
+			throw new APIManagementException(errorMsg, e);
 		}
 	}
 

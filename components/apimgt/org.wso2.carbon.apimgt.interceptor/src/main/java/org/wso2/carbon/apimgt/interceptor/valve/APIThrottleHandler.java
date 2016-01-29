@@ -124,8 +124,7 @@ public class APIThrottleHandler {
 	                }
 	            }
 			} catch (ThrottleException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				log.error("Error while initializing throttle handler", e);
 			}
 		}
 		

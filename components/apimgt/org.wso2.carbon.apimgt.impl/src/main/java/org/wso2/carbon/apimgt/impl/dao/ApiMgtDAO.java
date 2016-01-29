@@ -648,7 +648,7 @@ public class ApiMgtDAO {
                     conn.rollback();
                 }
             } catch (SQLException e1) {
-                log.error("Failed to rollback the changeAccessTokenStatus operation", e);
+                log.error("Failed to rollback the changeAccessTokenStatus operation", e1);
             }
             handleException("Error while executing SQL", e);
         } finally {
@@ -1149,7 +1149,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Error while rolling back the failed operation", e);
+                    log.error("Error while rolling back the failed operation", e1);
                 }
             }
             handleException("Error in adding new subscriber: " + e.getMessage(), e);
@@ -1184,7 +1184,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Error while rolling back the failed operation", e);
+                    log.error("Error while rolling back the failed operation", e1);
                 }
             }
             handleException("Error in updating subscriber: " + e.getMessage(), e);
@@ -1322,7 +1322,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add subscription ", e);
+                    log.error("Failed to rollback the add subscription ", e1);
                 }
             }
             handleException("Failed to add subscriber data ", e);
@@ -1486,7 +1486,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback remove subscription ", e);
+                    log.error("Failed to rollback remove subscription ", e1);
                 }
             }
             handleException("Failed to remove subscription data ", e);
@@ -1517,7 +1517,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback remove all subscription ", e);
+                    log.error("Failed to rollback remove all subscription ", e1);
                 }
             }
             handleException("Failed to remove all subscriptions data ", e);
@@ -3625,7 +3625,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add subscription ", e);
+                    log.error("Failed to rollback the add subscription ", e1);
                 }
             }
             handleException("Failed to update subscription data ", e);
@@ -3671,7 +3671,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the update subscription ", e);
+                    log.error("Failed to rollback the update subscription ", e1);
                 }
             }
             handleException("Failed to update subscription data ", e);
@@ -3705,7 +3705,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback subscription status update ", e);
+                    log.error("Failed to rollback subscription status update ", e1);
                 }
             }
             handleException("Failed to update subscription status ", e);
@@ -3760,7 +3760,7 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
+                    log.error("Failed to rollback the add access token ", e1);
                 }
             }
         } catch (CryptoException e) {
@@ -3769,7 +3769,7 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
+                    log.error("Failed to rollback the add access token ", e1);
                 }
             }
         } finally {
@@ -3848,7 +3848,7 @@ public class ApiMgtDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add access token ", e);
+                    log.error("Failed to rollback the add access token ", e1);
                 }
             }
         } finally {
@@ -4427,7 +4427,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add Application ", e);
+                    log.error("Failed to rollback the add Application ", e1);
                 }
             }
             handleException("Failed to add Application", e);
@@ -4450,7 +4450,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add Application ", e);
+                    log.error("Failed to rollback the add Application ", e1);
                 }
             }
             handleException("Failed to add Application", e);
@@ -4545,7 +4545,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add Application ", e);
+                    log.error("Failed to rollback the add Application ", e1);
                 }
             }
             handleException("Failed to add Application", e);
@@ -4632,7 +4632,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback getting user ratings ", e);
+                    log.error("Failed to rollback getting user ratings ", e1);
                 }
             }
             handleException("Failed to get user ratings", e);
@@ -4707,7 +4707,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback getting user ratings ", e);
+                    log.error("Failed to rollback getting user ratings ", e1);
                 }
             }
             handleException("Failed to get user ratings", e);
@@ -4752,7 +4752,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback getting user ratings ", e);
+                    log.error("Failed to rollback getting user ratings ", e1);
                 }
             }
             handleException("Failed to get user ratings", e);
@@ -4909,7 +4909,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the update Application ", e);
+                    log.error("Failed to rollback the update Application ", e1);
                 }
             }
             handleException("Failed to update Application", e);
@@ -4952,7 +4952,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the update Application ", e);
+                    log.error("Failed to rollback the update Application ", e1);
                 }
             }
             handleException("Failed to update Application", e);
@@ -5004,7 +5004,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the update Application ", e);
+                    log.error("Failed to rollback the update Application ", e1);
                 }
             }
             handleException("Failed to update Application", e);
@@ -5587,8 +5587,8 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             String msg = "Error occurred while getting consumer keys";
-            log.error(msg);
-            throw new APIManagementException(msg);
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
@@ -5978,7 +5978,7 @@ public class ApiMgtDAO {
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the API state change record", e);
+                    log.error("Failed to rollback the API state change record", e1);
                 }
             }
             handleException("Failed to record API state change", e);
@@ -7349,7 +7349,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add subscription ", e);
+                    log.error("Failed to rollback the add subscription ", e1);
                 }
             }
             handleException("Failed to add subscriber data ", e);
@@ -7593,7 +7593,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback the add comment ", e);
+                    log.error("Failed to rollback the add comment ", e1);
                 }
             }
             handleException("Failed to add comment data, for  " + identifier.getApiName() + '-'
@@ -7649,7 +7649,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                     connection.rollback();
                 }
             } catch (SQLException e1) {
-                log.error("Failed to retrieve comments ", e);
+                log.error("Failed to retrieve comments ", e1);
             }
             handleException("Failed to retrieve comments for  " + identifier.getApiName() + '-'
                     + identifier.getVersion(), e);
@@ -8427,7 +8427,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback storing external apistore details ", e);
+                    log.error("Failed to rollback storing external apistore details ", e1);
                 }
             }
             log.error("Failed to store external apistore details", e);
@@ -8487,7 +8487,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback deleting external apistore details ", e);
+                    log.error("Failed to rollback deleting external apistore details ", e1);
                 }
             }
             log.error("Failed to delete external apistore details", e);
@@ -8513,7 +8513,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback updating external apistore details ", e);
+                    log.error("Failed to rollback updating external apistore details ", e1);
                 }
             }
             log.error("Failed to update external apistore details", e);
@@ -8605,7 +8605,7 @@ public void addUpdateAPIAsDefaultVersion(API api, Connection connection) throws 
                 try {
                     conn.rollback();
                 } catch (SQLException e1) {
-                    log.error("Failed to rollback getting external apistore details ", e);
+                    log.error("Failed to rollback getting external apistore details ", e1);
                 }
             }
             log.error("Failed to get external apistore details", e);
