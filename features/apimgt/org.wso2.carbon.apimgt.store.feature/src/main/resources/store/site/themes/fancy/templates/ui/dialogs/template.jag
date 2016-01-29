@@ -47,7 +47,7 @@ i18n.init(request,localeResourcesBasePath);
 
         </div>
         <div class="modal-footer">
-            <a href="#" class="btn btn-primary" id="loginBtn"><%=i18n.localize("login")%></a>
+            <button href="#" class="btn btn-primary" id="loginBtn"><%=i18n.localize("login")%></button>
             <a href="#" class="btn" data-dismiss="modal"><%=i18n.localize("cancel")%></a>
         </div>
     </form>
