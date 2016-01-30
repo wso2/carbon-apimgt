@@ -2162,7 +2162,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
     }
 
-    //not used due to waiting for DAS REST pagination support
+    /**
+     * This method sort and set the result size
+     *
+     * @param usageData result to be sort
+     * @param limit     value to limit
+     * @return list of PerUserAPIUsageDTO
+     */
     private List<PerUserAPIUsageDTO> getTopEntries(List<PerUserAPIUsageDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
             public int compare(PerUserAPIUsageDTO o1, PerUserAPIUsageDTO o2) {
@@ -2186,7 +2192,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return usageData;
     }
 
-    //not used due to waiting for DAS REST pagination support
+    /**
+     * This method sort and limit the result size for API usage data
+     *
+     * @param usageData data to be sort and limit
+     * @param limit     value to be limited
+     * @return list of APIUsageDTO
+     */
     private List<APIUsageDTO> getAPIUsageTopEntries(List<APIUsageDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<APIUsageDTO>() {
             public int compare(APIUsageDTO o1, APIUsageDTO o2) {
@@ -2356,6 +2368,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
+    /**
+     * This method find the API usage
+     *
+     * @param apiName    API name
+     * @param apiVersion API version
+     * @throws APIMgtUsageQueryServiceClientException throws if error occurred
+     */
     private List<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
             throws APIMgtUsageQueryServiceClientException {
 

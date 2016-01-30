@@ -1379,8 +1379,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     /**
      * This method sort and set the result size
+     *
      * @param usageData result to be sort
-     * @param limit value to limit
+     * @param limit     value to limit
      * @return list of PerUserAPIUsageDTO
      */
     private List<PerUserAPIUsageDTO> getTopEntries(List<PerUserAPIUsageDTO> usageData, int limit) {
@@ -2115,7 +2116,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     /**
      * This method find the API usage
-     * @param apiName API name
+     *
+     * @param apiName    API name
      * @param apiVersion API version
      * @return list of APIUsageByUser
      * @throws APIMgtUsageQueryServiceClientException throws if error occurred

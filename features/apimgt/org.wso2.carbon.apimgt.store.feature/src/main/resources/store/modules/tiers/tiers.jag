@@ -2,9 +2,8 @@
 user = jagg.getUser();
 
 var getTiers = function () {
-    var tiers,
-            log = new Log(),
-            store = jagg.module("manager").getAPIStoreObj();
+    var tiers, log = new Log(),
+    store = jagg.module("manager").getAPIStoreObj();
 
     try {
         tiers = store.getTiers();
