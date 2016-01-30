@@ -2502,14 +2502,14 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(46, myn, checkValue(api.getProductionMaxTps()));
                 myn.put(47, myn, checkValue(api.getSandboxMaxTps()));
                 myn.put(48, myn, checkValue(Boolean.toString(api.isEndpointAuthDigest())));
-                CORSConfiguration corsConfigurationDto =api.getCorsConfiguration();
-                if (corsConfigurationDto == null){
+                CORSConfiguration corsConfigurationDto = api.getCorsConfiguration();
+                if (corsConfigurationDto == null) {
                     corsConfigurationDto =
                             new CORSConfiguration(false, Collections.EMPTY_LIST, false, Collections.EMPTY_LIST,
-                                                  Collections.EMPTY_LIST);
+                                    Collections.EMPTY_LIST);
                 }
                 String corsJson = APIUtil.getCorsConfigurationJsonFromDto(corsConfigurationDto);
-                myn.put(49, myn,corsJson);
+                myn.put(49, myn, corsJson);
 
             } else {
                 handleException("Cannot find the requested API- " + apiName +
