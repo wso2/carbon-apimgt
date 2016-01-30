@@ -5028,7 +5028,7 @@ public final class APIUtil {
     }
 
     /**
-     * This Method used to generate CORS Configuration object from CORS Configuration Json
+     * Used to generate CORS Configuration object from CORS Configuration Json
      *
      * @param jsonString json representation of CORS configuration
      * @return CORSConfiguration Object
@@ -5039,25 +5039,40 @@ public final class APIUtil {
     }
 
     /**
-     * This Method used to generate Json string from CORS Configuration object
+     * Used to generate Json string from CORS Configuration object
      *
-     * @param corsConfiguration
-     * @return
+     * @param corsConfiguration CORSConfiguration Object
+     * @return Json string according to CORSConfiguration Object
      */
     public static String getCorsConfigurationJsonFromDto(CORSConfiguration corsConfiguration) {
         return new Gson().toJson(corsConfiguration);
     }
 
+    /**
+     * Used to get access control allowed headers according to the api-manager.xml
+     *
+     * @return access control allowed headers string
+     */
     public static String getAllowedHeaders() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
     }
 
+    /**
+     * Used to get access control allowed methods define in api-manager.xml
+     *
+     * @return access control allowed methods string
+     */
     public static String getAllowedMethods() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
     }
 
+    /**
+     * Used to get access control allowed credential define in api-manager.xml
+     *
+     * @return true if access control allow credential enabled
+     */
     public static boolean isAllowCredentials() {
         String allowCredentials =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
@@ -5065,6 +5080,11 @@ public final class APIUtil {
         return Boolean.parseBoolean(allowCredentials);
     }
 
+    /**
+     * Used to get CORS Configuration enabled from api-manager.xml
+     *
+     * @return true if CORS-Configuration is enabled in api-manager.xml
+     */
     public static boolean isCORSEnabled() {
         String corsEnabled =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
@@ -5073,17 +5093,34 @@ public final class APIUtil {
         return Boolean.parseBoolean(corsEnabled);
     }
 
+    /**
+     * Used to return analytic enabled from the configuration
+     *
+     * @return true if analytics enabled in analytic configuration
+     */
     public static boolean isStatsEnabled() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 
+    /**
+     * Used to get access control allowed origins define in api-manager.xml
+     *
+     * @return allow origins list defined in api-manager.xml
+     */
     public static String getAllowedOrigins() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
 
     }
 
+    /**
+     * Used to get CORSConfiguration according to the API artifact
+     *
+     * @param artifact registry artifact for the API
+     * @return CORS Configuration object extract from the artifact
+     * @throws GovernanceException if attribute couldn't fetch from the artifact.
+     */
     public static CORSConfiguration getCorsConfigurationFromArtifact(GovernanceArtifact artifact)
             throws GovernanceException {
         CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(
@@ -5094,11 +5131,15 @@ public final class APIUtil {
         return corsConfiguration;
     }
 
+    /**
+     * Used to get Default CORS Configuration object according to configuration define in api-manager.xml
+     *
+     * @return CORSConfiguration object accordine to the defined values in api-manager.xml
+     */
     public static CORSConfiguration getDefaultCorsConfiguration() {
         List<String> allowHeadersStringSet = Arrays.asList(getAllowedHeaders().split(","));
         List<String> allowMethodsStringSet = Arrays.asList(getAllowedMethods().split(","));
         List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
-        return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet,
-                                     allowMethodsStringSet);
+        return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
     }
 }
