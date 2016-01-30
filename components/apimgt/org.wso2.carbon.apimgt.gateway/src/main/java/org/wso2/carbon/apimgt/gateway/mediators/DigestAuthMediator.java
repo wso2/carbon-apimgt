@@ -62,7 +62,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
         String wwwHeaderValueString = wwwHeaderSplits[1];
 
         //Should split from ", " instead of "," because this might fail when qop or algorithm has multiple values.
-        String wwwHeaderValueArray[] = wwwHeaderValueString.split(", ");
+        String[] wwwHeaderValueArray = wwwHeaderValueString.split(", ");
 
         for (String keyval : wwwHeaderValueArray) {
 
@@ -385,7 +385,7 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 log.debug("WWW-Authentication header is :" + wwwHeader);
             }
             //This step can throw a NullPointerException if a WWW-Authenticate header is not received.
-            String wwwHeaderSplits[] = wwwHeader.split("Digest");
+            String[] wwwHeaderSplits = wwwHeader.split("Digest");
 
             //Happens only if the WWW-Authenticate header supports digest authentication.
             if (wwwHeaderSplits.length > 1 && wwwHeaderSplits[1] != null) {
@@ -482,10 +482,10 @@ public class DigestAuthMediator extends AbstractMediator implements ManagedLifec
                 return true;
             }
         } catch (NullPointerException ex) {
-            log.error("The endpoint does not support digest authentication : " + ex.getMessage());
+            log.error("The endpoint does not support digest authentication : " + ex.getMessage(), ex);
             return false;
         } catch (Exception e) {
-            log.error("Exception has occurred while performing Digest Auth class mediation : " + e.getMessage());
+            log.error("Exception has occurred while performing Digest Auth class mediation : " + e.getMessage(), e);
             return false;
         }
 

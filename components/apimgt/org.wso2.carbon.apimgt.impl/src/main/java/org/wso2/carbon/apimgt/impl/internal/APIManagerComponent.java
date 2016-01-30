@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
@@ -201,11 +200,6 @@ public class APIManagerComponent {
 //            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
 //            authorizationManager.init();
             APIMgtDBUtil.initialize();
-            //Check User add listener enabled or not
-            boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
-            if (selfSignInProcessEnabled) {
-                bundleContext.registerService(UserStoreManagerListener.class.getName(), new UserAddListener(), null);
-            }
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
             boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();

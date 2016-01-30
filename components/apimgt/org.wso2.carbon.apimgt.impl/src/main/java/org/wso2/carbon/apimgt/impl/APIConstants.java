@@ -408,7 +408,8 @@ public final class APIConstants {
     public static final String API_KEY_VALIDATOR_TOKEN_ENDPOINT_NAME = API_KEY_VALIDATOR + "TokenEndPointName";
     public static final String API_KEY_VALIDATOR_USERNAME = API_KEY_VALIDATOR + "Username";
     public static final String API_KEY_VALIDATOR_PASSWORD = API_KEY_VALIDATOR + "Password";
-    public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR + "ApplicationTokenDefaultValidityPeriod";
+    public static final String API_KEY_VALIDATOR_APPLICATION_ACCESS_TOKEN_VALIDATION_PERIOD = API_KEY_VALIDATOR
+            + "ApplicationTokenDefaultValidityPeriod";
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT_PORT = API_KEY_VALIDATOR + "ThriftClientPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_PORT = API_KEY_VALIDATOR + "ThriftServerPort";
     public static final String API_KEY_VALIDATOR_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
@@ -429,33 +430,41 @@ public final class APIConstants {
 
     public static final String DEVICE_SCOPE_PATTERN = "^device_.*";
     public static final String OPEN_ID_SCOPE_NAME = "openid";
-    public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
+    public static final String API_KEY_MANGER_VALIDATIONHANDLER_CLASS_NAME = API_KEY_VALIDATOR
+            + "KeyValidationHandlerClassName";
     public static final String API_KEY_MANGER_SCOPE_WHITELIST = API_KEY_VALIDATOR + "ScopeWhitelist.Scope";
     public static final String API_KEY_MANGER_RESTAPI_SCOPES = "RESTAPIScopes.";
-    public static final String API_KEY_MANGER_RESTAPI_SCOPES_NAME = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Name";
-    public static final String API_KEY_MANGER_RESTAPI_SCOPES_ROLES = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES + "Scope.Roles";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_NAME = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES
+            + "Scope.Name";
+    public static final String API_KEY_MANGER_RESTAPI_SCOPES_ROLES = API_KEY_VALIDATOR + API_KEY_MANGER_RESTAPI_SCOPES
+            + "Scope.Roles";
     public static final String API_KEY_MANAGER_THRIFT_SERVER_HOST = API_KEY_VALIDATOR + "ThriftServerHost";
     public static final String API_KEY_VALIDATOR_CLIENT_TYPE = API_KEY_VALIDATOR + "KeyValidatorClientType";
     public static final String API_KEY_VALIDATOR_WS_CLIENT = "WSClient";
     public static final String API_KEY_VALIDATOR_ENABLE_THRIFT_SERVER = API_KEY_VALIDATOR + "EnableThriftServer";
     public static final String API_KEY_VALIDATOR_THRIFT_CLIENT = "ThriftClient";
     public static final String API_KEY_SECURITY_CONTEXT_TTL = API_KEY_VALIDATOR + "SecurityContextTTL";
-    public static final String API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE = API_KEY_VALIDATOR + "EnableKeyMgtValidationInfoCache";
-    public static final String API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_VALIDATOR + "RemoveUserNameFromJWTForApplicationToken";
+    public static final String API_KEY_VALIDATOR_ENABLE_VALIDATION_INFO_CACHE = API_KEY_VALIDATOR
+            + "EnableKeyMgtValidationInfoCache";
+    public static final String API_KEY_VALIDATOR_REMOVE_USERNAME_TO_JWT_FOR_APP_TOKEN = API_KEY_VALIDATOR
+            + "RemoveUserNameFromJWTForApplicationToken";
     public static final String API_KEY_VALIDATOR_ENABLE_ASSERTIONS = API_KEY_VALIDATOR + "EnableAssertions.";
-    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_VALIDATOR_ENABLE_ASSERTIONS + "UserName";
-    public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
-    public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_VALIDATOR + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
+    public static final String API_KEY_MANAGER_ENABLE_ASSERTIONS_USERNAME = API_KEY_VALIDATOR_ENABLE_ASSERTIONS
+            + "UserName";
+    public static final String API_KEY_MANAGER_ENABLE_ACCESS_TOKEN_PARTITIONING = API_KEY_VALIDATOR
+            + "AccessTokenPartitioning." + "EnableAccessTokenPartitioning";
+    public static final String API_KEY_MANAGER_ACCESS_TOKEN_PARTITIONING_DOMAINS = API_KEY_VALIDATOR
+            + "AccessTokenPartitioning." + "AccessTokenPartitioningDomains";
     public static final String API_KEY_VALIDATOR_ENCRYPT_TOKENS = API_KEY_VALIDATOR + "EncryptPersistedTokens";
-    public static final String API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE = API_KEY_VALIDATOR +"ApplicationTokenScope";
+    public static final String API_KEY_VALIDATOR_APPLICATION_TOKEN_SCOPE = API_KEY_VALIDATOR + "ApplicationTokenScope";
 
 
     public static final String API_STORE = "APIStore.";
-    public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = "APIStore."+"DisplayURL";
-    public static final String API_STORE_URL = "APIStore."+"URL";
-    public static final String API_STORE_SERVER_URL = "APIStore."+"ServerURL";
-    public static final String API_STORE_USERNAME = "APIStore."+"Username";
-    public static final String API_STORE_PASSWORD = "APIStore."+"Password";
+    public static final String SHOW_API_STORE_URL_FROM_PUBLISHER = API_STORE + "DisplayURL";
+    public static final String API_STORE_URL = API_STORE + "URL";
+    public static final String API_STORE_SERVER_URL = API_STORE + "ServerURL";
+    public static final String API_STORE_USERNAME = API_STORE + "Username";
+    public static final String API_STORE_PASSWORD = API_STORE + "Password";
     public static final String API_STORE_DISPLAY_ALL_APIS = API_STORE + "DisplayAllAPIs";
     public static final String API_STORE_DISPLAY_MULTIPLE_VERSIONS = API_STORE + "DisplayMultipleVersions";
     public static final String API_STORE_DISPLAY_COMMENTS = API_STORE + "DisplayComments";
@@ -468,12 +477,13 @@ public final class APIConstants {
 
 
     public static final String API_PUBLISHER = "APIPublisher.";
-    public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = "APIPublisher."+"DisplayURL";
-    public static final String API_PUBLISHER_URL = "APIPublisher."+"URL";
-    public static final String API_PUBLISHER_SERVER_URL = "APIPublisher."+"ServerURL";
-    public static final String API_PUBLISHER_USERNAME = "APIPublisher."+"Username";
-    public static final String API_PUBLISHER_PASSWORD = "APIPublisher."+"Password";
-    public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS= "APIPublisher."+"EnableAPIDocVisibilityLevels";
+    public static final String SHOW_API_PUBLISHER_URL_FROM_STORE = API_PUBLISHER + "DisplayURL";
+    public static final String API_PUBLISHER_URL =  API_PUBLISHER + "URL";
+    public static final String API_PUBLISHER_SERVER_URL = API_PUBLISHER + "ServerURL";
+    public static final String API_PUBLISHER_USERNAME = API_PUBLISHER + "Username";
+    public static final String API_PUBLISHER_PASSWORD = API_PUBLISHER + "Password";
+    public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS = API_PUBLISHER
+            + "EnableAPIDocVisibilityLevels";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
@@ -516,11 +526,14 @@ public final class APIConstants {
     
     public static final String CORS_CONFIGURATION = "CORSConfiguration.";
     public static final String CORS_CONFIGURATION_ENABLED = CORS_CONFIGURATION + "Enabled";
-    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN = CORS_CONFIGURATION + "Access-Control-Allow-Origin";
-    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS = CORS_CONFIGURATION + "Access-Control-Allow-Headers";
-    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS = CORS_CONFIGURATION + "Access-Control-Allow-Methods";
-    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION + "Access-Control-Allow-Credentials";
-    
+    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN = CORS_CONFIGURATION
+            + "Access-Control-Allow-Origin";
+    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS = CORS_CONFIGURATION
+            + "Access-Control-Allow-Headers";
+    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS = CORS_CONFIGURATION
+            + "Access-Control-Allow-Methods";
+    public static final String CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS = CORS_CONFIGURATION
+            + "Access-Control-Allow-Credentials";
     
     public static final String API_KEY_TYPE = "AM_KEY_TYPE";
     public static final String API_KEY_TYPE_PRODUCTION = "PRODUCTION";
@@ -682,7 +695,7 @@ public final class APIConstants {
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
-                    (Arrays.asList(new String[]{"get","put","post","delete","patch","head","options"}))));
+                    Arrays.asList(new String[]{"get","put","post","delete","patch","head","options"})));
     public static final String AUTH_NO_AUTHENTICATION = "None";
     public static final String AUTH_APPLICATION_LEVEL_TOKEN = "Application";
     public static final String AUTH_APPLICATION_USER_LEVEL_TOKEN = "Application_User";

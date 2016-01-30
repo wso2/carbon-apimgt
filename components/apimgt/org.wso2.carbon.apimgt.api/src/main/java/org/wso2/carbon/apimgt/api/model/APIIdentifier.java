@@ -102,6 +102,6 @@ public class APIIdentifier implements Serializable{
     
     @Override
     public String toString() {
-    	return this.getProviderName() + "-" + this.getApiName() + "-" + this.getVersion();
+    	return this.getProviderName() + '-' + this.getApiName() + '-' + this.getVersion();
     }
 }
