@@ -3016,6 +3016,12 @@ public final class APIUtil {
 
     }
 
+    /**
+     * Adds the sequences defined in repository/resources/customsequences folder to tenant registry
+     * 
+     * @param tenantID tenant Id
+     * @throws APIManagementException
+     */
     public static void writeDefinedSequencesToTenantRegistry(int tenantID)
             throws APIManagementException {
         try {
@@ -3030,7 +3036,7 @@ public final class APIUtil {
 
         } catch (RegistryException e) {
             throw new APIManagementException(
-                    "Error while saving defined sequences to the tenant's registry ", e);
+                    "Error while saving defined sequences to the registry of tenant with id " + tenantID, e);
         }
     }
 
