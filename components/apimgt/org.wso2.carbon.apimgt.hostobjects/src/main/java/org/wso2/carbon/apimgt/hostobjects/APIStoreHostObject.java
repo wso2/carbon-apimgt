@@ -3889,56 +3889,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getAPIUsageforSubscriber(Context cx, Scriptable thisObj,
-                                                                  Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIVersionUserUsageDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String subscriberName = (String) args[0];
-        String period = (String) args[1];
-
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getUsageBySubscriber(subscriberName, period);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        } catch (Exception e) {
-            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIVersionUserUsageDTO usage = (APIVersionUserUsageDTO) usageObject;
-                row.put("api", row, usage.getApiname());
-                row.put("version", row, usage.getVersion());
-                row.put("count", row, usage.getCount());
-                row.put("costPerAPI", row, usage.getCostPerAPI());
-                row.put("cost", row, usage.getCost());
-                myn.put(i, myn, row);
-                i++;
-
-            }
-        }
-        return myn;
-    }
-
     /**
      * Check the APIs' adding comment is turned on or off
      *
