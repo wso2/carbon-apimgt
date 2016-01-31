@@ -41,6 +41,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public class ApplicationThrottleController {
     
@@ -124,7 +125,7 @@ public class ApplicationThrottleController {
             ByteArrayInputStream inputStream = null;
             Object content = resource.getContent();
             if (content instanceof String) {
-                inputStream = new ByteArrayInputStream(content.toString().getBytes());
+                inputStream = new ByteArrayInputStream(content.toString().getBytes(Charset.defaultCharset()));
             } else if (content instanceof byte[]) {
                 inputStream = new ByteArrayInputStream((byte[]) content);
             }
@@ -182,7 +183,7 @@ public class ApplicationThrottleController {
             if ("text/plain".equals(resource.getMediaType())) {
                 // for non-xml text content
                 return OMAbstractFactory.getOMFactory().createOMText(
-                        new String((byte[]) resource.getContent()));
+                        new String((byte[]) resource.getContent(),Charset.defaultCharset()));
             }
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(

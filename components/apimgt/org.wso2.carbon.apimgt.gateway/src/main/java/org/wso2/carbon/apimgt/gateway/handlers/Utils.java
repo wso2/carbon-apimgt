@@ -62,14 +62,12 @@ public class Utils {
         messageContext.setProperty("RESPONSE", "true");
         messageContext.setTo(null);        
         axis2MC.removeProperty("NO_ENTITY_BODY");
-        String method = (String) axis2MC.getProperty(Constants.Configuration.HTTP_METHOD);
 
         // Always remove the ContentType - Let the formatter do its thing
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers != null) {
             headers.remove(HttpHeaders.AUTHORIZATION);
-            // headers.remove(HttpHeaders.ACCEPT);
             headers.remove(HttpHeaders.AUTHORIZATION);
             //headers.remove(HttpHeaders.ACCEPT);
             //Default we will send xml out put if error_message_type is json then we will send json response to client

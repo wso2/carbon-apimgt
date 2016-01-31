@@ -84,7 +84,7 @@ public class URITemplate implements Serializable{
                 String httpMethod = entry.getKey();
                 String mediationScript = entry.getValue();
 
-                aggregatedScript.append("if (mc.getProperty('REST_METHOD') == '" + httpMethod + "'){");
+                aggregatedScript.append("if (mc.getProperty('REST_METHOD') == '").append(httpMethod).append("'){");
                 aggregatedScript.append(mediationScript);
                 aggregatedScript.append("}");
 
@@ -181,19 +181,19 @@ public class URITemplate implements Serializable{
 
 
     public String getMethodsAsString() {
-        String str = "";
+        StringBuilder stringBuilder = new StringBuilder();
         for (String method : httpVerbs) {
-            str += method + " ";
+            stringBuilder.append(method).append(" ");
         }
-        return str.trim();
+        return stringBuilder.toString().trim();
     }
 
     public String getAuthTypeAsString() {
-        String str = "";
+        StringBuilder stringBuilder = new StringBuilder();
         for (String authType : authTypes) {
-            str += authType + " ";
+            stringBuilder.append(authType).append(" ");
         }
-        return str.trim();
+        return stringBuilder.toString().trim();
     }
 
     public void setThrottlingTiers(String tier) {
@@ -201,12 +201,11 @@ public class URITemplate implements Serializable{
     }
 
     public String getThrottlingTiersAsString() {
-        String str = "";
+        StringBuilder stringBuilder = new StringBuilder();
         for (String tier : throttlingTiers) {
-            tier = tier.trim();
-            str = str + tier + " ";
+            stringBuilder.append(tier.trim()).append(" ");
         }
-        return str.trim();
+        return stringBuilder.toString().trim();
     }
 
     public Scope getScope() {

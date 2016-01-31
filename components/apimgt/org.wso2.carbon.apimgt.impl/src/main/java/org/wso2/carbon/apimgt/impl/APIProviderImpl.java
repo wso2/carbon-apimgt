@@ -3137,16 +3137,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             faultMap.putAll(faultGatewayJson);
                             throw new FaultGatewaysException(faultMap);
                         } catch (ParseException e1) {
+                            log.error("Couldn't parse the Failed Environment json", e);
                             handleException("Couldn't parse the Failed Environment json : " + e.getMessage(), e);
                         }
                     }
-                }else if (cause.contains("APIManagementException:")) {
-                        handleException(
-                                "Failed to change the life cycle status : " + cause.split("APIManagementException:")[1], e);
-                    } else {
-                        handleException("Failed to change the life cycle status : " + e.getMessage(), e);
-                    }
+                } else if (cause.contains("APIManagementException:")) {
+                    // This exception already logged from APIExecutor class hence this no need to logged again
+                    handleException(
+                            "Failed to change the life cycle status : " + cause.split("APIManagementException:")[1], e);
+                } else {
+                    /* This exception already logged from APIExecutor class hence this no need to logged again
+                    This block handles the all the exception which not have custom cause message*/
+                    handleException("Failed to change the life cycle status : " + e.getMessage(), e);
                 }
+            }
             return false;
         }
          finally {
@@ -3396,6 +3400,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             boolean isTenantMode = (tenantDomain != null);
             if ((isTenantMode && this.tenantDomain == null) ||
                 (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {
+                if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    PrivilegedCarbonContext.startTenantFlow();
+                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    isTenantFlowStarted = true;
+                }
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                                                      .getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);

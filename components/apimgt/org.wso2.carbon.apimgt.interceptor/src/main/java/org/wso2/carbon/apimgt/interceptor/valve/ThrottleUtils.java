@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.interceptor.valve;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -39,7 +40,7 @@ public class ThrottleUtils {
             ByteArrayInputStream inputStream = null;
             Object content = resource.getContent();
             if (content instanceof String) {
-                inputStream = new ByteArrayInputStream(content.toString().getBytes());
+                inputStream = new ByteArrayInputStream(content.toString().getBytes(Charset.defaultCharset()));
             } else if (content instanceof byte[]) {
                 inputStream = new ByteArrayInputStream((byte[]) content);
             }
