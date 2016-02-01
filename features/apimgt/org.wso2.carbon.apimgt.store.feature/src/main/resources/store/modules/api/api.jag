@@ -56,8 +56,7 @@ var getTiers = function () {
 };
 
 var getResourceTiers = function () {
-    var tiers,
-            log = new Log();
+    var tiers, log = new Log();
     var tier;
     var tierArray = [];
     var store;

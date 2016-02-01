@@ -82,7 +82,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private APIProvider apiProviderImpl;
     private static final Log log = LogFactory.getLog(APIUsageStatisticsRestClientImpl.class);
     private DASRestClient restClient;
-    private final String clientType = "REST";
 
     /**
      * Create a rest client instance.
@@ -91,7 +90,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public APIUsageStatisticsRestClientImpl(String username) throws APIMgtUsageQueryServiceClientException {
-        OMElement element = null;
+        OMElement element;
         APIManagerConfiguration config;
         APIManagerAnalyticsConfiguration apiManagerAnalyticsConfiguration;
         try {
@@ -161,9 +160,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * @param inputStream
-     * @return
-     * @throws Exception
+     * @param inputStream stream to read xml
+     * @return OMElement representing the XML
+     * @throws Exception throw if error occurred
      */
     public static OMElement buildOMElement(InputStream inputStream) throws Exception {
         XMLStreamReader parser;
@@ -172,7 +171,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         } catch (XMLStreamException e) {
             String msg = "Error in initializing the parser to build the OMElement.";
             throw new Exception(msg, e);
-        } finally {
         }
         StAXOMBuilder builder = new StAXOMBuilder(parser);
         return builder.getDocumentElement();
@@ -208,14 +206,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeys
-                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
+            concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
+                    .append(subscriberApps.get(i));
         }
 
         //get the usage result
-        List<PerAppApiCountDTO> usage = getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
-                concatenatedKeys.toString(), fromDate, toDate, limit);
-        return usage;
+        return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeys.toString(),
+                fromDate, toDate, limit);
 
     }
 
@@ -332,14 +329,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeys
-                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
+            concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
+                    .append(subscriberApps.get(i));
         }
 
         //get the usage result
-        List<AppUsageDTO> usage = getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY,
-                concatenatedKeys.toString(), fromDate, toDate, limit);
-        return usage;
+        return getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeys.toString(),
+                fromDate, toDate, limit);
 
     }
 
@@ -452,16 +448,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeys
-                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
+            concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
+                    .append(subscriberApps.get(i));
         }
 
         //get the usage result
-        List<AppCallTypeDTO> usage = getAPICallTypeUsageData(
-                APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY, concatenatedKeys.toString(),
-                fromDate, toDate, limit);
-
-        return usage;
+        return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
+                concatenatedKeys.toString(), fromDate, toDate, limit);
     }
 
     /**
@@ -531,7 +524,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             boolean found = false;
             for (AppCallTypeDTO dto : appApiCallTypeList) {
                 if (dto.getAppName().equals(appName)) {
-                    dto.addGToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
+                    dto.addToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
                     found = true;
                     break;
                 }
@@ -540,7 +533,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (!found) {
                 appCallTypeDTO = new AppCallTypeDTO();
                 appCallTypeDTO.setAppName(appName);
-                appCallTypeDTO.addGToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
+                appCallTypeDTO.addToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
                 appApiCallTypeList.add(appCallTypeDTO);
             }
 
@@ -574,14 +567,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
-            concatenatedKeys
-                    .append(" OR " + APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(i));
+            concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
+                    .append(subscriberApps.get(i));
         }
 
         //get the usage result
-        List<FaultCountDTO> usage = getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY,
-                concatenatedKeys.toString(), fromDate, toDate, limit);
-        return usage;
+        return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeys.toString(),
+                fromDate, toDate, limit);
     }
 
     /**
@@ -853,26 +845,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIResponseTime> getAPIResponseTimeData(String providerName, String fromDate, String toDate, int limit)
             throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
-        String query = null;
+        StringBuilder query = new StringBuilder();
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
-                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']';
+            query.append(APIUsageStatisticsClientConstants.REQUEST_TIME).append(": [")
+                    .append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                    .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
-            query = new StringBuilder(query)
-                    .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
-                            + '\"').toString();
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(':').append('\"')
+                    .append(providerName).append('\"');
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 1,
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 1,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET,
                 APIUsageStatisticsClientConstants.API_VERSION_SERVICE_TIME_SUMMARY);
 
@@ -993,14 +985,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
 
         StringBuilder lastAccessQuery = new StringBuilder();
-        lastAccessQuery.append("tenantDomain: \"" + tenantDomain + "\"");
+        lastAccessQuery.append("tenantDomain: \"").append(tenantDomain).append("\"");
 
         if (!providerName.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            lastAccessQuery
-                    .append(" AND (" + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + ": \""
-                            + providerName + "\" OR "
-                            + APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE + ": \"" + APIUtil
-                            .getUserNameWithTenantSuffix(providerName) + "\")");
+            lastAccessQuery.append(" AND (").append(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE)
+                    .append(": \"").append(providerName).append("\" OR ")
+                    .append(APIUsageStatisticsClientConstants.API_PUBLISHER_THROTTLE_TABLE).append(": \"")
+                    .append(APIUtil.getUserNameWithTenantSuffix(providerName)).append("\")");
         }
 
         //create the bean
@@ -1106,26 +1097,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
 
-        String query = null;
+        StringBuilder query = new StringBuilder();
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
-                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']';
+            query.append(APIUsageStatisticsClientConstants.REQUEST_TIME).append(": [")
+                    .append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                    .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
-            query = new StringBuilder(query)
-                    .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
-                            + '\"').toString();
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(':').append('\"')
+                    .append(providerName).append('\"');
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3,
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 3,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_METHOD_FACET,
                 APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY);
 
@@ -1233,26 +1224,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIUsageByDestination> getAPIUsageByDestinationData(String providerName, String fromDate,
             String toDate) throws APIMgtUsageQueryServiceClientException {
 
-        String query = null;
+        StringBuilder query = new StringBuilder();
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
-                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']';
+            query.append(APIUsageStatisticsClientConstants.REQUEST_TIME).append(": [")
+                    .append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                    .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
-            query = new StringBuilder(query)
-                    .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
-                            + '\"').toString();
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(':').append('\"')
+                    .append(providerName).append('\"');
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3,
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 3,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_DEST_FACET,
                 APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY);
 
@@ -1360,8 +1351,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 }
             }
         }
-        List<APIUsageDTO> usage = getAPIUsageTopEntries(new ArrayList<APIUsageDTO>(usageByAPIs.values()), limit);
-        return usage;
+        return getAPIUsageTopEntries(new ArrayList<APIUsageDTO>(usageByAPIs.values()), limit);
     }
 
     /**
@@ -1378,26 +1368,26 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         //limit is used after DAS provide pagination of aggregate search
-        String query = null;
+        StringBuilder query = new StringBuilder();
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
-                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']';
+            query.append(APIUsageStatisticsClientConstants.REQUEST_TIME).append(": [")
+                    .append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                    .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
-            query = new StringBuilder(query)
-                    .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
-                            + '\"').toString();
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(':').append('\"')
+                    .append(providerName).append('\"');
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 2,
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 2,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET,
                 APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY);
 
@@ -1469,7 +1459,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         List<APIResponseFaultCountDTO> faultyCount = new ArrayList<APIResponseFaultCountDTO>();
         List<APIVersionUsageDTO> apiVersionUsageList;
-        APIVersionUsageDTO apiVersionUsageDTO;
+        //APIVersionUsageDTO apiVersionUsageDTO;
 
         //iterate over all the result data
         for (APIResponseFaultCount fault : faultyData) {
@@ -1488,8 +1478,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
                     //get the usage of the apis individually
                     apiVersionUsageList = getUsageByAPIVersions(providerName, fault.getApiName(), fromDate, toDate);
-                    for (int i = 0; i < apiVersionUsageList.size(); i++) {
-                        apiVersionUsageDTO = apiVersionUsageList.get(i);
+                    for (APIVersionUsageDTO apiVersionUsageDTO : apiVersionUsageList) {
                         //if both version are equal
                         if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             //get all the request count
@@ -1527,26 +1516,27 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     private List<APIResponseFaultCount> getAPIResponseFaultCountData(String providerName, String fromDate,
             String toDate) throws APIMgtUsageQueryServiceClientException {
         //limit is used after DAS provide pagination of aggregate search
-        String query = null;
+        StringBuilder query = new StringBuilder();
 
         //extending lucene query with time ranges
         try {
-            query = APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil.getFloorDateAsLong(fromDate)
-                    + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']';
+            query.append(APIUsageStatisticsClientConstants.REQUEST_TIME).append(": [")
+                    .append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                    .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
+            return new ArrayList<APIResponseFaultCount>();
         }
 
         //if My APIs stat, add constraint with API publisher
-        if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
+        if (!APIUsageStatisticsClientConstants.ALL_PROVIDERS.equals(providerName)) {
             providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
-            query = new StringBuilder(query)
-                    .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
-                            + '\"').toString();
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(':').append('\"')
+                    .append(providerName).append('\"');
         }
 
         //creating request bean
-        SearchRequestBean request = new SearchRequestBean(query, 3,
+        SearchRequestBean request = new SearchRequestBean(query.toString(), 3,
                 APIUsageStatisticsClientConstants.API_VERSION_APIPUBLISHER_CONTEXT_FACET,
                 APIUsageStatisticsClientConstants.API_FAULT_SUMMARY);
 
@@ -1620,8 +1610,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        StringBuilder query = new StringBuilder(
-                APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
+        StringBuilder query = new StringBuilder(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(':')
+                .append('\"').append(tenantDomain).append('\"');
 
         //if application or api is no available return empty result
         if (apiName.contains("No APIs Available")) {
@@ -1631,19 +1621,22 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
             provider = APIUtil.getUserNameWithTenantSuffix(provider);
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
+                    .append("\"");
         }
 
         //set the application name
         if (!StringUtils.isEmpty(appName)) {
-            query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + ":\"" + appName + "\"");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.APPLICATION_NAME).append(":\"")
+                    .append(appName).append("\"");
         }
 
         //lucene query with time ranges
         try {
-            query.append(" AND " + APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"" + " AND "
-                    + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
-                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']');
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API).append(":\"").append(apiName)
+                    .append("\"").append(" AND ").append(APIUsageStatisticsClientConstants.REQUEST_TIME)
+                    .append(": [").append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                    .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -1732,14 +1725,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
             provider = APIUtil.getUserNameWithTenantSuffix(provider);
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
+                    .append("\"");
         }
 
         //lucene query with time ranges
         try {
-            query.append(" AND " + APIUsageStatisticsClientConstants.APPLICATION_NAME + ":\"" + appName + "\"" + " AND "
-                    + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
-                    .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + ']');
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.APPLICATION_NAME).append(":\"")
+                    .append(appName).append("\"").append(" AND ").append(APIUsageStatisticsClientConstants.REQUEST_TIME)
+                    .append(": [").append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                    .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
@@ -1785,7 +1780,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIThrottlingOverTimeDTO> throttlingAppData = new ArrayList<APIThrottlingOverTimeDTO>();
-
+        if (obj == null) {
+            return throttlingAppData;
+        }
         //get the DTO class from the response bean classes
         //getColumnNames 0 index contain the api name, index 1 contain the publisher, 2 index contain application
         APIThrottlingOverTimeDTO usage;
@@ -1814,13 +1811,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the tenant domain
         String tenantDomain = MultitenantUtils.getTenantDomain(provider);
         //set the query to match tenant
-        StringBuilder query = new StringBuilder(
-                APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
+        StringBuilder query = new StringBuilder(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(':')
+                .append('\"').append(tenantDomain).append('\"');
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
             provider = APIUtil.getUserNameWithTenantSuffix(provider);
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
+                    .append("\"");
         }
 
         //creating request bean
@@ -1851,6 +1849,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //crete new list with apis in result
         List<String> throttlingAPIData = new ArrayList<String>();
+        if (obj == null) {
+            return throttlingAPIData;
+        }
+
         for (Result<APIsForThrottleStatsValue> result : obj) {
             APIsForThrottleStatsValue v = result.getValues();
             //getColumnNames 1 st element is api name
@@ -1881,7 +1883,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
             provider = APIUtil.getUserNameWithTenantSuffix(provider);
-            query.append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ":\"" + provider + "\"");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
+                    .append("\"");
         }
 
         //set the query to find specific api
@@ -1889,7 +1892,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (apiName.contains("No APIs Available")) {
                 return new ArrayList<String>();
             }
-            query.append(" AND " + APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"");
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API).append(":\"").append(apiName)
+                    .append("\"");
         }
 
         //creating request bean
@@ -1920,6 +1924,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //crete new list with apps in result
         List<String> throttlingAppData = new ArrayList<String>();
+        if (obj == null) {
+            return throttlingAppData;
+        }
+
         for (Result<APPsForThrottleStatsValue> result : obj) {
             APPsForThrottleStatsValue v = result.getValues();
             //getColumnNames 1 st element is app name
@@ -1989,8 +1997,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //lucene query with time ranges
         if (fromDate != null && toDate != null) {
             try {
-                query.append(" AND " + APIUsageStatisticsClientConstants.REQUEST_TIME + ": [" + RestClientUtil
-                        .getFloorDateAsLong(fromDate) + " TO " + RestClientUtil.getCeilingDateAsLong(toDate) + "]");
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.REQUEST_TIME).append(": [")
+                        .append(RestClientUtil.getFloorDateAsLong(fromDate)).append(" TO ")
+                        .append(RestClientUtil.getCeilingDateAsLong(toDate)).append("]");
             } catch (ParseException e) {
                 handleException("Error occurred while Error parsing date", e);
             }
@@ -2105,6 +2114,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //get the long value from the result
         APIFirstAccess firstAccess = null;
+        if (obj == null || obj.isEmpty()) {
+            return null;
+        }
         long accessTime = obj.get(0).getValues().getFirst_access_time();
 
         //check whether time is valid
@@ -2146,12 +2158,17 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         //status contain the "success" if table present
-        boolean isExist = status.getStatus().equalsIgnoreCase("success");
-        return isExist;
+        return status.getStatus().equalsIgnoreCase("success");
 
     }
 
-    //not used due to waiting for DAS REST pagination support
+    /**
+     * This method sort and set the result size
+     *
+     * @param usageData result to be sort
+     * @param limit     value to limit
+     * @return list of PerUserAPIUsageDTO
+     */
     private List<PerUserAPIUsageDTO> getTopEntries(List<PerUserAPIUsageDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
             public int compare(PerUserAPIUsageDTO o1, PerUserAPIUsageDTO o2) {
@@ -2175,7 +2192,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return usageData;
     }
 
-    //not used due to waiting for DAS REST pagination support
+    /**
+     * This method sort and limit the result size for API usage data
+     *
+     * @param usageData data to be sort and limit
+     * @param limit     value to be limited
+     * @return list of APIUsageDTO
+     */
     private List<APIUsageDTO> getAPIUsageTopEntries(List<APIUsageDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<APIUsageDTO>() {
             public int compare(APIUsageDTO o1, APIUsageDTO o2) {
@@ -2234,12 +2257,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public void deployArtifacts(String url, String user, String pass) throws Exception {
-
-        if (url.trim().equals("")) {
-            String message = "Data Analyzer URL is empty. cApp will not be deployed.";
-            log.warn(message);
-            return;
-        }
 
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics_REST.car";
@@ -2351,10 +2368,17 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
+    /**
+     * This method find the API usage
+     *
+     * @param apiName    API name
+     * @param apiVersion API version
+     * @throws APIMgtUsageQueryServiceClientException throws if error occurred
+     */
     private List<APIUsageByUser> getUsageOfAPI(String apiName, String apiVersion)
             throws APIMgtUsageQueryServiceClientException {
 
-        String query = APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"";;
+        String query = APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"";
 
         if (apiVersion != null) {
             query += " AND " + APIUsageStatisticsClientConstants.VERSION + ":\"" + apiVersion + "\"";
@@ -2429,7 +2453,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      *
      * @param usageData list of data to sort
      * @param limit     limit value
-     * @return
+     * @return return list of APIVersionLastAccessTimeDTO
      */
     private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
             int limit) {
@@ -2437,7 +2461,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
-                return (int) (o2.getLastAccessTime().compareToIgnoreCase(o1.getLastAccessTime()));
+                return o2.getLastAccessTime().compareToIgnoreCase(o1.getLastAccessTime());
             }
         });
         if (usageData.size() > limit) {
@@ -2454,7 +2478,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      *
      * @param usageData response time data to sort
      * @param limit     value to limit the data
-     * @return
+     * @return return list of APIResponseTimeDTO
      */
     private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
         Collections.sort(usageData, new Comparator<APIResponseTimeDTO>() {
@@ -2476,7 +2500,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * Sorting the throttle data by time
      *
      * @param usageData list to sort
-     * @return
+     * @return list of Result
      */
     private List<Result<ThrottleDataOfAPIAndApplicationValue>> getThrottleDataOfAPIAndApplicationSortedData(
             List<Result<ThrottleDataOfAPIAndApplicationValue>> usageData) {
@@ -2498,6 +2522,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public String getClientType() {
-        return clientType;
+        return "REST";
     }
 }
