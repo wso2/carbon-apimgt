@@ -69,13 +69,6 @@ public class Utils {
         if (headers != null) {
             headers.remove(HttpHeaders.AUTHORIZATION);
             headers.remove(HttpHeaders.AUTHORIZATION);
-            //headers.remove(HttpHeaders.ACCEPT);
-            //Default we will send xml out put if error_message_type is json then we will send json response to client
-            // We can set this parameter in _auth_failure_handler_ as follows
-            /*<sequence name="_auth_failure_handler_">
-            <property name="error_message_type" value="application/json"/>
-            <sequence key="_build_"/>
-            </sequence>     */
 
             headers.remove(HttpHeaders.HOST);
         }
