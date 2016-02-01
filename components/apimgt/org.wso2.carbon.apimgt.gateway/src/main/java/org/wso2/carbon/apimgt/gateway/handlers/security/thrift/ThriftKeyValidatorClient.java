@@ -61,6 +61,7 @@ public class ThriftKeyValidatorClient {
             keyValClient = new APIKeyValidationService.Client(protocol);
 
         } catch (TTransportException e) {
+            log.error(e.getMessage(), e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, e.getMessage(), e);
         }
     }
