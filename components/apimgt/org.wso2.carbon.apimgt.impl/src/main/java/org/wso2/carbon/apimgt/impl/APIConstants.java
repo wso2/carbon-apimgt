@@ -325,6 +325,8 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Overview constants for CORS configuration
+    public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
     public static final String LC_NEXT_STATES="nextStates";
@@ -751,17 +753,20 @@ public final class APIConstants {
     	private OperationParameter(){    	    
     	}
     }
-    
+
     public static class CORSHeaders {
-    	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-    	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+        public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+        public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+        public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-    	
-    	public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,PATCH,OPTIONS";
-    	private CORSHeaders(){    	    
-    	}
+        public static final String ALLOW_HEADERS_HANDLER_VALUE = "allowHeaders";
+        public static final String ALLOW_METHODS_HANDLER_VALUE = "allowedMethods";
+        public static final String ALLOW_ORIGIN_HANDLER_VALUE = "allowedOrigins";
+        public static final String ALLOW_CREDENTIALS_HANDLER_VALUE = "allowCredentials";
+        public static final String IMPLEMENTATION_TYPE_HANDLER_VALUE = "apiImplementationType";
+
+        private CORSHeaders() {
+        }
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";

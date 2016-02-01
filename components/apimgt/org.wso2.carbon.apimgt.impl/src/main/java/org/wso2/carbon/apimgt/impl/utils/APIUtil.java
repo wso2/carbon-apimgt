@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -382,6 +383,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -581,6 +583,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -678,6 +681,7 @@ public final class APIUtil {
             api.setUriTemplates(uriTemplates);
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -825,6 +829,9 @@ public final class APIUtil {
 
             }
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
+                                  APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -2211,6 +2218,7 @@ public final class APIUtil {
 
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
@@ -3840,6 +3848,8 @@ public final class APIUtil {
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
             throw new APIManagementException(msg, e);
@@ -5015,5 +5025,121 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Used to generate CORS Configuration object from CORS Configuration Json
+     *
+     * @param jsonString json representation of CORS configuration
+     * @return CORSConfiguration Object
+     */
+    public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
+        return new Gson().fromJson(jsonString, CORSConfiguration.class);
+
+    }
+
+    /**
+     * Used to generate Json string from CORS Configuration object
+     *
+     * @param corsConfiguration CORSConfiguration Object
+     * @return Json string according to CORSConfiguration Object
+     */
+    public static String getCorsConfigurationJsonFromDto(CORSConfiguration corsConfiguration) {
+        return new Gson().toJson(corsConfiguration);
+    }
+
+    /**
+     * Used to get access control allowed headers according to the api-manager.xml
+     *
+     * @return access control allowed headers string
+     */
+    public static String getAllowedHeaders() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
+    }
+
+    /**
+     * Used to get access control allowed methods define in api-manager.xml
+     *
+     * @return access control allowed methods string
+     */
+    public static String getAllowedMethods() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
+    }
+
+    /**
+     * Used to get access control allowed credential define in api-manager.xml
+     *
+     * @return true if access control allow credential enabled
+     */
+    public static boolean isAllowCredentials() {
+        String allowCredentials =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
+        return Boolean.parseBoolean(allowCredentials);
+    }
+
+    /**
+     * Used to get CORS Configuration enabled from api-manager.xml
+     *
+     * @return true if CORS-Configuration is enabled in api-manager.xml
+     */
+    public static boolean isCORSEnabled() {
+        String corsEnabled =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
+
+        return Boolean.parseBoolean(corsEnabled);
+    }
+
+    /**
+     * Used to return analytic enabled from the configuration
+     *
+     * @return true if analytics enabled in analytic configuration
+     */
+    public static boolean isStatsEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
+    }
+
+    /**
+     * Used to get access control allowed origins define in api-manager.xml
+     *
+     * @return allow origins list defined in api-manager.xml
+     */
+    public static String getAllowedOrigins() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+
+    }
+
+    /**
+     * Used to get CORSConfiguration according to the API artifact
+     *
+     * @param artifact registry artifact for the API
+     * @return CORS Configuration object extract from the artifact
+     * @throws GovernanceException if attribute couldn't fetch from the artifact.
+     */
+    public static CORSConfiguration getCorsConfigurationFromArtifact(GovernanceArtifact artifact)
+            throws GovernanceException {
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION));
+        if (corsConfiguration == null) {
+            corsConfiguration = getDefaultCorsConfiguration();
+        }
+        return corsConfiguration;
+    }
+
+    /**
+     * Used to get Default CORS Configuration object according to configuration define in api-manager.xml
+     *
+     * @return CORSConfiguration object accordine to the defined values in api-manager.xml
+     */
+    public static CORSConfiguration getDefaultCorsConfiguration() {
+        List<String> allowHeadersStringSet = Arrays.asList(getAllowedHeaders().split(","));
+        List<String> allowMethodsStringSet = Arrays.asList(getAllowedMethods().split(","));
+        List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
+        return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
     }
 }

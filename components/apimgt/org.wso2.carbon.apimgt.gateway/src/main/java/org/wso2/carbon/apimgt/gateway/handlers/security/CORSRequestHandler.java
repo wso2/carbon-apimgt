@@ -36,17 +36,17 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.*;
-import java.util.logging.Level;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
 	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
 	private String apiImplementationType;
 	private String allowHeaders;
-	private boolean allowCredentials;
+	private String allowCredentials;
 	private Set<String> allowedOrigins;
 	private boolean initializeHeaderValues;
-
+	private String allowedMethods;
+	private boolean allowCredentialsEnabled;
 	public void init(SynapseEnvironment synapseEnvironment) {
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing CORSRequest Handler instance");
@@ -63,18 +63,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	 */
 	void initializeHeaders() {
 		if (allowHeaders == null) {
-			allowHeaders = Utils
-					.getAllowedHeaders();
+			allowHeaders = APIUtil.getAllowedHeaders();
 		}
 		if (allowedOrigins == null) {
-			String allowedOriginsList = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-					getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+			String allowedOriginsList = APIUtil.getAllowedOrigins();
 			if (!allowedOriginsList.isEmpty()) {
 				allowedOrigins = new HashSet<String>(Arrays.asList(allowedOriginsList.split(",")));
 			}
 		}
-
-		allowCredentials = Utils.isAllowCredentials();
+		if (allowCredentials == null) {
+			allowCredentialsEnabled = APIUtil.isAllowCredentials();
+		}
+		if (allowedMethods == null) {
+			allowedMethods = APIUtil.getAllowedMethods();
+		}
 
 		initializeHeaderValues =  true;
 	}
@@ -139,7 +141,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     }
                 }
             }
-			
+
             String resourceString =
                     selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
             String resourceCacheKey = APIUtil
@@ -148,7 +150,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
             setCORSHeaders(messageContext, selectedResourceWithVerb);
             if (selectedResource != null && selectedResourceWithVerb != null) {
-                if ("inline".equalsIgnoreCase(apiImplementationType)) {
+                if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
                     messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
                 }
                 status = true;
@@ -196,9 +198,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
 		//Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
 		//and the allowed origin is not the wildcard (*)
-		if (allowCredentials && ! "*".equals(allowedOrigin)) {
-			messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
-		}
+        if (allowCredentialsEnabled && !"*".equals(allowedOrigin)) {
+            messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
+        }
 
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
 		String allowedMethods = "";
@@ -213,13 +215,13 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				allowedMethods = allowedMethods.substring(0, allowedMethods.length() - 1);
 			}
 		} else {
-			allowedMethods = Utils.getAllowedMethods();
+			allowedMethods = this.allowedMethods;
 		}
 		if ("*".equals(allowHeaders)) {
 			allowHeaders = headers.get("Access-Control-Request-Headers");
 
 		}
-		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, Utils.isCORSEnabled());
+		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, APIUtil.isCORSEnabled());
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
 	}
@@ -263,4 +265,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		setApiImplementationType(inlineType);
 	}
 
+	public String isAllowCredentials() {
+		return allowCredentials;
+	}
+
+	public void setAllowCredentials(String allowCredentials) {
+		this.allowCredentialsEnabled = Boolean.parseBoolean(allowCredentials);
+		this.allowCredentials = allowCredentials;
+	}
+
+	public String getAllowedMethods() {
+		return allowedMethods;
+	}
+
+	public void setAllowedMethods(String allowedMethods) {
+		this.allowedMethods = allowedMethods;
+	}
 }

@@ -17,9 +17,23 @@ $(document).ready(function(){
     } else {
         $('#toggleThrottle').parent().next().hide();
     }
-
-
-    $('#endpointType').on('change',function(){
+   if( $("#toggleCors").attr('checked') ) {
+        $('#toggleCors').parent().next().show();
+       } 
+      else {
+        $('#toggleCors').parent().next().hide();
+      }
+   if($('#toggleallOrigin').attr('checked')) {
+       $('#allowCredentials').attr("checked",false);
+       $('#allowCredentials').hide();
+       $('.originContainer').hide();
+      } else {
+        $('#allowCredentials').show();
+        $('#allOriginContainer').hide();
+        $('.originContainer').show();
+        } 
+ 
+     $('#endpointType').on('change',function(){
         var endpointType = $('#endpointType').find(":selected").val();
         if (endpointType == "secured") {
             var endpointAuthType = $('#endpointAuthType').find(":selected").val();
@@ -411,5 +425,12 @@ $("#toggleSequence").change(function(e){
         $('#faultSequence').val('');
         $('#inSequence').val('') ;
         $('#outSequence').val('');
+    }
+});
+$("#toggleCors").change(function(e){
+    if($(this).is(":checked")){
+        $(this).parent().next().show();
+    }else{
+        $(this).parent().next().hide();
     }
 });
