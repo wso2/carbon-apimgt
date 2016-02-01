@@ -361,7 +361,7 @@ public abstract class APIUsageStatisticsClient {
 
             //check is it shared application
             boolean sharedApp;
-            if (StringUtils.isEmpty(groupId)) {
+            if (!StringUtils.isEmpty(groupId)) {
                 query = query + "AM_APPLICATION.GROUP_ID = ? ";
                 sharedApp = true;
             } else {

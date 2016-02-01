@@ -9,7 +9,7 @@ var gson = com.google.gson.Gson();
 function getProviderAPIVersionUsage(providerName, apiName, server) {
     var usage = [];
 
-    if(usageClient == null){
+    if(usageClient == null) {
         return {
             error:false,
             usage:[]
@@ -103,7 +103,7 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
     var usage = [];
     var usageout = [];
 
-    if(usageClient == null){
+    if(usageClient == null) {
         return {
             error:false,
             usage:[]
@@ -322,7 +322,7 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
     var usage = [];
     var usageout = [];
 
-    if(usageClient == null){
+    if(usageClient == null) {
         return {
             error:false,
             usage:[]
@@ -390,7 +390,7 @@ function getFirstAccessTime(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        if(usageClient == null){
+        if(usageClient == null) {
             return {
                 error:true
             };

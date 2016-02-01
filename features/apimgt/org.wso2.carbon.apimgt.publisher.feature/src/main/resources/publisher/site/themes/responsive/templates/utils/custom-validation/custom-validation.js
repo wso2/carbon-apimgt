@@ -115,5 +115,5 @@ $(document).ready(function() {
 
     $.validator.addMethod('validateDescriptionLength', function(value, element) {
         return value.length <= 20000;
-    }, 'maximum support 20000 charactors only');
+    }, 'maximum support 20000 characters only');
 });

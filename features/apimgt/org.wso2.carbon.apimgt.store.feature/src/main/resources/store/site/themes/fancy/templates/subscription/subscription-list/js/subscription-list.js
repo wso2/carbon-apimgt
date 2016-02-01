@@ -442,17 +442,17 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
                 if(scopeTxtBox.length==0){  // checking whether scopeTxtBox is already exist
 
                     //generate scopeTxtBox and append
-                    var scopeTxtDiv=    '<div class="row-fluid keys">'+
-                                        '<div class="span3">'+
-                                        '<b>Scope:</b>'+
-                                        '</div>'+
-                                        '<div class="span9">'+
-                                        '<div class="token">'+
-                                        '<span class="accessTokenScopeDisplayPro keyValues" id="prodAccessScope" data-value="'+generatedScopesNames+'">'+generatedScopesNames+'</span>'+
-                                        '</div>'+
-                                        '</div>'+
-                                        '</div>';
-                   tokenTxtBox.before(scopeTxtDiv);
+                    var scopeTxtDiv = '<div class="row-fluid keys">'+
+                                    '<div class="span3">'+
+                                    '<b>Scope:</b>'+
+                                    '</div>'+
+                                    '<div class="span9">'+
+                                    '<div class="token">'+
+                                    '<span class="accessTokenScopeDisplayPro keyValues" id="prodAccessScope" data-value="'+generatedScopesNames+'">'+generatedScopesNames+'</span>'+
+                                    '</div>'+
+                                    '</div>'+
+                                    '</div>';
+                    tokenTxtBox.before(scopeTxtDiv);
                 }
             }else{  // if Scope is not selected
                 if(scopeTxtBox.length>0){
