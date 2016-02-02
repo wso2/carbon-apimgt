@@ -290,7 +290,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 
 	private void addAPI(API api, String documentURL) throws RegistryException,
 			APIManagementException {
-		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+		ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 		try {
 			this.registry = DataHolder.getRegistryService()
 					.getGovernanceSystemRegistry();

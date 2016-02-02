@@ -405,7 +405,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     public OAuthApplicationInfo retrieveOAuthApplication(String consumerKey)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         OAuthApplicationInfo oAuthApplicationInfo = apiMgtDAO.getOAuthApplication(consumerKey);
         return oAuthApplicationInfo;
     }
@@ -473,8 +473,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      */
     public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIKeyMgtException,
             APIManagementException, IdentityException {
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
-        return ApiMgtDAO.getSubscribedAPIsOfUser(userId);
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        return apiMgtDAO.getSubscribedAPIsOfUser(userId);
     }
 
     /**
@@ -585,7 +585,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             throw new APIKeyMgtException(errMsg, e);
         }
         
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         apiMgtDAO.updateRefreshedApplicationAccessToken(tokenScope, newAccessToken,
                 validityPeriod);
         return newAccessToken;
@@ -605,7 +605,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws AxisFault              on error in clearing cached key
      */
     public void revokeAccessToken(String key, String consumerKey, String authorizedUser) throws APIManagementException, AxisFault {
-        ApiMgtDAO dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         dao.revokeAccessToken(key);
         clearOAuthCache(consumerKey, authorizedUser);
     }
@@ -624,8 +624,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
         Set<SubscribedAPI> apiSet = null;
         Set<String> keys = null;
-        ApiMgtDAO dao;
-        dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (gatewayExists) {
             keys = dao.getApplicationKeys(application.getId());
             apiSet = dao.getSubscribedAPIs(application.getSubscriber(), null);
@@ -667,7 +666,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     public void revokeAccessTokenBySubscriber(Subscriber subscriber) throws
             APIManagementException, AxisFault {
         ApiMgtDAO dao;
-        dao = new ApiMgtDAO();
+        dao = ApiMgtDAO.getInstance();
         Application[] applications = dao.getApplications(subscriber, null);
         for (Application app : applications) {
             revokeAccessTokenForApplication(app);
@@ -684,7 +683,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      */
     public void revokeKeysByTier(String tierName) throws APIManagementException, AxisFault {
         ApiMgtDAO dao;
-        dao = new ApiMgtDAO();
+        dao = ApiMgtDAO.getInstance();
         Application[] applications = dao.getApplicationsByTier(tierName);
         for (Application application : applications) {
             revokeAccessTokenForApplication(application);

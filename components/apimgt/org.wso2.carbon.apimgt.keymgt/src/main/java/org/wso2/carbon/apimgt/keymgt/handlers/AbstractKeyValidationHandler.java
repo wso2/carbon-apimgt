@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 public abstract class AbstractKeyValidationHandler implements KeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(AbstractKeyValidationHandler.class);
-    private ApiMgtDAO dao = new ApiMgtDAO();
+    private ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
     @Override
     public boolean validateSubscription(TokenValidationContext validationContext) throws APIKeyMgtException {

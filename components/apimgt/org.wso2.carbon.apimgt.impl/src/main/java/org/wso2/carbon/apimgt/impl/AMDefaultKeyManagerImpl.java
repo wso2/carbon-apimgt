@@ -578,7 +578,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public Set<String> getActiveTokensByConsumerKey(String consumerKey) throws APIManagementException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         return apiMgtDAO.getActiveTokensOfConsumerKey(consumerKey);
     }
 

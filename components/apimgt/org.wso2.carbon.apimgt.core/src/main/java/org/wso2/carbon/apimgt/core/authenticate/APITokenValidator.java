@@ -33,7 +33,7 @@ public class APITokenValidator {
 
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String requiredAuthenticationLevel,
                                                String clientDomain) throws APIManagementException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         // first check whether client domain is authorized
         if (accessToken != null && ApiMgtDAO.findConsumerKeyFromAccessToken(accessToken) != null &&
                 ApiMgtDAO.isDomainRestricted(accessToken, clientDomain)) {

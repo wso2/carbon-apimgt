@@ -3127,7 +3127,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 description = (String) args[2];
             }
 
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
             boolean isTenantFlowStarted = false;
 

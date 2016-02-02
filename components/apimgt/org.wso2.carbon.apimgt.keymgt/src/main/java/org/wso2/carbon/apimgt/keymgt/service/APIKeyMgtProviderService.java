@@ -50,8 +50,8 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      */
     public APIKeyInfoDTO[] getIssuedKeyInfo(APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException {
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
-        return ApiMgtDAO.getSubscribedUsersForAPI(apiInfoDTO);
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        return apiMgtDAO.getSubscribedUsersForAPI(apiInfoDTO);
     }
 
     /**
@@ -64,8 +64,8 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      */
     public APIInfoDTO[] getAPIsOfUser(String userId, String providerId) throws APIKeyMgtException,
             APIManagementException, IdentityException {
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
-        APIInfoDTO[] apiInfoDTOs = ApiMgtDAO.getSubscribedAPIsOfUser(userId);
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        APIInfoDTO[] apiInfoDTOs = apiMgtDAO.getSubscribedAPIsOfUser(userId);
         // Filter by Provider
         List<APIInfoDTO> apiInfoDTOList = new ArrayList<APIInfoDTO>();
         for (APIInfoDTO apiInfoDTO : apiInfoDTOs) {
@@ -84,9 +84,9 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      */
     public void activateAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException, IdentityException {
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         for (String userId : users) {
-            ApiMgtDAO.changeAccessTokenStatus(userId, apiInfoDTO, APIConstants.TokenStatus.ACTIVE);
+            apiMgtDAO.changeAccessTokenStatus(userId, apiInfoDTO, APIConstants.TokenStatus.ACTIVE);
         }
     }
 
@@ -98,7 +98,7 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      */
     public void blockAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException, IdentityException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         for (String userId : users) {
             apiMgtDAO.changeAccessTokenStatus(userId, apiInfoDTO, APIConstants.TokenStatus.BLOCKED);
         }
@@ -112,9 +112,9 @@ public class APIKeyMgtProviderService extends AbstractAdmin {
      */
     public void revokeAccessTokens(String[] users, APIInfoDTO apiInfoDTO) throws APIKeyMgtException,
             APIManagementException, IdentityException {
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         for (String userId : users) {
-            ApiMgtDAO.changeAccessTokenStatus(userId, apiInfoDTO, APIConstants.TokenStatus.REVOKED);
+            apiMgtDAO.changeAccessTokenStatus(userId, apiInfoDTO, APIConstants.TokenStatus.REVOKED);
         }
     }
 

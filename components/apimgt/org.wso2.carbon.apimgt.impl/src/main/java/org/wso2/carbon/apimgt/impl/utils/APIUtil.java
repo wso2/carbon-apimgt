@@ -3261,7 +3261,7 @@ public final class APIUtil {
     }
 
     public static int getApplicationId(String appName, String userId) throws APIManagementException {
-        return new ApiMgtDAO().getApplicationId(appName, userId);
+        return ApiMgtDAO.getInstance().getApplicationId(appName, userId);
     }
 
     public static boolean isAPIManagementEnabled() {
@@ -4591,7 +4591,7 @@ public final class APIUtil {
      */
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
             throws APIManagementException {
-        return ApiMgtDAO.isApplicationExist(applicationName, subscriber, groupId);
+        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId);
     }
 
     public static String getHostAddress() {

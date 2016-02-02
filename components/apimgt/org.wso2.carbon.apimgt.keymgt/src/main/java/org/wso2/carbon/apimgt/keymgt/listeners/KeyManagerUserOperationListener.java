@@ -78,7 +78,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager) {
 
         boolean isTenantFlowStarted = false;
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
 
@@ -155,7 +155,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             return true;
         }
 
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Set<String> activeTokens;
 
         try {

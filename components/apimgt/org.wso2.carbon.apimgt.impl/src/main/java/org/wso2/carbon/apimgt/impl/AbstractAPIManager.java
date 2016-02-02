@@ -99,7 +99,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
-        apiMgtDAO = new ApiMgtDAO();
+        apiMgtDAO = ApiMgtDAO.getInstance();
 
         try {
             if (username == null) {

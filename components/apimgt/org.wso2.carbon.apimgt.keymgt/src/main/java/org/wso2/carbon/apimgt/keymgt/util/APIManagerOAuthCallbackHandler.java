@@ -57,15 +57,6 @@ public class APIManagerOAuthCallbackHandler extends AbstractOAuthCallbackHandler
                 String[] scopes = oauthCallback.getRequestedScope();
                 //If no scopes have been requested.
                 if(scopes == null || scopes.length == 0){
-                    /*ApiMgtDAO dao = new ApiMgtDAO();
-                    try {
-                        scopes = new String[]{dao.getTokenScope(oauthCallback.getClient())};
-                    } catch (APIManagementException e) {
-                        String msg = "Error while looking up token scope";
-                        log.error(msg, e);
-                        throw new UnsupportedCallbackException(oauthCallback, msg);
-                    }*/
-
                    //Issue a default scope. The default scope can only be used to access resources which are
                    // not associated to a scope
                    scopes = new String[]{APIConstants.OAUTH2_DEFAULT_SCOPE};

@@ -118,7 +118,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Subscriber getSubscriber(String subscriberId) throws APIManagementException {
         Subscriber subscriber = null;
         try {
-            subscriber = ApiMgtDAO.getSubscriber(subscriberId);
+            subscriber = ApiMgtDAO.getInstance().getSubscriber(subscriberId);
         } catch (APIManagementException e) {
             handleException("Failed to get Subscriber", e);
         }
@@ -2880,7 +2880,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 description = (String) args[2];
             }
 
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             boolean isTenantFlowStarted = false;
 
             try {

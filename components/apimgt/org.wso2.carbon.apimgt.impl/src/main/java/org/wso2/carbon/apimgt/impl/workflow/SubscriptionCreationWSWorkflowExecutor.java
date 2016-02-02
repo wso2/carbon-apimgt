@@ -124,7 +124,7 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
                 .getExternalWorkflowReference() + "Workflow State : " + workflowDTO.getStatus());
 
         if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             try {
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
                         APIConstants.SubscriptionStatus.UNBLOCKED);
@@ -133,7 +133,7 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
                 throw new WorkflowException("Could not complete subscription creation workflow", e);
             }
         } else if (WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())) {
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             try {
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
                         APIConstants.SubscriptionStatus.REJECTED);
