@@ -35,8 +35,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import java.util.*;
-import java.util.logging.Level;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
@@ -152,7 +154,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
                 }
                 status = true;
-            } else if (selectedResource != null && selectedResourceWithVerb == null) {
+            } else if (selectedResource != null) {
                 if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
 	                Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
 	                if (corsSequence != null) {
