@@ -139,7 +139,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     }
                 }
             }
-			
+
             String resourceString =
                     selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
             String resourceCacheKey = APIUtil
@@ -161,12 +161,26 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	                Utils.send(messageContext, HttpStatus.SC_OK);
                     status = false;
                 } else {
-                    status = true;
-                }
-            } else {
-                status = true;
-            }
-        } finally {
+					messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, HttpStatus.SC_METHOD_NOT_ALLOWED);
+					messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, HttpStatus.SC_METHOD_NOT_ALLOWED);
+					messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, "Method not allowed for given API resource");
+					Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
+					if (resourceMisMatchedSequence != null) {
+						resourceMisMatchedSequence.mediate(messageContext);
+					}
+					status = false;
+				}
+			} else {
+                messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, HttpStatus.SC_NOT_FOUND);
+                messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, HttpStatus.SC_NOT_FOUND);
+                messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, "No matching resource found for given API Request");
+                Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
+                if (resourceMisMatchedSequence != null) {
+					resourceMisMatchedSequence.mediate(messageContext);
+				}
+				status = false;
+			}
+		} finally {
             context.stop();
         }
         return status;
