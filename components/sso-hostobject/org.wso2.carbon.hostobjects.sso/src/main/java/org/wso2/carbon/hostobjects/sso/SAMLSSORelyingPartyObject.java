@@ -47,19 +47,19 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     private static final Log log = LogFactory.getLog(SAMLSSORelyingPartyObject.class);
     //stores sso properties like, identity server url,keystore path, alias, keystore password, issuerId
     private Properties ssoConfigProperties = new Properties();
-    protected static SAMLSSORelyingPartyObject ssho;
+    protected static volatile SAMLSSORelyingPartyObject ssho;
 
     // relay state,requested uri
     private static Map<String, String> relayStateMap = new HashMap<String, String>();
 
     // issuerId, relyingPartyObject .this is to provide sso functionality to multiple jaggery apps.
-    private static Map<String, SAMLSSORelyingPartyObject> ssoRelyingPartyMap = new HashMap<String, SAMLSSORelyingPartyObject>();
+    private static volatile Map<String, SAMLSSORelyingPartyObject> ssoRelyingPartyMap = new HashMap<String, SAMLSSORelyingPartyObject>();
 
     // sessionId, sessionIndex. this is to map current session with session index sent from Identity server.
     // When log out request come from identity server,we need to invalidate the current session.
-    private static Map<String, SessionInfo> sessionIdMap = new ConcurrentHashMap<String, SessionInfo>();
-    private static Map<String, Set<SessionHostObject>> sessionIndexMap = new ConcurrentHashMap<String, Set<SessionHostObject>>();
-    private static Set<SessionHostObject> sho = new HashSet<SessionHostObject>();
+    private static volatile Map<String, SessionInfo> sessionIdMap = new ConcurrentHashMap<String, SessionInfo>();
+    private static volatile Map<String, Set<SessionHostObject>> sessionIndexMap = new ConcurrentHashMap<String, Set<SessionHostObject>>();
+    private static volatile Set<SessionHostObject> sho = new HashSet<SessionHostObject>();
     //used store logged in user name until put into jaggery session
     private String loggedInUserName;
 
@@ -1128,6 +1128,36 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             sendSessionInvalidationClusterMessage(sessionIndex);
             return;
         }
+        
+        clearSessionData(sessionIndex);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
+        }
+    }
+    
+    public void handleClusterLogout(String sessionIndex) {
+        if (log.isDebugEnabled()) {
+            log.debug("session index map value:" + sessionIndexMap);
+            if (sessionIndexMap != null) {
+                log.debug("session index map size:" + sessionIndexMap.size());
+                log.debug("session index map :" + sessionIndexMap);
+                log.debug("session index :" + sessionIndex);
+                // log.debug("Is session index map contains session index:"+sessionIndexMap.containsKey(sessionIndex));
+            }
+        }
+        if ((sessionIndexMap != null && sessionIndex != null) && (!sessionIndexMap.containsKey(sessionIndex))) {
+            return;
+        }
+
+        clearSessionData(sessionIndex);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
+        }
+    }
+    
+    private void clearSessionData(String sessionIndex){
         try {
             ssho.invalidateSessionBySessionIndex(sessionIndex);
             // this is to invalidate relying party object after user log out. To release memory allocations.
@@ -1149,10 +1179,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             removeSession(sessionIndex);
             clearSessionsSet();
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
-        }
     }
+
 
 
     public void sendSessionInvalidationClusterMessage(String sessionIndex) {
