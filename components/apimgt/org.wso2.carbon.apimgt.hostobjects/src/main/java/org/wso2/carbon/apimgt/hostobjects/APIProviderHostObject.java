@@ -197,6 +197,7 @@ public class APIProviderHostObject extends ScriptableObject {
             log.error("Error occurred while checking for multiple user stores", e);
         }
 
+        boolean isTenantFlowStarted = false;
         try {
             AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, url + "AuthenticationAdmin");
             ServiceClient client = authAdminStub._getServiceClient();
@@ -212,6 +213,11 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             PermissionUpdateUtil.updatePermissionTree(tenantId);
             
+            if(tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();            
             CommonUtil.addDefaultLifecyclesIfNotAvailable(registryService.getConfigSystemRegistry(tenantId), 
                                                           CommonUtil.getRootSystemRegistry(tenantId));
@@ -256,6 +262,10 @@ public class APIProviderHostObject extends ScriptableObject {
         } catch (Exception e) {
             row.put("error", row, true);
             row.put("detail", row, e.getMessage());
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
 
         return row;
@@ -3307,82 +3317,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiStatus;
     }
 
-    public static NativeArray jsFunction_getUserAgentSummaryForALLAPIs(Context cx,
-                                                                       Scriptable thisObj,
-                                                                       Object[] args,
-                                                                       Function funObj)
-            throws APIManagementException {
-        List<APIRequestsByUserAgentsDTO> list = null;
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUserAgentSummaryForALLAPIs();
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
-        }
-        NativeArray myn = new NativeArray(0);
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIRequestsByUserAgentsDTO usage = (APIRequestsByUserAgentsDTO) usageObject;
-                row.put("user_agent", row, userAgentParser(usage.getUserAgent()));
-                row.put("request_count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIRequestsPerHour(Context cx,
-                                                               Scriptable thisObj,
-                                                               Object[] args,
-                                                               Function funObj)
-            throws APIManagementException {
-
-        List<APIRequestsByHourDTO> list = null ;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        String fromDate = (String) args[0];
-        String toDate = (String) args[1];
-        String apiName = (String)args[2];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIRequestsByHour(fromDate, toDate,apiName);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIRequestsByHourDTO usage = (APIRequestsByHourDTO) usageObject;
-                row.put("apiName", row, usage.getApi());
-                row.put("DateTierCount", row, usage.getDate().concat("|").concat(usage.getTier()).concat("|").concat(usage.getRequestCount()));
-                row.put("Date", row, usage.getDate());
-                row.put("request_count", row, usage.getRequestCount());
-                row.put("tier", row, usage.getTier());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-
-    }
-
-
     public static NativeArray jsFunction_searchAPIs(Context cx, Scriptable thisObj,
                                                     Object[] args,
                                                     Function funObj) throws APIManagementException {
@@ -4081,43 +4015,6 @@ public class APIProviderHostObject extends ScriptableObject {
 
     }
 
-
-
-    public static NativeArray jsFunction_getFirstAccessTime(Context cx, Scriptable thisObj,
-                                                            Object[] args, Function funObj)
-            throws APIManagementException {
-
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if(!HostObjectUtils.isUsageDataSourceSpecified()){
-            return myn;
-        }
-
-        List<APIFirstAccess> list = null;
-        if (args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getFirstAccessTime(providerName,1);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        }
-        NativeObject row = new NativeObject();
-
-        if (list != null && !list.isEmpty()) {
-            row.put("year",row,list.get(0));
-            row.put("month",row,list.get(1));
-            row.put("day",row,list.get(2));
-            myn.put(0,myn,row);
-        }
-
-        return myn;
-    }
-
     public static boolean jsFunction_validateRoles(Context cx,
                                                    Scriptable thisObj, Object[] args,
                                                    Function funObj) {
@@ -4799,21 +4696,21 @@ public class APIProviderHostObject extends ScriptableObject {
         Map<String, Object> resultMap;
         NativeArray myn = new NativeArray(0);
         NativeObject result = new NativeObject();
-
+        boolean isTenantFlowStarted = false;
         try {
-            if (tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            if (tenantDomain != null &&
+                !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            } else {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(
-                        org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-
+                isTenantFlowStarted = true;
             }
             resultMap = apiProvider.getAllPaginatedAPIs(tenantDomain, start, end);
 
-        }  finally {
-            PrivilegedCarbonContext.endTenantFlow();
+        } finally {
+            if (isTenantFlowStarted) {
+
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         if (resultMap != null) {
             apiList = (List<API>) resultMap.get("apis");

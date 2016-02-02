@@ -3,13 +3,13 @@ log = new Log(),
 apiStore = jagg.module("manager").getAPIStoreObj(),
 usageClient = jagg.module("manager").getUsageClient(),
 user = jagg.getUser();
-var gson=com.google.gson.Gson();
+var gson = com.google.gson.Gson();
 
 function getFirstAccessTime(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        if(usageClient==null){
+        if(usageClient == null) {
             return {
                 error:true
             };
@@ -25,7 +25,7 @@ function getFirstAccessTime(providerName, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -56,7 +56,7 @@ function getAppApiCallType(subscriberName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -90,7 +90,7 @@ function getPerAppAPIFaultCount(subscriberName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -122,7 +122,7 @@ function getProviderAPIUsage(subscriberName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -152,7 +152,7 @@ function getTopAppUsers(subscriberName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -182,7 +182,7 @@ function getPerAppSubscribers(subscriberName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -203,7 +203,7 @@ function isDataPublishingEnabled(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        usage = usage = org.wso2.carbon.apimgt.usage.client.UsageClient.isDataPublishingEnabled();
+        usage = org.wso2.carbon.apimgt.usage.client.UsageClient.isDataPublishingEnabled();
         if (log.isDebugEnabled()) {
             log.debug("isDataPublishingEnabled check");
         }

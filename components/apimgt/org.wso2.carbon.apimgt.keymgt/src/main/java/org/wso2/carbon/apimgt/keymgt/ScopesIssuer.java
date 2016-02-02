@@ -23,8 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -118,7 +119,7 @@ public class ScopesIssuer {
             }
 
             int tenantId;
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
             UserStoreManager userStoreManager;
             String[] userRoles;
 

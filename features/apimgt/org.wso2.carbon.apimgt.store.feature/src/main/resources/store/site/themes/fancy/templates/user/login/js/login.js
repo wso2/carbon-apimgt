@@ -3,6 +3,7 @@ var login = login || {};
     var loginbox = login.loginbox || (login.loginbox = {});
 
     loginbox.login = function (username, password, url,tenant) {
+        $('#loginBtn').attr('disabled', true);
         jagg.post("/site/blocks/user/login/ajax/login.jag", { action:"login", username:username, password:password,tenant:tenant },
                  function (result) {
                      if (result.error == false) {
@@ -14,6 +15,7 @@ var login = login || {};
                              window.location.reload();
                          }
                      } else {
+                         $('#loginBtn').attr('disabled', false);
                          $('#loginErrorMsg').show();
                          $('#password').val('');
                          $('#loginErrorMsg div.theMsg').text(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
