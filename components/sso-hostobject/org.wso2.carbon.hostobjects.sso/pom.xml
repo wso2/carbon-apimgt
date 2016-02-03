@@ -88,6 +88,39 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
+            			<Import-Package>
+                            javax.xml.parsers; resolution:=optional,
+                            javax.crypto,
+                            javax.script,
+                            javax.xml.namespace,
+                            org.apache.axis2.clustering,
+                            org.apache.axis2.context,
+                            org.apache.axis2.engine,
+                            org.apache.commons.lang,
+                            org.apache.commons.logging,
+                            org.jaggeryjs.hostobjects.web,
+                            org.joda.time,
+                            org.mozilla.javascript,
+                            org.opensaml,
+                            org.opensaml.common,
+                            org.opensaml.saml2.core,
+                            org.opensaml.saml2.core.impl,
+                            org.opensaml.xml,
+                            org.opensaml.xml.io,
+                            org.opensaml.xml.security.credential,
+                            org.opensaml.xml.security.x509,
+                            org.opensaml.xml.signature,
+                            org.opensaml.xml.util,
+                            org.osgi.service.component,
+                            org.w3c.dom,
+                            org.w3c.dom.bootstrap,
+                            org.w3c.dom.ls,
+                            org.wso2.carbon.core.util,
+                            org.wso2.carbon.user.core.service,
+                            org.wso2.carbon.user.core.tenant,
+                            org.wso2.carbon.utils,
+                            org.wso2.carbon.utils.multitenancy
+            			</Import-Package>
                         <Export-Package>
                             org.wso2.carbon.hostobjects.sso.*;
                         </Export-Package>
