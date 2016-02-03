@@ -116,9 +116,6 @@ import java.util.regex.Pattern;
 public class ApiMgtDAO {
     private static final Log log = LogFactory.getLog(ApiMgtDAO.class);
 
-    // We keep only a single instance of the class
-    private static ApiMgtDAO apiMgtDAO = null;
-
     private TokenGenerator tokenGenerator = null;
     private boolean forceCaseInsensitiveComparisons = false;
 
@@ -149,23 +146,27 @@ public class ApiMgtDAO {
         }
 
         String caseSensitiveComparison = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
+                getAPIManagerConfigurationService().getAPIManagerConfiguration().getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
         if (caseSensitiveComparison != null) {
             forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         }
     }
 
     /**
+     * This is an inner class to hold the instance of the ApiMgtDAO.
+     * The reason for writing it like this is to guarantee that only one instance would be created.
+     * ref: Initialization-on-demand holder idiom
+     */
+    private static class ApiMgtDAOHolder {
+        private static final ApiMgtDAO INSTANCE = new ApiMgtDAO();
+    }
+    /**
      * Method to get the instance of the ApiMgtDAO.
      *
      * @return {@link ApiMgtDAO} instance
      */
     public static ApiMgtDAO getInstance() {
-        if (apiMgtDAO == null) {
-            apiMgtDAO = new ApiMgtDAO();
-        }
-        return apiMgtDAO;
+        return ApiMgtDAOHolder.INSTANCE;
     }
 
     /**
@@ -340,7 +341,7 @@ public class ApiMgtDAO {
      * @return {@code Subscriber} with name and TenantId set.
      * @throws APIManagementException
      */
-    public static Subscriber getOwnerForConsumerApp(String consumerKey) throws APIManagementException {
+    public Subscriber getOwnerForConsumerApp(String consumerKey) throws APIManagementException {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -622,7 +623,7 @@ public class ApiMgtDAO {
                 keyValidationInfoDTO.setValidityPeriod(validityPeriod);
                 keyValidationInfoDTO.setSubscriber(subscriberName);
 
-                keyValidationInfoDTO.setAuthorizedDomains(ApiMgtDAO.getAuthorizedDomainList(accessToken));
+                keyValidationInfoDTO.setAuthorizedDomains(getAuthorizedDomainList(accessToken));
                 keyValidationInfoDTO.setConsumerKey(consumerKey);
                 Set<String> scopes = new HashSet<String>();
 
@@ -699,8 +700,8 @@ public class ApiMgtDAO {
                         }
                     }
                 } else {
-                    keyValidationInfoDTO.setValidationStatus(
-                            APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                    keyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus
+                                                                     .API_AUTH_INVALID_CREDENTIALS);
                     if (log.isDebugEnabled()) {
                         log.debug("Access token: " + accessToken + " is inactive");
                     }
@@ -864,7 +865,7 @@ public class ApiMgtDAO {
 
 
     //This returns the authorized client domains into a List
-    public static List<String> getAuthorizedDomainList(String apiKey) throws APIManagementException {
+    public List<String> getAuthorizedDomainList(String apiKey) throws APIManagementException {
         return Arrays.asList(getAuthorizedDomains(apiKey).split(","));
     }
 
@@ -2431,8 +2432,8 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
 
-            if (connection.getMetaData().getDriverName().contains("MySQL") ||
-                connection.getMetaData().getDriverName().contains("H2")) {
+            if (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData().getDriverName
+                    ().contains("H2")) {
                 sql = mySQL;
             } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                 sql = db2SQL;
@@ -2510,8 +2511,8 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
 
-            if (connection.getMetaData().getDriverName().contains("MySQL") ||
-                connection.getMetaData().getDriverName().contains("H2")) {
+            if (connection.getMetaData().getDriverName().contains("MySQL") || connection.getMetaData().getDriverName
+                    ().contains("H2")) {
                 sql = mySQL;
             } else if (connection.getMetaData().getDatabaseProductName().contains("DB2")) {
                 sql = db2SQL;
@@ -3110,7 +3111,7 @@ public class ApiMgtDAO {
      *
      * @param consumerKey
      */
-    public static void deleteAccessAllowDomains(String consumerKey) throws APIManagementException {
+    public void deleteAccessAllowDomains(String consumerKey) throws APIManagementException {
         String sqlDeleteAccessAllowDomains = SQLConstants.DELETE_ACCSS_ALLOWED_DOMAINS_SQL;
 
         Connection connection = null;
@@ -3131,7 +3132,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public static void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains)
+    public void addAccessAllowDomains(String oAuthConsumerKey, String[] accessAllowDomains)
             throws APIManagementException {
         String sqlAddAccessAllowDomains = SQLConstants.ADD_ACCESS_ALLOWED_DOMAINS_SQL;
 
@@ -3876,7 +3877,7 @@ public class ApiMgtDAO {
         return userRating;
     }
 
-    public static float getAverageRating(APIIdentifier apiId) throws APIManagementException {
+    public float getAverageRating(APIIdentifier apiId) throws APIManagementException {
         Connection conn = null;
         float avrRating = 0;
         try {
@@ -3899,7 +3900,7 @@ public class ApiMgtDAO {
         return avrRating;
     }
 
-    public static float getAverageRating(int apiId) throws APIManagementException {
+    public float getAverageRating(int apiId) throws APIManagementException {
         Connection conn = null;
         float avrRating = 0;
         PreparedStatement ps = null;
@@ -3942,7 +3943,7 @@ public class ApiMgtDAO {
      * @param apiIdentifier API Identifier
      * @throws APIManagementException if failed to add Application
      */
-    public static float getAverageRating(APIIdentifier apiIdentifier, Connection conn)
+    public float getAverageRating(APIIdentifier apiIdentifier, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -4328,7 +4329,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      */
     @Deprecated
-    public static List<Application> getBasicApplicationDetails(String subscriberName, String groupingId)
+    public List<Application> getBasicApplicationDetails(String subscriberName, String groupingId)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -5724,8 +5725,7 @@ public class ApiMgtDAO {
     /**
      * returns all URL templates define for all active(PUBLISHED) APIs.
      */
-    public static ArrayList<URITemplate> getAllURITemplates(String apiContext, String version)
-            throws APIManagementException {
+    public ArrayList<URITemplate> getAllURITemplates(String apiContext, String version) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -5816,7 +5816,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public static int getAPIID(APIIdentifier apiId, Connection connection) throws APIManagementException {
+    public int getAPIID(APIIdentifier apiId, Connection connection) throws APIManagementException {
         boolean created = false;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -5863,7 +5863,7 @@ public class ApiMgtDAO {
      * @param consumerKey
      * @throws APIManagementException
      */
-    public static void deleteApplicationMappingByConsumerKey(String consumerKey) throws APIManagementException {
+    public void deleteApplicationMappingByConsumerKey(String consumerKey) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
 
@@ -6069,7 +6069,7 @@ public class ApiMgtDAO {
         return applications;
     }
 
-    private static void handleException(String msg, Throwable t) throws APIManagementException {
+    private void handleException(String msg, Throwable t) throws APIManagementException {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
@@ -6122,7 +6122,7 @@ public class ApiMgtDAO {
         return calleeToken;
     }
 
-    public static HashMap<String, String> getURITemplatesPerAPIAsString(APIIdentifier identifier)
+    public HashMap<String, String> getURITemplatesPerAPIAsString(APIIdentifier identifier)
             throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
@@ -6171,7 +6171,7 @@ public class ApiMgtDAO {
         return urlMappings;
     }
 
-    public static boolean isDomainRestricted(String apiKey, String clientDomain) throws APIManagementException {
+    public boolean isDomainRestricted(String apiKey, String clientDomain) throws APIManagementException {
         boolean restricted = true;
         if (clientDomain != null) {
             clientDomain = clientDomain.trim();
@@ -6183,7 +6183,7 @@ public class ApiMgtDAO {
         return restricted;
     }
 
-    public static String getAuthorizedDomains(String accessToken) throws APIManagementException {
+    public String getAuthorizedDomains(String accessToken) throws APIManagementException {
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
         StringBuilder authorizedDomains = new StringBuilder();
@@ -6219,8 +6219,7 @@ public class ApiMgtDAO {
     }
 
     // This should be only used only when Token Partitioning is enabled.
-    public static String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken)
-            throws APIManagementException {
+    public String getConsumerKeyForTokenWhenTokenPartitioningEnabled(String accessToken) throws APIManagementException {
 
         if (APIUtil.checkAccessTokenPartitioningEnabled() && APIUtil.checkUserNameAssertionEnabled()) {
             String accessTokenStoreTable = APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
@@ -6259,7 +6258,7 @@ public class ApiMgtDAO {
         return null;
     }
 
-    public static String getAuthorizedDomainsByConsumerKey(String consumerKey) throws APIManagementException {
+    public String getAuthorizedDomainsByConsumerKey(String consumerKey) throws APIManagementException {
 
         StringBuilder authorizedDomains = new StringBuilder();
         String accessAllowDomainsSql = SQLConstants.GET_AUTHORIZED_DOMAINS_BY_ACCESS_KEY_SQL;
@@ -6290,7 +6289,7 @@ public class ApiMgtDAO {
         return authorizedDomains.toString();
     }
 
-    public static String findConsumerKeyFromAccessToken(String accessToken) throws APIManagementException {
+    public String findConsumerKeyFromAccessToken(String accessToken) throws APIManagementException {
         String accessTokenStoreTable = APIConstants.ACCESS_TOKEN_STORE_TABLE;
         accessTokenStoreTable = getAccessTokenStoreTableFromAccessToken(accessToken, accessTokenStoreTable);
         Connection connection = null;
@@ -6433,7 +6432,7 @@ public class ApiMgtDAO {
         return commentList.toArray(new Comment[commentList.size()]);
     }
 
-    public static boolean isContextExist(String context) {
+    public boolean isContextExist(String context) {
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
@@ -6458,7 +6457,7 @@ public class ApiMgtDAO {
         return false;
     }
 
-    public static String getAPIContext(APIIdentifier identifier) throws APIManagementException {
+    public String getAPIContext(APIIdentifier identifier) throws APIManagementException {
         Connection connection = null;
         ResultSet resultSet = null;
         PreparedStatement prepStmt = null;
@@ -6489,7 +6488,7 @@ public class ApiMgtDAO {
         return context;
     }
 
-    public static List<String> getAllAvailableContexts() {
+    public List<String> getAllAvailableContexts() {
         List<String> contexts = new ArrayList<String>();
         Connection connection = null;
         ResultSet resultSet = null;
@@ -6940,7 +6939,7 @@ public class ApiMgtDAO {
         return status;
     }
 
-    private static class SubscriptionInfo {
+    private class SubscriptionInfo {
         private int subscriptionId;
         private String tierId;
         private int applicationId;
@@ -7379,7 +7378,7 @@ public class ApiMgtDAO {
         }
     }
 
-    public static Set<Scope> getAPIScopes(APIIdentifier identifier) throws APIManagementException {
+    public Set<Scope> getAPIScopes(APIIdentifier identifier) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7454,7 +7453,7 @@ public class ApiMgtDAO {
         return scopes;
     }
 
-    public static Set<Scope> getAPIScopesByScopeKey(String scopeKey, int tenantId) throws APIManagementException {
+    public Set<Scope> getAPIScopesByScopeKey(String scopeKey, int tenantId) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7558,8 +7557,7 @@ public class ApiMgtDAO {
         addScopes(api.getUriTemplates(), apiId, tenantId);
     }
 
-    public static HashMap<String, String> getResourceToScopeMapping(APIIdentifier identifier)
-            throws APIManagementException {
+    public HashMap<String, String> getResourceToScopeMapping(APIIdentifier identifier) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7611,7 +7609,7 @@ public class ApiMgtDAO {
     }
 
     @Deprecated
-    public static String getUserFromOauthToken(String oauthToken) throws APIManagementException {
+    public String getUserFromOauthToken(String oauthToken) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7915,7 +7913,7 @@ public class ApiMgtDAO {
      * @param consumerKey
      * @return
      */
-    public static boolean isMappingExistsforConsumerKey(String consumerKey) throws APIManagementException {
+    public boolean isMappingExistsforConsumerKey(String consumerKey) throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
         PreparedStatement ps = null;
@@ -7945,7 +7943,7 @@ public class ApiMgtDAO {
      * @param keyType
      * @return
      */
-    public static String getConsumerkeyByApplicationIdAndKeyType(String applicationId, String keyType)
+    public String getConsumerkeyByApplicationIdAndKeyType(String applicationId, String keyType)
             throws APIManagementException {
         Connection conn = null;
         ResultSet resultSet = null;
@@ -7979,7 +7977,7 @@ public class ApiMgtDAO {
      * @param apiIdentifier API Identifier
      * @throws APIManagementException if failed to get external APIStores
      */
-    public static String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier, String storeName)
+    public String getLastPublishedAPIVersionFromAPIStore(APIIdentifier apiIdentifier, String storeName)
             throws APIManagementException {
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -8072,7 +8070,7 @@ public class ApiMgtDAO {
         return accessTokenStoreTable;
     }
 
-    private static String getAccessTokenStoreTableFromAccessToken(String accessToken, String accessTokenStoreTable)
+    private String getAccessTokenStoreTableFromAccessToken(String accessToken, String accessTokenStoreTable)
             throws APIManagementException {
         if (APIUtil.checkAccessTokenPartitioningEnabled() && APIUtil.checkUserNameAssertionEnabled()) {
             return APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);

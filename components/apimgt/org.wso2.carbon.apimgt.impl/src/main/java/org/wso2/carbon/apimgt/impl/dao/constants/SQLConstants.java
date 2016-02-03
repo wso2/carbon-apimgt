@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 public class SQLConstants {
 
-    public static final String GET_ACCESS_KEY_FOR_API_SQL = 
+    public static final String GET_ACCESS_KEY_FOR_API_SQL =
             " SELECT " +
             "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +
             " FROM " +
@@ -44,7 +44,7 @@ public class SQLConstants {
             "   AND APP.APPLICATION_ID = SP.APPLICATION_ID " +
             "   AND SP.SUBSCRIPTION_ID = SKM.SUBSCRIPTION_ID ";
 
-    public static final String GET_ACCESS_KEY_FOR_API_CASE_INSENSITIVE_SQL = 
+    public static final String GET_ACCESS_KEY_FOR_API_CASE_INSENSITIVE_SQL =
             " SELECT " +
             "   SKM.ACCESS_TOKEN AS ACCESS_TOKEN " +
             " FROM " +
@@ -1561,7 +1561,7 @@ public class SQLConstants {
             "   HTTP_METHOD," +
             "   AUTH_SCHEME," +
             "   THROTTLING_TIER, " +
-            "   MEDIATION_SCRIPT, " +
+            "   MEDIATION_SCRIPT " +
             " FROM " +
             "   AM_API_URL_MAPPING " +
             " WHERE " +
@@ -1647,7 +1647,7 @@ public class SQLConstants {
             "SELECT " +
             "   REG.TOKEN_TYPE," +
             "   REG.ALLOWED_DOMAINS," +
-            "   REG.VALIDITY_PERIOD," +
+            "   REG.VALIDITY_PERIOD" +
             " FROM " +
             "   AM_APPLICATION_REGISTRATION REG, " +
             "   AM_APPLICATION APP " +

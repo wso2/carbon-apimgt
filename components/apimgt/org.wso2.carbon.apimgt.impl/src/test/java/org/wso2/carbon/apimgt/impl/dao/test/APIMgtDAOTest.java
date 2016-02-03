@@ -112,7 +112,7 @@ public class APIMgtDAOTest extends TestCase {
     }
 
     public void testGetSubscriber() throws Exception {
-        Subscriber subscriber = ApiMgtDAO.getInstance().getSubscriber("SUMEDHA");
+        Subscriber subscriber = apiMgtDAO.getInstance().getSubscriber("SUMEDHA");
         assertNotNull(subscriber);
         assertNotNull(subscriber.getName());
         assertNotNull(subscriber.getId());

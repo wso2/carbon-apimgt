@@ -2370,7 +2370,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //if manageAPIs == true
             if (APIUtil.isAPIManagementEnabled()) {
                 Cache contextCache = APIUtil.getAPIContextCache();
-                String context = ApiMgtDAO.getAPIContext(identifier);
+                String context = apiMgtDAO.getAPIContext(identifier);
                 contextCache.remove(context);
                 contextCache.put(context, Boolean.FALSE);
             }
@@ -2640,8 +2640,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 // First trying to publish the API to external APIStore
                 boolean published;
-                String version = ApiMgtDAO
-                        .getLastPublishedAPIVersionFromAPIStore(api.getId(), store.getName());
+                String version = ApiMgtDAO.getInstance().getLastPublishedAPIVersionFromAPIStore(api.getId(),
+                                                                                                store.getName());
 
                 if (apiOlderVersionExist && version != null) {
                     published = publisher.createVersionedAPIToStore(api, store, version);

@@ -118,7 +118,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public Subscriber getSubscriber(String subscriberId) throws APIManagementException {
         Subscriber subscriber = null;
         try {
-            subscriber = ApiMgtDAO.getInstance().getSubscriber(subscriberId);
+            subscriber = apiMgtDAO.getSubscriber(subscriberId);
         } catch (APIManagementException e) {
             handleException("Failed to get Subscriber", e);
         }
@@ -1686,9 +1686,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String applicationId = String.valueOf(application.getId());
         apiMgtDAO.deleteApplicationRegistration(applicationId , tokenType);
         apiMgtDAO.deleteApplicationKeyMappingByApplicationIdAndType(applicationId, tokenType);
-        String consumerKey = ApiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
+        String consumerKey = apiMgtDAO.getConsumerkeyByApplicationIdAndKeyType(applicationId,tokenType);
         if(consumerKey != null){
-            ApiMgtDAO.deleteAccessAllowDomains(consumerKey);
+            apiMgtDAO.deleteAccessAllowDomains(consumerKey);
         }
 
     }
@@ -1717,7 +1717,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
         // Checking if clientId is mapped with another application.
-        if (ApiMgtDAO.isMappingExistsforConsumerKey(clientId)) {
+        if (apiMgtDAO.isMappingExistsforConsumerKey(clientId)) {
             String message = "Consumer Key " + clientId + " is used for another Application.";
             log.error(message);
             throw new APIManagementException(message);
@@ -1729,7 +1729,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
-        ApiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
+        apiMgtDAO.addAccessAllowDomains(clientId, allowedDomainArray);
 
         AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
         AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
@@ -2654,7 +2654,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Override
     public void addAccessAllowDomains(String oauthConsumerKey, String[] accessAllowDomains)
             throws APIManagementException {
-        ApiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains);
+        apiMgtDAO.addAccessAllowDomains(oauthConsumerKey, accessAllowDomains);
     }
 
     @Override
@@ -2863,7 +2863,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             if (applicationId != null && tokenType != null) {
                 apiMgtDAO.deleteApplicationKeyMappingByConsumerKey(consumerKey);
                 apiMgtDAO.deleteApplicationRegistration(applicationId, tokenType);
-                ApiMgtDAO.deleteAccessAllowDomains(consumerKey);
+                apiMgtDAO.deleteAccessAllowDomains(consumerKey);
             }
         }
     }

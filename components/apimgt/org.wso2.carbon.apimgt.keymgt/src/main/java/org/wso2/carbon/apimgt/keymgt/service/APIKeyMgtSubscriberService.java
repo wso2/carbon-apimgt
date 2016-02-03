@@ -424,7 +424,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             return;
         }
 
-        Subscriber subscriber = ApiMgtDAO.getOwnerForConsumerApp(consumerKey);
+        Subscriber subscriber = ApiMgtDAO.getInstance().getOwnerForConsumerApp(consumerKey);
         String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         String tenantAwareUsername = subscriber.getName();
 

@@ -443,7 +443,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         if (APIUtil.checkAccessTokenPartitioningEnabled() &&
                 APIUtil.checkUserNameAssertionEnabled()) {
-            tokenInfo.setConsumerKey(ApiMgtDAO.getConsumerKeyForTokenWhenTokenPartitioningEnabled(accessToken));
+            tokenInfo.setConsumerKey(ApiMgtDAO.getInstance().getConsumerKeyForTokenWhenTokenPartitioningEnabled(accessToken));
         }
 
         return tokenInfo;

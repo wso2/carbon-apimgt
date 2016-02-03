@@ -205,7 +205,7 @@ public class APIManagerComponent {
             boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();
             boolean loadAPIContextsAtStartup = APIUtil.isLoadAPIContextsAtStartup();
             if (apiManagementEnabled && loadAPIContextsAtStartup) {
-                List<String> contextList = ApiMgtDAO.getAllAvailableContexts();
+                List<String> contextList = ApiMgtDAO.getInstance().getAllAvailableContexts();
                 Cache contextCache = APIUtil.getAPIContextCache();
                 for (String context : contextList) {
                     contextCache.put(context, Boolean.TRUE);
