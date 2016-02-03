@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.impl.handlers.ScopesIssuer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.base.MultitenantConstants;
-import org.wso2.carbon.identity.application.common.model.User;
+import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.oauth2.IdentityOAuth2Exception;
 import org.wso2.carbon.identity.oauth2.model.RequestParameter;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
@@ -67,7 +67,7 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
             throws IdentityOAuth2Exception {
 
         boolean validateResult = super.validateGrant(tokReqMsgCtx);
-        User user = tokReqMsgCtx.getAuthorizedUser();
+        AuthenticatedUser user = tokReqMsgCtx.getAuthorizedUser();
         String tenantDomain = user.getTenantDomain();
         String username = user.getUserName(); 
         user.setUserName(username);
