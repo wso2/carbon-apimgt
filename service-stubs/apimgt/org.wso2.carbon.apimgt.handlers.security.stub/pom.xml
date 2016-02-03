@@ -21,14 +21,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-stubs</artifactId>
-        <version>4.3.1</version>
+        <version>4.3.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.handlers.security.stub</artifactId>
     <packaging>bundle</packaging>
-    <version>4.3.1</version>
+    <version>4.3.2-SNAPSHOT</version>
     <name>WSO2 Carbon - API Security Handler Service Stub</name>
     <url>http://wso2.org</url>
 
@@ -53,7 +53,7 @@
                                     <pathelement location="${settings.localRepository}/org/apache/axis2/wso2/axis2/${orbit.version.axis2}/axis2-${orbit.version.axis2}.jar" />
                                 </path>
                                 <java classname="org.apache.axis2.wsdl.WSDL2Java" fork="true">
-                                    <arg line="-uri src/main/resources/APIAuthenticationService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.handlers.security.stub                                     -ns2p http://service.security.handlers.gateway.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.handlers.security.stub,http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.handlers.security.stub.types,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2" />
+                                    <arg line="-uri src/main/resources/APIAuthenticationService.wsdl -u -uw -o target/generated-code -p org.wso2.carbon.apimgt.handlers.security.stub -ns2p http://service.security.handlers.gateway.apimgt.carbon.wso2.org=org.wso2.carbon.apimgt.handlers.security.stub,http://service.security.handlers.gateway.apimgt.carbon.wso2.org/xsd=org.wso2.carbon.apimgt.handlers.security.stub.types,http://org.apache.axis2/xsd=org.wso2.carbon.apimgt.keymgt.stub.types.axis2" />
                                     <classpath refid="wsdl2java.classpath" />
                                 </java>
                             </tasks>
