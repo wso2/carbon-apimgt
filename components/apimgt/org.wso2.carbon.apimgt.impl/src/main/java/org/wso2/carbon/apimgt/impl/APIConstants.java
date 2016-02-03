@@ -1029,4 +1029,9 @@ public final class APIConstants {
     public static final String PUBLISHER_CLIENT = "Publisher";
     public static final String STORE_CLIENT = "Store";
 
+    public static final String WSDL_REGISTRY_LOCATION_PREFIX = "/registry/resource";
+    public static final String HOST_NAME = "HostName";
+    public static final int DEFAULT_HTTPS_PORT = 443;
+    public static final String PROXY_CONTEXT_PATH = "ProxyContextPath";
+
 }
