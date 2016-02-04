@@ -2522,6 +2522,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public String getClientType() {
-        return "REST";
+        return APIUsageStatisticsClientConstants.REST_STATISTICS_CLIENT_TYPE;
     }
 }

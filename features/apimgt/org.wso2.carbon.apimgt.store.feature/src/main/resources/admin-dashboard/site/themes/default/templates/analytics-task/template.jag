@@ -134,7 +134,8 @@ var datasourceData = outputs.datasourceData;
                 <td/>
             </tr>
 
-        <% if (org.wso2.carbon.apimgt.usage.client.UsageClient.getStatClientType().equals("RDBMS")) {%>
+        <% if (org.wso2.carbon.apimgt.usage.client.UsageClient.getStatClientType()
+                .equals(org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants.RDBMS_STATISTICS_CLIENT_TYPE)) {%>
             <tr>
                 <td colspan="4">
                     <legend>Statistics Summary Datasource</legend>
