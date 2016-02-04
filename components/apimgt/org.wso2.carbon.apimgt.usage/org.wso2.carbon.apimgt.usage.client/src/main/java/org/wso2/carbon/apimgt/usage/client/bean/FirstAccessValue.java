@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
+/**
+ * This class is used as a bean for represent API First access time result from the DAS REST API
+ */
 public class FirstAccessValue {
     private long first_access_time;
 

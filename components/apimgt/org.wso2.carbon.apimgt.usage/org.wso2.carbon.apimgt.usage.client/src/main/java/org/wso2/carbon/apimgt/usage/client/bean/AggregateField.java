@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
+/**
+ * This class is used as a bean for represent a Aggregate function to form query for DAS Lucene Search Query
+ */
 public class AggregateField {
 
     private String fieldName;

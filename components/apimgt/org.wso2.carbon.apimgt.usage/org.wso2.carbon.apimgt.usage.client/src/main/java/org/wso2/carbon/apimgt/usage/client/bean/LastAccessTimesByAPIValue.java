@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
+/**
+ * This class is used as a bean for represent API Last Access time statistics result from the DAS REST API
+ */
 public class LastAccessTimesByAPIValue {
 
 	private String tenantDomain;

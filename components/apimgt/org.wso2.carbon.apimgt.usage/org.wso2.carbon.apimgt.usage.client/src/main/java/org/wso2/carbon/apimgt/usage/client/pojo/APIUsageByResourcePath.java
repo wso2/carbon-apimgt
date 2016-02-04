@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.pojo;
 
+/**
+ * This class is used as a pojo class to represent API usage by resource path
+ */
 public class APIUsageByResourcePath {
     private String apiName;
     private String apiVersion;
