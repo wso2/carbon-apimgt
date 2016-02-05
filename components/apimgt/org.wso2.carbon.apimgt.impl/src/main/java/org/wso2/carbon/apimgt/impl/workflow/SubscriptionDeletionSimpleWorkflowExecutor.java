@@ -57,7 +57,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
 
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         SubscriptionWorkflowDTO subWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         Connection conn = null;
         String errorMsg = null;

@@ -202,7 +202,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
             String apiContext, String iconPath, String documentURL, String authType) {
 		/* Check whether API already published */
 		if (contextCache.get(apiContext) != null
-				|| ApiMgtDAO.isContextExist(apiContext)) {
+				|| ApiMgtDAO.getInstance().isContextExist(apiContext)) {
 			if (log.isDebugEnabled()) {
 				log.info("API Context " + apiContext + " already exists");
 			}
@@ -290,7 +290,7 @@ public class APIManagerStartupPublisher implements ServerStartupHandler {
 
 	private void addAPI(API api, String documentURL) throws RegistryException,
 			APIManagementException {
-		ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+		ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 		try {
 			this.registry = DataHolder.getRegistryService()
 					.getGovernanceSystemRegistry();

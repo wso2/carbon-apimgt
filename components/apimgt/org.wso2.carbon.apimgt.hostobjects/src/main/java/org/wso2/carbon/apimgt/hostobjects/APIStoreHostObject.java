@@ -3092,7 +3092,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 description = (String) args[2];
             }
 
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
             boolean isTenantFlowStarted = false;
 
@@ -3681,7 +3681,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Object apiObject = it.next();
                     API api = (API) apiObject;
                     APIIdentifier apiIdentifier = api.getId();
-                    int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+                    int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
 
                     // API is partially created/deleted. We shouldn't be showing this API.
                     if (apiId == -1) {
@@ -3694,7 +3694,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                    apiIdentifier.getVersion());
                     currentApi.put("description", currentApi, api.getDescription());
                     //Rating should retrieve from db
-                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(apiId));
+                    currentApi.put("rates", currentApi, ApiMgtDAO.getInstance().getAverageRating(apiId));
                     if (api.getThumbnailUrl() == null) {
                         currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
                     } else {

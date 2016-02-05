@@ -57,7 +57,7 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
 
     @Override
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application application = applicationWorkflowDTO.getApplication();
         Connection conn = null;

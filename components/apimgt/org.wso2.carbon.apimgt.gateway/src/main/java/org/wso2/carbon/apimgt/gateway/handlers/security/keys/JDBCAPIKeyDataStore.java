@@ -36,7 +36,7 @@ public class JDBCAPIKeyDataStore implements APIKeyDataStore {
     private ApiMgtDAO dao;
 
     public JDBCAPIKeyDataStore() throws APISecurityException {
-        dao = new ApiMgtDAO();
+        dao = ApiMgtDAO.getInstance();
     }
 
     public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion,
@@ -62,7 +62,7 @@ public class JDBCAPIKeyDataStore implements APIKeyDataStore {
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     ) throws APISecurityException {
         try {
-            return ApiMgtDAO.getAllURITemplates(context, apiVersion);
+            return ApiMgtDAO.getInstance().getAllURITemplates(context, apiVersion);
         } catch (APIManagementException e) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Error while looking up API resource URI templates in the database", e);

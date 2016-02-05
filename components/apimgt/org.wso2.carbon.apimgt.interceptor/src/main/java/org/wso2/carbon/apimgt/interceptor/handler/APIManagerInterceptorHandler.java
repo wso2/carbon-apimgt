@@ -84,7 +84,7 @@ public class APIManagerInterceptorHandler extends AbstractHandler {
 					if (contextValueInCache != null) {
 						contextExist = contextValueInCache;
 					} else {
-						contextExist = ApiMgtDAO.isContextExist(context);
+						contextExist = ApiMgtDAO.getInstance().isContextExist(context);
 						APIUtil.getAPIContextCache().put(context, contextExist);
 					}
 

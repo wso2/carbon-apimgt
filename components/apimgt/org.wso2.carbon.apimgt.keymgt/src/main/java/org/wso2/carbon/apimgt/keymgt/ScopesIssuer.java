@@ -85,7 +85,7 @@ public class ScopesIssuer {
         Map<String, String> restAPIScopesOfCurrentTenant;
         try {
             Map<String, String> appScopes;
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
