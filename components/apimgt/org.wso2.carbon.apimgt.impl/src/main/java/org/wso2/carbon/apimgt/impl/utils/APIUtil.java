@@ -5055,4 +5055,27 @@ public final class APIUtil {
         return serverUrl;
     }
 
+    /**
+     * Extract the provider of the API from name
+     *
+     * @param apiVersion - API Name with version
+     * @param tenantDomain - tenant domain of the API
+     * @return API publisher name
+     */
+    public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
+        int index = apiVersion.indexOf("--");
+        String apiProvider;
+        if (index != -1) {
+            apiProvider = apiVersion.substring(0, index);
+            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
+                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+            if (!apiProvider.endsWith(tenantDomain)) {
+                apiProvider = apiProvider + '@' + tenantDomain;
+            }
+            return apiProvider;
+        }
+        return null;
+    }
 }

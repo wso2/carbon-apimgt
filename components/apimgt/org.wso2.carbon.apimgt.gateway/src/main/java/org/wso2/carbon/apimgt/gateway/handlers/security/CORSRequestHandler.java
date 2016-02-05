@@ -99,19 +99,13 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+			String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+			String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                     getProperty(Constants.Configuration.HTTP_METHOD);
-            API selectedApi = null;
-            Resource selectedResourceWithVerb = null;
+			API selectedApi = messageContext.getConfiguration().getAPI(apiName);
+			Resource selectedResourceWithVerb = null;
             Resource selectedResource = null;
-
-            for (API api : messageContext.getConfiguration().getAPIs()) {
-                if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
-                    selectedApi = api;
-                    break;
-                }
-            }
-            String subPath = null;
+			String subPath = null;
             String path = RESTUtils.getFullRequestPath(messageContext);
 			if(selectedApi != null) {
 				if (VersionStrategyFactory.TYPE_URL.equals(selectedApi.getVersionStrategy().getVersionType())) {
