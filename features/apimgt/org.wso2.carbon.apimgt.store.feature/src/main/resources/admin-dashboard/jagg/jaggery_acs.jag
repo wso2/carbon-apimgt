@@ -41,8 +41,8 @@
                     response.sendRedirect("../error.jag");
                     return;
                 }
-            }
-            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse);
+            }      
+            ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
             session.put("showLogin", "false");
             var api = jagg.module("api");
             var isUserCreatePermitted = api.hasUserPermissions(ssoRelyingParty.getLoggedInUser(sessionId));
