@@ -356,6 +356,7 @@ public class APIKeyValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
 
         String requestPath = Utils.getRequestPath(synCtx, fullRequestPath, apiContext, apiVersion);
         if ("".equals(requestPath)) {
@@ -370,19 +371,9 @@ public class APIKeyValidator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         if (resourceString == null) {
-            API selectedApi = null;
+            API selectedApi = synCtx.getConfiguration().getAPI(apiName);
             Resource selectedResource = null;
 
-            for (API api : synCtx.getConfiguration().getAPIs()) {
-                if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
-                    if (log.isDebugEnabled()) {
-
-                        log.debug("Selected API: " + apiContext + ", Version: " + apiVersion);
-                    }
-                    selectedApi = api;
-                    break;
-                }
-            }
 
             if (selectedApi != null){
                 Resource[] selectedAPIResources = selectedApi.getResources();
