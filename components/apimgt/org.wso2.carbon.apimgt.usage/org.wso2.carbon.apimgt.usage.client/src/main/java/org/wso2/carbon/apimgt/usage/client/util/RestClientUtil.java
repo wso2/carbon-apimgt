@@ -30,7 +30,7 @@ import java.util.Date;
  */
 public class RestClientUtil {
 
-   private final static String DATE_PATTERN = "yyyy-MM-dd";
+    private final static String DATE_PATTERN = "yyyy-MM-dd";
 
     /**
      * conversion from date to long value
@@ -99,11 +99,12 @@ public class RestClientUtil {
 
     /**
      * Parsing long value to the Date format
+     *
      * @param time time in long
      * @return
      */
-    public static String longToDate(long time){
-        Date date=new Date(time);
+    public static String longToDate(long time) {
+        Date date = new Date(time);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         return format.format(date);
     }

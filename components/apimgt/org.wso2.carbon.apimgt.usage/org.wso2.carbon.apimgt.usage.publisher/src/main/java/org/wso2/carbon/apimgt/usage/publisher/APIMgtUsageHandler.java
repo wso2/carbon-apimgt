@@ -106,20 +106,11 @@ public class APIMgtUsageHandler extends AbstractHandler {
             String context = (String) mc.getProperty(RESTConstants.REST_API_CONTEXT);
             String api_version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API);
             String fullRequestPath = (String) mc.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-            int tenantDomainIndex = fullRequestPath.indexOf("/t/");
             String apiPublisher = (String) mc.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
-            String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-            if (tenantDomainIndex != -1) {
-                String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
-                tenantDomain = temp.substring(0, temp.indexOf("/"));
-            }
+            String tenantDomain = MultitenantUtils.getTenantDomain(fullRequestPath);
 
             if (apiPublisher == null) {
-                apiPublisher = getAPIProviderFromRESTAPI(api_version);
-            }
-
-            if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
-                apiPublisher = apiPublisher + "@" + tenantDomain;
+                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(api_version,tenantDomain);
             }
 
             int index = api_version.indexOf("--");
@@ -192,18 +183,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
         return true;
     }
 
-    private String getAPIProviderFromRESTAPI(String api_version) {
-        int index = api_version.indexOf("--");
-        if (index != -1) {
-            String apiProvider = api_version.substring(0, index);
-            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
-                                      APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-            return apiProvider;
-        }
-        return null;
-    }
+//moving to APIUTil
 
     public boolean handleResponse(MessageContext mc) {
         return true;

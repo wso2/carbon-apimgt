@@ -191,7 +191,7 @@ public class APIKeyValidationService extends AbstractAdmin {
     public ArrayList<URITemplate> getAllURITemplates(String context, String version)
             throws APIKeyMgtException, APIManagementException {
 
-        return ApiMgtDAO.getAllURITemplates(context, version);
+        return ApiMgtDAO.getInstance().getAllURITemplates(context, version);
 
     }
 

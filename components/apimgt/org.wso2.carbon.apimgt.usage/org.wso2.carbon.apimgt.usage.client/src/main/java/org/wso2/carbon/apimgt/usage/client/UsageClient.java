@@ -223,7 +223,7 @@ public class UsageClient {
             type = UsageClient.getStatisticClient(null).getClientType();
         } catch (APIMgtUsageQueryServiceClientException e) {
             //throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
-            log.warn("Error geting usage statistic client...");
+            log.warn("Error getting usage statistic client...");
         }
 
         return type;
