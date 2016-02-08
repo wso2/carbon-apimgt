@@ -49,7 +49,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         if (log.isDebugEnabled()) {
             log.debug("Executing AbstractApplicationRegistrationWorkflowExecutor...");
         }
-        ApiMgtDAO dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         try {
             //dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO) workFlowDTO, false);
             ApplicationRegistrationWorkflowDTO appRegDTO;
@@ -74,7 +74,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         if (log.isDebugEnabled()) {
             log.debug("Completing AbstractApplicationRegistrationWorkflowExecutor...");
         }
-        ApiMgtDAO dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         try {
             String status = null;
             if ("CREATED".equals(workFlowDTO.getStatus().toString())) {
@@ -113,7 +113,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
      */
     protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
                                                                                               APIManagementException {
-        ApiMgtDAO dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             dogenerateKeysForApplication(workflowDTO);
 
@@ -129,7 +129,7 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
         log.debug("Registering Application and creating an Access Token... ");
         Application application = workflowDTO.getApplication();
         Subscriber subscriber = application.getSubscriber();
-        ApiMgtDAO dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (subscriber == null || workflowDTO.getAllowedDomains() == null) {
             dao.populateAppRegistrationWorkflowDTO(workflowDTO);
         }

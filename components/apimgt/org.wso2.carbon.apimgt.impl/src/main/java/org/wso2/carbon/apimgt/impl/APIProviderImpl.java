@@ -117,6 +117,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to get Providers
      */
+    @Override
     public Set<Provider> getAllProviders() throws APIManagementException {
         Set<Provider> providerSet = new HashSet<Provider>();
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
@@ -148,6 +149,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to get set of API
      */
+    @Override
     public List<API> getAPIsByProvider(String providerId) throws APIManagementException {
 
         List<API> apiSortedList = new ArrayList<API>();
@@ -187,6 +189,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to get subscribed APIs of given provider
      */
+    @Override
     public Set<Subscriber> getSubscribersOfProvider(String providerId) throws APIManagementException {
 
         Set<Subscriber> subscriberSet = null;
@@ -206,6 +209,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to get Provider
      */
+    @Override
     public Provider getProvider(String providerName) throws APIManagementException {
         Provider provider = null;
         String providerPath = APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
@@ -233,6 +237,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiIdentifier APIIdentifier
      * @return Usage
      */
+    @Override
     public Usage getUsageByAPI(APIIdentifier apiIdentifier) {
         return null;
     }
@@ -244,6 +249,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param apiName    name of the API
      * @return Usage
      */
+    @Override
     public Usage getAPIUsageByUsers(String providerId, String apiName) {
         return null;
     }
@@ -256,6 +262,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
+    @Override
     public UserApplicationAPIUsage[] getAllAPIUsageByProvider(String providerName) throws APIManagementException {
         return apiMgtDAO.getAllAPIUsageByProvider(providerName);
     }
@@ -268,6 +275,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
+    @Override
     public List<SubscribedAPI> getAPIUsageByAPIId(APIIdentifier apiId) throws APIManagementException {
         APIIdentifier apiIdEmailReplaced = new APIIdentifier(APIUtil.replaceEmailDomain(apiId.getProviderName()),
                 apiId.getApiName(), apiId.getVersion());
@@ -294,6 +302,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param consumerEmail E-mal Address of consumer
      * @return Usage
      */
+    @Override
     public Usage getAPIUsageBySubscriber(APIIdentifier apiIdentifier, String consumerEmail) {
         return null;
     }
@@ -306,6 +315,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to get Subscribers
      */
+    @Override
     public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException {
 
         Set<Subscriber> subscriberSet = null;
@@ -325,6 +335,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to get APISubscriptionCountByAPI
      */
+    @Override
     public long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException {
         long count = 0L;
         try {
@@ -335,10 +346,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return count;
     }
 
+    @Override
     public void addTier(Tier tier) throws APIManagementException {
         addOrUpdateTier(tier, false);
     }
 
+    @Override
     public void updateTier(Tier tier) throws APIManagementException {
         addOrUpdateTier(tier, true);
     }
@@ -483,6 +496,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return throttlePolicy;
     }
 
+    @Override
     public void removeTier(Tier tier) throws APIManagementException {
         if (APIConstants.UNLIMITED_TIER.equals(tier.getName())) {
             handleException("Changes on the '" + APIConstants.UNLIMITED_TIER + "' " +
@@ -538,6 +552,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          if failed to add API
      */
+    @Override
     public void addAPI(API api) throws APIManagementException {
         try {           
             createAPI(api);
@@ -606,7 +621,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
-
+    @Override
     public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException{
 
         String defaultVersion=null;
@@ -679,6 +694,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *          if failed to update API
      * @throws org.wso2.carbon.apimgt.api.FaultGatewaysException on Gateway Failure
      */
+    @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
@@ -860,6 +876,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
     public void manageAPI(API api) throws APIManagementException, FaultGatewaysException {
         updateAPI(api);
     }
@@ -989,6 +1006,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @return true if the API was added successfully
      * @throws APIManagementException
      */
+    @Override
     public  boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway, boolean
             deprecateOldVersions
             ,boolean makeKeysForwardCompatible)
@@ -1052,7 +1070,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return success;
     }
 
-
+    @Override
     public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
             throws APIManagementException, FaultGatewaysException {
         Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
@@ -1120,6 +1138,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    @Override
     public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
             throws APIManagementException {
         Map<String, String> failedGateways = new HashMap<String, String>();
@@ -1175,6 +1194,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return failedGateways;
     }
 
+    @Override
     public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
             Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
 
@@ -2370,7 +2390,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //if manageAPIs == true
             if (APIUtil.isAPIManagementEnabled()) {
                 Cache contextCache = APIUtil.getAPIContextCache();
-                String context = ApiMgtDAO.getAPIContext(identifier);
+                String context = apiMgtDAO.getAPIContext(identifier);
                 contextCache.remove(context);
                 contextCache.put(context, Boolean.FALSE);
             }
@@ -2640,8 +2660,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 // First trying to publish the API to external APIStore
                 boolean published;
-                String version = ApiMgtDAO
-                        .getLastPublishedAPIVersionFromAPIStore(api.getId(), store.getName());
+                String version = ApiMgtDAO.getInstance().getLastPublishedAPIVersionFromAPIStore(api.getId(),
+                                                                                                store.getName());
 
                 if (apiOlderVersionExist && version != null) {
                     published = publisher.createVersionedAPIToStore(api, store, version);

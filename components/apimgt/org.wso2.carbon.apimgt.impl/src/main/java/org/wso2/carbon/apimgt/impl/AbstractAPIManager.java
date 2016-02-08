@@ -99,7 +99,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public AbstractAPIManager(String username) throws APIManagementException {
-        apiMgtDAO = new ApiMgtDAO();
+        apiMgtDAO = ApiMgtDAO.getInstance();
 
         try {
             if (username == null) {
@@ -897,17 +897,15 @@ public abstract class AbstractAPIManager implements APIManager {
     	if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             context = "/t/" + tenantDomain + context;
         }
-        return ApiMgtDAO.isContextExist(context);
+        return apiMgtDAO.isContextExist(context);
     }
     
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
-
         return apiMgtDAO.isScopeKeyExist(scopeKey, tenantid);
     }
 
-    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid) 
-                                                                                    throws APIManagementException {
-
+    public boolean isScopeKeyAssigned(APIIdentifier identifier, String scopeKey, int tenantid)
+            throws APIManagementException {
         return apiMgtDAO.isScopeKeyAssigned(identifier, scopeKey, tenantid);
     }      
 

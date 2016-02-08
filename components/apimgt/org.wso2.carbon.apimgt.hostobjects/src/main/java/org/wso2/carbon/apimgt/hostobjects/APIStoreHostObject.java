@@ -209,41 +209,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-    public static NativeArray jsFunction_getFirstAccessTime(Context cx, Scriptable thisObj,
-                                                            Object[] args, Function funObj)
-            throws APIManagementException {
-
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-
-        List<APIFirstAccess> list = null;
-        if (args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String subscriberName = (String) args[0];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getFirstAccessTime(subscriberName,1);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for StoreAPIUsage", e);
-        }
-        NativeObject row = new NativeObject();
-
-        if (list != null && !list.isEmpty()) {
-            row.put("year", row, list.get(0));
-            row.put("month", row, list.get(1));
-            row.put("day", row, list.get(2));
-            myn.put(0, myn, row);
-        }
-
-        return myn;
-    }
-
     public static NativeArray jsFunction_getProviderAPIUsage(Context cx, Scriptable thisObj,
                                                              Object[] args, Function funObj)
             throws APIManagementException {
@@ -3127,7 +3092,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 description = (String) args[2];
             }
 
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
             boolean isTenantFlowStarted = false;
 
@@ -3716,7 +3681,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     Object apiObject = it.next();
                     API api = (API) apiObject;
                     APIIdentifier apiIdentifier = api.getId();
-                    int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+                    int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
 
                     // API is partially created/deleted. We shouldn't be showing this API.
                     if (apiId == -1) {
@@ -3729,7 +3694,7 @@ public class APIStoreHostObject extends ScriptableObject {
                                    apiIdentifier.getVersion());
                     currentApi.put("description", currentApi, api.getDescription());
                     //Rating should retrieve from db
-                    currentApi.put("rates", currentApi, ApiMgtDAO.getAverageRating(apiId));
+                    currentApi.put("rates", currentApi, ApiMgtDAO.getInstance().getAverageRating(apiId));
                     if (api.getThumbnailUrl() == null) {
                         currentApi.put("thumbnailurl", currentApi, "images/api-default.png");
                     } else {
@@ -3907,56 +3872,6 @@ public class APIStoreHostObject extends ScriptableObject {
             row.put("message", row, "Please provide a valid username");
             return row;
         }
-    }
-
-    public static NativeArray jsFunction_getAPIUsageforSubscriber(Context cx, Scriptable thisObj,
-                                                                  Object[] args, Function funObj)
-            throws APIManagementException {
-        List<APIVersionUserUsageDTO> list = null;
-        if (args == null || args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if (!HostObjectUtils.isUsageDataSourceSpecified()) {
-            return myn;
-        }
-        String subscriberName = (String) args[0];
-        String period = (String) args[1];
-
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIStoreHostObject) thisObj).getUsername());
-            list = client.getUsageBySubscriber(subscriberName, period);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        } catch (Exception e) {
-            handleException("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        }
-
-        Iterator it = null;
-
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIVersionUserUsageDTO usage = (APIVersionUserUsageDTO) usageObject;
-                row.put("api", row, usage.getApiname());
-                row.put("version", row, usage.getVersion());
-                row.put("count", row, usage.getCount());
-                row.put("costPerAPI", row, usage.getCostPerAPI());
-                row.put("cost", row, usage.getCost());
-                myn.put(i, myn, row);
-                i++;
-
-            }
-        }
-        return myn;
     }
 
     /**

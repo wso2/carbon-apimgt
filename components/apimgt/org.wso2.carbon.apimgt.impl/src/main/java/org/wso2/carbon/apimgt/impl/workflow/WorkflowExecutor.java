@@ -52,7 +52,7 @@ public abstract class WorkflowExecutor implements Serializable {
      * @throws WorkflowException - Thrown when the workflow execution was not fully performed.
      */
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             apiMgtDAO.addWorkflowEntry(workflowDTO);
             publishEvents(workflowDTO);
@@ -70,7 +70,7 @@ public abstract class WorkflowExecutor implements Serializable {
      */
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
 
-       ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+       ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
        try {
             apiMgtDAO.updateWorkflowStatus(workflowDTO);
             publishEvents(workflowDTO);
@@ -106,7 +106,7 @@ public abstract class WorkflowExecutor implements Serializable {
      * @throws WorkflowException
      */
     public void persistWorkflow(WorkflowDTO workflowDTO) throws WorkflowException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         try {
             apiMgtDAO.addWorkflowEntry(workflowDTO);
         } catch (APIManagementException e) {

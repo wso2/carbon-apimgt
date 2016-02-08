@@ -3,13 +3,13 @@ log = new Log(),
 apiProvider = jagg.module("manager").getAPIProviderObj(),
 usageClient = jagg.module("manager").getUsageClient(),
 user = jagg.getUser();
-var gson=com.google.gson.Gson();
+var gson = com.google.gson.Gson();
 
 //methods for usage monitoring
 function getProviderAPIVersionUsage(providerName, apiName, server) {
     var usage = [];
 
-    if(usageClient == null){
+    if(usageClient == null) {
         return {
             error:false,
             usage:[]
@@ -30,7 +30,7 @@ function getProviderAPIVersionUsage(providerName, apiName, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -83,7 +83,7 @@ function getProviderAPIUsage(providerName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -103,7 +103,7 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
     var usage = [];
     var usageout = [];
 
-    if(usageClient == null){
+    if(usageClient == null) {
         return {
             error:false,
             usage:[]
@@ -122,7 +122,7 @@ function getProviderAPIUserUsage(providerName, apiName, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -152,7 +152,7 @@ function getAPIUsageByResourcePath(providerName,from,to) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -182,7 +182,7 @@ function getAPIUsageByDestination(providerName,from,to) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -212,7 +212,7 @@ function getAPIUsageByUser(providerName,from,to) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -241,7 +241,7 @@ function getProviderAPIVersionUserLastAccess(providerName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -271,7 +271,7 @@ function getProviderAPIServiceTime(providerName,from,to, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -291,7 +291,7 @@ function getSubscriberCountByAPIs(providerName, isAllStatistics) {
     var usage = [];
     var usageout = [];
     try {
-        var usageClient=org.wso2.carbon.apimgt.usage.client.UsageClient;
+        var usageClient = org.wso2.carbon.apimgt.usage.client.UsageClient;
         usage = usageClient.getSubscriberCountByAPIs(providerName, isAllStatistics);
         if (log.isDebugEnabled()) {
             log.debug("getSubscriberCountByAPIs for : " + providerName);
@@ -302,7 +302,7 @@ function getSubscriberCountByAPIs(providerName, isAllStatistics) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -322,7 +322,7 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
     var usage = [];
     var usageout = [];
 
-    if(usageClient == null){
+    if(usageClient == null) {
         return {
             error:false,
             usage:[]
@@ -340,7 +340,7 @@ function getProviderAPIVersionUserUsage(providerName,apiName,version,serverUrl) 
                 usage:[]
             };
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -370,7 +370,7 @@ function getAPIResponseFaultCount(providerName,from,to) {
              };
 
          } else {
-             usage=JSON.parse(gson.toJson(usage));
+             usage = JSON.parse(gson.toJson(usage));
              return {
                  error:false,
                  usage:usage
@@ -390,7 +390,7 @@ function getFirstAccessTime(providerName, server) {
     var usage = [];
     var usageout = [];
     try {
-        if(usageClient==null){
+        if(usageClient == null) {
             return {
                 error:true
             };
@@ -405,7 +405,7 @@ function getFirstAccessTime(providerName, server) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -550,7 +550,7 @@ function getAppsForThrottleStats(providerName, apiName) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -566,11 +566,10 @@ function getAppsForThrottleStats(providerName, apiName) {
     }
 }
 
-function getThrottleDataOfApplication(appName,providerName,fromDate, toDate) {
-    var usage = [];
-    var usageout = [];
+function getThrottleDataOfApplication(appName, providerName, fromDate, toDate) {
+    var usage;
     try {
-        usage = usageClient.getThrottleDataOfApplication(appName,providerName,fromDate, toDate);
+        usage = usageClient.getThrottleDataOfApplication(appName, providerName, fromDate, toDate);
         if (log.isDebugEnabled()) {
             log.debug("getProviderAPIFirstAccessTime for : ");
         }
@@ -580,7 +579,7 @@ function getThrottleDataOfApplication(appName,providerName,fromDate, toDate) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -603,7 +602,7 @@ function getAPIsForThrottleStats(providerName) {
     try {
         usage = usageClient.getAPIsForThrottleStats(providerName);
         if (log.isDebugEnabled()) {
-            log.debug("getProviderAPIFirstAccessTime for : ");
+            log.debug("getProviderAPIFirstAccessTime for : " + providerName);
         }
         if (usage == null) {
             return {
@@ -611,7 +610,7 @@ function getAPIsForThrottleStats(providerName) {
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
@@ -627,13 +626,13 @@ function getAPIsForThrottleStats(providerName) {
     }
 }
 
-function getThrottleDataOfAPIAndApplication(apiName, providerName, appName,fromDate, toDate, groupBy) {
-    var usage = [];
-    var usageout = [];
+function getThrottleDataOfAPIAndApplication(apiName, providerName, appName, fromDate, toDate, groupBy) {
+    var usage;
+
     try {
-        usage = usageClient.getThrottleDataOfAPIAndApplication(apiName, providerName, appName,fromDate, toDate,groupBy);
+        usage = usageClient.getThrottleDataOfAPIAndApplication(apiName, providerName, appName, fromDate, toDate, groupBy);
         if (log.isDebugEnabled()) {
-            log.debug("getProviderAPIFirstAccessTime for : ");
+            log.debug("getProviderAPIFirstAccessTime for : " + providerName);
         }
         if (usage == null) {
             return {
@@ -641,7 +640,7 @@ function getThrottleDataOfAPIAndApplication(apiName, providerName, appName,fromD
             };
 
         } else {
-            usage=JSON.parse(gson.toJson(usage));
+            usage = JSON.parse(gson.toJson(usage));
             return {
                 error:false,
                 usage:usage
