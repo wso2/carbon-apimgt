@@ -235,7 +235,6 @@ public class DASRestClient {
             //pass to java object
             obj = gson.fromJson(reader, type);
         } finally {
-            //            httpClient.getConnectionManager().shutdown();
 
             if (reader != null) {
                 try {
