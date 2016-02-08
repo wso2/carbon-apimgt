@@ -151,7 +151,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
                 String url = restData.getUrl();
                 String user = restData.getUserName();
-                String pass = restData.getPassword();
+                char[] pass = restData.getPassword().toCharArray();
                 //crete new restClient instance
                 restClient = new DASRestClient(url, user, pass);
                 //log.info("Initialised DASRestClient");
@@ -723,14 +723,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
-
-        //if My APIs stat, add constraint with API publisher
-        /*if (!providerName.equals(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
-            providerName = APIUtil.getUserNameWithTenantSuffix(providerName);
-            query = new StringBuilder(query)
-                    .append(" AND " + APIUsageStatisticsClientConstants.API_PUBLISHER + ':' + '\"' + providerName
-                            + '\"').toString();
-        }*/
 
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query, 3,
