@@ -23,8 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -84,7 +85,7 @@ public class ScopesIssuer {
         Map<String, String> restAPIScopesOfCurrentTenant;
         try {
             Map<String, String> appScopes;
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
@@ -118,7 +119,7 @@ public class ScopesIssuer {
             }
 
             int tenantId;
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
             UserStoreManager userStoreManager;
             String[] userRoles;
 

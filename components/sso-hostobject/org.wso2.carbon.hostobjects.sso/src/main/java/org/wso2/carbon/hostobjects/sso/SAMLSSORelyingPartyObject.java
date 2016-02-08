@@ -47,21 +47,22 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     private static final Log log = LogFactory.getLog(SAMLSSORelyingPartyObject.class);
     //stores sso properties like, identity server url,keystore path, alias, keystore password, issuerId
     private Properties ssoConfigProperties = new Properties();
-    protected static SAMLSSORelyingPartyObject ssho;
+    protected static volatile SAMLSSORelyingPartyObject ssho;
 
     // relay state,requested uri
     private static Map<String, String> relayStateMap = new HashMap<String, String>();
 
     // issuerId, relyingPartyObject .this is to provide sso functionality to multiple jaggery apps.
-    private static Map<String, SAMLSSORelyingPartyObject> ssoRelyingPartyMap = new HashMap<String, SAMLSSORelyingPartyObject>();
+    private static volatile Map<String, SAMLSSORelyingPartyObject> ssoRelyingPartyMap = new HashMap<String, SAMLSSORelyingPartyObject>();
 
     // sessionId, sessionIndex. this is to map current session with session index sent from Identity server.
     // When log out request come from identity server,we need to invalidate the current session.
-    private static Map<String, SessionInfo> sessionIdMap = new ConcurrentHashMap<String, SessionInfo>();
-    private static Map<String, Set<SessionHostObject>> sessionIndexMap = new ConcurrentHashMap<String, Set<SessionHostObject>>();
-    private static Set<SessionHostObject> sho = new HashSet<SessionHostObject>();
+    private static volatile Map<String, SessionInfo> sessionIdMap = new ConcurrentHashMap<String, SessionInfo>();
+    private static volatile Map<String, Set<SessionHostObject>> sessionIndexMap = new ConcurrentHashMap<String, Set<SessionHostObject>>();
+    //private static volatile Set<SessionHostObject> sho = new HashSet<SessionHostObject>();
     //used store logged in user name until put into jaggery session
     private String loggedInUserName;
+	private static long maxInactiveInterval = 1800000; //default 30min
 
 
     @Override
@@ -77,7 +78,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             throw new ScriptException("Invalid argument. Session is missing.");
         }
         SessionHostObject sho = (SessionHostObject) args[0];
-        SAMLSSORelyingPartyObject.sho.add(sho);
+        maxInactiveInterval = sho.jsGet_maxInactive() * 1000; // convert to milliseconds
+        //SAMLSSORelyingPartyObject.sho.add(sho);
         SAMLSSORelyingPartyObject.ssho = (SAMLSSORelyingPartyObject) thisObj;
     }
 
@@ -737,8 +739,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                                                           Function funObj)
             throws Exception {
         int argLength = args.length;
-        if (argLength != 2 || !(args[0] instanceof String) || !(args[1] instanceof String)) {
-            throw new ScriptException("Invalid argument. Current session id and SAML response are missing.");
+        if (argLength != 3 || !(args[0] instanceof String) || 
+                !(args[1] instanceof String )|| !(args[2] instanceof SessionHostObject )) {
+            throw new ScriptException("Invalid argument. Current session id, SAML response and Session are missing.");
         }
 
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
@@ -799,7 +802,10 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
         sessionInfo.setSamlToken((String) args[1]);//We expect an encoded SamlToken here.
         relyingPartyObject.addSessionInfo(sessionInfo);
-        relyingPartyObject.addSessionInfo(sessionIndex, SAMLSSORelyingPartyObject.sho);
+        //relyingPartyObject.addSessionInfo(sessionIndex, SAMLSSORelyingPartyObject.sho);
+        
+        SessionHostObject sho = (SessionHostObject) args[2];
+        relyingPartyObject.addSessionInfo(sessionIndex, sho);
 
     }
 
@@ -1052,6 +1058,21 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
         sessionIndexMap.put(sessionIndex, sho);
     }
+    
+    private void addSessionInfo(String sessionIndex, SessionHostObject sho) {
+        if (log.isDebugEnabled()) {
+            log.debug("Added session index:" + sessionIndex);
+        }
+        if(sessionIndexMap.containsKey(sessionIndex)){
+            Set<SessionHostObject> sessionSet = sessionIndexMap.get(sessionIndex);
+            sessionSet.add(sho);
+        } else {
+            Set<SessionHostObject> sessionSet = new HashSet<SessionHostObject>();
+            sessionSet.add(sho);
+            sessionIndexMap.put(sessionIndex, sessionSet);
+        }
+        
+    }
 
     /**
      * Remove current browser session(s) mapped with session index given.
@@ -1091,19 +1112,47 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         }
     }
 
-    public void clearSessionsSet() {
-        if (SAMLSSORelyingPartyObject.sho != null) {
+    public void clearSessionsSet(){
+
+    	Date now = new Date();
+    	long lastAccessTime;    
+    	boolean hasExpired ;
+    	Iterator<Map.Entry<String, Set<SessionHostObject>>> iterator = sessionIndexMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+        	hasExpired = true;        
+        	lastAccessTime = 0;
+        	
+            Map.Entry<String, Set<SessionHostObject>> entry = iterator.next();
+            Set<SessionHostObject> sessions = new HashSet<SessionHostObject>(entry.getValue());
             if (log.isDebugEnabled()) {
-                log.debug("Removing set of session hostobjects");
+                log.debug("Cleanup: Checking session object status for  " + entry.getKey());
             }
-            SAMLSSORelyingPartyObject.sho = new HashSet<SessionHostObject>();
-        }
-        if (SAMLSSORelyingPartyObject.ssho != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Removing the session hostobject");
+            //check atleast one hostobject is still active. 
+            for (SessionHostObject session : sessions) {
+                Object[] args = new Object[0];
+                try {
+					lastAccessTime = SessionHostObject.jsFunction_getLastAccessedTime(null, session, new Object[0], null);
+					//createdTime = SessionHostObject.jsFunction_getCreationTime(null, session, new Object[0], null);
+				} catch (Exception ignored) {
+					
+				}			
+    			if(lastAccessTime + maxInactiveInterval > now.getTime()){
+    				 if (log.isDebugEnabled()) {
+ 		                log.debug("Cleanup: Contains active session hostobject");
+    				 }
+    				 hasExpired = false;
+    				 break;
+    			}
             }
-            SAMLSSORelyingPartyObject.ssho = null;
-        }
+            if(hasExpired){ 
+            	if (log.isDebugEnabled()) {
+                    log.debug("Cleanup: Removing expired session info for " + entry.getKey());
+                }
+        		removeSession(entry.getKey());    		
+        		sessionIdMap.remove(entry.getKey());
+        	}
+            
+        }  
     }
 
     public SessionHostObject getSession(String sessionIndex) {
@@ -1128,6 +1177,36 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             sendSessionInvalidationClusterMessage(sessionIndex);
             return;
         }
+        
+        clearSessionData(sessionIndex);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
+        }
+    }
+    
+    public void handleClusterLogout(String sessionIndex) {
+        if (log.isDebugEnabled()) {
+            log.debug("session index map value:" + sessionIndexMap);
+            if (sessionIndexMap != null) {
+                log.debug("session index map size:" + sessionIndexMap.size());
+                log.debug("session index map :" + sessionIndexMap);
+                log.debug("session index :" + sessionIndex);
+                // log.debug("Is session index map contains session index:"+sessionIndexMap.containsKey(sessionIndex));
+            }
+        }
+        if ((sessionIndexMap != null && sessionIndex != null) && (!sessionIndexMap.containsKey(sessionIndex))) {
+            return;
+        }
+
+        clearSessionData(sessionIndex);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
+        }
+    }
+    
+    private void clearSessionData(String sessionIndex){
         try {
             ssho.invalidateSessionBySessionIndex(sessionIndex);
             // this is to invalidate relying party object after user log out. To release memory allocations.
@@ -1149,10 +1228,8 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             removeSession(sessionIndex);
             clearSessionsSet();
         }
-        if (log.isDebugEnabled()) {
-            log.debug("Cleared authenticated session index:" + sessionIndex + "in handle logout method");
-        }
     }
+
 
 
     public void sendSessionInvalidationClusterMessage(String sessionIndex) {

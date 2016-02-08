@@ -24,15 +24,15 @@ public class AppCallTypeDTO {
         return apiCallTypeArray;
     }
 
-    public void addGToApiCallTypeArray(String apiName, List<String> callType) {
-        ApiCallTypeArray a=new ApiCallTypeArray();
-        a.setApiName(apiName);
-        a.setCallType(callType);
-        this.apiCallTypeArray.add(a);
+    public void addToApiCallTypeArray(String apiName, List<String> callType) {
+        ApiCallTypeArray apiCallTypeArray = new ApiCallTypeArray();
+        apiCallTypeArray.setApiName(apiName);
+        apiCallTypeArray.setCallType(callType);
+        this.apiCallTypeArray.add(apiCallTypeArray);
     }
 }
 
-class ApiCallTypeArray{
+class ApiCallTypeArray {
     String apiName;
     List<String> callType;
 

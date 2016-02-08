@@ -122,7 +122,7 @@ var drawAPIUsage = function (from,to) {
 
                              for (var i = 0; i < length; i++) {
 
-                                 var apiData= json.usage[i].apiName;
+                                 var apiData = json.usage[i].apiName;
 
                                  apiName_Provider=""+apiData[0]+" ("+apiData[2]+")";
                                  inputData.push({

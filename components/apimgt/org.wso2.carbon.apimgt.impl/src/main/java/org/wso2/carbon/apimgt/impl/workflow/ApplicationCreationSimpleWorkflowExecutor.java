@@ -81,7 +81,7 @@ public class ApplicationCreationSimpleWorkflowExecutor extends WorkflowExecutor 
 			status = APIConstants.ApplicationStatus.APPLICATION_APPROVED;
 		}
 
-		ApiMgtDAO dao = new ApiMgtDAO();
+		ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
 		try {
 			dao.updateApplicationStatus(Integer.parseInt(workFlowDTO.getWorkflowReference()),status);

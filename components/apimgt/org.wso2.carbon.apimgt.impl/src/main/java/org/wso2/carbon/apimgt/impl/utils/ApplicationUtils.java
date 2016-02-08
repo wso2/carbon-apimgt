@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
  */
 public class ApplicationUtils {
 
-    private static ApiMgtDAO dao = new ApiMgtDAO();
+    private static ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
     private static Log log = LogFactory.getLog(ApplicationUtils.class);
 

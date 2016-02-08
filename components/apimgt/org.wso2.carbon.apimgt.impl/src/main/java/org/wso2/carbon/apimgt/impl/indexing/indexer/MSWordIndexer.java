@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.impl.indexing.indexer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +53,11 @@ public class MSWordIndexer implements Indexer {
 			IndexDocument indexDoc = new IndexDocument(fileData.path, wordText, null);
 			
 			Map<String, List<String>> fields = new HashMap<String, List<String>>();
-			fields.put("path", Arrays.asList(fileData.path));
+			fields.put("path", Collections.singletonList(fileData.path));
 			if (fileData.mediaType != null) {
-				fields.put(IndexingConstants.FIELD_MEDIA_TYPE, Arrays.asList(fileData.mediaType));
+				fields.put(IndexingConstants.FIELD_MEDIA_TYPE, Collections.singletonList(fileData.mediaType));
 			} else {
-				fields.put(IndexingConstants.FIELD_MEDIA_TYPE, Arrays.asList("application/pdf"));
+				fields.put(IndexingConstants.FIELD_MEDIA_TYPE, Collections.singletonList("application/pdf"));
 			}
 			
 			indexDoc.setFields(fields);
@@ -66,7 +67,7 @@ public class MSWordIndexer implements Indexer {
 		} catch (IOException e) {
 			String msg = "Failed to write to the index";
 			log.error(msg, e);
-			throw new SolrException(ErrorCode.SERVER_ERROR, msg);
+			throw new SolrException(ErrorCode.SERVER_ERROR, msg, e);
 		}
 	}
 }
