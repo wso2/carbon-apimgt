@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent Lucene aggregate request for DAS REST API
+ */
 public class SearchRequestBean {
     public String getQuery() {
         return query;

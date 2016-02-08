@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 import java.util.Calendar;
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API,Application throttle out usage statistics result from the DAS REST API
+ */
 public class ThrottleDataOfAPIAndApplicationValue {
     private int success_request_count;
     private int throttle_out_count;

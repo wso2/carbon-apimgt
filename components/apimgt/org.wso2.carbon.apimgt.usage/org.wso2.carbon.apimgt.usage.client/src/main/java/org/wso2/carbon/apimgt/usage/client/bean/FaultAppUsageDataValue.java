@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API Fault count usage statistics result from the DAS REST API
+ */
 public class FaultAppUsageDataValue {
     private long count;
     private List<String> consumerKey_api_facet;

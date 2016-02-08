@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API Throttle out result from the DAS REST API
+ */
 public class APIsForThrottleStatsValue {
     private int success_request_count;
     private int throttle_out_count;

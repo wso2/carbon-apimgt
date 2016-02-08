@@ -2496,6 +2496,6 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
      */
     @Override
     public String getClientType() {
-        return "RDBMS";
+        return APIUsageStatisticsClientConstants.RDBMS_STATISTICS_CLIENT_TYPE;
     }
 }

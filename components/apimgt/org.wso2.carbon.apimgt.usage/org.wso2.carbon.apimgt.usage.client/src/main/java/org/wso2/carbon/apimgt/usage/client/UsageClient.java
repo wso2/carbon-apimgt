@@ -53,14 +53,8 @@ public class UsageClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-
-        try {
-            APIUsageStatisticsClient client = UsageClient.getStatisticClient(null);
-            client.initializeDataSource();
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error in initializing data sources", e);
-        }
-
+        APIUsageStatisticsClient client = UsageClient.getStatisticClient(null);
+        client.initializeDataSource();
     }
 
     /**
@@ -71,11 +65,7 @@ public class UsageClient {
      */
     public static APIUsageStatisticsClient getClient(String user) throws APIMgtUsageQueryServiceClientException {
         if (isDataPublishingEnabled()) {
-            try {
-                return UsageClient.getStatisticClient(user);
-            } catch (APIMgtUsageQueryServiceClientException e) {
-                throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
-            }
+            return UsageClient.getStatisticClient(user);
         } else {
             return null;
         }
