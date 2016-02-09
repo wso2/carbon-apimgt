@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.io.File;
 
 /**
  * APIProvider responsible for providing helper functionality
@@ -138,6 +139,8 @@ public interface APIProvider extends APIManager {
                  String httpverb);
 
     void addPolicy(HashMap<String, String> policyParametersMap) throws APIManagementException;
+
+    void addPolicy(Policy policy) throws APIManagementException;
     
     void updateTier(Tier tier) throws APIManagementException;
     
@@ -547,5 +550,8 @@ public interface APIProvider extends APIManager {
       */
      String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
 
+     File getFile(String fileName) throws APIManagementException;
+
+    void deleteFile(String fileName) throws APIManagementException;
 
 }
