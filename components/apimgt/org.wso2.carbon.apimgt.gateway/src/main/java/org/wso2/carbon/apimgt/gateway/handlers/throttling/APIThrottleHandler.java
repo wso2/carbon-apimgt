@@ -252,8 +252,22 @@ public class APIThrottleHandler extends AbstractHandler {
             errorDescription = "API not accepting requests";
             // It it's a hard limit exceeding, we tell it as service not being available.
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
+        } else if (APIThrottleConstants.API_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        } else if (APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
         } else {
-            errorCode = APIThrottleConstants.THROTTLE_OUT_ERROR_CODE;
+            errorCode = APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE;
             errorMessage = "Message throttled out";
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
@@ -555,6 +569,7 @@ public class APIThrottleHandler extends AbstractHandler {
                         }
                     } catch (ThrottleException e) {
                         log.warn("Exception occurred while performing role " + "based throttling", e);
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
                         return false;
                     }
 
@@ -580,6 +595,7 @@ public class APIThrottleHandler extends AbstractHandler {
                                 }
                             }
                         }
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
                         return false;
                     }
                 }
@@ -634,6 +650,7 @@ public class APIThrottleHandler extends AbstractHandler {
                             }
                         } catch (ThrottleException e) {
                             log.warn("Exception occurred while performing resource" + "based throttling", e);
+                            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
                             return false;
                         }
 
@@ -665,6 +682,7 @@ public class APIThrottleHandler extends AbstractHandler {
                                     synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, Boolean.TRUE);
                                 }
                             }else{
+                                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
                                 return false;
                             }
                         }
@@ -711,6 +729,7 @@ public class APIThrottleHandler extends AbstractHandler {
                     }
                 } catch (ThrottleException e) {
                     log.warn("Exception occurred while performing role " + "based throttling", e);
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);
                     return false;
                 }
 
@@ -742,6 +761,7 @@ public class APIThrottleHandler extends AbstractHandler {
                             synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, Boolean.TRUE);
                         }
                     } else {
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);
                         return false;
                     }
                 }
