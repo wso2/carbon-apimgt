@@ -139,10 +139,11 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             try {
                 //Try and validate the signature using the super tenant key store.
                 sigValid = Util.validateSignature(samlResponse,
-                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
-                relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
-                relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
-                MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                        relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_NAME),
+                        relyingPartyObject.getSSOProperty(SSOConstants.KEY_STORE_PASSWORD),
+                        relyingPartyObject.getSSOProperty(SSOConstants.IDP_ALIAS),
+                        MultitenantConstants.SUPER_TENANT_ID, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+
             } catch(SignatureVerificationFailure e) {
                 //do nothing at this point since we want to verify signature using the tenant key-store as well.
                 if(log.isDebugEnabled()){
