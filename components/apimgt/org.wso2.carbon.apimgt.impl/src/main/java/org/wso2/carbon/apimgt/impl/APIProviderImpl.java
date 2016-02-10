@@ -389,6 +389,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void addPolicy(Policy policy) throws APIManagementException {
+       // jsonWrite(policy);
         String decisionQueryRest = "";
         ArrayList<Condition> conditions = policy.getConditions();
         String eligibilityQuery = "\nFROM RequestStream\n" +
@@ -414,7 +415,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 "INSERT ALL EVENTS into ResultStream;\n";
         decisionQuery += elseCondition;
         appendPolicy(eligibilityQuery, decisionQuery, policy.getPolicyName());
-        jsonWrite(policy);
     }
 
     public long ipToLong(String ip) {
@@ -432,9 +432,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return ipAddressinLong;     
     }
 
-//    private static boolean fileCreated = false;
-//    private static File file = null;
-
     public void appendPolicy(String eligibilityQuery, String decisionQuery, String tierName){
         OMFactory factory = OMAbstractFactory.getOMFactory();
         OMElement policyTag = factory.createOMElement(QName.valueOf("policy"));
@@ -446,55 +443,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         OMText eligibilityQueryText = factory.createOMText(eligibilityQuery);
         OMText decisionQueryText = factory.createOMText(decisionQuery);
         boolean firstWrite = false;
-      /*  if (!fileCreated) {
-            file = new File("repository/conf/throttle-policy.xml");
-            fileCreated = true;
-            firstWrite = true;
-        }*/
+
         FileOutputStream fos = null;
         try {
-            /*if (firstWrite) {
-                fos = new FileOutputStream(file);
-                eligibility_query.addChild(eligibilityQueryText);
-                decision_query.addChild(decisionQueryText);
-                policyTag.addChild(eligibility_query);
-                policyTag.addChild(decision_query);
-                root.addChild(policyTag);
-                root.build();
-                String policy = root.toString();
-                System.out.println(root.toString());
-                byte[] contentInBytes = policy.getBytes();
-
-                fos.write(contentInBytes);
-                fos.flush();
-                fos.close();
-            } else {
-                FileInputStream inputStream = new FileInputStream(file);
-                XMLStreamReader parser = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
-                inputStream.close();
-                StAXOMBuilder builder = new StAXOMBuilder(parser);
-                OMElement newroot = builder.getDocumentElement();
-                System.out.println(builder.getDocumentElement());
-
-                eligibility_query.addChild(eligibilityQueryText);
-                decision_query.addChild(decisionQueryText);
-                policyTag.addChild(eligibility_query);
-                policyTag.addChild(decision_query);
-                newroot.addChild(policyTag);
-                newroot.build();
-                String policy = newroot.toString();
-                fos = new FileOutputStream(file);
-                byte[] contentInBytes = policy.getBytes();
-
-                fos.write(contentInBytes);
-                fos.flush();
-                fos.close();
-            }*/
-            File dir = new File("repository/deployment/server//throttle-conf");
+            File dir = new File("repository/deployment/server//throttlingconfigs");
             if(!dir.exists()){
                 dir.mkdir();
             }
-            File file = new File("repository/deployment/server/throttle-conf/"+tierName+".xml");
+            File file = new File("repository/deployment/server/throttlingconfigs/"+tierName+".xml");
             fos = new FileOutputStream(file);
             eligibility_query.addChild(eligibilityQueryText);
             decision_query.addChild(decisionQueryText);
@@ -511,15 +467,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         } catch (IOException e) {
             e.printStackTrace();
-        } /*catch (XMLStreamException e) {
-            e.printStackTrace();
-        }*/
+        }
     }
 
     public void jsonWrite(Policy policy){
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
        try {
-           File file2 = new File("repository/conf/" + policy.getPolicyName() + ".xml");
+           File file2 = new File("repository/conf/" + policy.getPolicyName() + ".txt");
            FileOutputStream fos = null;
            fos = new FileOutputStream(file2);
 
@@ -3608,7 +3562,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public File getFile(String fileName) throws APIManagementException{
-        File file= new File("repository/deployment/throttle-conf/"+fileName+".xml");
+        File file= new File("repository/deployment/throttlingconfigs/"+fileName+".xml");
         if(file.exists()){
             log.info("File "+fileName+" was found");
         }else{

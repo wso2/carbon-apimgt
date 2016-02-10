@@ -1208,6 +1208,5 @@ public class APIThrottleHandler extends AbstractHandler {
                 uuid});
 
         log.info("Event published to stream");
-
     }
 }

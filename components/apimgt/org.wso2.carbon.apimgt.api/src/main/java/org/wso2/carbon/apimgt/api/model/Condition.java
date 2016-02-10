@@ -12,6 +12,33 @@ public class Condition implements Serializable {
     private String httpVerb;
     private String startingIP;
     private String endingIP;
+    private String startingDate;
+    private String endingDate;
+    private String userAgent;
+
+    public String getStartingDate() {
+        return startingDate;
+    }
+
+    public void setStartingDate(String startingDate) {
+        this.startingDate = startingDate;
+    }
+
+    public String getEndingDate() {
+        return endingDate;
+    }
+
+    public void setEndingDate(String endingDate) {
+        this.endingDate = endingDate;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
 
     public String getRequestCount() {
         return requestCount;

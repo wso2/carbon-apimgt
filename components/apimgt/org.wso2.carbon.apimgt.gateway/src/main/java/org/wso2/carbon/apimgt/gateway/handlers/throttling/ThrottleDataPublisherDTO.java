@@ -10,9 +10,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class ThrottleDataPublisherDTO {
 
-
     private static final Log log = LogFactory.getLog(APIThrottleHandler.class);
-
     boolean isInitialized = false;
     String APIThrottleKey;
     String ApplicationThrottleKey;
@@ -23,9 +21,7 @@ public class ThrottleDataPublisherDTO {
     String MetaKey;          //concatanation of authorizeduser and consumerkey with ":"
     long IPAddressinLong;   //Since IP is check if it's in a range, the IP has to be in the form of a long
     String httpVerb;
-
     public long getIPAddress() {
-
         return IPAddressinLong;
     }
 
@@ -40,7 +36,6 @@ public class ThrottleDataPublisherDTO {
                 long ip = Long.parseLong(ipAddressArray[i]);   //parse to long
                 IPAddressinLong += ip*Math.pow(256,power);
             }
-
         }
     }
 
@@ -106,7 +101,4 @@ public class ThrottleDataPublisherDTO {
     public void setResourceThrottleTier(String resourceThrottleTier) {
         ResourceThrottleTier = resourceThrottleTier;
     }
-
-
-
 }

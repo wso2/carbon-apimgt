@@ -15,13 +15,14 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
         <version>5.0.4-SNAPSHOT</version>
-	    <relativePath>../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -113,14 +114,18 @@
                             <bundles>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.handlers.security.stub
+                                </bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                             </bundles>
 
                             <importFeatures>
                                 <importFeatureDef>org.apache.synapse.wso2:${carbon.mediation.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.mediation.initializer:${carbon.mediation.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.mediation.initializer:${carbon.mediation.version}
+                                </importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

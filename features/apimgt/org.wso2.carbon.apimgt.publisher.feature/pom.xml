@@ -15,7 +15,8 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -87,16 +88,23 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-				<bundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</bundleDef>
+                                <bundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</bundleDef>
                             </bundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}
+                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.registry.core:${carbon.kernel.version}
+                                </importFeatureDef>
                             </importFeatures>
                             <importBundles>
-                                <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.throttle.core:${carbon.throttle.module.version}</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon:org.wso2.carbon.throttle.core:${carbon.throttle.module.version}
+                                </importBundleDef>
                             </importBundles>
                         </configuration>
                     </execution>

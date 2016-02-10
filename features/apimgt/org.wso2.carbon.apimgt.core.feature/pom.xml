@@ -15,7 +15,8 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -116,13 +117,13 @@
             <groupId>net.sf.ehcache.wso2</groupId>
             <artifactId>ehcache</artifactId>
         </dependency>
-	<dependency>
-	    <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+        <dependency>
+            <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
         </dependency>
         <dependency>
-           <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
-           <artifactId>fontbox</artifactId>
+            <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+            <artifactId>fontbox</artifactId>
         </dependency>
     </dependencies>
 
@@ -141,7 +142,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete file="src/main/resources/repository/database/WSO2AM_DB.h2.db" />
+                                <delete file="src/main/resources/repository/database/WSO2AM_DB.h2.db"/>
                             </tasks>
                         </configuration>
                     </execution>
@@ -154,16 +155,18 @@
                         <configuration>
                             <tasks>
                                 <path id="h2.classpath">
-                                    <path refid="maven.compile.classpath" />
+                                    <path refid="maven.compile.classpath"/>
                                 </path>
-                                <echo message="########### Creating API Manager Database ##############" />
-                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <echo message="########### Creating API Manager Database ##############"/>
+                                <sql driver="org.h2.Driver"
+                                     url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true"
+                                     userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
                                     <classpath>
-                                        <path refid="h2.classpath" />
+                                        <path refid="h2.classpath"/>
                                     </classpath>
-                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql" />
+                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql"/>
                                 </sql>
-                                <echo message="##################### END ########################" />
+                                <echo message="##################### END ########################"/>
                             </tasks>
                         </configuration>
                     </execution>
@@ -241,7 +244,9 @@
                                     </includes>
                                 </resource>
                                 <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources</directory>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.impl/src/main/resources
+                                    </directory>
                                     <includes>
                                         <include>tenant/tenant-conf.json</include>
                                     </includes>
@@ -277,21 +282,46 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}
+                                </bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}</bundleDef>
-                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.publisher:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.core:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.statsupdate.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.gateway.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.tier.cache.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.sequences.stub:${carbon.mediation.version}
+                                </bundleDef>
+                                <bundleDef>
+                                    org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
+                                </bundleDef>
                                 <!--bundleDef>org.wso2.carbon:org.wso2.carbon.mediation.security.stub:${carbon.kernel.version}</bundleDef-->
                                 <bundleDef>org.apache.woden.wso2:woden</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
@@ -301,20 +331,35 @@
                             </bundles>
                             <importBundles>
                                 <!--importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.thrift.authentication:${carbon.identity.version}</importBundleDef-->
-                                <importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.identity:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}
+                                </importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
                                 <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:1.6.wso2v2</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.deployment:org.wso2.carbon.bam.service.data.publisher:${carbon.deployment.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon:org.wso2.carbon.throttle.core:${carbon.throttle.module.version}</importBundleDef>
-				<importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>
-				<importBundleDef>org.wso2.orbit.org.apache.pdfbox:fontbox:${orbit.version.pdfbox}</importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.commons:org.wso2.carbon.ganalytics.publisher:${carbon.commons.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.deployment:org.wso2.carbon.bam.service.data.publisher:${carbon.deployment.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon.mediation:org.wso2.carbon.mediation.security.stub:${carbon.mediation.version}
+                                </importBundleDef>
+                                <importBundleDef>
+                                    org.wso2.carbon:org.wso2.carbon.throttle.core:${carbon.throttle.module.version}
+                                </importBundleDef>
+                                <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}
+                                </importBundleDef>
+                                <importBundleDef>org.wso2.orbit.org.apache.pdfbox:fontbox:${orbit.version.pdfbox}
+                                </importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}</importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}
+                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}
+                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}
+                                </importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

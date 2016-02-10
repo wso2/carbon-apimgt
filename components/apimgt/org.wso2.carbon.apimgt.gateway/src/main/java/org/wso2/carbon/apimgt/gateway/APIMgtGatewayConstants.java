@@ -19,7 +19,7 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
-public class APIMgtGatewayConstants {
+public class    APIMgtGatewayConstants {
 
     public static final String CONSUMER_KEY = "api.ut.consumerKey";
     public static final String USER_ID = "api.ut.userId";

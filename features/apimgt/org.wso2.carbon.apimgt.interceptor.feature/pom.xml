@@ -15,21 +15,23 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
         <version>5.0.4-SNAPSHOT</version>
-	<relativePath>../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.interceptor.feature</artifactId> 
+    <artifactId>org.wso2.carbon.apimgt.interceptor.feature</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 Carbon - Api management Server Interceptor Feature</name>
     <url>http://wso2.org</url>
-    <description>This feature contains the tomcat valve that intercept all incomming request and add API Management</description>
+    <description>This feature contains the tomcat valve that intercept all incomming request and add API Management
+    </description>
 
     <dependencies>
         <dependency>

@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.4-SNAPSHOT</version>
+    <version>5.0.3</version>
     <name>WSO2 Carbon - API Management Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -237,7 +238,7 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
-	    <dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
                 <version>${carbon.apimgt.version}</version>
@@ -349,7 +350,7 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
 
-	    <dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.rest.api.dcr</artifactId>
                 <type>war</type>
@@ -504,7 +505,7 @@
                 <version>${carbon.governance.version}</version>
             </dependency>
 
-	    <dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.governance</groupId>
                 <artifactId>org.wso2.carbon.governance.lcm</artifactId>
                 <version>${carbon.governance.version}</version>
@@ -837,7 +838,7 @@
                 <version>${wso2-uri-templates.version}</version>
             </dependency>
 
-	    <dependency>
+            <dependency>
                 <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
                 <artifactId>pdfbox</artifactId>
                 <version>${orbit.version.pdfbox}</version>
@@ -856,7 +857,7 @@
         <project.scm.id>scm-server</project.scm.id>
 
         <!-- APIM Component Version -->
-        <carbon.apimgt.version>5.0.4-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>5.0.3</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[5.0.0, 6.0.0)</carbon.apimgt.imp.pkg.version>
 
         <!-- Carbon kernel version -->
