@@ -124,7 +124,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throw new APIMgtUsageQueryServiceClientException("Exception while instantiating API manager core objects",
                     e);
         }
-
     }
 
     /**
@@ -209,11 +208,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
                     .append(subscriberApps.get(i));
         }
-
         //get the usage result
         return getPerAppAPIUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeys.toString(),
                 fromDate, toDate, limit);
-
     }
 
     /**
@@ -239,7 +236,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
         }
-
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query, 1, APIUsageStatisticsClientConstants.KEY_API_FACET,
                 tableName);
@@ -265,7 +261,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<PerAppApiCountDTO> perAppUsageDataList = new ArrayList<PerAppApiCountDTO>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return perAppUsageDataList;
@@ -277,7 +272,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             PerAppPerAPIUsageValues values = result.getValues();
 
             //getColumnNames 0 index contain the app key and 1 index contain the api name
-
             String appName = subscriberAppsMap.get(values.getColumnNames().get(0));
 
             boolean found = false;
@@ -288,16 +282,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     break;
                 }
             }
-
             if (!found) {
                 apiUsageDTO = new PerAppApiCountDTO();
                 apiUsageDTO.setAppName(appName);
                 apiUsageDTO.addToApiCountArray(values.getColumnNames().get(1), values.getCount_sum());
                 perAppUsageDataList.add(apiUsageDTO);
             }
-
         }
-
         return perAppUsageDataList;
     }
 
@@ -332,11 +323,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
                     .append(subscriberApps.get(i));
         }
-
         //get the usage result
         return getTopAppUsageData(APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY, concatenatedKeys.toString(),
                 fromDate, toDate, limit);
-
     }
 
     /**
@@ -397,10 +386,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //add the list of apis to the app
         for (Result<TopAppUsersValues> result : obj) {
             TopAppUsersValues v = result.getValues();
-
             //getColumnNames 0 index contain the app key and 1 index contain the userId
             String appName = subscriberAppsMap.get(v.getColumnNames().get(0));
-
             boolean found = false;
             for (AppUsageDTO dto : topAppUsageDataList) {
                 if (dto.getAppName().equals(appName)) {
@@ -416,9 +403,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 appUsageDTO.addToUserCountArray(v.getColumnNames().get(1), v.getCount());
                 topAppUsageDataList.add(appUsageDTO);
             }
-
         }
-
         return topAppUsageDataList;
     }
 
@@ -451,7 +436,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
                     .append(subscriberApps.get(i));
         }
-
         //get the usage result
         return getAPICallTypeUsageData(APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY,
                 concatenatedKeys.toString(), fromDate, toDate, limit);
@@ -514,7 +498,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //add the list of apis to the app
         for (Result<AppApiCallTypeValues> result : obj) {
             AppApiCallTypeValues v = result.getValues();
-
             List<String> callTypeList = new ArrayList<String>();
             callTypeList.add(v.getColumnNames().get(3) + '(' + v.getColumnNames().get(2) + ')');
 
@@ -529,16 +512,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     break;
                 }
             }
-
             if (!found) {
                 appCallTypeDTO = new AppCallTypeDTO();
                 appCallTypeDTO.setAppName(appName);
                 appCallTypeDTO.addToApiCallTypeArray(v.getColumnNames().get(1), callTypeList);
                 appApiCallTypeList.add(appCallTypeDTO);
             }
-
         }
-
         return appApiCallTypeList;
     }
 
@@ -570,7 +550,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             concatenatedKeys.append(" OR ").append(APIUsageStatisticsClientConstants.CONSUMERKEY).append(':')
                     .append(subscriberApps.get(i));
         }
-
         //get the usage result
         return getFaultAppUsageData(APIUsageStatisticsClientConstants.API_FAULT_SUMMARY, concatenatedKeys.toString(),
                 fromDate, toDate, limit);
@@ -624,9 +603,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         } catch (IOException e) {
             handleException("Error occurred while Connecting to DAS REST API", e);
         }
-
         List<FaultCountDTO> falseAppUsageDataList = new ArrayList<FaultCountDTO>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return falseAppUsageDataList;
@@ -650,16 +627,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     break;
                 }
             }
-
             if (!found) {
                 faultCountDTO = new FaultCountDTO();
                 faultCountDTO.setAppName(appName);
                 faultCountDTO.addToApiFaultCountArray(apiName, v.getCount());
                 falseAppUsageDataList.add(faultCountDTO);
             }
-
         }
-
         return falseAppUsageDataList;
     }
 
@@ -681,10 +655,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //get the list of apis usage by user
         List<APIUsageByUserName> usageData = this.getAPIUsageByUserData(providerName, fromDate, toDate, null);
-
         //get the tenant domain of the provider
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
-
         List<APIUsageByUserDTO> usageByName = new ArrayList<APIUsageByUserDTO>();
 
         for (APIUsageByUserName usage : usageData) {
@@ -738,7 +710,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APIUsageByUserValues>>>() {
         }.getType();
-
         List<Result<APIUsageByUserValues>> obj = null;
 
         //do post and get the results
@@ -751,7 +722,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIUsageByUserName> usageByName = new ArrayList<APIUsageByUserName>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return usageByName;
@@ -762,20 +732,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIUsageByUserName usage;
         for (Result<APIUsageByUserValues> result : obj) {
             APIUsageByUserValues v = result.getValues();
-
             usage = new APIUsageByUserName();
             usage.setRequestCount(v.getCount_sum());
-
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setUserID(v.getColumnNames().get(2));
             usage.setApipublisher(v.getColumnNames().get(3));
-
             usageByName.add(usage);
         }
-
         return usageByName;
-
     }
 
     /**
@@ -811,10 +776,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(responseTime.getApiName()) &&
                         providerAPI.getId().getVersion().equals(responseTime.getApiVersion()) &&
                         providerAPI.getContext().equals(responseTime.getContext())) {
-
                     APIResponseTimeDTO responseTimeDTO = new APIResponseTimeDTO();
                     responseTimeDTO.setApiName(responseTime.getApiName());
-
                     //calculate the average response time
                     double avgTime = responseTime.getResponseTime() / responseTime.getResponseCount();
                     //format the time
@@ -823,7 +786,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 }
             }
         }
-
         return getResponseTimeTopEntries(apiResponseTimeUsage, limit);
     }
 
@@ -874,9 +836,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<ResponseTimesByAPIsValue>>>() {
         }.getType();
-
         List<Result<ResponseTimesByAPIsValue>> obj = null;
-
         //do post and get the results
         try {
             obj = restClient.doPost(request, type);
@@ -887,7 +847,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIResponseTime> responseTimeData = new ArrayList<APIResponseTime>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return responseTimeData;
@@ -898,17 +857,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIResponseTime usage;
         for (Result<ResponseTimesByAPIsValue> result : obj) {
             ResponseTimesByAPIsValue v = result.getValues();
-
             usage = new APIResponseTime();
             usage.setApiName(v.getColumnNames().get(0).split(":v")[0]);
             usage.setApiVersion(v.getColumnNames().get(0).split(":v")[1]);
             usage.setContext(v.getColumnNames().get(1));
             usage.setResponseTime(v.getTotalServiceTime());
             usage.setResponseCount(v.getTotalResponseCount());
-
             responseTimeData.add(usage);
         }
-
         return responseTimeData;
     }
 
@@ -930,11 +886,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //get the last access time data of the apis
         List<APIAccessTime> accessTimes = getLastAccessTimesByAPIData(providerName, fromDate, toDate, limit);
-
         //get all the apis of the provider
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIVersionLastAccessTimeDTO> apiVersionLastAccessTimeUsage = new ArrayList<APIVersionLastAccessTimeDTO>();
-
         APIVersionLastAccessTimeDTO accessTimeDTO;
         DateFormat dateFormat = new SimpleDateFormat();
         String apiName;
@@ -947,7 +901,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(accessTime.getApiName()) &&
                         providerAPI.getId().getVersion().equals(accessTime.getApiVersion()) &&
                         providerAPI.getContext().equals(accessTime.getContext())) {
-
                     //format api name with provider name
                     apiName = accessTime.getApiName() + '(' + providerAPI.getId().getProviderName() + ')';
                     accessTimeDTO = new APIVersionLastAccessTimeDTO();
@@ -959,7 +912,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 }
             }
         }
-
         return getLastAccessTimeTopEntries(apiVersionLastAccessTimeUsage, limit);
     }
 
@@ -975,7 +927,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //limit is used after DAS provide pagination of aggregate search
 
         String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
-
         StringBuilder lastAccessQuery = new StringBuilder();
         lastAccessQuery.append("tenantDomain: \"").append(tenantDomain).append("\"");
 
@@ -989,11 +940,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //create the bean
         RequestSearchBean lastAccessRequest = new RequestSearchBean(lastAccessQuery.toString(), 0, limit,
                 APIUsageStatisticsClientConstants.API_LAST_ACCESS_TIME_SUMMARY);
-
         //get the type of the required result type
         Type type = new TypeToken<List<Result<LastAccessTimesByAPIValue>>>() {
         }.getType();
-
         List<Result<LastAccessTimesByAPIValue>> obj = null;
 
         //do post and get the results
@@ -1006,7 +955,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIAccessTime> lastAccessTimeData = new ArrayList<APIAccessTime>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return lastAccessTimeData;
@@ -1017,7 +965,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIAccessTime usage;
         for (Result<LastAccessTimesByAPIValue> result : obj) {
             LastAccessTimesByAPIValue v = result.getValues();
-
             usage = new APIAccessTime();
             usage.setAccessTime(v.getMax_request_time());
             usage.setApiName(v.getApi());
@@ -1026,9 +973,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             usage.setContext(v.getContext());
             lastAccessTimeData.add(usage);
         }
-
         return lastAccessTimeData;
-
     }
 
     /**
@@ -1045,10 +990,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<APIResourcePathUsageDTO> getAPIUsageByResourcePath(String providerName, String fromDate, String toDate)
             throws APIMgtUsageQueryServiceClientException {
-
         //get the usage resource path data of the apis
         List<APIUsageByResourcePath> usageData = this.getAPIUsageByResourcePathData(providerName, fromDate, toDate);
-
         //get all the apis of the provider
         List<API> providerAPIs = getAPIsByProvider(providerName);
         List<APIResourcePathUsageDTO> usageByResourcePath = new ArrayList<APIResourcePathUsageDTO>();
@@ -1061,7 +1004,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
                         providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
                         providerAPI.getContext().equals(usage.getContext())) {
-
                     APIResourcePathUsageDTO usageDTO = new APIResourcePathUsageDTO();
                     usageDTO.setApiName(usage.getApiName());
                     usageDTO.setVersion(usage.getApiVersion());
@@ -1111,7 +1053,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query.toString(), 3,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_METHOD_FACET,
                 APIUsageStatisticsClientConstants.API_Resource_Path_USAGE_SUMMARY);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -1122,7 +1063,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APIUsageByResourcePathValue>>>() {
         }.getType();
-
         List<Result<APIUsageByResourcePathValue>> obj = null;
 
         //do post and get the results
@@ -1135,7 +1075,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIUsageByResourcePath> usageByResourcePath = new ArrayList<APIUsageByResourcePath>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return usageByResourcePath;
@@ -1146,19 +1085,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIUsageByResourcePath usage;
         for (Result<APIUsageByResourcePathValue> result : obj) {
             APIUsageByResourcePathValue v = result.getValues();
-
             usage = new APIUsageByResourcePath();
             usage.setRequestCount(v.getTotalRequestCount());
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setContext(v.getColumnNames().get(2));
             usage.setMethod(v.getColumnNames().get(3));
-
             usageByResourcePath.add(usage);
         }
-
         return usageByResourcePath;
-
     }
 
     /**
@@ -1190,7 +1125,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
                         providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
                         providerAPI.getContext().equals(usage.getContext())) {
-
                     APIDestinationUsageDTO usageDTO = new APIDestinationUsageDTO();
                     usageDTO.setApiName(usage.getApiName());
                     usageDTO.setVersion(usage.getApiVersion());
@@ -1217,7 +1151,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             String toDate) throws APIMgtUsageQueryServiceClientException {
 
         StringBuilder query = new StringBuilder();
-
         //extending lucene query with time ranges
         try {
             query.append(APIUsageStatisticsClientConstants.REQUEST_TIME).append(": [")
@@ -1238,7 +1171,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query.toString(), 3,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_DEST_FACET,
                 APIUsageStatisticsClientConstants.API_USAGEBY_DESTINATION_SUMMARY);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -1249,7 +1181,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APIUsageByDestinationValue>>>() {
         }.getType();
-
         List<Result<APIUsageByDestinationValue>> obj = null;
 
         //do post and get the results
@@ -1262,7 +1193,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIUsageByDestination> usageByResourcePath = new ArrayList<APIUsageByDestination>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return usageByResourcePath;
@@ -1273,19 +1203,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIUsageByDestination usage;
         for (Result<APIUsageByDestinationValue> result : obj) {
             APIUsageByDestinationValue v = result.getValues();
-
             usage = new APIUsageByDestination();
             usage.setRequestCount(v.getTotalRequesCount());
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setContext(v.getColumnNames().get(2));
             usage.setDestination(v.getColumnNames().get(3));
-
             usageByResourcePath.add(usage);
         }
-
         return usageByResourcePath;
-
     }
 
     /**
@@ -1319,17 +1245,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(usage.getApiName()) &&
                         providerAPI.getId().getVersion().equals(usage.getApiVersion()) &&
                         providerAPI.getContext().equals(usage.getContext())) {
-
                     String[] apiData = { usage.getApiName(), usage.getApiVersion(),
                             providerAPI.getId().getProviderName() };
-
                     //format result using json array
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add(0, apiData[0]);
                     jsonArray.add(1, apiData[1]);
                     jsonArray.add(2, apiData[2]);
                     String apiName = jsonArray.toJSONString();
-
                     //get the api usages
                     APIUsageDTO usageDTO = usageByAPIs.get(apiName);
                     if (usageDTO != null) {
@@ -1392,7 +1315,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         Type type = new TypeToken<List<Result<UsageByAPIsValue>>>() {
         }.getType();
-
         List<Result<UsageByAPIsValue>> obj = null;
 
         //do post and get the results
@@ -1405,7 +1327,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIUsage> usageDataList = new ArrayList<APIUsage>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return usageDataList;
@@ -1416,16 +1337,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIUsage usage;
         for (Result<UsageByAPIsValue> result : obj) {
             UsageByAPIsValue v = result.getValues();
-
             usage = new APIUsage();
             usage.setRequestCount(v.getTotalRequestCount());
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setContext(v.getColumnNames().get(2));
-
             usageDataList.add(usage);
         }
-
         return usageDataList;
     }
 
@@ -1445,10 +1363,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //get the response fault count data of the apis
         List<APIResponseFaultCount> faultyData = this.getAPIResponseFaultCountData(providerName, fromDate, toDate);
-
         //get all the apis of the provider
         List<API> providerAPIs = getAPIsByProvider(providerName);
-
         List<APIResponseFaultCountDTO> faultyCount = new ArrayList<APIResponseFaultCountDTO>();
         List<APIVersionUsageDTO> apiVersionUsageList;
         //APIVersionUsageDTO apiVersionUsageDTO;
@@ -1461,13 +1377,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 if (providerAPI.getId().getApiName().equals(fault.getApiName()) &&
                         providerAPI.getId().getVersion().equals(fault.getApiVersion()) &&
                         providerAPI.getContext().equals(fault.getContext())) {
-
                     APIResponseFaultCountDTO faultyDTO = new APIResponseFaultCountDTO();
                     faultyDTO.setApiName(fault.getApiName());
                     faultyDTO.setVersion(fault.getApiVersion());
                     faultyDTO.setContext(fault.getContext());
                     faultyDTO.setCount(fault.getFaultCount());
-
                     //get the usage of the apis individually
                     apiVersionUsageList = getUsageByAPIVersions(providerName, fault.getApiName(), fromDate, toDate);
                     for (APIVersionUsageDTO apiVersionUsageDTO : apiVersionUsageList) {
@@ -1475,11 +1389,9 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         if (apiVersionUsageDTO.getVersion().equals(fault.getApiVersion())) {
                             //get all the request count
                             long requestCount = apiVersionUsageDTO.getCount();
-
                             //get the fault percentage
                             double faultPercentage = ((double) fault.getFaultCount()) / requestCount * 100;
                             DecimalFormat twoDForm = new DecimalFormat("#.##");
-
                             //format fault percentage
                             faultPercentage = Double.valueOf(twoDForm.format(faultPercentage));
                             faultyDTO.setFaultPercentage(faultPercentage);
@@ -1487,9 +1399,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                             break;
                         }
                     }
-
                     faultyCount.add(faultyDTO);
-
                 }
             }
         }
@@ -1531,7 +1441,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query.toString(), 3,
                 APIUsageStatisticsClientConstants.API_VERSION_APIPUBLISHER_CONTEXT_FACET,
                 APIUsageStatisticsClientConstants.API_FAULT_SUMMARY);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_FAULT_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -1542,7 +1451,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APIResponseFaultCountValue>>>() {
         }.getType();
-
         List<Result<APIResponseFaultCountValue>> obj = null;
 
         //do post and get the results
@@ -1555,7 +1463,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIResponseFaultCount> faultUsage = new ArrayList<APIResponseFaultCount>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return faultUsage;
@@ -1566,18 +1473,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIResponseFaultCount usage;
         for (Result<APIResponseFaultCountValue> result : obj) {
             APIResponseFaultCountValue v = result.getValues();
-
             usage = new APIResponseFaultCount();
             usage.setFaultCount(v.getTotalFaultCount());
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setContext(v.getColumnNames().get(3));
-
             faultUsage.add(usage);
         }
-
         return faultUsage;
-
     }
 
     //Throttling related Methods
@@ -1604,7 +1507,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //set the query to match tenant
         StringBuilder query = new StringBuilder(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append(':')
                 .append('\"').append(tenantDomain).append('\"');
-
         //if application or api is no available return empty result
         if (apiName.contains("No APIs Available")) {
             return new ArrayList<APIThrottlingOverTimeDTO>();
@@ -1616,13 +1518,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
                     .append("\"");
         }
-
         //set the application name
         if (!StringUtils.isEmpty(appName)) {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.APPLICATION_NAME).append(":\"")
                     .append(appName).append("\"");
         }
-
         //lucene query with time ranges
         try {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.API).append(":\"").append(apiName)
@@ -1637,16 +1537,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query.toString(), 4,
                 APIUsageStatisticsClientConstants.API_YEAR_MONTH_WEEK_DAY_FACET,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
-
         //set the aggregate request to get success count
         AggregateField success_request_count_fields = new AggregateField(
                 APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
                 APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(success_request_count_fields);
-
         //set the aggregate request to get success throttle count
         AggregateField throttle_out_count_fields = new AggregateField(
                 APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT, APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -1657,7 +1554,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<ThrottleDataOfAPIAndApplicationValue>>>() {
         }.getType();
-
         //do post and get the results
         List<Result<ThrottleDataOfAPIAndApplicationValue>> obj = null;
         try {
@@ -1672,14 +1568,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //getColumnNames 0 index contain the api name, index 1 contain the publisher, 2 index contain application
         List<APIThrottlingOverTimeDTO> throttlingData = new ArrayList<APIThrottlingOverTimeDTO>();
         APIThrottlingOverTimeDTO usage;
-
         List<Result<ThrottleDataOfAPIAndApplicationValue>> sortedResult = getThrottleDataOfAPIAndApplicationSortedData(obj);
 
         for (Result<ThrottleDataOfAPIAndApplicationValue> result : sortedResult) {
             ThrottleDataOfAPIAndApplicationValue v = result.getValues();
-
             String api = v.getColumnNames().get(0);
-
             String time = RestClientUtil.longToDate(v.getMax_request_time());
             usage = new APIThrottlingOverTimeDTO(api, "publisher", v.getSuccess_request_count(),
                     v.getThrottle_out_count(), time);
@@ -1708,19 +1601,16 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //set the query to match tenant
         StringBuilder query = new StringBuilder(
                 APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
-
         //if application or api is no available return empty result
         if (appName.contains("No Apps Available")) {
             return new ArrayList<APIThrottlingOverTimeDTO>();
         }
-
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
             provider = APIUtil.getUserNameWithTenantSuffix(provider);
             query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
                     .append("\"");
         }
-
         //lucene query with time ranges
         try {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.APPLICATION_NAME).append(":\"")
@@ -1735,7 +1625,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query.toString(), 1,
                 APIUsageStatisticsClientConstants.API_YEAR_MONTH_WEEK_DAY_FACET,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
-
         //set the aggregate request to get success count
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField success_request_count_field = new AggregateField(
@@ -1743,12 +1632,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
                 APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(success_request_count_field);
-
         //set the aggregate request to get max time
         AggregateField max_request_time_fields = new AggregateField(APIUsageStatisticsClientConstants.REQUEST_TIME,
                 APIUsageStatisticsClientConstants.AGGREGATE_MAX, APIUsageStatisticsClientConstants.REQUEST_TIME);
         fields.add(max_request_time_fields);
-
         //set the aggregate request to get throttle count
         AggregateField throttle_out_count_fields = new AggregateField(
                 APIUsageStatisticsClientConstants.THROTTLED_OUT_COUNT, APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -1760,7 +1647,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
         }.getType();
-
         //do post and get the results
         List<Result<APIsForThrottleStatsValue>> obj = null;
         try {
@@ -1817,14 +1703,12 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query.toString(), 0,
                 APIUsageStatisticsClientConstants.API_YEAR_MONTH_WEEK_DAY_FACET,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
                 APIUsageStatisticsClientConstants.ALIAS_SUCCESS_REQUEST_COUNT);
         fields.add(field);
         request.setAggregateFields(fields);
-
         //get the type of the required result type
         Type type = new TypeToken<List<Result<APIsForThrottleStatsValue>>>() {
         }.getType();
@@ -1844,7 +1728,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (obj == null) {
             return throttlingAPIData;
         }
-
         for (Result<APIsForThrottleStatsValue> result : obj) {
             APIsForThrottleStatsValue v = result.getValues();
             //getColumnNames 1 st element is api name
@@ -1878,7 +1761,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":\"").append(provider)
                     .append("\"");
         }
-
         //set the query to find specific api
         if (apiName != null) {
             if (apiName.contains("No APIs Available")) {
@@ -1892,7 +1774,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query.toString(), 0,
                 APIUsageStatisticsClientConstants.APPLICATIONNAME_FACET,
                 APIUsageStatisticsClientConstants.API_THROTTLED_OUT_SUMMARY);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.SUCCESS_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -1904,7 +1785,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         Type type = new TypeToken<List<Result<APPsForThrottleStatsValue>>>() {
         }.getType();
         List<Result<APPsForThrottleStatsValue>> obj = null;
-
         //do post and get the results
         try {
             obj = restClient.doPost(request, type);
@@ -1919,7 +1799,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (obj == null) {
             return throttlingAppData;
         }
-
         for (Result<APPsForThrottleStatsValue> result : obj) {
             APPsForThrottleStatsValue v = result.getValues();
             //getColumnNames 1 st element is app name
@@ -1948,7 +1827,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         List<APIUsage> usageData = this
                 .getUsageByAPIVersionsData(APIUsageStatisticsClientConstants.API_VERSION_USAGE_SUMMARY, fromDate,
                         toDate, apiName);
-
         //get all the apis of the provider
         List<API> providerAPIs = getAPIsByProvider(providerName);
         Map<String, APIVersionUsageDTO> usageByVersions = new TreeMap<String, APIVersionUsageDTO>();
@@ -1999,7 +1877,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //creating request bean
         SearchRequestBean request = new SearchRequestBean(query.toString(), 2,
                 APIUsageStatisticsClientConstants.API_VERSION_CONTEXT_FACET, tableName);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -2010,7 +1887,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<UsageByAPIVersionsValue>>>() {
         }.getType();
-
         List<Result<UsageByAPIVersionsValue>> obj = null;
 
         //do post and get the results
@@ -2023,7 +1899,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIUsage> usageDataList = new ArrayList<APIUsage>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return usageDataList;
@@ -2034,18 +1909,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIUsage usage;
         for (Result<UsageByAPIVersionsValue> result : obj) {
             UsageByAPIVersionsValue v = result.getValues();
-
             usage = new APIUsage();
             usage.setRequestCount(v.getTotalRequestCount());
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setContext(v.getColumnNames().get(2));
-
             usageDataList.add(usage);
         }
-
         return usageDataList;
-
     }
 
     /**
@@ -2062,13 +1933,10 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (!isTableExist(APIUsageStatisticsClientConstants.DAS_TABLE_API_UTIL)) {
             return new ArrayList<APIFirstAccess>();
         }
-
         //getting the search bean
         APIFirstAccess firstAccess = this.queryFirstAccess(APIUsageStatisticsClientConstants.DAS_TABLE_API_UTIL);
         List<APIFirstAccess> APIFirstAccessList = new ArrayList<APIFirstAccess>();
-
         APIFirstAccess fTime;
-
         //if result are not null create the result and return
         if (firstAccess != null) {
             fTime = new APIFirstAccess(firstAccess.getYear(), firstAccess.getMonth(), firstAccess.getDay());
@@ -2092,9 +1960,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type for expected result
         Type type = new TypeToken<List<Result<FirstAccessValue>>>() {
         }.getType();
-
         List<Result<FirstAccessValue>> obj = null;
-
         //do post and get the results
         try {
             obj = restClient.doPost(request, type);
@@ -2116,16 +1982,13 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             //set the time to calendar
             Calendar cc = Calendar.getInstance();
             cc.setTimeInMillis(accessTime);
-
             //get the date as string
             String year = cc.get(Calendar.YEAR) + "";
             String month = cc.get(Calendar.MONTH) + "";
             String day = cc.get(Calendar.DATE) + "";
-
             firstAccess = new APIFirstAccess(year, month, day);
         }
         return firstAccess;
-
     }
 
     /**
@@ -2136,7 +1999,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     private boolean isTableExist(String tableName) throws APIMgtUsageQueryServiceClientException {
-
         TableExistResponseBean status;
         //invoke restClient isTableExist function
         try {
@@ -2148,10 +2010,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             log.error("Error occurred while Connecting to DAS REST API");
             throw new APIMgtUsageQueryServiceClientException("Error occurred while Connecting to DAS REST API", e);
         }
-
         //status contain the "success" if table present
         return status.getStatus().equalsIgnoreCase("success");
-
     }
 
     /**
@@ -2180,7 +2040,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
             usageData.add(other);
         }
-
         return usageData;
     }
 
@@ -2210,7 +2069,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
             usageData.add(other);
         }
-
         return usageData;
     }
 
@@ -2249,13 +2107,11 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     @Override
     public void deployArtifacts(String url, String user, String pass) throws Exception {
-
         //name of the capp to deploy
         String cAppName = "API_Manager_Analytics_REST.car";
         String cAppPath = System.getProperty("carbon.home") + File.separator + "statistics";
         cAppPath = cAppPath + File.separator + cAppName;
         File file = new File(cAppPath);
-
         //get the byte array of file
         byte[] byteArray = FileUtils.readFileToByteArray(file);
         DataHandler dataHandler = new DataHandler(byteArray,
@@ -2280,7 +2136,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         fileItem[0].setDataHandler(dataHandler);
         fileItem[0].setFileName(cAppName);
         fileItem[0].setFileType("jar");
-
         //upload the artifacts
         stub.uploadApp(fileItem);
     }
@@ -2316,7 +2171,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 }
             }
         }
-
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
@@ -2342,7 +2196,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                         api.getId().getApiName().equals(apiName) &&
                         api.getId().getVersion().equals(apiVersion) &&
                         apiVersion.equals(usageEntry.getApiVersion())) {
-
                     PerUserAPIUsageDTO usageDTO = usageByUsername.get(usageEntry.getUsername());
                     if (usageDTO != null) {
                         usageDTO.setCount(usageDTO.getCount() + usageEntry.getRequestCount());
@@ -2356,7 +2209,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 }
             }
         }
-
         return getTopEntries(new ArrayList<PerUserAPIUsageDTO>(usageByUsername.values()), limit);
     }
 
@@ -2371,7 +2223,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             throws APIMgtUsageQueryServiceClientException {
 
         String query = APIUsageStatisticsClientConstants.API + ":\"" + apiName + "\"";
-
         if (apiVersion != null) {
             query += " AND " + APIUsageStatisticsClientConstants.VERSION + ":\"" + apiVersion + "\"";
         }
@@ -2380,7 +2231,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         SearchRequestBean request = new SearchRequestBean(query, 3,
                 APIUsageStatisticsClientConstants.API_VERSION_USERID_CONTEXT_FACET,
                 APIUsageStatisticsClientConstants.API_REQUEST_SUMMARY);
-
         ArrayList<AggregateField> fields = new ArrayList<AggregateField>();
         AggregateField field = new AggregateField(APIUsageStatisticsClientConstants.TOTAL_REQUEST_COUNT,
                 APIUsageStatisticsClientConstants.AGGREGATE_SUM,
@@ -2391,9 +2241,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //get the type of the required result type
         Type type = new TypeToken<List<Result<UsageOfAPIValues>>>() {
         }.getType();
-
         List<Result<UsageOfAPIValues>> obj = null;
-
         //do post and get the results
         try {
             obj = restClient.doPost(request, type);
@@ -2404,7 +2252,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         }
 
         List<APIUsageByUser> apiUsage = new ArrayList<APIUsageByUser>();
-
         //check the result status
         if (obj == null || obj.isEmpty()) {
             return apiUsage;
@@ -2415,7 +2262,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         APIUsageByUser usage;
         for (Result<UsageOfAPIValues> result : obj) {
             UsageOfAPIValues v = result.getValues();
-
             usage = new APIUsageByUser();
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setUsername(v.getColumnNames().get(2));
@@ -2423,9 +2269,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             usage.setRequestCount(v.getTotalRequestCount());
             apiUsage.add(usage);
         }
-
         return apiUsage;
-
     }
 
     /**
@@ -2461,7 +2305,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 usageData.remove(limit);
             }
         }
-
         return usageData;
     }
 
@@ -2503,7 +2346,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 return (int) (o2.getValues().getMax_request_time() - o1.getValues().getMax_request_time());
             }
         });
-
         return usageData;
     }
 
