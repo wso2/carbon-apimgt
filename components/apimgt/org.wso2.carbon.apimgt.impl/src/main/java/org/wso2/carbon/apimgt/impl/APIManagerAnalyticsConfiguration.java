@@ -45,6 +45,8 @@ public class APIManagerAnalyticsConfiguration {
     private String faultStreamVersion;
     private String throttleStreamName;
     private String throttleStreamVersion;
+    private String executionTimeStreamName;
+    private String executionTimeStreamVersion;
 
     private APIManagerAnalyticsConfiguration() {
         analyticsEnabled = APIUtil.isAnalyticsEnabled();
@@ -87,6 +89,11 @@ public class APIManagerAnalyticsConfiguration {
         throttleStreamVersion = config.getFirstProperty(APIConstants.API_THRORRLE_STREAM_VERSION);
         if (throttleStreamName == null || throttleStreamVersion == null) {
             log.error("Throttle stream name or version is null. Check api-manager.xml");
+        }
+        executionTimeStreamName = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_NAME);
+        executionTimeStreamVersion = config.getFirstProperty(APIConstants.API_EXECUTION_TIME_STREAM_VERSION);
+        if (executionTimeStreamName == null || executionTimeStreamVersion == null) {
+            log.error("Execution Time stream name or version is null. Check api-manager.xml");
         }
         String build = config.getFirstProperty(APIConstants.API_USAGE_BUILD_MSG);
         buildMsg = build != null && JavaUtils.isTrueExplicitly(build);
@@ -166,5 +173,13 @@ public class APIManagerAnalyticsConfiguration {
 
     public boolean isBuildMsg() {
         return buildMsg;
+    }
+
+    public String getExecutionTimeStreamVersion() {
+        return executionTimeStreamVersion;
+    }
+
+    public String getExecutionTimeStreamName() {
+        return executionTimeStreamName;
     }
 }

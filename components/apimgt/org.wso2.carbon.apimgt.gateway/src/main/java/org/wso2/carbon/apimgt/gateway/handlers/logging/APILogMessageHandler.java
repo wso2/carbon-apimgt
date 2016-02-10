@@ -24,10 +24,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtCommonExtensionHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.Date;
@@ -42,7 +42,7 @@ import java.util.TreeMap;
  * is also invoked. If no extension is found either at the global level or at the per API level
  * this mediator simply returns true.
  */
-public class APILogMessageHandler extends AbstractHandler {
+public class APILogMessageHandler extends APIMgtCommonExtensionHandler {
 
     private static final String DIRECTION_IN = "In";
     private static final String DIRECTION_OUT = "Out";
@@ -149,10 +149,12 @@ public class APILogMessageHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+        super.handleRequest(messageContext);
         return !log.isDebugEnabled() || mediate(messageContext, DIRECTION_IN);
     }
 
     public boolean handleResponse(MessageContext messageContext) {
+        super.handleResponse(messageContext);
         return !log.isDebugEnabled() || mediate(messageContext, DIRECTION_OUT);
     }
 }

@@ -19,14 +19,9 @@ package org.wso2.carbon.apimgt.usage.publisher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeFaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeRequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.DataBridgeThrottlePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
+import org.json.simple.parser.JSONParser;
+import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
+import org.wso2.carbon.apimgt.usage.publisher.dto.*;
 import org.wso2.carbon.apimgt.usage.publisher.internal.DataPublisherAlreadyExistsException;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
 import org.wso2.carbon.context.CarbonContext;
@@ -111,6 +106,19 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                             DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName(),
                             DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion());
                 }
+                //If Execution Time Stream Definition does not exist.
+                if (!dataPublisher.isStreamDefinitionAdded(DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                        getExecutionTimeStreamName(), DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                        getExecutionTimeStreamVersion())) {
+
+                    //Get Throttle Stream Definition
+                    String executionStreamDefinition = DataBridgeExecutionTimePublisherDTO.getStreamDefinition();
+                    new JSONParser().parse(executionStreamDefinition);
+                    //Add Throttle Stream Definition;
+                    dataPublisher.addStreamDefinition(executionStreamDefinition,
+                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName(),
+                            DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion());
+                }
             }
         }catch (Exception e){
             log.error("Error initializing APIMgtUsageDataBridgeDataPublisher", e);
@@ -173,6 +181,22 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
 
         } catch (AgentException e) {
             log.error("Error while publishing Throttle exceed event", e);
+        }
+    }
+
+    @Override
+    public void publishEvent(ExecutionTimePublisherDTO executionTimePublisherDTO) {
+        DataBridgeExecutionTimePublisherDTO dataBridgeExecutionTimePublisherDTO = new
+                DataBridgeExecutionTimePublisherDTO(executionTimePublisherDTO);
+        try {
+            //Publish Throttle data
+            dataPublisher.publish(DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName(),
+                    DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion(),
+                    System.currentTimeMillis(), new Object[]{"external"}, null,
+                    (Object[]) dataBridgeExecutionTimePublisherDTO.createPayload());
+
+        } catch (AgentException e) {
+            log.error("Error while publishing Execution time events", e);
         }
     }
 

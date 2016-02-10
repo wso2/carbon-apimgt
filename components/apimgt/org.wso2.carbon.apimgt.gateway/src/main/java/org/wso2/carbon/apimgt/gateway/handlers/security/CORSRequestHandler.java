@@ -20,27 +20,27 @@ import org.apache.axis2.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.*;
+import org.apache.synapse.rest.API;
+import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.rest.RESTUtils;
+import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtCommonExtensionHandler;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
+public class CORSRequestHandler extends APIMgtCommonExtensionHandler {
 
 	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
 	private String apiImplementationType;
@@ -91,7 +91,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
 	public boolean handleRequest(MessageContext messageContext) {
-        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+		super.handleRequest(messageContext);
+
+		long executionStartTime = System.currentTimeMillis();
+		Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
 
@@ -180,12 +183,14 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				status = false;
 			}
 		} finally {
-            context.stop();
-        }
+			publishExecutionTime(messageContext, executionStartTime, "CORS");
+			context.stop();
+		}
         return status;
     }
 
 	public boolean handleResponse(MessageContext messageContext) {
+		super.handleResponse(messageContext);
 		Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
 		if (corsSequence != null) {
 			corsSequence.mediate(messageContext);

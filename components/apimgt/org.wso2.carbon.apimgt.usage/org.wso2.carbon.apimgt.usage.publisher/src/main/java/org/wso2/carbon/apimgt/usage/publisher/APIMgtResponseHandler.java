@@ -45,54 +45,14 @@ import java.util.Map;
 * This mediator is to publish events upon success API invocations
 */
 
-public class APIMgtResponseHandler extends AbstractMediator {
-
-    private boolean skipEventReceiverConnection;
-
-    private volatile APIMgtUsageDataPublisher publisher;
+public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
 
     public APIMgtResponseHandler() {
-        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
-            this.initializeDataPublisher();
-        }
-    }
-
-    private void initializeDataPublisher() {
-
-        skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                isSkipEventReceiverConnection();
-        if (!DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled() ||
-            skipEventReceiverConnection) {
-            return;
-        }
-        if (publisher == null) {
-            synchronized (this) {
-                if (publisher == null) {
-                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                            getPublisherClass();
-                    try {
-                        log.debug("Instantiating Data Publisher");
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                        publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
-                        publisher.init();
-                    } catch (ClassNotFoundException e) {
-                        log.error("Class not found " + publisherClass, e);
-                    } catch (InstantiationException e) {
-                        log.error("Error instantiating " + publisherClass, e);
-                    } catch (IllegalAccessException e) {
-                        log.error("Illegal access to " + publisherClass, e);
-                    } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
-                    }
-                }
-            }
-        }
+        super();
     }
 
     public boolean mediate(MessageContext mc) {
-
+        super.mediate(mc);
         if (publisher == null) {
             this.initializeDataPublisher();
         }

@@ -22,7 +22,6 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.clustering.ClusteringAgent;
 import org.apache.axis2.clustering.ClusteringFault;
 import org.apache.axis2.clustering.state.Replicator;
 import org.apache.axis2.context.ConfigurationContext;
@@ -48,7 +47,6 @@ import org.apache.synapse.commons.throttle.core.ThrottleFactory;
 import org.apache.synapse.commons.throttle.core.factory.ThrottleContextFactory;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
@@ -56,6 +54,7 @@ import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtCommonExtensionHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -82,7 +81,7 @@ import java.util.TreeMap;
  * ThrottleConstants.API_THROTTLE_OUT_HANDLER and executes it. Following that it will send
  * a HTTP 503 response to the API consumer.
  */
-public class APIThrottleHandler extends AbstractHandler {
+public class APIThrottleHandler extends APIMgtCommonExtensionHandler {
 
     private static final Log log = LogFactory.getLog(APIThrottleHandler.class);
 
@@ -157,17 +156,21 @@ public class APIThrottleHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
+        super.handleRequest(messageContext);
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
+        long executionStartTime = System.currentTimeMillis();
         try {
             return doThrottle(messageContext);
         } finally {
+            publishExecutionTime(messageContext,executionStartTime,"Throttling");
             context.stop();
         }
     }
 
     public boolean handleResponse(MessageContext messageContext) {
+        super.handleResponse(messageContext);
         return doThrottle(messageContext);
     }
 

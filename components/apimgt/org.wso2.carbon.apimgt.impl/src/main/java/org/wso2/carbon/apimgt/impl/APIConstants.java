@@ -610,6 +610,7 @@ public final class APIConstants {
     public static final String API_USAGE_RESPONSE_STREAM = API_USAGE_STREAMS + "Response.";
     public static final String API_USAGE_FAULT_STREAM = API_USAGE_STREAMS + "Fault.";
     public static final String API_USAGE_THROTTLE_STREAM = API_USAGE_STREAMS + "Throttle.";
+    public static final String API_USAGE_EXECUTION_TIME_STREAM = API_USAGE_STREAMS + "ExecutionTime.";
     public static final String API_REQUEST_STREAM_NAME = API_USAGE_REQUEST_STREAM + "Name";
     public static final String API_REQUEST_STREAM_VERSION = API_USAGE_REQUEST_STREAM + "Version";
     public static final String API_RESPONSE_STREAM_NAME = API_USAGE_RESPONSE_STREAM + "Name";
@@ -618,6 +619,9 @@ public final class APIConstants {
     public static final String API_FAULT_STREAM_VERSION = API_USAGE_FAULT_STREAM + "Version";
     public static final String API_THROTTLE_STREAM_NAME = API_USAGE_THROTTLE_STREAM + "Name";
     public static final String API_THRORRLE_STREAM_VERSION = API_USAGE_THROTTLE_STREAM + "Version";
+    public static final String API_EXECUTION_TIME_STREAM_NAME = API_USAGE_EXECUTION_TIME_STREAM + "Name";
+    public static final String API_EXECUTION_TIME_STREAM_VERSION = API_USAGE_EXECUTION_TIME_STREAM + "Version";
+
     public static final String API_USAGE_WF_STREAM = API_USAGE_STREAMS + "Workflow.";
     public static final String API_WF_STREAM_NAME = API_USAGE_WF_STREAM + "Name";
     public static final String API_WF_STREAM_VERSION = API_USAGE_WF_STREAM + "Version";

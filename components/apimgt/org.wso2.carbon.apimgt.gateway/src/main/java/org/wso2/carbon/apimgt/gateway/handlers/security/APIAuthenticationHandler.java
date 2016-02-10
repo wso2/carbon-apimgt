@@ -16,7 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import edu.umd.cs.findbugs.annotations.*;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -30,23 +29,20 @@ import org.apache.http.HttpStatus;
 import org.apache.synapse.*;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtCommonExtensionHandler;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
@@ -66,8 +62,7 @@ import java.util.regex.Pattern;
  * If no authentication errors are encountered, this will add some AuthenticationContext
  * information to the request and let it through to the next handler in the chain.
  */
-public class APIAuthenticationHandler extends AbstractHandler implements ManagedLifecycle {
-
+public class APIAuthenticationHandler extends APIMgtCommonExtensionHandler {
     private static final Log log = LogFactory.getLog(APIAuthenticationHandler.class);
 
     private volatile Authenticator authenticator;
@@ -116,10 +111,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "EXS_EXCEPTION_SOFTENING_RETURN_FALSE",
             justification = "Error is sent through payload")
     public boolean handleRequest(MessageContext messageContext) {
+        super.handleRequest(messageContext);
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
         Timer.Context context = timer.start();
-
+        long executionStartTime = System.currentTimeMillis();
         long startTime = System.nanoTime();
         long endTime;
         long difference;
@@ -165,16 +161,16 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
             handleAuthFailure(messageContext, e);
         } finally {
+            publishExecutionTime(messageContext, executionStartTime,"Authentication");
             context.stop();
+
         }
+
         return false;
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        if (APIUtil.isStatsEnabled()) {
-            long currentTime = System.currentTimeMillis();
-            messageContext.setProperty("api.ut.backendRequestEndTime", Long.toString(currentTime));
-        }
+        super.handleResponse(messageContext);
         return true;
     }
 

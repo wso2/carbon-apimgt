@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.RequestPublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.usage.publisher.internal.UsageComponent;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
@@ -72,8 +71,10 @@ public class APIMgtUsageHandler extends AbstractHandler {
                     if (publisher == null) {
                         try {
                             log.debug("Instantiating Data Publisher");
-                            publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
-                            publisher.init();
+
+                            APIMgtUsageDataPublisher tempPublisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
+                            tempPublisher.init();
+                            publisher = tempPublisher;
                         } catch (ClassNotFoundException e) {
                             log.error("Class not found " + publisherClass, e);
                         } catch (InstantiationException e) {
@@ -113,17 +114,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
                 apiPublisher = APIUtil.getAPIProviderFromRESTAPI(api_version,tenantDomain);
             }
 
-            int index = api_version.indexOf("--");
-
-            if (index != -1) {
-                api_version = api_version.substring(index + 2);
-            }
-
-            String api = api_version.split(":")[0];
-            index = api.indexOf("--");
-            if (index != -1) {
-                api = api.substring(index + 2);
-            }
+            String api = APIUtil.getAPINamefromRESTAPI(api_version);
             String version = (String) mc.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
             String resource = extractResource(mc);
             String method = (String) (axis2MsgContext.getProperty(

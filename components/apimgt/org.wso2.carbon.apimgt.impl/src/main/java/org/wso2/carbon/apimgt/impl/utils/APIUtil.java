@@ -5204,4 +5204,23 @@ public final class APIUtil {
         List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
         return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
     }
+
+    /**
+     * Used to get API name from synapse API Name
+     * @param api_version API name from synapse configuration
+     * @return api name according to the tenant
+     */
+    public static String getAPINamefromRESTAPI(String api_version) {
+        int index = api_version.indexOf("--");
+        String api;
+        if (index != -1) {
+            api_version = api_version.substring(index + 2);
+        }
+        api = api_version.split(":")[0];
+        index = api.indexOf("--");
+        if (index != -1) {
+            api = api.substring(index + 2);
+        }
+        return api;
+    }
 }

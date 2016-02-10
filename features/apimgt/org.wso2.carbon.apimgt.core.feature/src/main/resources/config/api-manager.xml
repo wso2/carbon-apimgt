@@ -286,6 +286,11 @@
                 <Name>org.wso2.apimgt.statistics.workflow</Name>
                 <Version>1.0.0</Version>
             </Workflow>
+            <ExecutionTime>
+                <Name>org.wso2.apimgt.statistics.execution.time</Name>
+                <Version>1.0.0</Version>
+            </ExecutionTime>
+
         </Streams>
 
     </APIUsageTracking>
