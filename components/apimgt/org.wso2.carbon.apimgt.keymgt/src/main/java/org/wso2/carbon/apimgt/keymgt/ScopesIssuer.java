@@ -1,17 +1,19 @@
 /*
- *  Copyright WSO2 Inc.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 package org.wso2.carbon.apimgt.keymgt;
@@ -21,8 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth2.token.OAuthTokenReqMessageContext;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -49,16 +52,16 @@ public class ScopesIssuer {
      * Singleton of ScopeIssuer.*
      */
     private static ScopesIssuer scopesIssuer;
+    
+    private ScopesIssuer() {
+    }
 
     public static void loadInstance(List<String> whitelist) {
         scopesIssuer = new ScopesIssuer();
         if (whitelist != null && !whitelist.isEmpty()) {
             scopesIssuer.scopeSkipList.addAll(whitelist);
         }
-    }
-
-    private ScopesIssuer() {
-    }
+    }  
 
     public static ScopesIssuer getInstance() {
         return scopesIssuer;
@@ -82,7 +85,7 @@ public class ScopesIssuer {
         Map<String, String> restAPIScopesOfCurrentTenant;
         try {
             Map<String, String> appScopes;
-            ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
@@ -94,7 +97,8 @@ public class ScopesIssuer {
             if (restAPIScopesOfCurrentTenant!= null) {
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
             }else {
-                restAPIScopesOfCurrentTenant = APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                restAPIScopesOfCurrentTenant = APIUtil
+                        .getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
                 //call load tenant config for rest API.
                 //then put cache
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
@@ -115,7 +119,7 @@ public class ScopesIssuer {
             }
 
             int tenantId;
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
             UserStoreManager userStoreManager;
             String[] userRoles;
 
@@ -160,9 +164,10 @@ public class ScopesIssuer {
                         authorizedScopes.add(scope);
                     }
                 }
-                //The requested scope is defined for the context of the App but no roles have been associated with the scope
-                //OR
-                //The scope string starts with 'device_'.
+                // The requested scope is defined for the context of the App but no roles have been associated with the
+                // scope
+                // OR
+                // The scope string starts with 'device_'.
                 else if (appScopes.containsKey(scope) || isWhiteListedScope(scope)) {
                     authorizedScopes.add(scope);
                 }
@@ -174,7 +179,7 @@ public class ScopesIssuer {
                 tokReqMsgCtx.setScope(defaultScope);
             }
         } catch (APIManagementException e) {
-            log.error("Error while getting scopes of application " + e.getMessage());
+            log.error("Error while getting scopes of application " + e.getMessage(), e);
             return false;
         }
         return true;

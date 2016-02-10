@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
@@ -57,12 +56,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     /**
      * Retrieves all the applications that the user has access to
-     * 
-     * @param groupId group Id
-     * @param query search condition
-     * @param limit max number of objects returns
-     * @param offset starting index
-     * @param accept accepted media type of the client
+     *
+     * @param groupId     group Id
+     * @param query       search condition
+     * @param limit       max number of objects returns
+     * @param offset      starting index
+     * @param accept      accepted media type of the client
      * @param ifNoneMatch If-None-Match header value
      * @return Response object containing resulted applications
      */
@@ -73,7 +72,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
         // As a improvement, we can check admin privileges of the user and honor groupId.
-        groupId = RestAPIStoreUtils.getLoggedInUserGroupId();
+        groupId = RestApiUtil.getLoggedInUserGroupId();
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -99,15 +98,16 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             return Response.ok().entity(applicationListDTO).build();
         } catch (APIManagementException e) {
-            handleException("Error while retrieving applications of the user " + username, e);
-            return null;
+            RestApiUtil
+                    .handleInternalServerError("Error while retrieving applications of the user " + username, e, log);
         }
+        return null;
     }
 
     /**
      * Creates a new application
-     * 
-     * @param body request body containing application details
+     *
+     * @param body        request body containing application details
      * @param contentType Content-Type header value
      * @return 201 response if successful
      */
@@ -123,10 +123,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             if (tierName != null) {
                 Map<String, Tier> appTierMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
                 if (appTierMap == null || RestApiUtil.findTier(appTierMap.values(), tierName) == null) {
-                    throw RestApiUtil.buildBadRequestException("Specified tier " + tierName + " is invalid");
+                    RestApiUtil.handleBadRequest("Specified tier " + tierName + " is invalid", log);
                 }
             } else {
-                throw RestApiUtil.buildBadRequestException("Throttling tier cannot be null");
+                RestApiUtil.handleBadRequest("Throttling tier cannot be null", log);
             }
 
             //subscriber field of the body is not honored. It is taken from the context
@@ -134,7 +134,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
             //setting the proper groupId. This is not honored for now.
             // Later we can honor it by checking admin privileges of the user.
-            String groupId = RestAPIStoreUtils.getLoggedInUserGroupId();
+            String groupId = RestApiUtil.getLoggedInUserGroupId();
             application.setGroupId(groupId);
             int applicationId = apiConsumer.addApplication(application, username);
 
@@ -148,21 +148,24 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             return Response.created(location).entity(createdApplicationDTO).build();
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceAlreadyExists(e)) {
-                throw RestApiUtil.buildConflictException("An application already exists with name " + body.getName());
+                RestApiUtil.handleResourceAlreadyExistsError(
+                        "An application already exists with name " + body.getName(), e,
+                        log);
             } else {
-                handleException("Error while adding a new application for the user " + username, e);
-                return null;
+                RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
+                        e, log);
             }
         }
+        return null;
     }
 
     /**
      * Generate keys for a application
-     * 
-     * @param applicationId application identifier
-     * @param body request body
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param applicationId     application identifier
+     * @param body              request body
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return A response object containing application keys
      */
@@ -192,16 +195,20 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
                     return Response.ok().entity(applicationKeyDTO).build();
                 } else {
-                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.rootCauseMessageMatches(e, "primary key violation")) {
-                throw RestApiUtil.buildConflictException("Keys already generated for the application " + applicationId);
-            } else{
-                handleException("Error while generating keys for application " + applicationId, e);
+                RestApiUtil
+                        .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
+                                e,
+                                log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while generating keys for application " + applicationId, e,
+                        log);
             }
         }
         return null;
@@ -209,10 +216,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     /**
      * Get an application by Id
-     * 
-     * @param applicationId application identifier
-     * @param accept accepted media type of the client
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param applicationId   application identifier
+     * @param accept          accepted media type of the client
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @return response containing the required application object
      */
@@ -228,24 +235,24 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                     return Response.ok().entity(applicationDTO).build();
                 } else {
-                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            handleException("Error while retrieving application " + applicationId, e);
-            return null;
+            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
         }
+        return null;
     }
 
     /**
      * Update an application by Id
-     * 
-     * @param applicationId application identifier
-     * @param body request body containing application details
-     * @param contentType Content-Type header value
-     * @param ifMatch If-Match header value
+     *
+     * @param applicationId     application identifier
+     * @param body              request body containing application details
+     * @param contentType       Content-Type header value
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @return response containing the updated application object
      */
@@ -274,25 +281,25 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                             .fromApplicationtoDTO(updatedApplication);
                     return Response.ok().entity(updatedApplicationDTO).build();
                 } else {
-                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            handleException("Error while updating application " + applicationId, e);
-            return null;
+            RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
         }
+        return null;
     }
 
     /**
      * Deletes an application by id
-     * 
-     * @param applicationId application identifier
-     * @param ifMatch If-Match header value
+     *
+     * @param applicationId     application identifier
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @return 200 Response if successfully deleted the application 
-     */ 
+     * @return 200 Response if successfully deleted the application
+     */
     @Override
     @SuppressWarnings("unchecked")
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch,
@@ -306,20 +313,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     apiConsumer.removeApplication(application);
                     return Response.ok().build();
                 } else {
-                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            handleException("Error while deleting application " + applicationId, e);
-            return null;
+            RestApiUtil.handleInternalServerError("Error while deleting application " + applicationId, e, log);
         }
+        return null;
     }
-
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(t);
-    }
-
 }

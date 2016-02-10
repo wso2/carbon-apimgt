@@ -215,7 +215,7 @@
 			  </a>
 			<%}%>
 
-                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=doc.sourceUrl%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="glyphicon glyphicon-retweet"></i> <%=i18n.localize("update")%></a>
+                        | <a href="javascript:updateDocumentation('<%=api.name%>-<%= encode.forJavaScriptAttribute(doc.docName)%>','<%= encode.forJavaScriptAttribute(doc.docName)%>','<%=doc.docType%>','<%= encode.forJavaScriptAttribute(doc.summary)%>','<%=doc.sourceType%>','<%=encode.forHtmlAttribute(encode.forUri(doc.sourceUrl))%>','<%=doc.filePath%>','<%=doc.otherTypeName%>','<%=doc.visibility%>')"><i class="glyphicon glyphicon-retweet"></i> <%=i18n.localize("update")%></a>
                          
                         |<a href="javascript:removeDocumentation('<%=api.provider%>','<%=api.name%>','<%=api.version%>','<%= encode.forJavaScriptAttribute(doc.docName) %>','<%= encode.forJavaScriptAttribute(doc.docType)%>')"><i class="glyphicon glyphicon-trash"></i> <%=i18n.localize("deleteMethod")%></a>
 			</td>

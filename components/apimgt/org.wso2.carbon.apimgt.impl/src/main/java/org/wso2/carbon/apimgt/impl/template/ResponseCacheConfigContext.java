@@ -20,10 +20,10 @@ public class ResponseCacheConfigContext extends ConfigContextDecorator {
         VelocityContext context = super.getContext();
 
         if (APIConstants.ENABLED.equalsIgnoreCase(api.getResponseCache())) {
-            context.put("responseCacheEnabled", true);
+            context.put("responseCacheEnabled", Boolean.TRUE);
             context.put("responseCacheTimeOut", api.getCacheTimeout());
         } else {
-            context.put("responseCacheEnabled", false);
+            context.put("responseCacheEnabled", Boolean.FALSE);
         }
 
         return context;

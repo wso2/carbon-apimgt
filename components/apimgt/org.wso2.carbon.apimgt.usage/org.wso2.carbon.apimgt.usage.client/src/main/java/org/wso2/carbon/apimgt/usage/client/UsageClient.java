@@ -124,7 +124,7 @@ public class UsageClient {
             throw new APIMgtUsageQueryServiceClientException(
                     "Cannot access the constructor in Statistic Client class: " + className, e);
         } catch (InvocationTargetException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error occurred while getting constructor");
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while getting constructor", e);
         } catch (NoSuchMethodException e) {
             throw new APIMgtUsageQueryServiceClientException(
                     "Cannot found expected constructor in Statistic Client class: " + className, e);
@@ -223,7 +223,7 @@ public class UsageClient {
             type = UsageClient.getStatisticClient(null).getClientType();
         } catch (APIMgtUsageQueryServiceClientException e) {
             //throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
-            log.warn("Error geting usage statistic client...");
+            log.warn("Error getting usage statistic client...");
         }
 
         return type;

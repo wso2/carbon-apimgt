@@ -26,13 +26,23 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.listener.IdentityOathEventListener;
-import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -61,32 +71,71 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     }
 
     /**
-     * Deleting user from the identity database prerequisites.
+     * Deleting user from the identity database prerequisites. Remove pending aprroval requests for the user and remove
+     * the gateway key chache.
      */
     @Override
-    public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager)
-                                                                    throws UserStoreException {
+    public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager) {
+
+        boolean isTenantFlowStarted = false;
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+            Tenant tenant = APIKeyMgtDataHolder.getRealmService().getTenantManager().getTenant(tenantId);
+            Map<String, String> userStoreProperties = userStoreManager.getProperties(tenant);
+            String userDomain = userStoreProperties.get(UserCoreConstants.RealmConfig.PROPERTY_DOMAIN_NAME);
+
+            // IdentityUtil.addDomaintoName adds domain to the name only if domain name is not PRIMARY
+            // therefore domain name should be manually added to the username if domain is PRIMARY
+            if (UserCoreConstants.PRIMARY_DEFAULT_DOMAIN_NAME.equals(userDomain)) {
+                username = userDomain.toUpperCase() + UserCoreConstants.DOMAIN_SEPARATOR + username;
+            } else {
+                username = IdentityUtil.addDomainToName(username, userDomain);
+            }
+
+            WorkflowExecutor userSignupWFExecutor = WorkflowExecutorFactory.getInstance().
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+            String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForUserSignup(username);
+            userSignupWFExecutor.cleanUpPendingTask(workflowExtRef);
+        } catch (WorkflowException e) {
+            // exception is not thrown to the caller since this is a event Identity(IS) listener
+            log.error("Error while cleaning up workflow task for the user: " + username, e);
+        } catch (APIManagementException e) {
+            // exception is not thrown to the caller since this is a event Identity(IS) listener
+            log.error("Error while cleaning up workflow task for the user: " + username, e);
+        } catch (UserStoreException e) {
+            // exception is not thrown to the caller since this is a event Identity(IS) listener
+            log.error("Error while cleaning up workflow task for the user: " + username, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
+    }
+
+    @Override
+    public boolean doPreUpdateRoleListOfUser(String username, String[] deletedRoles, String[] newRoles,
+            UserStoreManager userStoreManager) {
 
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
 
     @Override
-    public boolean doPreUpdateRoleListOfUser(String username, String[] deletedRoles,
-                                             String[] newRoles,
-                                             UserStoreManager userStoreManager){
+    public boolean doPreUpdateUserListOfRole(String username, String[] deletedRoles, String[] newRoles,
+            UserStoreManager userStoreManager) {
 
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
 
-    @Override
-    public boolean doPreUpdateUserListOfRole(String username, String[] deletedRoles,
-                                             String[] newRoles,
-                                             UserStoreManager userStoreManager){
-
-        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
-    }
-
-    private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager){
+    private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager) {
 
         String userStoreDomain = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -95,7 +144,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
 
         //If the username is not case sensitive
-        if(!IdentityUtil.isUserStoreInUsernameCaseSensitive(username)){
+        if (!IdentityUtil.isUserStoreInUsernameCaseSensitive(username)) {
             username = username.toLowerCase();
         }
 
@@ -106,7 +155,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             return true;
         }
 
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Set<String> activeTokens;
 
         try {
@@ -117,20 +166,20 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         }
 
         if (activeTokens == null || activeTokens.isEmpty()) {
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("No active tokens found for the user " + username);
             }
             return true;
         }
 
-        if(log.isDebugEnabled()){
+        if (log.isDebugEnabled()) {
             log.debug("Found " + activeTokens.size() + " active tokens of the user " + username);
         }
 
         Map<String, Environment> gatewayEnvs = config.getApiGatewayEnvironments();
 
         for (Environment environment : gatewayEnvs.values()) {
-            if(log.isDebugEnabled()){
+            if (log.isDebugEnabled()) {
                 log.debug("Going to remove tokens from the cache of the Gateway '" + environment.getName() + "'");
             }
             try {
@@ -141,7 +190,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             } catch (AxisFault axisFault) {
                 //log and continue invalidating caches of other Gateways (if any).
                 log.error("Error occurred while invalidating the Gateway Token Cache of Gateway '" +
-                                                                            environment.getName() + "'", axisFault);
+                        environment.getName() + "'", axisFault);
             }
         }
 

@@ -28,10 +28,14 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.listners.UserAddListener;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
@@ -71,7 +75,11 @@ import org.wso2.carbon.utils.FileUtil;
 
 import javax.cache.Cache;
 
-import java.io.*;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.List;
 
 
@@ -192,23 +200,15 @@ public class APIManagerComponent {
 //            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
 //            authorizationManager.init();
             APIMgtDBUtil.initialize();
-            //Check User add listener enabled or not
-            boolean selfSignInProcessEnabled = Boolean.parseBoolean(configuration.getFirstProperty("WorkFlowExtensions.SelfSignIn.ProcessEnabled"));
-            if (selfSignInProcessEnabled) {
-                if (bundleContext != null) {
-                    bundleContext.registerService(UserStoreManagerListener.class.getName(),
-                                                  new UserAddListener(), null);
-                }
-            }
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
             boolean apiManagementEnabled = APIUtil.isAPIManagementEnabled();
             boolean loadAPIContextsAtStartup = APIUtil.isLoadAPIContextsAtStartup();
             if (apiManagementEnabled && loadAPIContextsAtStartup) {
-                List<String> contextList = ApiMgtDAO.getAllAvailableContexts();
+                List<String> contextList = ApiMgtDAO.getInstance().getAllAvailableContexts();
                 Cache contextCache = APIUtil.getAPIContextCache();
                 for (String context : contextList) {
-                    contextCache.put(context, true);
+                    contextCache.put(context, Boolean.TRUE);
                 }
             }
             APIUtil.createSelfSignUpRoles(MultitenantConstants.SUPER_TENANT_ID);
@@ -242,13 +242,21 @@ public class APIManagerComponent {
     }
 
     protected void setDataPublisherService(ServiceDataPublisherAdmin service) {
-        log.debug("Event Data Publisher service bound to the API usage handler");
         dataPublisherAdminService = service;
-        APIManagerAnalyticsConfiguration.createNewInstance().setAPIManagerConfiguration(configuration);
+        if (log.isDebugEnabled()) {
+            log.debug("Event Data Publisher service bound to the API usage handler");
+            log.debug("Writing Analytics Configuration to Registry...");
+        }
+        APIUtil.writeAnalyticsConfigurationToRegistry(ServiceReferenceHolder.getInstance()
+                                                              .getAPIManagerConfigurationService()
+                                                              .getAPIManagerConfiguration());
+        APIManagerAnalyticsConfiguration.getInstance().setAPIManagerConfiguration(configuration);
     }
 
     protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
-        log.debug("Event Data Publisher service unbound from the API usage handler");
+        if (log.isDebugEnabled()) {
+            log.debug("Event Data Publisher service unbound from the API usage handler");
+        }
         dataPublisherAdminService = null;
     }
 
@@ -281,7 +289,9 @@ public class APIManagerComponent {
     protected void setListenerManager(ListenerManager listenerManager) {
         // We bind to the listener manager so that we can read the local IP
         // address and port numbers properly.
-        log.debug("Listener manager bound to the API manager component");
+        if (log.isDebugEnabled()) {
+            log.debug("Listener manager bound to the API manager component");
+        }
         APIManagerConfigurationService service = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService();
         if (service != null) {
@@ -328,7 +338,7 @@ public class APIManagerComponent {
                 }
                 String rxt = FileUtil.readFileToString(rxtDir + File.separator + rxtPath);
                 Resource resource = systemRegistry.newResource();
-                resource.setContent(rxt.getBytes());
+                resource.setContent(rxt.getBytes(Charset.defaultCharset()));
                 resource.setMediaType(APIConstants.RXT_MEDIA_TYPE);
                 systemRegistry.put(resourcePath, resource);
             } catch (IOException e) {
@@ -419,25 +429,20 @@ public class APIManagerComponent {
         }
     }
 
-	private void addDefinedSequencesToRegistry() throws APIManagementException {
-		try {
-			RegistryService registryService =
-					ServiceReferenceHolder.getInstance().getRegistryService();
-			UserRegistry registry = registryService.getGovernanceSystemRegistry();
+    private void addDefinedSequencesToRegistry() throws APIManagementException {
+        try {
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            UserRegistry registry = registryService.getGovernanceSystemRegistry();
 
-			//Add all custom in,out and fault sequences to registry
-			APIUtil.addDefinedAllSequencesToRegistry(registry,
-			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-			APIUtil.addDefinedAllSequencesToRegistry(registry,
-			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
-			APIUtil.addDefinedAllSequencesToRegistry(registry,
-			                                         APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
+            //Add all custom in,out and fault sequences to registry
+            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT);
+            APIUtil.addDefinedAllSequencesToRegistry(registry, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
-		} catch (RegistryException e) {
-			throw new APIManagementException(
-					"Error while saving defined sequences to the registry ", e);
-		}
-	}
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while saving defined sequences to the registry ", e);
+        }
+    }
 
     private void setupSelfRegistration(APIManagerConfiguration config) throws APIManagementException {
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -452,10 +457,6 @@ public class APIManagerComponent {
                     "in the self sign up configuration");
         }
 
-        String[] permissions = new String[]{
-                "/permission/admin/login",
-                APIConstants.Permissions.API_SUBSCRIBE
-        };
         try {
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             UserRealm realm = realmService.getBootstrapRealm();
@@ -516,7 +517,6 @@ public class APIManagerComponent {
 
             if (!tenantGovReg.resourceExists(permissionResourcePath)) {
                 String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-                boolean loggedInUserChanged;
                 UserRealm realm =
                         (UserRealm) CarbonContext.getThreadLocalCarbonContext().getUserRealm();
 
@@ -526,13 +526,10 @@ public class APIManagerComponent {
                         realm.getRealmConfiguration().getAdminUserName());
                 tenantGovReg = CarbonContext.getThreadLocalCarbonContext()
                         .getRegistry(RegistryType.USER_GOVERNANCE);
-                loggedInUserChanged = true;
                 Collection appRootNode = tenantGovReg.newCollection();
                 appRootNode.setProperty("name", "Applications");
                 tenantGovReg.put(permissionResourcePath, appRootNode);
-                if (loggedInUserChanged) {
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(loggedInUser);
-                }
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(loggedInUser);
             }
         } catch (org.wso2.carbon.user.core.UserStoreException e) {
             throw new APIManagementException("Error while reading user store information.", e);

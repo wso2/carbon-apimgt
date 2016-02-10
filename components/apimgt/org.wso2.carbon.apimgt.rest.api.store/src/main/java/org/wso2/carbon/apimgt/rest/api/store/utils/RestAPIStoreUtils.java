@@ -53,31 +53,6 @@ public class RestAPIStoreUtils {
     private static final Log log = LogFactory.getLog(RestAPIStoreUtils.class);
 
     /** 
-     * Returns the current logged in consumer's group id
-     * @return group id of the current logged in user.
-     */
-    @SuppressWarnings("unchecked")
-    public static String getLoggedInUserGroupId() {
-        String username = RestApiUtil.getLoggedInUsername();
-        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-        JSONObject loginInfoJsonObj = new JSONObject();
-        try {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
-            loginInfoJsonObj.put("user", username);
-            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                loginInfoJsonObj.put("isSuperTenant", true);
-            } else {
-                loginInfoJsonObj.put("isSuperTenant", false);
-            }
-            String loginInfoString = loginInfoJsonObj.toJSONString();
-            return apiConsumer.getGroupIds(loginInfoString);
-        } catch (APIManagementException e) {
-            log.error("Unable to get groupIds of user " + username);
-            throw new InternalServerErrorException(e);
-        }
-    }
-
-    /** 
      * check whether current logged in user has access to the specified application
      * 
      * @param application Application object
@@ -94,7 +69,7 @@ public class RestAPIStoreUtils {
                     return true;
                 }
             } else {
-                String userGroupId = RestAPIStoreUtils.getLoggedInUserGroupId();
+                String userGroupId = RestApiUtil.getLoggedInUserGroupId();
                 //if the application is a shared one, application's group id and the user's group id should be same
                 if (application.getGroupId().equals(userGroupId)) {
                     return true;

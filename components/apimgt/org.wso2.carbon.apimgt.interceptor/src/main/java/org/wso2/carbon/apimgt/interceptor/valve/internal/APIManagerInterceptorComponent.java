@@ -83,13 +83,13 @@ public class APIManagerInterceptorComponent {
 			publisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(statsPublisherClass).newInstance();
 		} catch (InstantiationException e) {
 			String msg = "Error instantiating";
-			log.error(msg + statsPublisherClass);
+			log.error(msg + statsPublisherClass, e);
 		} catch (IllegalAccessException e) {
 			String msg = "Illegal access to";
-			log.error(msg + statsPublisherClass);
+			log.error(msg + statsPublisherClass, e);
 		} catch (ClassNotFoundException e) {
 			String msg = "Class not found";
-			log.error(msg + statsPublisherClass);
+			log.error(msg + statsPublisherClass, e);
 		}
 		UsageStatConfiguration statconf = new UsageStatConfiguration();
 		statconf.setHostName(hostName);		

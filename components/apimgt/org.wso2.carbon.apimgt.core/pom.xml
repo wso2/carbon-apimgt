@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>5.0.4-SNAPSHOT</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -70,7 +70,8 @@
                             javax.cache.*,
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.impl.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.usage.publisher.*;version="${carbon.apimgt.imp.pkg.version}"
+                            org.wso2.carbon.apimgt.usage.publisher.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.utils.multitenancy.*;version="${carbon.kernel.package.import.version.range}
                         </Import-Package>
                     </instructions>
                 </configuration>

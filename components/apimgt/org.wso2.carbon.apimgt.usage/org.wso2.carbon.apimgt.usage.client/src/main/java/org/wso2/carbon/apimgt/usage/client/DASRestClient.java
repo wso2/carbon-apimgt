@@ -66,10 +66,8 @@ public class DASRestClient {
      * @param pass DAs rest api password
      */
     public DASRestClient(String url, String user, String pass) {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();       
-       
-        URL dasURL = new URL(url);      
-        //httpClient = HttpClients.custom().setConnectionManager(cm).build();
+           
+        URL dasURL = new URL(url);          
         httpClient = (CloseableHttpClient) APIUtil.getHttpClient(dasURL.getPort(), dasURL.getProtocol());
         this.dasUrl = url;
         this.user = user;
@@ -102,16 +100,8 @@ public class DASRestClient {
         input.setContentType(APIUsageStatisticsClientConstants.APPLICATION_JSON);
         postRequest.setEntity(input);
 
-        CloseableHttpResponse response;
-        try {
-            //send the request
-            response = httpClient.execute(postRequest, context);
-        } finally {
-            //            httpClient.getConnectionManager().shutdown();
-        }
-
-        return response;
-
+        //send the request
+        return httpClient.execute(postRequest, context);
     }
 
     /**
@@ -223,7 +213,7 @@ public class DASRestClient {
      */
     public TableExistResponseBean isTableExist(String name) throws JsonSyntaxException, IOException {
 
-        //crete the http get request method to RETS API
+        //crete the http get request method to REST API
         HttpGet getRequest = new HttpGet(
                 dasUrl + APIUsageStatisticsClientConstants.DAS_TABLE_EXIST_REST_API_URL + "?table=" + name);
 

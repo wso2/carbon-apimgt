@@ -83,7 +83,7 @@ public class APITokenAuthenticator {
 
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws APIManagementException {
         try {
-            return ApiMgtDAO.getAllURITemplates(context, apiVersion);
+            return ApiMgtDAO.getInstance().getAllURITemplates(context, apiVersion);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while looking up API resource URI templates in the database", e);
         }

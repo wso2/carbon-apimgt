@@ -43,6 +43,15 @@ $(document).ready(function() {
         return value.indexOf("{}") == -1
     }, 'Empty curly brackets "{}" are not allowed in context field.');
 
+    $.validator.addMethod('validateUrl', function(value, element){
+        var validUrlRegex = /^(http|https):\/\/(.)+/g;
+        value = value.replace(/^\s+|\s+$/g, "");
+        if(value != ""){
+            return validUrlRegex.test(value);
+        }
+        return true;
+    }, 'Please provide a valid URL.');
+
     $.validator.addMethod('noSpace', function(value, element) {
         return !/\s/g.test(value);
     },'Name contains white spaces.');
@@ -125,4 +134,7 @@ $(document).ready(function() {
         return !regexForwardSlashAtEnd.test(value);
     }, 'Name or Context contains / at the end');
 
+    $.validator.addMethod('validateDescriptionLength', function(value, element) {
+        return value.length <= 20000;
+    }, 'maximum support 20000 characters only');
 });

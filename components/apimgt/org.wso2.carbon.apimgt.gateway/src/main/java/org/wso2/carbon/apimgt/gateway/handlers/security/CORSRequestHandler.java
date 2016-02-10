@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
+import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.SynapseEnvironment;
@@ -35,19 +36,20 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.logging.Level;
+import java.util.Set;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
 	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
 	private String apiImplementationType;
 	private String allowHeaders;
-	private boolean allowCredentials;
-	private List<String> allowedOrigins;
+	private String allowCredentials;
+	private Set<String> allowedOrigins;
 	private boolean initializeHeaderValues;
-
+	private String allowedMethods;
+	private boolean allowCredentialsEnabled;
 	public void init(SynapseEnvironment synapseEnvironment) {
 		if (log.isDebugEnabled()) {
 			log.debug("Initializing CORSRequest Handler instance");
@@ -64,18 +66,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	 */
 	void initializeHeaders() {
 		if (allowHeaders == null) {
-			allowHeaders = Utils
-					.getAllowedHeaders();
+			allowHeaders = APIUtil.getAllowedHeaders();
 		}
 		if (allowedOrigins == null) {
-			String allowedOriginsList = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-					getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+			String allowedOriginsList = APIUtil.getAllowedOrigins();
 			if (!allowedOriginsList.isEmpty()) {
-				allowedOrigins = Arrays.asList(allowedOriginsList.split(","));
+				allowedOrigins = new HashSet<String>(Arrays.asList(allowedOriginsList.split(",")));
 			}
 		}
-
-		allowCredentials = Utils.isAllowCredentials();
+		if (allowCredentials == null) {
+			allowCredentialsEnabled = APIUtil.isAllowCredentials();
+		}
+		if (allowedMethods == null) {
+			allowedMethods = APIUtil.getAllowedMethods();
+		}
 
 		initializeHeaderValues =  true;
 	}
@@ -98,43 +102,43 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+			String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+			String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                     getProperty(Constants.Configuration.HTTP_METHOD);
-            API selectedApi = null;
-            Resource selectedResourceWithVerb = null;
+			API selectedApi = messageContext.getConfiguration().getAPI(apiName);
+			Resource selectedResourceWithVerb = null;
             Resource selectedResource = null;
-
-            for (API api : messageContext.getConfiguration().getAPIs()) {
-                if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
-                    selectedApi = api;
-                    break;
-                }
-            }
-            String subPath;
+			String subPath = null;
             String path = RESTUtils.getFullRequestPath(messageContext);
-            if (selectedApi.getVersionStrategy().getVersionType().equals(VersionStrategyFactory.TYPE_URL)) {
-                subPath = path.substring(
-                        selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
-            } else {
-                subPath = path.substring(selectedApi.getContext().length());
-            }
+			if(selectedApi != null) {
+				if (VersionStrategyFactory.TYPE_URL.equals(selectedApi.getVersionStrategy().getVersionType())) {
+					subPath = path.substring(
+							selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
+				} else {
+					subPath = path.substring(selectedApi.getContext().length());
+				}
+			}
             if ("".equals(subPath)) {
                 subPath = "/";
             }
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
 
-            if (selectedApi.getResources().length > 0) {
-                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedApi.getResources()));
-                    if (resource != null) {
-                        selectedResource = resource;
-                        if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                            selectedResourceWithVerb = resource;
-                            break;
+            if(selectedApi != null){
+                Resource[] selectedAPIResources = selectedApi.getResources();
+                if (selectedAPIResources.length > 0) {
+                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                        Resource resource = dispatcher.findResource(messageContext, Arrays.asList(selectedAPIResources));
+                        if (resource != null) {
+                            selectedResource = resource;
+                            if (Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                                selectedResourceWithVerb = resource;
+                                break;
+                            }
                         }
                     }
                 }
             }
+
             String resourceString =
                     selectedResourceWithVerb != null ? selectedResourceWithVerb.getDispatcherHelper().getString() : null;
             String resourceCacheKey = APIUtil
@@ -143,29 +147,49 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
             setCORSHeaders(messageContext, selectedResourceWithVerb);
             if (selectedResource != null && selectedResourceWithVerb != null) {
-                if ("inline".equalsIgnoreCase(apiImplementationType)) {
+                if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
                     messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
                 }
                 status = true;
-            } else if (selectedResource != null && selectedResourceWithVerb == null) {
+            } else if (selectedResource != null) {
                 if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
-                    messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
-                    Utils.send(messageContext, HttpStatus.SC_OK);
+	                Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+	                if (corsSequence != null) {
+		                corsSequence.mediate(messageContext);
+	                }
+	                Utils.send(messageContext, HttpStatus.SC_OK);
                     status = false;
                 } else {
-                    status = true;
-                }
-            } else {
-                status = true;
-            }
-        } finally {
+					messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, HttpStatus.SC_METHOD_NOT_ALLOWED);
+					messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, HttpStatus.SC_METHOD_NOT_ALLOWED);
+					messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, "Method not allowed for given API resource");
+					Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
+					if (resourceMisMatchedSequence != null) {
+						resourceMisMatchedSequence.mediate(messageContext);
+					}
+					status = false;
+				}
+			} else {
+                messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, HttpStatus.SC_NOT_FOUND);
+                messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, HttpStatus.SC_NOT_FOUND);
+                messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, "No matching resource found for given API Request");
+                Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
+                if (resourceMisMatchedSequence != null) {
+					resourceMisMatchedSequence.mediate(messageContext);
+				}
+				status = false;
+			}
+		} finally {
             context.stop();
         }
         return status;
     }
 
 	public boolean handleResponse(MessageContext messageContext) {
-		messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
+		Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+		if (corsSequence != null) {
+			corsSequence.mediate(messageContext);
+		}
 		return true;
 	}
 
@@ -185,27 +209,30 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
 		//Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
 		//and the allowed origin is not the wildcard (*)
-		if (allowCredentials && !allowedOrigin.equals("*")) {
-			messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, true);
-		}
+        if (allowCredentialsEnabled && !"*".equals(allowedOrigin)) {
+            messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
+        }
 
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
 		String allowedMethods = "";
+		StringBuffer allowedMethodsBuffer = new StringBuffer();
 		if (selectedResource != null) {
-			for (String method : selectedResource.getMethods()) {
-				allowedMethods += method + ",";
-			}
-			if (!allowedMethods.isEmpty()) {
+			String[] methods = selectedResource.getMethods();
+			for (String method : methods) {
+				allowedMethodsBuffer.append(method).append(',');
+				}
+			allowedMethods = allowedMethodsBuffer.toString();
+			if (methods.length != 0) {
 				allowedMethods = allowedMethods.substring(0, allowedMethods.length() - 1);
 			}
 		} else {
-			allowedMethods = Utils.getAllowedMethods();
+			allowedMethods = this.allowedMethods;
 		}
 		if ("*".equals(allowHeaders)) {
 			allowHeaders = headers.get("Access-Control-Request-Headers");
 
 		}
-		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, Utils.isCORSEnabled());
+		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, APIUtil.isCORSEnabled());
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
 		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
 	}
@@ -230,7 +257,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 	}
 
     public void setAllowedOrigins(String allowedOrigins) {
-        this.allowedOrigins = Arrays.asList(allowedOrigins.split(","));
+        this.allowedOrigins = new HashSet<String>(Arrays.asList(allowedOrigins.split(",")));
     }
 
 	public String getApiImplementationType() {
@@ -249,4 +276,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 		setApiImplementationType(inlineType);
 	}
 
+	public String isAllowCredentials() {
+		return allowCredentials;
+	}
+
+	public void setAllowCredentials(String allowCredentials) {
+		this.allowCredentialsEnabled = Boolean.parseBoolean(allowCredentials);
+		this.allowCredentials = allowCredentials;
+	}
+
+	public String getAllowedMethods() {
+		return allowedMethods;
+	}
+
+	public void setAllowedMethods(String allowedMethods) {
+		this.allowedMethods = allowedMethods;
+	}
 }

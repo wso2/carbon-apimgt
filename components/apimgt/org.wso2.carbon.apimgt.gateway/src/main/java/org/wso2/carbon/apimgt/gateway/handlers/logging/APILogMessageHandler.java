@@ -83,7 +83,7 @@ public class APILogMessageHandler extends AbstractHandler {
                 }
             } catch (AxisFault axisFault) {
                 //Ignore Axis fault to continue logging
-                log.error("Cannot get Transport headers from Gateway");
+                log.error("Cannot get Transport headers from Gateway", axisFault);
             }
         }
         if (logID != null) {
@@ -98,7 +98,7 @@ public class APILogMessageHandler extends AbstractHandler {
         String requestURI = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
         if (requestURI != null) {
             logMessage = logMessage + " , requestURI=" + requestURI;
-            if (requestURI.equalsIgnoreCase("/token/")) {
+            if ("/token/".equalsIgnoreCase(requestURI)) {
                 isLoginRequest = true;
             }
         }
@@ -110,8 +110,8 @@ public class APILogMessageHandler extends AbstractHandler {
         String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
                 .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
         if (remoteIP != null) {
-            if (remoteIP.indexOf(",") > 0) {
-                remoteIP = remoteIP.substring(0, remoteIP.indexOf(","));
+            if (remoteIP.indexOf(',') > 0) {
+                remoteIP = remoteIP.substring(0, remoteIP.indexOf(','));
             }
         } else {
             remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);

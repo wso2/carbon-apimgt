@@ -108,8 +108,7 @@ public class RESTAPIAdminClient {
 	 */
     public APIData getApi(String tenantDomain) throws AxisFault {
         try {
-        	APIData apiData = restApiAdminStub.getApiForTenant(qualifiedName,tenantDomain);
-            return (APIData) apiData;
+        	return restApiAdminStub.getApiForTenant(qualifiedName,tenantDomain);
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
         }
@@ -117,8 +116,8 @@ public class RESTAPIAdminClient {
     
     public APIData getApi() throws AxisFault {
         try {
-        	APIData apiData = restApiAdminStub.getApiByName(qualifiedName);
-            return (APIData) apiData;
+        	return restApiAdminStub.getApiByName(qualifiedName);
+
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining API information from gateway. " + e.getMessage(), e);
         }
@@ -126,8 +125,7 @@ public class RESTAPIAdminClient {
 
     public APIData getDefaultApi(String tenantDomain) throws AxisFault {
         try {
-            APIData apiData = restApiAdminStub.getApiForTenant(qualifiedDefaultApiName,tenantDomain);
-            return (APIData) apiData;
+           return restApiAdminStub.getApiForTenant(qualifiedDefaultApiName,tenantDomain);
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining default API information from gateway." + e.getMessage(), e);
         }
@@ -135,8 +133,7 @@ public class RESTAPIAdminClient {
     
     public APIData getDefaultApi() throws AxisFault {
         try {
-            APIData apiData = restApiAdminStub.getApiByName(qualifiedDefaultApiName);
-            return (APIData) apiData;
+            return restApiAdminStub.getApiByName(qualifiedDefaultApiName);
         } catch (Exception e) {
             throw new AxisFault("Error while obtaining default API information from gateway." + e.getMessage(), e);
         }

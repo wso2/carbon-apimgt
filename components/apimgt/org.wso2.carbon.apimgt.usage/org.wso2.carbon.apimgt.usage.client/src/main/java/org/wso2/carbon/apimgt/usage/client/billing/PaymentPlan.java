@@ -99,7 +99,7 @@ public class PaymentPlan extends BillingBase {
             return true;
         }
         catch (Exception e){
-            log.error("Error in adding new parameter element to parameter vector");
+            log.error("Error in adding new parameter element to parameter vector", e);
             return false;
         }
 

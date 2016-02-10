@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.gateway.handlers.security.thrift;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 
 public class ThriftAPIDataStore implements APIKeyDataStore{
 
+    public static final Log log = LogFactory.getLog(ThriftAPIDataStore.class);
     private static final ThriftKeyValidatorClientPool clientPool = ThriftKeyValidatorClientPool.getInstance();
 
     /**
@@ -56,7 +59,10 @@ public class ThriftAPIDataStore implements APIKeyDataStore{
                 if (client != null) {
                     clientPool.release(client);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Releasing client from client pool caused an exception = " + exception.getMessage());
+                }
             }
         }
     }
@@ -74,7 +80,10 @@ public class ThriftAPIDataStore implements APIKeyDataStore{
                 if (client != null) {
                     clientPool.release(client);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Releasing client from client pool caused an exception = " + exception.getMessage());
+                }
             }
         }
     }

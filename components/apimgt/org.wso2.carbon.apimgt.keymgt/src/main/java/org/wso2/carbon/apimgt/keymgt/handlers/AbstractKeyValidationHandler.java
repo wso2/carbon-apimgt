@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.keymgt.handlers;
 
 import org.apache.commons.logging.Log;
@@ -13,14 +31,10 @@ import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
 import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtDataHolder;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public abstract class AbstractKeyValidationHandler implements KeyValidationHandler {
 
     private static final Log log = LogFactory.getLog(AbstractKeyValidationHandler.class);
-    private ApiMgtDAO dao = new ApiMgtDAO();
+    private ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
     @Override
     public boolean validateSubscription(TokenValidationContext validationContext) throws APIKeyMgtException {
@@ -59,17 +73,16 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Before validating subscriptions : " + dto);
-                log.debug("Validation Info : { context : " + validationContext.getContext() + " , " +
-                          "version : " + validationContext.getVersion() + " , consumerKey : " + dto.getConsumerKey() + " }");
+                log.debug("Validation Info : { context : " + validationContext.getContext() + " , " + "version : "
+                        + validationContext.getVersion() + " , consumerKey : " + dto.getConsumerKey() + " }");
             }
 
-            state = dao.validateSubscriptionDetails(validationContext.getContext(),
-                                                    validationContext.getVersion(),
-                                                    dto.getConsumerKey(), dto);
+            state = dao.validateSubscriptionDetails(validationContext.getContext(), validationContext.getVersion(),
+                    dto.getConsumerKey(), dto);
             if (state) {
 
-                dto.setAuthorizedDomains(APIUtil.getListOfAuthorizedDomainsByConsumerKey(validationContext
-                                                                                                 .getTokenInfo().getConsumerKey()));
+                dto.setAuthorizedDomains(APIUtil
+                        .getListOfAuthorizedDomainsByConsumerKey(validationContext.getTokenInfo().getConsumerKey()));
                 checkClientDomainAuthorized(dto, validationContext.getClientDomain());
             }
 
@@ -120,7 +133,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
         if (authScheme == null || authScheme.isEmpty() || tokenInfo == null) {
             return false;
         }
-        // setTokenType(tokenInfo);
 
         if (APIConstants.AUTH_APPLICATION_LEVEL_TOKEN.equals(authScheme)) {
             return tokenInfo.isApplicationToken();
@@ -139,8 +151,7 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
         try {
             String jwt = generator.generateToken(validationContext.getValidationInfoDTO(),
-                                                 validationContext.getContext(), validationContext
-                            .getVersion(), validationContext.getAccessToken());
+                    validationContext.getContext(), validationContext.getVersion(), validationContext.getAccessToken());
             validationContext.getValidationInfoDTO().setEndUserToken(jwt);
             return true;
 

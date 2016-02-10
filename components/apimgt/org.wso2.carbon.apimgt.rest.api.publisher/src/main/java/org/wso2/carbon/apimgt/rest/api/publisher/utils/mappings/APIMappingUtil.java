@@ -19,36 +19,26 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class APIMappingUtil {
+
+    private static final Log log = LogFactory.getLog(APIMappingUtil.class);
 
     public static APIIdentifier getAPIIdentifierFromApiId(String apiId) {
         //if apiId contains -AT-, that need to be replaced before splitting
@@ -56,7 +46,7 @@ public class APIMappingUtil {
         String[] apiIdDetails = apiId.split(RestApiConstants.API_ID_DELIMITER);
 
         if (apiIdDetails.length < 3) {
-            throw RestApiUtil.buildBadRequestException("Provided API identifier '" + apiId + "' is invalid");
+            RestApiUtil.handleBadRequest("Provided API identifier '" + apiId + "' is invalid", log);
         }
 
         // apiId format: provider-apiName-version
@@ -230,6 +220,20 @@ public class APIMappingUtil {
         dto.setBusinessInformation(apiBusinessInformationDTO);
         String gatewayEnvironments = StringUtils.join(model.getEnvironments(),",");
         dto.setGatewayEnvironments(gatewayEnvironments);
+        APICorsConfigurationDTO apiCorsConfigurationDTO = new APICorsConfigurationDTO();
+        CORSConfiguration corsConfiguration = model.getCorsConfiguration();
+        if (corsConfiguration == null) {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        apiCorsConfigurationDTO
+                .setAccessControlAllowOrigins(corsConfiguration.getAccessControlAllowOrigins());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowHeaders(corsConfiguration.getAccessControlAllowHeaders());
+        apiCorsConfigurationDTO
+                .setAccessControlAllowMethods(corsConfiguration.getAccessControlAllowMethods());
+        apiCorsConfigurationDTO.setCorsConfigurationEnabled(corsConfiguration.isCorsConfigurationEnabled());
+        apiCorsConfigurationDTO.setAccessControlAllowCredentials(corsConfiguration.isAccessControlAllowCredentials());
+        dto.setCorsConfiguration(apiCorsConfigurationDTO);
         return dto;
     }
 
@@ -354,6 +358,20 @@ public class APIMappingUtil {
             //this means the provided gatewayEnvironments is "" (empty)
             model.setEnvironments(APIUtil.extractEnvironmentsForAPI(APIConstants.API_GATEWAY_NONE));
         }
+        APICorsConfigurationDTO apiCorsConfigurationDTO = dto.getCorsConfiguration();
+        CORSConfiguration corsConfiguration;
+        if (apiCorsConfigurationDTO != null) {
+            corsConfiguration =
+                    new CORSConfiguration(apiCorsConfigurationDTO.getCorsConfigurationEnabled(),
+                                          apiCorsConfigurationDTO.getAccessControlAllowOrigins(),
+                                          apiCorsConfigurationDTO.getAccessControlAllowCredentials(),
+                                          apiCorsConfigurationDTO.getAccessControlAllowHeaders(),
+                                          apiCorsConfigurationDTO.getAccessControlAllowMethods());
+
+        } else {
+            corsConfiguration = APIUtil.getDefaultCorsConfiguration();
+        }
+        model.setCorsConfiguration(corsConfiguration);
         return model;
     }
 

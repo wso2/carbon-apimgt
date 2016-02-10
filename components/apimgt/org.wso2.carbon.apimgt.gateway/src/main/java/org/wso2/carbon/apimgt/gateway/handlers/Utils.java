@@ -62,33 +62,13 @@ public class Utils {
         messageContext.setProperty("RESPONSE", "true");
         messageContext.setTo(null);        
         axis2MC.removeProperty("NO_ENTITY_BODY");
-        String method = (String) axis2MC.getProperty(Constants.Configuration.HTTP_METHOD);
-        if (method.matches("^(?!.*(POST|PUT|PATCH)).*$")) {
-            // If the request was not an entity enclosing request, send a XML response back
-            axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/xml");
-        }
+
         // Always remove the ContentType - Let the formatter do its thing
         axis2MC.removeProperty(Constants.Configuration.CONTENT_TYPE);
         Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers != null) {
             headers.remove(HttpHeaders.AUTHORIZATION);
-            // headers.remove(HttpHeaders.ACCEPT);
             headers.remove(HttpHeaders.AUTHORIZATION);
-            //headers.remove(HttpHeaders.ACCEPT);
-            //Default we will send xml out put if error_message_type is json then we will send json response to client
-            // We can set this parameter in _auth_failure_handler_ as follows
-            /*<sequence name="_auth_failure_handler_">
-            <property name="error_message_type" value="application/json"/>
-            <sequence key="_build_"/>
-            </sequence>     */
-            /*  if (messageContext.getProperty("error_message_type") != null &&
-                    messageContext.getProperty("error_message_type").toString().equalsIgnoreCase("application/json")) {
-                axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/json");
-            }*/
-            //adding this fix to support any message type as error message type
-            if (messageContext.getProperty("error_message_type") != null) {
-                axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, messageContext.getProperty("error_message_type"));
-            }
 
             headers.remove(HttpHeaders.HOST);
         }
@@ -100,6 +80,9 @@ public class Utils {
                 getAxis2MessageContext();
         JsonUtil.removeJsonPayload(axis2MC);
         messageContext.getEnvelope().getBody().addChild(payload);
+        Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String acceptType = (String) headers.get(HttpHeaders.ACCEPT);
+        axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, acceptType);
     }
     
     public static void setSOAPFault(MessageContext messageContext, String code, 
@@ -177,35 +160,7 @@ public class Utils {
             messageContext.setRelatesTo(new RelatesTo[] { relatesTo });
         }
     }
-
-    public static String getAllowedHeaders() {
-    	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
-    }
-    
-    public static String getAllowedMethods() {
-    	return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
-    }
-
-    public static boolean isAllowCredentials() {
-        String allowCredentials = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
-                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
-        return Boolean.parseBoolean(allowCredentials);
-    }
-    
-    public static boolean isCORSEnabled() {
-    	String corsEnabled = config.
-    	        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
-    	    	    	
-    	return Boolean.parseBoolean(corsEnabled);
-    }
-
-    public static boolean isStatsEnabled() {
-        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService().
-                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
-    }
-
+//// moving methods to Util
     /**
      * validates if an accessToken has expired or not
      *
@@ -249,10 +204,7 @@ public class Utils {
         if(VersionStrategyFactory.TYPE_URL.equals(versionStrategy)){
             // most used strategy. server:port/context/version/resource
             requestPath = fullRequestPath.substring((apiContext + apiVersion).length() + 1, fullRequestPath.length());
-        }else if(VersionStrategyFactory.TYPE_CONTEXT.equals(versionStrategy)){
-            // version in context. server:port/contextWithVersion/resource
-            requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
-        }else{
+         }else{
             // default version. assume there is no version is used
             requestPath = fullRequestPath.substring(apiContext.length(), fullRequestPath.length());
         }

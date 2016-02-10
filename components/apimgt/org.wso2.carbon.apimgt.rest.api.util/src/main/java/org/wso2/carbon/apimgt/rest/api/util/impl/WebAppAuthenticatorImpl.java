@@ -1,3 +1,20 @@
+/*
+ *
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.wso2.carbon.apimgt.rest.api.util.impl;
 
 import org.apache.commons.logging.Log;
@@ -47,7 +64,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
         try {
             tokenInfo = KeyManagerHolder.getKeyManagerInstance().getTokenMetaData(accessToken);
         } catch (APIManagementException e) {
-            log.error("Error while retrieving token information for token: " + accessToken + e.getMessage());
+            log.error("Error while retrieving token information for token: " + accessToken, e);
         }
         // if we got valid access token we will proceed with next
         if (tokenInfo != null && tokenInfo.isTokenValid()) {
@@ -76,7 +93,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                     }
                     return true;
                 } catch (UserStoreException e) {
-                    log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain);
+                    log.error("Error while retrieving tenant id for tenant domain: " + tenantDomain, e);
                 }
             } else {
                 log.error("You cannot access API as scope validation failed");
@@ -119,7 +136,7 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                 templateToValidate = new org.wso2.uri.template.URITemplate(templateString);
             } catch (URITemplateException e) {
                 log.error("Error while creating URI Template object to validate request. Template pattern: " +
-                        templateString);
+                        templateString, e);
             }
             if (templateToValidate != null && templateToValidate.matches(resource, var) && scopes != null
                     && verb != null && verb.equalsIgnoreCase(((URITemplate)template).getHTTPVerb())) {
@@ -131,15 +148,14 @@ public class WebAppAuthenticatorImpl implements WebAppAuthenticator {
                             if (log.isDebugEnabled()) {
                                 log.debug("Scope validation successful for access token: " +
                                         tokenInfo.getAccessToken().toString() + " with scope: " + scp.getKey() +
-                                        " for resource path: " + path);
+                                        " for resource path: " + path + " and verb " + verb);
                             }
                             return true;
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug(
-                                    "Scope not defined in swagger for matching resource. So consider as anonymous permission and"
-                                            + "let request to");
+                            log.debug("Scope not defined in swagger for matching resource " + resource + " and verb "
+                                    + verb + " . So consider as anonymous permission and let request to continue.");
                         }
                         return true;
                     }

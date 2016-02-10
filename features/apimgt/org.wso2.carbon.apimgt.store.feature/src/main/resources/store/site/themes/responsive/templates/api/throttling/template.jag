@@ -3,7 +3,7 @@
 var i, length, app, thumbURL, api = outputs.api, templatesList = outputs.uriTemplates;
                              var mod = jagg.module("api");
                              var result = mod.getTiers().tiers;
-                              var tiersList = mod.getTiers().tiers;
+                              var tiersList = mod.getResourceTiers().tiers;
 
 %>
 

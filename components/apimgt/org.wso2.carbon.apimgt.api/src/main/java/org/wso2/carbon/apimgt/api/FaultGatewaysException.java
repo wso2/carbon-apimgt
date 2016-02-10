@@ -17,6 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import java.util.Map;
 
 public class FaultGatewaysException extends Exception {
@@ -31,11 +34,13 @@ public class FaultGatewaysException extends Exception {
 				StringBuilder failedToUnPublish = new StringBuilder();
 				Map<String, String> failedToPublishMap = faultMap.get(PUBLISHED);
 				Map<String, String> failedToUnPublishMap = faultMap.get(UN_PUBLISHED);
-				for (String environmentName : failedToPublishMap.keySet()) {
-					failedToPublish.append(environmentName + ":" + failedToPublishMap.get(environmentName) + ",");
+				for (Map.Entry<String, String> environmentEntry : failedToPublishMap.entrySet()) {
+					failedToPublish.append(environmentEntry.getKey()).append(':').append(environmentEntry.getValue())
+							.append(',');
 				}
-				for (String environmentName : failedToUnPublishMap.keySet()) {
-					failedToUnPublish.append(environmentName + ":" + failedToUnPublishMap.get(environmentName) + ",");
+				for (Map.Entry<String, String> environmentEntry : failedToUnPublishMap.entrySet()) {
+					failedToUnPublish.append(environmentEntry.getKey()).append(':').append(environmentEntry.getValue())
+							.append(',');
 				}
 				if (failedToPublish.length() != 0) {
 					failedToPublish.deleteCharAt(failedToPublish.length() - 1);
@@ -56,5 +61,9 @@ public class FaultGatewaysException extends Exception {
 
 	public FaultGatewaysException(Map<String, Map<String, String>> faultMap) {
 		this.faultMap = faultMap;
+	}
+
+	public String getFaultMap() {
+		return JSONObject.toJSONString(faultMap);
 	}
 }

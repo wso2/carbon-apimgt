@@ -100,7 +100,10 @@ public class APIKeyValidationService extends AbstractAdmin {
                         headersMap = (Map) headers;
                         activityID = (String) headersMap.get("activityID");
                     }
-                    headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
+                    if(headersMap != null) {
+                        headersList.add(new Header("activityID", (String) headersMap.get("activityID")));
+                    }
+
                     responseMessageContext.setProperty(HTTPConstants.HTTP_HEADERS, headersList);
                 }
             }
@@ -188,7 +191,7 @@ public class APIKeyValidationService extends AbstractAdmin {
     public ArrayList<URITemplate> getAllURITemplates(String context, String version)
             throws APIKeyMgtException, APIManagementException {
 
-        return ApiMgtDAO.getAllURITemplates(context, version);
+        return ApiMgtDAO.getInstance().getAllURITemplates(context, version);
 
     }
 

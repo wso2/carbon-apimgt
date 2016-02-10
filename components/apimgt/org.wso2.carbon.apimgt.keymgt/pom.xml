@@ -12,103 +12,102 @@
     limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-    <parent>
-        <groupId>org.wso2.carbon.apimgt</groupId>
-        <artifactId>apimgt</artifactId>
-        <version>5.0.4-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+	<parent>
+		<groupId>org.wso2.carbon.apimgt</groupId>
+		<artifactId>apimgt</artifactId>
+		<version>6.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
 
-    <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
-    <packaging>bundle</packaging>
-    <name>WSO2 Carbon - API Key Mgt</name>
-    <description>Key Management functionality for API Mgt/Store solution</description>
-    <url>http://wso2.org</url>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>org.wso2.carbon.apimgt.keymgt</artifactId>
+	<packaging>bundle</packaging>
+	<name>WSO2 Carbon - API Key Mgt</name>
+	<description>Key Management functionality for API Mgt/Store solution</description>
+	<url>http://wso2.org</url>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.identity.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.identity</groupId>
-            <artifactId>org.wso2.carbon.identity.oauth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.registry.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.utils</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon</groupId>
-            <artifactId>org.wso2.carbon.logging</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.wso2.carbon.identity</groupId>
+			<artifactId>org.wso2.carbon.identity.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.identity</groupId>
+			<artifactId>org.wso2.carbon.identity.oauth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon</groupId>
+			<artifactId>org.wso2.carbon.registry.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon</groupId>
+			<artifactId>org.wso2.carbon.core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon</groupId>
+			<artifactId>org.wso2.carbon.utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon</groupId>
+			<artifactId>org.wso2.carbon.logging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.carbon.apimgt</groupId>
+			<artifactId>org.wso2.carbon.apimgt.impl</artifactId>
+		</dependency>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/Abstract*</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>
-                            ${project.artifactId}
-                        </Bundle-SymbolicName>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>**/Abstract*</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-scr-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>
+							${project.artifactId}
+						</Bundle-SymbolicName>
 
-                        <Private-Package>
-                            org.wso2.carbon.apimgt.keymgt.internal
-                        </Private-Package>
-                        <Import-Package>
-                            org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
-                            org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
-                            org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
-                            *;resolution:=optional
-                        </Import-Package>
-                        <Export-Package>
-                            !org.wso2.carbon.apimgt.keymgt.stub.validator,
-                            !org.wso2.carbon.apimgt.keymgt.stub.provider,
-                            !org.wso2.carbon.apimgt.keymgt.stub.subscriber,
-                            !org.wso2.carbon.apimgt.keymgt.stub.types.axis2,
-                            !org.wso2.carbon.apimgt.keymgt.stub.types.carbon,
-                            !org.wso2.carbon.apimgt.keymgt.client,
-                            org.wso2.carbon.apimgt.keymgt.*
-                        </Export-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+						<Private-Package>
+							org.wso2.carbon.apimgt.keymgt.internal
+						</Private-Package>
+						<Import-Package>
+							org.apache.commons.logging.*; version="${commons.logging.imp.pkg.version}",
+							org.wso2.carbon.identity.base.*; version="${carbon.identity.imp.pkg.version}",
+							org.wso2.carbon.identity.core.*; version="${carbon.identity.imp.pkg.version}",
+							*;resolution:=optional
+						</Import-Package>
+						<Export-Package>
+							!org.wso2.carbon.apimgt.keymgt.stub.validator,
+							!org.wso2.carbon.apimgt.keymgt.stub.provider,
+							!org.wso2.carbon.apimgt.keymgt.stub.subscriber,
+							!org.wso2.carbon.apimgt.keymgt.stub.types.axis2,
+							!org.wso2.carbon.apimgt.keymgt.stub.types.carbon,
+							!org.wso2.carbon.apimgt.keymgt.client,
+							org.wso2.carbon.apimgt.keymgt.*
+						</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 
 
 </project>

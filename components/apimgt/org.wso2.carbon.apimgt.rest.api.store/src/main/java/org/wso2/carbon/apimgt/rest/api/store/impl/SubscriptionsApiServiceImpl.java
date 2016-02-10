@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.SubscriptionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -86,7 +85,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
         // currently groupId is taken from the user so that groupId coming as a query parameter is not honored.
         // As a improvement, we can check admin privileges of the user and honor groupId.
-        groupId = RestAPIStoreUtils.getLoggedInUserGroupId();
+        groupId = RestApiUtil.getLoggedInUserGroupId();
 
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
@@ -114,11 +113,12 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 Application application = apiConsumer.getApplicationByUUID(applicationId);
 
                 if (application == null) {
-                    throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                    return null;
                 }
 
                 if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
                 }
 
                 subscriptions = apiConsumer.getSubscribedAPIs(subscriber, application.getName(),
@@ -140,24 +140,26 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
             } else {
                 //neither apiId nor applicationId is given
-                throw RestApiUtil.buildBadRequestException("Either applicationId or apiId should be available");
+                RestApiUtil.handleBadRequest("Either applicationId or apiId should be available", log);
+                return null;
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, apiId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {
-                handleException("Error while getting subscriptions of the user " + username, e);
-                return null;
+                RestApiUtil.handleInternalServerError("Error while getting subscriptions of the user " + username, e,
+                        log);
             }
         }
+        return null;
     }
 
     /**
      * Creates a new subscriptions with the details specified in the body parameter
      *
-     * @param body new subscription details
+     * @param body        new subscription details
      * @param contentType Content-Type header
      * @return newly added subscription as a SubscriptionDTO if successful
      */
@@ -173,19 +175,21 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             //check whether user is permitted to access the API. If the API does not exist, 
             // this will throw a APIMgtResourceNotFoundException
             if (!RestAPIStoreUtils.isUserAccessAllowedForAPI(body.getApiIdentifier(), tenantDomain)) {
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_API, body.getApiIdentifier());
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, body.getApiIdentifier(), log);
             }
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(body.getApiIdentifier(), tenantDomain);
+            APIIdentifier apiIdentifier = APIMappingUtil
+                    .getAPIIdentifierFromApiIdOrUUID(body.getApiIdentifier(), tenantDomain);
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application == null) {
                 //required application not found
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                return null;
             }
 
             if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 //application access failure occurred
-                throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_APPLICATION, applicationId);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
 
             //Validation for allowed throttling tiers and Tenant based validation for subscription. If failed this will
@@ -205,22 +209,23 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
         } catch (APIMgtAuthorizationFailedException e) {
             //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
             // the message of the exception e
-            throw RestApiUtil.buildForbiddenException(e.getMessage());
+            RestApiUtil.handleAuthorizationFailure(e.getMessage(), e, log);
         } catch (SubscriptionAlreadyExistingException e) {
-            throw RestApiUtil.buildConflictException(
-                    "Specified subscription already exists for API " + body.getApiIdentifier() + " for application " + body
-                            .getApplicationId());
+            RestApiUtil.handleResourceAlreadyExistsError(
+                    "Specified subscription already exists for API " + body.getApiIdentifier() + " for application "
+                            + body.getApplicationId(), e, log);
         } catch (APIManagementException | URISyntaxException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 //this happens when the specified API identifier does not exist
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_API, body.getApiIdentifier());
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, body.getApiIdentifier(), e, log);
             } else {
                 //unhandled exception
-                handleException("Error while adding the subscription API:" + body.getApiIdentifier() + ", application:" + body
-                        .getApplicationId() + ", tier:" + body.getTier(), e);
-                return null;
+                RestApiUtil.handleInternalServerError(
+                        "Error while adding the subscription API:" + body.getApiIdentifier() + ", application:" + body
+                                .getApplicationId() + ", tier:" + body.getTier(), e, log);
             }
         }
+        return null;
     }
 
     /**
@@ -245,15 +250,15 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                     SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
                     return Response.ok().entity(subscriptionDTO).build();
                 } else {
-                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
         } catch (APIManagementException e) {
-            handleException("Error while getting subscription with id " + subscriptionId, e);
-            return null;
+            RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
         }
+        return null;
     }
 
     /**
@@ -275,21 +280,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 if (RestAPIStoreUtils.isUserAccessAllowedForSubscription(subscribedAPI)) {
                     apiConsumer.removeSubscription(subscribedAPI);
                 } else {
-                    throw RestApiUtil.buildForbiddenException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
                 }
             } else {
-                throw RestApiUtil.buildNotFoundException(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
             return Response.ok().build();
         } catch (APIManagementException e) {
-            handleException("Error while deleting subscription with id " + subscriptionId, e);
-            return null;
+            RestApiUtil
+                    .handleInternalServerError("Error while deleting subscription with id " + subscriptionId, e, log);
         }
+        return null;
     }
-
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(t);
-    }
-
 }

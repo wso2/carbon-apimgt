@@ -71,13 +71,13 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
         ApplicationRegistrationWorkflowDTO regWFDTO = (ApplicationRegistrationWorkflowDTO) workFlowDTO;
 		
 
-		ApiMgtDAO dao = new ApiMgtDAO();
+		ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
 		try {
             dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO)workFlowDTO,false);
             generateKeysForApplication(regWFDTO);
 		} catch (APIManagementException e) {
-			String msg = "Error occured when updating the status of the Application creation process";
+			String msg = "Error occurred when updating the status of the Application creation process";
 			log.error(msg, e);
 			throw new WorkflowException(msg, e);
 		}

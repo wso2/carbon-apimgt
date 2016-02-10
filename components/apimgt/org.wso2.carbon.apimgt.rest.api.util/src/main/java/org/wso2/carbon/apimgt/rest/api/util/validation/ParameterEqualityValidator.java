@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.rest.api.util.validation;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.validation.constraints.ValidateParamEquality;
 
@@ -30,6 +32,8 @@ import java.lang.reflect.InvocationTargetException;
 
 @SupportedValidationTarget(ValidationTarget.PARAMETERS)
 public class ParameterEqualityValidator implements ConstraintValidator<ValidateParamEquality, Object[]> {
+
+    private static final Log log = LogFactory.getLog(ParameterEqualityValidator.class);
 
     private int firstParamIndex;
     private int secondParamIndex;
@@ -48,39 +52,48 @@ public class ParameterEqualityValidator implements ConstraintValidator<ValidateP
 
     @Override
     public boolean isValid(Object object[], ConstraintValidatorContext constraintValidatorContext) {
+        Object firstObj = object[firstParamIndex];
+        Object secondObj = object[secondParamIndex];
 
         try {
-            Object firstObj = object[firstParamIndex];
-            Object secondObj = object[secondParamIndex];
-
             if (!StringUtils.isEmpty(firstField)) {
                 firstObj = BeanUtils.getProperty(firstObj,
                         firstField); //if first field is present, take first object as the field value of the firstObj
             }
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            handleException("Error while accessing first field " + firstField + " for validation", e);
+            return false;
+        }
 
+        try {
             if (!StringUtils.isEmpty(secondField)) {
                 secondObj = BeanUtils.getProperty(secondObj,
                         secondField); //if second field is present, take second object as the field value of the secondObj
             }
-
-            //let @NotNull for checking null values
-            if (firstObj == null || secondObj == null) {
-                return true;
-            }
-
-            boolean isValid = firstObj.equals(secondObj);
-
-            if (!isValid && ValidateParamEquality.DEFAULT_ERROR_MESSAGE.equals(errorMessage)) {
-                constraintValidatorContext.disableDefaultConstraintViolation();
-                constraintValidatorContext.buildConstraintViolationWithTemplate(
-                        "Values \\{" + firstObj + "," + secondObj + "\\} must be equal").addConstraintViolation();
-            }
-
-            return isValid;
-
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new InternalServerErrorException(e);
+            handleException("Error while accessing second field " + secondField + " for validation", e);
+            return false;
         }
+
+        //let @NotNull for checking null values
+        if (firstObj == null || secondObj == null) {
+            return true;
+        }
+
+        boolean isValid = firstObj.equals(secondObj);
+
+        if (!isValid && ValidateParamEquality.DEFAULT_ERROR_MESSAGE.equals(errorMessage)) {
+            constraintValidatorContext.disableDefaultConstraintViolation();
+            constraintValidatorContext.buildConstraintViolationWithTemplate(
+                    "Values \\{" + firstObj + "," + secondObj + "\\} must be equal").addConstraintViolation();
+        }
+
+        return isValid;
+    }
+
+    private void handleException(String errorMessage, Throwable throwable) {
+        log.error(errorMessage, throwable);
+        throw new InternalServerErrorException(errorMessage, throwable);
     }
 
 }

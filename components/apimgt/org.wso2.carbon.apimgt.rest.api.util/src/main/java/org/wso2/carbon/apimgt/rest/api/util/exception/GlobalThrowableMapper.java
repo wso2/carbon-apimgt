@@ -1,11 +1,12 @@
 /*
- *  Copyright WSO2 Inc.
+ *
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,6 +85,13 @@ public class GlobalThrowableMapper implements ExceptionMapper<Throwable> {
         if (e instanceof MethodNotAllowedException) {
             log.error("Method not allowed", e);
             return ((MethodNotAllowedException) e).getResponse();
+        }
+
+        if (e instanceof InternalServerErrorException) {
+            String errorMessage = "The server encountered an internal error : " + e.getMessage();
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).header("Content-Type", "application/json")
+                    .entity(e500).build();
         }
 
         if (e instanceof JsonParseException) {

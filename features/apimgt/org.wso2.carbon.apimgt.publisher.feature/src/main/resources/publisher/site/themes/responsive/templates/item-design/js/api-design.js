@@ -263,7 +263,7 @@ APIDesigner.prototype.get_scopes = function() {
     if(checkNested(this.api_doc, 'x-wso2-security','apim','x-wso2-scopes')){
     	var scopes = this.api_doc['x-wso2-security'].apim['x-wso2-scopes'];
     	for(var i =0; i < scopes.length ; i++ ){
-    	    options.push({ "value": scopes[i].key , "text": scopes[i].name });
+    	    options.push({ "value": scopes[i].key , "text": scopes[i].key });
     	}	
     }
     return options;
@@ -837,6 +837,12 @@ $(document).ready(function(){
                         return '';
                 }));
             }
+
+            if(tagName.length > 30){
+                $tag.val(tagName.substring(0, 30));
+                $('.tags-error').html('The tag can have only 30 characters maximum.');
+            }
+
         });
         $('.tags-error').html('');
         $("#tags").on('itemAdded', function(event) {

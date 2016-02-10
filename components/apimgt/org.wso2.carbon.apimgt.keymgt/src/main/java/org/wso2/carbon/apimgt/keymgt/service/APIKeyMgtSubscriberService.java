@@ -68,6 +68,7 @@ import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import javax.cache.Caching;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -382,8 +383,6 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                 return oAuthApplicationInfo;
             }
 
-            return createOAuthAppInfoFromDTO(oAuthConsumerAppDTO);
-
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while creating ServiceProvider for app " + applicationName, e);
         } catch (Exception e) {
@@ -406,7 +405,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     public OAuthApplicationInfo retrieveOAuthApplication(String consumerKey)
             throws APIKeyMgtException, APIManagementException, IdentityException {
 
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         OAuthApplicationInfo oAuthApplicationInfo = apiMgtDAO.getOAuthApplication(consumerKey);
         return oAuthApplicationInfo;
     }
@@ -425,7 +424,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             return;
         }
 
-        Subscriber subscriber = ApiMgtDAO.getOwnerForConsumerApp(consumerKey);
+        Subscriber subscriber = ApiMgtDAO.getInstance().getOwnerForConsumerApp(consumerKey);
         String baseUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
         String tenantAwareUsername = subscriber.getName();
 
@@ -449,6 +448,10 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             log.debug("Removing Service Provider with name : " + spAppName);
             appMgtService.deleteApplication(spAppName, tenantDomain, tenantAwareUsername);
 
+            if (OAuthServerConfiguration.getInstance().isCacheEnabled()) {
+                OAuthCache oAuthCache = OAuthCache.getInstance();
+                oAuthCache.clearCacheEntry(new OAuthCacheKey(consumerKey));
+            }
 
         } catch (IdentityApplicationManagementException e) {
             APIUtil.handleException("Error occurred while deleting ServiceProvider", e);
@@ -470,8 +473,8 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      */
     public APIInfoDTO[] getSubscribedAPIsOfUser(String userId) throws APIKeyMgtException,
             APIManagementException, IdentityException {
-        ApiMgtDAO ApiMgtDAO = new ApiMgtDAO();
-        return ApiMgtDAO.getSubscribedAPIsOfUser(userId);
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        return apiMgtDAO.getSubscribedAPIsOfUser(userId);
     }
 
     /**
@@ -582,7 +585,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             throw new APIKeyMgtException(errMsg, e);
         }
         
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         apiMgtDAO.updateRefreshedApplicationAccessToken(tokenScope, newAccessToken,
                 validityPeriod);
         return newAccessToken;
@@ -602,7 +605,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      * @throws AxisFault              on error in clearing cached key
      */
     public void revokeAccessToken(String key, String consumerKey, String authorizedUser) throws APIManagementException, AxisFault {
-        ApiMgtDAO dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         dao.revokeAccessToken(key);
         clearOAuthCache(consumerKey, authorizedUser);
     }
@@ -621,22 +624,25 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         boolean gatewayExists = config.getApiGatewayEnvironments().size() > 0;
         Set<SubscribedAPI> apiSet = null;
         Set<String> keys = null;
-        ApiMgtDAO dao;
-        dao = new ApiMgtDAO();
+        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (gatewayExists) {
             keys = dao.getApplicationKeys(application.getId());
             apiSet = dao.getSubscribedAPIs(application.getSubscriber(), null);
         }
         List<APIKeyMapping> mappings = new ArrayList<APIKeyMapping>();
-        for (String key : keys) {
-            dao.revokeAccessToken(key);
-            for (SubscribedAPI api : apiSet) {
-                APIKeyMapping mapping = new APIKeyMapping();
-                API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
-                mapping.setApiVersion(api.getApiId().getVersion());
-                mapping.setContext(apiDefinition.getContext());
-                mapping.setKey(key);
-                mappings.add(mapping);
+        if(keys != null) {
+            for (String key : keys) {
+                dao.revokeAccessToken(key);
+                if (apiSet != null) {
+                    for (SubscribedAPI api : apiSet) {
+                        APIKeyMapping mapping = new APIKeyMapping();
+                        API apiDefinition = APIKeyMgtUtil.getAPI(api.getApiId());
+                        mapping.setApiVersion(api.getApiId().getVersion());
+                        mapping.setContext(apiDefinition.getContext());
+                        mapping.setKey(key);
+                        mappings.add(mapping);
+                    }
+                }
             }
         }
         if (mappings.size() > 0) {
@@ -660,7 +666,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     public void revokeAccessTokenBySubscriber(Subscriber subscriber) throws
             APIManagementException, AxisFault {
         ApiMgtDAO dao;
-        dao = new ApiMgtDAO();
+        dao = ApiMgtDAO.getInstance();
         Application[] applications = dao.getApplications(subscriber, null);
         for (Application app : applications) {
             revokeAccessTokenForApplication(app);
@@ -677,7 +683,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
      */
     public void revokeKeysByTier(String tierName) throws APIManagementException, AxisFault {
         ApiMgtDAO dao;
-        dao = new ApiMgtDAO();
+        dao = ApiMgtDAO.getInstance();
         Application[] applications = dao.getApplicationsByTier(tierName);
         for (Application application : applications) {
             revokeAccessTokenForApplication(application);

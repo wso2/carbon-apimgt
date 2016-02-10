@@ -24,6 +24,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -51,12 +52,14 @@ import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ConflictException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.ForbiddenException;
+import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.MethodNotAllowedException;
 import org.wso2.carbon.apimgt.rest.api.util.exception.NotFoundException;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.registry.core.secure.AuthorizationFailedException;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.validation.ConstraintViolation;
@@ -193,6 +196,32 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns the current logged in consumer's group id
+     * @return group id of the current logged in user.
+     */
+    @SuppressWarnings("unchecked")
+    public static String getLoggedInUserGroupId() {
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+        JSONObject loginInfoJsonObj = new JSONObject();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            loginInfoJsonObj.put("user", username);
+            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                loginInfoJsonObj.put("isSuperTenant", true);
+            } else {
+                loginInfoJsonObj.put("isSuperTenant", false);
+            }
+            String loginInfoString = loginInfoJsonObj.toJSONString();
+            return apiConsumer.getGroupIds(loginInfoString);
+        } catch (APIManagementException e) {
+            String errorMsg = "Unable to get groupIds of user " + username;
+            handleInternalServerError(errorMsg, e, log);
+            return null;
+        }
+    }
+
+    /**
      * Check if the user's tenant and the API's tenant is equal. If it is not this will throw an 
      * APIMgtAuthorizationFailedException
      * 
@@ -251,6 +280,17 @@ public class RestApiUtil {
         } finally {
             IOUtils.closeQuietly(outFileStream);
         }
+    }
+
+    /**
+     * Returns a new InternalServerErrorException
+     *
+     * @return a new InternalServerErrorException with default details as a response DTO
+     */
+    public static InternalServerErrorException buildInternalServerErrorException() {
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, 500l,
+                RestApiConstants.STATUS_INTERNAL_SERVER_ERROR_DESCRIPTION_DEFAULT);
+        return new InternalServerErrorException(errorDTO);
     }
 
     /**
@@ -410,6 +450,198 @@ public class RestApiUtil {
     }
 
     /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     * 
+     * @param msg error message
+     * @param log Log instance
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg, Log log) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg);
+        log.error(msg);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     * 
+     * @param resource Resource type
+     * @param id id of resource
+     * @param t Throwable
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleAuthorizationFailure(String resource, String id, Throwable t, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
+        log.error(forbiddenException.getMessage(), t);
+        throw forbiddenException;
+    }
+
+    /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     * 
+     * @param resource requested resource
+     * @param id id of resource
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleAuthorizationFailure(String resource, String id, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(resource, id);
+        log.error(forbiddenException.getMessage());
+        throw forbiddenException;
+    }
+
+    /**
+     * Logs the error, builds a ForbiddenException with specified details and throws it
+     * 
+     * @param description description of the error
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws ForbiddenException
+     */
+    public static void handleAuthorizationFailure(String description, Throwable t, Log log)
+            throws ForbiddenException {
+        ForbiddenException forbiddenException = buildForbiddenException(description);
+        log.error(description, t);
+        throw forbiddenException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     * 
+     * @param resource requested resource
+     * @param id id of resource
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String resource, String id, Throwable t, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        log.error(notFoundException.getMessage(), t);
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     * 
+     * @param resource requested resource
+     * @param id id of resource
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String resource, String id, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(resource, id);
+        log.error(notFoundException.getMessage());
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String description, Throwable t, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(description);
+        log.error(description, t);
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a NotFoundException with specified details and throws it
+     *
+     * @param description description of the error
+     * @param log Log instance
+     * @throws NotFoundException
+     */
+    public static void handleResourceNotFoundError(String description, Log log)
+            throws NotFoundException {
+        NotFoundException notFoundException = buildNotFoundException(description);
+        log.error(description);
+        throw notFoundException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     * 
+     * @param description description of the error
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handleResourceAlreadyExistsError(String description, Log log)
+            throws ConflictException {
+        ConflictException conflictException = buildConflictException(description);
+        log.error(description);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a ConflictException with specified details and throws it
+     * 
+     * @param description description of the error
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws ConflictException
+     */
+    public static void handleResourceAlreadyExistsError(String description, Throwable t, Log log)
+            throws ConflictException {
+        ConflictException conflictException = buildConflictException(description);
+        log.error(description, t);
+        throw conflictException;
+    }
+
+    /**
+     * Logs the error, builds a MethodNotAllowedException with specified details and throws it
+     * 
+     * @param method http method
+     * @param resource requested resource
+     * @param log Log instance
+     * @throws MethodNotAllowedException
+     */
+    public static void handleMethodNotAllowedError(String method, String resource, Log log)
+            throws MethodNotAllowedException {
+        MethodNotAllowedException methodNotAllowedException = buildMethodNotAllowedException(method, resource);
+        log.error(methodNotAllowedException.getMessage());
+        throw methodNotAllowedException;
+    }
+
+    /**
+     * Logs the error, builds a internalServerErrorException with specified details and throws it
+     * 
+     * @param msg error message
+     * @param t Throwable instance
+     * @param log Log instance
+     * @throws InternalServerErrorException
+     */
+    public static void handleInternalServerError(String msg, Throwable t, Log log)
+            throws InternalServerErrorException {
+        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
+        log.error(msg, t);
+        throw internalServerErrorException;
+    }
+
+    /**
+     * Logs the error, builds a internalServerErrorException with specified details and throws it
+     *
+     * @param msg error message
+     * @param log Log instance
+     * @throws InternalServerErrorException
+     */
+    public static void handleInternalServerError(String msg, Log log)
+            throws InternalServerErrorException {
+        InternalServerErrorException internalServerErrorException = buildInternalServerErrorException();
+        log.error(msg);
+        throw internalServerErrorException;
+    }
+
+    /**
      * Checks whether the specified tenant domain is available
      * 
      * @param tenantDomain tenant domain
@@ -433,7 +665,7 @@ public class RestApiUtil {
         if (RestApiConstants.RESOURCE_PATH_TIERS_APPLICATION.equals(resource)
                 || RestApiConstants.RESOURCE_PATH_TIERS_RESOURCE.equals(resource)) {
             if (!"GET".equals(method)) {
-                throw RestApiUtil.buildMethodNotAllowedException(method, resource);
+                RestApiUtil.handleMethodNotAllowedError(method, resource, log);
             }
         }
     }
@@ -638,7 +870,7 @@ public class RestApiUtil {
         try {
             uriTemplates = definitionFromSwagger20.getURITemplates(api, swagger);
         } catch (APIManagementException e) {
-            log.error("Error while parsing swagger content to get URI Templates" + e.getMessage());
+            log.error("Error while parsing swagger content to get URI Templates", e);
         }
         api.setUriTemplates(uriTemplates);
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
@@ -646,7 +878,7 @@ public class RestApiUtil {
         try {
             registeredResource = keyManager.getResourceByApiId(api.getId().toString());
         } catch (APIManagementException e) {
-            log.error("Error while getting registered resources for API: " + api.getId().toString() + e.getMessage());
+            log.error("Error while getting registered resources for API: " + api.getId().toString(), e);
         }
         //Add new resource if not exist
         if (registeredResource == null) {
@@ -654,7 +886,7 @@ public class RestApiUtil {
             try {
                 isNewResourceRegistered = keyManager.registerNewResource(api, null);
             } catch (APIManagementException e) {
-                log.error("Error while registering new resource for API: " + api.getId().toString() + e.getMessage());
+                log.error("Error while registering new resource for API: " + api.getId().toString(), e);
             }
             if (!isNewResourceRegistered) {
                 log.error("New resource not registered for API: " + api.getId());
@@ -665,7 +897,7 @@ public class RestApiUtil {
             try {
                 keyManager.updateRegisteredResource(api, registeredResource);
             } catch (APIManagementException e) {
-                log.error("Error while updating resource");
+                log.error("Error while updating resource", e);
             }
         }
         return true;
@@ -679,7 +911,7 @@ public class RestApiUtil {
             returnedAPP = impl.createApplication(appRequest);
         } catch (APIManagementException e) {
             log.error("Cannot create OAuth application from provided information, for APP name: " +
-                    appRequest.getOAuthApplicationInfo().getClientName());
+                    appRequest.getOAuthApplicationInfo().getClientName(), e);
         }
         return returnedAPP;
     }
@@ -691,7 +923,7 @@ public class RestApiUtil {
         try {
             returnedAPP = impl.retrieveApplication(consumerKey);
         } catch (APIManagementException e) {
-            log.error("Error while retrieving OAuth application information for Consumer Key: " + consumerKey);
+            log.error("Error while retrieving OAuth application information for Consumer Key: " + consumerKey, e);
         }
         return returnedAPP;
     }
@@ -719,9 +951,9 @@ public class RestApiUtil {
                 //Get URL templates from swagger content we created
                 storeResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName());
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName());
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
             }
             return storeResourceMappings;
         }
@@ -752,9 +984,9 @@ public class RestApiUtil {
                 //Get URL templates from swagger content we created
                 publisherResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
             } catch (APIManagementException e) {
-                log.error("Error while reading resource mappings for API: " + api.getId().getApiName());
+                log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
-                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName());
+                log.error("Error while reading the swagger definition for API: " + api.getId().getApiName(), e);
             }
             return publisherResourceMappings;
         }

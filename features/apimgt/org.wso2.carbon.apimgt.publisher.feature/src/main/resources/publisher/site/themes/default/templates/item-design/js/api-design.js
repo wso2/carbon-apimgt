@@ -691,10 +691,15 @@ $(document).ready(function(){
 
     $("#clearThumb").on("click", function () {
         $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
+        $("#apiEditThumb").attr("src", "") ;
     });
 
     $("#clearSeqFile").on("click", function () {
         $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge" name="apiThumb" />');
+    });
+
+    $("#clearOutSeqFile").on("click", function () {
+            $('#outSeqFile').val('');
     });
 
     $('#import_swagger').attr('disabled','disabled');
@@ -859,6 +864,12 @@ $(document).ready(function(){
                         return '';
                 }));
             }
+
+            if(tagName.length > 30){
+                $tag.val(tagName.substring(0, 30));
+                $('.tags-error').html('The tag can have only 30 characters maximum.');
+            }
+
         });
         $('.tags-error').html('');
         $("#tags").on('itemAdded', function(event) {
@@ -882,6 +893,9 @@ $(document).ready(function(){
         if (imageFileSize > 1){
           $('#error-invalidImageFileSize').modal('show');
           $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge validateImageFile" name="apiThumb" />');
+        }else{
+            var output = document.getElementById('apiEditThumb');
+            output.src = URL.createObjectURL(this.files[0]);
         }
     });
 });

@@ -7,20 +7,19 @@
 	under the License is distributed on an "AS IS" BASIS, # WITHOUT WARRANTIES
 	OR CONDITIONS OF ANY KIND, either express or implied. # See the License for
 	the specific language governing permissions and # limitations under the License. -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>5.0.3</version>
+        <version>6.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.impl</artifactId>
     <packaging>bundle</packaging>
-    <name>WSO2 Carbon - API Management Implementation</name>
+    <name>WSO2 Carbon - API Management Implementation </name>
 
     <dependencies>
         <dependency>
@@ -159,10 +158,13 @@
             <artifactId>org.wso2.carbon.apimgt.registry.cache.stub</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
+             <groupId>org.wso2.orbit.org.apache.pdfbox</groupId>
+             <artifactId>pdfbox</artifactId>
+         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.governance</groupId>
+            <artifactId>org.wso2.carbon.governance.lcm</artifactId>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
@@ -179,20 +181,18 @@
                         <configuration>
                             <tasks>
                                 <path id="h2.classpath">
-                                    <path refid="maven.compile.classpath"/>
+                                    <path refid="maven.compile.classpath" />
                                 </path>
-                                <echo message="########### Create Test Database ##############"/>
-                                <sql driver="org.h2.Driver"
-                                     url="jdbc:h2:${basedir}/target/repository/database/WSO2AM_DB" userid="wso2carbon"
-                                     password="wso2carbon" autocommit="true" onerror="continue">
+                                <echo message="########### Create Test Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/target/repository/database/WSO2AM_DB" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
                                     <classpath>
-                                        <path refid="h2.classpath"/>
+                                        <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2.sql"/>
-                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql"/>
+                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2.sql" />
+                                    <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql" />
 
                                 </sql>
-                                <echo message="##################### END ########################"/>
+                                <echo message="##################### END ########################" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -255,8 +255,8 @@
                             org.apache.axiom.*; version="${imp.pkg.version.axiom}",
                             org.wso2.carbon.utils; version="${carbon.platform.package.import.version.range}",
                             org.wso2.carbon.registry.core.*; version="${carbon.registry.imp.pkg.version}",
-                            org.wso2.carbon.registry.indexing.*;
-                            version="${carbon.registry.package.import.version.range}",
+                            org.wso2.carbon.registry.common.*,
+                            org.wso2.carbon.registry.indexing.*; version="${carbon.registry.package.import.version.range}",
                             org.apache.pdfbox.*; version="${orbit.version.pdfbox}",
                             org.apache.poi.*,
                             org.apache.thrift.*,

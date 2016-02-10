@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
@@ -31,6 +33,8 @@ import java.util.ArrayList;
  * may incur a significant overhead on the key validation process.
  */
 public class WSAPIKeyDataStore implements APIKeyDataStore {
+
+    public static final Log log = LogFactory.getLog(WSAPIKeyDataStore.class);
 
     private static final APIKeyValidatorClientPool clientPool = APIKeyValidatorClientPool.getInstance();
 
@@ -54,7 +58,10 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
                 if (client != null) {
                     clientPool.release(client);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Releasing client from client pool caused an exception = " + exception.getMessage());
+                }
             }
         }
     }
@@ -74,7 +81,10 @@ public class WSAPIKeyDataStore implements APIKeyDataStore {
                 if (client != null) {
                     clientPool.release(client);
                 }
-            } catch (Exception ignored) {
+            } catch (Exception exception) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Releasing client from client pool caused an exception = " + exception.getMessage());
+                }
             }
         }
     }

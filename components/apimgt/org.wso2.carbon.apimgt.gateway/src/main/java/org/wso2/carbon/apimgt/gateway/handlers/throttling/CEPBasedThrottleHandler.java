@@ -143,14 +143,13 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
             ConfigurationContext cc = axis2MC.getConfigurationContext();
-
-            /*if (this.throttler == null) {
+            if (this.throttler == null) {
                 synchronized (this) {
                     if (this.throttler == null) {
                         initThrottle(messageContext, cc);
                     }
                 }
-            } */
+            }
 
             doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         }
@@ -159,6 +158,8 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
 
     private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
+         ServiceReferenceHolder.getInstance().setThrottler(Throttler.getInstance());
+         ServiceReferenceHolder.getInstance().getThrottler().deployLocalCEPRules();
         this.throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     }
@@ -223,7 +224,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             // It it's a hard limit exceeding, we tell it as service not being available.
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
         } else {
-            errorCode = APIThrottleConstants.THROTTLE_OUT_ERROR_CODE;
+            errorCode = 503;
             errorMessage = "Message throttled out";
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;

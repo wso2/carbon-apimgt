@@ -38,10 +38,11 @@ import javax.net.ssl.X509TrustManager;
 
 public class ThriftAuthClient {
 
-    private String sessionId = null;
+
     private THttpClient client = null;
 
     public String getSessionId(String userName, String password) throws AuthenticationException {
+        String sessionId = null;
         try {
 
             TProtocol protocol = new TCompactProtocol(client);
@@ -51,11 +52,11 @@ public class ThriftAuthClient {
             client.close();
 
         } catch (TTransportException e) {
-            throw new AuthenticationException("Error in authenticating with thrift client..");
+            throw new AuthenticationException("Error in authenticating with thrift client..", e);
         } catch (TException e) {
-            throw new AuthenticationException("Error in authenticating with thrift client..");
+            throw new AuthenticationException("Error in authenticating with thrift client..", e);
         } catch (AuthenticationException e) {
-            throw new AuthenticationException("Error in authenticating with thrift client..");
+            throw new AuthenticationException("Error in authenticating with thrift client..", e);
         } finally {
             if (client != null) {
                 client.close();
@@ -71,14 +72,12 @@ public class ThriftAuthClient {
             TrustManager easyTrustManager = new X509TrustManager() {
                 public void checkClientTrusted(
                         java.security.cert.X509Certificate[] x509Certificates,
-                        String s)
-                        throws java.security.cert.CertificateException {
+                        String s){
                 }
 
                 public void checkServerTrusted(
                         java.security.cert.X509Certificate[] x509Certificates,
-                        String s)
-                        throws java.security.cert.CertificateException {
+                        String s){
                 }
 
                 public java.security.cert.X509Certificate[] getAcceptedIssuers() {
@@ -105,15 +104,15 @@ public class ThriftAuthClient {
                 //Assign it an empty value since it is part of the thriftServiceURL.
                 webContextRoot = "";
             }
-            String thriftServiceURL = "https://" + serverIP + ":" + remoteServerPort +
-                                      webContextRoot + "/" + "thriftAuthenticator";
+            String thriftServiceURL = "https://" + serverIP + ':' + remoteServerPort +
+                                      webContextRoot + '/' + "thriftAuthenticator";
             client = new THttpClient(thriftServiceURL, httpClient);
 
 
         } catch (TTransportException e) {
-            throw new AuthenticationException("Error in creating thrift authentication client..");
+            throw new AuthenticationException("Error in creating thrift authentication client..", e);
         } catch (Exception e) {
-            throw new AuthenticationException("Error in creating thrift authentication client..");
+            throw new AuthenticationException("Error in creating thrift authentication client..", e);
         }
     }
 }

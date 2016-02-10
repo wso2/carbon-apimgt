@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.throttling;
 
+import edu.umd.cs.findbugs.annotations.*;
 import org.apache.axiom.om.*;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
 import org.apache.axiom.om.impl.llom.OMDocumentImpl;
@@ -40,6 +41,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public class ApplicationThrottleController {
     
@@ -81,7 +83,7 @@ public class ApplicationThrottleController {
         try {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
-            handleException("Unable to Find the tenant ID using tenant: " + tenantDomain);
+            handleException("Unable to Find the tenant ID using tenant: " + tenantDomain, e);
             return null;
         }
 
@@ -123,7 +125,7 @@ public class ApplicationThrottleController {
             ByteArrayInputStream inputStream = null;
             Object content = resource.getContent();
             if (content instanceof String) {
-                inputStream = new ByteArrayInputStream(content.toString().getBytes());
+                inputStream = new ByteArrayInputStream(content.toString().getBytes(Charset.defaultCharset()));
             } else if (content instanceof byte[]) {
                 inputStream = new ByteArrayInputStream((byte[]) content);
             }
@@ -178,10 +180,10 @@ public class ApplicationThrottleController {
         }
 
         if (resource != null) {
-            if (resource.getMediaType().equals("text/plain")) {
+            if ("text/plain".equals(resource.getMediaType())) {
                 // for non-xml text content
                 return OMAbstractFactory.getOMFactory().createOMText(
-                        new String((byte[]) resource.getContent()));
+                        new String((byte[]) resource.getContent(),Charset.defaultCharset()));
             }
 
             ByteArrayInputStream inputStream = new ByteArrayInputStream(
@@ -212,7 +214,7 @@ public class ApplicationThrottleController {
         try {
             registry = registryService.getGovernanceSystemRegistry(tenantId);
         } catch (RegistryException e) {
-            log.error("Error while fetching Governance Registry of Super Tenant");
+            log.error("Error while fetching Governance Registry of Super Tenant", e);
             return null;
         }
 
@@ -228,6 +230,8 @@ public class ApplicationThrottleController {
         return null;
     }
 
+    @edu.umd.cs.findbugs.annotations.SuppressWarnings (value = "UCPM_USE_CHARACTER_PARAMETERIZED_METHOD",
+            justification = "The error occurs due to FB violation in Registry code")
     private static String resolvePath(String path) {
         if (path == null || "".equals(path)) {
             path = RegistryConstants.ROOT_PATH;
@@ -238,7 +242,6 @@ public class ApplicationThrottleController {
         if (path.startsWith(RegistryConstants.PATH_SEPARATOR)) {
                 path = path.substring(1);
         }
-        path = RegistryConstants.ROOT_PATH + path;
-        return path;
+        return RegistryConstants.ROOT_PATH + path;
     }
 }

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -32,6 +34,8 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class ApplicationKeyMappingUtil {
+
+    private static final Log log = LogFactory.getLog(ApplicationKeyMappingUtil.class);
 
     @SuppressWarnings("unchecked")
     public static ApplicationKeyDTO fromApplicationKeyToDTO(Map<String, Object> keyDetails, String applicationKeyType) {
@@ -64,7 +68,9 @@ public class ApplicationKeyMappingUtil {
 
             applicationKeyDTO.setToken(tokenDTO);
         } catch (ParseException e) {
-            throw new InternalServerErrorException(e);
+            String errorMsg = "Error while parsing application details string";
+            log.error(errorMsg, e);
+            throw new InternalServerErrorException(errorMsg, e);
         }
         return applicationKeyDTO;
     }

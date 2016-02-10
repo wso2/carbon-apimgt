@@ -70,19 +70,22 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     public boolean authenticate(MessageContext synCtx) throws APISecurityException {
+        String apiKey = null;
+        boolean defaultVersionInvoked = false;
         Map headers = (Map) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        requestOrigin = (String) headers.get("Origin");
-        String apiKey = null;
+
         if (headers != null) {
+            requestOrigin = (String) headers.get("Origin");
             apiKey = extractCustomerKeyFromAuthHeader(headers);
             if (log.isDebugEnabled()) {
                 log.debug(apiKey != null ? "Received Token ".concat(apiKey) : "No valid Authorization header found");
             }
+            //Check if client invoked the default version API (accessing API without version).
+            defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
         }
 
-        //Check if client invoked the default version API (accessing API without version).
-        boolean defaultVersionInvoked = headers.containsKey(defaultAPIHeader);
+
         if(log.isDebugEnabled()){
             log.debug("Default Version API invoked");
         }
@@ -99,16 +102,6 @@ public class OAuthAuthenticator implements Authenticator {
 
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-
-        String requestPath = Utils.getRequestPath(synCtx, fullRequestPath, apiContext, apiVersion);
-
-        if(log.isDebugEnabled()){
-            log.debug("Full Request Path = ".concat(requestPath));
-        }
-        if (requestPath.equals("")) {
-            requestPath = requestPath + "/";
-        }
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
 
@@ -117,7 +110,6 @@ public class OAuthAuthenticator implements Authenticator {
             log.debug("Received Client Domain ".concat(clientDomain));
         }
         //If the matching resource does not require authentication
-        //String authenticationScheme = keyValidator.getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
         String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
@@ -208,7 +200,7 @@ public class OAuthAuthenticator implements Authenticator {
             try {
                 APIUtil.checkClientDomainAuthorized(info, clientDomain);
             } catch (APIManagementException e) {
-               throw new APISecurityException(info.getValidationStatus(), e.getMessage());
+               throw new APISecurityException(info.getValidationStatus(), e.getMessage(), e);
             }
             if(log.isDebugEnabled()){
                 log.debug("User is authorized to access the Resource");
@@ -218,8 +210,9 @@ public class OAuthAuthenticator implements Authenticator {
             if(log.isDebugEnabled()){
                 log.debug("User is NOT authorized to access the Resource");
             }
-            throw new APISecurityException(info.getValidationStatus(),
-                    "Access failure for API: " + apiContext + ", version: " + apiVersion);
+            throw new APISecurityException(info.getValidationStatus(), "Access failure for API: " + apiContext +
+                    ", version: "+ apiVersion + " with key: " + apiKey + " status: (" + info.getValidationStatus() +
+                    ") - " + APISecurityConstants.getAuthenticationFailureMessage(info.getValidationStatus()));
         }
     }
 
@@ -241,7 +234,7 @@ public class OAuthAuthenticator implements Authenticator {
         }
 
         if (authHeader.startsWith("OAuth ") || authHeader.startsWith("oauth ")) {
-            authHeader = authHeader.substring(authHeader.indexOf("o"));
+            authHeader = authHeader.substring(authHeader.indexOf('o'));
         }
 
         String[] headers = authHeader.split(oauthHeaderSplitter);

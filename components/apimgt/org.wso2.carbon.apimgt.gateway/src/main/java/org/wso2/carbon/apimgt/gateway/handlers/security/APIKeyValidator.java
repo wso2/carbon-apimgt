@@ -60,8 +60,6 @@ public class APIKeyValidator {
 
     private APIKeyDataStore dataStore;
 
-    private AxisConfiguration axisConfig;
-
     private boolean gatewayKeyCacheEnabled = true;
 
     private boolean isGatewayAPIResourceValidationEnabled = true;
@@ -69,8 +67,6 @@ public class APIKeyValidator {
     protected Log log = LogFactory.getLog(getClass());
 
     public APIKeyValidator(AxisConfiguration axisConfig) {
-        this.axisConfig = axisConfig;
-
         //check the client type from config
         String keyValidatorClientType = APISecurityUtils.getKeyValidatorClientType();
         if (APIConstants.API_KEY_VALIDATOR_WS_CLIENT.equals(keyValidatorClientType)) {
@@ -242,7 +238,7 @@ public class APIKeyValidator {
                 synCtx.setProperty(APIConstants.VERB_INFO_DTO, verb);
             }
         } catch (ResourceNotFoundException e) {
-            log.error("Could not find matching resource for request");
+            log.error("Could not find matching resource for request", e);
             return APIConstants.NO_MATCHING_AUTH_SCHEME;
         }
 
@@ -360,6 +356,7 @@ public class APIKeyValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String)synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        String apiName = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API);
 
         String requestPath = Utils.getRequestPath(synCtx, fullRequestPath, apiContext, apiVersion);
         if ("".equals(requestPath)) {
@@ -374,29 +371,23 @@ public class APIKeyValidator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         if (resourceString == null) {
-            API selectedApi = null;
+            API selectedApi = synCtx.getConfiguration().getAPI(apiName);
             Resource selectedResource = null;
 
-            for (API api : synCtx.getConfiguration().getAPIs()) {
-                if (apiContext.equals(api.getContext()) && apiVersion.equals(api.getVersion())) {
-                    if (log.isDebugEnabled()) {
 
-                        log.debug("Selected API: " + apiContext + ", Version: " + apiVersion);
-                    }
-                    selectedApi = api;
-                    break;
-                }
-            }
-
-            if (selectedApi.getResources().length > 0) {
-                for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-                    Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedApi.getResources()));
-                    if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
-                        selectedResource = resource;
-                        break;
+            if (selectedApi != null){
+                Resource[] selectedAPIResources = selectedApi.getResources();
+                if (selectedAPIResources.length > 0) {
+                    for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+                        Resource resource = dispatcher.findResource(synCtx, Arrays.asList(selectedAPIResources));
+                        if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
+                            selectedResource = resource;
+                            break;
+                        }
                     }
                 }
             }
+           
 
             if (selectedResource == null) {
                 //No matching resource found.
@@ -510,7 +501,7 @@ public class APIKeyValidator {
     public VerbInfoDTO getVerbInfoDTOFromAPIData(String context, String apiVersion, String requestPath, String httpMethod) 
     		throws APISecurityException {
 
-        String cacheKey = context + ":" + apiVersion;
+        String cacheKey = context + ':' + apiVersion;
         APIInfoDTO apiInfoDTO = null;
         if (isGatewayAPIResourceValidationEnabled) {
         apiInfoDTO = (APIInfoDTO) getResourceCache().get(cacheKey);
@@ -522,7 +513,7 @@ public class APIKeyValidator {
 
         //Match the case where the direct api context is matched
         if ("/".equals(requestPath)) {
-            String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
+            String requestCacheKey = context + '/' + apiVersion + requestPath + ':' + httpMethod;
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
@@ -559,7 +550,7 @@ public class APIKeyValidator {
 
         while (requestPath.length() > 1) {
 
-            String requestCacheKey = context + "/" + apiVersion + requestPath + ":" + httpMethod;
+            String requestCacheKey = context + '/' + apiVersion + requestPath + ':' + httpMethod;
 
             //Get decision from cache.
             VerbInfoDTO matchingVerb = null;
@@ -599,7 +590,7 @@ public class APIKeyValidator {
 
 
             //Remove the section after the last occurrence of the '/' character
-            int index = requestPath.lastIndexOf("/");
+            int index = requestPath.lastIndexOf('/');
             requestPath = requestPath.substring(0, index <= 0 ? 0 : index);
         }
         //nothing found. return the highest level of security

@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
 
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -68,6 +69,7 @@ import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -140,6 +142,7 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
+import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
@@ -185,8 +188,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -204,7 +205,7 @@ public final class APIUtil {
     private static long tenantIdleTimeMillis;
     private static Set<String> currentLoadingTenants = new HashSet<String>();
 
-    private static Set<String> whiteListedScopes;
+    private static volatile Set<String> whiteListedScopes;
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -234,7 +235,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
 
             if (apiId == -1) {
                 return null;
@@ -242,8 +243,8 @@ public final class APIUtil {
             api = new API(apiIdentifier);
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
-            //BigDecimal res = bigDecimal.setScale(1, RoundingMode.HALF_UP);
+
+
             api.setRating(getAverageRating(apiId));
             //set description
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
@@ -252,8 +253,6 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -320,20 +319,20 @@ public final class APIUtil {
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-            api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
 
 
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
             List<String> uriTemplateNames = new ArrayList<String>();
 
-            Set<Scope> scopes = ApiMgtDAO.getAPIScopes(api.getId());
+            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
             HashMap<String, String> urlPatternsSet;
-            urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
+            urlPatternsSet = ApiMgtDAO.getInstance().getURITemplatesPerAPIAsString(api.getId());
 
-            HashMap<String, String> resourceScopes;
-            resourceScopes = ApiMgtDAO.getResourceToScopeMapping(api.getId());
+            HashMap<String, String> resourceScopesMap;
+            resourceScopesMap = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
             Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
             String resourceScopeKey;
@@ -356,7 +355,7 @@ public final class APIUtil {
                 uriTemplate.setThrottlingTiers(throttlingTier);
                 uriTemplate.setMediationScript(mediationScript);
                 resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                uriTemplate.setScopes(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
                 //Checking for duplicate uri template names
                 if (uriTemplateNames.contains(uTemplate)) {
                     for (URITemplate tmp : uriTemplates) {
@@ -365,7 +364,7 @@ public final class APIUtil {
                             tmp.setAuthTypes(authType);
                             tmp.setThrottlingTiers(throttlingTier);
                             resourceScopeKey = APIUtil.getResourceKey(api.getContext(), apiVersion, uTemplate, method);
-                            tmp.setScopes(findScopeByKey(scopes, resourceScopes.get(resourceScopeKey)));
+                            tmp.setScopes(findScopeByKey(scopes, resourceScopesMap.get(resourceScopeKey)));
                             break;
                         }
                     }
@@ -375,7 +374,7 @@ public final class APIUtil {
                 uriTemplateNames.add(uTemplate);
             }
             api.setUriTemplates(uriTemplates);
-            api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             Set<String> tags = new HashSet<String>();
             Tag[] tag = registry.getTags(artifactPath);
             for (Tag tag1 : tag) {
@@ -386,6 +385,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -418,7 +418,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
 
             if (apiId == -1) {
                 return null;
@@ -429,16 +429,13 @@ public final class APIUtil {
             api.setUUID(artifact.getId());
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            // BigDecimal bigDecimal = new BigDecimal(getAverageRating(apiId));
-            //BigDecimal res = bigDecimal.setScale(1, RoundingMode.HALF_UP);
+
             api.setRating(getAverageRating(apiId));
             //set description
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
             //set last access time
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -513,19 +510,19 @@ public final class APIUtil {
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-            api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
 
 
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
             List<String> uriTemplateNames = new ArrayList<String>();
 
-            Set<Scope> scopes = ApiMgtDAO.getAPIScopes(api.getId());
+            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
             HashMap<String, String> urlPatternsSet;
-            urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
+            urlPatternsSet = ApiMgtDAO.getInstance().getURITemplatesPerAPIAsString(api.getId());
             HashMap<String, String> resourceScopes;
-            resourceScopes = ApiMgtDAO.getResourceToScopeMapping(api.getId());
+            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
             Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
             String resourceScopeKey;
@@ -570,14 +567,14 @@ public final class APIUtil {
                 uriTemplateNames.add(uTemplate);
             }
 
-            if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_INLINE)) {
+            if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
                 for (URITemplate template : uriTemplates) {
                     template.setMediationScript(template.getAggregatedMediationScript());
                 }
             }
 
             api.setUriTemplates(uriTemplates);
-            api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             Set<String> tags = new HashSet<String>();
             Tag[] tag = registry.getTags(artifactPath);
             for (Tag tag1 : tag) {
@@ -588,6 +585,7 @@ public final class APIUtil {
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
@@ -613,7 +611,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
             if (apiId == -1) {
                 return null;
             }
@@ -643,7 +641,7 @@ public final class APIUtil {
 
             Set<Tier> availableTier = new HashSet<Tier>();
             String tiers = artifact.getAttribute(APIConstants.API_OVERVIEW_TIER);
-            if (tiers != null) {
+            if (tiers != null) {                
                 String[] tierNames = tiers.split("\\|\\|");
                 for (String tierName : tierNames) {
                     Tier tier = new Tier(tierName);
@@ -666,7 +664,7 @@ public final class APIUtil {
             api.setSubscriptionAvailableTenants(artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABLE_TENANTS));
 
             api.setDestinationStatsEnabled(artifact.getAttribute(APIConstants.API_OVERVIEW_DESTINATION_BASED_STATS_ENABLED));
-            api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
             api.setImplementation(artifact.getAttribute(APIConstants.PROTOTYPE_OVERVIEW_IMPLEMENTATION));
             api.setTechnicalOwner(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER));
             api.setTechnicalOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_TEC_OWNER_EMAIL));
@@ -674,7 +672,7 @@ public final class APIUtil {
             api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             
             ArrayList<URITemplate> urlPatternsList;
-            urlPatternsList = ApiMgtDAO.getAllURITemplates(api.getContext(), api.getId().getVersion());
+            urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(api.getContext(), api.getId().getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
             for (URITemplate uriTemplate : uriTemplates) {
@@ -685,6 +683,7 @@ public final class APIUtil {
             api.setUriTemplates(uriTemplates);
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
         } catch (GovernanceException e) {
             String msg = "Failed to get API from artifact ";
             throw new APIManagementException(msg, e);
@@ -723,16 +722,18 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static Set<Scope> getScopeByScopeKey(String scopeKey, String provider) throws APIManagementException {
-        Set<Scope> scopeList = null;
+        Set<Scope> scopeSet = null;
         String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(provider));
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
-            scopeList = ApiMgtDAO.getAPIScopesByScopeKey(scopeKey, tenantId);
+            scopeSet = ApiMgtDAO.getInstance().getAPIScopesByScopeKey(scopeKey, tenantId);
         } catch (UserStoreException e) {
-            handleException("Error while retrieving Scopes");
+            String msg = "Error while retrieving Scopes";
+            log.error(msg ,e);
+            handleException(msg);
         }
-        return scopeList;
+        return scopeSet;
     }
 
     /**
@@ -755,8 +756,6 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT, api.getContext());
             artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, api.getId().getProviderName());
             artifact.setAttribute(APIConstants.API_OVERVIEW_DESCRIPTION, api.getDescription());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL, api.getUrl());
-            artifact.setAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL, api.getSandboxUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_WSDL, api.getWsdlUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_WADL, api.getWadlUrl());
             artifact.setAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL, api.getThumbnailUrl());
@@ -827,12 +826,14 @@ public final class APIUtil {
                 artifact.addAttribute(APIConstants.API_URI_PATTERN + i, uriTemplate.getUriTemplate());
                 artifact.addAttribute(APIConstants.API_URI_HTTP_METHOD + i, uriTemplate.getHTTPVerb());
                 artifact.addAttribute(APIConstants.API_URI_AUTH_TYPE + i, uriTemplate.getAuthType());
-//                artifact.addAttribute(APIConstants.API_URI_MEDIATION_SCRIPT + i,
-//                        uriTemplate.getMediationScript());
+
                 i++;
 
             }
             artifact.setAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS, writeEnvironmentsToArtifact(api));
+
+            artifact.setAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION,
+                                  APIUtil.getCorsConfigurationJsonFromDto(api.getCorsConfiguration()));
 
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -1039,18 +1040,15 @@ public final class APIUtil {
      * @fileName File name.
      */
     public static String getDocumentationFilePath(APIIdentifier identifier, String fileName) {
-        String contentPath = APIUtil.getAPIDocPath(identifier) + APIConstants.DOCUMENT_FILE_DIR +
+        return APIUtil.getAPIDocPath(identifier) + APIConstants.DOCUMENT_FILE_DIR +
                 RegistryConstants.PATH_SEPARATOR + fileName;
-        return contentPath;
     }
 
     //remove getSwagger12DefinitionFilePath once getSwagger20DefinitionFilePath operates
-    public static String getSwagger12DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
-        String resourcePath = APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
+    public static String getSwagger12DefinitionFilePath(String apiName, String apiVersion, String apiProvider) { 
+        return APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 apiName + '-' + apiVersion + '-' + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 APIConstants.API_DOC_1_2_LOCATION;
-
-        return resourcePath;
     }
 
     public static String getSwagger20DefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
@@ -1264,7 +1262,8 @@ public final class APIUtil {
             String wsdRegistryPath;
 
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            if (tenantDomain.equalsIgnoreCase(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase
+                    (tenantDomain)) {
                 wsdRegistryPath = RegistryConstants.PATH_SEPARATOR + "registry"
                         + RegistryConstants.PATH_SEPARATOR + "resource"
                         + absoluteWSDLResourcePath;
@@ -1286,7 +1285,7 @@ public final class APIUtil {
 
                 registry.put(wsdlResourcePath, wsdlResource);
                 //set the anonymous role for wsld resource to avoid basicauth security.
-                String visibleRoles[] = null;
+                String[] visibleRoles = null;
                 if (api.getVisibleRoles() != null) {
                     visibleRoles = api.getVisibleRoles().split(",");
                 }
@@ -1337,16 +1336,22 @@ public final class APIUtil {
             }
             in.close();
             if (isWsdl2) {
-                WSDLReader wsdlReader20 = null;
-                try {
-                    wsdlReader20 = WSDLFactory.newInstance().newWSDLReader();
-                    wsdlReader20.readWSDL(url);
-                } catch (WSDLException e) {
-                    throw new APIManagementException("Error while reading WSDL Document from " + url, e);
-                }
+                WSDLReader wsdlReader20 = null;                
+                wsdlReader20 = WSDLFactory.newInstance().newWSDLReader();
+                wsdlReader20.readWSDL(url);                
             }
         } catch (IOException e) {
             throw new APIManagementException("Error Reading Input from Stream from " + url, e);
+        } catch (WSDLException e) {
+            throw new APIManagementException("Error while reading WSDL Document from " + url, e);
+        } finally {
+            if(in != null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    log.error("Error when closing input stream", e);
+                }
+            }
         }
         return isWsdl2;
     }
@@ -1362,7 +1367,7 @@ public final class APIUtil {
 
     public static String getGatewayendpoint(String transports) {
 
-        String gatewayURLs = null;
+        String gatewayURLs;
         String gatewayURL = null;
 
         Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
@@ -1397,7 +1402,7 @@ public final class APIUtil {
      */
 
     private static String extractHTTPSEndpoint(String gatewayURLs, String transports) {
-        String gatewayURL = null;
+        String gatewayURL;
         String gatewayHTTPURL = null;
         String gatewayHTTPSURL = null;
         boolean httpsEnabled = false;
@@ -1405,7 +1410,7 @@ public final class APIUtil {
         String[] transportsArray = transports.split(",");
 
         for (String transport : transportsArray) {
-            if (transport.startsWith("https")) {
+            if (transport.startsWith(APIConstants.HTTPS_PROTOCOL)) {
                 httpsEnabled = true;
             }
         }
@@ -1515,8 +1520,7 @@ public final class APIUtil {
                         OMElement password = storeElem.getFirstChildWithName(new QName(
                                 APIConstants.EXTERNAL_API_STORE_PASSWORD));
                         if (password != null) {
-//                            String key = APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORE + "."
-//                                    + APIConstants.EXTERNAL_API_STORE_PASSWORD + '_' + name; //Set store login password
+
                             String value = password.getText();
 
                             store.setPassword(replaceSystemProperty(value));
@@ -1588,13 +1592,11 @@ public final class APIUtil {
 
             return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
         } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
         } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1612,13 +1614,11 @@ public final class APIUtil {
 
             return getAllTiers(registry, APIConstants.API_TIER_LOCATION);
         } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+        } catch (XMLStreamException e) {           
+            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1636,13 +1636,11 @@ public final class APIUtil {
 
             return getTiers(registry, APIConstants.API_TIER_LOCATION);
         } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
-        } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
+        } catch (XMLStreamException e) {           
+            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1660,13 +1658,11 @@ public final class APIUtil {
 
             return getTiers(registry, APIConstants.API_TIER_LOCATION);
         } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
         } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
     }
 
@@ -1699,13 +1695,11 @@ public final class APIUtil {
                 throw new APIManagementException("No such a tier type : " + tierType);
             }
         } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
         } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -1733,7 +1727,7 @@ public final class APIUtil {
 
         if (registry.resourceExists(tierLocation)) {
             Resource resource = registry.get(tierLocation);
-            String content = new String((byte[]) resource.getContent());
+            String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
 
             OMElement element = AXIOMUtil.stringToOM(content);
             OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
@@ -1747,7 +1741,7 @@ public final class APIUtil {
 
                 // Constructing the tier object
                 Tier tier = new Tier(tierName);
-                tier.setPolicyContent(policy.toString().getBytes());
+                tier.setPolicyContent(policy.toString().getBytes(Charset.defaultCharset()));
 
                 if (id.getAttribute(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT) != null) {
                     tier.setDisplayName(id.getAttributeValue(APIConstants.THROTTLE_ID_DISPLAY_NAME_ELEMENT));
@@ -1776,7 +1770,8 @@ public final class APIUtil {
                     // If there is any issue in getting the request counts or the time duration, that means this tier
                     // information can not be used for throttling. Hence we log this exception and continue the flow
                     // to the next tier.
-                    log.warn("Unable to get the request count/time duration information for : " + tier.getName());
+                    log.warn("Unable to get the request count/time duration information for : " + tier.getName() + ". "
+                            + ex.getMessage());
                     continue;
                 }
 
@@ -1790,32 +1785,35 @@ public final class APIUtil {
                     while (attributeIterator.hasNext()) {
                         Entry<String, Object> entry = attributeIterator.next();
 
-                        if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equals(entry.getKey())) {
-                            if (entry.getValue() instanceof String) {
-                                tier.setDescription((String) entry.getValue());
+                        if (APIConstants.THROTTLE_TIER_DESCRIPTION_ATTRIBUTE.equals(entry.getKey())
+                                && entry.getValue() instanceof String) {
 
-                                // We remove the attribute from the map
-                                attributeIterator.remove();
-                                continue;
-                            }
+                            tier.setDescription((String) entry.getValue());
+
+                            // We remove the attribute from the map
+                            attributeIterator.remove();
+                            continue;
+
                         }
-                        if (APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE.equals(entry.getKey())) {
-                            if (entry.getValue() instanceof String) {
-                                tier.setTierPlan((String) entry.getValue());
+                        if (APIConstants.THROTTLE_TIER_PLAN_ATTRIBUTE.equals(entry.getKey())
+                                && entry.getValue() instanceof String) {
 
-                                // We remove the attribute from the map
-                                attributeIterator.remove();
-                                continue;
-                            }
+                            tier.setTierPlan((String) entry.getValue());
+
+                            // We remove the attribute from the map
+                            attributeIterator.remove();
+                            continue;
+
                         }
-                        if (APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE.equals(entry.getKey())) {
-                            if (entry.getValue() instanceof String) {
-                                tier.setStopOnQuotaReached(Boolean.parseBoolean((String) entry.getValue()));
+                        if (APIConstants.THROTTLE_TIER_QUOTA_ACTION_ATTRIBUTE.equals(entry.getKey())
+                                && entry.getValue() instanceof String) {
 
-                                // We remove the attribute from the map
-                                attributeIterator.remove();
-                                // We do not need a continue since this is the last statement.
-                            }
+                            tier.setStopOnQuotaReached(Boolean.parseBoolean((String) entry.getValue()));
+
+                            // We remove the attribute from the map
+                            attributeIterator.remove();
+                            // We do not need a continue since this is the last statement.
+
                         }
                     }
                     tier.setTierAttributes(tierAttributes);
@@ -1873,7 +1871,7 @@ public final class APIUtil {
                     getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_TIER_LOCATION)) {
                 Resource resource = registry.get(APIConstants.API_TIER_LOCATION);
-                String content = new String((byte[]) resource.getContent());
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                 OMElement element = AXIOMUtil.stringToOM(content);
                 OMElement assertion = element.getFirstChildWithName(APIConstants.ASSERTION_ELEMENT);
                 Iterator policies = assertion.getChildrenWithName(APIConstants.POLICY_ELEMENT);
@@ -1897,13 +1895,11 @@ public final class APIUtil {
                 resource.setContent(element.toString());
                 registry.put(APIConstants.API_TIER_LOCATION, resource);
             }
-        } catch (RegistryException e) {
-            String errorMessage = "Error while retrieving API tiers from registry";
-            log.error(errorMessage, e);
+        } catch (RegistryException e) {          
+            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
             throw new APIManagementException(e.getMessage());
         } catch (XMLStreamException e) {
-            String errorMessage = "Malformed XML found in the API tier policy resource";
-            log.error(errorMessage, e);
+            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
             throw new APIManagementException(e.getMessage());
         }
     }
@@ -1916,6 +1912,9 @@ public final class APIUtil {
      */
     public static String getTierDisplayName(int tenantId, String tierName) throws APIManagementException {
         String displayName = null;
+        if (APIConstants.UNLIMITED_TIER.equals(tierName)) {
+            return APIConstants.UNLIMITED_TIER;
+        }
         try {
             Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().
                     getGovernanceSystemRegistry(tenantId);
@@ -1935,20 +1934,15 @@ public final class APIUtil {
                         } else if (displayName == null) {
                             displayName = id.getText();
                         }
-                    } else if (APIConstants.UNLIMITED_TIER.equals(tierName)) {
-                        displayName = APIConstants.UNLIMITED_TIER;
                     }
                 }
-
             }
-        } catch (RegistryException e) {
-            String msg = "Error while retrieving API tiers from registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+        } catch (RegistryException e) {       
+            log.error(APIConstants.MSG_TIER_RET_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_TIER_RET_ERROR, e);
         } catch (XMLStreamException e) {
-            String msg = "Malformed XML found in the API tier policy resource";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            log.error(APIConstants.MSG_MALFORMED_XML_ERROR, e);
+            throw new APIManagementException(APIConstants.MSG_MALFORMED_XML_ERROR, e);
         }
         return displayName;
     }
@@ -1981,7 +1975,7 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(tenantDomain);
 
-            if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 org.wso2.carbon.user.api.AuthorizationManager manager =
                         ServiceReferenceHolder.getInstance()
                                 .getRealmService()
@@ -2042,7 +2036,12 @@ public final class APIUtil {
         try {
             checkPermission(username, permission);
             return true;
-        } catch (APIManagementException e) {
+        } catch (APIManagementException ignore) {
+            // Ignore the exception.
+            // Logging it on debug mode so if needed we can see the exception stacktrace.
+            if(log.isDebugEnabled()){
+                log.debug("User does not have permission", ignore);
+            }
             return false;
         }
     }
@@ -2053,6 +2052,8 @@ public final class APIUtil {
      * @param cookie     Cookie of the previously logged in session.
      * @param serviceUrl Url of the authentication service.
      * @return LoggedUserInfo object containing details of the logged in user.
+     * @throws ExceptionException 
+     * @throws RemoteException 
      */
     public static LoggedUserInfo getLoggedInUserInfo(String cookie, String serviceUrl) throws RemoteException, ExceptionException {
         LoggedUserInfoAdminStub stub = new LoggedUserInfoAdminStub(null,
@@ -2102,14 +2103,14 @@ public final class APIUtil {
 
     public static void setFilePermission(String filePath) throws APIManagementException {
         try {
-            filePath = filePath.replaceFirst("/registry/resource/", "");
+            String filePathString = filePath.replaceFirst("/registry/resource/", "");
             org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                    filePath, ActionConstants.GET)) {
+                    filePathString, ActionConstants.GET)) {
                 accessControlAdmin.authorizeRole(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
-                        filePath, ActionConstants.GET);
+                        filePathString, ActionConstants.GET);
             }
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while setting up permissions for file location", e);
@@ -2135,7 +2136,7 @@ public final class APIUtil {
             api = new API(new APIIdentifier(providerName, apiName, apiVersion));
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            BigDecimal bigDecimal = new BigDecimal(registry.getAverageRating(artifactPath));
+            BigDecimal bigDecimal = BigDecimal.valueOf(registry.getAverageRating(artifactPath));
             BigDecimal res = bigDecimal.setScale(1, RoundingMode.HALF_UP);
             api.setRating(res.floatValue());
             //set description
@@ -2145,8 +2146,6 @@ public final class APIUtil {
             //set uuid
             api.setUUID(artifact.getId());
             // set url
-            api.setUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_URL));
-            api.setSandboxUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_SANDBOX_URL));
             api.setStatus(getApiStatus(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)));
             api.setThumbnailUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL));
             api.setWsdlUrl(artifact.getAttribute(APIConstants.API_OVERVIEW_WSDL));
@@ -2197,10 +2196,10 @@ public final class APIUtil {
             api.addAvailableTiers(availableTier);
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
-            api.setLatest(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
+            api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            urlPatternsList = ApiMgtDAO.getAllURITemplates(oldContext, oldId.getVersion());
+            urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
             for (URITemplate uriTemplate : uriTemplates) {
@@ -2217,10 +2216,11 @@ public final class APIUtil {
             }
             api.addTags(tags);
             api.setLastUpdated(registry.get(artifactPath).getLastModified());
-            api.setAsDefaultVersion(Boolean.valueOf(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
+            api.setAsDefaultVersion(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_DEFAULT_VERSION)));
 
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
 
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
@@ -2245,7 +2245,7 @@ public final class APIUtil {
      */
     public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
             throws APIManagementException {
-        String list = ApiMgtDAO.getAuthorizedDomainsByConsumerKey(consumerKey);
+        String list = ApiMgtDAO.getInstance().getAuthorizedDomainsByConsumerKey(consumerKey);
         if (list != null && !list.isEmpty()) {
             return Arrays.asList(list.split(","));
         }
@@ -2357,7 +2357,8 @@ public final class APIUtil {
     }
 
     /**
-     * When an input is having '@',replace it with '-AT-' [This is required to persist API data in registry,as registry paths don't allow '@' sign.]
+     * When an input is having '@',replace it with '-AT-' [This is required to persist API data in registry,as registry
+     *  paths don't allow '@' sign.]
      *
      * @param input inputString
      * @return String modifiedString
@@ -2433,7 +2434,7 @@ public final class APIUtil {
                             + artifactPath);
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-            if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantManager().getTenantId(tenantDomain);
                 // calculate resource path
@@ -2443,16 +2444,16 @@ public final class APIUtil {
                 org.wso2.carbon.user.api.AuthorizationManager authManager =
                         ServiceReferenceHolder.getInstance().getRealmService().
                                 getTenantUserRealm(tenantId).getAuthorizationManager();
-                if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
+                if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
                     boolean isRoleEveryOne = false;
                     /*If no roles have defined, authorize for everyone role */
                     if (roles != null) {
-                        if (roles.length == 1 && roles[0].equals("")) {
+                        if (roles.length == 1 && "".equals(roles[0])) {
                             authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                             isRoleEveryOne = true;
                         } else {
                             for (String role : roles) {
-                                if (role.equalsIgnoreCase(APIConstants.EVERYONE_ROLE)) {
+                                if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role)) {
                                     isRoleEveryOne = true;
                                 }
                                 authManager.authorizeRole(role, resourcePath, ActionConstants.GET);
@@ -2464,10 +2465,10 @@ public final class APIUtil {
                         authManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     }
                     authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                } else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_PRIVATE_VISIBILITY)) {
+                } else if (visibility != null && APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
                     authManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     authManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                } else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.DOC_OWNER_VISIBILITY)) {
+                } else if (visibility != null && APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(visibility)) {
 
                     /*If no roles have defined, deny access for everyone & anonymous role */
                     if (roles == null) {
@@ -2487,11 +2488,11 @@ public final class APIUtil {
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager
                         (ServiceReferenceHolder.getUserRealm());
 
-                if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_RESTRICTED_VISIBILITY)) {
+                if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
                     boolean isRoleEveryOne = false;
                     if (roles != null) {
                         for (String role : roles) {
-                            if (role.equalsIgnoreCase(APIConstants.EVERYONE_ROLE)) {
+                            if (APIConstants.EVERYONE_ROLE.equalsIgnoreCase(role)) {
                                 isRoleEveryOne = true;
                             }
                             authorizationManager.authorizeRole(role, resourcePath, ActionConstants.GET);
@@ -2503,10 +2504,10 @@ public final class APIUtil {
                     }
                     authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
 
-                } else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.API_PRIVATE_VISIBILITY)) {
+                } else if (visibility != null && APIConstants.API_PRIVATE_VISIBILITY.equalsIgnoreCase(visibility)) {
                     authorizationManager.authorizeRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
                     authorizationManager.denyRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
-                } else if (visibility != null && visibility.equalsIgnoreCase(APIConstants.DOC_OWNER_VISIBILITY)) {
+                } else if (visibility != null && APIConstants.DOC_OWNER_VISIBILITY.equalsIgnoreCase(visibility)) {
                      /*If no roles have defined, deny access for everyone & anonymous role */
                     if (roles == null) {
                         authorizationManager.denyRole(APIConstants.EVERYONE_ROLE, resourcePath, ActionConstants.GET);
@@ -2530,16 +2531,13 @@ public final class APIUtil {
     }
 
     public static void loadTenantAPIPolicy(String tenant, int tenantID) throws APIManagementException {
+        
+        String tierBasePath = CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
+                + File.separator + "default-tiers" + File.separator;
 
-        String apiTierFilePath =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_API_TIER_FILE_NAME;
-        String appTierFilePath =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
-        String resTierFilePath =
-                CarbonUtils.getCarbonHome() + File.separator + "repository" + File.separator + "resources"
-                        + File.separator + "default-tiers" + File.separator + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
+        String apiTierFilePath = tierBasePath + APIConstants.DEFAULT_API_TIER_FILE_NAME;
+        String appTierFilePath = tierBasePath + APIConstants.DEFAULT_APP_TIER_FILE_NAME;
+        String resTierFilePath = tierBasePath + APIConstants.DEFAULT_RES_TIER_FILE_NAME;
 
         loadTenantAPIPolicy(tenantID, APIConstants.API_TIER_LOCATION, apiTierFilePath);
         loadTenantAPIPolicy(tenantID, APIConstants.APP_TIER_LOCATION, appTierFilePath);
@@ -2559,7 +2557,7 @@ public final class APIUtil {
 
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
+   
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
             if (govRegistry.resourceExists(location)) {
@@ -2607,7 +2605,7 @@ public final class APIUtil {
     public static void loadTenantExternalStoreConfig(int tenantID) throws APIManagementException {
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
+
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
             if (govRegistry.resourceExists(APIConstants.EXTERNAL_API_STORES_LOCATION)) {
@@ -2656,7 +2654,7 @@ public final class APIUtil {
             RegistryService registryService =
                     ServiceReferenceHolder.getInstance()
                             .getRegistryService();
-            //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
+
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
             if (govRegistry.resourceExists(APIConstants.GA_CONFIGURATION_LOCATION)) {
@@ -2694,7 +2692,7 @@ public final class APIUtil {
                 }
             } catch (IOException e) {
                 if (log.isWarnEnabled()) {
-                    log.warn("Error while closing the input stream");
+                    log.warn("Error while closing the input stream", e);
                 }
             }
         }
@@ -2705,7 +2703,7 @@ public final class APIUtil {
         // TODO: Merge different resource loading methods and create a single method.
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-            //UserRegistry govRegistry = registryService.getGovernanceUserRegistry(tenant, tenantID);
+
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantID);
 
             if (govRegistry.resourceExists(APIConstants.WORKFLOW_EXECUTOR_LOCATION)) {
@@ -2810,8 +2808,7 @@ public final class APIUtil {
      * @param tenantId
      * @throws APIManagementException
      */
-    public static void createSelfSignUpRoles(int tenantId)
-            throws APIManagementException {
+    public static void createSelfSignUpRoles(int tenantId) throws APIManagementException {
         try {
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             UserRegistry govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
@@ -2821,21 +2818,29 @@ public final class APIUtil {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder parser = factory.newDocumentBuilder();
                 Document dc = parser.parse(content);
-                boolean enableSignup = Boolean.parseBoolean(dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ENABLED).item(0).getFirstChild().getNodeValue());
-                String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0).getFirstChild().getNodeValue();
+                boolean enableSignup = Boolean.parseBoolean(dc
+                        .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ENABLED).item(0).getFirstChild()
+                        .getNodeValue());
+                String signUpDomain = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_DOMAIN_ELEM).item(0)
+                        .getFirstChild().getNodeValue();
 
                 if (enableSignup) {
-                    int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT).getLength();
+                    int roleLength = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
+                            .getLength();
 
                     for (int i = 0; i < roleLength; i++) {
-                        String roleName = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT).item(i).getFirstChild().getNodeValue();
-                        boolean isExternalRole = Boolean.parseBoolean(dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL).item(i).getFirstChild().getNodeValue());
+                        String roleName = dc.getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_NAME_ELEMENT)
+                                .item(i).getFirstChild().getNodeValue();
+                        boolean isExternalRole = Boolean.parseBoolean(dc
+                                .getElementsByTagName(APIConstants.SELF_SIGN_UP_REG_ROLE_IS_EXTERNAL).item(i)
+                                .getFirstChild().getNodeValue());
                         if (roleName != null) {
                             // If isExternalRole==false ;create the subscriber role as an internal role
                             if (isExternalRole && signUpDomain != null) {
                                 roleName = signUpDomain.toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + roleName;
                             } else {
-                                roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + roleName;
+                                roleName = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR
+                                        + roleName;
                             }
                             createSubscriberRole(roleName, tenantId);
                         }
@@ -2845,7 +2850,6 @@ public final class APIUtil {
             if (log.isDebugEnabled()) {
                 log.debug("Adding Self signup configuration to the tenant's registry");
             }
-
 
         } catch (RegistryException e) {
             throw new APIManagementException("Error while getting Self signup role information from the registry", e);
@@ -2939,9 +2943,9 @@ public final class APIUtil {
                 serviceDataPublisherAdmin.configureEventing(eventingConfigData);
                 serviceDataPublisherAdmin.configureRestAPI(restApiConfigData);
             } catch (APIManagementException e) {
-                log.error("Error occurred while adding BAMServerProfile");
+                log.error("Error occurred while adding BAMServerProfile", e);
             } catch (Exception e) {
-                log.error("Error occurred while updating EventingConfiguration");
+                log.error("Error occurred while updating EventingConfiguration", e);
             }
         }
     }
@@ -2957,6 +2961,13 @@ public final class APIUtil {
         return propertyMap;
     }
 
+    /**
+     * Add all the custom sequences of given type to registry 
+     * 
+     * @param registry Registry instance
+     * @param customSequenceType Custom sequence type which is in/out or fault
+     * @throws APIManagementException
+     */
     public static void addDefinedAllSequencesToRegistry(UserRegistry registry,
                                                         String customSequenceType)
             throws APIManagementException {
@@ -2975,15 +2986,18 @@ public final class APIUtil {
                 for (File sequenceFile : sequences) {
                     String sequenceFileName = sequenceFile.getName();
                     String regResourcePath =
-                            APIConstants.API_CUSTOM_SEQUENCE_LOCATION + "/" +
-                                    customSequenceType + "/" + sequenceFileName;
+                            APIConstants.API_CUSTOM_SEQUENCE_LOCATION + '/' +
+                                    customSequenceType + '/' + sequenceFileName;
                     if (registry.resourceExists(regResourcePath)) {
                         if (log.isDebugEnabled()) {
-                            log.debug("Defined sequences have already been added to the registry");
+                            log.debug("The sequence file with the name " + sequenceFileName
+                                    + " already exists in the registry path " + regResourcePath);
                         }
                     } else {
                         if (log.isDebugEnabled()) {
-                            log.debug("Adding defined sequences to the registry.");
+                            log.debug(
+                                    "Adding sequence file with the name " + sequenceFileName + " to the registry path "
+                                            + regResourcePath);
                         }
 
                         inSeqStream = new FileInputStream(sequenceFile);
@@ -3007,15 +3021,7 @@ public final class APIUtil {
         } catch (IOException e) {
             throw new APIManagementException("Error while reading defined sequence ", e);
         } finally {
-            if (inSeqStream != null) {
-                try {
-                    inSeqStream.close();
-                } catch (IOException e) {
-                    log.error(
-                            "Error while closing input stream in path " + seqFolderLocation + " " +
-                                    e);
-                }
-            }
+            IOUtils.closeQuietly(inSeqStream);
         }
 
     }
@@ -3050,7 +3056,7 @@ public final class APIUtil {
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
         UserRegistry registry = null;
         try {
-            //registry = registryService.getRegistry(tenant, tenantID);
+   
             registry = registryService.getGovernanceSystemRegistry(tenantID);
         } catch (RegistryException e) {
             throw new APIManagementException("Error when create registry instance ", e);
@@ -3060,6 +3066,7 @@ public final class APIUtil {
                 File.separator + "rxts";
         File file = new File(rxtDir);
         FilenameFilter filenameFilter = new FilenameFilter() {
+            @Override
             public boolean accept(File dir, String name) {
                 // if the file extension is .rxt return true, else false
                 return name.endsWith(".rxt");
@@ -3122,14 +3129,15 @@ public final class APIUtil {
      * @return Username with domain name set to uppercase.
      */
     public static String setDomainNameToUppercase(String username) {
+        String modifiedName = username;
         if (username != null) {
             String[] nameParts = username.split(CarbonConstants.DOMAIN_SEPARATOR);
             if (nameParts.length > 1) {
-                username = nameParts[0].toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + nameParts[1];
+                modifiedName = nameParts[0].toUpperCase() + CarbonConstants.DOMAIN_SEPARATOR + nameParts[1];
             }
         }
 
-        return username;
+        return modifiedName;
     }
 
     public static void createSubscriberRole(String roleName, int tenantId) throws APIManagementException {
@@ -3150,31 +3158,32 @@ public final class APIUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating subscriber role: " + roleName);
                 }
-                Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
-                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
-                String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId).
-                        getRealmConfiguration().getAdminUserName();
-                String[] userList = new String[]{tenantAdminName};
+                Permission[] subscriberPermissions = new Permission[] {
+                        new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
+                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
+                String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
+                String[] userList = new String[] { tenantAdminName };
                 manager.addRole(roleName, userList, subscriberPermissions);
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while creating subscriber role: " + roleName + " - " +
-                    "Self registration might not function properly.", e);
+            throw new APIManagementException("Error while creating subscriber role: " + roleName + " - "
+                    + "Self registration might not function properly.", e);
         }
     }
 
-    public void setupSelfRegistration(APIManagerConfiguration config, int tenantId)
-            throws APIManagementException {
+    public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
         if (!enabled) {
             return;
         }
-        //Create the subscriber role as an internal role
-        String role = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR + config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
-        if (role.equals(UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR)) {
+        // Create the subscriber role as an internal role
+        String role = UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR
+                + config.getFirstProperty(APIConstants.SELF_SIGN_UP_ROLE);
+        if ((UserCoreConstants.INTERNAL_DOMAIN + CarbonConstants.DOMAIN_SEPARATOR).equals(role)) {
             // Required parameter missing - Throw an exception and interrupt startup
-            throw new APIManagementException("Required subscriber role parameter missing " +
-                    "in the self sign up configuration");
+            throw new APIManagementException("Required subscriber role parameter missing "
+                    + "in the self sign up configuration");
         }
 
         try {
@@ -3194,17 +3203,17 @@ public final class APIUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Creating subscriber role: " + role);
                 }
-                Permission[] subscriberPermissions = new Permission[]{new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
-                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION)};
-                String tenantAdminName = ServiceReferenceHolder.getInstance()
-                        .getRealmService().getTenantUserRealm(tenantId).
-                                getRealmConfiguration().getAdminUserName();
-                String[] userList = new String[]{tenantAdminName};
+                Permission[] subscriberPermissions = new Permission[] {
+                        new Permission("/permission/admin/login", UserMgtConstants.EXECUTE_ACTION),
+                        new Permission(APIConstants.Permissions.API_SUBSCRIBE, UserMgtConstants.EXECUTE_ACTION) };
+                String tenantAdminName = ServiceReferenceHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId).getRealmConfiguration().getAdminUserName();
+                String[] userList = new String[] { tenantAdminName };
                 manager.addRole(role, userList, subscriberPermissions);
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while creating subscriber role: " + role + " - " +
-                    "Self registration might not function properly.", e);
+            throw new APIManagementException("Error while creating subscriber role: " + role + " - "
+                    + "Self registration might not function properly.", e);
         }
     }
 
@@ -3219,19 +3228,17 @@ public final class APIUtil {
     }
 
     public static float getAverageRating(APIIdentifier apiId) throws APIManagementException {
-        return ApiMgtDAO.getAverageRating(apiId);
+        return ApiMgtDAO.getInstance().getAverageRating(apiId);
     }
 
     public static float getAverageRating(int apiId) throws APIManagementException {
-        return ApiMgtDAO.getAverageRating(apiId);
+        return ApiMgtDAO.getInstance().getAverageRating(apiId);
     }
 
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
         ArrayList<Tenant> tenantArrayList = new ArrayList<Tenant>();
-        for (Tenant t : tenants) {
-            tenantArrayList.add(t);
-        }
+        Collections.addAll(tenantArrayList, tenants);
         Tenant superAdminTenant = new Tenant();
         superAdminTenant.setDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         superAdminTenant.setId(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_ID);
@@ -3253,10 +3260,10 @@ public final class APIUtil {
         String loggedUserTenantDomain = MultitenantUtils.getTenantDomain(loggedInUser);
         String authorizedUserTenantDomain = MultitenantUtils.getTenantDomain(authorizedUser);
 
-        if (loggedUserTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME) &&
-                authorizedUserTenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(loggedUserTenantDomain) && MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME.equals(authorizedUserTenantDomain)) {
             return true;
-        } else if (loggedUserTenantDomain.equals(authorizedUserTenantDomain)) {
+        } else if (authorizedUserTenantDomain.equals(loggedUserTenantDomain)) {
             return true;
         }
 
@@ -3264,7 +3271,7 @@ public final class APIUtil {
     }
 
     public static int getApplicationId(String appName, String userId) throws APIManagementException {
-        return new ApiMgtDAO().getApplicationId(appName, userId);
+        return ApiMgtDAO.getInstance().getApplicationId(appName, userId);
     }
 
     public static boolean isAPIManagementEnabled() {
@@ -3272,17 +3279,14 @@ public final class APIUtil {
     }
 
     public static boolean isLoadAPIContextsAtStartup() {
-        return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty("APIManagement.LoadAPIContextsInServerStartup"));
+        return Boolean.parseBoolean(CarbonUtils.getServerConfiguration().getFirstProperty(
+                "APIManagement.LoadAPIContextsInServerStartup"));
     }
 
     public static Set<APIStore> getExternalAPIStores(int tenantId) throws APIManagementException {
         SortedSet<APIStore> apistoreSet = new TreeSet<APIStore>(new APIStoreNameComparator());
         apistoreSet.addAll(getExternalStores(tenantId));
-        if (apistoreSet.size() != 0) {
-            return apistoreSet;
-        } else {
-            return null;
-        }
+        return apistoreSet;
 
     }
 
@@ -3318,10 +3322,11 @@ public final class APIUtil {
         //Retains only the stores that contained in configuration
         inputStores.retainAll(apiStores);
         boolean exists = false;
-        if (apiStores.size() != 0) {
+        if (!apiStores.isEmpty()) {
             for (APIStore store : apiStores) {
                 for (APIStore inputStore : inputStores) {
-                    if (inputStore.getName().equals(store.getName())) { //If the configured apistore already stored in db,ignore adding it again
+                    if (inputStore.getName().equals(store.getName())) { // If the configured apistore already stored in
+                                                                        // db,ignore adding it again
                         exists = true;
                     }
                 }
@@ -3336,16 +3341,18 @@ public final class APIUtil {
 
     public static boolean isAPIsPublishToExternalAPIStores(int tenantId)
             throws APIManagementException {
-        return getExternalStores(tenantId).size() != 0;
+        return !getExternalStores(tenantId).isEmpty();
     }
 
     public static boolean isAPIGatewayKeyCacheEnabled() {
         try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
             String serviceURL = config.getFirstProperty(APIConstants.API_GATEWAY_KEY_CACHE_ENABLED);
             return Boolean.parseBoolean(serviceURL);
         } catch (Exception e) {
-            log.error("Did not found valid API Validation Information cache configuration. Use default configuration" + e);
+            log.error("Did not found valid API Validation Information cache configuration. Use default configuration"
+                    + e);
         }
         return true;
     }
@@ -3371,7 +3378,7 @@ public final class APIUtil {
      * @throws UserStoreException
      */
     public static Set<String> getActiveTenantDomains() throws UserStoreException {
-        Set<String> tenantDomains = null;
+        Set<String> tenantDomains;
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
         if (tenants == null || tenants.length == 0) {
             tenantDomains = Collections.<String>emptySet();
@@ -3382,7 +3389,7 @@ public final class APIUtil {
                     tenantDomains.add(tenant.getDomain());
                 }
             }
-            if (tenantDomains.size() > 0) {
+            if (!tenantDomains.isEmpty()) {
                 tenantDomains.add(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             }
         }
@@ -3392,17 +3399,18 @@ public final class APIUtil {
 
     /**
      * Retrieves the role list of system
-     *
+     * 
      * @throws APIManagementException If an error occurs
      */
     public static String[] getRoleNames(String username) throws APIManagementException {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(username);
         try {
-            if (!tenantDomain.equals(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                UserStoreManager manager = ServiceReferenceHolder.getInstance().
-                        getRealmService().getTenantUserRealm(tenantId).getUserStoreManager();
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId).getUserStoreManager();
 
                 return manager.getRoleNames();
             } else {
@@ -3410,7 +3418,7 @@ public final class APIUtil {
             }
         } catch (UserStoreException e) {
             log.error("Error while getting all the roles", e);
-            return null;
+            return new String[0];
 
         }
     }
@@ -3420,13 +3428,15 @@ public final class APIUtil {
      *
      * @param api API
      * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to generate the content and save
+     * @deprecated
      */
+
     @Deprecated
     public static String createSwaggerJSONContent(API api) throws APIManagementException {
         APIIdentifier identifier = api.getId();
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
 
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
@@ -3439,12 +3449,12 @@ public final class APIUtil {
         // With the new context version strategy, the URL prefix is the apiContext. the verison will be embedded in
         // the apiContext.
         String urlPrefix = apiContext;
-//        String urlPrefix = apiContext + "/" +version;
 
         if (endpointsSet.length < 1) {
-            throw new APIManagementException("Error in creating JSON representation of the API" + identifier.getApiName());
+            throw new APIManagementException("Error in creating JSON representation of the API"
+                    + identifier.getApiName());
         }
-        if (description == null || description.equals("")) {
+        if (description == null || "".equals(description)) {
             description = "";
         } else {
             description = description.trim();
@@ -3454,31 +3464,33 @@ public final class APIUtil {
         List<APIResource> apis = new ArrayList<APIResource>();
         for (URITemplate template : uriTemplates) {
             List<Operation> ops;
-            List<Parameter> parameters = null;
-            String path = urlPrefix +
-                    APIUtil.removeAnySymbolFromUriTempate(template.getUriTemplate());
+            List<Parameter> parameters;
+            String path = urlPrefix + APIUtil.removeAnySymbolFromUriTempate(template.getUriTemplate());
             /* path exists in uriTemplateDefinitions */
             if (uriTemplateDefinitions.get(path) != null) {
                 ops = uriTemplateDefinitions.get(path);
                 parameters = new ArrayList<Parameter>();
 
                 String httpVerb = template.getHTTPVerb();
-                /* For GET and DELETE Parameter name - Query Parameters*/
-                if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
-                        httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
+                /* For GET and DELETE Parameter name - Query Parameters */
+                if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
+                    || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
                     Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
-                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
+                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(queryParam);
-                } else {/* For POST, PUT and PATCH Parameter name - Payload*/
+                } else {/* For POST, PUT and PATCH Parameter name - Payload */
                     Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION,
+                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(payLoadParam);
                 }
 
                 Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME,
-                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
+                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION,
+                        APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
                 parameters.add(authParam);
-                if (!httpVerb.equals("OPTIONS")) {
+                if (!"OPTIONS".equals(httpVerb)) {
                     Operation op = new Operation(httpVerb, description, description, parameters);
                     ops.add(op);
                 }
@@ -3487,21 +3499,24 @@ public final class APIUtil {
                 parameters = new ArrayList<Parameter>();
 
                 String httpVerb = template.getHTTPVerb();
-                /* For GET and DELETE Parameter name - Query Parameters*/
-                if (httpVerb.equals(Constants.Configuration.HTTP_METHOD_GET) ||
-                        httpVerb.equals(Constants.Configuration.HTTP_METHOD_DELETE)) {
+                /* For GET and DELETE Parameter name - Query Parameters */
+                if (Constants.Configuration.HTTP_METHOD_GET.equals(httpVerb)
+                    || Constants.Configuration.HTTP_METHOD_DELETE.equals(httpVerb)) {
                     Parameter queryParam = new Parameter(APIConstants.OperationParameter.QUERY_PARAM_NAME,
-                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+                            APIConstants.OperationParameter.QUERY_PARAM_DESCRIPTION,
+                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(queryParam);
-                } else {/* For POST,PUT and PATCH Parameter name - Payload*/
+                } else {/* For POST,PUT and PATCH Parameter name - Payload */
                     Parameter payLoadParam = new Parameter(APIConstants.OperationParameter.PAYLOAD_PARAM_NAME,
-                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION, APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
+                            APIConstants.OperationParameter.PAYLOAD_PARAM_DESCRIPTION,
+                            APIConstants.OperationParameter.PAYLOAD_PARAM_TYPE, false, false, "String");
                     parameters.add(payLoadParam);
                 }
                 Parameter authParam = new Parameter(APIConstants.OperationParameter.AUTH_PARAM_NAME,
-                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION, APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
+                        APIConstants.OperationParameter.AUTH_PARAM_DESCRIPTION,
+                        APIConstants.OperationParameter.AUTH_PARAM_TYPE, false, false, "String");
                 parameters.add(authParam);
-                if (!httpVerb.equals("OPTIONS")) {
+                if (!"OPTIONS".equals(httpVerb)) {
                     Operation op = new Operation(httpVerb, description, description, parameters);
                     ops.add(op);
                 }
@@ -3512,10 +3527,12 @@ public final class APIUtil {
         final Set<Entry<String, List<Operation>>> entries = uriTemplateDefinitions.entrySet();
 
         for (Entry entry : entries) {
-            APIResource apiResource = new APIResource((String) entry.getKey(), description, (List<Operation>) entry.getValue());
+            APIResource apiResource = new APIResource((String) entry.getKey(), description,
+                    (List<Operation>) entry.getValue());
             apis.add(apiResource);
         }
-        APIDefinition apidefinition = new APIDefinition(version, APIConstants.SWAGGER_VERSION, endpointsSet[0], apiContext, apis);
+        APIDefinition apidefinition = new APIDefinition(version, APIConstants.SWAGGER_VERSION, endpointsSet[0],
+                apiContext, apis);
 
         Gson gson = new Gson();
         return gson.toJson(apidefinition);
@@ -3537,11 +3554,10 @@ public final class APIUtil {
             return MultitenantConstants.SUPER_TENANT_ID;
         }
 
-        try {
-            int tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
-            return tenantId;
+        try {           
+            return realmService.getTenantManager().getTenantId(tenantDomain);
         } catch (UserStoreException e) {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
 
         return -1;
@@ -3597,23 +3613,28 @@ public final class APIUtil {
      * @return
      * @throws APIManagementException
      */
-    public static OMElement getCustomSequence(String sequenceName, int tenantId, String direction, APIIdentifier identifier)
-            throws APIManagementException {
+    public static OMElement getCustomSequence(String sequenceName, int tenantId, String direction,
+            APIIdentifier identifier) throws APIManagementException {
         org.wso2.carbon.registry.api.Collection seqCollection = null;
 
         try {
-            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceSystemRegistry(tenantId);
+            UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getGovernanceSystemRegistry(tenantId);
 
             if ("in".equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
             } else if ("out".equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
             } else if ("fault".equals(direction)) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION);
             }
 
             if (seqCollection == null) {
-                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier, direction));
+                seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
+                        direction));
 
             }
 
@@ -3631,7 +3652,8 @@ public final class APIUtil {
 
             // If the sequence not found the default sequences, check in custom sequences
 
-            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier, direction));
+            seqCollection = (org.wso2.carbon.registry.api.Collection) registry.get(getSequencePath(identifier,
+                    direction));
             if (seqCollection != null) {
                 String[] childPaths = seqCollection.getChildren();
 
@@ -3643,7 +3665,6 @@ public final class APIUtil {
                     }
                 }
             }
-
 
         } catch (Exception e) {
             String msg = "Issue is in accessing the Registry";
@@ -3707,8 +3728,8 @@ public final class APIUtil {
      * @return {@link String} -HTTP permlink
      */
     public static String getRegistryResourceHTTPPermlink(String path) {
-        String schemeHttp = "http";
-        String schemeHttps = "https";
+        String schemeHttp = APIConstants.HTTP_PROTOCOL;
+        String schemeHttps = APIConstants.HTTPS_PROTOCOL;
 
         ConfigurationContextService contetxservice = ServiceReferenceHolder.getContextService();
         //First we will try to generate http permalink and if its disabled then only we will consider https
@@ -3726,7 +3747,7 @@ public final class APIUtil {
 
         String webContext = ServerConfiguration.getInstance().getFirstProperty("WebContextRoot");
 
-        if (webContext == null || webContext.equals("/")) {
+        if (webContext == null || "/".equals(webContext)) {
             webContext = "";
         }
         RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
@@ -3771,9 +3792,9 @@ public final class APIUtil {
                 return true;
             }
         } catch (ParseException e) {
-            log.error("Unable to parse endpoint config JSON", e);
+            log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
         } catch (ClassCastException e) {
-            log.error("Unable to parse endpoint config JSON", e);
+            log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
         }
         return false;
     }
@@ -3788,9 +3809,9 @@ public final class APIUtil {
                 return true;
             }
         } catch (ParseException e) {
-            log.error("Unable to parse endpoint config JSON", e);
+            log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
         } catch (ClassCastException e) {
-            log.error("Unable to parse endpoint config JSON", e);
+            log.error(APIConstants.MSG_JSON_PARSE_ERROR, e);
         }
         return false;
     }
@@ -3829,6 +3850,8 @@ public final class APIUtil {
             api.setAdvertiseOnly(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY)));
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
+            api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
+
         } catch (GovernanceException e) {
             String msg = "Failed to get API fro artifact ";
             throw new APIManagementException(msg, e);
@@ -3859,7 +3882,8 @@ public final class APIUtil {
      * @return - The resource key
      */
     public static String getResourceKey(API api, URITemplate template) {
-        return APIUtil.getResourceKey(api.getContext(), api.getId().getVersion(), template.getUriTemplate(), template.getHTTPVerb());
+        return APIUtil.getResourceKey(api.getContext(), api.getId().getVersion(), template.getUriTemplate(),
+                template.getHTTPVerb());
     }
 
     /**
@@ -3915,7 +3939,7 @@ public final class APIUtil {
      */
     public static String getAccessTokenCacheKey(String accessToken, String apiContext, String apiVersion,
                                                 String resourceUri, String httpVerb, String authLevel) {
-        return accessToken + ":" + apiContext + "/" + apiVersion + resourceUri + ":" + httpVerb + ":" + authLevel;
+        return accessToken + ':' + apiContext + '/' + apiVersion + resourceUri + ':' + httpVerb + ':' + authLevel;
     }
 
 
@@ -3942,13 +3966,13 @@ public final class APIUtil {
             String propValue = System.getProperty(sysProp);
 
             if (propValue == null) {
-                if (sysProp.equals("carbon.context")) {
+                if ("carbon.context".equals(sysProp)) {
                     propValue = ServiceReferenceHolder.getContextService().getServerConfigContext().getContextRoot();
-                } else if (sysProp.equals("admin.username") || sysProp.equals("admin.password")) {
+                } else if ("admin.username".equals(sysProp) || "admin.password".equals(sysProp)) {
                     try {
                         RealmConfiguration realmConfig =
                                 new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
-                        if (sysProp.equals("admin.username")) {
+                        if ("admin.username".equals(sysProp)) {
                             propValue = realmConfig.getAdminUserName();
                         } else {
                             propValue = realmConfig.getAdminPassword();
@@ -3956,7 +3980,7 @@ public final class APIUtil {
                     } catch (UserStoreException e) {
                         // Can't throw an exception because the server is
                         // starting and can't be halted.
-                        log.error(e.getMessage());
+                        log.error("Unable to build the Realm Configuration", e);
                         return null;
                     }
                 }
@@ -3966,8 +3990,8 @@ public final class APIUtil {
                 text = text.substring(0, indexOfStartingChars) + propValue
                         + text.substring(indexOfClosingBrace + 1);
             }
-            if (sysProp.equals("carbon.home") && propValue != null
-                    && propValue.equals(".")) {
+            if ("carbon.home".equals(sysProp) && propValue != null
+                    && ".".equals(propValue)) {
                 text = new File(".").getAbsolutePath() + File.separator + text;
             }
         }
@@ -3983,9 +4007,19 @@ public final class APIUtil {
         }
     }
 
-    public static Map<Documentation, API> searchAPIsByDoc(Registry registry, int tenantID, String username, String searchTerm, String searchType) throws APIManagementException {
-        List<API> apiSortedList = new ArrayList<API>();
-
+    /**
+     * Search Apis by Doc Content
+     *
+     * @param registry - Registry which is searched
+     * @param tenantID - Tenant id of logged in domain
+     * @param username - Logged in username
+     * @param searchTerm - Search value for doc
+     * @param searchClient - Search client
+     * @return - Documentation to APIs map
+     * @throws APIManagementException - If failed to get ArtifactManager for given tenant
+     */
+    public static Map<Documentation, API> searchAPIsByDoc(Registry registry, int tenantID, String username,
+                                                          String searchTerm, String searchClient) throws APIManagementException {
         Map<Documentation, API> apiDocMap = new HashMap<Documentation, API>();
 
         try {
@@ -3998,6 +4032,9 @@ public final class APIUtil {
             fields.put(APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, "*" + APIConstants.API_ROOT_LOCATION + "*");
             fields.put(APIConstants.DOCUMENTATION_SEARCH_MEDIA_TYPE_FIELD, "*");
 
+            if (tenantID == -1) {
+                tenantID = MultitenantConstants.SUPER_TENANT_ID;
+            }
             //PaginationContext.init(0, 10000, "ASC", APIConstants.DOCUMENTATION_SEARCH_PATH_FIELD, Integer.MAX_VALUE);
             SolrDocumentList documentList = client.query(searchTerm, tenantID, fields);
 
@@ -4015,7 +4052,7 @@ public final class APIUtil {
                 API api = null;
                 Documentation doc = null;
                 for (Association association : associations) {
-                    boolean isAuthorized = false;
+                    boolean isAuthorized;
                     String documentationPath = association.getSourcePath();
                     String path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                             APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
@@ -4037,7 +4074,7 @@ public final class APIUtil {
                         Association[] docAssociations = registry.getAssociations(documentationPath, APIConstants.DOCUMENTATION_ASSOCIATION);
                         /* There will be only one document association, for a document path which is by its owner API*/
                         if (docAssociations.length > 0) {
-                            isAuthorized = false;
+                           
                             String apiPath = docAssociations[0].getSourcePath();
                             path = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
@@ -4054,7 +4091,6 @@ public final class APIUtil {
                                 if (apiArtifactId != null) {
                                     GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
                                     api = APIUtil.getAPI(apiArtifact, registry);
-                                    apiSortedList.add(api);
                                 } else {
                                     throw new GovernanceException("artifact id is null of " + apiPath);
                                 }
@@ -4063,7 +4099,14 @@ public final class APIUtil {
                     }
 
                     if (doc != null && api != null) {
-                        apiDocMap.put(doc, api);
+                        if (APIConstants.STORE_CLIENT.equals(searchClient)) {
+                            if (api.getStatus().equals(getApiStatus(APIConstants.PUBLISHED)) ||
+                                api.getStatus().equals(getApiStatus(APIConstants.PROTOTYPED))) {
+                                apiDocMap.put(doc, api);
+                            }
+                        } else {
+                            apiDocMap.put(doc, api);
+                        }
                     }
                 }
             }
@@ -4078,7 +4121,8 @@ public final class APIUtil {
     }
 
 
-    public static Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end) throws APIManagementException {
+    public static Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
+            throws APIManagementException {
         SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
         List<API> apiList = new ArrayList<API>();
         final String searchValue = searchTerm.trim();
@@ -4095,9 +4139,11 @@ public final class APIUtil {
                 for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
                     // "url_template" entry stores in registry,unless we search in each API
                     criteria = APIConstants.API_URI_PATTERN + i;
-                    listMap.put(criteria, new ArrayList<String>() {{
-                        add(searchValue);
-                    }});
+                    listMap.put(criteria, new ArrayList<String>() {
+                        {
+                           add(searchValue);
+                        }
+                    });
                     genericArtifacts = (GenericArtifact[]) ArrayUtils.addAll(genericArtifacts, artifactManager
                             .findGenericArtifacts(listMap));
                 }
@@ -4112,7 +4158,7 @@ public final class APIUtil {
                     if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
                         String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
                         if (isAllowDisplayAPIsWithMultipleStatus()) {
-                            if (status.equals(APIConstants.PUBLISHED) || status.equals(APIConstants.DEPRECATED)) {
+                            if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
                                 if (api != null) {
                                     apiList.add(api);
@@ -4120,7 +4166,7 @@ public final class APIUtil {
                                 }
                             }
                         } else {
-                            if (status.equals(APIConstants.PUBLISHED)) {
+                            if (APIConstants.PUBLISHED.equals(status)) {
                                 API api = APIUtil.getAPI(artifact, registry);
                                 if (api != null) {
                                     apiList.add(api);
@@ -4158,8 +4204,8 @@ public final class APIUtil {
      * @return true if its valid url else fale
      */
     public static boolean isValidWSDLURL(String wsdlURL, boolean required) {
-        if ((wsdlURL != null && !"".equals(wsdlURL))) {
-            if ((wsdlURL.contains("http:") || wsdlURL.contains("https:") || wsdlURL.contains("file:"))) {
+        if (wsdlURL != null && !"".equals(wsdlURL)) {
+            if (wsdlURL.contains("http:") || wsdlURL.contains("https:") || wsdlURL.contains("file:")) {
                 return true;
             }
         } else if (!required) {
@@ -4200,6 +4246,7 @@ public final class APIUtil {
                     //Only one concurrent request is allowed to add to the currentLoadingTenants
                     currentLoadingTenants.add(tenantDomain);
                     ctx.getThreadPool().execute(new Runnable() {
+                        @Override
                         public void run() {
                             Thread.currentThread().setName("APIMHostObjectUtils-loadTenantConfig-thread");
                             try {
@@ -4233,7 +4280,6 @@ public final class APIUtil {
         } catch (Exception e) {
             log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
         }
-
     }
 
     public static void checkClientDomainAuthorized(APIKeyValidationInfoDTO apiKeyValidationInfoDTO, String clientDomain)
@@ -4252,14 +4298,6 @@ public final class APIUtil {
 
     }
 
-    /**
-     * This method will return mounted path of the path if the path
-     * is mounted. Else path will be returned.
-     *
-     * @param registryContext Registry Context instance which holds path mappings
-     * @param path            default path of the registry
-     * @return mounted path or path
-     */
     public static String extractCustomerKeyFromAuthHeader(Map headersMap) {
 
         //From 1.0.7 version of this component onwards remove the OAuth authorization header from
@@ -4397,8 +4435,9 @@ public final class APIUtil {
         try {
             int tenantId;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
                 PrivilegedCarbonContext.startTenantFlow();
+                isTenantFlowStarted = true;
+
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             } else {
@@ -4466,7 +4505,6 @@ public final class APIUtil {
      * This method used to set environment values to governance artifact of API .
      *
      * @param api API object with the attributes value
-     * @throws GovernanceException
      */
     public static String writeEnvironmentsToArtifact(API api) {
         StringBuilder publishedEnvironments = new StringBuilder();
@@ -4565,7 +4603,7 @@ public final class APIUtil {
      */
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
             throws APIManagementException {
-        return ApiMgtDAO.isApplicationExist(applicationName, subscriber, groupId);
+        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId);
     }
 
     public static String getHostAddress() {
@@ -4612,7 +4650,7 @@ public final class APIUtil {
     }
 
     public static boolean isStringArray(Object[] args) {
-        int argsCount = args.length;
+
         for (Object arg : args) {
             if (!(arg instanceof String)) {
                 return false;
@@ -4670,7 +4708,8 @@ public final class APIUtil {
         }
     }
 
-    private static boolean isTierPaid(String tierName, String tenantDomain) throws APIManagementException {
+    private static boolean isTierPaid(String tierName, String tenantDomainName) throws APIManagementException {
+        String tenantDomain = tenantDomainName;
         if (tenantDomain == null) {
             tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
@@ -4705,8 +4744,10 @@ public final class APIUtil {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
 
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getConfigSystemRegistry(tenantId);
 
             if (registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
                 Resource resource = registry.get(APIConstants.API_TENANT_CONF_LOCATION);
@@ -4733,7 +4774,8 @@ public final class APIUtil {
             if (value != null) {
                 return Boolean.parseBoolean(value.toString());
             } else {
-                throw new APIManagementException(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID + " config does not exist for tenant " + tenantDomain);
+                throw new APIManagementException(APIConstants.API_TENANT_CONF_IS_UNLIMITED_TIER_PAID
+                        + " config does not exist for tenant " + tenantDomain);
             }
         }
 
@@ -4783,14 +4825,17 @@ public final class APIUtil {
                 getCache(APIConstants.TIERS_CACHE);
     }
 
-    /*
-    * Util method to return the artifact from a registry resource path
-    *
-    * */
-    public static GenericArtifact getAPIArtifact(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
+    /**
+     * Util method to return the artifact from a registry resource path
+     * @param apiIdentifier
+     * @param registry
+     * @return
+     * @throws APIManagementException
+     */
+    public static GenericArtifact getAPIArtifact(APIIdentifier apiIdentifier, Registry registry)
+            throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(apiIdentifier);
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.API_KEY);
+        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
         try {
             Resource apiResource = registry.get(apiPath);
             String artifactId = apiResource.getUUID();
@@ -4816,17 +4861,17 @@ public final class APIUtil {
         X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
         socketFactory.setHostnameVerifier(hostnameVerifier);
-        if ("https".equals(protocol)) {
+        if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             if (port >= 0) {
-                registry.register(new Scheme("https", port, socketFactory));
+                registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
             } else {
-                registry.register(new Scheme("https", 443, socketFactory));
+                registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, 443, socketFactory));
             }
-        } else if ("http".equals(protocol)) {
+        } else if (APIConstants.HTTP_PROTOCOL.equals(protocol)) {
             if (port >= 0) {
-                registry.register(new Scheme("http", port, PlainSocketFactory.getSocketFactory()));
+                registry.register(new Scheme(APIConstants.HTTP_PROTOCOL, port, PlainSocketFactory.getSocketFactory()));
             } else {
-                registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+                registry.register(new Scheme(APIConstants.HTTP_PROTOCOL, 80, PlainSocketFactory.getSocketFactory()));
             }
         }
         HttpParams params = new BasicHttpParams();
@@ -4850,12 +4895,14 @@ public final class APIUtil {
         if (APIConstants.RegistryResourceTypesForUI.TAG_THUMBNAIL.equals(resourceType)) {
             if (tenantDomain != null && !"".equals(tenantDomain)
                     && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                resourcePathBuilder.append(RegistryConstants.PATH_SEPARATOR).append(MultitenantConstants
-                        .TENANT_AWARE_URL_PREFIX)
-                        .append(RegistryConstants.PATH_SEPARATOR).append(tenantDomain);
+                // The compiler will concatenate the 2 constants. If we use the builder to append the 2 constants, then
+                // it will happen during the runtime.
+                resourcePathBuilder.append(RegistryConstants.PATH_SEPARATOR + MultitenantConstants
+                        .TENANT_AWARE_URL_PREFIX + RegistryConstants.PATH_SEPARATOR).append(tenantDomain);
             }
-            resourcePathBuilder.append(APIConstants.REGISTRY_RESOURCE_PREFIX);
-            resourcePathBuilder.append(RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
+            // The compiler will concatenate the 2 constants. If we use the builder to append the 2 constants, then
+            // it will happen during the runtime.
+            resourcePathBuilder.append(APIConstants.REGISTRY_RESOURCE_PREFIX + RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH);
             resourcePathBuilder.append(resourcePath);
         }
         return resourcePathBuilder.toString();
@@ -4871,7 +4918,8 @@ public final class APIUtil {
      * @throws InstantiationException
      */
 
-    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException,
+            InstantiationException {
         return Class.forName(className);
     }
 
@@ -4889,8 +4937,9 @@ public final class APIUtil {
         }
         try {
             URL urlVal = new URL(url);
+            // If there are no issues, then this is a valid URL. Hence returning true.
             return true;
-        } catch (MalformedURLException e) {           
+        } catch (MalformedURLException e) {
             return false;
         }
     }
@@ -4905,7 +4954,8 @@ public final class APIUtil {
         JSONObject apiTenantConfig = null;
         JSONObject restAPIConfigJSON = null;
         try {
-            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+            String content = new APIMRegistryServiceImpl().getConfigRegistryResourceContent(tenantDomain,
+                    APIConstants.API_TENANT_CONF_LOCATION);
 
             if (content != null) {
                 JSONParser parser = new JSONParser();
@@ -4915,7 +4965,8 @@ public final class APIUtil {
                     if (value != null) {
                         restAPIConfigJSON = (JSONObject) value;
                     } else {
-                        throw new APIManagementException("RESTAPIScopes" + " config does not exist for tenant " + tenantDomain);
+                        throw new APIManagementException("RESTAPIScopes" + " config does not exist for tenant "
+                                + tenantDomain);
                     }
                 }
             }
@@ -4935,7 +4986,7 @@ public final class APIUtil {
      */
     public static Map<String, String> getRESTAPIScopesFromConfig(JSONObject config) {
         Map<String, String> scopes = new HashMap<String, String>();
-        JSONArray scopesArray = (JSONArray) ((JSONObject) config).get("Scope");
+        JSONArray scopesArray = (JSONArray) config.get("Scope");
         for (Object scopeObj : scopesArray) {
             JSONObject scope = (JSONObject) scopeObj;
             String scopeName = scope.get(APIConstants.REST_API_SCOPE_NAME).toString();
@@ -4976,5 +5027,181 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Used to generate CORS Configuration object from CORS Configuration Json
+     *
+     * @param jsonString json representation of CORS configuration
+     * @return CORSConfiguration Object
+     */
+    public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
+        return new Gson().fromJson(jsonString, CORSConfiguration.class);
+
+    }
+
+    /**
+     * Used to generate Json string from CORS Configuration object
+     *
+     * @param corsConfiguration CORSConfiguration Object
+     * @return Json string according to CORSConfiguration Object
+     */
+    public static String getCorsConfigurationJsonFromDto(CORSConfiguration corsConfiguration) {
+        return new Gson().toJson(corsConfiguration);
+    }
+
+    /**
+     * Used to get access control allowed headers according to the api-manager.xml
+     *
+     * @return access control allowed headers string
+     */
+    public static String getAllowedHeaders() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS);
+    }
+
+    /**
+     * Used to get access control allowed methods define in api-manager.xml
+     *
+     * @return access control allowed methods string
+     */
+    public static String getAllowedMethods() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS);
+    }
+
+    /**
+     * Used to get access control allowed credential define in api-manager.xml
+     *
+     * @return true if access control allow credential enabled
+     */
+    public static boolean isAllowCredentials() {
+        String allowCredentials =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_CREDENTIALS);
+        return Boolean.parseBoolean(allowCredentials);
+    }
+
+    /**
+     * Used to get CORS Configuration enabled from api-manager.xml
+     *
+     * @return true if CORS-Configuration is enabled in api-manager.xml
+     */
+    public static boolean isCORSEnabled() {
+        String corsEnabled =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                        getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
+
+        return Boolean.parseBoolean(corsEnabled);
+    }
+
+    /**
+     * Used to return analytic enabled from the configuration
+     *
+     * @return true if analytics enabled in analytic configuration
+     */
+    public static boolean isStatsEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
+    }
+
+    /**
+     * Used to get access control allowed origins define in api-manager.xml
+     *
+     * @return allow origins list defined in api-manager.xml
+     */
+    public static String getAllowedOrigins() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN);
+
+    }
+
+    /**
+     * Used to get CORSConfiguration according to the API artifact
+     *
+     * @param artifact registry artifact for the API
+     * @return CORS Configuration object extract from the artifact
+     * @throws GovernanceException if attribute couldn't fetch from the artifact.
+     */
+    public static CORSConfiguration getCorsConfigurationFromArtifact(GovernanceArtifact artifact)
+            throws GovernanceException {
+        CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(
+                artifact.getAttribute(APIConstants.API_OVERVIEW_CORS_CONFIGURATION));
+        if (corsConfiguration == null) {
+            corsConfiguration = getDefaultCorsConfiguration();
+        }
+        return corsConfiguration;
+    }
+
+    /**
+     * Used to get Default CORS Configuration object according to configuration define in api-manager.xml
+     *
+     * @return CORSConfiguration object accordine to the defined values in api-manager.xml
+     */
+    public static CORSConfiguration getDefaultCorsConfiguration() {
+        List<String> allowHeadersStringSet = Arrays.asList(getAllowedHeaders().split(","));
+        List<String> allowMethodsStringSet = Arrays.asList(getAllowedMethods().split(","));
+        List<String> allowOriginsStringSet = Arrays.asList(getAllowedOrigins().split(","));
+        return new CORSConfiguration(false, allowOriginsStringSet, false, allowHeadersStringSet, allowMethodsStringSet);
+    }
+
+    public static String getServerURL() throws APIManagementException{
+        String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
+
+        try {
+            if (hostName == null) {
+                hostName = NetworkUtils.getLocalHostname();
+            }
+        } catch (SocketException e) {
+            throw new APIManagementException("Error while trying to read hostname.", e);
+        }
+
+        String mgtTransport = CarbonUtils.getManagementTransport();
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        if (mgtTransportPort <= 0) {
+            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+        }
+        String serverUrl = mgtTransport + "://" + hostName.toLowerCase();
+        // If it's well known HTTPS port, skip adding port
+        if (mgtTransportPort != APIConstants.DEFAULT_HTTPS_PORT) {
+            serverUrl += ":" + mgtTransportPort;
+        }
+        // If ProxyContextPath is defined then append it
+        String proxyContextPath = ServerConfiguration.getInstance().getFirstProperty(APIConstants.PROXY_CONTEXT_PATH);
+        if (proxyContextPath != null && !proxyContextPath.trim().isEmpty()) {
+            if (proxyContextPath.charAt(0) == '/') {
+                serverUrl += proxyContextPath;
+            } else {
+                serverUrl += "/" + proxyContextPath;
+            }
+        }
+
+        return serverUrl;
+    }
+
+    /**
+     * Extract the provider of the API from name
+     *
+     * @param apiVersion - API Name with version
+     * @param tenantDomain - tenant domain of the API
+     * @return API publisher name
+     */
+    public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
+        int index = apiVersion.indexOf("--");
+        String apiProvider;
+        if (index != -1) {
+            apiProvider = apiVersion.substring(0, index);
+            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
+                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+            if (!apiProvider.endsWith(tenantDomain)) {
+                apiProvider = apiProvider + '@' + tenantDomain;
+            }
+            return apiProvider;
+        }
+        return null;
     }
 }

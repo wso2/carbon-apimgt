@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.*;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
@@ -184,26 +185,21 @@ public class APIThrottleHandler extends AbstractHandler {
                 getAxis2MessageContext();
         ConfigurationContext cc = axis2MC.getConfigurationContext();
 
-        ThrottleDataHolder dataHolder =
-                (ThrottleDataHolder) cc.getProperty(ThrottleConstants.THROTTLE_INFO_KEY);
+        ThrottleDataHolder dataHolder = null;
+        if (cc == null) {
+            handleException("Error while retrieving ConfigurationContext from messageContext");
+        }
 
-        if (dataHolder == null) {
-            log.debug("Data holder not present...");
-
-            synchronized (cc) {
-                dataHolder =
-                        (ThrottleDataHolder) cc.getProperty(ThrottleConstants.THROTTLE_INFO_KEY);
-                if (dataHolder == null) {
-                    dataHolder = new ThrottleDataHolder();
-                    cc.setNonReplicableProperty(ThrottleConstants.THROTTLE_INFO_KEY, dataHolder);
-                }
+        synchronized (cc) {
+            dataHolder = (ThrottleDataHolder) cc.getProperty(ThrottleConstants.THROTTLE_INFO_KEY);
+            if (dataHolder == null) {
+                dataHolder = new ThrottleDataHolder();
+                cc.setNonReplicableProperty(ThrottleConstants.THROTTLE_INFO_KEY, dataHolder);
             }
         }
 
-
         if ((throttle == null && !isResponse) || (isResponse && concurrentAccessController == null)) {
-            ClusteringAgent clusteringAgent = cc.getAxisConfiguration().getClusteringAgent();
-            if (clusteringAgent != null) {
+            if (GatewayUtils.isClusteringEnabled()) {
                 isClusteringEnable = true;
             }
         }
@@ -234,13 +230,13 @@ public class APIThrottleHandler extends AbstractHandler {
         // All the replication functionality of the access rate based throttling handled by itself
         // Just replicate the current state of ConcurrentAccessController
         if (isClusteringEnable && concurrentAccessController != null) {
-            if (cc != null) {
-                try {
-                    Replicator.replicate(cc);
-                } catch (ClusteringFault clusteringFault) {
-                    handleException("Error during the replicating  states ", clusteringFault);
-                }
+
+            try {
+                Replicator.replicate(cc);
+            } catch (ClusteringFault clusteringFault) {
+                handleException("Error during the replicating  states ", clusteringFault);
             }
+
         }
 
         if (!canAccess) {
@@ -264,8 +260,22 @@ public class APIThrottleHandler extends AbstractHandler {
             errorDescription = "API not accepting requests";
             // It it's a hard limit exceeding, we tell it as service not being available.
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
+        } else if (APIThrottleConstants.API_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.API_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
+        } else if (APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED
+                .equals(messageContext.getProperty(APIThrottleConstants.THROTTLED_OUT_REASON))) {
+            errorCode = APIThrottleConstants.RESOURCE_THROTTLE_OUT_ERROR_CODE;
+            errorMessage = "Message throttled out";
+            // By default we send a 429 response back
+            httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
+            errorDescription = "You have exceeded your quota";
         } else {
-            errorCode = APIThrottleConstants.THROTTLE_OUT_ERROR_CODE;
+            errorCode = APIThrottleConstants.APPLICATION_THROTTLE_OUT_ERROR_CODE;
             errorMessage = "Message throttled out";
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
@@ -570,11 +580,13 @@ public class APIThrottleHandler extends AbstractHandler {
                         }
                     } catch (ThrottleException e) {
                         log.warn("Exception occurred while performing role " + "based throttling", e);
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
                         return false;
                     }
 
                     //check for the permission for access
                     if (info != null && !info.isAccessAllowed()) {
+                        log.info("Exceeded the allocated quota in Application level.");
                         //In the case of both of concurrency throttling and
                         //rate based throttling have enabled ,
                         //if the access rate less than maximum concurrent access ,
@@ -594,6 +606,7 @@ public class APIThrottleHandler extends AbstractHandler {
                                 }
                             }
                         }
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.APPLICATION_LIMIT_EXCEEDED);
                         return false;
                     }
                 }
@@ -651,12 +664,13 @@ public class APIThrottleHandler extends AbstractHandler {
                             }
                         } catch (ThrottleException e) {
                             log.warn("Exception occurred while performing resource" + "based throttling", e);
+                            synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
                             return false;
                         }
 
                         //check for the permission for access
                         if (info != null && !info.isAccessAllowed()) {
-
+                            log.info("Exceeded the allocated quota in Resource level.");
                             //In the case of both of concurrency throttling and
                             //rate based throttling have enabled ,
                             //if the access rate less than maximum concurrent access ,
@@ -679,9 +693,10 @@ public class APIThrottleHandler extends AbstractHandler {
                                 // This means that we are allowing the requests to continue even after the throttling
                                 // limit has reached.
                                 if (synCtx.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY) == null) {
-                                    synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, true);
+                                    synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, Boolean.TRUE);
                                 }
                             }else{
+                                synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.RESOURCE_LIMIT_EXCEEDED);
                                 return false;
                             }
                         }
@@ -731,11 +746,13 @@ public class APIThrottleHandler extends AbstractHandler {
                     }
                 } catch (ThrottleException e) {
                     log.warn("Exception occurred while performing role " + "based throttling", e);
+                    synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);
                     return false;
                 }
 
                 //check for the permission for access
                 if (info != null && !info.isAccessAllowed()) {
+                    log.info("Exceeded the allocated quota in API level.");
                     //In the case of both of concurrency throttling and
                     //rate based throttling have enabled ,
                     //if the access rate less than maximum concurrent access ,
@@ -758,9 +775,10 @@ public class APIThrottleHandler extends AbstractHandler {
                         // This means that we are allowing the requests to continue even after the throttling
                         // limit has reached.
                         if (synCtx.getProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY) == null) {
-                            synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, true);
+                            synCtx.setProperty(APIConstants.API_USAGE_THROTTLE_OUT_PROPERTY_KEY, Boolean.TRUE);
                         }
                     } else {
+                        synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.API_LIMIT_EXCEEDED);
                         return false;
                     }
                 }
@@ -806,6 +824,7 @@ public class APIThrottleHandler extends AbstractHandler {
 
                 if (info != null && !info.isAccessAllowed()) {
                     synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
+                    log.info("Hard Throttling limit exceeded.");
                     return false;
                 }
             }
@@ -1070,7 +1089,7 @@ public class APIThrottleHandler extends AbstractHandler {
         try {
             parsedPolicy = AXIOMUtil.stringToOM(policy.toString());
         } catch (XMLStreamException e) {
-            log.error("Error occurred while creating policy file for Hard Throttling.");
+            log.error("Error occurred while creating policy file for Hard Throttling.", e);
         }
         return parsedPolicy;
     }
@@ -1114,15 +1133,13 @@ public class APIThrottleHandler extends AbstractHandler {
                 logMessage = logMessage + " with userAgent=" + userAgent;
             }
         } catch (Exception e) {
-            log.debug("Error while getting User Agent for request");
+            log.error("Error while getting User Agent for request", e);
         }
 
         long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
         Date incomingReqTime = new Date(reqIncomingTimestamp);
-        if (incomingReqTime != null) {
-            logMessage = logMessage + " at requestTime=" + incomingReqTime;
-        }
+        logMessage = logMessage + " at requestTime=" + incomingReqTime;
         //If gateway is fronted by hardware load balancer client ip should retrieve from x forward for header
         String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
                                                                          .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
@@ -1152,7 +1169,7 @@ public class APIThrottleHandler extends AbstractHandler {
         this.productionMaxCount = productionMaxCount;
     }
 
-    private boolean isContinueOnThrottleReached(String tier) {
+    private synchronized boolean isContinueOnThrottleReached(String tier) {
         if (continueOnLimitReachedMap.isEmpty()) {
             // This means that there are no tiers that has the attribute defined. Hence we should not allow to continue.
             return false;

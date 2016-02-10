@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.rest.api.store.TagsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
-import org.wso2.carbon.apimgt.rest.api.util.exception.InternalServerErrorException;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.TagMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -63,7 +62,7 @@ public class TagsApiServiceImpl extends TagsApiService {
         List<Tag> tagList = new ArrayList<>();
         try {
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                throw RestApiUtil.buildBadRequestException("Provided tenant domain '" + xWSO2Tenant + "' is invalid");
+                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
             String username = RestApiUtil.getLoggedInUsername();
@@ -75,16 +74,12 @@ public class TagsApiServiceImpl extends TagsApiService {
             TagMappingUtil.setPaginationParams(tagListDTO, limit, offset, tagList.size());
             return Response.ok().entity(tagListDTO).build();
         } catch (APIManagementException e) {
-            handleException("Error while retrieving tags", e);
+            RestApiUtil.handleInternalServerError("Error while retrieving tags", e, log);
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            handleException(errorMessage, e);
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
-    private void handleException(String msg, Throwable t) throws InternalServerErrorException {
-        log.error(msg, t);
-        throw new InternalServerErrorException(t);
-    }
 }

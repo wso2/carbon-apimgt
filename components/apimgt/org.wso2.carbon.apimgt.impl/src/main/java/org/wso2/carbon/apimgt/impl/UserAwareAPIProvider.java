@@ -144,7 +144,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     public boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
-            throws APIManagementException {
+            throws APIManagementException, FaultGatewaysException {
         checkPublishPermission();
         return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
     }

@@ -63,8 +63,6 @@ public class APIKeyValidationServiceImpl extends AbstractAdmin
             PrivilegedCarbonContext carbonContextHolder, ThriftSession authSession) throws org.wso2.carbon.apimgt.keymgt.APIKeyMgtException {
 
         //read parameters from it and set it in current carbon context for this thread
-        PrivilegedCarbonContext storedCarbonCtxHolder = (PrivilegedCarbonContext)
-                authSession.getSessionCarbonContextHolder();
         
         try {
 			carbonContextHolder.setUsername((String)(authSession.getAttribute(ServerConstants.AUTHENTICATION_SERVICE_USERNAME)));

@@ -286,7 +286,7 @@ public class APIKeyMgtServiceComponent {
     /**
      * Thread that starts thrift server
      */
-    private class ServerRunnable implements Runnable {
+    private static class ServerRunnable implements Runnable {
         TServer server;
 
         public ServerRunnable(TServer server) {
@@ -316,7 +316,7 @@ public class APIKeyMgtServiceComponent {
         byte[] byteAddress = new byte[4];
         for (int i = 0; i < splittedString.length; i++) {
             if (Integer.parseInt(splittedString[i]) > 127) {
-                byteAddress[i] = new Integer(Integer.parseInt(splittedString[i]) - 256).byteValue();
+                byteAddress[i] = Integer.valueOf(Integer.parseInt(splittedString[i]) - 256).byteValue();
             } else {
                 byteAddress[i] = Byte.parseByte(splittedString[i]);
             }

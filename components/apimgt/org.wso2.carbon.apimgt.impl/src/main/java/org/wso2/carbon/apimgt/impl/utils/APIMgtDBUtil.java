@@ -34,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -79,7 +80,7 @@ public final class APIMgtDBUtil {
                         dataSource = (DataSource) ctx.lookup(dataSourceName);
                     } catch (NamingException e) {
                         throw new APIManagementException("Error while looking up the data " +
-                                "source: " + dataSourceName);
+                                "source: " + dataSourceName, e);
                     }
                 } else {
                     DBConfiguration configuration = getDBConfig(config);
@@ -187,7 +188,7 @@ public final class APIMgtDBUtil {
      * Close PreparedStatement
      * @param preparedStatement PreparedStatement
      */
-    private static void closeStatement(PreparedStatement preparedStatement) {
+    public static void closeStatement(PreparedStatement preparedStatement) {
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
@@ -227,7 +228,7 @@ public final class APIMgtDBUtil {
         String line;
         try {
 
-            br = new BufferedReader(new InputStreamReader(is));
+            br = new BufferedReader(new InputStreamReader(is, Charset.defaultCharset()));
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }

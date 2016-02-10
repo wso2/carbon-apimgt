@@ -1,11 +1,12 @@
 /*
- *  Copyright WSO2 Inc.
+ *
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
  *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +17,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.exception;
 
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
 public class InternalServerErrorException extends WebApplicationException {
+
+    private String message;
 
     public InternalServerErrorException(Throwable e) {
         super(e, Response.Status.INTERNAL_SERVER_ERROR);
@@ -27,5 +33,20 @@ public class InternalServerErrorException extends WebApplicationException {
 
     public InternalServerErrorException() {
         super(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    public InternalServerErrorException(String message, Throwable e) {
+        super(message, e, Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    public InternalServerErrorException(String message) {
+        super(message, Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    public InternalServerErrorException(ErrorDTO errorDTO) {
+        super(Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(errorDTO)
+                .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.DEFAULT_RESPONSE_CONTENT_TYPE)
+                .build());
     }
 }
