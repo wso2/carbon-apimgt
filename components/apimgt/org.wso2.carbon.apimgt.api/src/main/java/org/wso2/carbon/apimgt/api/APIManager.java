@@ -419,5 +419,4 @@ public interface APIManager {
      * @throws APIManagementException - If an error occurs while checking the value in the APIM DB.
      */
     boolean isDuplicateContextTemplate(String contextTemplate) throws APIManagementException;
-
 }
