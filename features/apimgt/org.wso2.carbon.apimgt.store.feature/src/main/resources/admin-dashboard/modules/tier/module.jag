@@ -11,10 +11,6 @@ jagg.module("tier", {
 
     getAllTiers:function () {
         return jagg.require(jagg.getModulesDir() + "tier/tier-manage.jag").getAllTiers.apply(this, arguments);
-    },
-    addPolicy:function(){
-        return jagg.require(jagg.getModulerDir() + "tier/throttle-attributes.jag").addPolicy.apply(this,arguments);
     }
-
 });
 %>

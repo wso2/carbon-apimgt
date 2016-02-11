@@ -130,7 +130,7 @@
             <xs:element name="value" minOccurs="0" maxOccurs="unbounded" type="xs:string"/>
         </xs:sequence>
         <xs:attribute name="class"/>
-        <xs:attribute name="isLifecycle" type="xs:boolean"/>
+		<xs:attribute name="isLifecycle" type="xs:boolean"/>
     </xs:complexType>
 
     <xs:complexType name="associationType">

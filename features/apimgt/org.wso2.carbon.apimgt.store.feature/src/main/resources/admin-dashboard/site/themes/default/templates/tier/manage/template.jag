@@ -67,7 +67,7 @@
 
     </div>
     <div class='form-actions'>
-        <input id="add-tier-btn" type='button' class='btn btn-primary' value='Add New Policy' />
+        <input id="add-tier-btn" type='button' class='btn btn-primary' value='Add New Tier' />
     </div>
 </div>
 
@@ -79,7 +79,7 @@
 
     $(document).ready(function(){
         $('#add-tier-btn').on('click',function(){
-            location.href = "<%= jagg.url('/add-policy')%>";
+            location.href = "<%= jagg.url('/tier-edit')%>";
         });
     });
 </script>
