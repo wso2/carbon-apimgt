@@ -49,42 +49,55 @@ public class APIManagerAnalyticsConfiguration {
     private String executionTimeStreamVersion;
 
     private APIManagerAnalyticsConfiguration() {
-        analyticsEnabled = APIUtil.isAnalyticsEnabled();
-        if (analyticsEnabled) {
-            Map<String, String> analyticsConfigs = APIUtil.getAnalyticsConfigFromRegistry();
-            bamServerUrlGroups = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
-            bamServerUser = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_USER);
-            bamServerPassword = analyticsConfigs.get(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
-        }
+    }
+
+    /**
+     * This is an inner class to hold the instance of the APIManagerAnalyticsConfiguration.
+     * The reason for writing it like this is to guarantee that only one instance would be created.
+     * ref: Initialization-on-demand holder idiom
+     */
+    private static class APIManagerAnalyticsConfigurationHolder {
+        private static final APIManagerAnalyticsConfiguration INSTANCE = new APIManagerAnalyticsConfiguration();
+
+        private APIManagerAnalyticsConfigurationHolder(){}
     }
 
     public static synchronized APIManagerAnalyticsConfiguration getInstance() {
-        if (instance == null) {
-            instance = new APIManagerAnalyticsConfiguration();
-        }
-        return instance;
+        return APIManagerAnalyticsConfigurationHolder.INSTANCE;
     }
 
     public void setAPIManagerConfiguration(APIManagerConfiguration config){
+        analyticsEnabled = APIUtil.isAnalyticsEnabled();
+        if (analyticsEnabled) {
+            bamServerUrlGroups = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_URL_GROUPS);
+            bamServerUser = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_USER);
+            bamServerPassword = config.getFirstProperty(APIConstants.API_USAGE_BAM_SERVER_PASSWORD);
+        }
+
         String skipEventReceiverConnStr = config.getFirstProperty(APIConstants.API_USAGE_SKIP_EVENT_RECEIVER_CONN);
-        skipEventReceiverConnection = skipEventReceiverConnStr != null && JavaUtils.isTrueExplicitly
-                (skipEventReceiverConnStr);
+        skipEventReceiverConnection = skipEventReceiverConnStr != null
+                                      && JavaUtils.isTrueExplicitly(skipEventReceiverConnStr);
+
         publisherClass = config.getFirstProperty(APIConstants.API_USAGE_PUBLISHER_CLASS);
+
         requestStreamName = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_NAME);
         requestStreamVersion = config.getFirstProperty(APIConstants.API_REQUEST_STREAM_VERSION);
         if (requestStreamName == null || requestStreamVersion == null) {
             log.error("Request stream name or version is null. Check api-manager.xml");
         }
+
         responseStreamName = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_NAME);
         responseStreamVersion = config.getFirstProperty(APIConstants.API_RESPONSE_STREAM_VERSION);
         if (responseStreamName == null || responseStreamVersion == null) {
             log.error("Response stream name or version is null. Check api-manager.xml");
         }
+
         faultStreamName = config.getFirstProperty(APIConstants.API_FAULT_STREAM_NAME);
         faultStreamVersion = config.getFirstProperty(APIConstants.API_FAULT_STREAM_VERSION);
         if (faultStreamName == null || faultStreamVersion == null) {
             log.error("Fault stream name or version is null. Check api-manager.xml");
         }
+
         throttleStreamName = config.getFirstProperty(APIConstants.API_THROTTLE_STREAM_NAME);
         throttleStreamVersion = config.getFirstProperty(APIConstants.API_THRORRLE_STREAM_VERSION);
         if (throttleStreamName == null || throttleStreamVersion == null) {
