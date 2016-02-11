@@ -20,13 +20,8 @@ package org.wso2.carbon.apimgt.api.model.policy;
 
 public class Limit {
 
-    public long getRequestCount() {
-        return requestCount;
-    }
-
-    public void setRequestCount(long requestCount) {
-        this.requestCount = requestCount;
-    }
+    private String timeUnit;
+    private int UnitTime;
 
     public String getTimeUnit() {
         return timeUnit;
@@ -36,22 +31,6 @@ public class Limit {
         this.timeUnit = timeUnit;
     }
 
-    public long getDataAmount() {
-        return DataAmount;
-    }
-
-    public void setDataAmount(long dataAmount) {
-        DataAmount = dataAmount;
-    }
-
-    public String getDataUnit() {
-        return DataUnit;
-    }
-
-    public void setDataUnit(String dataUnit) {
-        DataUnit = dataUnit;
-    }
-
     public int getUnitTime() {
         return UnitTime;
     }
@@ -59,13 +38,4 @@ public class Limit {
     public void setUnitTime(int unitTime) {
         UnitTime = unitTime;
     }
-
-    private long requestCount;
-    private String timeUnit;
-
-    private long DataAmount;
-    private String DataUnit;
-
-    private int UnitTime;
-
 }

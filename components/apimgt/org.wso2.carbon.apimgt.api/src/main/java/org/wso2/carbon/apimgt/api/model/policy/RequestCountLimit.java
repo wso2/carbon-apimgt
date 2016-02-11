@@ -16,16 +16,17 @@
 * under the License.
 */
 
+
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class IPCondition extends Condition {
-    private String specificIP;
+public class RequestCountLimit extends Limit {
+    private long requestCount;
 
-    public String getSpecificIP() {
-        return specificIP;
+    public long getRequestCount() {
+        return requestCount;
     }
 
-    public void setSpecificIP(String specificIP) {
-        this.specificIP = specificIP;
+    public void setRequestCount(long requestCount) {
+        this.requestCount = requestCount;
     }
 }

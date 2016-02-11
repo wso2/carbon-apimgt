@@ -16,16 +16,26 @@
 * under the License.
 */
 
+
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class IPCondition extends Condition {
-    private String specificIP;
+public class BandwidthLimit extends Limit {
+    private long dataAmount;
+    private String dataUnit;
 
-    public String getSpecificIP() {
-        return specificIP;
+    public long getDataAmount() {
+        return dataAmount;
     }
 
-    public void setSpecificIP(String specificIP) {
-        this.specificIP = specificIP;
+    public void setDataAmount(long dataAmount) {
+        this.dataAmount = dataAmount;
+    }
+
+    public String getDataUnit() {
+        return dataUnit;
+    }
+
+    public void setDataUnit(String dataUnit) {
+        this.dataUnit = dataUnit;
     }
 }

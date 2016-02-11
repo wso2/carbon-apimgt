@@ -18,19 +18,19 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class Pipeline {
 
     private QuotaPolicy quotaPolicy;
 
-    private ArrayList<Condition> conditions;
+    private List<Condition> conditions;
 
-    public ArrayList<Condition> getCondition() {
+    public List<Condition> getCondition() {
         return conditions;
     }
 
-    public void setConditions(ArrayList<Condition> condition) {
+    public void setConditions(List<Condition> condition) {
         this.conditions = condition;
     }
 

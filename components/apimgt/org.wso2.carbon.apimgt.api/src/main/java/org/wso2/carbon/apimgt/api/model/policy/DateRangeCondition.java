@@ -16,16 +16,27 @@
 * under the License.
 */
 
+
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class IPCondition extends Condition {
-    private String specificIP;
+public class DateRangeCondition extends Condition {
+    private String startingDate;
+    private String endingDate;
 
-    public String getSpecificIP() {
-        return specificIP;
+    public String getEndingDate() {
+        return endingDate;
     }
 
-    public void setSpecificIP(String specificIP) {
-        this.specificIP = specificIP;
+    public void setEndingDate(String endingDate) {
+        this.endingDate = endingDate;
+    }
+
+    public String getStartingDate() {
+        return startingDate;
+    }
+
+    public void setStartingDate(String startingDate) {
+        this.startingDate = startingDate;
     }
 }
+

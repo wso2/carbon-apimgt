@@ -19,4 +19,22 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class JWTClaimsCondition {
+    private String claimUrl;
+    private String attribute;
+
+    public String getClaimUrl() {
+        return claimUrl;
+    }
+
+    public void setClaimUrl(String claimUrl) {
+        this.claimUrl = claimUrl;
+    }
+
+    public String getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
+    }
 }
