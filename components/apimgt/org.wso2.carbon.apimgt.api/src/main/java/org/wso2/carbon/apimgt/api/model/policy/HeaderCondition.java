@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-import org.wso2.carbon.apimgt.api.model.Condition;
-
 public class HeaderCondition extends Condition {
     private String header;
     private String value;

@@ -19,8 +19,6 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 
-import org.wso2.carbon.apimgt.api.model.Condition;
-
 public class QuotaPolicy extends Condition {
 
     private String type;

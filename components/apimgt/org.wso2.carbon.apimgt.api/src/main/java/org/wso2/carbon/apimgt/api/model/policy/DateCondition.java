@@ -16,16 +16,36 @@
 * under the License.
 */
 
+
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class HTTPVerbCondition extends Condition {
-    private String httpVerb;
+public class DateCondition extends Condition{
+    private String startingDate;
+    private String endingDate;
+    private String specificDate;
 
-    public String getHttpVerb() {
-        return httpVerb;
+    public String getEndingDate() {
+        return endingDate;
     }
 
-    public void setHttpVerb(String httpVerb) {
-        this.httpVerb = httpVerb;
+    public void setEndingDate(String endingDate) {
+        this.endingDate = endingDate;
+    }
+
+    public String getSpecificDate() {
+        return specificDate;
+    }
+
+    public void setSpecificDate(String specificDate) {
+        this.specificDate = specificDate;
+    }
+
+    public String getStartingDate() {
+
+        return startingDate;
+    }
+
+    public void setStartingDate(String startingDate) {
+        this.startingDate = startingDate;
     }
 }

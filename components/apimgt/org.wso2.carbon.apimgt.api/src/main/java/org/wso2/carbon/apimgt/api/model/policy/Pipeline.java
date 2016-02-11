@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-import org.wso2.carbon.apimgt.api.model.Condition;
-
 import java.util.ArrayList;
 
 public class Pipeline {

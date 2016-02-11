@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-import org.wso2.carbon.apimgt.api.model.Condition;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
