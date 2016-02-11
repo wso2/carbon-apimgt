@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
-import org.wso2.throttle.core.Throttler;
 
 /**
  * @scr.component name="org.wso2.carbon.apimgt.handlers" immediate="true"
@@ -74,9 +73,7 @@ public class APIHandlerServiceComponent {
 			log.error("Error while initializing the API Gateway (APIHandlerServiceComponent) component", e);
 		}
 
-        ServiceReferenceHolder.getInstance().setThrottler(Throttler.getInstance());
-        ServiceReferenceHolder.getInstance().getThrottler().deployLocalCEPRules();
-        log.info("Deployed CEP rules while starting server");
+
 
     }
 
