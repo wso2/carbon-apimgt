@@ -17,9 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.InputStream;
 import java.util.List;

@@ -16,25 +16,18 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.api.model.policy;
 
-public class HeaderCondition extends Condition{
-    private String header;
-    private String value;
+import org.wso2.carbon.apimgt.api.model.Condition;
 
-    public String getHeader() {
-        return header;
+public class HTTPVerbCondition extends Condition {
+    private String httpVerb;
+
+    public String getHttpVerb() {
+        return httpVerb;
     }
 
-    public void setHeader(String header) {
-        this.header = header;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
+    public void setHttpVerb(String httpVerb) {
+        this.httpVerb = httpVerb;
     }
 }

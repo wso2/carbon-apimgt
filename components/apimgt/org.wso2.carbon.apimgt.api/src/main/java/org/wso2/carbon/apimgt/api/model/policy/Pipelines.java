@@ -16,7 +16,18 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.api.model.policy;
 
-public class JWTClaimsCondition {
+import java.util.ArrayList;
+
+public class Pipelines {
+    private ArrayList<Pipeline> pipeline;
+
+    public ArrayList<Pipeline> getPipeline() {
+        return pipeline;
+    }
+
+    public void setPipeline(ArrayList<Pipeline> pipeline) {
+        this.pipeline = pipeline;
+    }
 }

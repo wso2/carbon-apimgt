@@ -16,16 +16,7 @@
 * under the License.
 */
 
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.api.model.policy;
 
-public class HTTPVerbCondition extends Condition {
-    private String httpVerb;
-
-    public String getHttpVerb() {
-        return httpVerb;
-    }
-
-    public void setHttpVerb(String httpVerb) {
-        this.httpVerb = httpVerb;
-    }
+public class QueryParameterCondition {
 }
