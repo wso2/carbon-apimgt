@@ -10,7 +10,7 @@
     </Database>
     <APIConsumerAuthentication>
         <EnableTokenGeneration>false</EnableTokenGeneration>
-        <SignatureAlgorithm>NONE</SignatureAlgorithm>
+	<SignatureAlgorithm>NONE</SignatureAlgorithm>
     </APIConsumerAuthentication>
     <APIUsageTracking>
         <Enabled>false</Enabled>
@@ -48,8 +48,7 @@
         <!--ThriftServerHost>localhost</ThriftServerHost-->
         <EnableThriftServer>true</EnableThriftServer>
         <ApplicationTokenScope>am_application_scope</ApplicationTokenScope>
-        <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler
-        </KeyValidationHandlerClassName>
+        <KeyValidationHandlerClassName>org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler</KeyValidationHandlerClassName>
         <TokenEndPointName>/oauth2/token</TokenEndPointName>
         <RevokeAPIURL>https://${carbon.local.ip}:${https.nio.port}/revoke</RevokeAPIURL>
         <EncryptPersistedTokens>false</EncryptPersistedTokens>

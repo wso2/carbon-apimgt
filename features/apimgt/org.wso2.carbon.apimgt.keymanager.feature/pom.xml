@@ -15,8 +15,7 @@
  ~ limitations under the License.
 -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
@@ -61,7 +60,7 @@
 
     <build>
         <plugins>
-            <plugin>
+	    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <version>1.1</version>
@@ -74,7 +73,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <delete file="src/main/resources/repository/database/WSO2AM_DB.h2.db"/>
+                                <delete file="src/main/resources/repository/database/WSO2AM_DB.h2.db" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -87,18 +86,16 @@
                         <configuration>
                             <tasks>
                                 <path id="h2.classpath">
-                                    <path refid="maven.compile.classpath"/>
+                                    <path refid="maven.compile.classpath" />
                                 </path>
-                                <echo message="########### Creating API Manager Database ##############"/>
-                                <sql driver="org.h2.Driver"
-                                     url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true"
-                                     userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
+                                <echo message="########### Creating API Manager Database ##############" />
+                                <sql driver="org.h2.Driver" url="jdbc:h2:${basedir}/src/main/resources/repository/database/WSO2AM_DB;create=true" userid="wso2carbon" password="wso2carbon" autocommit="true" onerror="continue">
                                     <classpath>
-                                        <path refid="h2.classpath"/>
+                                        <path refid="h2.classpath" />
                                     </classpath>
-                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql"/>
+                                    <fileset file="${basedir}/src/main/resources/sql/h2.sql" />
                                 </sql>
-                                <echo message="##################### END ########################"/>
+                                <echo message="##################### END ########################" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -126,23 +123,13 @@
                                 </properties>
                             </adviceFile>
                             <bundles>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}
-                                </bundleDef>
-                                <bundleDef>
-                                    org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}
-                                </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.stub:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt.client:${carbon.apimgt.version}</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.keymgt:${carbon.apimgt.version}</bundleDef>
 
-                                <bundleDef>
-                                    org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}
-                                </bundleDef>
+                                <bundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
                                 <bundleDef>com.googlecode.json-simple.wso2:json-simple</bundleDef>
                                 <bundleDef>com.google.code.gson:gson:${google.code.gson.version}</bundleDef>
                                 <bundleDef>net.sf.ehcache.wso2:ehcache</bundleDef>
@@ -150,18 +137,13 @@
                             </bundles>
                             <importBundles>
                                 <!--importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.thrift.authentication:${carbon.identity.version}</importBundleDef-->
-                                <importBundleDef>
-                                    org.wso2.carbon.identity:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}
-                                </importBundleDef>
+                                <importBundleDef>org.wso2.carbon.identity:org.wso2.carbon.identity.authenticator.thrift:${carbon.identity.version}</importBundleDef>
                                 <importBundleDef>libthrift.wso2:libthrift:0.8.0.wso2v1</importBundleDef>
                             </importBundles>
                             <importFeatures>
-                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}
-                                </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}
-                                </importFeatureDef>
-                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}
-                                </importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.core.server:${carbon.kernel.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.identity.oauth.server:${carbon.identity.version}</importFeatureDef>
+                                <importFeatureDef>org.wso2.carbon.um.ws.service.server:${carbon.identity.version}</importFeatureDef>
                             </importFeatures>
                         </configuration>
                     </execution>

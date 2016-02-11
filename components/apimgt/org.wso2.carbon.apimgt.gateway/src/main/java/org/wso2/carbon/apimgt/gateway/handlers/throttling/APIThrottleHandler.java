@@ -64,22 +64,14 @@ import org.wso2.carbon.apimgt.impl.utils.APIDescriptionGenUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
-import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
-import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
-import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
-import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
-import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
-import org.wso2.carbon.databridge.commons.exception.TransportException;
 
-import java.net.MalformedURLException;
 import javax.xml.stream.XMLStreamException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
+
 /**
  * This API handler is responsible for evaluating authenticated user requests against their
  * corresponding access tiers (SLAs) and deciding whether the requests should be accepted
@@ -496,7 +488,6 @@ public class APIThrottleHandler extends AbstractHandler {
         boolean canAccess = true;
         ThrottleDataHolder dataHolder = (ThrottleDataHolder)
                 cc.getPropertyNonReplicable(ThrottleConstants.THROTTLE_INFO_KEY);
-        ThrottleDataPublisherDTO throttleDataPublisherDTO = new ThrottleDataPublisherDTO();
 
         if (throttle.getThrottleContext(ThrottleConstants.ROLE_BASED_THROTTLE_KEY) == null) {
             //there is no throttle configuration for RoleBase Throttling
@@ -528,9 +519,7 @@ public class APIThrottleHandler extends AbstractHandler {
                 roleID = authContext.getTier();
                 applicationTier = authContext.getApplicationTier();
                 applicationId = authContext.getApplicationId();
-                throttleDataPublisherDTO.setApplicationThrottleTier(applicationTier);
-                throttleDataPublisherDTO.setApplicationThrottleKey(applicationId);
-                throttleDataPublisherDTO.setMetaKey(consumerKey,authorizedUser);
+
                 if (accessToken == null || roleID == null) {
                     log.warn("No consumer key or role information found on the request - " +
                              "Throttling not applied");
@@ -634,15 +623,12 @@ public class APIThrottleHandler extends AbstractHandler {
                                  "not apply");
                     } else {
                         resourceLevelRoleId = resourceAndHTTPVerbThrottlingTier;
-                        throttleDataPublisherDTO.setResourceThrottleTier(resourceLevelRoleId);
                     }
                     //adding consumerKey and authz_user combination instead of access token to resourceAndHTTPVerbKey
                     //This avoids sending more than the permitted number of requests in a unit time by
                     // regenerating the access token
                     String resourceAndHTTPVerbKey = verbInfoDTO.getRequestKey() + '-' + consumerKey + ':' +
                                                     authorizedUser;
-                    throttleDataPublisherDTO.setResourceThrottleKey(resourceAndHTTPVerbKey);
-                    throttleDataPublisherDTO.setHTTPVerb(verbInfoDTO.getHttpVerb());
                     //resourceLevelTier should get from auth context or request synapse context
                     // getResourceAuthenticationScheme(apiContext, apiVersion, requestPath, httpMethod);
                     //api + resource+http verb combination as verb_resource_api_combined_key
@@ -735,9 +721,6 @@ public class APIThrottleHandler extends AbstractHandler {
                     //This avoids sending more than the permitted number of requests in a unit time by
                     // regenerating the access token
                     String apiKey = apiContext + ':' + apiVersion + ':' + consumerKey + ':' + authorizedUser;
-                    throttleDataPublisherDTO.setAPIThrottleKey(apiKey);
-                    throttleDataPublisherDTO.setAPIThrottleTier(roleID);
-
                     //If the application has not been subscribed to the Unlimited Tier and
                     //if application level throttling has passed
                     if (!APIConstants.UNLIMITED_TIER.equals(roleID) && (info == null || info.isAccessAllowed())) {
@@ -835,34 +818,6 @@ public class APIThrottleHandler extends AbstractHandler {
             synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
             return false;
         }
-
-        //getting remote IP address; First try to get it from X-Forwarded-For . If it is not possible get it from REMOTE_ADDR
-        org.apache.axis2.context.MessageContext axisMC = ((Axis2MessageContext)synCtx).getAxis2MessageContext();
-        String clientIP =  (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-        if(clientIP == null){  //if X-Forwarded-For not providing IP Address
-            clientIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-        }
-        throttleDataPublisherDTO.setIPAddress(clientIP);
-
-        //publish the event to CEP
-        /*try {
-            publishEvent(throttleDataPublisherDTO);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (AgentException e) {
-            e.printStackTrace();
-        } catch (AuthenticationException e) {
-            e.printStackTrace();
-        } catch (TransportException e) {
-            e.printStackTrace();
-        } catch (MalformedStreamDefinitionException e) {
-            e.printStackTrace();
-        } catch (StreamDefinitionException e) {
-            e.printStackTrace();
-        } catch (DifferentStreamDefinitionAlreadyDefinedException e) {
-            e.printStackTrace();
-        } */
         return canAccess;
     }
 
@@ -1176,54 +1131,5 @@ public class APIThrottleHandler extends AbstractHandler {
         }
         // This means that the tier is not there. Then we have should not allow to continue.
         return continueOnLimitReachedMap.containsKey(tier) && continueOnLimitReachedMap.get(tier);
-    }
-
-    //To publish the throttle data to CEP server running with the port off set 5
-    private boolean isInitialized = false;  //to check whether the publisher is initialized
-    private DataPublisher dataPublisher;
-    private String throttleDataStream;
-    public void publishEvent(ThrottleDataPublisherDTO throttleDataPublisherDTO) throws MalformedURLException,
-            AgentException, AuthenticationException, TransportException, MalformedStreamDefinitionException,
-            StreamDefinitionException, DifferentStreamDefinitionAlreadyDefinedException {
-
-        if(!isInitialized) {  //if stream and publisher are not initialized
-            dataPublisher = new DataPublisher("tcp://localhost:7616", "admin", "admin");  //CEP server running with port off set 5
-            throttleDataStream = dataPublisher.defineStream("{" +       //Publishing stream defining
-                    "  'name':'ThrottleCEPStream13'," +
-                    "  'version':'1.0.0'," +
-                    "  'nickName': 'CEP Publisher'," +
-                    "  'description': 'Throttle Data Publisher'," +
-                    "  'metaData':[" +
-                    "          {'name':'key','type':'STRING'}" +
-                    "  ]," +
-                    "  'payloadData':[" +
-                    "          {'name':'api_key','type':'STRING'}," +
-                    "          {'name':'application_key','type':'STRING'}," +
-                    "          {'name':'resource_key','type':'STRING'}," +
-                    "          {'name':'api_tier','type':'STRING'}," +
-                    "          {'name':'application_tier','type':'STRING'}," +
-                    "          {'name':'resource_tier','type':'STRING'}," +
-                    "          {'name':'ip_address','type':'LONG'}," +
-                    "          {'name':'http_method','type':'STRING'}," +
-                    "          {'name':'messageID','type':'STRING'}" +
-                    "  ]" +
-                    "}");
-            log.info("stream defined: " + throttleDataStream);
-            isInitialized = true;
-        }
-        String uuid = UUID.randomUUID().toString();   //generate random UUID as message ID
-        // the data publishing to cep server
-        dataPublisher.publish(throttleDataStream, new Object[]{throttleDataPublisherDTO.getMetaKey()}, null,
-                new Object[]{throttleDataPublisherDTO.getAPIThrottleKey() ,
-                throttleDataPublisherDTO.getApplicationThrottleKey(),
-                throttleDataPublisherDTO.getResourceThrottleKey(),
-                throttleDataPublisherDTO.getAPIThrottleTier(),
-                throttleDataPublisherDTO.getApplicationThrottleTier(),
-                throttleDataPublisherDTO.getResourceThrottleTier(),
-                throttleDataPublisherDTO.getIPAddress(),
-                throttleDataPublisherDTO.getHTTPVerb(),
-                uuid});
-
-        log.info("Event published to stream");
     }
 }
