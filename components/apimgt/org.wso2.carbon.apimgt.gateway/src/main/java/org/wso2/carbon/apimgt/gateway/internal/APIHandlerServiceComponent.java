@@ -42,7 +42,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  */
 public class APIHandlerServiceComponent {
-    
+
     private static final Log log = LogFactory.getLog(APIHandlerServiceComponent.class);
 
     private APIKeyValidatorClientPool clientPool;
