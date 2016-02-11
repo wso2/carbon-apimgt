@@ -171,8 +171,7 @@ public class APIManagerComponent {
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
             // when ServiceDataPublisherAdmin is set.
             APIUtil.writeAnalyticsConfigurationToRegistry(configuration);
-            APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            analyticsConfiguration.setAPIManagerConfiguration(configuration);
+            APIManagerAnalyticsConfiguration.getInstance().setAPIManagerConfiguration(configuration);
 
             AuthorizationUtils.addAuthorizeRoleListener(APIConstants.AM_CREATOR_APIMGT_EXECUTION_ID,
                                                         RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
@@ -197,8 +196,6 @@ public class APIManagerComponent {
                                                         UserMgtConstants.EXECUTE_ACTION, null);
 
             setupImagePermissions();
-//            RemoteAuthorizationManager authorizationManager = RemoteAuthorizationManager.getInstance();
-//            authorizationManager.init();
             APIMgtDBUtil.initialize();
             //Load initially available api contexts at the server startup. This Cache is only use by the products other than the api-manager
             /* TODO: Load Config values from apimgt.core*/
@@ -215,7 +212,6 @@ public class APIManagerComponent {
 
             // Initialise KeyManager.
             KeyManagerHolder.initializeKeyManager(configuration);
-            
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         }
@@ -247,10 +243,11 @@ public class APIManagerComponent {
             log.debug("Event Data Publisher service bound to the API usage handler");
             log.debug("Writing Analytics Configuration to Registry...");
         }
-        APIUtil.writeAnalyticsConfigurationToRegistry(ServiceReferenceHolder.getInstance()
-                                                              .getAPIManagerConfigurationService()
-                                                              .getAPIManagerConfiguration());
-        APIManagerAnalyticsConfiguration.getInstance().setAPIManagerConfiguration(configuration);
+
+        // we have persist the analytics configuration here also since at the other place, the dataPublisherAdmin
+        // could be null.
+        APIUtil.writeAnalyticsConfigurationToRegistry(configuration);
+//        APIManagerAnalyticsConfiguration.getInstance().setAPIManagerConfiguration(configuration);
     }
 
     protected void unsetDataPublisherService(ServiceDataPublisherAdmin service) {
