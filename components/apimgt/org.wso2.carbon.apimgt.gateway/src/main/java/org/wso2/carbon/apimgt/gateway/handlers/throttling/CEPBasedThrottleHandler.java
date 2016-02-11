@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.throttle.core.Throttler;
+import org.wso2.carbon.throttle.event.core.ThrottlerService;
 
 /**
  * This class is implemented to handle
@@ -55,7 +55,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
      */
     private long version;
 
-    private Throttler throttler = ServiceReferenceHolder.getInstance().getThrottler();
+    private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     public CEPBasedThrottleHandler() {
         this.applicationRoleBasedAccessController = new RoleBasedAccessRateController();
@@ -143,26 +143,11 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
             ConfigurationContext cc = axis2MC.getConfigurationContext();
-            if (this.throttler == null) {
-                synchronized (this) {
-                    if (this.throttler == null) {
-                        initThrottle(messageContext, cc);
-                    }
-                }
-            }
-
             doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         }
         return canAccess;
     }
 
-
-    private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
-         ServiceReferenceHolder.getInstance().setThrottler(Throttler.getInstance());
-         ServiceReferenceHolder.getInstance().getThrottler().deployLocalCEPRules();
-        this.throttler = ServiceReferenceHolder.getInstance().getThrottler();
-
-    }
 
     public String getId() {
         return id;
