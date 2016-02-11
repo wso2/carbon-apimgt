@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidato
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.throttle.event.core.ThrottlerService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -40,6 +41,9 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * @scr.reference name="api.manager.config.service"
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
+ * @scr.reference name="throttle.event.core.service"
+ * interface="org.wso2.carbon.throttle.event.core.ThrottlerService" cardinality="1..1"
+ * policy="dynamic" bind="setThrottlerService" unbind="unsetThrottlerService"
  */
 public class APIHandlerServiceComponent {
 
@@ -111,5 +115,19 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
+    protected void setThrottlerService(ThrottlerService throttlerService) {
+        if (log.isDebugEnabled()) {
+            log.debug("API manager configuration service bound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setThrottler(throttlerService);
+    }
+
+    protected void unsetThrottlerService(ThrottlerService throttlerService) {
+        if (log.isDebugEnabled()) {
+            log.debug("API manager configuration service unbound from the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setThrottler(null);
     }
 }
