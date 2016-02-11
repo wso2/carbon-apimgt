@@ -53,6 +53,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
+import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
@@ -3547,6 +3549,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 "INSERT ALL EVENTS into ResultStream;\n";
         decisionQuery += elseCondition;
         appendPolicy(eligibilityQuery, decisionQuery, policy.getPolicyName());
+        /*
+        try {
+            String throttlePolicy = ThrottlePolicyTemplateBuilder.getThrottlePolicy(policy);
+        } catch (APITemplateException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        */
     }
 
     public long ipToLong(String ip) {
