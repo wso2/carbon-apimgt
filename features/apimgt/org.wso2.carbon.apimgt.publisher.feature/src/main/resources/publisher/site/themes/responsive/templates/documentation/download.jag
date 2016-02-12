@@ -1,7 +1,7 @@
 <%
 include("/jagg/jagg.jag");
 var publisher = jagg.module("manager").getAPIProviderObj();
-var tenantDomain = request.getParameter("tenant");
+var tenantDomain = String(jagg.getTenantDomain());
 var resourceUrl = request.getParameter("resourceUrl");
 
 var object = publisher.getDocument(tenantDomain,resourceUrl);

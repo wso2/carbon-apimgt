@@ -43,6 +43,15 @@ $(document).ready(function() {
         return value.indexOf("{}") == -1
     }, 'Empty curly brackets "{}" are not allowed in context field.');
 
+    $.validator.addMethod('validateUrl', function(value, element){
+        var validUrlRegex = /^(http|https):\/\/(.)+/g;
+        value = value.replace(/^\s+|\s+$/g, "");
+        if(value != ""){
+            return validUrlRegex.test(value);
+        }
+        return true;
+    }, 'Please provide a valid URL.');
+
     $.validator.addMethod('noSpace', function(value, element) {
         return !/\s/g.test(value);
     },'Name contains white spaces.');
@@ -67,6 +76,18 @@ $(document).ready(function() {
     $.validator.addMethod('validateEndpoints', function (value, element){
         return APP.is_production_endpoint_specified() || APP.is_sandbox_endpoint_specified();
     }, 'A Production or Sandbox URL must be provided.');
+
+    $.validator.addMethod('validateDefaultEndpoint', function (value, element){
+        var endpointType = $('#endpoint_type').val();
+        if(endpointType == "default")   {
+            if(($('#inSequence :selected').text() != "None") || $('#inSeqFile').val() != "")  {
+                return true;
+            } else  {
+                return false;
+            }
+        }
+        return true;
+    }, 'You must upload or select a message mediation policy');
     
     $.validator.addMethod('validateProdWSDLService', function (value, element){
     	if (APP.is_production_endpoint_specified()) {

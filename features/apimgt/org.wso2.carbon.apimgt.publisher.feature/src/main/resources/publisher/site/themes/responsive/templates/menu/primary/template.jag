@@ -46,7 +46,15 @@ var tenantDomain =MultitenantUtils.getTenantDomain(outputs.user.username);
           </ul>
         </li>
         <li>&nbsp;&nbsp;&nbsp;</li>
-      </ul>        
+      </ul>
+<%if(jagg.getShowStoreURL()){%>
+                                <!--Links to Access APIStore-->
+                                  <div class="tenant-position-setter">
+
+                                   Go to <a href="<%=storeUrl%>"  target="_blank"><%=i18n.localize("apistore")%></a>
+
+                                  </div>
+                                <%}%>        
   </div><!--/.nav-collapse -->
 </nav>
 <%});%>
