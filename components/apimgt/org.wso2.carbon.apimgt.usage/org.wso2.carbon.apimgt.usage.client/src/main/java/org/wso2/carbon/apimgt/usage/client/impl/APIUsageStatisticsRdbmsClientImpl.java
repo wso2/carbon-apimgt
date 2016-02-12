@@ -251,7 +251,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         if (size > 0) {
             concatenatedKeySetString.append("'").append(subscriberApps.get(0)).append("'");
         } else {
-            return new ArrayList<FaultCountDTO>();
+            return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeySetString.append(",'").append(subscriberApps.get(i)).append("'");
@@ -281,7 +281,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         if (size > 0) {
             concatenatedKeys.append("'").append(subscriberApps.get(0)).append("'");
         } else {
-            return new ArrayList<AppUsageDTO>();
+            return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
@@ -477,7 +477,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         if (size > 0) {
             concatenatedKeys.append("'").append(subscriberApps.get(0)).append("'");
         } else {
-            return new ArrayList<AppCallTypeDTO>();
+            return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
@@ -604,7 +604,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         if (size > 0) {
             concatenatedKeys.append("'").append(subscriberApps.get(0)).append("'");
         } else {
-            return new ArrayList<PerAppApiCountDTO>();
+            return Collections.emptyList();
         }
         for (int i = 1; i < subscriberApps.size(); i++) {
             concatenatedKeys.append(",'").append(subscriberApps.get(i)).append("'");
