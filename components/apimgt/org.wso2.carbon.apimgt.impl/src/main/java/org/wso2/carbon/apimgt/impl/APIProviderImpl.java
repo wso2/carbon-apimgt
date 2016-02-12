@@ -3523,40 +3523,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void addPolicy(Policy policy) throws APIManagementException {
-        // jsonWrite(policy);
-        String decisionQueryRest = "";
-        ArrayList<Condition> conditions = policy.getConditions();
-        String eligibilityQuery = "\nFROM RequestStream\n" +
-                "SELECT 'api_" + policy.getPolicyName() + "' AS rule, messageID, ( not(api_key is null ) AND " +
-                "api_tier=='" + policy.getPolicyName() + "' ) AS isEligible, str:concat('api_" + policy.getPolicyName() + "_', api_key,'_key')" +
-                " AS key, verb, ip\n" +
-                " INSERT INTO EligibilityStream;\n";
-        String decisionQuery = "\nFROM EligibilityStream[isEligible==true AND rule == 'api_" + policy.getPolicyName() + "']\n" +
-                "select key as throttle_key, messageID, (" + getCondition(policy) + ") as condition\n" +
-                "INSERT into Api" + policy.getPolicyName() + "Stream;\n";
-        for (int i = 0; i < policy.getConditions().size(); i++) {
-            decisionQueryRest += "FROM Api" + policy.getPolicyName() + "Stream[condition=='condition" + i + "']#window.time("
-                    + conditions.get(i).getUnitTime() + " " + conditions.get(i).getTimeUnit() + ")" +
-                    " select throttle_key, (count(messageID) >= " + conditions.get(i).getRequestCount() + ") as isThrottled" +
-                    " group by throttle_key \n" +
-                    "INSERT ALL EVENTS into ResultStream;\n";
-        }
-        decisionQuery += decisionQueryRest;
-        String elseCondition = "FROM Api" + policy.getPolicyName() + "Stream[condition=='elseCondition']#window.time(" +
-                policy.getDefaultUnitTime() + " " + policy.getDefaultTimeUnit() + ")" +
-                " select throttle_key, (count(messageID) >= " + policy.getDefaultRequestCount() + ") as isThrottled" +
-                " group by throttle_key \n" +
-                "INSERT ALL EVENTS into ResultStream;\n";
-        decisionQuery += elseCondition;
-        appendPolicy(eligibilityQuery, decisionQuery, policy.getPolicyName());
-        /*
-        try {
-            String throttlePolicy = ThrottlePolicyTemplateBuilder.getThrottlePolicy(policy);
-        } catch (APITemplateException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        */
+
     }
 
     public long ipToLong(String ip) {
@@ -3575,118 +3542,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void appendPolicy(String eligibilityQuery, String decisionQuery, String tierName){
-        OMFactory factory = OMAbstractFactory.getOMFactory();
-        OMElement policyTag = factory.createOMElement(QName.valueOf("policy"));
-        policyTag.addAttribute("tier",tierName, null);
-        policyTag.addAttribute("level", "api", null);
-        policyTag.addAttribute("name","api_"+tierName,null);
-        OMElement eligibility_query = factory.createOMElement(QName.valueOf("eligibilityQuery"));
-        OMElement decision_query = factory.createOMElement(QName.valueOf("decisionQuery"));
-        OMText eligibilityQueryText = factory.createOMText(eligibilityQuery);
-        OMText decisionQueryText = factory.createOMText(decisionQuery);
-        boolean firstWrite = false;
 
-        FileOutputStream fos = null;
-        try {
-            File dir = new File("repository/deployment/server//throttlingconfigs");
-            if(!dir.exists()){
-                dir.mkdir();
-            }
-            File file = new File("repository/deployment/server/throttlingconfigs/"+tierName+".xml");
-            fos = new FileOutputStream(file);
-            eligibility_query.addChild(eligibilityQueryText);
-            decision_query.addChild(decisionQueryText);
-            policyTag.addChild(eligibility_query);
-            policyTag.addChild(decision_query);
-            policyTag.build();
-            String policy = policyTag.toString();
-            System.out.println(policyTag.toString());
-            byte[] contentInBytes = policy.getBytes();
-
-            fos.write(contentInBytes);
-            fos.flush();
-            fos.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void jsonWrite(Policy policy){
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try {
-            File file2 = new File("repository/conf/" + policy.getPolicyName() + ".txt");
-            FileOutputStream fos = null;
-            fos = new FileOutputStream(file2);
-
-            String write = gson.toJson(policy);
-            System.out.println(write);
-            byte[] contentWrite = write.getBytes();
-
-            fos.write(contentWrite);
-            fos.flush();
-            fos.close();
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public String getCondition(Policy policy) {
-        ArrayList<Condition> conditions = policy.getConditions();
-        String httpVerb = null;
-        String startingIP = null;
-        String endingIP = null;
-        String condition = "";
-        String ifThenElse = "ifThenElse(";
-        String elseCondition = "'elseCondition'";
-        for (int i = 0; i < conditions.size(); i++) {
-            condition += ifThenElse;
-            httpVerb = conditions.get(i).getHttpVerb();
-            startingIP = conditions.get(i).getStartingIP();
-            endingIP = conditions.get(i).getEndingIP();
-
-            if (!httpVerb.isEmpty()) {
-                condition += "verb == '" + httpVerb + "'";
-            }
-            if (!startingIP.isEmpty() && !endingIP.isEmpty()) {
-                if (!httpVerb.isEmpty()) {
-                    condition += " AND ";
-                }
-                String ipRange = "ip>=" + ipToLong(startingIP) + " AND " + ipToLong(endingIP) + ">=ip";
-                condition += ipRange;
-            }
-            condition += ", 'condition" + i + "',";
-        }
-        condition += elseCondition;
-        for (int i = 0; i < conditions.size(); i++) {
-            condition += ")";
-        }
-        return condition;
+        return null;
     }
-
-    public File getFile(String fileName) throws APIManagementException{
-        File file= new File("repository/deployment/throttlingconfigs/"+fileName+".xml");
-        if(file.exists()){
-            log.info("File "+fileName+" was found");
-        }else{
-            log.info("File is not in the directory");
-        }
-        return file;
-    }
-
-    public void deleteFile(String fileName) throws APIManagementException{
-        try{
-            File file = getFile(fileName);
-            if(file.delete()){
-                log.info("File "+fileName+" was deleted");
-            }else{
-                log.info("Delete operation failed");
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-
-
 }

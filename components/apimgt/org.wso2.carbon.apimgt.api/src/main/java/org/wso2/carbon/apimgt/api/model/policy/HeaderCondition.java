@@ -22,6 +22,10 @@ public class HeaderCondition extends Condition {
     private String header;
     private String value;
 
+    public HeaderCondition() {
+        setType(PolicyConstants.HEADER_TYPE);
+    }
+
     public String getHeader() {
         return header;
     }
@@ -36,5 +40,10 @@ public class HeaderCondition extends Condition {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }

@@ -20,48 +20,34 @@ package org.wso2.carbon.apimgt.api.model.policy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Policy implements Serializable{
     private String policyName;
     private String policyLevel;
-    private Pipelines pipelines;
-    private ArrayList<Condition>  conditions;
+    private boolean acrossAllUsers;
+    private String description;
+    private List<Pipeline> pipelines;
     private QuotaPolicy defaultQuotaPolicy;
-
-    public void setDefaultQuotaPolicy(QuotaPolicy defaultQuotaPolicy) {
-        this.defaultQuotaPolicy = defaultQuotaPolicy;
-    }
-
-    public Pipelines getPipelines() {
-        return pipelines;
-    }
-
-    public void setPipelines(Pipelines pipelines) {
-        this.pipelines = pipelines;
-    }
-
-    public ArrayList<Condition> getConditions() {
-        return conditions;
-    }
-
-    public void setConditions(ArrayList<Condition> conditions) {
-        this.conditions = conditions;
-    }
-
-    public QuotaPolicy getDefaultQuotaPolicy() {
-        return defaultQuotaPolicy;
-    }
-
-    public String getPolicyLevel() {
-        return policyLevel;
-    }
-
-    public void setPolicyLevel(String policyLevel) {
-        this.policyLevel = policyLevel;
-    }
 
     public Policy(String name){
         this.policyName=name;
+    }
+
+    public boolean isAcrossAllUsers() {
+        return acrossAllUsers;
+    }
+
+    public void setAcrossAllUsers(boolean acrossAllUsers) {
+        this.acrossAllUsers = acrossAllUsers;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getPolicyName() {
@@ -72,30 +58,27 @@ public class Policy implements Serializable{
         this.policyName = policyName;
     }
 
-    public String getDefaultRequestCount() {
-        return defaultRequestCount;
+    public List<Pipeline> getPipelines() {
+        return pipelines;
     }
 
-    public void setDefaultRequestCount(String defaultRequestCount) {
-        this.defaultRequestCount = defaultRequestCount;
+    public void setPipelines(List<Pipeline> pipelines) {
+        this.pipelines = pipelines;
     }
 
-    public String getDefaultUnitTime() {
-        return defaultUnitTime;
+    public String getPolicyLevel() {
+        return policyLevel;
     }
 
-    public void setDefaultUnitTime(String defaultUnitTime) {
-        this.defaultUnitTime = defaultUnitTime;
+    public void setPolicyLevel(String policyLevel) {
+        this.policyLevel = policyLevel;
     }
 
-    public String getDefaultTimeUnit() {
-        return defaultTimeUnit;
+    public void setDefaultQuotaPolicy(QuotaPolicy defaultQuotaPolicy) {
+        this.defaultQuotaPolicy = defaultQuotaPolicy;
     }
 
-    public void setDefaultTimeUnit(String defalutTimeUnit) {
-        this.defaultTimeUnit = defalutTimeUnit;
+    public QuotaPolicy getDefaultQuotaPolicy() {
+        return defaultQuotaPolicy;
     }
-    private String defaultRequestCount;
-    private String defaultUnitTime;
-    private String defaultTimeUnit;
 }

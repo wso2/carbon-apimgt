@@ -18,25 +18,25 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+public class PolicyConstants {
 
-public class QuotaPolicy {
+    public static final String IP_RANGE_TYPE = "IPRange";
 
-    private String type;
-    private Limit limit;
+    public static final String IP_SPECIFIC_TYPE ="IPSpecific";
 
-    public String getType() {
-        return type;
-    }
+    public static final String HEADER_TYPE = "Header";
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    public static final String DATE_RANGE_TYPE = "DateRage";
 
-    public Limit getLimit() {
-        return limit;
-    }
+    public static final String DATE_SPECIFIC_TYPE = "DateSpecific";
 
-    public void setLimit(Limit limit) {
-        this.limit = limit;
-    }
+    public static final String JWT_CLAIMS_TYPE = "JWTClaims";
+
+    public static final String HTTP_VERB_TYPE = "HTTPVerb";
+
+    public static final String QUERY_PARAMETER_TYPE = "QueryParameterType";
+
+    public static final String BANDWIDTH_TYPE = "Bandwidth";
+
+    public static final String REQUEST_COUNT_TYPE = "RequestCount";
 }

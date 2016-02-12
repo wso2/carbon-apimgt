@@ -18,19 +18,28 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class IPCondition extends Condition {
-    private String specificIP;
+public class IPRangeCondition extends Condition {
+    private String startingIP;
+    private String endingIP;
 
-    public IPCondition() {
-        setType(PolicyConstants.IP_SPECIFIC_TYPE);
+    public IPRangeCondition() {
+        setType(PolicyConstants.IP_RANGE_TYPE);
     }
 
-    public String getSpecificIP() {
-        return specificIP;
+    public String getStartingIP() {
+        return startingIP;
     }
 
-    public void setSpecificIP(String specificIP) {
-        this.specificIP = specificIP;
+    public void setStartingIP(String startingIP) {
+        this.startingIP = startingIP;
+    }
+
+    public String getEndingIP() {
+        return endingIP;
+    }
+
+    public void setEndingIP(String endingIP) {
+        this.endingIP = endingIP;
     }
 
     public long ipToLong(String ip) {

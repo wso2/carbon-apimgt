@@ -20,16 +20,11 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class DateCondition extends Condition{
-    private String startingDate;
-    private String endingDate;
     private String specificDate;
 
-    public String getEndingDate() {
-        return endingDate;
-    }
+    public DateCondition(String queryAttribute) {
+        setType(PolicyConstants.DATE_SPECIFIC_TYPE);
 
-    public void setEndingDate(String endingDate) {
-        this.endingDate = endingDate;
     }
 
     public String getSpecificDate() {
@@ -40,12 +35,8 @@ public class DateCondition extends Condition{
         this.specificDate = specificDate;
     }
 
-    public String getStartingDate() {
-
-        return startingDate;
-    }
-
-    public void setStartingDate(String startingDate) {
-        this.startingDate = startingDate;
+    @Override
+    public String getCondition() {
+        return null;
     }
 }

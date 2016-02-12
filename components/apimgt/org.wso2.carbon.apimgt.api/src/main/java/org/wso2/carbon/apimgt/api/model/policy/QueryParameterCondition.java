@@ -18,5 +18,32 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class QueryParameterCondition {
+public class QueryParameterCondition extends Condition {
+    private String parameter;
+    private String value;
+
+    public QueryParameterCondition() {
+        setType(PolicyConstants.QUERY_PARAMETER_TYPE);
+    }
+
+    public String getParameter() {
+        return parameter;
+    }
+
+    public void setParameter(String parameter) {
+        this.parameter = parameter;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
+    }
 }

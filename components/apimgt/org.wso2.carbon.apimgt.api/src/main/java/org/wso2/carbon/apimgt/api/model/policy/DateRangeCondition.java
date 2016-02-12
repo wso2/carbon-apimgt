@@ -16,27 +16,36 @@
 * under the License.
 */
 
+
 package org.wso2.carbon.apimgt.api.model.policy;
 
+public class DateRangeCondition extends Condition {
+    private String startingDate;
+    private String endingDate;
 
-public class QuotaPolicy {
-
-    private String type;
-    private Limit limit;
-
-    public String getType() {
-        return type;
+    public DateRangeCondition() {
+        setType(PolicyConstants.DATE_RANGE_TYPE);
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getEndingDate() {
+        return endingDate;
     }
 
-    public Limit getLimit() {
-        return limit;
+    public void setEndingDate(String endingDate) {
+        this.endingDate = endingDate;
     }
 
-    public void setLimit(Limit limit) {
-        this.limit = limit;
+    public String getStartingDate() {
+        return startingDate;
+    }
+
+    public void setStartingDate(String startingDate) {
+        this.startingDate = startingDate;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }
+

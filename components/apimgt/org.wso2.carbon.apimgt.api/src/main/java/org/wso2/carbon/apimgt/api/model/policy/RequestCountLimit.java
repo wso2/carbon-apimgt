@@ -16,27 +16,19 @@
 * under the License.
 */
 
+
 package org.wso2.carbon.apimgt.api.model.policy;
 
+public class RequestCountLimit extends Limit {
+    private long requestCount;
 
-public class QuotaPolicy {
-
-    private String type;
-    private Limit limit;
-
-    public String getType() {
-        return type;
+    public long getRequestCount() {
+        return requestCount;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setRequestCount(long requestCount) {
+        this.requestCount = requestCount;
     }
 
-    public Limit getLimit() {
-        return limit;
-    }
 
-    public void setLimit(Limit limit) {
-        this.limit = limit;
-    }
 }

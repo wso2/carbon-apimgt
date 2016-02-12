@@ -21,86 +21,31 @@ package org.wso2.carbon.apimgt.api.model.policy;
 
 import java.io.Serializable;
 
-public class Condition implements Serializable {
-    private String requestCount;
-    private String timeUnit;
-    private String unitTime;
-    private String httpVerb;
-    private String startingIP;
-    private String endingIP;
-    private String startingDate;
-    private String endingDate;
-    private String userAgent;
+public abstract class Condition implements Serializable {
+   private String type;
+   private boolean invertCondition;
 
-    public String getStartingDate() {
-        return startingDate;
+    public String getQueryAttribueName() {
+        return queryAttribueName;
     }
 
-    public void setStartingDate(String startingDate) {
-        this.startingDate = startingDate;
+    private String queryAttribueName;
+
+    public String getType() {
+        return type;
     }
 
-    public String getEndingDate() {
-        return endingDate;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public void setEndingDate(String endingDate) {
-        this.endingDate = endingDate;
+    public boolean isInvertCondition() {
+        return invertCondition;
     }
 
-    public String getUserAgent() {
-        return userAgent;
+    public void setInvertCondition(boolean invertCondition) {
+        this.invertCondition = invertCondition;
     }
 
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
-    public String getRequestCount() {
-        return requestCount;
-    }
-
-    public void setRequestCount(String requestCount) {
-        this.requestCount = requestCount;
-    }
-
-    public String getTimeUnit() {
-        return timeUnit;
-    }
-
-    public void setTimeUnit(String timeUnit) {
-        this.timeUnit = timeUnit;
-    }
-
-    public String getUnitTime() {
-        return unitTime;
-    }
-
-    public void setUnitTime(String unitTime) {
-        this.unitTime = unitTime;
-    }
-
-    public String getHttpVerb() {
-        return httpVerb;
-    }
-
-    public void setHttpVerb(String httpVerb) {
-        this.httpVerb = httpVerb;
-    }
-
-    public String getStartingIP() {
-        return startingIP;
-    }
-
-    public void setStartingIP(String startingIP) {
-        this.startingIP = startingIP;
-    }
-
-    public String getEndingIP() {
-        return endingIP;
-    }
-
-    public void setEndingIP(String endingIP) {
-        this.endingIP = endingIP;
-    }
+    public abstract String getCondition();
 }

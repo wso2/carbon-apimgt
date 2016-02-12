@@ -21,11 +21,20 @@ package org.wso2.carbon.apimgt.api.model.policy;
 public class HTTPVerbCondition extends Condition {
     private String httpVerb;
 
+    public HTTPVerbCondition() {
+        setType(PolicyConstants.HTTP_VERB_TYPE);
+    }
+
     public String getHttpVerb() {
         return httpVerb;
     }
 
     public void setHttpVerb(String httpVerb) {
         this.httpVerb = httpVerb;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }

@@ -16,27 +16,26 @@
 * under the License.
 */
 
+
 package org.wso2.carbon.apimgt.api.model.policy;
 
+public class BandwidthLimit extends Limit {
+    private long dataAmount;
+    private String dataUnit;
 
-public class QuotaPolicy {
-
-    private String type;
-    private Limit limit;
-
-    public String getType() {
-        return type;
+    public long getDataAmount() {
+        return dataAmount;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setDataAmount(long dataAmount) {
+        this.dataAmount = dataAmount;
     }
 
-    public Limit getLimit() {
-        return limit;
+    public String getDataUnit() {
+        return dataUnit;
     }
 
-    public void setLimit(Limit limit) {
-        this.limit = limit;
+    public void setDataUnit(String dataUnit) {
+        this.dataUnit = dataUnit;
     }
 }
