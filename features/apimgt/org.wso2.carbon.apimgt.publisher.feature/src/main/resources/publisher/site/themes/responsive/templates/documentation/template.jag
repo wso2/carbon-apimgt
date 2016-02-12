@@ -12,7 +12,7 @@
         var showDocVisibilityResult=modAPI.showAPIDocVisibility();
         var docs = result.docs;
         var createPermitted = outputs.isCreatePermitted;
-        var tenant= encode.forUriComponent(request.getParameter("tenant"));
+        var tenant= tenantDomain;
         var urlPrefix;
         var urlPostfix;
         if(tenant!='null') {urlPrefix="?tenant="+tenant;}else{urlPrefix='';}
