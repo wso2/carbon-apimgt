@@ -44,14 +44,14 @@ public class CEPPolicyManagementServiceClient {
         username = config.getFirstProperty(APIConstants.CPS_SERVER_USERNAME);
 
         if (serviceURL == null) {
-            throw new APIManagementException("Required connection details for the key management server not provided");
+            throw new APIManagementException("Required connection details for the central policy server not provided");
         }
         try {
 
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
             //Initialize the client here
         } catch (AxisFault axisFault) {
-            throw new APIManagementException("Error while initializing the OAuth admin service stub", axisFault);
+            throw new APIManagementException("Error while initializing central policy client", axisFault);
         }
     }
 
