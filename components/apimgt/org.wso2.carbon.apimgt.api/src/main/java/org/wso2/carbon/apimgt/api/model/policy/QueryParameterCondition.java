@@ -18,9 +18,13 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
-public class QueryParameterCondition {
+public class QueryParameterCondition extends Condition {
     private String parameter;
     private String value;
+
+    public QueryParameterCondition() {
+        setType(PolicyConstants.QUERY_PARAMETER_TYPE);
+    }
 
     public String getParameter() {
         return parameter;
@@ -36,5 +40,10 @@ public class QueryParameterCondition {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }

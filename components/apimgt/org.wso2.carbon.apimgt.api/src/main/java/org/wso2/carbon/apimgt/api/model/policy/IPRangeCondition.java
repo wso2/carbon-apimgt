@@ -22,6 +22,10 @@ public class IPRangeCondition extends Condition {
     private String startingIP;
     private String endingIP;
 
+    public IPRangeCondition() {
+        setType(PolicyConstants.IP_RANGE_TYPE);
+    }
+
     public String getStartingIP() {
         return startingIP;
     }
@@ -36,5 +40,25 @@ public class IPRangeCondition extends Condition {
 
     public void setEndingIP(String endingIP) {
         this.endingIP = endingIP;
+    }
+
+    public long ipToLong(String ip) {
+        long ipAddressinLong = 0;
+        if (ip != null) {
+            //convert ipaddress into a long
+            String[] ipAddressArray = ip.split("\\.");    //split by "." and add to an array
+
+            for (int i = 0; i < ipAddressArray.length; i++) {
+                int power = 3 - i;
+                long ipAddress = Long.parseLong(ipAddressArray[i]);   //parse to long
+                ipAddressinLong += ipAddress * Math.pow(256, power);
+            }
+        }
+        return ipAddressinLong;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }

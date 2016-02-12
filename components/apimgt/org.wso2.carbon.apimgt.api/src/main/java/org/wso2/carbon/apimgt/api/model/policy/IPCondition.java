@@ -21,11 +21,35 @@ package org.wso2.carbon.apimgt.api.model.policy;
 public class IPCondition extends Condition {
     private String specificIP;
 
+    public IPCondition() {
+        setType(PolicyConstants.IP_SPECIFIC_TYPE);
+    }
+
     public String getSpecificIP() {
         return specificIP;
     }
 
     public void setSpecificIP(String specificIP) {
         this.specificIP = specificIP;
+    }
+
+    public long ipToLong(String ip) {
+        long ipAddressinLong = 0;
+        if (ip != null) {
+            //convert ipaddress into a long
+            String[] ipAddressArray = ip.split("\\.");    //split by "." and add to an array
+
+            for (int i = 0; i < ipAddressArray.length; i++) {
+                int power = 3 - i;
+                long ipAddress = Long.parseLong(ipAddressArray[i]);   //parse to long
+                ipAddressinLong += ipAddress * Math.pow(256, power);
+            }
+        }
+        return ipAddressinLong;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }

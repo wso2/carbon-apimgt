@@ -22,11 +22,21 @@ package org.wso2.carbon.apimgt.api.model.policy;
 public class DateCondition extends Condition{
     private String specificDate;
 
+    public DateCondition(String queryAttribute) {
+        setType(PolicyConstants.DATE_SPECIFIC_TYPE);
+
+    }
+
     public String getSpecificDate() {
         return specificDate;
     }
 
     public void setSpecificDate(String specificDate) {
         this.specificDate = specificDate;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }

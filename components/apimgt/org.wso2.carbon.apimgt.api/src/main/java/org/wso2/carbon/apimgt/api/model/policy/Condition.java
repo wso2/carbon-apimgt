@@ -21,9 +21,15 @@ package org.wso2.carbon.apimgt.api.model.policy;
 
 import java.io.Serializable;
 
-public class Condition implements Serializable {
+abstract class Condition implements Serializable {
    private String type;
    private boolean invertCondition;
+
+    public String getQueryAttribueName() {
+        return queryAttribueName;
+    }
+
+    private String queryAttribueName;
 
     public String getType() {
         return type;
@@ -40,4 +46,6 @@ public class Condition implements Serializable {
     public void setInvertCondition(boolean invertCondition) {
         this.invertCondition = invertCondition;
     }
+
+    public abstract String getCondition();
 }

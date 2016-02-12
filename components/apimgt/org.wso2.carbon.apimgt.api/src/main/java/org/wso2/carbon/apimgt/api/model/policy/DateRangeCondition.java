@@ -23,6 +23,10 @@ public class DateRangeCondition extends Condition {
     private String startingDate;
     private String endingDate;
 
+    public DateRangeCondition() {
+        setType(PolicyConstants.DATE_RANGE_TYPE);
+    }
+
     public String getEndingDate() {
         return endingDate;
     }
@@ -37,6 +41,11 @@ public class DateRangeCondition extends Condition {
 
     public void setStartingDate(String startingDate) {
         this.startingDate = startingDate;
+    }
+
+    @Override
+    public String getCondition() {
+        return null;
     }
 }
 
