@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.api.model.policy;
 
 import java.io.Serializable;
 
-abstract class Condition implements Serializable {
+public abstract class Condition implements Serializable {
    private String type;
    private boolean invertCondition;
 
