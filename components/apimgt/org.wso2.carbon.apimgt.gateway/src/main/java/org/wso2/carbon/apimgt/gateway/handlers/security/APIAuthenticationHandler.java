@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
@@ -312,10 +313,6 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
         String apiPublisher = (String) messageContext.getProperty(APIMgtGatewayConstants.API_PUBLISHER);
 
-        if (apiPublisher == null) {
-            apiPublisher = getAPIProviderFromRESTAPI(apiVersion);
-        }
-
         int index = apiVersion.indexOf("--");
 
         if (index != -1) {
@@ -326,16 +323,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         String version = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 
         String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-        int tenantDomainIndex = fullRequestPath.indexOf("/t/");
 
-        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantDomainIndex != -1) {
-            String temp = fullRequestPath.substring(tenantDomainIndex + 3, fullRequestPath.length());
-            tenantDomain = temp.substring(0, temp.indexOf('/'));
-        }
+        String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
 
-        if (apiPublisher != null && !apiPublisher.endsWith(tenantDomain)) {
-            apiPublisher = apiPublisher + '@' + tenantDomain;
+        if (apiPublisher == null) {
+            apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion,tenantDomain);
         }
 
         String resource = extractResource(messageContext);
@@ -367,16 +359,4 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         return resource;
     }
 
-    private String getAPIProviderFromRESTAPI(String apiVersion) {
-        int index = apiVersion.indexOf("--");
-        if (index != -1) {
-            String apiProvider = apiVersion.substring(0, index);
-            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
-                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
-                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
-            }
-            return apiProvider;
-        }
-        return null;
-    }
 }

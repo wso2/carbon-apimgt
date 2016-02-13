@@ -3317,82 +3317,6 @@ public class APIProviderHostObject extends ScriptableObject {
         return apiStatus;
     }
 
-    public static NativeArray jsFunction_getUserAgentSummaryForALLAPIs(Context cx,
-                                                                       Scriptable thisObj,
-                                                                       Object[] args,
-                                                                       Function funObj)
-            throws APIManagementException {
-        List<APIRequestsByUserAgentsDTO> list = null;
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getUserAgentSummaryForALLAPIs();
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
-        }
-        NativeArray myn = new NativeArray(0);
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIRequestsByUserAgentsDTO usage = (APIRequestsByUserAgentsDTO) usageObject;
-                row.put("user_agent", row, userAgentParser(usage.getUserAgent()));
-                row.put("request_count", row, usage.getCount());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-    }
-
-    public static NativeArray jsFunction_getAPIRequestsPerHour(Context cx,
-                                                               Scriptable thisObj,
-                                                               Object[] args,
-                                                               Function funObj)
-            throws APIManagementException {
-
-        List<APIRequestsByHourDTO> list = null ;
-        if (args == null ||  args.length==0) {
-            handleException("Invalid number of parameters.");
-        }
-        NativeArray myn = new NativeArray(0);
-        String fromDate = (String) args[0];
-        String toDate = (String) args[1];
-        String apiName = (String)args[2];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getAPIRequestsByHour(fromDate, toDate,apiName);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIVersionLastAccess", e);
-        }
-        Iterator it = null;
-        if (list != null) {
-            it = list.iterator();
-        }
-        int i = 0;
-        if (it != null) {
-            while (it.hasNext()) {
-                NativeObject row = new NativeObject();
-                Object usageObject = it.next();
-                APIRequestsByHourDTO usage = (APIRequestsByHourDTO) usageObject;
-                row.put("apiName", row, usage.getApi());
-                row.put("DateTierCount", row, usage.getDate().concat("|").concat(usage.getTier()).concat("|").concat(usage.getRequestCount()));
-                row.put("Date", row, usage.getDate());
-                row.put("request_count", row, usage.getRequestCount());
-                row.put("tier", row, usage.getTier());
-                myn.put(i, myn, row);
-                i++;
-            }
-        }
-        return myn;
-
-    }
-
-
     public static NativeArray jsFunction_searchAPIs(Context cx, Scriptable thisObj,
                                                     Object[] args,
                                                     Function funObj) throws APIManagementException {
@@ -3947,20 +3871,33 @@ public class APIProviderHostObject extends ScriptableObject {
 
     private static void validateWsdl(String url) throws Exception {
 
+        //If url is empty or null throw exception
+        if(StringUtils.isEmpty(url)) {
+            handleException("URL is not empty");
+        }
+
+        if(url.startsWith(APIConstants.WSDL_REGISTRY_LOCATION_PREFIX)) {
+            url = APIUtil.getServerURL() + url;
+        }
+
         URL wsdl = new URL(url);
         BufferedReader in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
         String inputLine;
         boolean isWsdl2 = false;
         boolean isWsdl10 = false;
         StringBuilder urlContent = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
-            String wsdl10NameSpace = "http://schemas.xmlsoap.org/wsdl/";
-            urlContent.append(inputLine);
-            isWsdl2 = urlContent.indexOf(wsdl2NameSpace) > 0;
-            isWsdl10 = urlContent.indexOf(wsdl10NameSpace) > 0;
+        try {
+            while ((inputLine = in.readLine()) != null) {
+                String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
+                String wsdl10NameSpace = "http://schemas.xmlsoap.org/wsdl/";
+                urlContent.append(inputLine);
+                isWsdl2 = urlContent.indexOf(wsdl2NameSpace) > 0;
+                isWsdl10 = urlContent.indexOf(wsdl10NameSpace) > 0;
+            }
+        } finally {
+                in.close();
         }
-        in.close();
+
         if (isWsdl10) {
             javax.wsdl.xml.WSDLReader wsdlReader11 = javax.wsdl.factory.WSDLFactory.newInstance().newWSDLReader();
             wsdlReader11.readWSDL(url);
@@ -4089,43 +4026,6 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
 
-    }
-
-
-
-    public static NativeArray jsFunction_getFirstAccessTime(Context cx, Scriptable thisObj,
-                                                            Object[] args, Function funObj)
-            throws APIManagementException {
-
-        NativeArray myn = new NativeArray(0);
-        if (!HostObjectUtils.isStatPublishingEnabled()) {
-            return myn;
-        }
-        if(!HostObjectUtils.isUsageDataSourceSpecified()){
-            return myn;
-        }
-
-        List<APIFirstAccess> list = null;
-        if (args.length == 0) {
-            handleException("Invalid number of parameters.");
-        }
-        String providerName = (String) args[0];
-        try {
-            APIUsageStatisticsRdbmsClientImpl client = new APIUsageStatisticsRdbmsClientImpl(((APIProviderHostObject) thisObj).getUsername());
-            list = client.getFirstAccessTime(providerName,1);
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            log.error("Error while invoking APIUsageStatisticsRdbmsClientImpl for ProviderAPIUsage", e);
-        }
-        NativeObject row = new NativeObject();
-
-        if (list != null && !list.isEmpty()) {
-            row.put("year",row,list.get(0));
-            row.put("month",row,list.get(1));
-            row.put("day",row,list.get(2));
-            myn.put(0,myn,row);
-        }
-
-        return myn;
     }
 
     public static boolean jsFunction_validateRoles(Context cx,
@@ -4773,11 +4673,9 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return boolean type stating validated or not
      */
     private static boolean isURL(String url) {
-
         Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(url);
         return matcher.matches();
-
     }
     public static NativeObject jsFunction_getAllPaginatedAPIs(Context cx, Scriptable thisObj,
                                                                        Object[] args, Function funObj)

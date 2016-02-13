@@ -135,7 +135,7 @@ public final class APIUsageStatisticsClientConstants {
     public static final String MAX_REQUEST_TIME = "max_request_time";
 
     public static final String APPLICATION_JSON = "application/json";
-    public static final String APPLICATION_OCTET_STREAM="application/octet-stream";
+    public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
     public static final String HTTP_AUTH_HEADER_NAME = "Authorization";
     public static final String HTTP_AUTH_HEADER_TYPE = "Basic";
 
@@ -147,29 +147,32 @@ public final class APIUsageStatisticsClientConstants {
 
     public static final String KEY_API_FACET = "key_api_facet";
     public static final String KEY_USERID_FACET = "key_userId_facet";
-    public static final String KEY_API_METHOD_PATH_FACET ="key_api_method_path_facet";
-    public static final String CONSUMERKEY_API_FACET ="consumerKey_api_facet";
+    public static final String KEY_API_METHOD_PATH_FACET = "key_api_method_path_facet";
+    public static final String CONSUMERKEY_API_FACET = "consumerKey_api_facet";
     public static final String API_VERSION_USERID_APIPUBLISHER_FACET = "api_version_userId_apiPublisher_facet";
-    public static final String API_VERSION_CONTEXT_FACET ="api_version_context_facet";
-    public static final String API_VERSION_USERID_CONTEXT_FACET="api_version_userId_context_facet";
-    public static final String API_VERSION_CONTEXT_METHOD_FACET ="api_version_context_method_facet";
-    public static final String API_VERSION_CONTEXT_DEST_FACET="api_version_context_dest_facet";
-    public static final String API_VERSION_APIPUBLISHER_CONTEXT_FACET ="api_version_apiPublisher_context_facet";
-    public static final String API_YEAR_MONTH_WEEK_DAY_FACET ="api_year_month_week_day_facet";
-    public static final String APPLICATIONNAME_FACET="applicationName_facet";
+    public static final String API_VERSION_CONTEXT_FACET = "api_version_context_facet";
+    public static final String API_VERSION_USERID_CONTEXT_FACET = "api_version_userId_context_facet";
+    public static final String API_VERSION_CONTEXT_METHOD_FACET = "api_version_context_method_facet";
+    public static final String API_VERSION_CONTEXT_DEST_FACET = "api_version_context_dest_facet";
+    public static final String API_VERSION_APIPUBLISHER_CONTEXT_FACET = "api_version_apiPublisher_context_facet";
+    public static final String API_YEAR_MONTH_WEEK_DAY_FACET = "api_year_month_week_day_facet";
+    public static final String APPLICATIONNAME_FACET = "applicationName_facet";
 
-    public static final String AGGREGATE_SUM="SUM";
-    public static final String AGGREGATE_MAX="MAX";
+    public static final String AGGREGATE_SUM = "SUM";
+    public static final String AGGREGATE_MAX = "MAX";
 
-    public static final String ALIAS_COUNT="count";
+    public static final String ALIAS_COUNT = "count";
     public static final String ALIAS_TOTAL_SERVICE_TIME = "totalServiceTime";
     public static final String ALIAS_TOTAL_RESPONSE_COUNT = "totalResponseCount";
-    public static final String ALIAS_LAST_ACCESS_TIME ="lastAccessTime";
-    public static final String ALIAS_TOTAL_REQUEST_COUNT ="totalRequestCount";
-    public static final String ALIAS_TOTAL_FAULT_COUNT ="totalFaultCount";
-    public static final String ALIAS_SUCCESS_REQUEST_COUNT="success_request_count";
-    public static final String ALIAS_THROTTLE_OUT_COUNT="throttle_out_count";
+    public static final String ALIAS_LAST_ACCESS_TIME = "lastAccessTime";
+    public static final String ALIAS_TOTAL_REQUEST_COUNT = "totalRequestCount";
+    public static final String ALIAS_TOTAL_FAULT_COUNT = "totalFaultCount";
+    public static final String ALIAS_SUCCESS_REQUEST_COUNT = "success_request_count";
+    public static final String ALIAS_THROTTLE_OUT_COUNT = "throttle_out_count";
 
-    public static final String TENANT_DOMAIN ="tenantDomain";
+    public static final String TENANT_DOMAIN = "tenantDomain";
+
+    public static final String RDBMS_STATISTICS_CLIENT_TYPE = "RDBMS";
+    public static final String REST_STATISTICS_CLIENT_TYPE = "REST";
 
 }

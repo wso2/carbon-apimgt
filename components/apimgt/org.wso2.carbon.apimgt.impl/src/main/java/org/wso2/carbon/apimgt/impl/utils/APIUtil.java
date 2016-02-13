@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.google.gson.Gson;
 
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -140,6 +141,7 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.FileUtil;
+import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
@@ -232,7 +234,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
 
             if (apiId == -1) {
                 return null;
@@ -322,14 +324,14 @@ public final class APIUtil {
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
             List<String> uriTemplateNames = new ArrayList<String>();
 
-            Set<Scope> scopes = ApiMgtDAO.getAPIScopes(api.getId());
+            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
             HashMap<String, String> urlPatternsSet;
-            urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
+            urlPatternsSet = ApiMgtDAO.getInstance().getURITemplatesPerAPIAsString(api.getId());
 
             HashMap<String, String> resourceScopesMap;
-            resourceScopesMap = ApiMgtDAO.getResourceToScopeMapping(api.getId());
+            resourceScopesMap = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
             Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
             String resourceScopeKey;
@@ -414,7 +416,7 @@ public final class APIUtil {
             String apiName = artifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
-            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
 
             if (apiId == -1) {
                 return null;
@@ -512,13 +514,13 @@ public final class APIUtil {
             Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
             List<String> uriTemplateNames = new ArrayList<String>();
 
-            Set<Scope> scopes = ApiMgtDAO.getAPIScopes(api.getId());
+            Set<Scope> scopes = ApiMgtDAO.getInstance().getAPIScopes(api.getId());
             api.setScopes(scopes);
 
             HashMap<String, String> urlPatternsSet;
-            urlPatternsSet = ApiMgtDAO.getURITemplatesPerAPIAsString(api.getId());
+            urlPatternsSet = ApiMgtDAO.getInstance().getURITemplatesPerAPIAsString(api.getId());
             HashMap<String, String> resourceScopes;
-            resourceScopes = ApiMgtDAO.getResourceToScopeMapping(api.getId());
+            resourceScopes = ApiMgtDAO.getInstance().getResourceToScopeMapping(api.getId());
 
             Set<String> urlPatternsKeySet = urlPatternsSet.keySet();
             String resourceScopeKey;
@@ -606,7 +608,7 @@ public final class APIUtil {
             String apiVersion = artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
             api = new API(apiIdentifier);
-            int apiId = ApiMgtDAO.getAPIID(apiIdentifier, null);
+            int apiId = ApiMgtDAO.getInstance().getAPIID(apiIdentifier, null);
             if (apiId == -1) {
                 return null;
             }
@@ -667,7 +669,7 @@ public final class APIUtil {
             api.setBusinessOwnerEmail(artifact.getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER_EMAIL));
             
             ArrayList<URITemplate> urlPatternsList;
-            urlPatternsList = ApiMgtDAO.getAllURITemplates(api.getContext(), api.getId().getVersion());
+            urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(api.getContext(), api.getId().getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
             for (URITemplate uriTemplate : uriTemplates) {
@@ -721,7 +723,7 @@ public final class APIUtil {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomainName);
-            scopeSet = ApiMgtDAO.getAPIScopesByScopeKey(scopeKey, tenantId);
+            scopeSet = ApiMgtDAO.getInstance().getAPIScopesByScopeKey(scopeKey, tenantId);
         } catch (UserStoreException e) {
             String msg = "Error while retrieving Scopes";
             log.error(msg ,e);
@@ -2190,7 +2192,7 @@ public final class APIUtil {
             api.setLatest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_IS_LATEST)));
             ArrayList<URITemplate> urlPatternsList;
 
-            urlPatternsList = ApiMgtDAO.getAllURITemplates(oldContext, oldId.getVersion());
+            urlPatternsList = ApiMgtDAO.getInstance().getAllURITemplates(oldContext, oldId.getVersion());
             Set<URITemplate> uriTemplates = new HashSet<URITemplate>(urlPatternsList);
 
             for (URITemplate uriTemplate : uriTemplates) {
@@ -2235,7 +2237,7 @@ public final class APIUtil {
      */
     public static List<String> getListOfAuthorizedDomainsByConsumerKey(String consumerKey)
             throws APIManagementException {
-        String list = ApiMgtDAO.getAuthorizedDomainsByConsumerKey(consumerKey);
+        String list = ApiMgtDAO.getInstance().getAuthorizedDomainsByConsumerKey(consumerKey);
         if (list != null && !list.isEmpty()) {
             return Arrays.asList(list.split(","));
         }
@@ -3224,11 +3226,11 @@ public final class APIUtil {
     }
 
     public static float getAverageRating(APIIdentifier apiId) throws APIManagementException {
-        return ApiMgtDAO.getAverageRating(apiId);
+        return ApiMgtDAO.getInstance().getAverageRating(apiId);
     }
 
     public static float getAverageRating(int apiId) throws APIManagementException {
-        return ApiMgtDAO.getAverageRating(apiId);
+        return ApiMgtDAO.getInstance().getAverageRating(apiId);
     }
 
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
@@ -3267,7 +3269,7 @@ public final class APIUtil {
     }
 
     public static int getApplicationId(String appName, String userId) throws APIManagementException {
-        return new ApiMgtDAO().getApplicationId(appName, userId);
+        return ApiMgtDAO.getInstance().getApplicationId(appName, userId);
     }
 
     public static boolean isAPIManagementEnabled() {
@@ -4597,7 +4599,7 @@ public final class APIUtil {
      */
     public static boolean isApplicationExist(String subscriber, String applicationName, String groupId)
             throws APIManagementException {
-        return ApiMgtDAO.isApplicationExist(applicationName, subscriber, groupId);
+        return ApiMgtDAO.getInstance().isApplicationExist(applicationName, subscriber, groupId);
     }
 
     public static String getHostAddress() {
@@ -5021,5 +5023,65 @@ public final class APIUtil {
             }
         }
         return false;
+    }
+
+    public static String getServerURL() throws APIManagementException{
+        String hostName = ServerConfiguration.getInstance().getFirstProperty(APIConstants.HOST_NAME);
+
+        try {
+            if (hostName == null) {
+                hostName = NetworkUtils.getLocalHostname();
+            }
+        } catch (SocketException e) {
+            throw new APIManagementException("Error while trying to read hostname.", e);
+        }
+
+        String mgtTransport = CarbonUtils.getManagementTransport();
+        AxisConfiguration axisConfiguration = ServiceReferenceHolder
+                .getContextService().getServerConfigContext().getAxisConfiguration();
+        int mgtTransportPort = CarbonUtils.getTransportProxyPort(axisConfiguration, mgtTransport);
+        if (mgtTransportPort <= 0) {
+            mgtTransportPort = CarbonUtils.getTransportPort(axisConfiguration, mgtTransport);
+        }
+        String serverUrl = mgtTransport + "://" + hostName.toLowerCase();
+        // If it's well known HTTPS port, skip adding port
+        if (mgtTransportPort != APIConstants.DEFAULT_HTTPS_PORT) {
+            serverUrl += ":" + mgtTransportPort;
+        }
+        // If ProxyContextPath is defined then append it
+        String proxyContextPath = ServerConfiguration.getInstance().getFirstProperty(APIConstants.PROXY_CONTEXT_PATH);
+        if (proxyContextPath != null && !proxyContextPath.trim().isEmpty()) {
+            if (proxyContextPath.charAt(0) == '/') {
+                serverUrl += proxyContextPath;
+            } else {
+                serverUrl += "/" + proxyContextPath;
+            }
+        }
+
+        return serverUrl;
+    }
+
+    /**
+     * Extract the provider of the API from name
+     *
+     * @param apiVersion - API Name with version
+     * @param tenantDomain - tenant domain of the API
+     * @return API publisher name
+     */
+    public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
+        int index = apiVersion.indexOf("--");
+        String apiProvider;
+        if (index != -1) {
+            apiProvider = apiVersion.substring(0, index);
+            if (apiProvider.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
+                apiProvider = apiProvider.replace(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT,
+                        APIConstants.EMAIL_DOMAIN_SEPARATOR);
+            }
+            if (!apiProvider.endsWith(tenantDomain)) {
+                apiProvider = apiProvider + '@' + tenantDomain;
+            }
+            return apiProvider;
+        }
+        return null;
     }
 }

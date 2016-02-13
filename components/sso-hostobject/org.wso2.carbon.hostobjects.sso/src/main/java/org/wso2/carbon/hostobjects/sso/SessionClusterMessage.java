@@ -25,7 +25,7 @@ public class SessionClusterMessage extends ClusteringMessage {
         if (log.isDebugEnabled()) {
             log.debug("Executing the received cluster message with session index:"+sessionIndex);
         }
-        SAMLSSORelyingPartyObject.ssho.handleLogout(sessionIndex);
+        SAMLSSORelyingPartyObject.ssho.handleClusterLogout(sessionIndex);
 
     }
 

@@ -928,6 +928,9 @@ public final class APIConstants {
     }
 
     public static final String CORS_SEQUENCE_NAME = "_cors_request_handler_";
+    public static final String CUSTOM_HTTP_STATUS_CODE = "CUSTOM_HTTP_SC";
+    public static final String CUSTOM_ERROR_CODE = "ERROR_CODE";
+    public static final String CUSTOM_ERROR_MESSAGE = "ERROR_MESSAGE";
     //Swagger v2.0 constants
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
@@ -1025,5 +1028,10 @@ public final class APIConstants {
 
     public static final String PUBLISHER_CLIENT = "Publisher";
     public static final String STORE_CLIENT = "Store";
+
+    public static final String WSDL_REGISTRY_LOCATION_PREFIX = "/registry/resource";
+    public static final String HOST_NAME = "HostName";
+    public static final int DEFAULT_HTTPS_PORT = 443;
+    public static final String PROXY_CONTEXT_PATH = "ProxyContextPath";
 
 }

@@ -33,11 +33,11 @@ public class APITokenValidator {
 
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken, String requiredAuthenticationLevel,
                                                String clientDomain) throws APIManagementException {
-        ApiMgtDAO apiMgtDAO = new ApiMgtDAO();
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         // first check whether client domain is authorized
-        if (accessToken != null && ApiMgtDAO.findConsumerKeyFromAccessToken(accessToken) != null &&
-                ApiMgtDAO.isDomainRestricted(accessToken, clientDomain)) {
-            String authorizedDomains = ApiMgtDAO.getAuthorizedDomains(accessToken);
+        if (accessToken != null && apiMgtDAO.findConsumerKeyFromAccessToken(accessToken) != null &&
+            apiMgtDAO.isDomainRestricted(accessToken, clientDomain)) {
+            String authorizedDomains = apiMgtDAO.getAuthorizedDomains(accessToken);
             log.error("Unauthorized client domain :" + clientDomain +
                     ". Only \"" + authorizedDomains + "\" domains are authorized to access the API.");
             throw new APIManagementException("Unauthorized client domain :" + clientDomain +

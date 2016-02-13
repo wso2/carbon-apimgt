@@ -36,7 +36,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
     }
 
     public void validate() throws APIManagementException {
-        if (api.getUriTemplates() == null || api.getUriTemplates().size() == 0) {
+        if (api.getUriTemplates() == null || api.getUriTemplates().isEmpty()) {
             throw new APIManagementException("At least one resource is required");
         }
     }

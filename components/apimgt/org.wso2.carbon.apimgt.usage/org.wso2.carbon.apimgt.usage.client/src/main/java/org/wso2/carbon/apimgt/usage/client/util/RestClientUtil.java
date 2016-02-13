@@ -30,7 +30,7 @@ import java.util.Date;
  */
 public class RestClientUtil {
 
-   private final static String DATE_PATTERN = "yyyy-MM-dd";
+    private final static String DATE_PATTERN = "yyyy-MM-dd";
 
     /**
      * conversion from date to long value
@@ -91,19 +91,21 @@ public class RestClientUtil {
      * @param pass password
      * @return encoded basic auth, as string
      */
-    public static String encodeCredentials(String user, String pass) {
-        String cred = user + ':' + pass;
+    public static String encodeCredentials(String user, char[] pass) {
+        StringBuilder builder = new StringBuilder(user).append(':').append(pass);
+        String cred = builder.toString();
         byte[] encodedBytes = Base64.encodeBase64(cred.getBytes());
         return new String(encodedBytes);
     }
 
     /**
      * Parsing long value to the Date format
+     *
      * @param time time in long
      * @return
      */
-    public static String longToDate(long time){
-        Date date=new Date(time);
+    public static String longToDate(long time) {
+        Date date = new Date(time);
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         return format.format(date);
     }

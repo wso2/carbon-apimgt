@@ -53,14 +53,8 @@ public class UsageClient {
      * @throws APIMgtUsageQueryServiceClientException
      */
     public static void initializeDataSource() throws APIMgtUsageQueryServiceClientException {
-
-        try {
-            APIUsageStatisticsClient client = UsageClient.getStatisticClient(null);
-            client.initializeDataSource();
-        } catch (APIMgtUsageQueryServiceClientException e) {
-            throw new APIMgtUsageQueryServiceClientException("Error in initializing data sources", e);
-        }
-
+        APIUsageStatisticsClient client = UsageClient.getStatisticClient(null);
+        client.initializeDataSource();
     }
 
     /**
@@ -71,11 +65,7 @@ public class UsageClient {
      */
     public static APIUsageStatisticsClient getClient(String user) throws APIMgtUsageQueryServiceClientException {
         if (isDataPublishingEnabled()) {
-            try {
-                return UsageClient.getStatisticClient(user);
-            } catch (APIMgtUsageQueryServiceClientException e) {
-                throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
-            }
+            return UsageClient.getStatisticClient(user);
         } else {
             return null;
         }
@@ -106,7 +96,6 @@ public class UsageClient {
         String className = config.getFirstProperty("StatisticClientProvider");
 
         try {
-
             //get the Class from the class name
             Class statClass = APIUtil.getClassForName(className);
             //use the constructor and pass appropriate args to get a instance
@@ -116,7 +105,6 @@ public class UsageClient {
             } else {
                 usageStatisticsClient = (APIUsageStatisticsClient) statClass.getConstructor().newInstance();
             }
-
         } catch (InstantiationException e) {
             throw new APIMgtUsageQueryServiceClientException("Cannot instantiate Statistic Client class: " + className,
                     e);
@@ -132,7 +120,6 @@ public class UsageClient {
             throw new APIMgtUsageQueryServiceClientException("Cannot found the Statistic Client class: " + className,
                     e);
         }
-
         return usageStatisticsClient;
     }
 
@@ -146,7 +133,6 @@ public class UsageClient {
     public static List<SubscriberCountByAPIs> getSubscriberCountByAPIs(String loggedUser, boolean isAllStatistics)
             throws APIManagementException {
 
-        //get the provider
         APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(loggedUser);
         String providerName = null;
         if (isAllStatistics) {
@@ -174,7 +160,6 @@ public class UsageClient {
                 } else {
                     apiSet = apiProvider.getAPIsByProvider(APIUtil.replaceEmailDomain(loggedUser));
                 }
-
                 //iterate over apis
                 for (API api : apiSet) {
                     //ignore created apis
@@ -186,7 +171,6 @@ public class UsageClient {
                     if (count == 0) {
                         continue;
                     }
-
                     SubscriberCountByAPIs apiSub = new SubscriberCountByAPIs();
                     List<String> apiName = new ArrayList<String>();
                     apiName.add(api.getId().getApiName());
@@ -197,19 +181,13 @@ public class UsageClient {
                     apiSub.setApiName(apiName);
                     list.add(apiSub);
                 }
-
             }
-        /*} catch (Exception e) {
-            log.error("Error while getting subscribers of the provider: " + providerName, e);
-            throw new APIManagementException("Error while getting subscribers of the provider: " + providerName, e);
-            */
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
         }
         return list;
-
     }
 
     /**
@@ -223,7 +201,7 @@ public class UsageClient {
             type = UsageClient.getStatisticClient(null).getClientType();
         } catch (APIMgtUsageQueryServiceClientException e) {
             //throw new APIMgtUsageQueryServiceClientException("Error getting Statistics usage client instance", e);
-            log.warn("Error geting usage statistic client...");
+            log.warn("Error getting usage statistic client...");
         }
 
         return type;

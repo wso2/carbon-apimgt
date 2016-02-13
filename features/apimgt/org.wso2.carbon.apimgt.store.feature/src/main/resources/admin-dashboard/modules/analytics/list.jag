@@ -1,4 +1,4 @@
-<%
+    <%
 
 var log = new Log();
 
@@ -31,7 +31,7 @@ var getAnalyticsConfig = function (analyticsData) {
         client.setOptions(client_options);
 
         var eventingConfig = stub.getEventingConfigData();
-        var analyzingConfigData = stub.getAnalyzingConfigData();         //Commented due to Current component not support this
+        var analyzingConfigData = stub.getAnalyzingConfigData();
 
         var conf = null;
         if (eventingConfig.getUrl() == '') {

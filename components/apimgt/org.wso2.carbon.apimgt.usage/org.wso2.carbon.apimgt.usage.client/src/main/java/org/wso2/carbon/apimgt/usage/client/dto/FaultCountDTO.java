@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.usage.client.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used as a DTO for represent API fault count usage
+ */
 public class FaultCountDTO {
     private String appName;
     private List<ApiFaultCountArray> apiCountArray = new ArrayList<ApiFaultCountArray>();
@@ -45,6 +48,9 @@ public class FaultCountDTO {
     }
 }
 
+/**
+ * This class is used to represent API and it's count
+ */
 class ApiFaultCountArray {
     private String apiName;
     private long count;

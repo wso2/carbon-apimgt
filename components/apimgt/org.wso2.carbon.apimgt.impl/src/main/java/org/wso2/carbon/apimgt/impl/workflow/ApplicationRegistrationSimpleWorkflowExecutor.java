@@ -71,7 +71,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
         ApplicationRegistrationWorkflowDTO regWFDTO = (ApplicationRegistrationWorkflowDTO) workFlowDTO;
 		
 
-		ApiMgtDAO dao = new ApiMgtDAO();
+		ApiMgtDAO dao = ApiMgtDAO.getInstance();
 
 		try {
             dao.createApplicationRegistrationEntry((ApplicationRegistrationWorkflowDTO)workFlowDTO,false);
