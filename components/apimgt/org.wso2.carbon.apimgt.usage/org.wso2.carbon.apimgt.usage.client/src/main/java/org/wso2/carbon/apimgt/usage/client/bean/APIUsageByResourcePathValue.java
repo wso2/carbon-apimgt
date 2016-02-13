@@ -28,7 +28,6 @@ public class APIUsageByResourcePathValue {
     private List<String> api_version_context_method_facet;
 
     public APIUsageByResourcePathValue(int lastAccessTime, List<String> api_version_userId_facet) {
-        super();
         this.totalRequestCount = lastAccessTime;
         this.api_version_context_method_facet = api_version_userId_facet;
     }
