@@ -733,7 +733,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (Result<APIUsageByUserValues> result : obj) {
             APIUsageByUserValues v = result.getValues();
             usage = new APIUsageByUserName();
-            usage.setRequestCount(v.getCount_sum());
+            usage.setRequestCount(v.getCountSum());
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setUserID(v.getColumnNames().get(2));
