@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
+/**
+ * This class is used as a bean for represent Lucene Search Query
+ */
 public class RequestSearchBean {
     public String getQuery() {
         return query;

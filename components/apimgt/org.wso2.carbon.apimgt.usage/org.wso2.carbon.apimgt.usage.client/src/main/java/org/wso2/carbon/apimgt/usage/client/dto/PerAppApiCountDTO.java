@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.usage.client.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used as DTO represent to App and API usage count
+ */
 public class PerAppApiCountDTO {
 
     private String appName;
@@ -46,6 +49,9 @@ public class PerAppApiCountDTO {
     }
 }
 
+/**
+ * This class is used as represent api name and it's count
+ */
 class ApiCountArray{
     String apiName;
     long count;

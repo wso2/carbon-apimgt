@@ -320,7 +320,7 @@ public class APIAuthenticationHandler extends APIMgtCommonExtensionHandler {
 
         String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
 
-        String tenantDomain = MultitenantUtils.getTenantDomain(fullRequestPath);
+        String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
 
         if (apiPublisher == null) {
             apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion,tenantDomain);

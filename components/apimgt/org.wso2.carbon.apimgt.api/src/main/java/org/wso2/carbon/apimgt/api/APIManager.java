@@ -204,7 +204,7 @@ public interface APIManager {
     /** returns the SubscribedAPI object which is related to the UUID
      *
      * @param uuid UUID of Subscription
-     * @return
+     * @return SubscribedAPI object which is related to the UUID
      * @throws APIManagementException
      */
     SubscribedAPI getSubscriptionByUUID(String uuid) throws APIManagementException;
