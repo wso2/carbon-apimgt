@@ -1,0 +1,89 @@
+<%
+include("/jagg/jagg.jag");
+var log = new Log();
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result,
+    action = request.getParameter("action"),
+    apiName = request.getParameter("apiName"),
+    apiVersion = request.getParameter("apiVersion"),    
+    fromDate = request.getParameter("fromDate"),
+    toDate = request.getParameter("toDate"),
+    site = require("/site/conf/site.json"),
+    msg = require("/site/conf/ui-messages.jag"),
+    convertToDateObj = function (date) {
+        var dateWithoutHour = date.split("\ ")[0].split("-");
+        var year = dateWithoutHour[0];
+        var month = dateWithoutHour[1] - 1;
+        var day = dateWithoutHour[2];
+        return new Date(year,month,day);
+    }
+
+    dayDiff = function (fromDate,toDate){
+        fromDate = convertToDateObj(fromDate);
+        toDate = convertToDateObj(toDate);
+        return (toDate - fromDate)/(1000*60*60*24);
+    }
+
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'AuthenticateError'
+            });
+        } else {        
+            var provider = jagg.getUser().username;
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            var tenantDomain = MultitenantUtils.getTenantDomain(provider);
+            var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
+            var usageStatClient;
+            var currentLocation = request.getParameter("currentLocation");
+            if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
+                provider = allProviders;
+            }
+
+            if (provider.indexOf("@") == -1) {
+                provider = provider + "@" + tenantDomain;
+            }
+
+            if (action === "getExecutionTimeOfAPI") {     
+
+                mod = jagg.module("statistics");
+                var data = {};
+                result = mod.getExecutionTimeByAPI(apiName,apiVersion,provider,fromDate,toDate);
+                if (result.error == "true") {
+                    obj = {
+                        error: result.error,
+                        message: msg.error.backendError(action)
+                    };
+                    } else {
+                        data = result.usage;
+                        obj = {
+                            error: false,
+                            usage: data
+                        }
+                    }
+                    print(obj);
+
+                    }  else if (action === "isDataPublishingEnabled") {
+
+                        mod = jagg.module("statistics");
+                        result = mod.isDataPublishingEnabled();
+
+                        if (result.error == "true") {
+                            obj = {
+                                error: result.error,
+                                message: msg.error.backendError(action)
+                            };
+                            } else {
+                                obj = {
+                                    error: false,
+                                    usage: result.usage
+                                }
+                            }
+                            print(obj);
+
+                        };
+                    }
+
+                    }());
+%>

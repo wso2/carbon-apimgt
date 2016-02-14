@@ -148,6 +148,7 @@
     "apiResponseTimes" : "API Response Times",
     "apiLastAccessTimes" : "API Last Access Times",
     "apiUsageResourcePath" : "API Usage by Resource Path",
+    "apiLatencyTime" : "API Latency Time",
     "apiUsageFromDestination" : "API Usage by Destination",
     "apiUsageComparison" : "API Usage Comparison",
     "faultyInvocations" : "Faulty Invocations",
@@ -155,6 +156,7 @@
     "applicationThrottledCounts" : "App Throttled Out Requests",
 
     "overallAPIUsageTitle": "Overall API Usage (Across All Versions)",
+    "apiLatencyTimeTitle" : "API Latency BreakDown",
     "overallAPISubscriptionsTitle": "Overall API Subscriptions (Across All Versions)",
     "overallAPIResponseTimesTitle": "API Response Times (Across All Versions)",
     "overallAPILastAccessTimesTitle": "API Last Access Times (Across All Versions)",

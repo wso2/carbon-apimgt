@@ -1,0 +1,15 @@
+<%
+jagg.initializer("stats/api-latencytime", {
+
+    preInitialize:function () {
+        jagg.addHeaderJS("stats", "stats", "templates/stats/api-latencytime/js/stats.js");
+     }
+});
+%>
+
+
+
+
+
+
+

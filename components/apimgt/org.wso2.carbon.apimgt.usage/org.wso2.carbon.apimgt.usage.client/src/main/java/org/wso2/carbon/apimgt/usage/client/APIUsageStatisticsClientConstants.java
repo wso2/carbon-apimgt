@@ -171,5 +171,6 @@ public final class APIUsageStatisticsClientConstants {
     public static final String ALIAS_THROTTLE_OUT_COUNT = "throttle_out_count";
 
     public static final String TENANT_DOMAIN = "tenantDomain";
+    public static final String API_EXECUTION_TME_SUMMARY = "API_EXECUTION_TIME_SUMMARY";
 
 }

@@ -24,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
+import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
+import org.wso2.carbon.apimgt.usage.client.bean.Result;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
@@ -545,4 +547,19 @@ public abstract class APIUsageStatisticsClient {
      * @return String
      */
     public abstract String getClientType();
+
+    /**
+     * return list of api usage for a particular api and version
+     *
+     * @param providerName API provider name
+     * @param apiName      Name of the API
+     * @return a List of PerUserAPIUsageDTO objects - Possibly empty
+     * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
+     */
+    public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName,String version,
+                                                                                 String providerName,String fromDate,
+                                                                                 String toDate) throws
+            APIMgtUsageQueryServiceClientException;
+
+
 }

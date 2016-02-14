@@ -38,6 +38,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
 import org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClientConstants;
+import org.wso2.carbon.apimgt.usage.client.bean.ExecutionTimeOfAPIValues;
+import org.wso2.carbon.apimgt.usage.client.bean.Result;
 import org.wso2.carbon.apimgt.usage.client.billing.APIUsageRangeCost;
 import org.wso2.carbon.apimgt.usage.client.billing.PaymentPlan;
 import org.wso2.carbon.apimgt.usage.client.dto.*;
@@ -2497,5 +2499,10 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     @Override
     public String getClientType() {
         return "RDBMS";
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String providerName, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
+        return null;
     }
 }

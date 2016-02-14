@@ -32,12 +32,13 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
         setExecutionTime(executionTimePublisherDTO.getExecutionTime());
         setEventTime(executionTimePublisherDTO.getEventTime());
     }
+
     public static String getStreamDefinition() {
 
-        return  "{\n" +
-                "  \"name\": \""+DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName()+"\",\n" +
-                "  \"version\": \""+DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion()+"\",\n" +
-                "  \"nickName\": \"\",\n" +
+        return "{\n" +
+                "  \"name\": \"" + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName() + "\",\n" +
+                "  \"version\": \"" + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion() + "\",\n" +
+                "  \"nickName\": \"Execution Time Data\",\n" +
                 "  \"description\": \"This stream will persist the data which send by the mediation executions\",\n" +
                 "  \"metaData\": [\n" +
                 "    {\n" +
@@ -83,8 +84,8 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
                 "}";
     }
 
-    public Object createPayload(){
-        return new Object[]{getApiName(),getVersion(),
-                getTenantDomain(),getProvider(),getMediationType(),getExecutionTime(),getContext(),getEventTime()};
+    public Object createPayload() {
+        return new Object[]{getApiName(), getVersion(),
+                getTenantDomain(), getProvider(), getMediationType(), getExecutionTime(), getContext(), getEventTime()};
     }
 }

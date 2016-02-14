@@ -2524,4 +2524,53 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     public String getClientType() {
         return "REST";
     }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+                                                                        String providerName, String fromDate,
+                                                                        String toDate)
+            throws APIMgtUsageQueryServiceClientException {
+        StringBuilder query = new StringBuilder("api:" + apiName);
+        if (version != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
+        }
+        if (providerName != null) {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":").append(providerName);
+        }
+        if (fromDate != null && toDate != null) {
+            try {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TIME).append(": [")
+                        .append(getDateToLong(fromDate)).append(" TO ")
+                        .append(getDateToLong(toDate)).append("]");
+            } catch (ParseException e) {
+                handleException("Error occurred while Error parsing date", e);
+            }
+        }
+        RequestSearchBean request = new RequestSearchBean(query.toString(), 0, 500, APIUsageStatisticsClientConstants
+                .API_EXECUTION_TME_SUMMARY);
+        Type type = new TypeToken<List<Result<ExecutionTimeOfAPIValues>>>() {
+        }.getType();
+
+        List<Result<ExecutionTimeOfAPIValues>> obj;
+        try {
+            obj = restClient.doPost(request, type);
+            if (obj.isEmpty()) {
+                return new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+            }
+            return obj;
+        } catch (JsonSyntaxException e) {
+            handleException("Error occurred while parsing response", e);
+        } catch (IOException e) {
+            handleException("Error occurred while Connecting to DAS REST API", e);
+        }
+        return null;
+    }
+
+    private long getDateToLong(String date) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH");
+        Date fDate = dateFormat.parse(date);
+        Long lDate = fDate.getTime();
+        return lDate;
+
+    }
 }
