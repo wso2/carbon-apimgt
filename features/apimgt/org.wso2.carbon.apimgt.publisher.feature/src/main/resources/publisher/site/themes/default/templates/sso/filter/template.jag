@@ -23,16 +23,16 @@
             var keyStoreAlias = site.ssoConfiguration.identityAlias;
             var keyStoreLocation = site.ssoConfiguration.keyStoreName;
             var CarbonUtils = Packages.org.wso2.carbon.utils.CarbonUtils;
-            if(site.ssoConfiguration.keyStorePassword == null || site.ssoConfiguration.keyStorePassword == ""){
+            if (site.ssoConfiguration.keyStorePassword == null || site.ssoConfiguration.keyStorePassword == "") {
                 site.ssoConfiguration.keyStorePassword = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Password");
-                }
-            if(site.ssoConfiguration.identityAlias == null || site.ssoConfiguration.identityAlias == ""){
+            }
+            if (site.ssoConfiguration.identityAlias == null || site.ssoConfiguration.identityAlias == "") {
                 site.ssoConfiguration.identityAlias = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.KeyAlias");
-                }
-            if(site.ssoConfiguration.keyStoreName == null || site.ssoConfiguration.keyStoreName == ""){
+            }
+            if (site.ssoConfiguration.keyStoreName == null || site.ssoConfiguration.keyStoreName == "") {
                 site.ssoConfiguration.keyStoreName = CarbonUtils.getServerConfiguration().getFirstProperty("Security.KeyStore.Location");
-                }
-            if(site.ssoConfiguration.nameIdPolicy == null){
+            }
+            if (site.ssoConfiguration.nameIdPolicy == null) {
                 site.ssoConfiguration.nameIdPolicy = "";
             }
             ssoRelyingParty.setProperty("identityProviderURL", site.ssoConfiguration.identityProviderURL);

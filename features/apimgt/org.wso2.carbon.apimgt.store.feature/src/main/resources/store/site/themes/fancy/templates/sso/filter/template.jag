@@ -3,40 +3,40 @@
     var site = require("/site/conf/site.json");
     var security =require("sso");
 
-	var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
-	var sessionId = session.getId();
-	var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
+    var ssoRelyingParty = new security.SSORelyingParty(site.ssoConfiguration.issuer);
+    var sessionId = session.getId();
+    var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
 
-	var requestURI;
+    var requestURI;
 
     var isPassiveAuthRequired = false;
     var samlAuthRequest;
 
-	var requestedPage = request.getParameter("requestedPage");
+    var requestedPage = request.getParameter("requestedPage");
     var passiveAuthRequired = request.getParameter("passiveAuthRequired");
     if (requestedPage != null) {
         requestURI = requestedPage;
     } else {
-	    requestURI = request.getRequestURI();
-	    if (request.getQueryString() != null) {
-	        requestURI = requestURI + '?' + request.getQueryString();
-	    }
-	}
-	var checkSSO = true;
+        requestURI = request.getRequestURI();
+        if (request.getQueryString() != null) {
+            requestURI = requestURI + '?' + request.getQueryString();
+        }
+    }
+    var checkSSO = true;
 
-	if (requestURI.indexOf("register.jag") != -1) {
-		checkSSO = false;
-	} else if(requestURI.indexOf("confirmemail.jag") != -1) {
-		checkSSO = false;
-	} else if (passiveAuthRequired != null && 'false' == passiveAuthRequired) {
+    if (requestURI.indexOf("register.jag") != -1) {
+        checkSSO = false;
+    } else if(requestURI.indexOf("confirmemail.jag") != -1) {
+        checkSSO = false;
+    } else if (passiveAuthRequired != null && 'false' == passiveAuthRequired) {
         isPassiveAuthRequired = false;
     } else if ((requestURI == site.context+'/') || requestURI.indexOf(site.context+'/?tenant=') != -1 || requestURI.indexOf("list-apis.jag") != -1 || requestURI.indexOf("apis/info") != -1 || requestURI.indexOf("apis/list") != -1) {
         isPassiveAuthRequired = true;
     }
 
-	if (checkSSO && !Boolean(isAuthenticated)) {
+    if (checkSSO && !Boolean(isAuthenticated)) {
 
-	    var keyStorePassword = site.ssoConfiguration.keyStorePassword;
+        var keyStorePassword = site.ssoConfiguration.keyStorePassword;
         var acsURL = site.ssoConfiguration.acsURL;
         var keyStoreAlias = site.ssoConfiguration.identityAlias;
         var keyStoreLocation = site.ssoConfiguration.keyStoreName;
@@ -82,42 +82,42 @@
             }
         }
 
-	    var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);
-	    var relayState = ssoRelyingParty.getUUID();
-	    ssoRelyingParty.setRelayStateProperty(relayState, requestURI);
-	    var idpURL = ssoRelyingParty.getProperty("identityProviderURL");
+        var encodedRequest = ssoRelyingParty.encode(samlAuthRequest);
+        var relayState = ssoRelyingParty.getUUID();
+        ssoRelyingParty.setRelayStateProperty(relayState, requestURI);
+        var idpURL = ssoRelyingParty.getProperty("identityProviderURL");
 %>
 <div>
 
-	        <p>You are now redirected to Identity. If the
+            <p>You are now redirected to Identity. If the
 
-	        redirection fails, please click the post button.</p>
+            redirection fails, please click the post button.</p>
 
-	        <form method="post" action="<%=idpURL%>">
+            <form method="post" action="<%=idpURL%>">
 
-	            <p>
+                <p>
 
-	                <input type="hidden" name="SAMLRequest"
+                    <input type="hidden" name="SAMLRequest"
 
-	                value="<%= encodedRequest %>"/>
+                    value="<%= encodedRequest %>"/>
 
-	                <input type="hidden" name="RelayState" value="<%= relayState %>"/>
+                    <input type="hidden" name="RelayState" value="<%= relayState %>"/>
 
-	                <input type="hidden" name="SSOAuthSessionID" value="<%= sessionId %>"/>
+                    <input type="hidden" name="SSOAuthSessionID" value="<%= sessionId %>"/>
 
-	                <button type="submit">POST</button>
+                    <button type="submit">POST</button>
 
-	            </p>
+                </p>
 
-	        </form>
+            </form>
 
-	    </div>
+        </div>
 
-	    <script type = "text/javascript" >
+        <script type = "text/javascript" >
 
-	           document.forms[0].submit();
+               document.forms[0].submit();
 
-	    </script>
+        </script>
 
 <%  }  %>
 <% }); %>
