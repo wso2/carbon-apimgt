@@ -125,7 +125,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         long difference;
 
         try {
-            if (Utils.isStatsEnabled()) {
+            if (APIUtil.isStatsEnabled()) {
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
             }
@@ -171,7 +171,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        if (Utils.isStatsEnabled()) {
+        if (APIUtil.isStatsEnabled()) {
             long currentTime = System.currentTimeMillis();
             messageContext.setProperty("api.ut.backendRequestEndTime", Long.toString(currentTime));
         }
