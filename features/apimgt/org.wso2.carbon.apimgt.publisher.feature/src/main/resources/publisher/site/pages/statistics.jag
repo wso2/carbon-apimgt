@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-include("headerName.jag");
+include("header.jag");
 var site = require("/site/conf/site.json");
 
 var i18n = require("i18n");
@@ -24,7 +24,7 @@ var page = request.getParameter("page");
         "name":"page/base",
         "inputs":{
             "title":"API Publisher- Statistics",
-             "headerName":{
+             "header":{
                 "name":"menu/primary"
             },
             "body":[

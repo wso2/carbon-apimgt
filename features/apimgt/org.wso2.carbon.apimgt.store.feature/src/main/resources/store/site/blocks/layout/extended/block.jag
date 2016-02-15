@@ -44,7 +44,7 @@ jagg.block("layout/extended", {
 
     getOutputBlocks:function () {
         return [
-            "headerName",
+            "header",
             "top",
             "left",
             "right"

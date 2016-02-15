@@ -8,7 +8,7 @@ var site = require("/site/conf/site.json");
         "name":"page/base",
         "inputs":{
             "title":"APIManager Workflow Admin - Error",
-          "headerName":{
+          "header":{
                 "name":"menu/login"
             },
             "body":[

@@ -215,7 +215,7 @@ paths:
         - application/json
         - application/xml
       parameters:
-        - in: headerName
+        - in: header
           name: api_key
           description: ""
           required: true
@@ -482,7 +482,7 @@ securityDefinitions:
   api_key:
     type: apiKey
     name: api_key
-    in: headerName
+    in: header
   petstore_auth:
     type: oauth2
     authorizationUrl: http://petstore.swagger.wordnik.com/api/oauth/dialog

@@ -34,10 +34,10 @@ i18n.init(request,localeResourcesBasePath);
 
 <%
     var data = jagg.data();
-    if(data.headerName) {
-        jagg.printData(data.headerName.js);
-        jagg.printData(data.headerName.css);
-        jagg.printData(data.headerName.code);
+    if(data.header) {
+        jagg.printData(data.header.js);
+        jagg.printData(data.header.css);
+        jagg.printData(data.header.code);
     }
     %>
 </head>
@@ -53,7 +53,7 @@ var editUrl="info";
 %>
 <body>
 
-    <% jagg.includeBlocks(outputs.headerName); %>
+    <% jagg.includeBlocks(outputs.header); %>
     <% jagg.includeBlocks(outputs.body); %>
     <% jagg.includeBlocks(outputs.footer); %>
     <% jagg.includeBlock("dialogs", null); %>

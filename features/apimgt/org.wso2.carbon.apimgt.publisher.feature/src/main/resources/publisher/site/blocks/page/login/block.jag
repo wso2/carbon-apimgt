@@ -18,7 +18,7 @@ jagg.block("page/login", {
 
     getStaticBlocks:function () {
         return [
-            "headerName/login"
+            "header/login"
         ];
     },
 

@@ -1,5 +1,5 @@
 <%
-// This is a generic headerName file that can be included in all the pages.
+// This is a generic header file that can be included in all the pages.
 
 response.addHeader("X-Frame-Options", "SAMEORIGIN");
 

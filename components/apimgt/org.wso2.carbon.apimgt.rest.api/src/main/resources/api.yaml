@@ -44,18 +44,18 @@ host: apis.wso2.com
 basePath: /publisher/v1.0.0
 
 # The following media types can be passed as input in message bodies of the API.
-# The actual media type must be specified in the Content-Type headerName field of the request.
-# The default is json, i.e. the Content-Type headerName is not needed to
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
 # be set, but supporting it serves extensibility.
 consumes: 
   - application/json
 
 # The following media types may be passed as output in message bodies of the API.
-# The media type(s) consumable by the requestor is specified in the Accept headerName field
+# The media type(s) consumable by the requestor is specified in the Accept header field
 # of the corresponding request. 
-# The actual media type returned will be specfied in the Content-Type headerName field
+# The actual media type returned will be specfied in the Content-Type header field
 # of the of the response.
-# The default of the Accept headerName is json, i.e. there is not needed to
+# The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
 produces: 
   - application/json
@@ -155,7 +155,7 @@ paths:
 #        - Create
       responses:
         '201':
-          description: Created. Successful response with the newly created object as entity in the body. Location headerName contains URL of newly created entity.
+          description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/API'
           headers:
@@ -328,7 +328,7 @@ paths:
 #        - Copy
       responses:
         '201':
-          description: Created. Successful response with the newly created API as entity in the body. Location headerName contains URL of newly created API.
+          description: Created. Successful response with the newly created API as entity in the body. Location header contains URL of newly created API.
           headers:
             Location:
               description: The URL of the newly created API.
@@ -478,7 +478,7 @@ paths:
 #        - Add Document
       responses:
         '201':
-          description: Created. Successful response with the newly created Document object as entity in the body. Location headerName contains URL of newly added document.
+          description: Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document.
           schema:
             $ref: '#/definitions/Document'
           headers:
@@ -700,7 +700,7 @@ paths:
 #        - Create
       responses:
         '201':
-          description: Created. Successful response with the newly created object as entity in the body. Location headerName contains URL of newly created entity.
+          description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Application'
           headers:
@@ -978,7 +978,7 @@ paths:
 #        - Create
       responses:
         '201':
-          description: Created. Successful response with the newly created object as entity in the body. Location headerName contains URL of newly created entity.
+          description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Subscription'
           headers:
@@ -1211,7 +1211,7 @@ paths:
 #        - Create
       responses:
         '201':
-          description: Created. Successful response with the newly created object as entity in the body. Location headerName contains URL of newly created entity.
+          description: Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Tier'
           headers:
@@ -1594,33 +1594,33 @@ parameters:
     format: integer
   Accept:
     name: Accept
-    in: headerName
+    in: header
     description: 'Media types acceptable for the response. Should denote XML or JSON, default is JSON.'
     type: string
   Content-Type:
     name: Content-Type
-    in: headerName
+    in: header
     description: 'Media type of the entity in the request body. Should denote XML or JSON, default is JSON.'
     type: string
   If-None-Match:
     name: If-None-Match
-    in: headerName
+    in: header
     description: Validator for conditional requests; based on ETag.
     type: string
   If-Modified-Since:
     name: If-Modified-Since
-    in: headerName
-    description: Validator for conditional requests; based on Last Modified headerName.
+    in: header
+    description: Validator for conditional requests; based on Last Modified header.
     type: string
   If-Match:
     name: If-Match
-    in: headerName
+    in: header
     description: Validator for conditional requests; based on ETag.
     type: string
   If-Unmodified-Since:
     name: If-Unmodified-Since
-    in: headerName
-    description: Validator for conditional requests; based on Last Modified headerName.
+    in: header
+    description: Validator for conditional requests; based on Last Modified header.
     type: string
 
 ######################################################

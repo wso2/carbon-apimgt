@@ -1,5 +1,5 @@
 <%
-// This is a generic headerName file that can be included in all the pages.
+// This is a generic header file that can be included in all the pages.
 var encode = require('encode');
 encode = new encode.Encode();
 var site = require("/site/conf/site.json");

@@ -123,7 +123,7 @@ var select_environment = function(){
   $("#access_token").change(function(){
     var key = $(this).val();
     if(key && key.trim() != "") {
-      swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "headerName"));
+      swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
     }
   });
 

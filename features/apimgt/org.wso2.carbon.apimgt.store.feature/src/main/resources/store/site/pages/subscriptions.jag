@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-include("headerName.jag");
+include("header.jag");
 response.addHeader('Pragma', 'No-cache');
 response.addHeader('Cache-control', 'no-cache');
 var site = require("/site/conf/site.json");

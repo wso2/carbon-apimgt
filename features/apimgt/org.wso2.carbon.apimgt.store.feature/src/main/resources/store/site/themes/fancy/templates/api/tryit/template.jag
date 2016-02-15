@@ -12,7 +12,7 @@
             <div class="content-section shadow-up">
                 <div class="content-data">
                     <h3>Request</h3>
-                    <div class="tryit-headerName-section">
+                    <div class="tryit-header-section">
                         <div class="container-fluid">
                             <div class="row-fluid request-form">
                                 <div class="span2">
@@ -61,7 +61,7 @@
                                             <textarea style="width:98%" id="req_headers" placeholder="Headers"></textarea>
                                         </div>
                                         <div class="tab-pane fade" id="tryit-headers-form">
-                                            <a onclick="addNewHeaderRow()"><i class="icon-plus-sign"></i> Add new headerName </a>
+                                            <a onclick="addNewHeaderRow()"><i class="icon-plus-sign"></i> Add new header </a>
                                             <div class="form-inline row-by-row" style="margin-top:5px;" id="tryit-headers-form-content"></div>
                                         </div>
                                     </div>
@@ -99,7 +99,7 @@
                                             </select>
                                         </div>
                                         <div class="span7">
-                                            Set "Content-Type" headerName to overwrite this value.
+                                            Set "Content-Type" header to overwrite this value.
                                         </div>
                                     </div>
                                 </div>

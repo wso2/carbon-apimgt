@@ -36,7 +36,7 @@ if(uri != null) {
 if(action == "exit"){
     response.sendError(404);
 } else {
-include("headerName.jag");
+include("header.jag");
 (function () {
     var apis, site, tag, query, result, mod, user = jagg.getUser();
 

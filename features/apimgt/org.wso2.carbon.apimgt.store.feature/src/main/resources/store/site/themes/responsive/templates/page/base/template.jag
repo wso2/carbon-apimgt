@@ -39,10 +39,10 @@
 
     <%
     var data = jagg.data();
-    if(data.headerName) {
-        jagg.printData(data.headerName.css);
-        jagg.printData(data.headerName.js);
-        jagg.printData(data.headerName.code);
+    if(data.header) {
+        jagg.printData(data.header.css);
+        jagg.printData(data.header.js);
+        jagg.printData(data.header.code);
     }
     %>
     <script>

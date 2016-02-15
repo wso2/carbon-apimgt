@@ -146,7 +146,7 @@ securityDefinitions:
     authorizationUrl: http://petstore.swagger.wordnik.com/oauth/dialog
   internalApiKey:
     type: apiKey
-    in: headerName
+    in: header
     name: api_key
 definitions:
   Pet:

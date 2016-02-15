@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-include("headerName.jag");
+include("header.jag");
 var site = require("/site/conf/site.json");
 
 var i18n = require("i18n");
@@ -35,7 +35,7 @@ middlePage="analytics-task";
         "name":"page/base",
         "inputs":{
             "title":"Tasks Listing",
-            "headerName":{
+            "header":{
                 "name":"menu/primary"
             },
             "body":[

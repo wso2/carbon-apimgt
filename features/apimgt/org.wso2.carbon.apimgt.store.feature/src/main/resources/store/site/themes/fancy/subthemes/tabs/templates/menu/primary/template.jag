@@ -1,7 +1,7 @@
 <% jagg.template("menu/primary", function(inputs, outputs, jagg) { %>
 
       <!--START Header menu-->
-      <div class="container-fluid headerName">
+      <div class="container-fluid header">
           <div class="row-fluid">
               <div class="span3 logo-section">
                   <%var tenant=request_tenant;

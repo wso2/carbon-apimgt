@@ -392,7 +392,7 @@
         <div id="publish-success" class="modal fade">
           <div class="modal-dialog">
             <div class="modal-content">
-              <div class="modal-headerName">
+              <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h3>Congratulations</h3>
               </div>
@@ -561,11 +561,11 @@
                                        $( "#modal-published-content" ).append(divPublish);
                                        $( "#modal-unpublished-content" ).append(divUnpublished);
                                        if(failedToPublishEnvironments==""){
-                                       $("#modal-published-headerName").hide();
+                                       $("#modal-published-header").hide();
                                        $("#modal-published-content").hide();
                                         }
                                        if(failedToUnpublishedEnvironments==""){
-                                            $("#modal-unpublished-headerName").hide();
+                                            $("#modal-unpublished-header").hide();
                                             $("#modal-unpublished-content").hide();
                                           }
                                          $("#retryType").val("manage");
@@ -632,11 +632,11 @@
                             $( "#modal-published-content" ).append(divPublish);
                            $( "#modal-unpublished-content" ).append(divUnpublished);
                              if(failedToPublishEnvironments==""){
-                                            $("#modal-published-headerName").hide();
+                                            $("#modal-published-header").hide();
                                             $("#modal-published-content").hide();
                                             }
                                                  if(failedToUnpublishedEnvironments==""){
-                                                                    $("#modal-unpublished-headerName").hide();
+                                                                    $("#modal-unpublished-header").hide();
                                                                     $("#modal-unpublished-content").hide();
                                                                     }
                                 $("#retryType").val("lifeCycle");
@@ -686,7 +686,7 @@
 <div  id="define_scope_modal" class="modal fade">
     <div class="modal-dialog">
     <div class="modal-content">
-    <div class="modal-headerName">
+    <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3>Define Scope</h3>
     </div>
@@ -728,17 +728,17 @@
 </div>
 
 <div  id="environmentsRetry-modal" class="modal hide fade">
-        <div class="modal-headerName">
+        <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>Gateway Failures</h3>
         </div>
         <div class="modal-body">
-        <div id="modal-published-headerName">
+        <div id="modal-published-header">
         Failed to Publish Environments
         </div>
         <div id="modal-published-content">
         </div>
-        <div id="modal-unpublished-headerName">
+        <div id="modal-unpublished-header">
                 Failed to UnPublish Environments
                 </div>
                 <div id="modal-unpublished-content">

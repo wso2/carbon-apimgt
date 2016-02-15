@@ -19,20 +19,20 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class HeaderCondition extends Condition {
-    private String headerName;
+    private String header;
     private String value;
 
     public HeaderCondition() {
         setType(PolicyConstants.HEADER_TYPE);
     }
 
-    public String getHeaderName() {
-        return headerName;
+    public String getHeader() {
+        return header;
     }
 
-    public void setHeaderName(String headerName) {
-        this.headerName = headerName;
-        setQueryAttributeName(headerName);
+    public void setHeader(String header) {
+        this.header = header;
+        setQueryAttributeName(header);
     }
 
     public String getValue() {

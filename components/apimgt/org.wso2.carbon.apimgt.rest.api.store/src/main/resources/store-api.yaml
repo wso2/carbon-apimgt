@@ -36,18 +36,18 @@ host: apis.wso2.com
 basePath: /api/am/store/v0.9
 
 # The following media types can be passed as input in message bodies of the API.
-# The actual media type must be specified in the Content-Type headerName field of the request.
-# The default is json, i.e. the Content-Type headerName is not needed to
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
 # be set, but supporting it serves extensibility.
 consumes: 
   - application/json
 
 # The following media types may be passed as output in message bodies of the API.
-# The media type(s) consumable by the requestor is specified in the Accept headerName field
+# The media type(s) consumable by the requestor is specified in the Accept header field
 # of the corresponding request. 
-# The actual media type returned will be specfied in the Content-Type headerName field
+# The actual media type returned will be specfied in the Content-Type header field
 # of the of the response.
-# The default of the Accept headerName is json, i.e. there is not needed to
+# The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
 produces: 
   - application/json
@@ -401,7 +401,7 @@ paths:
           303:
             description: |
               See Other.
-              Source can be retrived from the URL specified at the Location headerName.
+              Source can be retrived from the URL specified at the Location header.
             headers:
               Location:
                 description: |
@@ -516,7 +516,7 @@ paths:
           description: |
             Created. 
             Successful response with the newly created object as entity in the body. 
-            Location headerName contains URL of newly created entity.
+            Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Application'
           headers:
@@ -851,7 +851,7 @@ paths:
           description: |
             Created. 
             Successful response with the newly created object as entity in the body. 
-            Location headerName contains URL of newly created entity.
+            Location header contains URL of newly created entity.
           schema:
             $ref: '#/definitions/Subscription'
           headers:
@@ -1126,10 +1126,10 @@ paths:
 parameters:
 
 # Requested Tenant domain
-# Specified as a headerName parameter
+# Specified as a header parameter
   requestedTenant:
     name: X-WSO2-Tenant
-    in: headerName
+    in: header
     description: |
       For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be 
         retirieved from.
@@ -1254,61 +1254,61 @@ parameters:
     default: 0
     type: integer
 
-# The HTTP Accept headerName
+# The HTTP Accept header
   Accept:
     name: Accept
-    in: headerName
+    in: header
     description: |
       Media types acceptable for the response. Default is JSON.
     default: JSON
     type: string
 
-# The HTTP Content-Type headerName
+# The HTTP Content-Type header
   Content-Type:
     name: Content-Type
-    in: headerName
+    in: header
     description: |
       Media type of the entity in the body. Default is JSON.
     default: JSON
     required: true
     type : string
 
-# The HTTP If-None-Match headerName
+# The HTTP If-None-Match header
 # Used to avoid retrieving data that are already cached
   If-None-Match:
     name: If-None-Match
-    in: headerName
+    in: header
     description: |
       Validator for conditional requests; based on the ETag of the formerly retrieved
       variant of the resourec.
     type : string
 
-# The HTTP If-Modified-Since headerName
+# The HTTP If-Modified-Since header
 # Used to avoid retrieving data that are already cached
   If-Modified-Since:
     name: If-Modified-Since
-    in: headerName
+    in: header
     description: |
-      Validator for conditional requests; based on Last Modified headerName of the
+      Validator for conditional requests; based on Last Modified header of the
       formerly retrieved variant of the resource.
     type: string
 
-# The HTTP If-Match headerName
+# The HTTP If-Match header
 # Used to avoid concurrent updates
   If-Match:
     name: If-Match
-    in: headerName
+    in: header
     description: |
       Validator for conditional requests; based on ETag.
     type: string
 
-# The HTTP If-Unmodified-Since headerName
+# The HTTP If-Unmodified-Since header
 # Used to avoid concurrent updates
   If-Unmodified-Since:
     name: If-Unmodified-Since
-    in: headerName
+    in: header
     description: |
-      Validator for conditional requests; based on Last Modified headerName.
+      Validator for conditional requests; based on Last Modified header.
     type: string
 
 ######################################################

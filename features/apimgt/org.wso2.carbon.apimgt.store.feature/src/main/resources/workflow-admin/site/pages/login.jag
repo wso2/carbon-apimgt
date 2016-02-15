@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-include("headerName.jag");
+include("header.jag");
 var site = require("/site/conf/site.json");
 
 var i18n = require("i18n");
@@ -12,7 +12,7 @@ i18n.init(request,localeResourcesBasePath);
         "name":"page/base",
         "inputs":{
             "title":"APIManager Workflow Admin- Login",
-            "headerName":{
+            "header":{
                 "name":"menu/login"
             },
             "body":[
