@@ -22,14 +22,18 @@ package org.wso2.carbon.apimgt.api.model.policy;
 import java.io.Serializable;
 
 public abstract class Condition implements Serializable {
-   private String type;
-   private boolean invertCondition;
+    private String type;       //type of each condition: eg:IP, DATE, DATE RANGE etc.
+    private String queryAttributeName;   // needed in making condition for sidhdhi query (eg: properties.verb=='POST')
+    private boolean invertCondition;     //To check if the condition to be included or excluded
 
-    public String getQueryAttribueName() {
-        return queryAttribueName;
+    public void setQueryAttributeName(String attributeName) {
+        String queryCondition = "properties."+ attributeName;
+        this.queryAttributeName = queryCondition;
     }
 
-    private String queryAttribueName;
+    public String getQueryAttributeName() {
+        return queryAttributeName;
+    }
 
     public String getType() {
         return type;

@@ -51,10 +51,10 @@ i18n.init(request,localeResourcesBasePath);
 	<!--[if lt IE 9]><link rel="stylesheet" type="text/css" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/style-ie7-8.css"))%>" media="all"/><![endif]-->
     <%
     var data = jagg.data();
-    if(data.header) {
-        jagg.printData(data.header.js);
-        jagg.printData(data.header.css);
-        jagg.printData(data.header.code);
+    if(data.headerName) {
+        jagg.printData(data.headerName.js);
+        jagg.printData(data.headerName.css);
+        jagg.printData(data.headerName.code);
     }
     %>
     <script>

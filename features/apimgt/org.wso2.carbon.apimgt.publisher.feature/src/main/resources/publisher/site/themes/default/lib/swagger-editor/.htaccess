@@ -24,7 +24,7 @@
 # | CORS-enabled images                                                        |
 # ------------------------------------------------------------------------------
 
-# Send the CORS header for images when browsers request it.
+# Send the CORS headerName for images when browsers request it.
 # https://developer.mozilla.org/en/CORS_Enabled_Image
 # http://blog.chromium.org/2011/07/using-cross-domain-images-in-webgl-and.html
 # http://hacks.mozilla.org/2011/11/using-cors-to-load-webgl-textures-from-cross-domain-images/
@@ -90,7 +90,7 @@ ErrorDocument 404 /404.html
 <IfModule mod_headers.c>
     Header set X-UA-Compatible "IE=edge"
     # `mod_headers` can't match based on the content-type, however, we only
-    # want to send this header for HTML pages and not for the other resources
+    # want to send this headerName for HTML pages and not for the other resources
     <FilesMatch "\.(appcache|crx|css|eot|gif|htc|ico|jpe?g|js|m4a|m4v|manifest|mp4|oex|oga|ogg|ogv|otf|pdf|png|safariextz|svg|svgz|ttf|vcf|webapp|webm|webp|woff|xml|xpi)$">
         Header unset X-UA-Compatible
     </FilesMatch>
@@ -268,7 +268,7 @@ AddDefaultCharset utf-8
 # attacks by setting a Content Security Policy which whitelists trusted sources
 # of content for your site.
 
-# The example header below allows ONLY scripts that are loaded from the current
+# The example headerName below allows ONLY scripts that are loaded from the current
 # site's origin (no inline scripts, no CDN, etc). This almost certainly won't
 # work as-is for your site!
 
@@ -339,7 +339,7 @@ AddDefaultCharset utf-8
 # If a user types "example.com" in his browser, the above rule will redirect him
 # to the secure version of the site. That still leaves a window of opportunity
 # (the initial HTTP connection) for an attacker to downgrade or redirect the
-# request. The following header ensures that browser will ONLY connect to your
+# request. The following headerName ensures that browser will ONLY connect to your
 # server via HTTPS, regardless of what the users type in the address bar.
 # http://www.html5rocks.com/en/tutorials/security/transport-layer-security/
 

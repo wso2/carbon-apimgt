@@ -4,9 +4,9 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);%>
 
          <div class="modal" id="apiModal" style="display:none;">
-            <div class="modal-header">
+            <div class="modal-headerName">
                 <button class="close" data-dismiss="modal">&times;</button>
-                <h3 class="modal-title">Modal header</h3>
+                <h3 class="modal-title">Modal headerName</h3>
             </div>
             <div class="modal-body">
                 <p>One fine body…</p>
@@ -18,9 +18,9 @@ i18n.init(request,localeResourcesBasePath);%>
         </div>
         <div class="modal fade" id="messageModal" style="display:none"></div>
          <div id="confirmation-data" style="display:none;">
-            <div class="modal-header">
+            <div class="modal-headerName">
                 <button class="close" data-dismiss="modal">&times;</button>
-                <h3 class="modal-title">Modal header</h3>
+                <h3 class="modal-title">Modal headerName</h3>
             </div>
             <div class="modal-body">
                 <p>One fine body…</p>
@@ -35,7 +35,7 @@ i18n.init(request,localeResourcesBasePath);%>
 
 
              <form id="mainLoginForm"  autocomplete="off">
-                <div class="modal-header">
+                <div class="modal-headerName">
                     <button class="close" data-dismiss="modal">&times;</button>
                     <h3>Login</h3>
                 </div>

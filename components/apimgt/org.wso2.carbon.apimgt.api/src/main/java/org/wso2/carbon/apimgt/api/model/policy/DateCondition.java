@@ -24,7 +24,7 @@ public class DateCondition extends Condition{
 
     public DateCondition(String queryAttribute) {
         setType(PolicyConstants.DATE_SPECIFIC_TYPE);
-
+        setQueryAttributeName(PolicyConstants.DATE_QUERY);
     }
 
     public String getSpecificDate() {
@@ -37,6 +37,7 @@ public class DateCondition extends Condition{
 
     @Override
     public String getCondition() {
+        String condition = getQueryAttributeName()+ " == "+getSpecificDate();
         return null;
     }
 }

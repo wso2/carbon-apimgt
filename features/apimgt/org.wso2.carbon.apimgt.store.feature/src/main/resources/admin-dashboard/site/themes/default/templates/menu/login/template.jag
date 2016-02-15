@@ -1,5 +1,5 @@
 <% jagg.template("menu/login", function(inputs, outputs, jagg) { %>
-<div class="container-fluid login-header">
+<div class="container-fluid login-headerName">
   <div class="row-fluid">
       <div class="span2 logo-section">
           <a class="brand"><img src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo.png"))%>" alt="API PROVIDER"></a>

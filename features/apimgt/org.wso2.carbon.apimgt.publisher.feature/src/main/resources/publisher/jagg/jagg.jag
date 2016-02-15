@@ -171,7 +171,7 @@ var getThemeFile = function (path) {
 
         fn = template(name);
         if (!fn) {
-            log.error("Template header and footer includes are missing for : " + name);
+            log.error("Template headerName and footer includes are missing for : " + name);
         }
         if (populate) {
             blok = block(name);
@@ -568,7 +568,7 @@ var getThemeFile = function (path) {
         include(getTemplateFile(name));
         fn = template(name);
         if (!fn) {
-            log.error("Template header and footer includes are missing for : " + name);
+            log.error("Template headerName and footer includes are missing for : " + name);
         }
         inputs = obj.inputs;
         blok = block(name);
@@ -609,26 +609,26 @@ var getThemeFile = function (path) {
 
     var addHeaderCSS = function (template, key, css) {
         css = '<link type="text/css" rel="stylesheet" href="' + url(getThemeFile(css)) + '"/>';
-        insertData(this, template, "header", "css", key, css);
+        insertData(this, template, "headerName", "css", key, css);
     };
 
     var addHeaderCSSCode = function (template, key, css) {
         css = '<style type="text/css">' + css + '</style>';
-        insertData(this, template, "header", "css", key, css);
+        insertData(this, template, "headerName", "css", key, css);
     };
 
     var addHeaderJS = function (template, key, js) {
         js = '<script type="text/javascript" src="' + url(getThemeFile(js)) + '"></script>\n';
-        insertData(this, template, "header", "js", key, js);
+        insertData(this, template, "headerName", "js", key, js);
     };
 
     var addHeaderJSCode = function (template, key, js) {
         js = '<script type="text/javascript">' + js + '</script>';
-        insertData(this, template, "header", "js", key, js);
+        insertData(this, template, "headerName", "js", key, js);
     };
 
     var addHeaderCode = function (template, key, code) {
-        insertData(this, template, "header", "code", key, code);
+        insertData(this, template, "headerName", "code", key, code);
     };
 
     var addFooterCSS = function (template, key, css) {

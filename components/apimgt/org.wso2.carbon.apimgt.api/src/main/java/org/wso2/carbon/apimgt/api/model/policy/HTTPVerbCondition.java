@@ -23,6 +23,7 @@ public class HTTPVerbCondition extends Condition {
 
     public HTTPVerbCondition() {
         setType(PolicyConstants.HTTP_VERB_TYPE);
+        setQueryAttributeName(PolicyConstants.HTTP_VERB_QUERY);
     }
 
     public String getHttpVerb() {
@@ -35,6 +36,7 @@ public class HTTPVerbCondition extends Condition {
 
     @Override
     public String getCondition() {
+        String condition = getQueryAttributeName()+" == "+getHttpVerb();
         return null;
     }
 }

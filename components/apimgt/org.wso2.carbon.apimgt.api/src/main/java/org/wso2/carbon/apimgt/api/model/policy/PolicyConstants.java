@@ -39,4 +39,10 @@ public class PolicyConstants {
     public static final String BANDWIDTH_TYPE = "Bandwidth";
 
     public static final String REQUEST_COUNT_TYPE = "RequestCount";
+
+    public static final String DATE_QUERY = "date";
+
+    public static final String IP_QUERY = "ip";
+
+    public static final String HTTP_VERB_QUERY = "httpVerb";
 }

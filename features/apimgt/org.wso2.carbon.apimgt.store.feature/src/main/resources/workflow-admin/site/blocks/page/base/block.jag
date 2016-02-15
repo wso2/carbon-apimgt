@@ -9,7 +9,7 @@ jagg.block("page/base", {
         return {
             title:null,
             pagePath:null,
-            header:null,
+            headerName:null,
             body:null,
             footer:null
         };
@@ -27,7 +27,7 @@ jagg.block("page/base", {
 
     getInputBlocks:function () {
         return [
-            "header",
+            "headerName",
             "body",
             "footer"
         ];

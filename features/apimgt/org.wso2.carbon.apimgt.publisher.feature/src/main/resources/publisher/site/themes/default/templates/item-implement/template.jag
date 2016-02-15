@@ -126,7 +126,7 @@
                          <strong>Address Endpoint</strong><p>The direct URL of the service</p>
                          <strong>Failover Group </strong><p>The endpoints that the service tries to connect to in case of a failure. This happens in a round robin manner.</p>
                          <strong>Load Balance</strong><p>The endpoints where the incoming requests are directed to in a round robin manner. They automatically handle fail-over as well.</p>
-                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' header.</p>
+                         <Strong>Default Endpoint</strong><p>The default endpoint will send the message to the address specified in the 'To' headerName.</p>
                         </div>
 
                         <div id="endpoint_form" class="endpoint_dives" >
@@ -343,7 +343,7 @@
             </div>
 
             <div id="prototype-success" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-header">
+                <div class="modal-headerName">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 <h3>API Publisher - Notification</h3>
                 </div>
@@ -371,7 +371,7 @@
 </div>
 
 <div  id="advance_endpoint_config" class="modal hide fade">
-    <div class="modal-header">
+    <div class="modal-headerName">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3>Advanced Endpoint Configuration</h3>
     </div>
@@ -427,17 +427,17 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 </div>  
 </script>
 <div  id="environmentsRetry-modal" class="modal hide fade">
-        <div class="modal-header">
+        <div class="modal-headerName">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h3>Gateway Failures</h3>
         </div>
         <div class="modal-body">
-        <div id="modal-published-header">
+        <div id="modal-published-headerName">
         Failed to Publish Environments
         </div>
         <div id="modal-published-content">
         </div>
-        <div id="modal-unpublished-header">
+        <div id="modal-unpublished-headerName">
                 Failed to UnPublish Environments
                 </div>
                 <div id="modal-unpublished-content">

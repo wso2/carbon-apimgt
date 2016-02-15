@@ -712,7 +712,7 @@
 
         <% if(lenS > 0){ %>
             <div id="scopePopup" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-header">
+                    <div class="modal-headerName">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3><%=i18n.localize("selectScopes")%></h3>
                     </div>
@@ -744,7 +744,7 @@
             </div>
             
             <div id="scopePopupSand" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-header">
+                    <div class="modal-headerName">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3><%=i18n.localize("selectScopes")%></h3>
                     </div>

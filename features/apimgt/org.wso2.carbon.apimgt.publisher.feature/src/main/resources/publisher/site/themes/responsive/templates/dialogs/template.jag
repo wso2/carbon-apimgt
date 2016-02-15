@@ -6,7 +6,7 @@ i18n.init(request,localeResourcesBasePath);%>
          <div class="modal fade" id="messageModal">
            <div class="modal-dialog" >
              <div class="modal-content" >
-                   <div class="modal-header">
+                   <div class="modal-headerName">
                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                      <h3 class="modal-title">Modal title</h3>
                    </div>
@@ -26,7 +26,7 @@ i18n.init(request,localeResourcesBasePath);%>
 
 
              <form id="mainLoginForm"  autocomplete="off">
-                <div class="modal-header">
+                <div class="modal-headerName">
                     <button class="close" data-dismiss="modal">&times;</button>
                     <h3>Login</h3>
                 </div>

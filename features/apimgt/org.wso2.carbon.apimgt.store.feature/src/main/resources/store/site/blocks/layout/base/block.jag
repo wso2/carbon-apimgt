@@ -8,7 +8,7 @@ jagg.block("layout/base", {
     getInputs:function () {
         return {
             title:null,
-            header:null,
+            headerName:null,
             top:null,
             left:null,
             middle:null,
@@ -24,7 +24,7 @@ jagg.block("layout/base", {
 
     getInputBlocks:function () {
         return [
-            "header",
+            "headerName",
             "top",
             "left",
             "middle",

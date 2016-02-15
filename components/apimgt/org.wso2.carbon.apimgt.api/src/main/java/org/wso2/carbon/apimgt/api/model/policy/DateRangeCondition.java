@@ -25,6 +25,7 @@ public class DateRangeCondition extends Condition {
 
     public DateRangeCondition() {
         setType(PolicyConstants.DATE_RANGE_TYPE);
+        setQueryAttributeName(PolicyConstants.DATE_QUERY);
     }
 
     public String getEndingDate() {
@@ -45,7 +46,9 @@ public class DateRangeCondition extends Condition {
 
     @Override
     public String getCondition() {
-        return null;
+        String condition = getQueryAttributeName()+">="+ getStartingDate() + " AND "+ getQueryAttributeName() +"<="+
+                getEndingDate();
+        return condition;
     }
 }
 

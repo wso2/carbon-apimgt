@@ -71,7 +71,7 @@
     -->
     <APIConsumerAuthentication>
         <!--
-            Name of the security context header to be added to the validated requests.
+            Name of the security context headerName to be added to the validated requests.
         -->
         <SecurityContextHeader>X-JWT-Assertion</SecurityContextHeader>
 
@@ -180,7 +180,7 @@
         <EnableGatewayResourceCache>true</EnableGatewayResourceCache>
 
         <!-- Header name can be configurable, as you preferred. When API invocation is restricted to access only for authorized domains,
-            client request should send his domain, as the value of this header.
+            client request should send his domain, as the value of this headerName.
         -->
         <ClientDomainHeader>referer</ClientDomainHeader>
 
@@ -552,13 +552,13 @@
     </StartupAPIPublisher>
 
     <!--Configuration to enable/disable sending CORS headers in the Gateway response
-        and define the Access-Control-Allow-Origin header value.-->
+        and define the Access-Control-Allow-Origin headerName value.-->
     <CORSConfiguration>
 
         <!--Configuration to enable/disable sending CORS headers from the Gateway-->
         <Enabled>true</Enabled>
 
-        <!--The value of the Access-Control-Allow-Origin header. Default values are
+        <!--The value of the Access-Control-Allow-Origin headerName. Default values are
             API Store addresses, which is needed for swagger to function.-->
         <Access-Control-Allow-Origin>*</Access-Control-Allow-Origin>
 
@@ -569,8 +569,8 @@
         <Access-Control-Allow-Headers>authorization,Access-Control-Allow-Origin,Content-Type</Access-Control-Allow-Headers>
 
         <!--Configure Access-Control-Allow-Credentials-->
-        <!-- Specifying this header to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
-             It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin header does not contain the wildcard (*)
+        <!-- Specifying this headerName to true means that the server allows cookies (or other user credentials) to be included on cross-origin requests.
+             It is false by default and if you set it to true then make sure that the Access-Control-Allow-Origin headerName does not contain the wildcard (*)
         -->
         <Access-Control-Allow-Credentials>false</Access-Control-Allow-Credentials>
 

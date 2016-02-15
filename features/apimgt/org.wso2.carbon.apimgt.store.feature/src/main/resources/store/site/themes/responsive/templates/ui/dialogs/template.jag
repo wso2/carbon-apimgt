@@ -32,7 +32,7 @@ i18n.init(request,localeResourcesBasePath);
 <form id="mainLoginForm" autocomplete="off">    
 <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-headerName">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title"><%=i18n.localize("login")%></h4>
       </div>
@@ -70,9 +70,9 @@ i18n.init(request,localeResourcesBasePath);
 
 
 <div id="codnfirmation-data" style="display:none;">
-    <div class="modal-header">
+    <div class="modal-headerName">
         <button class="close" data-dismiss="modal">x</button>
-        <h3 class="modal-title">Modal header</h3>
+        <h3 class="modal-title">Modal headerName</h3>
     </div>
     <div class="modal-body">
         <p>One fine body…</p>
@@ -87,7 +87,7 @@ i18n.init(request,localeResourcesBasePath);
 <div class="modal fade hide" id="confirmation-data" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-headerName">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="myModalLabel">Modal title</h4>
       </div>

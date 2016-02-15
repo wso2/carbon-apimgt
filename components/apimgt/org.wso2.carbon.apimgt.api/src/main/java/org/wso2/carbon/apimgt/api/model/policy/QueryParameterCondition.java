@@ -32,6 +32,7 @@ public class QueryParameterCondition extends Condition {
 
     public void setParameter(String parameter) {
         this.parameter = parameter;
+        setQueryAttributeName(parameter);
     }
 
     public String getValue() {
@@ -44,6 +45,7 @@ public class QueryParameterCondition extends Condition {
 
     @Override
     public String getCondition() {
+        String condition = getQueryAttributeName()+" == "+getValue();
         return null;
     }
 }

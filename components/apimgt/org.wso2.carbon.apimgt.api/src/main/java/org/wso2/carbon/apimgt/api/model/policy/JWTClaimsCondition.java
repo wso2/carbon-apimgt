@@ -32,6 +32,7 @@ public class JWTClaimsCondition extends Condition{
 
     public void setClaimUrl(String claimUrl) {
         this.claimUrl = claimUrl;
+        setQueryAttributeName(claimUrl);
     }
 
     public String getAttribute() {
@@ -44,6 +45,7 @@ public class JWTClaimsCondition extends Condition{
 
     @Override
     public String getCondition() {
-        return null;
+        String condition = getQueryAttributeName()+" == "+getAttribute();
+        return condition;
     }
 }

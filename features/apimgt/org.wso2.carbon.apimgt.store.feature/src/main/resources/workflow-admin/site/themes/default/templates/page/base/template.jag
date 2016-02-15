@@ -55,10 +55,10 @@ i18n.init(request,localeResourcesBasePath);
 
     <%
     var data = jagg.data();
-    if(data.header) {
-        jagg.printData(data.header.js);
-        jagg.printData(data.header.css);
-        jagg.printData(data.header.code);
+    if(data.headerName) {
+        jagg.printData(data.headerName.js);
+        jagg.printData(data.headerName.css);
+        jagg.printData(data.headerName.code);
     }
     %>
 </head>
@@ -76,7 +76,7 @@ var editUrl="info";
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> onload="loadTiers()"<%}%>
 >
     <div id="wrap">
-        <div class="container-fluid header">
+        <div class="container-fluid headerName">
           <div class="row-fluid">
               <div class="span6"></div>
               <div class="span6 top-menu"></div>
@@ -84,7 +84,7 @@ var editUrl="info";
         </div>
 
         <div class="clearfix"></div>
-        <div id="header"><% jagg.includeBlocks(outputs.header); %></div>
+        <div id="headerName"><% jagg.includeBlocks(outputs.headerName); %></div>
         <div id="body"><% jagg.includeBlocks(outputs.body); %></div>
         <div id="push"></div>
     </div>

@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-include("header.jag");
+include("headerName.jag");
 var site = require("/site/conf/site.json");
 
 var i18n = require("i18n");
@@ -18,7 +18,7 @@ i18n.init(request,localeResourcesBasePath);
         "name":"page/base",
         "inputs":{
             "title":"API Publisher- API Info",
-            "header":{
+            "headerName":{
                 "name":"menu/primary"
             },
             "body":[

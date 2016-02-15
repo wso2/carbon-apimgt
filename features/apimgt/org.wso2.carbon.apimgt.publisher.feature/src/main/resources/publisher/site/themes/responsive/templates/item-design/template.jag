@@ -129,7 +129,7 @@
 <div class="modal fade" id="swaggerUpload" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-headerName">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 id="swaggerUploadLabel">Import API Definition</h3>
       </div>
@@ -278,7 +278,7 @@
      <%}%>
 
      <div id="error-invalidImageFileSize" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
-         <div class="modal-header">
+         <div class="modal-headerName">
          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
          <h3>API Publisher - Error</h3>
          </div>

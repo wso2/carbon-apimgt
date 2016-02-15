@@ -227,7 +227,7 @@
                <xs:element minOccurs="0" name="SOAPBodyFirstElementLocalName" nillable="true" type="xs:string"></xs:element>
                <xs:element minOccurs="0" name="SOAPBodyFirstElementNS" nillable="true" type="ax264:OMNamespace"></xs:element>
                <xs:element minOccurs="0" name="body" nillable="true" type="ax262:SOAPBody"></xs:element>
-               <xs:element minOccurs="0" name="header" nillable="true" type="ax262:SOAPHeader"></xs:element>
+               <xs:element minOccurs="0" name="headerName" nillable="true" type="ax262:SOAPHeader"></xs:element>
                <xs:element minOccurs="0" name="version" nillable="true" type="ax262:SOAPVersion"></xs:element>
             </xs:sequence>
          </xs:complexType>

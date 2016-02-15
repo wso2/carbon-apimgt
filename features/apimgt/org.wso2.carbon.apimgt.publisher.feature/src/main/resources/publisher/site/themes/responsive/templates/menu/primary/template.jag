@@ -22,7 +22,7 @@ var tenantDomain =MultitenantUtils.getTenantDomain(outputs.user.username);
 
 <!-- Fixed navbar -->
 <nav class="navbar navbar-default navbar-fixed-top navbar-inverse">
-  <div class="navbar-header">
+  <div class="navbar-headerName">
     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
       <span class="sr-only">Toggle navigation</span>
       <span class="icon-bar"></span>
@@ -39,7 +39,7 @@ var tenantDomain =MultitenantUtils.getTenantDomain(outputs.user.username);
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%if(outputs.user!=null){%><%=outputs.user.username%><%}%> <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
-            <li role="presentation" class="dropdown-header"><%=i18n.localize("logged")%></li>
+            <li role="presentation" class="dropdown-headerName"><%=i18n.localize("logged")%></li>
             <li role="presentation" class="disabled"><a role="menuitem" tabindex="-1" href="#"><strong><%=outputs.user.username%></strong></a></li>
             <li role="presentation" class="divider"></li>
             <li><a href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>" id="logout-link"><i class="fa fa-sign-out"></i> <%=i18n.localize("logout")%></a></li>

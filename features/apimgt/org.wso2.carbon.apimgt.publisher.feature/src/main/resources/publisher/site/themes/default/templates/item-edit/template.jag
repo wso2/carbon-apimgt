@@ -525,7 +525,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
         </form>
 
                     <div  id="advance_endpoint_config" class="modal hide fade">
-                         <div class="modal-header">
+                         <div class="modal-headerName">
                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                          <h3>Advanced Endpoint Configuration</h3>
                          </div>
@@ -540,7 +540,7 @@ API Definition for Swagger will not be overriden with the changes you will do to
                     </div>
 
             <div  id="define_scope_modal" class="modal hide fade form-horizontal">
-                <div class="modal-header">
+                <div class="modal-headerName">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h3>Define Scope</h3>
                 </div>

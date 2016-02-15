@@ -24,6 +24,7 @@ public class IPRangeCondition extends Condition {
 
     public IPRangeCondition() {
         setType(PolicyConstants.IP_RANGE_TYPE);
+        setQueryAttributeName(PolicyConstants.IP_QUERY);
     }
 
     public String getStartingIP() {
@@ -59,6 +60,9 @@ public class IPRangeCondition extends Condition {
 
     @Override
     public String getCondition() {
-        return null;
+        long ipStart = ipToLong(getStartingIP());
+        long ipEnd = ipToLong(getEndingIP());
+        String condiion = ipStart+"<="+ getQueryAttributeName() +" AND "+ipEnd+">="+ getQueryAttributeName();
+        return condiion;
     }
 }

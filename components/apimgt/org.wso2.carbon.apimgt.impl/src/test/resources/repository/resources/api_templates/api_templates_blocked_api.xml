@@ -30,7 +30,7 @@
             <property name="HTTP_SC" value="503" scope="axis2"/>
             <property name="RESPONSE" value="true"/>
             <property name="NO_ENTITY_BODY" scope="axis2" action="remove"/>
-            <header name="To" action="remove"/>
+            <headerName name="To" action="remove"/>
             <send/>
         </inSequence>
     </resource>

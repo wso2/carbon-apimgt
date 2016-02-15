@@ -3,7 +3,7 @@
       START Header back ground
       No real content is here just to display the head
       -->
-      <div class="container-fluid header">
+      <div class="container-fluid headerName">
           <div class="row-fluid">
               <div class="span6"></div>
               <div class="span6 top-menu"></div>

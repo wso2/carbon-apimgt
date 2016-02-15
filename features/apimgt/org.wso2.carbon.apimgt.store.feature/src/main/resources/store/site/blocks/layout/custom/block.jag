@@ -22,7 +22,7 @@ jagg.block("layout/custom", {
 
     getOutputBlocks:function () {
         return [
-            "header",
+            "headerName",
             "top"
 
         ];
