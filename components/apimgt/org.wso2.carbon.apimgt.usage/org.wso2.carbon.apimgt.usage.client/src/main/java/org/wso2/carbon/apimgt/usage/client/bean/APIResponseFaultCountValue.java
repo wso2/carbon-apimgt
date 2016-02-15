@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API fault count result from the DAS REST API
+ */
 public class APIResponseFaultCountValue {
     private int totalFaultCount;
     private List<String> api_version_apiPublisher_context_facet;

@@ -18,6 +18,10 @@
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
 
+/**
+ * This class is used as a bean for represent generic statistics result from the DAS REST API
+ * @param <T> expected result type
+ */
 public class Result<T> {
     private String id;
     private String tableName;

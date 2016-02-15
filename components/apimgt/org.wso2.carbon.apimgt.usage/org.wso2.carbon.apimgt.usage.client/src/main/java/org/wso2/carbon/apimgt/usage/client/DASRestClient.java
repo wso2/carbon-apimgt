@@ -54,7 +54,7 @@ public class DASRestClient {
     private CloseableHttpClient httpClient;
     private String dasUrl;
     private String user;
-    private String pass;
+    private char[] pass;
     private final Gson gson = new Gson();
     private static final Log log = LogFactory.getLog(DASRestClient.class);
 
@@ -65,14 +65,12 @@ public class DASRestClient {
      * @param user DAS rest api username
      * @param pass DAs rest api password
      */
-    public DASRestClient(String url, String user, String pass) {
-           
-        URL dasURL = new URL(url);          
+    public DASRestClient(String url, String user, char[] pass) {
+        URL dasURL = new URL(url);
         httpClient = (CloseableHttpClient) APIUtil.getHttpClient(dasURL.getPort(), dasURL.getProtocol());
         this.dasUrl = url;
         this.user = user;
         this.pass = pass;
-
     }
 
     /**
@@ -237,7 +235,6 @@ public class DASRestClient {
             //pass to java object
             obj = gson.fromJson(reader, type);
         } finally {
-            //            httpClient.getConnectionManager().shutdown();
 
             if (reader != null) {
                 try {
@@ -251,7 +248,6 @@ public class DASRestClient {
 
         }
         return obj;
-
     }
 
 }

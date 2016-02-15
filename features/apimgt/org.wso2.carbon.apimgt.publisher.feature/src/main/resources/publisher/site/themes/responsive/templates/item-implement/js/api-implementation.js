@@ -13,8 +13,28 @@ $(document).ready(function(){
         $(".implementation_method_"+$(this).val()).show();
     });
 
-
-    $('#endpointType').on('change', function () {
+    if($('#toggleThrottle').attr('checked')){
+        $('#toggleThrottle').parent().next().show();
+    } else {
+        $('#toggleThrottle').parent().next().hide();
+    }
+   if( $("#toggleCors").attr('checked') ) {
+        $('#toggleCors').parent().next().show();
+       } 
+      else {
+        $('#toggleCors').parent().next().hide();
+      }
+   if($('#toggleallOrigin').attr('checked')) {
+       $('#allowCredentials').attr("checked",false);
+       $('#allowCredentials').hide();
+       $('.originContainer').hide();
+      } else {
+        $('#allowCredentials').show();
+        $('#allOriginContainer').hide();
+        $('.originContainer').show();
+        } 
+ 
+     $('#endpointType').on('change',function() {
         var endpointType = $('#endpointType').find(":selected").val();
         if (endpointType == "secured") {
             var endpointAuthType = $('#endpointAuthType').find(":selected").val();
@@ -123,8 +143,9 @@ $(document).ready(function(){
                          jagg.showLogin();
                      }
                  } else {
-                     jagg.message({content:responseText.message,type:"error"});
-                 }
+                              var message=responseText.message;
+                              showGatewayFailure(message);
+                         }
                  $('#'+thisID).buttonLoader('stop');
              }
             }, dataType: 'json'
@@ -163,27 +184,42 @@ $(document).ready(function(){
                                  } else {
                                      jagg.showLogin();
                                  }
-                             } else {
-                                 jagg.message({content:responseText.message,type:"error"});
-                             }
+                             }else {
+                              var message=responseText.message;
+                              showGatewayFailure(message);
+                         }
                         }
                     },
                     dataType: "json"
                 });               
             });
-        $("#prototype_form").submit();                        
+        $("#prototype_form").submit();
+	return false;                         
     });
 
     // last saved implementation state
-    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
-    if ($('#endpoint_config').val()){
-        if(endpoint_config.implementation_status == "managed"){
-            $('#prototype').hide();
-            $('#managed-api').slideDown();
-        }else if(endpoint_config.implementation_status == "prototyped"){
-            $('#managed-api').hide();
-            $('#prototype').slideDown();
-        }
+   if ($('#endpoint_config').val() != "") {
+	    var endpoint_config = jQuery.parseJSON($('#endpoint_config').val());
+	    if ($('#endpoint_config').val()){
+		if(endpoint_config.implementation_status == "managed"){
+		    $('#prototype').hide();
+		    $('#managed-api').slideDown();
+		}else if(endpoint_config.implementation_status == "prototyped"){
+		    $('#managed-api').hide();
+		    $('#prototype').slideDown();
+		}
+	    }
+    }
+
+    loadInSequences();
+    loadOutSequences();
+    loadFaultSequences();
+
+    if ( $("#toggleSequence").attr('checked') ) {
+        $('#toggleSequence').parent().next().show();
+    }
+    else {
+        $('#toggleSequence').parent().next().hide();
     }
 
 });
@@ -203,4 +239,201 @@ $('#prototyped_api').click(function(e){
 
 $('#go_to_manage').click(function(e){
     thisID = $(this).attr('id');
+});
+
+$('#save_policies').click(function(e){
+    thisID = $(this).attr('id');
+});
+
+function showGatewayFailure(message) {
+    if (message.split("||")[1] == "warning") {
+        var environmentsFailed = JSON.parse(message.split("||")[0]);
+        var failedToPublishEnvironments = environmentsFailed.PUBLISHED;
+        var failedToUnpublishedEnvironments = environmentsFailed.UNPUBLISHED;
+        var divPublish = "", divUnpublished = "";
+        for (i = 0; i < failedToPublishEnvironments.split(",").length; i++) {
+            var splitPublished = (failedToPublishEnvironments.split(",")[i]).split(":");
+            divPublish += splitPublished[0] + "<br>" + splitPublished[1] + "<br>";
+        }
+        for (i = 0; i < failedToUnpublishedEnvironments.split(",").length; i++) {
+            var splitUnPublished = (failedToUnpublishedEnvironments.split(",")[i]).split(":");
+
+            divUnpublished += splitUnPublished[0] + "<br>" + splitUnPublished[1] + "<br>";
+        }
+        $("#modal-published-content").empty();
+        $("#modal-unpublished-content").empty();
+        $("#modal-published-content").append(divPublish);
+        $("#modal-unpublished-content").append(divUnpublished);
+        if (failedToPublishEnvironments == "") {
+            $("#modal-published-header").hide();
+            $("#modal-published-content").hide();
+        }
+        if (failedToUnpublishedEnvironments == "") {
+            $("#modal-unpublished-header").hide();
+            $("#modal-unpublished-content").hide();
+        }
+        $("#retryType").val("manage");
+        $("#environmentsRetry-modal").modal('show');
+    }
+    else {
+
+        jagg.message({content: responseText.message, type: "error"});
+    }
+}
+
+function loadInSequences() {
+
+    if(inSequencesLoaded){
+        return;
+    }
+
+        jagg.post("/site/blocks/item-add/ajax/add.jag", {
+                action : "getCustomInSequences", provider:apiProvider, apiName:apiName, apiVersion:apiVersion
+            },
+              function(result) {
+                  if (!result.error) {
+                      var arr = [];
+                      if (result.sequences.length == 0) {
+                          var msg = "No defined sequences";
+                          $('<input>').
+                                  attr('type', 'hidden').
+                                  attr('name', 'inSeq').
+                                  attr('id', 'inSeq').
+                                  attr('value', msg).
+                                  appendTo('#manage_form');
+                      } else {
+                          for ( var j = 0; j < result.sequences.length; j++) {
+                              arr.push(result.sequences[j]);
+                          }
+                          for ( var i = 0; i < arr.length; i++) {
+                              if(result.sequences[i] == insequence){
+                                  $('#inSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
+                              }else{
+                                  $('#inSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+                              }
+                              $('<input>').
+                                      attr('type', 'hidden').
+                                      attr('name', 'inSeq').
+                                      attr('id', 'inSeq').
+                                      attr('value', result.sequences[i]).
+                                      appendTo('#manage_form');
+
+                          }
+                      }
+                      inSequencesLoaded = true;
+                  }
+              }, "json");
+}
+
+function loadOutSequences() {
+
+    if(outSequencesLoaded){
+        return;
+    }
+
+    jagg.post("/site/blocks/item-add/ajax/add.jag", {
+                action : "getCustomOutSequences" , provider:apiProvider, apiName:apiName, apiVersion:apiVersion
+            },
+              function(result) {
+                  if (!result.error) {
+                      var arr = [];
+                      if (result.sequences.length == 0) {
+                          var msg = "No defined sequences";
+                          $('<input>').
+                                  attr('type', 'hidden').
+                                  attr('name', 'outSeq').
+                                  attr('id', 'outSeq').
+                                  attr('value', msg).
+                                  appendTo('#manage_form');
+                      }else {
+                          for ( var j = 0; j < result.sequences.length; j++) {
+                              arr.push(result.sequences[j]);
+                          }
+                          for(var i=0; i<arr.length; i++){
+                              if(result.sequences[i] == outsequence){
+                                  $('#outSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
+                              }
+                              else{
+                                  $('#outSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+                              }
+                              $('<input>').
+                                      attr('type', 'hidden').
+                                      attr('name', 'outSeq').
+                                      attr('id', 'outSeq').
+                                      attr('value', result.sequences[i]).
+                                      appendTo('#manage_form');
+
+                          }
+                      }
+                      outSequencesLoaded = true;
+                  }
+              }, "json");
+}
+
+function loadFaultSequences() {
+
+    if(faultSequencesLoaded){
+        return;
+    }
+
+    jagg.post("/site/blocks/item-add/ajax/add.jag", {
+                action : "getCustomFaultSequences"
+            },
+              function(result) {
+                  if (!result.error) {
+                      var arr = [];
+                      if (result.sequences.length == 0) {
+                          var msg = "No defined sequences";
+                          $('<input>').
+                                  attr('type', 'hidden').
+                                  attr('name', 'faultSeq').
+                                  attr('id', 'faultSeq').
+                                  attr('value', msg).
+                                  appendTo('#manage_form');
+                      }else {
+                          for ( var j = 0; j < result.sequences.length; j++) {
+                              arr.push(result.sequences[j]);
+                          }
+                          for(var i=0; i<arr.length; i++){
+                              if(result.sequences[i] == faultsequence){
+                                  $('#faultSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
+                              }
+                              else{
+                                  $('#faultSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
+                              }
+                              $('<input>').
+                                      attr('type', 'hidden').
+                                      attr('name', 'faultSeq').
+                                      attr('id', 'faultSeq').
+                                      attr('value', result.sequences[i]).
+                                      appendTo('#manage_form');
+
+                          }
+                      }
+                      faultSequencesLoaded = true;
+                  }
+              }, "json");
+}
+
+
+
+$("#toggleSequence").change(function(e){
+    if($(this).is(":checked")){
+        $(this).parent().next().show();
+        loadInSequences();
+        loadOutSequences();
+        loadFaultSequences();
+    }else{
+        $(this).parent().next().hide();
+        $('#faultSequence').val('');
+        $('#inSequence').val('') ;
+        $('#outSequence').val('');
+    }
+});
+$("#toggleCors").change(function(e){
+    if($(this).is(":checked")){
+        $(this).parent().next().show();
+    }else{
+        $(this).parent().next().hide();
+    }
 });

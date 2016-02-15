@@ -55,15 +55,18 @@ $(document).ready(function(){
         if(input.val()==''){
             $("#errorTier"+increment).show();
             $("#errorTierRoles"+increment).hide();
+            $("#addNewAPIButton-"+increment).prop('disabled', true);
         }else{
             $("#errorTier"+increment).hide();
             var valid1=validateRoles(input.val());
             if(!valid1){
                 $("#errorTierRoles"+increment).show();
                 $("#errorTier"+increment).hide();
+                $("#addNewAPIButton-"+increment).prop('disabled', true);
             }else{
                 $("#errorTierRoles"+increment).hide();
                 $("#errorTier"+increment).hide();
+                $("#addNewAPIButton-"+increment).prop('disabled', false);
             }
 
         }

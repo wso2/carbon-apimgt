@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API user's usage statistics result from the DAS REST API
+ */
 public class APIUsageByUserValues {
     private int count;
     private List<String> api_version_userId_apiPublisher_facet;

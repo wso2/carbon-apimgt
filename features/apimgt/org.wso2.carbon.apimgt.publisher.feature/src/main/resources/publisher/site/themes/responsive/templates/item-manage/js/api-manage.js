@@ -77,13 +77,6 @@ $(document).ready(function(){
 
         });
 
-
-    
-
-    loadInSequences();
-    loadOutSequences();
-    loadFaultSequences();
-
     if ( $("#toggleSequence").attr('checked') ) {
 	$('#toggleSequence').parent().next().show();
     } 
@@ -91,6 +84,13 @@ $(document).ready(function(){
 	$('#toggleSequence').parent().next().hide();
     }
     
+    if( $("#toggleThrottle").attr('checked') ) {
+    $('#toggleThrottle').parent().next().show();
+    } 
+    else {
+    $('#toggleThrottle').parent().next().hide();
+    }
+
 });
 
 $('.js_hidden_section_title').click(function(){
@@ -107,154 +107,14 @@ $('.js_hidden_section_title').click(function(){
         }
     });
 
-function loadInSequences() {
-
-    if(inSequencesLoaded){
-        return;
-    }
-
-    jagg.post("/site/blocks/item-add/ajax/add.jag", {
-        action : "getCustomInSequences"
-    },
-    function(result) {
-        if (!result.error) {
-            var arr = [];
-            if (result.sequences.length == 0) {
-                var msg = "No defined sequences";
-                $('<input>').
-                attr('type', 'hidden').
-                attr('name', 'inSeq').
-                attr('id', 'inSeq').
-                attr('value', msg).
-                appendTo('#manage_form');
-            } else {
-                for ( var j = 0; j < result.sequences.length; j++) {
-                    arr.push(result.sequences[j]);
-                }
-                for ( var i = 0; i < arr.length; i++) {
-                    if(result.sequences[i] == insequence){
-                        $('#inSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
-                    }else{
-                        $('#inSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
-                    }
-                    $('<input>').
-                    attr('type', 'hidden').
-                    attr('name', 'inSeq').
-                    attr('id', 'inSeq').
-                    attr('value', result.sequences[i]).
-                    appendTo('#manage_form');
- 
-                }
-            }
-            inSequencesLoaded = true;
-        }
-    }, "json");
-}
- 
-function loadOutSequences() {
-
-    if(outSequencesLoaded){
-        return;
-    }
-
-    jagg.post("/site/blocks/item-add/ajax/add.jag", {
-        action : "getCustomOutSequences"
-    },
-            function(result) {
-                if (!result.error) {
-                    var arr = [];
-                    if (result.sequences.length == 0) {
-                        var msg = "No defined sequences";
-                        $('<input>').
-                        attr('type', 'hidden').
-                        attr('name', 'outSeq').
-                        attr('id', 'outSeq').
-                        attr('value', msg).
-                        appendTo('#manage_form');
-                    }else {
-                        for ( var j = 0; j < result.sequences.length; j++) {
-                            arr.push(result.sequences[j]);
-                        }
-                        for(var i=0; i<arr.length; i++){
-                            if(result.sequences[i] == outsequence){
-                                $('#outSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
-                            }
-                            else{
-                                $('#outSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
-                            }
-                            $('<input>').
-                            attr('type', 'hidden').
-                            attr('name', 'outSeq').
-                            attr('id', 'outSeq').
-                            attr('value', result.sequences[i]).
-                            appendTo('#manage_form');
-
-                        }
-                    }
-                    outSequencesLoaded = true;
-                }
-            }, "json");
-}
-
-function loadFaultSequences() {
-
-    if(faultSequencesLoaded){
-        return;
-    }
-
-    jagg.post("/site/blocks/item-add/ajax/add.jag", {
-        action : "getCustomFaultSequences"
-    },
-            function(result) {
-                if (!result.error) {
-                    var arr = [];
-                    if (result.sequences.length == 0) {
-                        var msg = "No defined sequences";
-                        $('<input>').
-                        attr('type', 'hidden').
-                        attr('name', 'faultSeq').
-                        attr('id', 'faultSeq').
-                        attr('value', msg).
-                        appendTo('#manage_form');
-                    }else {
-                        for ( var j = 0; j < result.sequences.length; j++) {
-                            arr.push(result.sequences[j]);
-                        }
-                        for(var i=0; i<arr.length; i++){
-                            if(result.sequences[i] == faultsequence){
-                                $('#faultSequence').append('<option value="'+result.sequences[i]+'" selected="selected">'+result.sequences[i]+'</option>');
-                            }
-                            else{
-                                $('#faultSequence').append('<option value="'+result.sequences[i]+'">'+result.sequences[i]+'</option>');
-                            }
-                            $('<input>').
-                            attr('type', 'hidden').
-                            attr('name', 'faultSeq').
-                            attr('id', 'faultSeq').
-                            attr('value', result.sequences[i]).
-                            appendTo('#manage_form');
-
-                        }
-                    }
-                    faultSequencesLoaded = true;
-                }
-            }, "json");
-}
-
-$("#toggleSequence").on('click',function(e){
+$("#toggleThrottle").change(function(e){
     if($(this).is(":checked")){
-        $(this).parent().parent().next().show();
-        loadInSequences();
-        loadOutSequences();
-        loadFaultSequences();
+        $(this).parent().next().show();
     }else{
-        $(this).parent().parent().next().hide();
-        $('#faultSequence').val('');
-        $('#inSequence').val('') ;
-        $('#outSequence').val('');
+        $(this).parent().next().hide();
     }
-    //$('select').selectpicker();
 });
+
 function validate_Transports(){
     var checkedHttpTransport=$('#transport_http').is(":checked");
     var checkedHttpsTransport=$('#transport_https').is(":checked");
