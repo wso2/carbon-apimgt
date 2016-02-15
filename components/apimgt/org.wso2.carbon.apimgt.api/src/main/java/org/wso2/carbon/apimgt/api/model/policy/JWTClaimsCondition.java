@@ -32,7 +32,7 @@ public class JWTClaimsCondition extends Condition{
 
     public void setClaimUrl(String claimUrl) {
         this.claimUrl = claimUrl;
-        setQueryAttributeName(claimUrl);
+        setQueryAttributeName(this.claimUrl);
     }
 
     public String getAttribute() {

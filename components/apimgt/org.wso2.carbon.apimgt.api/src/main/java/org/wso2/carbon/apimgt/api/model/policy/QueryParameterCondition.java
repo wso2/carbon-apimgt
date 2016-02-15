@@ -32,7 +32,7 @@ public class QueryParameterCondition extends Condition {
 
     public void setParameter(String parameter) {
         this.parameter = parameter;
-        setQueryAttributeName(parameter);
+        setQueryAttributeName(this.parameter);
     }
 
     public String getValue() {
