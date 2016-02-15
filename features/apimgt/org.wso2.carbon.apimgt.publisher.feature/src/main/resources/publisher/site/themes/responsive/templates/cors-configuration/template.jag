@@ -2,8 +2,6 @@
 if(outputs.isCreatePermitted){
         var api = outputs.api;
         var corsJson = JSON.parse(api.corsConfiguration);
-	var log = new Log();
-	log.info(corsJson);
  %>
          <div id="corsConfigs">
             
