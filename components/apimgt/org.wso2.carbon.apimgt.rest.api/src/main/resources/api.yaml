@@ -53,7 +53,7 @@ consumes:
 # The following media types may be passed as output in message bodies of the API.
 # The media type(s) consumable by the requestor is specified in the Accept header field
 # of the corresponding request. 
-# The actual media type returned will be specfied in the Content-Type header field
+# The actual media type returned will be specfied in the Content-Type header field 
 # of the of the response.
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
