@@ -8,7 +8,7 @@
     var subsUrl=jagg.getAbsoluteUrl("/site/pages/index.jag");
     var subsMappedUrl=jagg.getMappedUrl("/site/pages/index.jag");
 
-
+    
     var partWithContext = request.getRequestURL().split(
                                 request.getRequestURI()
                               )[0]+request.getContextPath();
