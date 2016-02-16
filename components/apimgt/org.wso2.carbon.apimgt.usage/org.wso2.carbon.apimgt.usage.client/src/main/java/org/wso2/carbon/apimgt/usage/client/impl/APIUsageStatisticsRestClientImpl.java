@@ -201,7 +201,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(0);
         } else {
-            return new ArrayList<PerAppApiCountDTO>();
+            return Collections.emptyList();
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
@@ -316,7 +316,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(0);
         } else {
-            return new ArrayList<AppUsageDTO>();
+            return Collections.emptyList();
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
@@ -429,7 +429,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(0);
         } else {
-            return new ArrayList<AppCallTypeDTO>();
+            return Collections.emptyList();
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
@@ -543,7 +543,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         if (size > 0) {
             firstKey = APIUsageStatisticsClientConstants.CONSUMERKEY + ':' + subscriberApps.get(0);
         } else {
-            return new ArrayList<FaultCountDTO>();
+            return Collections.emptyList();
         }
         StringBuilder concatenatedKeys = new StringBuilder(firstKey);
         for (int i = 1; i < subscriberApps.size(); i++) {
@@ -733,7 +733,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         for (Result<APIUsageByUserValues> result : obj) {
             APIUsageByUserValues v = result.getValues();
             usage = new APIUsageByUserName();
-            usage.setRequestCount(v.getCount_sum());
+            usage.setRequestCount(v.getCountSum());
             usage.setApiName(v.getColumnNames().get(0));
             usage.setApiVersion(v.getColumnNames().get(1));
             usage.setUserID(v.getColumnNames().get(2));
@@ -1427,7 +1427,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                     .append(RestClientUtil.getCeilingDateAsLong(toDate)).append(']');
         } catch (ParseException e) {
             handleException("Error occurred while Error parsing date", e);
-            return new ArrayList<APIResponseFaultCount>();
+            return Collections.emptyList();
         }
 
         //if My APIs stat, add constraint with API publisher
@@ -1509,7 +1509,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 .append('\"').append(tenantDomain).append('\"');
         //if application or api is no available return empty result
         if (apiName.contains("No APIs Available")) {
-            return new ArrayList<APIThrottlingOverTimeDTO>();
+            return Collections.emptyList();
         }
 
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
@@ -1603,7 +1603,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 APIUsageStatisticsClientConstants.TENANT_DOMAIN + ':' + '\"' + tenantDomain + '\"');
         //if application or api is no available return empty result
         if (appName.contains("No Apps Available")) {
-            return new ArrayList<APIThrottlingOverTimeDTO>();
+            return Collections.emptyList();
         }
         //if provider is not ALL_PROVIDERS set the query to preserve specific provider
         if (!provider.startsWith(APIUsageStatisticsClientConstants.ALL_PROVIDERS)) {
@@ -1764,7 +1764,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
         //set the query to find specific api
         if (apiName != null) {
             if (apiName.contains("No APIs Available")) {
-                return new ArrayList<String>();
+                return Collections.emptyList();
             }
             query.append(" AND ").append(APIUsageStatisticsClientConstants.API).append(":\"").append(apiName)
                     .append("\"");
@@ -1931,7 +1931,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
 
         //check whether API_UTIL class id present
         if (!isTableExist(APIUsageStatisticsClientConstants.DAS_TABLE_API_UTIL)) {
-            return new ArrayList<APIFirstAccess>();
+            return Collections.emptyList();
         }
         //getting the search bean
         APIFirstAccess firstAccess = this.queryFirstAccess(APIUsageStatisticsClientConstants.DAS_TABLE_API_UTIL);

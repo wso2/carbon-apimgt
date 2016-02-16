@@ -28,7 +28,6 @@ public class APIUsageByDestinationValue {
     private List<String> api_version_context_dest_facet;
 
     public APIUsageByDestinationValue(int lastAccessTime, List<String> api_version_userId_facet) {
-        super();
         this.totalRequestCount = lastAccessTime;
         this.api_version_context_dest_facet = api_version_userId_facet;
     }

@@ -28,7 +28,6 @@ public class APIResponseFaultCountValue {
     private List<String> api_version_apiPublisher_context_facet;
 
     public APIResponseFaultCountValue(int totalFaultCount, List<String> api_version_userId_facet) {
-        super();
         this.totalFaultCount = totalFaultCount;
         this.api_version_apiPublisher_context_facet = api_version_userId_facet;
     }

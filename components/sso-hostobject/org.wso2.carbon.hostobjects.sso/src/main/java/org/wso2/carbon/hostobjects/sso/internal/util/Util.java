@@ -336,13 +336,13 @@ public class Util {
     /** Build NameIDPolicy object given name ID policy format
      *
      * @param nameIdPolicy Name ID policy format
-     * @return
+     * @return SAML NameIDPolicy object
      */
     public static NameIDPolicy buildNameIDPolicy(String nameIdPolicy) {
         NameIDPolicy nameIDPolicyObj = new NameIDPolicyBuilder().buildObject();
-        if (!StringUtils.isEmpty(nameIdPolicy)){
+        if (!StringUtils.isEmpty(nameIdPolicy)) {
             nameIDPolicyObj.setFormat(nameIdPolicy);
-        }else {
+        } else {
             nameIDPolicyObj.setFormat(SSOConstants.NAME_ID_POLICY_DEFAULT);
         }
         nameIDPolicyObj.setAllowCreate(true);
@@ -352,8 +352,8 @@ public class Util {
     /** Build NameID object given name ID format
      *
      * @param nameIdFormat Name ID format
-     * @param subject
-     * @return
+     * @param subject Subject
+     * @return SAML NameID object
      */
     public static NameID buildNameID(String nameIdFormat, String subject) {
         NameID nameIdObj = new NameIDBuilder().buildObject();
@@ -369,10 +369,10 @@ public class Util {
     /**
      * Replaces the ${} in url with system properties and returns
      *
-     * @param acsUrl
-     * @return
+     * @param acsUrl assertion consumer service url
+     * @return acsUrl with system properties replaced
      */
-    public static String processAcsUrl(String acsUrl){
+    public static String processAcsUrl(String acsUrl) {
         //matches shortest segments that are between '{' and '}'
         Pattern pattern = Pattern.compile("\\$\\{(.*?)\\}");
         Matcher matcher = pattern.matcher(acsUrl);
