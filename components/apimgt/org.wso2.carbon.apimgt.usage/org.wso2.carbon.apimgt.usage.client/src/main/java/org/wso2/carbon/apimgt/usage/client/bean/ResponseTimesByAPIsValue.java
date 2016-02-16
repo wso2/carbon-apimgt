@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API response time statistics result from the DAS REST API
+ */
 public class ResponseTimesByAPIsValue {
     private int totalServiceTime;
     private int totalResponseCount;

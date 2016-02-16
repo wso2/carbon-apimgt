@@ -54,7 +54,7 @@ public class DASRestClient {
     private CloseableHttpClient httpClient;
     private String dasUrl;
     private String user;
-    private String pass;
+    private char[] pass;
     private final Gson gson = new Gson();
     private static final Log log = LogFactory.getLog(DASRestClient.class);
 
@@ -65,14 +65,12 @@ public class DASRestClient {
      * @param user DAS rest api username
      * @param pass DAs rest api password
      */
-    public DASRestClient(String url, String user, String pass) {
-           
-        URL dasURL = new URL(url);          
+    public DASRestClient(String url, String user, char[] pass) {
+        URL dasURL = new URL(url);
         httpClient = (CloseableHttpClient) APIUtil.getHttpClient(dasURL.getPort(), dasURL.getProtocol());
         this.dasUrl = url;
         this.user = user;
         this.pass = pass;
-
     }
 
     /**
@@ -84,11 +82,9 @@ public class DASRestClient {
      * @throws IOException throw if the connection exception occur
      */
     CloseableHttpResponse post(String json, String url) throws IOException {
-
         if (log.isDebugEnabled()) {
             log.debug("Sending Lucene Query : " + json);
         }
-
         HttpPost postRequest = new HttpPost(url);
         HttpContext context = HttpClientContext.create();
 
@@ -115,7 +111,6 @@ public class DASRestClient {
      * @throws IOException           throws if connection error occur
      */
     <T> List<Result<T>> parse(CloseableHttpResponse response, Type type) throws IllegalStateException, IOException {
-
         BufferedReader reader = null;
         List<Result<T>> obj;
         try {
@@ -133,7 +128,6 @@ public class DASRestClient {
                     log.error("Error occurred while closing the buffers reader.", e);
                 }
             }
-
             if (response != null) {
                 try {
                     //close the response reader
@@ -143,7 +137,6 @@ public class DASRestClient {
                     log.error("Error occurred while closing the response.", e);
                 }
             }
-
         }
         return obj;
     }
@@ -159,7 +152,6 @@ public class DASRestClient {
      * @throws IOException         throws if connection error occur to the REST API
      */
     public <T> List<Result<T>> doPost(SearchRequestBean request, Type type) throws JsonSyntaxException, IOException {
-
         //get the json string of the request object
         String json = gson.toJson(request);
 
@@ -174,9 +166,7 @@ public class DASRestClient {
         }
 
         //parse the response back to the java objects
-        List<Result<T>> result = parse(response, type);
-
-        return result;
+        return parse(response, type);
     }
 
     /**
@@ -198,9 +188,7 @@ public class DASRestClient {
         CloseableHttpResponse response = post(json, dasUrl + APIUsageStatisticsClientConstants.DAS_SEARCH_REST_API_URL);
 
         //parse the response back to the java objects
-        List<Result<T>> result = parse(response, type);
-
-        return result;
+        return parse(response, type);
     }
 
     /**
@@ -212,7 +200,6 @@ public class DASRestClient {
      * @throws IOException         throws if connection problem occur
      */
     public TableExistResponseBean isTableExist(String name) throws JsonSyntaxException, IOException {
-
         //crete the http get request method to REST API
         HttpGet getRequest = new HttpGet(
                 dasUrl + APIUsageStatisticsClientConstants.DAS_TABLE_EXIST_REST_API_URL + "?table=" + name);
@@ -237,8 +224,6 @@ public class DASRestClient {
             //pass to java object
             obj = gson.fromJson(reader, type);
         } finally {
-            //            httpClient.getConnectionManager().shutdown();
-
             if (reader != null) {
                 try {
                     //close the reader when done
@@ -248,10 +233,8 @@ public class DASRestClient {
                     log.error("Error occurred while closing the buffers reader.", e);
                 }
             }
-
         }
         return obj;
-
     }
 
 }

@@ -293,7 +293,13 @@ public abstract class AbstractAPIManager implements APIManager {
                                                                                 APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
-                API api = APIUtil.getAPI(artifact);
+                API api = null;
+                try {
+                    api = APIUtil.getAPI(artifact);
+                } catch (APIManagementException e) {
+                    //log and continue since we want to load the rest of the APIs.
+                    log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
+                }
                 if (api != null) {
                     apiSortedList.add(api);
                 }
@@ -441,15 +447,13 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 handleResourceNotFoundException(
                         "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
-                return null;
             }
         } catch (RegistryException e) {
-            handleException("Failed to get API", e);
-            return null;
+            handleException("Failed to get API with uuid " + uuid, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Failed to get API", e);
-            return null;
+            handleException("Failed to get tenant Id while getting API with uuid " + uuid, e);
         }
+        return null;
     }
 
     /**

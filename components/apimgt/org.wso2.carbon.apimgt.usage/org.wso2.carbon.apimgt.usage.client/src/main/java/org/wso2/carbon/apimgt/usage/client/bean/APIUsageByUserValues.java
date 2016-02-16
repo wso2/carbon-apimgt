@@ -20,15 +20,18 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API user's usage statistics result from the DAS REST API
+ */
 public class APIUsageByUserValues {
     private int count;
     private List<String> api_version_userId_apiPublisher_facet;
 
-    public int getCount_sum() {
+    public int getCountSum() {
         return count;
     }
 
-    public void setCount_sum(int count_sum) {
+    public void setCountSum(int count_sum) {
         this.count = count_sum;
     }
 
@@ -41,7 +44,6 @@ public class APIUsageByUserValues {
     }
 
     public APIUsageByUserValues(int count_sum, List<String> ColumnNames) {
-        super();
         this.count = count_sum;
         this.api_version_userId_apiPublisher_facet = ColumnNames;
     }

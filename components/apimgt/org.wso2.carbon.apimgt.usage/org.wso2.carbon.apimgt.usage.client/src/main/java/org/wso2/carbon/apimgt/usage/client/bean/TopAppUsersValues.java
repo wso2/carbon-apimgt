@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API top app user's usage statistics result from the DAS REST API
+ */
 public class TopAppUsersValues {
     private int count;
     private List<String> key_userId_facet;
