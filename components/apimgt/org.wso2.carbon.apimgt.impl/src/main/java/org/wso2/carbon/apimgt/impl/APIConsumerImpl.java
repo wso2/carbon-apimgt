@@ -543,8 +543,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
                 int tempLength=0;
                 for (GenericArtifact artifact : genericArtifacts) {
-                    // adding the API provider can mark the latest API .
-                    API api  = APIUtil.getAPI(artifact);
+
+                    API api  = null;
+                    try {
+                        api = APIUtil.getAPI(artifact);
+                    } catch (APIManagementException e) {
+                        //log and continue since we want to load the rest of the APIs.
+                        log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                                e);
+                    }
                     if (api != null) {
                         if (returnAPITags) {
                             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
@@ -918,7 +925,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
         		SortedSet<API> allAPIs = new TreeSet<API>(new APINameComparator());
         		for (GenericArtifact artifact : genericArtifacts) {
-                    API api = APIUtil.getAPI(artifact);
+
+                    API api = null;
+                    try {
+                        api = APIUtil.getAPI(artifact);
+                    } catch (APIManagementException e) {
+                        //just log and continue since we want to go through the other APIs as well.
+                        log.error("Error loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
+                    }
                     if (api != null) {
                         allAPIs.add(api);
                     }

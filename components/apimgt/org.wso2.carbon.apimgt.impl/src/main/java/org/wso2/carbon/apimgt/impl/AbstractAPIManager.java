@@ -293,7 +293,13 @@ public abstract class AbstractAPIManager implements APIManager {
                                                                                 APIConstants.API_KEY);
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
-                API api = APIUtil.getAPI(artifact);
+                API api = null;
+                try {
+                    api = APIUtil.getAPI(artifact);
+                } catch (APIManagementException e) {
+                    //log and continue since we want to load the rest of the APIs.
+                    log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
+                }
                 if (api != null) {
                     apiSortedList.add(api);
                 }
