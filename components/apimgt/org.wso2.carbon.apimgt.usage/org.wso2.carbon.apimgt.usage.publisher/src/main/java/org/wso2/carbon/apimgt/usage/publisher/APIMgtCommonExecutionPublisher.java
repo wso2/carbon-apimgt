@@ -74,7 +74,8 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
                         PrivilegedCarbonContext.startTenantFlow();
                         PrivilegedCarbonContext.getThreadLocalCarbonContext().
                                 setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
-                        APIMgtUsageDataPublisher tempPublisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName(publisherClass).newInstance();
+                        APIMgtUsageDataPublisher tempPublisher = (APIMgtUsageDataPublisher) APIUtil.getClassForName
+                                (publisherClass).newInstance();
                         tempPublisher.init();
                         publisher = tempPublisher;
                     } catch (ClassNotFoundException e) {

@@ -17,6 +17,7 @@
 *
 */
 package org.wso2.carbon.apimgt.usage.client.bean;
+
 public class ExecutionTimeOfAPIValues {
     private String api;
     private String version;
@@ -24,8 +25,21 @@ public class ExecutionTimeOfAPIValues {
     private String mediationName;
     private String apiPublisher;
     private String context;
-    private int year,hour,month,day,minutes;
+    private int year;
+    private int hour;
+    private int month;
+    private int day;
+    private int minutes;
+    private int seconds;
     private long executionTime;
+
+    public int getSeconds() {
+        return seconds;
+    }
+
+    public void setSeconds(int seconds) {
+        this.seconds = seconds;
+    }
 
     public int getMinutes() {
         return minutes;

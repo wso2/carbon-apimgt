@@ -5,9 +5,10 @@ var apiNameVersionMap = {};
 var apiName;
 var version;
 var d = new Date();
-var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes());
+var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(),d.getSeconds());
 var to = new Date();
 var from = new Date(to.getTime() - 1000 * 60 * 60 * 24);
+var depth ="minutes";
 $( document ).ready(function() {
     populateAPIList();
    $("#apiSelect").change(function (e) {
@@ -18,19 +19,19 @@ $( document ).ready(function() {
       version = this.value;
       var fromDate = from;
       var toDate = to;
-      renderGraph(fromDate,toDate);
+      renderGraph(fromDate,toDate,false);
     });
     $('#today-btn').on('click', function () {
-      renderGraph((currentDay - 86400000),currentDay);
+      renderGraph((currentDay - 86400000),currentDay,false);
     });
        $('#hour-btn').on('click', function () {
-         renderGraph((currentDay - 3600000),currentDay);
+         renderGraph((currentDay - 3600000),currentDay,false);
       });
        $('#week-btn').on('click', function () {
-         renderGraph((currentDay - 604800000),currentDay);
+         renderGraph((currentDay - 604800000),currentDay,false);
       });
        $('#month-btn').on('click', function () {
-        renderGraph((currentDay - (604800000 * 4)),currentDay);
+        renderGraph((currentDay - (604800000 * 4)),currentDay,false);
         });
         $('#date-range').click(function () {
          $(this).removeClass('active');
@@ -52,7 +53,7 @@ $( document ).ready(function() {
                  btnActiveToggle(this);
                  from = convertDate(obj.date1);
                  to = convertDate(obj.date2);
-                 renderGraph(from, to);
+                 renderGraph(from, to,false);
                         });
 });
 
@@ -118,7 +119,7 @@ function isDataPublishingEnabled(){
 
 var convertTimeString = function(date){
     var d = new Date(date);
-    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes());
+    var formattedDate = d.getFullYear() + "-" + formatTimeChunk((d.getMonth()+1)) + "-" + formatTimeChunk(d.getDate())+" "+formatTimeChunk(d.getHours())+":"+formatTimeChunk(d.getMinutes())+":"+formatTimeChunk(d.getSeconds());
     return formattedDate;
 };
 
@@ -149,10 +150,10 @@ function btnActiveToggle(button){
     $(button).siblings().removeClass('active');
     $(button).addClass('active');
 }
-function renderGraph(fromDate,toDate){
+function renderGraph(fromDate,toDate,drillDown){
    var to = convertTimeString(toDate);
     var from = convertTimeString(fromDate);
-           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to },
+           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
         function (json) {
             if (!json.error) {
             var data1 = [];
@@ -163,7 +164,7 @@ function renderGraph(fromDate,toDate){
                     if (!tempdata) {
                         tempdata = [];
                     }
-                    var d = new Date(json.usage[usage1].values.year, json.usage[usage1].values.month, json.usage[usage1].values.day, json.usage[usage1].values.hour,json.usage[usage1].values.minutes,"00","00");
+                    var d = new Date(json.usage[usage1].values.year, (json.usage[usage1].values.month -1), json.usage[usage1].values.day, json.usage[usage1].values.hour,json.usage[usage1].values.minutes,json.usage[usage1].values.seconds,"00");
                     tempdata.push({x:d,y:json.usage[usage1].values.executionTime});
                      data1[mediationName] = tempdata;
                   }
@@ -195,7 +196,7 @@ function drawGraphInArea(rdata){
     $('#chartContainer').empty();
     $('#temploadinglatencytTime').empty();
     var renderdata = [];
-    var dateFormat = '%d/%m %H:%M';
+    var dateFormat = '%d/%m %H:%M:%S';
     for(var legand in rdata){
         renderdata.push({values: rdata[legand],key: legand,color: pickLegandColor(legand)});
     }
@@ -221,6 +222,18 @@ nv.addGraph(function() {
 
   //Update the chart when window resizes.
   nv.utils.windowResize(function() { chart.update() });
+ d3.selectAll(".nv-point").on("click", function (e) {
+    if (depth == "minutes"){
+    var date = new Date(e.x);
+    var fromDate = new Date(date);
+    var toDate = date.setMinutes(date.getMinutes()+5);
+    depth = "seconds";
+    renderGraph(fromDate,toDate,true);      
+    }else{
+    depth = "minutes";
+    renderGraph(from,to,false);            
+    }
+  });
   return chart;
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));

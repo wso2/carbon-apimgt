@@ -72,6 +72,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static java.util.Collections.sort;
+
 /**
  * Usage statistics clas implementation for the APIUsageStatisticsClient.
  * Use the DAS REST API to query and fetch the data for getting usage Statistics
@@ -2022,7 +2024,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of PerUserAPIUsageDTO
      */
     private List<PerUserAPIUsageDTO> getTopEntries(List<PerUserAPIUsageDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
+        sort(usageData, new Comparator<PerUserAPIUsageDTO>() {
             public int compare(PerUserAPIUsageDTO o1, PerUserAPIUsageDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2051,7 +2053,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return list of APIUsageDTO
      */
     private List<APIUsageDTO> getAPIUsageTopEntries(List<APIUsageDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<APIUsageDTO>() {
+        sort(usageData, new Comparator<APIUsageDTO>() {
             public int compare(APIUsageDTO o1, APIUsageDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2273,18 +2275,6 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     }
 
     /**
-     * Use to handle exception of common type in single step
-     *
-     * @param msg custom message
-     * @param e   throwable object of the exception
-     * @throws APIMgtUsageQueryServiceClientException
-     */
-    private static void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
-        log.error(msg, e);
-        throw new APIMgtUsageQueryServiceClientException(msg, e);
-    }
-
-    /**
      * sort the last access time data by last access time
      *
      * @param usageData list of data to sort
@@ -2293,7 +2283,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<APIVersionLastAccessTimeDTO> getLastAccessTimeTopEntries(List<APIVersionLastAccessTimeDTO> usageData,
             int limit) {
-        Collections.sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
+        sort(usageData, new Comparator<APIVersionLastAccessTimeDTO>() {
             public int compare(APIVersionLastAccessTimeDTO o1, APIVersionLastAccessTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2316,7 +2306,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      * @return return list of APIResponseTimeDTO
      */
     private List<APIResponseTimeDTO> getResponseTimeTopEntries(List<APIResponseTimeDTO> usageData, int limit) {
-        Collections.sort(usageData, new Comparator<APIResponseTimeDTO>() {
+        sort(usageData, new Comparator<APIResponseTimeDTO>() {
             public int compare(APIResponseTimeDTO o1, APIResponseTimeDTO o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2339,7 +2329,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
      */
     private List<Result<ThrottleDataOfAPIAndApplicationValue>> getThrottleDataOfAPIAndApplicationSortedData(
             List<Result<ThrottleDataOfAPIAndApplicationValue>> usageData) {
-        Collections.sort(usageData, new Comparator<Result<ThrottleDataOfAPIAndApplicationValue>>() {
+        sort(usageData, new Comparator<Result<ThrottleDataOfAPIAndApplicationValue>>() {
             public int compare(Result<ThrottleDataOfAPIAndApplicationValue> o1, Result<ThrottleDataOfAPIAndApplicationValue> o2) {
                 // Note that o2 appears before o1
                 // This is because we need to sort in the descending order
@@ -2362,14 +2352,15 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
                                                                         String providerName, String fromDate,
-                                                                        String toDate)
+                                                                        String toDate,boolean drillDown)
             throws APIMgtUsageQueryServiceClientException {
         StringBuilder query = new StringBuilder("api:" + apiName);
         if (version != null) {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
         }
         if (providerName != null) {
-            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":").append(providerName);
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append(":").append
+                    (providerName);
         }
         if (fromDate != null && toDate != null) {
             try {
@@ -2380,8 +2371,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 handleException("Error occurred while Error parsing date", e);
             }
         }
-        RequestSearchBean request = new RequestSearchBean(query.toString(), 0, 500, APIUsageStatisticsClientConstants
-                .API_EXECUTION_TME_SUMMARY);
+        RequestSearchBean request;
+        if (drillDown){
+          request  = new RequestSearchBean(query.toString(), 0, 500, APIUsageStatisticsClientConstants
+                    .API_EXECUTION_TIME_MINUTE_SUMMARY);
+        }else{
+            request  = new RequestSearchBean(query.toString(), 0, 500, APIUsageStatisticsClientConstants
+                    .API_EXECUTION_TME_SUMMARY);
+        }
         Type type = new TypeToken<List<Result<ExecutionTimeOfAPIValues>>>() {
         }.getType();
 
@@ -2391,6 +2388,18 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             if (obj.isEmpty()) {
                 return new ArrayList<Result<ExecutionTimeOfAPIValues>>();
             }
+            sort(obj, new Comparator<Result<ExecutionTimeOfAPIValues>>() {
+                @Override
+                public int compare(Result<ExecutionTimeOfAPIValues> o1, Result<ExecutionTimeOfAPIValues> o2) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(o1.getValues().getYear(), o1.getValues().getMonth(), o1.getValues().getDay(), o1
+                            .getValues().getHour(), o1.getValues().getMinutes(),o1.getValues().getSeconds());
+                    Calendar comparedDate = Calendar.getInstance();
+                    comparedDate.set(o2.getValues().getYear(), o2.getValues().getMonth(), o2.getValues().getDay(), o2
+                            .getValues().getHour(), o2.getValues().getMinutes(), o2.getValues().getSeconds());
+                    return calendar.getTime().compareTo(comparedDate.getTime());
+                }
+            });
             return obj;
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
@@ -2398,13 +2407,5 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             handleException("Error occurred while Connecting to DAS REST API", e);
         }
         return null;
-    }
-
-    private long getDateToLong(String date) throws ParseException {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH");
-        Date fDate = dateFormat.parse(date);
-        Long lDate = fDate.getTime();
-        return lDate;
-
     }
 }

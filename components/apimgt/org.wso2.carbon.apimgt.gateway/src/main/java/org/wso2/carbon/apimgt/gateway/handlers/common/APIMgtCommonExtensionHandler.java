@@ -39,7 +39,8 @@ public class APIMgtCommonExtensionHandler extends AbstractHandler implements Man
 
     public boolean handleRequest(MessageContext messageContext) {
         if (messageContext.getProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME) == null) {
-            messageContext.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, Long.toString(System.currentTimeMillis()));
+            messageContext.setProperty(APIMgtGatewayConstants.REQUEST_EXECUTION_START_TIME, Long.toString(System
+                    .currentTimeMillis()));
         }
         return true;
     }
@@ -74,9 +75,9 @@ public class APIMgtCommonExtensionHandler extends AbstractHandler implements Man
         String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String tenantDomain = MultitenantUtils.getTenantDomain(RESTUtils.getFullRequestPath(messageContext));
         executionTimePublisherDTO.setApiName(APIUtil.getAPINamefromRESTAPI(apiName));
-            if (executionStartTime == 0) {
-                executionTimePublisherDTO.setExecutionTime(0);
-            }
+        if (executionStartTime == 0) {
+            executionTimePublisherDTO.setExecutionTime(0);
+        }
         executionTimePublisherDTO.setExecutionTime(executionTime);
         executionTimePublisherDTO.setMediationType(mediationType);
         executionTimePublisherDTO.setVersion(apiVersion);

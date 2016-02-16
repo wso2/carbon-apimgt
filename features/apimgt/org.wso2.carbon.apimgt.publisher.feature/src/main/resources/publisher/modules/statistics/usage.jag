@@ -655,10 +655,16 @@ function getThrottleDataOfAPIAndApplication(apiName, providerName, appName, from
         };
     }
 }
-function getExecutionTimeByAPI(apiName,version,providerName,fromDate,toDate) {
+function getExecutionTimeByAPI(apiName,version,providerName,fromDate,toDate,drilldown) {
     var usage;
     try {
-        usage = usageClient.getExecutionTimeByAPI(apiName,version,providerName,fromDate,toDate);
+        if (drilldown == 'false'){
+            drilldown = false;
+        }else{
+            drilldown = true;
+        }
+                usage = usageClient.getExecutionTimeByAPI(apiName,version,providerName,fromDate,toDate,drilldown);            
+
         if (log.isDebugEnabled()) {
             log.debug("getExecutionTimeByAPI for : " + providerName);
         }

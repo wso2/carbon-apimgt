@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.usage.client.dto.*;
 import org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException;
 import org.wso2.carbon.apimgt.usage.client.internal.APIUsageClientServiceComponent;
 import org.wso2.carbon.apimgt.usage.client.pojo.*;
+import org.wso2.carbon.apimgt.usage.client.util.RestClientUtil;
 import org.wso2.carbon.application.mgt.stub.upload.CarbonAppUploaderStub;
 import org.wso2.carbon.application.mgt.stub.upload.types.carbon.UploadedFileItem;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -65,6 +66,9 @@ import java.io.InputStream;
 import java.sql.*;
 import java.text.*;
 import java.util.*;
+import java.util.Date;
+
+import static java.util.Collections.sort;
 
 /**
  * Usage statistics class implementation for the APIUsageStatisticsClient.
@@ -2366,7 +2370,101 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
     }
 
     @Override
-    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String providerName, String fromDate, String toDate) throws APIMgtUsageQueryServiceClientException {
-        return null;
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
+            providerName, String fromDate, String toDate, boolean drillDown) throws
+            APIMgtUsageQueryServiceClientException {
+
+        if (dataSource == null) {
+            throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
+                    + "that the data source is properly configured in the APIUsageTracker configuration.");
+        }
+        List<Result<ExecutionTimeOfAPIValues>> result = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet rs = null;
+        try {
+            connection = dataSource.getConnection();
+            StringBuilder query = new StringBuilder("SELECT * FROM ");
+            String tableName;
+            if (drillDown) {
+                tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY;
+                query.append(APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY + " WHERE ");
+            } else {
+                tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TME_SUMMARY;
+                query.append(APIUsageStatisticsClientConstants.API_EXECUTION_TME_SUMMARY + " WHERE ");
+            }
+            query.append("api='" + apiName).append("'");
+            if (version != null) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
+                        .append("'");
+            }
+            if (providerName != null) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append("='").append
+                        (providerName).append("'");
+            }
+            if (fromDate != null && toDate != null) {
+                try {
+                    query.append(" AND ").append(getDateToLong(fromDate)).append(" <= ").append(" " +
+                            "" + APIUsageStatisticsClientConstants.TIME + " ").append("<=").append(getDateToLong
+                            (toDate));
+                } catch (ParseException e) {
+                    handleException("Error occurred while Error parsing date", e);
+                }
+            }
+            if (isTableExist(tableName, connection)) { //Tables exist
+                preparedStatement = connection.prepareStatement(query.toString());
+                rs = preparedStatement.executeQuery();
+                while (rs.next()) {
+                    Result<ExecutionTimeOfAPIValues> result1 = new Result<ExecutionTimeOfAPIValues>();
+                    ExecutionTimeOfAPIValues executionTimeOfAPIValues = new ExecutionTimeOfAPIValues();
+                    executionTimeOfAPIValues.setApi(rs.getString(APIUsageStatisticsClientConstants.API));
+                    executionTimeOfAPIValues.setContext(rs.getString(APIUsageStatisticsClientConstants.CONTEXT));
+                    executionTimeOfAPIValues.setApiPublisher(rs.getString(APIUsageStatisticsClientConstants
+                            .API_PUBLISHER));
+                    executionTimeOfAPIValues.setVersion(rs.getString(APIUsageStatisticsClientConstants.VERSION));
+                    executionTimeOfAPIValues.setYear(rs.getInt(APIUsageStatisticsClientConstants.YEAR));
+                    executionTimeOfAPIValues.setMonth(rs.getInt(APIUsageStatisticsClientConstants.MONTH));
+                    executionTimeOfAPIValues.setDay(rs.getInt(APIUsageStatisticsClientConstants.DAY));
+                    executionTimeOfAPIValues.setHour(rs.getInt(APIUsageStatisticsClientConstants.HOUR));
+                    executionTimeOfAPIValues.setMinutes(rs.getInt(APIUsageStatisticsClientConstants.MINUTES));
+                    if (drillDown){
+                        executionTimeOfAPIValues.setSeconds(rs.getInt(APIUsageStatisticsClientConstants.SECONDS));
+                    }else{
+                        executionTimeOfAPIValues.setSeconds(0);
+                    }
+                    executionTimeOfAPIValues.setMediationName(rs.getString(APIUsageStatisticsClientConstants
+                            .MEDIATION));
+                    executionTimeOfAPIValues.setExecutionTime(rs.getInt(APIUsageStatisticsClientConstants
+                            .EXECUTION_TIME));
+                    result1.setValues(executionTimeOfAPIValues);
+                    result1.setTableName(tableName);
+                    result1.setTimestamp(RestClientUtil.longToDate(new Date().getTime()));
+                    result.add(result1);
+                }
+            } else {
+                throw new APIMgtUsageQueryServiceClientException(
+                        "Statistics Table:" + tableName +
+                                " does not exist.");
+            }
+            if (!result.isEmpty()){
+                sort(result, new Comparator<Result<ExecutionTimeOfAPIValues>>() {
+                    @Override
+                    public int compare(Result<ExecutionTimeOfAPIValues> o1, Result<ExecutionTimeOfAPIValues> o2) {
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.set(o1.getValues().getYear(), o1.getValues().getMonth(), o1.getValues().getDay(), o1
+                                .getValues().getHour(), o1.getValues().getMinutes(),o1.getValues().getSeconds());
+                        Calendar comparedDate = Calendar.getInstance();
+                        comparedDate.set(o2.getValues().getYear(), o2.getValues().getMonth(), o2.getValues().getDay(), o2
+                                .getValues().getHour(), o2.getValues().getMinutes(), o2.getValues().getSeconds());
+                        return calendar.getTime().compareTo(comparedDate.getTime());
+                    }
+                });
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } finally {
+            closeDatabaseLinks(rs, preparedStatement, connection);
+        }
     }
 }

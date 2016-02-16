@@ -34,10 +34,9 @@ import org.wso2.carbon.apimgt.usage.client.pojo.APIFirstAccess;
 import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Abstract class and act as a interface for the Statistic usage client for APIM.
@@ -558,8 +557,30 @@ public abstract class APIUsageStatisticsClient {
      */
     public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName,String version,
                                                                                  String providerName,String fromDate,
-                                                                                 String toDate) throws
+                                                                                 String toDate,boolean drillDown) throws
             APIMgtUsageQueryServiceClientException;
 
-
+    /**
+     *  Used to get long value of String date.
+     * @param date Date string
+     * @return long value of given date
+     * @throws ParseException on Error
+     */
+    protected long getDateToLong(String date) throws ParseException {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        java.util.Date fDate = dateFormat.parse(date);
+        Long lDate = fDate.getTime();
+        return lDate;
+    }
+    /**
+     * Use to handle exception of common type in single step
+     *
+     * @param msg custom message
+     * @param e   throwable object of the exception
+     * @throws APIMgtUsageQueryServiceClientException
+     */
+    protected void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
+        log.error(msg, e);
+        throw new APIMgtUsageQueryServiceClientException(msg, e);
+    }
 }

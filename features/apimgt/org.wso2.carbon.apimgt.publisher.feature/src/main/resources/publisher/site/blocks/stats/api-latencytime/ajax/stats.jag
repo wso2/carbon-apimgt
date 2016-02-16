@@ -9,6 +9,7 @@ var log = new Log();
     apiVersion = request.getParameter("apiVersion"),    
     fromDate = request.getParameter("fromDate"),
     toDate = request.getParameter("toDate"),
+    drilldown = request.getParameter("drilldown"),
     site = require("/site/conf/site.json"),
     msg = require("/site/conf/ui-messages.jag"),
     convertToDateObj = function (date) {
@@ -49,7 +50,7 @@ var log = new Log();
 
                 mod = jagg.module("statistics");
                 var data = {};
-                result = mod.getExecutionTimeByAPI(apiName,apiVersion,provider,fromDate,toDate);
+                result = mod.getExecutionTimeByAPI(apiName,apiVersion,provider,fromDate,toDate,drilldown);
                 if (result.error == "true") {
                     obj = {
                         error: result.error,
