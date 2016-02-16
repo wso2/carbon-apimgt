@@ -432,22 +432,18 @@ public class APIStoreHostObject extends ScriptableObject {
                 } else {
                     jsonParams = null;
                 }
-
-
                 //checking for authorized scopes
                 Set<Scope> scopeSet = new LinkedHashSet<Scope>();
-                List<Scope> authorizedScopes = new ArrayList<Scope>();
                 String authScopeString;
                 APIConsumer apiConsumer = getAPIConsumer(thisObj);
                 if (scopes != null && scopes.length() != 0 &&
                     !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
                     scopeSet.addAll(apiConsumer.getScopesByScopeKeys(scopes, tenantId));
-                    authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
                 }
 
-                if (!authorizedScopes.isEmpty()) {
+                if (!scopeSet.isEmpty()) {
                     StringBuilder scopeBuilder = new StringBuilder();
-                    for (Scope scope : authorizedScopes) {
+                    for (Scope scope : scopeSet) {
                         scopeBuilder.append(scope.getKey()).append(" ");
                     }
                     authScopeString = scopeBuilder.toString();
@@ -2339,45 +2335,6 @@ public class APIStoreHostObject extends ScriptableObject {
         }
     }
 
-	private static List<Scope> getAllowedScopesForUserApplication(String username, Set<Scope> reqScopeSet) {
-        String[] userRoles = null;
-        org.wso2.carbon.user.api.UserStoreManager userStoreManager = null;
-
-        List<Scope> authorizedScopes = new ArrayList<Scope>();
-        try {
-            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                                 .getTenantId(MultitenantUtils.getTenantDomain(username));
-            userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
-            userRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            // Log and return since we do not want to stop issuing the token in
-            // case of scope validation failures.
-            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
-        }
-
-		List<String> userRoleList = new ArrayList<String>(Arrays.asList(userRoles));
-
-		//Iterate the requested scopes list.
-		for (Scope scope : reqScopeSet) {
-			//Get the set of roles associated with the requested scope.
-			String roles = scope.getRoles();
-
-			//If the scope has been defined in the context of the App and if roles have been defined for the scope
-			if (roles != null && roles.length() != 0) {
-				List<String> roleList =
-						new ArrayList<String>(Arrays.asList(roles.replaceAll(" ", "").split(",")));
-				//Check if user has at least one of the roles associated with the scope
-				roleList.retainAll(userRoleList);
-				if (!roleList.isEmpty()) {
-					authorizedScopes.add(scope);
-				}
-			}
-		}
-
-		return authorizedScopes;
-	}
-
 	private static String getScopeNamesbyKey(String scopeKey, Set<Scope> availableScopeSet) {
 		//convert scope keys to names
 		StringBuilder scopeBuilder = new StringBuilder("");
@@ -2818,6 +2775,10 @@ public class APIStoreHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException{
 
         if (args != null && isStringArray(args)) {
+            if (args.length < 2) {
+                handleException(
+                        "Expected 2 arguments for adding a subscriber (username, groupId), but found " + args.length);
+            }
             String username = (String) args[0];
             String groupId = (String) args[1];
             APIConsumer apiConsumer = getAPIConsumer(thisObj);

@@ -20,12 +20,14 @@ package org.wso2.carbon.apimgt.usage.client.bean;
 
 import java.util.List;
 
+/**
+ * This class is used as a bean for represent API resource usage statistics result from the DAS REST API
+ */
 public class APIUsageByResourcePathValue {
     private int totalRequestCount;
     private List<String> api_version_context_method_facet;
 
     public APIUsageByResourcePathValue(int lastAccessTime, List<String> api_version_userId_facet) {
-        super();
         this.totalRequestCount = lastAccessTime;
         this.api_version_context_method_facet = api_version_userId_facet;
     }
