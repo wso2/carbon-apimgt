@@ -1,0 +1,25 @@
+<% jagg.template("stats/api-subscriptions", function(inputs, outputs, jagg) { %>
+
+<div id="apiSubscription-stat-page" class="stat-page">
+<div class="title-section"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
+    <br>
+    <div class="col-md-12">
+
+        <div id="spinner" class="center-wrapper">
+            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+        </div>
+
+        <div id="pie-chart">
+            <div class="progress progress-striped active">
+                <div class="bar" style="width: 10%;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <ul id="pagination" class="pagination"></ul>
+</div>
+
+<% }); %>
+
+

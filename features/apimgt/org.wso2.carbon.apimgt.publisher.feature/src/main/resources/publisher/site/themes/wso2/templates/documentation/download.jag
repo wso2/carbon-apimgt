@@ -1,0 +1,16 @@
+<%
+include("/jagg/jagg.jag");
+var publisher = jagg.module("manager").getAPIProviderObj();
+var tenantDomain = String(jagg.getTenantDomain());
+var resourceUrl = request.getParameter("resourceUrl");
+
+var object = publisher.getDocument(tenantDomain,resourceUrl);
+if(object == null){
+    response.status=500;
+   }else{
+    response.contentType = "application/force-download";
+    response.addHeader("Content-Disposition","attachment; filename=\""+object.name+"\"");
+
+    print(object.Data);
+}
+%>

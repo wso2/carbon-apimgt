@@ -1,0 +1,220 @@
+<% jagg.template("overview", function(inputs, outputs, jagg) { %>
+<% var api=outputs.api; var createPermitted=outputs.isCreatePermitted;%>
+<%var tenant= encode.forUriComponent(request.getParameter("tenant"));%>
+<%  if(api.endpointConfig){
+    var endpoint_config = parse(api.endpointConfig); 
+  } %>
+<div class="row">
+    <div class="col-md-2">
+         <% jagg.includeBlock("item-nav-list",{api:api}); %>
+    </div>
+    <div class="col-md-10">
+    <%if(api.description!=''){%>
+        <div class="well" id="apiView"><%=api.description%>
+        </div>
+    <%}%>
+        <table class="table table-bordered">
+            <tbody>
+            <tr>
+                <td class="col-sm-3"><%=i18n.localize("visibility")%></td>
+                <td id="inUrl"><%if(api.visibility == "restricted"){%> <%="Restricted by roles, only visible to " + api.roles +"."%><%}else{%><%=i18n.localize(api.visibility)%><%}%></td>
+            </tr>
+            <tr>
+                <td class="col-sm-3"><%=i18n.localize("context")%></td>
+                <td id="inUrl"><%=api.context%></td>
+            </tr>
+            <% if(endpoint_config && (endpoint_config.production_endpoints != undefined)){ %>
+            <tr>
+                <td class="col-sm-3"><%=i18n.localize("endpoint")%></td>
+                <td id="inUrl">
+                <%
+                    if(endpoint_config.production_endpoints instanceof Array){
+                        print('<ul class="endpoint_list">');
+                        for(var index = 0; index < endpoint_config.production_endpoints.length; index++){
+                        %>
+                            <li><%= encode.forHtml(endpoint_config.production_endpoints[index].url) %></li>
+                        <%
+                        }
+                        print('</ul>');
+                    }
+                    else{
+                        print(encode.forHtml(endpoint_config.production_endpoints.url));
+                    }
+                %>
+                </td>
+            </tr>
+            <% } %>
+            <% if(endpoint_config && (endpoint_config.production_failovers != undefined)){ %>
+            <tr>
+                <td><%=i18n.localize("productionFailoverEp")%></td>
+                <td>
+                <%
+                        print('<ul class="endpoint_list">');
+                        for(var index = 0; index < endpoint_config.production_failovers.length; index++){
+                        %>
+                            <li><%= encode.forHtml(endpoint_config.production_failovers[index].url) %></li>
+                        <%
+                        }
+                        print('</ul>');
+
+                %>
+                </td>
+            </tr>
+            <% } %>
+            <%if(endpoint_config && (endpoint_config.sandbox_endpoints != undefined)){%>
+            <tr>
+                <td><%=i18n.localize("sandbox")%></td>
+                <td id="sandbox">
+                <%
+                    if(endpoint_config.sandbox_endpoints instanceof Array){
+                        print('<ul class="endpoint_list">');
+                        for(var index = 0; index < endpoint_config.sandbox_endpoints.length; index++){
+                        %>
+                            <li><%= encode.forHtml(endpoint_config.sandbox_endpoints[index].url) %></li>
+                        <%
+                        }
+                        print('</ul>');
+                    }
+                    else{
+                        print(encode.forHtml(endpoint_config.sandbox_endpoints.url));
+                    }
+                %>
+                </td>
+            </tr>
+            <% if(endpoint_config && (endpoint_config.sandbox_failovers != undefined)){ %>
+            <tr>
+                <td><%=i18n.localize("sandboxFailoverEp")%></td>
+                <td>
+                <%
+                        print('<ul class="endpoint_list">');
+                        for(var index = 0; index < endpoint_config.sandbox_failovers.length; index++){
+                        %>
+                            <li><%= encode.forHtml(endpoint_config.sandbox_failovers[index].url) %></li>
+                        <%
+                        }
+                        print('</ul>');
+
+                %>
+                </td>
+            </tr>
+            <% } %>
+            <%}%>
+            <%if(api.wsdl!=''){%>
+            <tr>
+                <td><%=i18n.localize("wsdl")%></td>
+                <td id="wsdl"><a href="/publisher/site/themes/responsive/templates/documentation/download.jag?tenant=<%=tenant%>&resourceUrl=<%= encode.forHtmlAttribute(jagg.getRegistryPath(api.wsdl)) %>" target="_blank"><%= encode.forHtml(api.wsdl.substring(api.wsdl.lastIndexOf("/")))%></a></td>
+            </tr>
+            <%}
+            if(api.wadl!=''){%>
+            <tr>
+                <td><%=i18n.localize("wadl")%></td>
+                <td id="wadl"><a href="<%= encode.forHtmlAttribute(api.wadl)%>" target="_blank"><%= encode.forHtml(api.wadl)%></a></td>
+            </tr>
+            <%}%>
+            <tr>
+                <td><%=i18n.localize("lastUpdated")%></td>
+                <td id="inUpdated" class="dateFull"><%=api.lastUpdated%></td>
+            </tr>
+            <tr>
+                <td><%=i18n.localize("tier")%></td>
+                <td id="tierAvb"><%=api.availableTiersDisplayNames%></td>
+            </tr>
+            <tr>
+                <td><%=i18n.localize("defaultAPIVersion")%></td>
+                <td id="defaultAPIVersion">
+                    <%if(api.hasDefaultVersion){
+                        print(api.currentDefaultVersion);
+                    }else{
+                        print("None");
+                    }%>
+                </td>
+
+            </tr>
+            <% if(api.tags!=''){%>
+            <tr>
+                <td><%=i18n.localize("tags")%></td>
+                <td id="tags"><%=api.tags%></td>
+            </tr>
+             <%
+            }if(api.bizOwner!=''){%>
+             <tr>
+                <td><%=i18n.localize("busiOwner")%></td>
+                <td id="bizOwnerData"><%=api.bizOwner%> <% if(api.bizOwnerMail!=''){%>
+                [<a href="mailto:<%=api.bizOwnerMail%>"><%=api.bizOwnerMail%></a>]
+                <%}%>
+                </td>
+            </tr>
+             <%
+             }if(api.techOwner!=''){%>
+             <tr>
+                <td><%=i18n.localize("techOwner")%></td>
+                <td id="techOwnerData"><%=api.techOwner%><% if(api.techOwnerMail!=''){%>
+                [<a href="mailto:<%=api.techOwnerMail%>"><%=api.techOwnerMail%></a>]
+                <%}%>
+                </td>
+            </tr>
+            <%}%>
+                         <tr>
+                            <td>Published Environments</td>
+                            <td>
+           <% var publishedEnvironments = api.environments;
+              var publishedElement="";
+           for(i=0 ;i<publishedEnvironments.split(",").length;i++){
+               publishedElement += publishedEnvironments.split(",")[i]+"</br>";
+               }
+               %>
+               <%=publishedElement%>
+                            </td>
+                        </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-4">
+        <div id="chart1"></div>
+    </div>
+</div>
+
+<!-- Row -->
+<%if(createPermitted){%>
+        <script>
+            var provider = '<%=api.provider%>';
+        </script>
+<div class="row-fluid">
+    <form id="copyApiForm">
+    <div class="well form-inline" id="copy-api" style="display: none;">
+        <input type="hidden" id="overviewAPIVersion" value="<%=api.version%>"/>
+        <input type="hidden" id="overviewAPIName" value="<%=api.name%>"/>
+
+            <div class="form-group">
+                <label><%=i18n.localize("toVersion")%></label>
+                <input type="text" class="required form-control" id="new-version"/>
+                <p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
+                <span class="help-inline "><%=i18n.localize("versionHelpMsg")%></span>
+                <a class="glyphicon glyphicon-question-sign help_popup" help_data="versionCopy_help"></a>
+            </div>
+        <br />
+        <div class="default-version form-group">
+            <div class="checkbox">
+                <label class="control-label">Default Version &nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" class="form-control default_version_check_cp" id="default_version_cp" name="default_version_cp" value="default_version"/></label>
+            </div>
+                <input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value=""/>
+                 <%if(api.hasDefaultVersion){%>
+                    <p class="help-block">Currently set to version : <%=api.currentDefaultVersion%></p>
+                <%}else{%>
+                    <p class="help-block">No default version defined for the current API</p>
+                <%}%>
+        </div>
+       
+        
+        <div class="copy-buttons">
+            <button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("done")%></button>
+            <button type="button" class="btn btn-default cancel-button" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("cancel")%></button>
+        </div>
+
+
+    </div>
+    </form>
+</div>
+<%}%>
+<% }); %>
+

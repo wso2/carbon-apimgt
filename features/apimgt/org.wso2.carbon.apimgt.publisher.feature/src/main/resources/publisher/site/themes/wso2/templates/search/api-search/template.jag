@@ -1,0 +1,38 @@
+<% jagg.template("search/api-search", function(inputs, outputs, jagg) {
+var query=request.getParameter("query");
+%>
+<div class="row">
+  <div class="col-md-6 api-search">
+    <form class="form-search" action="<%=jagg.getMappedUrl("/site/pages/index.jag")%>">
+        <div class="input-group">
+            <input type="text" name="query" class="form-control search-query col-sm" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
+    placeholder="<%=i18n.localize("filterAPIs")%>"<%}%> />
+    <%var tenant=request.getParameter("tenant");if(tenant!='null'){ %>
+    <input type="hidden" class="span5" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
+    <%}%>
+            <div class="input-group-btn">
+                <button class="btn btn-primary"><%=i18n.localize("search")%></button>
+            </div>
+        </div>
+    <div id="searchAPIHelp" class="hide help-popover-content">
+    <div><%=i18n.localize("searchAPIHelpMsg1")%></div>
+    <ol>
+        <li><%=i18n.localize("searchAPIHelpMsg2")%></li>
+        <li><%=i18n.localize("searchAPIHelpMsg3")%></li>
+        <li><%=i18n.localize("searchAPIHelpMsg4")%></li>
+        <li><%=i18n.localize("searchAPIHelpMsg5")%></li>
+        <li><%=i18n.localize("searchAPIHelpMsg6")%></li>
+        <li><%=i18n.localize("searchAPIHelpMsg7")%></li>
+        <li><%=i18n.localize("searchAPIHelpMsg8")%></li>
+        <li><%=i18n.localize("searchAPIHelpMsg9")%></li>
+    </ol>
+    </div>
+    </form>
+  </div>
+  <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#searchAPIHelp"><i class="fa fa-question-circle"></i> Search Options</a></div>
+</div>
+<div class="alert alert-success" id="searchMessageContainer" style="display:none">
+        <a class="close" data-dismiss="alert">x</a>
+         <div id="searchMessage"></div>
+      </div>
+<% }); %>
