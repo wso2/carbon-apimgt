@@ -25,7 +25,7 @@ public class DateRangeCondition extends Condition {
 
     public DateRangeCondition() {
         setType(PolicyConstants.DATE_RANGE_TYPE);
-        setQueryAttributeName(PolicyConstants.DATE_QUERY);
+        this.queryAttributeName = "cast(map:get(properties,’"+PolicyConstants.DATE_QUERY+"’),’string’)";
     }
 
     public String getEndingDate() {
@@ -46,8 +46,11 @@ public class DateRangeCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = getQueryAttributeName()+">="+ getStartingDate() + " AND "+ getQueryAttributeName() +"<="+
-                getEndingDate();
+        String condition = "("+getQueryAttributeName()+">="+ getStartingDate() + " AND "+ getQueryAttributeName() +"<="+
+                getEndingDate()+")";
+        if(isInvertCondition()){
+            condition="!"+condition;
+        }
         return condition;
     }
 }

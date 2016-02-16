@@ -32,7 +32,7 @@ public class QueryParameterCondition extends Condition {
 
     public void setParameter(String parameter) {
         this.parameter = parameter;
-        setQueryAttributeName(this.parameter);
+        this.queryAttributeName = "cast(map:get(properties,’"+this.parameter+"’),’string’)";
     }
 
     public String getValue() {
@@ -45,7 +45,10 @@ public class QueryParameterCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = getQueryAttributeName()+" == "+getValue();
-        return null;
+        String condition = "("+ getQueryAttributeName()+" == "+getValue()+")";
+        if(isInvertCondition()){
+            condition="!"+condition;
+        }
+        return condition;
     }
 }

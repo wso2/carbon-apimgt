@@ -32,7 +32,7 @@ public class HeaderCondition extends Condition {
 
     public void setHeader(String headerName) {
         this.headerName = headerName;
-        setQueryAttributeName(this.headerName);
+        this.queryAttributeName = "cast(map:get(properties,’"+this.headerName+"’),’string’)";
     }
 
     public String getValue() {
@@ -45,7 +45,10 @@ public class HeaderCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = getQueryAttributeName()+" == "+getValue();
+        String condition = "("+getQueryAttributeName()+" == "+getValue()+")";
+        if(isInvertCondition()){
+            condition="!"+condition;
+        }
         return condition;
     }
 }

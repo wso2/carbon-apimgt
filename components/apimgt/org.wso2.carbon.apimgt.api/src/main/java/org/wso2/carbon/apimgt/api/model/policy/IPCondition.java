@@ -23,7 +23,7 @@ public class IPCondition extends Condition {
 
     public IPCondition() {
         setType(PolicyConstants.IP_SPECIFIC_TYPE);
-        setQueryAttributeName(PolicyConstants.IP_QUERY);
+        this.queryAttributeName = "cast(map:get(properties,’"+PolicyConstants.IP_QUERY+"’),’string’)";
     }
 
     public String getSpecificIP() {
@@ -52,7 +52,10 @@ public class IPCondition extends Condition {
     @Override
     public String getCondition() {
         long ip = ipToLong(getSpecificIP());
-        String condition = getQueryAttributeName()+" == "+ip;
+        String condition = "("+getQueryAttributeName()+" == "+ip+")";
+        if(isInvertCondition()){
+            condition="!"+condition;
+        }
         return condition;
     }
 }

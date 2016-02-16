@@ -44,5 +44,5 @@ public class PolicyConstants {
 
     public static final String IP_QUERY = "ip";
 
-    public static final String HTTP_VERB_QUERY = "httpVerb";
+    public static final String HTTP_VERB_QUERY = "verb";
 }
