@@ -1229,7 +1229,15 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
                 if (sessionList != null) {
                     for (SessionHostObject session : sessionList) {
                         if (SessionHostObject.jsFunction_getId(null, session, args, null) != null) {
-                            SessionHostObject.jsFunction_invalidate(null, session, args, null);
+                            try {
+                                SessionHostObject.jsFunction_invalidate(null, session, args, null);
+                            } catch (Exception ex){
+                                if(ex.getMessage().contains("Session already invalidated")){ // can be ignored
+                                    log.info(ex.getMessage());
+                                } else {
+                                    throw ex;
+                                }
+                            }
                         }
                     }
                 }
@@ -1237,6 +1245,9 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
             removeSession(sessionIndex);
             clearSessionsSet();
         } catch (Exception ignored) {
+            if (log.isDebugEnabled()) {
+	        log.debug(ignored.getMessage());
+            }
             removeSession(sessionIndex);
             clearSessionsSet();
         }
