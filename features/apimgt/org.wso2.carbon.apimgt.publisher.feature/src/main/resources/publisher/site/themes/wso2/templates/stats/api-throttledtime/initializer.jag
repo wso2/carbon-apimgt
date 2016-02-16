@@ -1,0 +1,14 @@
+<%
+jagg.initializer("stats/api-throttledtime", {
+
+    preInitialize:function () {
+     }
+});
+%>
+
+
+
+
+
+
+

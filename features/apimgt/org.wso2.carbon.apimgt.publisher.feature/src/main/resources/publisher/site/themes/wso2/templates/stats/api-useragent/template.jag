@@ -1,0 +1,91 @@
+<% jagg.template("stats/api-useragent", function(inputs, outputs, jagg) { %>
+
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/bootstrap.min.css"))%>"/>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/d3.min.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/vega.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.js"))%>"></script>
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/barchart/igviz.css"))%>"/>
+
+
+
+
+
+
+  <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
+
+<div class="title-section"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
+
+<div class="content-section shadow-up">
+<div class="content-data">
+    <div class="well" id="bar">
+  
+    </div>
+</div>
+</div>
+
+
+<script>
+
+  var width = document.getElementById("bar").offsetWidth; //canvas width
+    var height = 270; 
+
+    var config = {
+        "title": "",
+        "yAxis": 1,
+        "xAxis": 0,
+        "pointLabel": 0,
+        "interpolationMode":"basis",
+        "width": 500,
+        "height": 270,
+        "padding": 60,
+        "chartType": "bar",
+
+        "tickLabelConfig":{
+            "textAngle":-60,
+            "x":0,
+            "y":9,
+            "dy":".15em",
+            "dx":"-.8em",
+            "tickHeight":6,
+            "tickWidth":0
+        },
+
+        "yAxisLabelConfig":{
+            "fontSize":"200px",
+            "rotate":-90,
+            "x":-10 ,
+            "y":6,
+            "dy":".71em",
+            "dx":0
+        }
+
+    }
+    
+    var dataTable;
+	var dataTableJSONText = '{"metadata":{"names":["UserAgent","Count"],"types":["C", "N"]},"data":';
+  jagg.post("/site/blocks/stats/api-useragent/ajax/stats.jag",{action:"getUserAgentSummaryForALLAPIs"},function(json){
+  	//console.log(json);
+  	var data = "[[";
+  	for(var i = 0 ; i < json.usage.usage.length; i++){
+  		data = data+"\""+json.usage.usage[i].user_agent+"\","+json.usage.usage[i].request_count+"]";
+  		if((json.usage.usage.length-1) != i ){
+  			data=data+",[";
+  		}
+  		else{
+  			data=data+"]}";
+  		}
+  	}
+  	
+  	dataTableJSONText=dataTableJSONText+""+data;
+  	dataTable = JSON.parse(dataTableJSONText);
+  	console.log(dataTable.data);
+  	chart=igviz.setUp("#bar",config,dataTable);
+	chart.plot(dataTable.data);
+  },"json");
+
+    //draw a bar chart on div #bar
+
+</script>
+
+
+<% }); %>
