@@ -217,37 +217,57 @@
                                             </thead>
                                             <tr>
                                                 <td>
-                                                    <select id="inSequence"  name="inSequence" >
+                                                    <select class="form-control" id="inSequence"  name="inSequence" >
                                                         <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <select id="outSequence"  name="outSequence">
+                                                    <select class="form-control" id="outSequence"  name="outSequence">
                                                         <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                     </select>
                                                 </td>
                                                 <td>
-                                                    <select id="faultSequence"  name="faultSequence">
+                                                    <select class="form-control" id="faultSequence"  name="faultSequence">
                                                         <option value="none" selected="selected"><%=i18n.localize("none")%></option>
                                                     </select>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div id="inpFile" class="pull-left">
-                                                        <div id="apiThumb-container"  style="display: inline;">
-                                                            <input type="file" class="input-xlarge " id="inSeqFile"  name="inSeqFile" />
-                                                        </div>
-                                                    </div>
-                                                    <input type="button" class="btn pull-left" id="clearSeqFile" value="<%=i18n.localize("clear")%>"/>
+						   <div class="input-group input-wrap file-upload-control">
+							   <div class="input-group-btn">
+								<button id="inSeqBrowse" class="btn browse" type="button" title="Browse File">
+								    <i class="fw fw-file-browse" aria-hidden="true"></i>
+								    <span class="hidden-xs">Browse</span>
+								</button>
+							    </div>
+							    <input type="text" id="inSeqFileValue" class="form-control" readonly>
+							    <input type="file" id="inSeqFile" name="inSeqFile" class="form-control">
+							    <div class="input-group-btn">
+								<button class="btn btn-default btn-primary" id="clearSeqFile" type="button" title="<%=i18n.localize("clear")%>">
+								    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
+								</button>
+							    </div>
+						   </div>
                                                 </td>
                                                 <td>
-                                                    <div id="inpFile" class="pull-left">
-                                                        <div id="apiThumb-container"  style="display: inline;">
-                                                            <input type="file" class="input-xlarge " id="outSeqFile"  name="outSeqFile" />
-                                                        </div>
-                                                    </div>
-                                                    <input type="button" class="btn pull-left" id="clearOutSeqFile" value="<%=i18n.localize("clear")%>"/>
+						    <div class="input-group input-wrap file-upload-control">
+							   <div class="input-group-btn">
+								<button id="outSeqBrowse" class="btn browse" type="button" title="Browse File">
+								    <i class="fw fw-file-browse" aria-hidden="true"></i>
+								    <span class="hidden-xs">Browse</span>
+								</button>
+
+							    </div>
+							    <input type="text" id="outSeqFileValue" class="form-control" readonly>
+							    <input type="file" id="outSeqFile"  name="outSeqFile" class="form-control">
+							    <div class="input-group-btn"></div>
+							    <div class="input-group-btn">
+								<button class="btn btn-default btn-primary" id="clearOutSeqFile" type="button" title="<%=i18n.localize("clear")%>">
+								    <span class="hidden-xs"><%=i18n.localize("clear")%></span>
+								</button>
+							    </div>
+						   </div>
                                                 </td>
                                             </tr>
                                     </table>

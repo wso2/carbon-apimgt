@@ -706,11 +706,11 @@ $(document).ready(function(){
     });
 
     $("#clearSeqFile").on("click", function () {
-        $('#apiThumb-container').html('<input type="file" id="apiThumb" class="input-xlarge" name="apiThumb" />');
+	$('#inSeqFileValue').val('');
     });
 
     $("#clearOutSeqFile").on("click", function () {
-            $('#outSeqFile').val('');
+            $('#outSeqFileValue').val('');
     });
 	$('.toggleContainers .controls').hide();
     $('#import_swagger').attr('disabled','disabled');

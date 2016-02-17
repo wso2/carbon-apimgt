@@ -298,7 +298,7 @@
       </h4>
     </div>
     <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
-        <table class="table table-bordered table-striped">
+        <table class="table table-striped table-hover table-bordered display data-table">
              <thead>
              <tr>
                 <th width="5%"><div class="environments_checkbox"></div></th>
@@ -314,7 +314,7 @@
              if(environmentsJson=="none"){
                     for(i=0 ;i<environmentsList.length;i++){
              %>
-                <tr>
+                <tr data-type="selectable">
                     <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div></td>
                     <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                     <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
@@ -324,14 +324,14 @@
              else{
                  for(i=0 ;i<environmentsList.length;i++){
                         if(environmentsJson.split(",").indexOf(environmentsList[i].name)>=0){%>
-                            <tr>
+                            <tr data-type="selectable">
                                  <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" checked class="env"></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].description%></div></td>
                             </tr>
                       <%}else{%>
-                            <tr>
+                            <tr data-type="selectable">
                                  <td><div class="environments_checkbox"><input type="checkbox" value="<%=environmentsList[i].name%>" class="env"></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].name%></div></td>
                                  <td><div class="environments_data"><%=environmentsList[i].type%></div></td>
