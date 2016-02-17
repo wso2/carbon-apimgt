@@ -1,0 +1,51 @@
+###################################  macros  #######################################
+##
+###generate key
+#macro( getKey )##
+#if($policy.getPolicyLevel() == "api")
+#if($policy.isAcrossAllUsers())
+str:concat('${apiname}_all_','${pipeline}_' ,'_key')##
+#else
+str:concat('${apiname}_per_','${pipeline}_' ,user_id ,'_key')##
+#end
+#end
+#end
+###generate rule
+#macro( getRule $policy)
+#if($policy.getPolicyLevel() == "api")
+#if($policy.isAcrossAllUsers())
+${apiname}_all_${pipeline}##
+#else
+${apiname}_per_${pipeline}##
+#end
+#end
+#end
+<policy tier="$policy.getPolicyLevel()_$policy.getPolicyName()" level="$policy.getPolicyLevel()" name="#getRule($policy)">
+	<eligibilityQuery>
+		FROM RequestStream
+#if($policy.getPolicyLevel() == "api")	
+		SELECT '#getRule($policy)' AS rule, messageID, ( api_key == '${apicontext}:${apiversion}'$condition ) AS isEligible, false as isLocallyThrottled, #getKey() AS throttle_key
+#elseif($policy.getPolicyLevel() == "app")
+##
+#elseif($policy.getPolicyLevel() == "subscription")
+##
+#elseif($policy.getPolicyLevel() == "global")
+##
+#end		
+		INSERT INTO EligibilityStream; 
+	</eligibilityQuery>
+	<decisionQuery>	
+#if($quotaPolicy != "")
+		FROM EligibilityStream[isEligible==true AND rule == '#getRule($policy)']#window.time($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit()) 
+#if($quotaPolicy.getType() == 'RequestCount')
+		select throttle_key, (count(messageID)) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled 
+#else
+		select throttle_key, (count(messageID)) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}
+#end		
+#if($policy.isAcrossAllUsers() == 'false' && $pipeline == 'elseCondition' )
+		group by throttle_key
+#end
+		INSERT ALL EVENTS into ResultStream;
+#end
+	</decisionQuery>
+</policy>
