@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.pojo;
 
+/**
+ * This class is used as a pojo class to represent API Response time
+ */
 public class APIResponseTime {
     private String apiName;
     private String apiVersion;

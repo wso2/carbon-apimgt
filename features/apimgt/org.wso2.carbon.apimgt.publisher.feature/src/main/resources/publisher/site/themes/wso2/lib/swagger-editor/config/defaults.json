@@ -1,0 +1,33 @@
+{
+  "codegen": {
+
+  },
+  "analytics": {
+    "google": {
+      "id": ""
+    }
+  },
+  "disableCodeGen": true,
+  "disableExamples":true,
+  "disableImport":true,
+  "examplesFolder": "/spec-files/",
+  "editorOptions": {
+  
+  },
+  "exampleFiles": [
+
+  ],
+  "autocompleteExtension": {},
+  "useBackendForStorage": false,
+  "backendThrottle": 200,
+  "backendEndpoint": "/editor/spec",
+  "backendHealthCheckTimeout": 5000,
+  "useYamlBackend": false,
+  "disableFileMenu": false,
+  "headerBranding": true,
+  "enableTryIt": false,
+  "brandingCssClass": "wso2apim",
+  "schemaUrl": "/schema/swagger.json",
+  "importProxyUrl": "",
+  "disableNewUserIntro": true
+}

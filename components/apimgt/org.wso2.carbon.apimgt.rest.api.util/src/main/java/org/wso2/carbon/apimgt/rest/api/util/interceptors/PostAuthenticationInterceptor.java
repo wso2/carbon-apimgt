@@ -62,8 +62,7 @@ public class PostAuthenticationInterceptor extends AbstractPhaseInterceptor {
                 }
             }
         } catch (APIManagementException e) {
-            String errorMsg = "Unable to add the subscriber " + username;
-            RestApiUtil.handleInternalServerError(errorMsg, e, logger);
+            RestApiUtil.handleInternalServerError("Unable to add the subscriber " + username, e, logger);
         }
     }
 }

@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.usage.client.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used as a pojo class to represent API count by subscribers
+ */
 public class SubscriberCountByAPIs {
     private List<String> apiName = new ArrayList<String>();
     private long count;

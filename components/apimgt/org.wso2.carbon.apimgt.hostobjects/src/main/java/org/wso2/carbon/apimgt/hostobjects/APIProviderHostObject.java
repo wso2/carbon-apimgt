@@ -4702,11 +4702,9 @@ public class APIProviderHostObject extends ScriptableObject {
      * @return boolean type stating validated or not
      */
     private static boolean isURL(String url) {
-
         Pattern pattern = Pattern.compile("^(http|https)://(.)+", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(url);
         return matcher.matches();
-
     }
     public static NativeObject jsFunction_getAllPaginatedAPIs(Context cx, Scriptable thisObj,
                                                                        Object[] args, Function funObj)

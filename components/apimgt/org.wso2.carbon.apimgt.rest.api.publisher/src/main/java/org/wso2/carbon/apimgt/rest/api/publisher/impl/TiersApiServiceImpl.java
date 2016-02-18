@@ -42,14 +42,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/** This is the service implementation class for Publisher tier related operations
- *
+/**
+ * This is the service implementation class for Publisher tier related operations
  */
 public class TiersApiServiceImpl extends TiersApiService {
 
     private static final Log log = LogFactory.getLog(TiersApiServiceImpl.class);
 
-    /** Retrieves all the Tiers
+    /**
+     * Retrieves all the Tiers
      *
      * @param tierLevel   tier level (api/application or resource)
      * @param limit max number of objects returns
@@ -80,13 +81,13 @@ public class TiersApiServiceImpl extends TiersApiService {
                 if (apiTiersMap != null) {
                     tierList.addAll(apiTiersMap.values());
                 }
-            } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)){
+            } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)) {
                 Map<String, Tier> appTiersMap = APIUtil.getTiers(APIConstants.TIER_APPLICATION_TYPE, tenantDomain);
                 if (appTiersMap != null) {
                     tierList.addAll(appTiersMap.values());
                 }
             } else if (TierDTO.TierLevelEnum.resource.toString().equals(tierLevel)) {
-                Map<String, Tier> resourceTiersMap = 
+                Map<String, Tier> resourceTiersMap =
                         APIUtil.getTiers(APIConstants.TIER_RESOURCE_TYPE, tenantDomain);
                 if (resourceTiersMap != null) {
                     tierList.addAll(resourceTiersMap.values());
@@ -96,7 +97,7 @@ public class TiersApiServiceImpl extends TiersApiService {
                         "tierLevel should be one of " + Arrays.toString(TierDTO.TierLevelEnum.values()), log);
             }
             TierListDTO tierListDTO = TierMappingUtil.fromTierListToDTO(tierList, tierLevel, limit, offset);
-            TierMappingUtil.setPaginationParams(tierListDTO, tierLevel , limit, offset, tierList.size());
+            TierMappingUtil.setPaginationParams(tierListDTO, tierLevel, limit, offset, tierList.size());
             return Response.ok().entity(tierListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving tiers";
@@ -105,8 +106,9 @@ public class TiersApiServiceImpl extends TiersApiService {
         return null;
     }
 
-    /** Adds a new Tier 
-     * 
+    /**
+     * Adds a new Tier
+     *
      * @param tierLevel   tier level (api/application or resource)
      * @param body TierDTO specifying the new Tier to be added
      * @param contentType Content-Type header value
@@ -142,7 +144,8 @@ public class TiersApiServiceImpl extends TiersApiService {
         return null;
     }
 
-    /** Updates permission of a tier specified by name
+    /** 
+     * Updates permission of a tier specified by name
      * 
      * @param tierName name of the tier
      * @param tierLevel   tier level (api/application or resource)
@@ -170,7 +173,7 @@ public class TiersApiServiceImpl extends TiersApiService {
             }
 
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            if (permissions.getRoles().size() > 0 ) {
+            if (permissions.getRoles().size() > 0) {
                 String roles = StringUtils.join(permissions.getRoles(), ",");
                 String permissionType = permissions.getPermissionType().toString();
                 apiProvider.updateTierPermissions(tierName, permissionType, roles);
@@ -185,7 +188,8 @@ public class TiersApiServiceImpl extends TiersApiService {
         return null;
     }
 
-    /** Returns the matched tier to the given name
+    /**
+     * Returns the matched tier to the given name
      *
      * @param tierName name of the tier
      * @param tierLevel   tier level (api/application or resource)
@@ -245,7 +249,8 @@ public class TiersApiServiceImpl extends TiersApiService {
         return null;
     }
 
-    /** Updates an existing Tier 
+    /**
+     * Updates an existing Tier 
      * 
      * @param tierName name of the tier to be updated
      * @param body TierDTO object as the new tier
@@ -288,7 +293,8 @@ public class TiersApiServiceImpl extends TiersApiService {
         return null;
     }
 
-    /** Deletes a tier specified by the name
+    /**
+     * Deletes a tier specified by the name
      * 
      * @param tierName name of the tier to be deleted
      * @param tierLevel  tier level (api/application or resource)
