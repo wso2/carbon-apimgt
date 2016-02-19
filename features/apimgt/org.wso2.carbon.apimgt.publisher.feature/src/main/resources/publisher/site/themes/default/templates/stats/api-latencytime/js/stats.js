@@ -19,19 +19,25 @@ $( document ).ready(function() {
       version = this.value;
       var fromDate = from;
       var toDate = to;
-      renderGraph(fromDate,toDate,false);
+      renderGraph(fromDate,toDate,"HOUR");
+      depth = "HOUR";
     });
     $('#today-btn').on('click', function () {
-      renderGraph((currentDay - 86400000),currentDay,false);
+      renderGraph((currentDay - 86400000),currentDay,"HOUR");
+      depth = "HOUR";
     });
        $('#hour-btn').on('click', function () {
-         renderGraph((currentDay - 3600000),currentDay,false);
+         renderGraph((currentDay - 3600000),currentDay,"MINUTES");
+        depth = "MINUTES";
+
       });
        $('#week-btn').on('click', function () {
-         renderGraph((currentDay - 604800000),currentDay,false);
+         renderGraph((currentDay - 604800000),currentDay,"DAY");
+         depth = "DAY";
       });
        $('#month-btn').on('click', function () {
-        renderGraph((currentDay - (604800000 * 4)),currentDay,false);
+        renderGraph((currentDay - (604800000 * 4)),currentDay,"DAY");
+        depth = "DAY";
         });
         $('#date-range').click(function () {
          $(this).removeClass('active');
@@ -53,7 +59,13 @@ $( document ).ready(function() {
                  btnActiveToggle(this);
                  from = convertDate(obj.date1);
                  to = convertDate(obj.date2);
-                 renderGraph(from, to,false);
+                 if ((to-from)>(3600000*24*2)) {
+                 renderGraph(from, to,"DAY");  
+                 depth = "DAY";                  
+                 }else{
+                 renderGraph(from, to,"HOUR"); 
+                 depth = "HOUR";                                     
+                 }
                         });
 });
 
@@ -168,7 +180,7 @@ function renderGraph(fromDate,toDate,drillDown){
                     tempdata.push({x:d,y:json.usage[usage1].values.executionTime});
                      data1[mediationName] = tempdata;
                   }
-                    drawGraphInArea(data1);
+                    drawGraphInArea(data1,drillDown);
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#temploadinglatencytTime').html('');
@@ -191,12 +203,26 @@ function renderGraph(fromDate,toDate,drillDown){
             }
         }, "json");
 }
-function drawGraphInArea(rdata){
+function drawGraphInArea(rdata,drilldown){
     $('#chartContainer').show();
     $('#chartContainer').empty();
     $('#temploadinglatencytTime').empty();
     var renderdata = [];
-    var dateFormat = '%d/%m %H:%M:%S';
+    var dateFormat;
+    var xAxisLabel;
+    if (drilldown == "DAY") {
+      dateFormat = '%d/%m';
+      xAxisLabel = 'Time (Days)';
+    }else if (drilldown == "HOUR") {
+      dateFormat = '%d/%m %H';
+      xAxisLabel = 'Time (Hours)';
+    }else if (drilldown == "MINUTES") {
+      dateFormat = '%d/%m %H:%M';
+      xAxisLabel = 'Time (Minutes)';
+    }else if (drilldown == "SECONDS") {
+      dateFormat = '%d/%m %H:%M:%S';
+      xAxisLabel = 'Time (Seconds)';
+    }
     for(var legand in rdata){
         renderdata.push({values: rdata[legand],key: legand,color: pickLegandColor(legand)});
     }
@@ -207,8 +233,8 @@ nv.addGraph(function() {
                 .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
                 .showYAxis(true)        //Show the y-axis
                 .showXAxis(true)        //Show the x-axis
-  ;
-  chart.xAxis.axisLabel('Time (minutes)')
+            ;
+  chart.xAxis.axisLabel(xAxisLabel).rotateLabels(-45)
         .tickFormat(function (d) {
         return d3.time.format(dateFormat)(new Date(d))});
 
@@ -223,17 +249,31 @@ nv.addGraph(function() {
   //Update the chart when window resizes.
   nv.utils.windowResize(function() { chart.update() });
  d3.selectAll(".nv-point").on("click", function (e) {
-    if (depth == "minutes"){
     var date = new Date(e.x);
-    var fromDate = new Date(date);
-    var toDate = date.setMinutes(date.getMinutes()+5);
-    depth = "seconds";
-    renderGraph(fromDate,toDate,true);      
-    }else{
-    depth = "minutes";
-    renderGraph(from,to,false);            
+    if (depth == "DAY"){
+    var fromDate = new Date(e.x).setDate(date.getDate()-1);
+    var toDate = new Date(e.x).setDate(date.getDate()+1); 
+    depth = "HOUR";
+    renderGraph(fromDate,toDate,"HOUR");            
+    }else if (depth == "HOUR"){
+    var fromDate = new Date(e.x).setHours(date.getHours()-1);
+    var toDate = new Date(e.x).setHours(date.getHours()+1); 
+    depth = "MINUTES";
+    renderGraph(fromDate,toDate,"MINUTES");            
+    }else if (depth == "MINUTES"){
+    var fromDate = new Date(e.x).setMinutes(date.getMinutes()-1);
+    var toDate = new Date(e.x).setMinutes(date.getMinutes()+1);
+    depth = "SECONDS";
+    renderGraph(fromDate,toDate,"SECONDS");      
+    }else if (depth == "SECONDS"){
+    depth = "HOUR";
+    var fromDate = new Date(e.x).setHours(date.getHours()-1);
+    var toDate = new Date(e.x).setHours(date.getHours()+1); 
+    renderGraph(fromDate,toDate,"HOUR");            
     }
   });
+ d3.select(".nv-lineChart")
+      .attr("transform","translate(80,10)")  
   return chart;
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));
