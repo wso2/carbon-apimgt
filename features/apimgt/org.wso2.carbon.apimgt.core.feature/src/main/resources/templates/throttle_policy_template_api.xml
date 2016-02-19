@@ -4,7 +4,7 @@
 #macro( getKey )##
 #if($policy.getPolicyLevel() == "api")
 #if($policy.isAcrossAllUsers())
-str:concat('${apiname}_all_','${pipeline}_' ,'_key')##
+str:concat('${apiname}_all_','${pipeline}' ,'_key')##
 #else
 str:concat('${apiname}_per_','${pipeline}_' ,user_id ,'_key')##
 #end
