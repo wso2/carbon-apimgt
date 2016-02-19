@@ -42,7 +42,6 @@ public final class RestApiConstants {
     public static final String RESOURCE_TAG = "tag";
 
     public static final String API_ID_DELIMITER = "-";
-
     public static final String QUERY_PARAM = "{query}";
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";

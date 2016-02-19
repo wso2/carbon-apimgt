@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.pojo;
 
+/**
+ * This class is used as a pojo class to represent API usage by user
+ */
 public class APIUsageByUser {
     private String context;
     private String username;

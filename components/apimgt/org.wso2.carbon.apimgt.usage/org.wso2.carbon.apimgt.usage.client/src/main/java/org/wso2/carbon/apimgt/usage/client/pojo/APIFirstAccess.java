@@ -18,6 +18,9 @@
 */
 package org.wso2.carbon.apimgt.usage.client.pojo;
 
+/**
+ * This class is used as a pojo class to represent API First Access time
+ */
 public class APIFirstAccess {
     private String year;
     private String month;

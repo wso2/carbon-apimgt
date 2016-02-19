@@ -666,7 +666,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateWsdl(API api) throws APIManagementException {
 
-
+        boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
             String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
@@ -684,13 +684,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
             registry.commitTransaction();
+            transactionCommitted = true;
         } catch (RegistryException e) {
             try {
                 registry.rollbackTransaction();
             } catch (RegistryException ex) {
-                handleException("Error occurred while saving the wsdl in the registry.", ex);
+                handleException("Error occurred while rolling back the transaction.", ex);
             }
-            handleException("Error while performing registry transaction operation", e);
+            throw new APIManagementException("Error occurred while saving the wsdl in the registry.", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
+            }
         }
     }
 
@@ -895,6 +904,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //Validate Transports
         validateAndSetTransports(api);
+        boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
             String apiArtifactId = registry.get(APIUtil.getAPIPath(api.getId())).getUUID();
@@ -964,6 +974,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                artifactPath);
             }
             registry.commitTransaction();
+            transactionCommitted = true;
             if (updatePermissions) {
                 APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                         getAPIManagerConfigurationService().getAPIManagerConfiguration();
@@ -1006,7 +1017,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
             }
             handleException("Error while performing registry transaction operation", e);
-
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error occurred while rolling back the transaction.", ex);
+            }
         }
     }
 
@@ -1609,6 +1627,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             RegistryConstants.PATH_SEPARATOR + api.getId().getApiName() +
                             RegistryConstants.PATH_SEPARATOR + newVersion +
                             APIConstants.API_RESOURCE_NAME;
+
+        boolean transactionCommitted = false;
         try {
             if (registry.resourceExists(targetPath)) {
                 throw new DuplicateAPIException("API version already exist with version :" + newVersion);
@@ -1828,6 +1848,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             apiMgtDAO.addAPI(newAPI, tenantId);
             registry.commitTransaction();
+            transactionCommitted = true;
 
             if(log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
@@ -1846,6 +1867,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             String msg = "Failed to create new version : " + newVersion + " of : " + api.getId().getApiName();
             handleException(msg, e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for API: " + api.getId(), ex);
+            }
         }
     }
 
@@ -1983,8 +2012,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             docContent.setMediaType(APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE);
             registry.put(contentPath, docContent);
-            registry.addAssociation(documentationPath, contentPath,
-                                    APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
+            registry.addAssociation(documentationPath, contentPath, APIConstants.DOCUMENTATION_CONTENT_ASSOCIATION);
             String apiPath = APIUtil.getAPIPath(identifier);
             String[] authorizedRoles = getAuthorizedRoles(apiPath);
             String docVisibility=doc.getVisibility().name();
@@ -2118,6 +2146,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         //Validate Transports
         validateAndSetTransports(api);
+        boolean transactionCommitted = false;
         try {
             registry.beginTransaction();
             GenericArtifact genericArtifact =
@@ -2163,6 +2192,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     artifactPath);
             registry.commitTransaction();
+            transactionCommitted = true;
+
             if (log.isDebugEnabled()) {
                 String logMessage =
                         "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
@@ -2178,6 +2209,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                  api.getId().getApiName(), re);
              }
              handleException("Error while performing registry transaction operation", e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    registry.rollbackTransaction();
+                }
+            } catch (RegistryException ex) {
+                handleException("Error while rolling back the transaction for API: " + api.getId().getApiName(), ex);
+            }
         }
     }
 

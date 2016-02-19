@@ -21,6 +21,9 @@ package org.wso2.carbon.apimgt.usage.client.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used as a DTO to represent subscribed app users
+ */
 public class RegisteredAppUsersDTO {
     private String appName;
     private List<String> userArray = new ArrayList<String>();
