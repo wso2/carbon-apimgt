@@ -28,6 +28,7 @@ var getRedirectPathForNonAuthenticatedUser = function () {
     return redirectPath;
 };
 
+/*Below function can be removed*/
 var isTenantAllowed=function(){
  var user = jagg.getUser(),username;
 
