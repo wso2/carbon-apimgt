@@ -41,18 +41,24 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 public class ThrottlePolicyTemplateBuilder {
 
     private static final Log log = LogFactory.getLog(ThrottlePolicyTemplateBuilder.class);
-    public static final String POLICY_VELOCITY = "throttle_policy_template";
-    public static final String POLICY_VELOCITY_API = "throttle_policy_template_api";
-    public static final String POLICY_VELOCITY_GLOBAL = "throttle_policy_global";
-    public static final String POLICY_VELOCITY_APP = "throttle_policy_app";
-    public static final String POLICY_VELOCITY_SUB = "throttle_policy_sub";
-    public static final String POLICY_TEMPATE_LOCATION = "repository" + File.separator + "resources" + File.separator
+    private static final String POLICY_VELOCITY = "throttle_policy_template";
+    private static final String POLICY_VELOCITY_API = "throttle_policy_template_api";
+    private static final String POLICY_VELOCITY_GLOBAL = "throttle_policy_template_global";
+    private static final String POLICY_VELOCITY_APP = "throttle_policy_template_app";
+    private static final String POLICY_VELOCITY_SUB = "throttle_policy_template_sub";
+    private String policyTemplateLocation = "repository" + File.separator + "resources" + File.separator
             + "policy_templates" + File.separator;
     private static String velocityLogPath = "not-defined";
-
-    private ThrottlePolicyTemplateBuilder() {
-
+    
+    /**
+     * Set the location of the policy templates. If not set, default location is used
+     * @param path
+     */
+    public void setPolicyTemplateLocation(String path){
+        policyTemplateLocation = path;
     }
+
+    
 
     /**
      * Generate policy for api level throttling
@@ -66,7 +72,7 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public static List<String> getThrottlePolicyForAPILevel(Policy policy, String apiName, String apiVersion,
+    public List<String> getThrottlePolicyForAPILevel(Policy policy, String apiName, String apiVersion,
             String apiContext) throws APITemplateException {
 
         List<String> policyArray = new ArrayList<String>();
@@ -149,7 +155,7 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public static String getThrottlePolicyForGlobalLevel(Policy policy) throws APITemplateException {
+    public String getThrottlePolicyForGlobalLevel(Policy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
         //TODO move to constant
         if(!"global".equals(policy.getPolicyLevel())){
@@ -192,7 +198,7 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public static String getThrottlePolicyForAppLevel(Policy policy) throws APITemplateException {
+    public String getThrottlePolicyForAppLevel(Policy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
         // TODO move to constant
         if (!"app".equals(policy.getPolicyLevel())) {
@@ -234,7 +240,7 @@ public class ThrottlePolicyTemplateBuilder {
      * @return
      * @throws APITemplateException
      */
-    public static String getThrottlePolicyForSubscriptionLevel(Policy policy) throws APITemplateException {
+    public String getThrottlePolicyForSubscriptionLevel(Policy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
         //TODO move to constant
         if(!"sub".equals(policy.getPolicyLevel())){
@@ -269,20 +275,20 @@ public class ThrottlePolicyTemplateBuilder {
         return writer.toString();
     }
 
-    private static String getTemplatePathForAPI() {
-        return POLICY_TEMPATE_LOCATION + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_API + ".xml";
+    private  String getTemplatePathForAPI() {
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_API + ".xml";
     }
 
-    private static String getTemplatePathForGlobal() {
-        return POLICY_TEMPATE_LOCATION + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_GLOBAL + ".xml";
+    private  String getTemplatePathForGlobal() {
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_GLOBAL + ".xml";
     }
 
-    private static String getTemplatePathForApplication() {
-        return POLICY_TEMPATE_LOCATION + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_APP + ".xml";
+    private  String getTemplatePathForApplication() {
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_APP + ".xml";
     }
 
-    private static String getTemplatePathForSubscription() {
-        return POLICY_TEMPATE_LOCATION + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_SUB + ".xml";
+    private  String getTemplatePathForSubscription() {
+        return policyTemplateLocation + ThrottlePolicyTemplateBuilder.POLICY_VELOCITY_SUB + ".xml";
     }
 
     private static String getVelocityLogger() {
