@@ -23,6 +23,7 @@ public class HTTPVerbCondition extends Condition {
 
     public HTTPVerbCondition() {
         setType(PolicyConstants.HTTP_VERB_TYPE);
+        this.queryAttributeName = "cast(map:get(properties,’"+PolicyConstants.HTTP_VERB_QUERY+"’),’string’)";
     }
 
     public String getHttpVerb() {
@@ -35,6 +36,10 @@ public class HTTPVerbCondition extends Condition {
 
     @Override
     public String getCondition() {
-        return null;
+        String condition = "("+getQueryAttributeName()+" == "+getHttpVerb()+")";
+        if(isInvertCondition()){
+            condition="!"+condition;
+        }
+        return condition;
     }
 }

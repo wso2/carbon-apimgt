@@ -19,19 +19,20 @@
 package org.wso2.carbon.apimgt.api.model.policy;
 
 public class HeaderCondition extends Condition {
-    private String header;
+    private String headerName;
     private String value;
 
     public HeaderCondition() {
         setType(PolicyConstants.HEADER_TYPE);
     }
 
-    public String getHeader() {
-        return header;
+    public String getHeaderName() {
+        return headerName;
     }
 
-    public void setHeader(String header) {
-        this.header = header;
+    public void setHeader(String headerName) {
+        this.headerName = headerName;
+        this.queryAttributeName = "cast(map:get(properties,’"+this.headerName+"’),’string’)";
     }
 
     public String getValue() {
@@ -44,6 +45,10 @@ public class HeaderCondition extends Condition {
 
     @Override
     public String getCondition() {
-        return null;
+        String condition = "("+getQueryAttributeName()+" == "+getValue()+")";
+        if(isInvertCondition()){
+            condition="!"+condition;
+        }
+        return condition;
     }
 }

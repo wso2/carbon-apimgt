@@ -24,7 +24,7 @@ public class DateCondition extends Condition{
 
     public DateCondition(String queryAttribute) {
         setType(PolicyConstants.DATE_SPECIFIC_TYPE);
-
+        this.queryAttributeName = "cast(map:get(properties,’"+PolicyConstants.DATE_QUERY+"’),’string’)";
     }
 
     public String getSpecificDate() {
@@ -37,6 +37,10 @@ public class DateCondition extends Condition{
 
     @Override
     public String getCondition() {
-        return null;
+        String condition = "("+getQueryAttributeName()+" == "+getSpecificDate()+")";
+        if(isInvertCondition()){
+            condition="!"+condition;
+        }
+        return condition;
     }
 }
