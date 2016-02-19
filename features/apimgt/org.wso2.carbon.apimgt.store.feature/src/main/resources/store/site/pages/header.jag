@@ -28,35 +28,6 @@ var getRedirectPathForNonAuthenticatedUser = function () {
     return redirectPath;
 };
 
-/*Below function can be removed*/
-var isTenantAllowed=function(){
- var user = jagg.getUser(),username;
-
-	var userInSession = session.get("LOGGED_IN_USER");
-	var hasPublisherAccess= session.get("hasPublisherAccess");
-	var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
-
-	if(userInSession != null && jagg.getTenantDomain() != null){
-		var domainName = MultitenantUtils.getTenantDomain(userInSession);
-
-	    	if(domainName == jagg.getTenantDomain()){
-				jagg.setUser({username:userInSession, cookie:null, hasPublisherAccess:hasPublisherAccess});
-	    	}
-
-	}
-
-   /*if(user!=null){
-   	username=user.username;
-   	if(jagg.getTenantDomain()!=null){
-   		if(user.username.split("@")[1]!=jagg.getTenantDomain()){
-   			jagg.setUser(null);
-   			response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
-   			return;
-   		}
-   	}
-   }*/
-   };
-
     // 1  Filter out tenant parameter
     var request_tenant = jagg.getTenantDomain();
     var illegalChars = /([~!@#;%^*+={}\|\\<>\"\',])/;
