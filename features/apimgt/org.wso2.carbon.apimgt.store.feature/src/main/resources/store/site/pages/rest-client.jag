@@ -8,7 +8,6 @@ i18n.init(request,localeResourcesBasePath);
 
 (function () {
 
-   isTenantAllowed();
    jagg.render({
         "name":"page/base",
         "inputs":{

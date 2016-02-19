@@ -13,7 +13,6 @@ var stat;
 
 (function () {
     var user = jagg.getUser(),isCreatePermitted;
-    isTenantAllowed();
     if (!user) {
     response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
     return;
