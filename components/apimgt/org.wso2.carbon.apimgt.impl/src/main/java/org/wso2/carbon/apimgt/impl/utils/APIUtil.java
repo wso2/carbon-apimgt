@@ -5082,6 +5082,9 @@ public final class APIUtil {
      */
     public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
         int index = apiVersion.indexOf("--");
+        if (tenantDomain == null){
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         String apiProvider;
         if (index != -1) {
             apiProvider = apiVersion.substring(0, index);

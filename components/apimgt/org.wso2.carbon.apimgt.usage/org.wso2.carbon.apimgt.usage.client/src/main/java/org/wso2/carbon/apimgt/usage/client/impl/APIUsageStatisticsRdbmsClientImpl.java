@@ -2371,7 +2371,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     @Override
     public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
-            providerName, String fromDate, String toDate, boolean drillDown) throws
+            providerName, String fromDate, String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -2385,14 +2385,8 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         try {
             connection = dataSource.getConnection();
             StringBuilder query = new StringBuilder("SELECT * FROM ");
-            String tableName;
-            if (drillDown) {
-                tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY;
-                query.append(APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY + " WHERE ");
-            } else {
-                tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TME_SUMMARY;
-                query.append(APIUsageStatisticsClientConstants.API_EXECUTION_TME_SUMMARY + " WHERE ");
-            }
+            String tableName = getExecutionTimeTableByView(drillDown);
+                query.append(tableName).append(" WHERE ");
             query.append("api='" + apiName).append("'");
             if (version != null) {
                 query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
@@ -2414,7 +2408,20 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (isTableExist(tableName, connection)) { //Tables exist
                 preparedStatement = connection.prepareStatement(query.toString());
                 rs = preparedStatement.executeQuery();
+                int hour = 0;
+                int minute = 0;
+                int seconds = 0;
                 while (rs.next()) {
+                    if ("HOUR".equals(drillDown)){
+                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
+                    }else if ("MINUTES".equals(drillDown)){
+                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
+                        minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
+                    }else if ("SECONDS".equals(drillDown)){
+                        hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
+                        minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
+                        seconds = rs.getInt(APIUsageStatisticsClientConstants.SECONDS);
+                    }
                     Result<ExecutionTimeOfAPIValues> result1 = new Result<ExecutionTimeOfAPIValues>();
                     ExecutionTimeOfAPIValues executionTimeOfAPIValues = new ExecutionTimeOfAPIValues();
                     executionTimeOfAPIValues.setApi(rs.getString(APIUsageStatisticsClientConstants.API));
@@ -2425,13 +2432,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                     executionTimeOfAPIValues.setYear(rs.getInt(APIUsageStatisticsClientConstants.YEAR));
                     executionTimeOfAPIValues.setMonth(rs.getInt(APIUsageStatisticsClientConstants.MONTH));
                     executionTimeOfAPIValues.setDay(rs.getInt(APIUsageStatisticsClientConstants.DAY));
-                    executionTimeOfAPIValues.setHour(rs.getInt(APIUsageStatisticsClientConstants.HOUR));
-                    executionTimeOfAPIValues.setMinutes(rs.getInt(APIUsageStatisticsClientConstants.MINUTES));
-                    if (drillDown){
-                        executionTimeOfAPIValues.setSeconds(rs.getInt(APIUsageStatisticsClientConstants.SECONDS));
-                    }else{
-                        executionTimeOfAPIValues.setSeconds(0);
-                    }
+                    executionTimeOfAPIValues.setHour(hour);
+                    executionTimeOfAPIValues.setMinutes(minute);
+                    executionTimeOfAPIValues.setSeconds(seconds);
                     executionTimeOfAPIValues.setMediationName(rs.getString(APIUsageStatisticsClientConstants
                             .MEDIATION));
                     executionTimeOfAPIValues.setExecutionTime(rs.getInt(APIUsageStatisticsClientConstants

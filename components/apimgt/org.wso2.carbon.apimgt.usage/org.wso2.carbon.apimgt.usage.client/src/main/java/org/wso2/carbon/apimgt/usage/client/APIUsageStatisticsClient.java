@@ -550,14 +550,15 @@ public abstract class APIUsageStatisticsClient {
     /**
      * return list of api usage for a particular api and version
      *
-     * @param providerName API provider name
      * @param apiName      Name of the API
+     * @param providerName API provider name
+     * @param drillDown
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
-    public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName,String version,
-                                                                                 String providerName,String fromDate,
-                                                                                 String toDate,boolean drillDown) throws
+    public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
+                                                                                 String providerName, String fromDate,
+                                                                                 String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException;
 
     /**
@@ -582,5 +583,24 @@ public abstract class APIUsageStatisticsClient {
     protected void handleException(String msg, Throwable e) throws APIMgtUsageQueryServiceClientException {
         log.error(msg, e);
         throw new APIMgtUsageQueryServiceClientException(msg, e);
+    }
+
+    /**
+     *
+     * @param drillDown selected type of data
+     * @return Table name for view
+     */
+    protected  String getExecutionTimeTableByView(String drillDown){
+        String tableName = APIUsageStatisticsClientConstants.API_EXECUTION_TME_DAY_SUMMARY;
+        if ("DAY".equals(drillDown)) {
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TME_DAY_SUMMARY;
+        }else if ("HOUR".equals(drillDown)){
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_HOUR_SUMMARY;
+        }else if ("MINUTES".equals(drillDown)){
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_MINUTE_SUMMARY;
+        }else if ("SECONDS".equals(drillDown)){
+            tableName =  APIUsageStatisticsClientConstants.API_EXECUTION_TIME_SECONDS_SUMMARY;
+        }
+        return tableName;
     }
 }

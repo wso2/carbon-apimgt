@@ -73,7 +73,8 @@ public class APIMgtCommonExtensionHandler extends AbstractHandler implements Man
         String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        String tenantDomain = MultitenantUtils.getTenantDomain(RESTUtils.getFullRequestPath(messageContext));
+        String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(RESTUtils.getFullRequestPath
+                (messageContext));
         executionTimePublisherDTO.setApiName(APIUtil.getAPINamefromRESTAPI(apiName));
         if (executionStartTime == 0) {
             executionTimePublisherDTO.setExecutionTime(0);

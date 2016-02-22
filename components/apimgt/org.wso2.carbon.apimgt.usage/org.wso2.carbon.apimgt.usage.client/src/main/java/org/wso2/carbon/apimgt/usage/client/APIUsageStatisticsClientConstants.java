@@ -171,8 +171,10 @@ public final class APIUsageStatisticsClientConstants {
     public static final String ALIAS_THROTTLE_OUT_COUNT = "throttle_out_count";
 
     public static final String TENANT_DOMAIN = "tenantDomain";
-    public static final String API_EXECUTION_TME_SUMMARY = "API_EXECUTION_TIME_SUMMARY";
+    public static final String API_EXECUTION_TME_DAY_SUMMARY = "API_EXECUTION_TME_DAY_SUMMARY";
+    public static final String API_EXECUTION_TIME_HOUR_SUMMARY = "API_EXECUTION_TIME_HOUR_SUMMARY";
     public static final String API_EXECUTION_TIME_MINUTE_SUMMARY = "API_EXECUTION_TIME_MINUTE_SUMMARY";
+    public static final String API_EXECUTION_TIME_SECONDS_SUMMARY = "API_EXECUTION_TIME_SECONDS_SUMMARY";
 
     public static final String RDBMS_STATISTICS_CLIENT_TYPE = "RDBMS";
     public static final String REST_STATISTICS_CLIENT_TYPE = "REST";

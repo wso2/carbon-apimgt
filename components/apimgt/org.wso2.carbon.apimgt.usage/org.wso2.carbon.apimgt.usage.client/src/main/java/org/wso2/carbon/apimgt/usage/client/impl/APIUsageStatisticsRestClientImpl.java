@@ -2352,7 +2352,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
     @Override
     public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
                                                                         String providerName, String fromDate,
-                                                                        String toDate,boolean drillDown)
+                                                                        String toDate,String drillDown)
             throws APIMgtUsageQueryServiceClientException {
         StringBuilder query = new StringBuilder("api:" + apiName);
         if (version != null) {
@@ -2372,13 +2372,8 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             }
         }
         RequestSearchBean request;
-        if (drillDown){
-          request  = new RequestSearchBean(query.toString(), 0, 500, APIUsageStatisticsClientConstants
-                    .API_EXECUTION_TIME_MINUTE_SUMMARY);
-        }else{
-            request  = new RequestSearchBean(query.toString(), 0, 500, APIUsageStatisticsClientConstants
-                    .API_EXECUTION_TME_SUMMARY);
-        }
+        String tableName = getExecutionTimeTableByView(drillDown);
+          request  = new RequestSearchBean(query.toString(), 0, 500, tableName);
         Type type = new TypeToken<List<Result<ExecutionTimeOfAPIValues>>>() {
         }.getType();
 
