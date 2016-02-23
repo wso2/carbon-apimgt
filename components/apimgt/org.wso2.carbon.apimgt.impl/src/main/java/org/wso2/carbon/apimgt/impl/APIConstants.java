@@ -325,6 +325,8 @@ public final class APIConstants {
     public static final String PROTOTYPED = "PROTOTYPED";
     public static final String VERB_INFO_DTO = "VERB_INFO";
 
+    //Overview constants for CORS configuration
+    public static final String API_OVERVIEW_CORS_CONFIGURATION = "overview_corsConfiguration";
     //Registry lifecycle related info
     public static final String API_LIFE_CYCLE="APILifeCycle";
     public static final String LC_NEXT_STATES="nextStates";
@@ -590,6 +592,9 @@ public final class APIConstants {
 // The following properties describes the reason for the throttle out.
     public static final String THROTTLE_OUT_REASON_HARD_LIMIT_EXCEEDED = "HARD_LIMIT_EXCEEDED";
     public static final String THROTTLE_OUT_REASON_SOFT_LIMIT_EXCEEDED = "SOFT_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_API_LIMIT_EXCEEDED = "API_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_RESOURCE_LIMIT_EXCEEDED = "RESOURCE_LIMIT_EXCEEDED";
+    public static final String THROTTLE_OUT_REASON_APPLICATION_LIMIT_EXCEEDED = "APPLICATION_LIMIT_EXCEEDED";
 
     public static final String API_USAGE_TRACKING = "APIUsageTracking.";
     public static final String API_USAGE_ENABLED = "APIUsageTracking.Enabled";
@@ -748,17 +753,20 @@ public final class APIConstants {
     	private OperationParameter(){    	    
     	}
     }
-    
+
     public static class CORSHeaders {
-    	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
-    	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+        public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+        public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+        public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
-    	
-    	public static final String ACCESS_CONTROL_ALLOW_HEADERS_VALUE = "authorization,Access-Control-Allow-Origin,Content-Type";
-    	public static final String ACCESS_CONTROL_ALLOW_METHODS_VALUE = "GET,POST,PUT,DELETE,PATCH,OPTIONS";
-    	private CORSHeaders(){    	    
-    	}
+        public static final String ALLOW_HEADERS_HANDLER_VALUE = "allowHeaders";
+        public static final String ALLOW_METHODS_HANDLER_VALUE = "allowedMethods";
+        public static final String ALLOW_ORIGIN_HANDLER_VALUE = "allowedOrigins";
+        public static final String ALLOW_CREDENTIALS_HANDLER_VALUE = "allowCredentials";
+        public static final String IMPLEMENTATION_TYPE_HANDLER_VALUE = "apiImplementationType";
+
+        private CORSHeaders() {
+        }
     }
 
     public static final String EXTENSION_HANDLER_POSITION = "ExtensionHandlerPosition";
@@ -1033,5 +1041,11 @@ public final class APIConstants {
     public static final String HOST_NAME = "HostName";
     public static final int DEFAULT_HTTPS_PORT = 443;
     public static final String PROXY_CONTEXT_PATH = "ProxyContextPath";
+
+    //Starts CEP based throttling policy implementation related constants
+    public static final String CPS_SERVER_URL = "CPSServerUrl";
+    public static final String CPS_SERVER_USERNAME = "CPSServerUsername";
+    public static final String CPS_SERVER_PASSWORD = "CPSServerPassword";
+
 
 }

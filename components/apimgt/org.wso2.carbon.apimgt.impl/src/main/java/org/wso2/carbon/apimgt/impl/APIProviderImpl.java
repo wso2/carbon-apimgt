@@ -18,9 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
+import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -39,6 +42,8 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -48,6 +53,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
+import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
@@ -82,6 +89,8 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
@@ -1455,28 +1464,48 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private APITemplateBuilder getAPITemplateBuilder(API api) throws APIManagementException {
         APITemplateBuilderImpl vtb = new APITemplateBuilderImpl(api);
         Map<String, String> corsProperties = new HashMap<String, String>();
-        corsProperties.put("apiImplementationType", api.getImplementation());
-        if (api.getAllowedHeaders() != null && !api.getAllowedHeaders().isEmpty()) {
-            StringBuilder allowHeaders = new StringBuilder();
-            for (String header : api.getAllowedHeaders()) {
-                allowHeaders.append(header).append(',');
+        corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE, api.getImplementation());
+
+        if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
+            CORSConfiguration corsConfiguration = api.getCorsConfiguration();
+            if (corsConfiguration.getAccessControlAllowHeaders() != null) {
+                StringBuilder allowHeaders = new StringBuilder();
+                for (String header : corsConfiguration.getAccessControlAllowHeaders()) {
+                    allowHeaders.append(header).append(',');
+                }
+                if (allowHeaders.length() != 0) {
+                    allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_HEADERS_HANDLER_VALUE, allowHeaders.toString());
+                }
             }
-            if (!allowHeaders.toString().isEmpty()) {
-                allowHeaders.deleteCharAt(allowHeaders.length() - 1);
+            if (corsConfiguration.getAccessControlAllowOrigins() != null) {
+                StringBuilder allowOrigins = new StringBuilder();
+                for (String origin : corsConfiguration.getAccessControlAllowOrigins()) {
+                    allowOrigins.append(origin).append(',');
+                }
+                if (allowOrigins.length() != 0) {
+                    allowOrigins.deleteCharAt(allowOrigins.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_ORIGIN_HANDLER_VALUE, allowOrigins.toString());
+                }
             }
-            corsProperties.put("allowHeaders", allowHeaders.toString());
+            if (corsConfiguration.getAccessControlAllowMethods() != null) {
+                StringBuilder allowedMethods = new StringBuilder();
+                for (String methods : corsConfiguration.getAccessControlAllowMethods()) {
+                    allowedMethods.append(methods).append(',');
+                }
+                if (allowedMethods.length() != 0) {
+                    allowedMethods.deleteCharAt(allowedMethods.length() - 1);
+                    corsProperties.put(APIConstants.CORSHeaders.ALLOW_METHODS_HANDLER_VALUE, allowedMethods.toString());
+                }
+            }
+            if (corsConfiguration.isAccessControlAllowCredentials()) {
+                corsProperties.put(APIConstants.CORSHeaders.ALLOW_CREDENTIALS_HANDLER_VALUE,
+                                   String.valueOf(corsConfiguration.isAccessControlAllowCredentials()));
+            }
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
+        } else if (APIUtil.isCORSEnabled()) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         }
-        if (api.getAllowedOrigins() != null && !api.getAllowedOrigins().isEmpty()) {
-            StringBuilder allowOrigins = new StringBuilder();
-            for (String origin : api.getAllowedOrigins()) {
-                allowOrigins.append(origin).append(',');
-            }
-            if (!allowOrigins.toString().isEmpty()) {
-                allowOrigins.deleteCharAt(allowOrigins.length() - 1);
-            }
-            corsProperties.put("allowedOrigins", allowOrigins.toString());
-        }
-        vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
 
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
@@ -3530,5 +3559,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             return !(this.tenantDomain.equals(tenantDomain));
         }
         return true;
+    }
+
+    public void addPolicy(Policy policy) throws APIManagementException {
+
+    }
+
+    public long ipToLong(String ip) {
+        long ipAddressinLong = 0;
+        if (ip != null) {
+            //convert ipaddress into a long
+            String[] ipAddressArray = ip.split("\\.");    //split by "." and add to an array
+
+            for (int i = 0; i < ipAddressArray.length; i++) {
+                int power = 3 - i;
+                long ipAddress = Long.parseLong(ipAddressArray[i]);   //parse to long
+                ipAddressinLong += ipAddress * Math.pow(256, power);
+            }
+        }
+        return ipAddressinLong;
+    }
+
+    public void appendPolicy(String eligibilityQuery, String decisionQuery, String tierName){
+
+    }
+
+    public String getCondition(Policy policy) {
+        return null;
     }
 }

@@ -16,10 +16,13 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.throttle.event.core.ThrottlerService;
 import org.wso2.carbon.utils.ConfigurationContextService;
+
 
 public class ServiceReferenceHolder {
 
@@ -27,7 +30,15 @@ public class ServiceReferenceHolder {
 
     private ConfigurationContextService cfgCtxService;
     private APIManagerConfigurationService amConfigService;
+    public ThrottlerService getThrottler() {
+        return throttler;
+    }
 
+    public void setThrottler(ThrottlerService throttler) {
+        this.throttler = throttler;
+    }
+
+    private ThrottlerService throttler;
     private ServiceReferenceHolder() {
 
     }

@@ -1,0 +1,21 @@
+###################################  macros  #######################################
+##
+###generate key
+#macro( getKey )##
+#if($policy.getPolicyLevel() == "global")
+${policy.getPolicyLevel()}_${policy.getPolicyName()}_key##
+#end
+#end
+###generate rule
+#macro( getRule $policy)
+#if($policy.getPolicyLevel() == "global")
+${policy.getPolicyLevel()}_${policy.getPolicyName()}##
+#end
+#end
+<policy tier="$policy.getPolicyLevel()_$policy.getPolicyName()" level="$policy.getPolicyLevel()" name="#getRule($policy)">
+	<eligibilityQuery>
+		FROM RequestStream
+		SELECT '#getRule($policy)' AS rule, messageID, true AS isEligible, ($condition) as isLocallyThrottled, '#getKey()' AS throttle_key
+		INSERT INTO EligibilityStream;	
+	</eligibilityQuery>	
+</policy>

@@ -24,6 +24,8 @@ jagg.initializer("item-implement", {
         jagg.addFooterJS("jsonpath-0.8.0", "jagg", "templates/item-design/js/jsonpath-0.8.0.js");        
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
         jagg.addFooterJS("implementation-api", "jagg", "templates/item-implement/js/api-implementation.js");
+        jagg.addHeaderCSS("tagscss", "jagg", "templates/item-design/css/bootstrap-tagsinput.css");
+        
     }
 });
 %>

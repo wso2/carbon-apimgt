@@ -17,9 +17,9 @@
 */
 package org.wso2.carbon.apimgt.api;
 
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.InputStream;
 import java.util.List;
@@ -132,7 +132,9 @@ public interface APIProvider extends APIManager {
     long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException;
 
     void addTier(Tier tier) throws APIManagementException;
-    
+
+    void addPolicy(Policy policy) throws APIManagementException;
+
     void updateTier(Tier tier) throws APIManagementException;
     
     void removeTier(Tier tier) throws APIManagementException;
