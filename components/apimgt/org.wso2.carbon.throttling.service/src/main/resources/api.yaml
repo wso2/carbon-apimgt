@@ -1,0 +1,59 @@
+# this is an example of the Uber API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: Shop Around You API
+  description: This API allows you to find shops near you and get price estimation for products you need.
+  version: "1.0.0"
+# the domain of the service
+host: shop.wso2.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /throttle:
+    get:
+      summary: throttled events available
+      description: |
+        This will provide access to throttled events in database.
+      tags:
+        - Shops
+      responses:
+        200:
+          description: An array of shops around you
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ThrottledEvent'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+  ThrottledEvent:
+    properties:
+      throttle_key:
+        type: string
+        description: throttle key.
+      last_updated_time:
+        type: string
+        description: Last time decision updated.
+      throttle_state:
+        type: string
+        description: throttle state.
+
+  Error:
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
+
