@@ -1,7 +1,7 @@
 var currentLocation;
 currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
-var apiNameVersionMap = {}; 
+var apiNameVersionMap = {};
 var apiName;
 var version;
 var d = new Date();
@@ -60,11 +60,11 @@ $( document ).ready(function() {
                  from = convertDate(obj.date1);
                  to = convertDate(obj.date2);
                  if ((to-from)>(3600000*24*2)) {
-                 renderGraph(from, to,"DAY");  
-                 depth = "DAY";                  
+                 renderGraph(from, to,"DAY");
+                 depth = "DAY";
                  }else{
-                 renderGraph(from, to,"HOUR"); 
-                 depth = "HOUR";                                     
+                 renderGraph(from, to,"HOUR");
+                 depth = "HOUR";
                  }
                         });
 });
@@ -73,7 +73,7 @@ var populateAPIList = function(){
            jagg.post("/site/blocks/listing/ajax/item-list.jag", { action: "getAllAPIs"},
         function (json) {
         if (!json.error) {
-                if (json.apis && json.apis.length>0) {                   
+                if (json.apis && json.apis.length>0) {
                     var apiList = json.apis;
                     for (var i in apiList) {
                         var apiname = apiList[i].name;
@@ -91,7 +91,7 @@ var populateAPIList = function(){
                     if (i==0) {
                     $('#apiSelect').append('<option selected="selected" value'+name+'>' + name + '</option>');
                 }else{
-                    $('#apiSelect').append('<option value='+name+'>' + name+ '</option>');                    
+                    $('#apiSelect').append('<option value='+name+'>' + name+ '</option>');
                 }
                 i++;
             }
@@ -107,7 +107,7 @@ var populateVersionList = function(apiName){
                     if (i==0) {
                     $('#versionSelect').append('<option selected="selected" value'+tempVersion+'>' + tempVersion + '</option>');
                 }else{
-                    $('#versionSelect').append('<option value='+tempVersion+'>' + tempVersion+ '</option>');                    
+                    $('#versionSelect').append('<option value='+tempVersion+'>' + tempVersion+ '</option>');
                 }
                 i++;
         }
@@ -126,7 +126,7 @@ function isDataPublishingEnabled(){
                     jagg.message({content: json.message, type: "error"});
                 }
             }
-        }, "json");        
+        }, "json");
 }
 
 var convertTimeString = function(date){
@@ -194,7 +194,7 @@ function renderGraph(fromDate,toDate,drillDown){
                         + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-last-access-times/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
-            else {  
+            else {
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
                 } else {
@@ -228,6 +228,7 @@ function drawGraphInArea(rdata,drilldown){
     }
 nv.addGraph(function() {
   var chart = nv.models.lineChart()
+                .margin({left: 100, bottom: 100})
                 .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
                 .transitionDuration(350)  //how fast do you want the lines to transition?
                 .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
@@ -242,7 +243,7 @@ nv.addGraph(function() {
   chart.yAxis     //Chart y-axis settings
       .axisLabel('Execution Time (ms)')
       .tickFormat(d3.format(',r'));
-  d3.select('#latencytTime svg')    //Select the <svg> element you want to render the chart in.   
+  d3.select('#latencytTime svg')    //Select the <svg> element you want to render the chart in.
       .datum(renderdata)         //Populate the <svg> element with chart data...
       .call(chart);          //Finally, render the chart!
 
@@ -252,29 +253,26 @@ nv.addGraph(function() {
     var date = new Date(e.x);
     if (depth == "DAY"){
     var fromDate = new Date(e.x).setDate(date.getDate()-1);
-    var toDate = new Date(e.x).setDate(date.getDate()+1); 
+    var toDate = new Date(e.x).setDate(date.getDate()+1);
     depth = "HOUR";
-    renderGraph(fromDate,toDate,"HOUR");            
+    renderGraph(fromDate,toDate,"HOUR");
     }else if (depth == "HOUR"){
     var fromDate = new Date(e.x).setHours(date.getHours()-1);
-    var toDate = new Date(e.x).setHours(date.getHours()+1); 
+    var toDate = new Date(e.x).setHours(date.getHours()+1);
     depth = "MINUTES";
-    renderGraph(fromDate,toDate,"MINUTES");            
+    renderGraph(fromDate,toDate,"MINUTES");
     }else if (depth == "MINUTES"){
     var fromDate = new Date(e.x).setMinutes(date.getMinutes()-1);
     var toDate = new Date(e.x).setMinutes(date.getMinutes()+1);
     depth = "SECONDS";
-    renderGraph(fromDate,toDate,"SECONDS");      
+    renderGraph(fromDate,toDate,"SECONDS");
     }else if (depth == "SECONDS"){
     depth = "HOUR";
     var fromDate = new Date(e.x).setHours(date.getHours()-1);
-    var toDate = new Date(e.x).setHours(date.getHours()+1); 
-    renderGraph(fromDate,toDate,"HOUR");            
+    var toDate = new Date(e.x).setHours(date.getHours()+1);
+    renderGraph(fromDate,toDate,"HOUR");
     }
   });
- d3.select(".nv-lineChart")
-      .attr("transform","translate(80,10)")  
-  return chart;
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));
 $('#latencytTime svg').show();
@@ -296,5 +294,5 @@ var pickLegandColor = function(legand){
     case "CORS":
           return "#06DA0A";
         break;
-} 
+}
 }
