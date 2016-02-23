@@ -22,9 +22,10 @@ package org.wso2.carbon.apimgt.api.model.policy;
 public class DateCondition extends Condition{
     private String specificDate;
 
-    public DateCondition(String queryAttribute) {
+    public DateCondition() {
         setType(PolicyConstants.DATE_SPECIFIC_TYPE);
-        this.queryAttributeName = "cast(map:get(properties,’"+PolicyConstants.DATE_QUERY+"’),’string’)";
+        this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.DATE_QUERY + PolicyConstants.END_QUERY;
+                                    // "cast(map:get(properties,’"+value+"’),’string’)";
     }
 
     public String getSpecificDate() {
@@ -37,9 +38,10 @@ public class DateCondition extends Condition{
 
     @Override
     public String getCondition() {
-        String condition = "("+getQueryAttributeName()+" == "+getSpecificDate()+")";
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL +
+                getSpecificDate() + PolicyConstants.CLOSE_BRACKET; //"("+queryAttribute+"=="+value+")"
         if(isInvertCondition()){
-            condition="!"+condition;
+            condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
         }
         return condition;
     }

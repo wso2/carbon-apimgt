@@ -24,7 +24,8 @@ public class IPRangeCondition extends Condition {
 
     public IPRangeCondition() {
         setType(PolicyConstants.IP_RANGE_TYPE);
-        this.queryAttributeName = "cast(map:get(properties,’"+PolicyConstants.IP_QUERY+"’),’string’)";
+        this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.IP_QUERY + PolicyConstants.END_QUERY;
+        // "cast(map:get(properties,’"+value+"’),’string’)";
     }
 
     public String getStartingIP() {
@@ -62,9 +63,11 @@ public class IPRangeCondition extends Condition {
     public String getCondition() {
         long ipStart = ipToLong(getStartingIP());
         long ipEnd = ipToLong(getEndingIP());
-        String condition = "("+ipStart+"<="+ getQueryAttributeName() +" AND "+ipEnd+">="+ getQueryAttributeName()+")";
+        String condition = PolicyConstants.OPEN_BRACKET+ipStart+PolicyConstants.LESS_THAN+ getQueryAttributeName() +
+                PolicyConstants.AND+ipEnd+PolicyConstants.GREATER_THAN+ getQueryAttributeName()+
+                PolicyConstants.CLOSE_BRACKET;    //"("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
         if(isInvertCondition()){
-            condition="!"+condition;
+            condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
         }
         return condition;
     }

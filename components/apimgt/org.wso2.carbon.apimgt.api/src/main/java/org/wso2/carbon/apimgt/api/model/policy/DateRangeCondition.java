@@ -25,7 +25,8 @@ public class DateRangeCondition extends Condition {
 
     public DateRangeCondition() {
         setType(PolicyConstants.DATE_RANGE_TYPE);
-        this.queryAttributeName = "cast(map:get(properties,’"+PolicyConstants.DATE_QUERY+"’),’string’)";
+        this.queryAttributeName = PolicyConstants.START_QUERY + PolicyConstants.DATE_QUERY + PolicyConstants.END_QUERY;
+        // "cast(map:get(properties,’"+value+"’),’string’)";
     }
 
     public String getEndingDate() {
@@ -46,10 +47,11 @@ public class DateRangeCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = "("+getQueryAttributeName()+">="+ getStartingDate() + " AND "+ getQueryAttributeName() +"<="+
-                getEndingDate()+")";
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.GREATER_THAN +
+                getStartingDate() + PolicyConstants.AND + getQueryAttributeName() + PolicyConstants.LESS_THAN +
+                getEndingDate()+PolicyConstants.CLOSE_BRACKET; //"("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
         if(isInvertCondition()){
-            condition="!"+condition;
+            condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
         }
         return condition;
     }

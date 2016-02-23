@@ -32,7 +32,8 @@ public class JWTClaimsCondition extends Condition{
 
     public void setClaimUrl(String claimUrl) {
         this.claimUrl = claimUrl;
-        this.queryAttributeName = "cast(map:get(properties,’"+this.claimUrl+"’),’string’)";
+        this.queryAttributeName = PolicyConstants.START_QUERY + this.claimUrl + PolicyConstants.END_QUERY;
+        // "cast(map:get(properties,’"+value+"’),’string’)";
     }
 
     public String getAttribute() {
@@ -45,9 +46,10 @@ public class JWTClaimsCondition extends Condition{
 
     @Override
     public String getCondition() {
-        String condition = "("+getQueryAttributeName()+" == "+getAttribute()+")";
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL +
+                getAttribute() + PolicyConstants.CLOSE_BRACKET;  //"("+queryAttribute+"=="+value+")"
         if(isInvertCondition()){
-            condition="!"+condition;
+            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
         }
         return condition;
     }
