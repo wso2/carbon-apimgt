@@ -16,7 +16,6 @@ import javax.ws.rs.core.Response;
 public class ThrottleApiServiceImpl extends ThrottleApiService {
     @Override
     public Response throttleGet(){
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity(ThrottlingDBUtil.getThrottledEvents()).build();
     }
 }
