@@ -24,6 +24,7 @@ import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -5082,8 +5083,8 @@ public final class APIUtil {
      */
     public static String getAPIProviderFromRESTAPI(String apiVersion, String tenantDomain) {
         int index = apiVersion.indexOf("--");
-        if (tenantDomain == null){
-            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        if(StringUtils.isEmpty(tenantDomain)){
+            tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         }
         String apiProvider;
         if (index != -1) {

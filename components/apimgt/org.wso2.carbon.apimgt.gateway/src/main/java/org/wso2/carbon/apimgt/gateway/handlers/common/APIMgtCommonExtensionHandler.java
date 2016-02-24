@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.gateway.handlers.common;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -28,6 +29,7 @@ import org.apache.synapse.rest.RESTUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.HashMap;
@@ -79,6 +81,10 @@ public class APIMgtCommonExtensionHandler extends AbstractHandler implements Man
         if (executionStartTime == 0) {
             executionTimePublisherDTO.setExecutionTime(0);
         }
+        if(StringUtils.isEmpty(tenantDomain)){
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
         executionTimePublisherDTO.setExecutionTime(executionTime);
         executionTimePublisherDTO.setMediationType(mediationType);
         executionTimePublisherDTO.setVersion(apiVersion);

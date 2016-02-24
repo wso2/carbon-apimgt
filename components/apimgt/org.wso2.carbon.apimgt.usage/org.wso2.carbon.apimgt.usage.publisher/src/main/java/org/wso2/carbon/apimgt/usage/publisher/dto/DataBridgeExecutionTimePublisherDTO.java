@@ -36,8 +36,10 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
     public static String getStreamDefinition() {
 
         return "{\n" +
-                "  \"name\": \"" + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName() + "\",\n" +
-                "  \"version\": \"" + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion() + "\",\n" +
+                "  \"name\": \"" + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName
+                () + "\",\n" +
+                "  \"version\": \"" + DataPublisherUtil.getApiManagerAnalyticsConfiguration()
+                .getExecutionTimeStreamVersion() + "\",\n" +
                 "  \"nickName\": \"Execution Time Data\",\n" +
                 "  \"description\": \"This stream will persist the data which send by the mediation executions\",\n" +
                 "  \"metaData\": [\n" +

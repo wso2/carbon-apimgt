@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Date;
@@ -322,6 +324,9 @@ public class APIAuthenticationHandler extends APIMgtCommonExtensionHandler {
 
         String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
 
+        if(StringUtils.isEmpty(tenantDomain)){
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
         if (apiPublisher == null) {
             apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion,tenantDomain);
         }

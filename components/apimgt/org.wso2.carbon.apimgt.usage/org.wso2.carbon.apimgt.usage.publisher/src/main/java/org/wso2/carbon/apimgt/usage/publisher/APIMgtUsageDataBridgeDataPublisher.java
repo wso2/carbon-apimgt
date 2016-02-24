@@ -111,10 +111,9 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                         getExecutionTimeStreamName(), DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                         getExecutionTimeStreamVersion())) {
 
-                    //Get Throttle Stream Definition
+                    //Get Execution Time Stream Definition
                     String executionStreamDefinition = DataBridgeExecutionTimePublisherDTO.getStreamDefinition();
-                    new JSONParser().parse(executionStreamDefinition);
-                    //Add Throttle Stream Definition;
+                    //Add Execution Time Definition;
                     dataPublisher.addStreamDefinition(executionStreamDefinition,
                             DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName(),
                             DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion());

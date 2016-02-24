@@ -551,13 +551,13 @@ public abstract class APIUsageStatisticsClient {
      * return list of api usage for a particular api and version
      *
      * @param apiName      Name of the API
-     * @param providerName API provider name
+     * @param tenantDomain Logged in tenantDomain
      * @param drillDown
      * @return a List of PerUserAPIUsageDTO objects - Possibly empty
      * @throws org.wso2.carbon.apimgt.usage.client.exception.APIMgtUsageQueryServiceClientException on error
      */
     public abstract List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version,
-                                                                                 String providerName, String fromDate,
+                                                                                 String tenantDomain, String fromDate,
                                                                                  String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException;
 

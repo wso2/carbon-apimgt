@@ -37,20 +37,11 @@ var log = new Log();
             var tenantDomain = MultitenantUtils.getTenantDomain(provider);
             var APIUsageStatisticsClient = Packages.org.wso2.carbon.apimgt.usage.client.APIUsageStatisticsClient;
             var usageStatClient;
-            var currentLocation = request.getParameter("currentLocation");
-            if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
-                provider = allProviders;
-            }
-
-            if (provider.indexOf("@") == -1) {
-                provider = provider + "@" + tenantDomain;
-            }
-
-            if (action === "getExecutionTimeOfAPI") {     
+               if (action === "getExecutionTimeOfAPI") {
 
                 mod = jagg.module("statistics");
                 var data = {};
-                result = mod.getExecutionTimeByAPI(apiName,apiVersion,provider,fromDate,toDate,drilldown);
+                result = mod.getExecutionTimeByAPI(apiName,apiVersion,tenantDomain,fromDate,toDate,drilldown);
                 if (result.error == "true") {
                     obj = {
                         error: result.error,

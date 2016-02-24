@@ -2371,7 +2371,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
 
     @Override
     public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
-            providerName, String fromDate, String toDate, String drillDown) throws
+            tenantDomain, String fromDate, String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException {
 
         if (dataSource == null) {
@@ -2392,9 +2392,9 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
                         .append("'");
             }
-            if (providerName != null) {
-                query.append(" AND ").append(APIUsageStatisticsClientConstants.API_PUBLISHER).append("='").append
-                        (providerName).append("'");
+            if (tenantDomain != null) {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.TENANT_DOMAIN).append("='").append
+                        (tenantDomain).append("'");
             }
             if (fromDate != null && toDate != null) {
                 try {
