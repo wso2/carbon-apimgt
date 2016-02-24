@@ -78,7 +78,16 @@ public final class ThrottlingDBUtil {
         if (dataSource != null) {
             return dataSource.getConnection();
         }
-        throw new SQLException("Data source is not configured properly.");
+        else {
+            try {
+                initialize();
+                return dataSource.getConnection();
+
+            } catch (Exception e) {
+                throw new SQLException("Data source is not configured properly.");
+            }
+        }
+
     }
 
     public static ThrottledEventDTO[] getThrottledEvents() {
