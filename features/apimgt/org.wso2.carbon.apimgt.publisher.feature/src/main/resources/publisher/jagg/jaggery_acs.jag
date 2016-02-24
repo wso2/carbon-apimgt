@@ -62,6 +62,10 @@
             //First check whether user is having sufficent permissions [create/publish]
             if (isUserCreatePermitted.permitted) {
                 jagg.setUser({username: ssoRelyingParty.getLoggedInUser(sessionId), cookie: null});
+                sessionId = session.getId();
+                ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
+                ssoRelyingParty.addSession(session);
+                session.put("showLogin", "false");
                 session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
             }  else {
                 response.sendRedirect("../site/pages/error-pages/401.html");
