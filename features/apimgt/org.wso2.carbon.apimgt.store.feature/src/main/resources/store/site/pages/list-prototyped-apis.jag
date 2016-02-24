@@ -9,8 +9,6 @@ var tenantDomain = jagg.getTenantDomain();
         
 (function () {
     var apis, site, tag, query, result, mod, user = jagg.getUser();
-    isTenantAllowed();
-    
 
     jagg.render({
         "name":"page/base",
