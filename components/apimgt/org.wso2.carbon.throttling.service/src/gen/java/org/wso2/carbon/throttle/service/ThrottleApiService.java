@@ -14,6 +14,6 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 
 public abstract class ThrottleApiService {
-    public abstract Response throttleGet();
+    public abstract Response throttleGet(String query);
 }
 

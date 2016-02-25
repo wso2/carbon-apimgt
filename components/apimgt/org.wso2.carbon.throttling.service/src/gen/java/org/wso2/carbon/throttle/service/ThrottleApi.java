@@ -34,9 +34,9 @@ public class ThrottleApi  {
         
         @io.swagger.annotations.ApiResponse(code = 0, message = "Unexpected error") })
 
-    public Response throttleGet()
+    public Response throttleGet(@ApiParam(value = "**Search condition**.\n\nYou can search for an application by specifying the name as \"query\" attribute.\n\nEg.\n\"app1\" will match an application if the name is exactly \"app1\".\n\nCurrently this does not support wildcards. Given name must exactly match the application name.\n") @QueryParam("query") String query)
     {
-    return delegate.throttleGet();
+    return delegate.throttleGet(query);
     }
 }
 
