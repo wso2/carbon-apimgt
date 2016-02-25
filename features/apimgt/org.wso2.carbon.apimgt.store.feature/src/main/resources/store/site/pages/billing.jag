@@ -9,7 +9,6 @@ var localeResourcesBasePath="/site/conf/locales/jaggery/";
 i18n.init(request,localeResourcesBasePath);
 (function () {
     var usage, site,  result, mod, user = jagg.getUser();
-    isTenantAllowed();
 
     if (!user) {
         response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
