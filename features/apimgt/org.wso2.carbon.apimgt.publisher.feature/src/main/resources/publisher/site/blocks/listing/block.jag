@@ -44,7 +44,7 @@ jagg.block("listing", {
         }
         var itemCount;
         if (apis != null) {
-            itemCount = result.response.totalLength;
+            itemCount = result.totalLength;
             var numberOfPages = itemCount / itemsPerPage;
             if (itemCount % itemsPerPage != 0) {
                 numberOfPages++;

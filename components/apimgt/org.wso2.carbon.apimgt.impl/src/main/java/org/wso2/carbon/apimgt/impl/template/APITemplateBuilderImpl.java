@@ -169,6 +169,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new TransportConfigContext(configcontext, api);
             configcontext = new ResourceConfigContext(configcontext, api);
+            configcontext = new TemplateUtilContext(configcontext);
 
             VelocityContext context = configcontext.getContext();
             context.put("defaultVersion", defaultVersion);
