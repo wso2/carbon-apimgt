@@ -90,7 +90,9 @@ public final class ThrottlingDBUtil {
 
     }
 
-    public static ThrottledEventDTO[] getThrottledEvents() {
+    public static ThrottledEventDTO[] getThrottledEvents(String query) {
+
+
         ThrottledEventDTO[] throttledEventDTOs = null;
         Connection conn = null;
         PreparedStatement ps = null;
@@ -107,6 +109,16 @@ public final class ThrottlingDBUtil {
                 throttledEventDTO.setThrottleKey(throttleKey);
                 throttledEventDTOList.add(throttledEventDTO);
             }
+            int count = 1;
+            if(query != null && query.length()> 0){
+                count =  Integer.parseInt(query);
+                for (int i = 0; i < count; i++ ){
+                    ThrottledEventDTO throttledEventDTO = new ThrottledEventDTO();
+                    throttledEventDTO.setThrottleKey("key_"+i);
+                    throttledEventDTOList.add(throttledEventDTO);
+                }
+            }
+
             throttledEventDTOs = throttledEventDTOList.toArray(new ThrottledEventDTO[throttledEventDTOList.size()]);
         } catch (SQLException e) {
             log.error("Error while executing SQL", e);
