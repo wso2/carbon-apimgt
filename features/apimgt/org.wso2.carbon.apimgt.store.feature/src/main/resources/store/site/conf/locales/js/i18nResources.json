@@ -22,7 +22,8 @@
         "tokenHelpMsg" : "The period after which the token will expire after generation. A negative value ensures that the token never expires.",
         "curlHelpMsg" : "CURL command created from the access tokens to send the request.",
         "domainUpdateHelp":"Specify list of domains that are permitted to send requests to the gateway through this application.",
-        "cancelSubs":"Cancel Subscription"
+        "cancelSubs":"Cancel Subscription",
+        "clieGenHelpMsg":"This will generate the client side Android SDK for the selected application. It will take few seconds to begin the download."
 
     },
     "confirm": {

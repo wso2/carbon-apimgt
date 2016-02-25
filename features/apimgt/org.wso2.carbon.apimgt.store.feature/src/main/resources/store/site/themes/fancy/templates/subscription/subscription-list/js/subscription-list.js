@@ -12,6 +12,24 @@ function showHideKeys(){
         }
     }
 
+function generateAndroidSdk(app) {
+    $("#cssload-contain").fadeIn();
+    jagg.post("/site/blocks/subscription/subscription-list/ajax/subscription-list.jag", {
+        action:"generateSdk",
+        selectedApp:app,
+        language:"android",
+    }, function (result) {
+        $("#cssload-contain").fadeOut();
+        if (!result.error) {
+            window.location.href = "../themes/fancy/templates/subscription/subscription-list/js/download.jag?fileName="+result.appName+".zip";
+//            location.reload();
+        } else {
+            jagg.message({content:result.message,type:"error"});
+        }
+    }, "json");
+}
+
+
 $(document).ready(function () {
 
     $('#scopeSelectButtonPop').click(function() {
@@ -218,6 +236,13 @@ $(document).ready(function () {
         showHideKeys();
     });
     showHideKeys();
+    $('.help_popup_cli_gen').click(function(){
+        $('#cligen_help').toggle('fast', function()
+        {
+            $('#cligen_help').html(i18n.t('info.clieGenHelpMsg'));
+        });
+        return false;
+    })
 
 
     $('.help_popup_prod').click(function(){
