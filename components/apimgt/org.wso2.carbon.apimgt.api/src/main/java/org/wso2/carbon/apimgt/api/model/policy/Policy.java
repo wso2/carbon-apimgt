@@ -25,21 +25,40 @@ import java.util.List;
 public class Policy implements Serializable{
     private String policyName;
     private String policyLevel;
-    private boolean acrossAllUsers;
+    private String userLevel;
     private String description;
     private List<Pipeline> pipelines;
     private QuotaPolicy defaultQuotaPolicy;
+    private int rateLimitCount;
+
+    public String getRatelimitTimeUnit() {
+        return ratelimitTimeUnit;
+    }
+
+    public void setRatelimitTimeUnit(String ratelimitTimeUnit) {
+        this.ratelimitTimeUnit = ratelimitTimeUnit;
+    }
+
+    public int getRateLimitCount() {
+        return rateLimitCount;
+    }
+
+    public void setRateLimitCount(int rateLimitCount) {
+        this.rateLimitCount = rateLimitCount;
+    }
+
+    private String ratelimitTimeUnit;
 
     public Policy(String name){
         this.policyName=name;
     }
 
-    public boolean isAcrossAllUsers() {
-        return acrossAllUsers;
+    public String getUserLevel() {
+        return userLevel;
     }
 
-    public void setAcrossAllUsers(boolean acrossAllUsers) {
-        this.acrossAllUsers = acrossAllUsers;
+    public void setUserLevel(String userLevel) {
+        this.userLevel = userLevel;
     }
 
     public String getDescription() {

@@ -63,4 +63,8 @@ public class PolicyConstants {
     public static final String START_QUERY = "cast(map:get(properties,’";
 
     public static final String END_QUERY = "’),’string’)";
+
+    public static final String PER_USER =  "per user";
+
+    public static final String ACROSS_ALL = "across all";
 }
