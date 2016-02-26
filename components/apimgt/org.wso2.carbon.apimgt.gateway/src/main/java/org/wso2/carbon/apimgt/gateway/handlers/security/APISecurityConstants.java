@@ -24,7 +24,7 @@ public class APISecurityConstants {
     public static final int API_AUTH_INVALID_CREDENTIALS = 900901;
     public static final String API_AUTH_INVALID_CREDENTIALS_MESSAGE = "Invalid Credentials";
     public static final String API_AUTH_INVALID_CREDENTIALS_DESCRIPTION =
-            "Make sure your have given the correct access token";
+            "Make sure you have given the correct access token";
 
     public static final int API_AUTH_MISSING_CREDENTIALS = 900902;
     public static final String API_AUTH_MISSING_CREDENTIALS_MESSAGE = "Missing Credentials";
