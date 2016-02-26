@@ -13,7 +13,7 @@ str:concat('${policy.getPolicyLevel()}_${policy.getPolicyName()}_',api_key ,app_
 ###generate rule
 #macro( getRule $policy)
 #if($policy.getPolicyLevel() == "sub")
-#if($policy.isAcrossAllUsers())
+#if($policy.getUserLevel() == "across all")
 ####not defined yet######
 #else
 ${policy.getPolicyLevel()}_${policy.getPolicyName()}_user##
