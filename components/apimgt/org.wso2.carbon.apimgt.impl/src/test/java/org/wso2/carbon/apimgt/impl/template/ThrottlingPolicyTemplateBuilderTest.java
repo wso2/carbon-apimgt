@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.model.policy.HTTPVerbCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 
@@ -81,7 +82,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private Policy getPolicyAPILevelPerAPI(){
         Policy policy = new Policy("Gold");
         
-        policy.setAcrossAllUsers(true); 
+        policy.setUserLevel(PolicyConstants.ACROSS_ALL);
         policy.setDescription("Description");    
         policy.setPolicyLevel("api");
        
@@ -162,7 +163,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private Policy getPolicyAPILevelPerUser(){
         Policy policy = new Policy("Gold");
         
-        policy.setAcrossAllUsers(false); 
+        policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");    
         policy.setPolicyLevel("api");
        
@@ -220,7 +221,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private Policy getPolicyAppLevel(){
         Policy policy = new Policy("gold");
         
-        policy.setAcrossAllUsers(true); 
+        policy.setUserLevel(PolicyConstants.ACROSS_ALL); 
         policy.setDescription("Description");    
         policy.setPolicyLevel("app");
        
@@ -242,7 +243,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private Policy getPolicyGlobalLevel(){
         Policy policy = new Policy("1");
         
-        policy.setAcrossAllUsers(true); 
+        policy.setUserLevel(PolicyConstants.ACROSS_ALL);
         policy.setDescription("Description");    
         policy.setPolicyLevel("global");
        
@@ -271,7 +272,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private Policy getPolicySubscriptionLevelperUser(){
         Policy policy = new Policy("gold");
         
-        policy.setAcrossAllUsers(false); 
+        policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");    
         policy.setPolicyLevel("sub");
        

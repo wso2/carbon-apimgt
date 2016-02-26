@@ -13,7 +13,7 @@ str:concat('${apiname}_per_','${pipeline}_' ,user_id ,'_key')##
 ###generate rule
 #macro( getRule $policy)
 #if($policy.getPolicyLevel() == "api")
-#if($policy.isAcrossAllUsers())
+#if($policy.getUserLevel() == "across all")
 ${apiname}_all_${pipeline}##
 #else
 ${apiname}_per_${pipeline}##

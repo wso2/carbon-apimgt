@@ -111,7 +111,7 @@ public class ThrottlePolicyTemplateBuilder {
                 //pipeline name is defined as 'condition0' 'condition1' etc
                 context.put("pipeline", "condition" + condition);
 
-                String conditionString = getPolicyCondition(pipeline.getCondition());
+                String conditionString = getPolicyCondition(pipeline.getConditions());
                 conditionsSet.add(conditionString);
 
                 context.put("condition", " AND " + conditionString);
@@ -175,7 +175,7 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context = new VelocityContext();
             context.put("policy", policy);
             if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
-                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getCondition());
+                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
                 context.put("condition", conditionString);
             } else {
                 context.put("condition", "");
@@ -217,7 +217,7 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context = new VelocityContext();
             context.put("policy", policy);
             if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
-                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getCondition());
+                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
                 context.put("condition", " AND " + conditionString);
             } else {
                 context.put("condition", "");
@@ -259,7 +259,7 @@ public class ThrottlePolicyTemplateBuilder {
             VelocityContext context = new VelocityContext();
             context.put("policy", policy);
             if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
-                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getCondition());
+                String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
                 context.put("condition", " AND " + conditionString);
             } else {
                 context.put("condition", "");
