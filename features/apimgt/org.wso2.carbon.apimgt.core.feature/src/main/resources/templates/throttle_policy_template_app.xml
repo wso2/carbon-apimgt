@@ -2,13 +2,13 @@
 ##
 ###generate key
 #macro( getKey )##
-#if($policy.getPolicyLevel() == "app")
+#if($policy.getPolicyLevel() == $POLICY_LEVEL_APP)
 str:concat('${policy.getPolicyLevel()}_${policy.getPolicyName()}_', app_key,'_key')##
 #end
 #end
 ###generate rule
 #macro( getRule $policy)
-#if($policy.getPolicyLevel() == "app")
+#if($policy.getPolicyLevel() == $POLICY_LEVEL_APP)
 ${policy.getPolicyLevel()}_${policy.getPolicyName()}##
 #end
 #end
@@ -21,7 +21,7 @@ ${policy.getPolicyLevel()}_${policy.getPolicyName()}##
 	<decisionQuery>	
 #if($quotaPolicy != "")
 		FROM EligibilityStream[isEligible==true AND rule == '#getRule($policy)']#window.time($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit()) 
-#if($quotaPolicy.getType() == 'RequestCount')
+#if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
 		select throttle_key, (count(messageID)) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled 
 #else
 		select throttle_key, (count(messageID)) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}

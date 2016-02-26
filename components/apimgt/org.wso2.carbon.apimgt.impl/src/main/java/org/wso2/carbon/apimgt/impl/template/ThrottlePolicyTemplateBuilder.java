@@ -34,6 +34,7 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -78,8 +79,7 @@ public class ThrottlePolicyTemplateBuilder {
         List<String> policyArray = new ArrayList<String>();
         Set<String> conditionsSet = new HashSet<String>();
         
-        //TODO move to constant
-        if(!"api".equals(policy.getPolicyLevel())){
+        if(!PolicyConstants.POLICY_LEVEL_API.equals(policy.getPolicyLevel())){
             throw new APITemplateException("Invalid policy level :" + policy.getPolicyLevel() + ". Has to be 'api'");
         }
 
@@ -99,6 +99,7 @@ public class ThrottlePolicyTemplateBuilder {
             int condition = 0;
             for (Pipeline pipeline : policy.getPipelines()) {
                 context = new VelocityContext();
+                setConstantContext(context);
                 context.put("pipelineItem", pipeline);
                 context.put("policy", policy);
 
@@ -125,6 +126,7 @@ public class ThrottlePolicyTemplateBuilder {
             // for default one
 
             context = new VelocityContext();
+            setConstantContext(context);
            //default policy is defined as 'elseCondition' 
             context.put("pipeline", "elseCondition"); //// constant
             context.put("pipelineItem", null);
@@ -157,8 +159,8 @@ public class ThrottlePolicyTemplateBuilder {
      */
     public String getThrottlePolicyForGlobalLevel(Policy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
-        //TODO move to constant
-        if(!"global".equals(policy.getPolicyLevel())){
+        
+        if(!PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policy.getPolicyLevel())){
             throw new APITemplateException("Invalid policy level :" + policy.getPolicyLevel() + ". Has to be 'global'");
         }
         try {
@@ -173,6 +175,7 @@ public class ThrottlePolicyTemplateBuilder {
             Template template = velocityengine.getTemplate(getTemplatePathForGlobal());
 
             VelocityContext context = new VelocityContext();
+            setConstantContext(context);
             context.put("policy", policy);
             if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
                 String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
@@ -200,8 +203,8 @@ public class ThrottlePolicyTemplateBuilder {
      */
     public String getThrottlePolicyForAppLevel(Policy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
-        // TODO move to constant
-        if (!"app".equals(policy.getPolicyLevel())) {
+        
+        if (!PolicyConstants.POLICY_LEVEL_APP.equals(policy.getPolicyLevel())) {
             throw new APITemplateException("Invalid policy level :" + policy.getPolicyLevel() + ". Has to be 'app'");
         }
         try {
@@ -215,6 +218,7 @@ public class ThrottlePolicyTemplateBuilder {
             Template template = velocityengine.getTemplate(getTemplatePathForApplication());
 
             VelocityContext context = new VelocityContext();
+            setConstantContext(context);
             context.put("policy", policy);
             if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
                 String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
@@ -242,8 +246,8 @@ public class ThrottlePolicyTemplateBuilder {
      */
     public String getThrottlePolicyForSubscriptionLevel(Policy policy) throws APITemplateException {
         StringWriter writer = new StringWriter();
-        //TODO move to constant
-        if(!"sub".equals(policy.getPolicyLevel())){
+        
+        if(!PolicyConstants.POLICY_LEVEL_SUB.equals(policy.getPolicyLevel())){
             throw new APITemplateException("Invalid policy level :" + policy.getPolicyLevel() + ". Has to be 'sub'");
         }
         try {
@@ -256,7 +260,8 @@ public class ThrottlePolicyTemplateBuilder {
             velocityengine.init();
             Template t = velocityengine.getTemplate(getTemplatePathForSubscription());
 
-            VelocityContext context = new VelocityContext();
+            VelocityContext context = new VelocityContext();   
+            setConstantContext(context);
             context.put("policy", policy);
             if (policy.getPipelines() != null && !policy.getPipelines().isEmpty()) {
                 String conditionString = getPolicyCondition(policy.getPipelines().get(0).getConditions());
@@ -344,5 +349,17 @@ public class ThrottlePolicyTemplateBuilder {
 
         conditionString = "!(" + conditionString + ")";
         return conditionString;
+    }
+    
+    private static void setConstantContext(VelocityContext context){
+        context.put("ACROSS_ALL",PolicyConstants.ACROSS_ALL);
+        context.put("PER_USER",PolicyConstants.PER_USER);        
+        context.put("POLICY_LEVEL_API",PolicyConstants.POLICY_LEVEL_API);
+        context.put("POLICY_LEVEL_APP",PolicyConstants.POLICY_LEVEL_APP);
+        context.put("POLICY_LEVEL_SUB",PolicyConstants.POLICY_LEVEL_SUB);
+        context.put("POLICY_LEVEL_GLOBAL",PolicyConstants.POLICY_LEVEL_GLOBAL);
+        context.put("REQUEST_COUNT_TYPE",PolicyConstants.REQUEST_COUNT_TYPE);
+        context.put("BANDWIDTH_TYPE",PolicyConstants.BANDWIDTH_TYPE);
+        
     }
 }

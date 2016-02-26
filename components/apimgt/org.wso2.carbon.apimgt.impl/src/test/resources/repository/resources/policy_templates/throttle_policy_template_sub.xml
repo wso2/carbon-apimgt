@@ -2,22 +2,14 @@
 ##
 ###generate key
 #macro( getKey )##
-#if($policy.getPolicyLevel() == "sub")
-#if($policy.isAcrossAllUsers())
-######not defined yet#######
-#else
+#if($policy.getPolicyLevel() == $POLICY_LEVEL_SUB)
 str:concat('${policy.getPolicyLevel()}_${policy.getPolicyName()}_',api_key ,app_key ,user_id ,'_key')##
-#end
 #end
 #end
 ###generate rule
 #macro( getRule $policy)
-#if($policy.getPolicyLevel() == "sub")
-#if($policy.getUserLevel() == "across all")
-####not defined yet######
-#else
-${policy.getPolicyLevel()}_${policy.getPolicyName()}_user##
-#end
+#if($policy.getPolicyLevel() == $POLICY_LEVEL_SUB)
+${policy.getPolicyLevel()}_${policy.getPolicyName()}##
 #end
 #end
 <policy tier="$policy.getPolicyLevel()_$policy.getPolicyName()" level="$policy.getPolicyLevel()" name="#getRule($policy)">
@@ -29,7 +21,7 @@ ${policy.getPolicyLevel()}_${policy.getPolicyName()}_user##
 	<decisionQuery>	
 #if($quotaPolicy != "")
 		FROM EligibilityStream[isEligible==true AND rule == '#getRule($policy)']#window.time($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit()) 
-#if($quotaPolicy.getType() == 'RequestCount')
+#if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
 		select throttle_key, (count(messageID)) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled 
 #else
 		select throttle_key, (count(messageID)) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}

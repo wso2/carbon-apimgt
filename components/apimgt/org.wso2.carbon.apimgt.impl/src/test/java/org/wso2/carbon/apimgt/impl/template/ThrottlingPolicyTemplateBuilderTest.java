@@ -272,7 +272,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     private Policy getPolicySubscriptionLevelperUser(){
         Policy policy = new Policy("gold");
         
-        policy.setUserLevel(PolicyConstants.PER_USER);
+      
         policy.setDescription("Description");    
         policy.setPolicyLevel("sub");
        
