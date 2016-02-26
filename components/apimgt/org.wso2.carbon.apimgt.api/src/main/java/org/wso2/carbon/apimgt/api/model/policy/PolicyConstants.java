@@ -59,6 +59,8 @@ public class PolicyConstants {
     public static final String GREATER_THAN = ">=";
 
     public static final String LESS_THAN = "<=";
+    
+    public static final String QUOTE = "'";
 
     public static final String START_QUERY = "cast(map:get(properties,’";
 
@@ -75,6 +77,8 @@ public class PolicyConstants {
     public static final String POLICY_LEVEL_GLOBAL = "global";
     
     public static final String POLICY_LEVEL_APP = "app";
+
+    
     
     
 }
