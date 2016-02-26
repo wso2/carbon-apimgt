@@ -67,4 +67,14 @@ public class PolicyConstants {
     public static final String PER_USER =  "per user";
 
     public static final String ACROSS_ALL = "across all";
+    
+    public static final String POLICY_LEVEL_API = "api";
+    
+    public static final String POLICY_LEVEL_SUB = "sub";
+    
+    public static final String POLICY_LEVEL_GLOBAL = "global";
+    
+    public static final String POLICY_LEVEL_APP = "app";
+    
+    
 }
