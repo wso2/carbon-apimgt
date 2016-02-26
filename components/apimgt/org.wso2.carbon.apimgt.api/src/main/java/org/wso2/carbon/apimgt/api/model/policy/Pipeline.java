@@ -26,7 +26,7 @@ public class Pipeline {
 
     private List<Condition> conditions;
 
-    public List<Condition> getCondition() {
+    public List<Condition> getConditions() {
         return conditions;
     }
 
