@@ -45,4 +45,26 @@ public class PolicyConstants {
     public static final String IP_QUERY = "ip";
 
     public static final String HTTP_VERB_QUERY = "verb";
+
+    public static final String OPEN_BRACKET = "(";
+
+    public static final String CLOSE_BRACKET = ")";
+
+    public static final String INVERT_CONDITION = "!";
+
+    public static final String EQUAL = "==";
+
+    public static final String AND = " AND ";
+
+    public static final String GREATER_THAN = ">=";
+
+    public static final String LESS_THAN = "<=";
+
+    public static final String START_QUERY = "cast(map:get(properties,’";
+
+    public static final String END_QUERY = "’),’string’)";
+
+    public static final String PER_USER =  "per user";
+
+    public static final String ACROSS_ALL = "across all";
 }

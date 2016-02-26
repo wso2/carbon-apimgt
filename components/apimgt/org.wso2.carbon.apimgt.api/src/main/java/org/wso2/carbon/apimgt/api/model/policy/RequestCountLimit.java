@@ -29,6 +29,4 @@ public class RequestCountLimit extends Limit {
     public void setRequestCount(long requestCount) {
         this.requestCount = requestCount;
     }
-
-
 }

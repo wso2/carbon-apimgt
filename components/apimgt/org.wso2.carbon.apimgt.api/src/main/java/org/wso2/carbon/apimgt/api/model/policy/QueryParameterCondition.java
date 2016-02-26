@@ -32,7 +32,8 @@ public class QueryParameterCondition extends Condition {
 
     public void setParameter(String parameter) {
         this.parameter = parameter;
-        this.queryAttributeName = "cast(map:get(properties,’"+this.parameter+"’),’string’)";
+        this.queryAttributeName = PolicyConstants.START_QUERY + this.parameter + PolicyConstants.END_QUERY;
+        // "cast(map:get(properties,’"+value+"’),’string’)";
     }
 
     public String getValue() {
@@ -45,9 +46,10 @@ public class QueryParameterCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = "("+ getQueryAttributeName()+" == "+getValue()+")";
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL +getValue()+
+                PolicyConstants.CLOSE_BRACKET;   //"("+queryAttribute+"=="+value+")"
         if(isInvertCondition()){
-            condition="!"+condition;
+            condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
         }
         return condition;
     }
