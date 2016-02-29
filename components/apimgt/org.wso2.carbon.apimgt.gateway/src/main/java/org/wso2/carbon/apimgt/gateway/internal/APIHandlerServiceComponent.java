@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftKeyValidato
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.throttle.event.core.ThrottlerService;
+import org.wso2.carbon.event.throttle.core.ThrottlerService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -42,7 +42,7 @@ import org.wso2.carbon.utils.ConfigurationContextService;
  * interface="org.wso2.carbon.apimgt.impl.APIManagerConfigurationService" cardinality="1..1"
  * policy="dynamic" bind="setAPIManagerConfigurationService" unbind="unsetAPIManagerConfigurationService"
  * @scr.reference name="throttle.event.core.service"
- * interface="org.wso2.carbon.throttle.event.core.ThrottlerService" cardinality="1..1"
+ * interface="org.wso2.carbon.event.throttle.core.ThrottlerService" cardinality="1..1"
  * policy="dynamic" bind="setThrottlerService" unbind="unsetThrottlerService"
  */
 public class APIHandlerServiceComponent {
