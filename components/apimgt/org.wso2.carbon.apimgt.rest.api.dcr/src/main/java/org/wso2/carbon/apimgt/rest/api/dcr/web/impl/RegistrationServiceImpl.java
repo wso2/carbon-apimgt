@@ -28,6 +28,9 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.RegistrationService;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.RegistrationProfile;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -58,30 +61,47 @@ public class RegistrationServiceImpl implements RegistrationService {
          *}
          */
         Response response;
+        String errorMsg;
+        ErrorDTO errorDTO;
         try {
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
             OAuthAppRequest appRequest = new OAuthAppRequest();
             OAuthApplicationInfo applicationInfo = new OAuthApplicationInfo();
-            applicationInfo.setClientName(profile.getClientName());
-            applicationInfo.setCallBackURL(profile.getCallbackUrl());
-            applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, profile.getOwner());
-            applicationInfo.setClientId("");
-            applicationInfo.setClientSecret("");
-            applicationInfo.setIsSaasApplication(profile.isSaasApp());
-            appRequest.setOAuthApplicationInfo(applicationInfo);
-            OAuthApplicationInfo returnedAPP = keyManager.createApplication(appRequest);
-            if (returnedAPP != null) {
-                returnedAPP.removeParameter("tokenScope");
-                return Response.status(Response.Status.CREATED).entity(returnedAPP).build();
+
+            //validates if the application owner and logged in username is same.
+            String owner = profile.getOwner();
+            String authUserName = RestApiUtil.getLoggedInUsername();
+            if (authUserName != null && authUserName.equals(owner)) {
+                applicationInfo.setClientName(profile.getClientName());
+                applicationInfo.setCallBackURL(profile.getCallbackUrl());
+                applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
+                applicationInfo.setClientId("");
+                applicationInfo.setClientSecret("");
+                applicationInfo.setIsSaasApplication(profile.isSaasApp());
+                appRequest.setOAuthApplicationInfo(applicationInfo);
+                OAuthApplicationInfo returnedAPP = keyManager.createApplication(appRequest);
+                if (returnedAPP != null) {
+                    returnedAPP.removeParameter("tokenScope");
+                    return Response.status(Response.Status.CREATED).entity(returnedAPP).build();
+                }
+
+                //returnedAPP is null
+                errorMsg = "OAuth app '" + profile.getClientName()
+                        + "' creation failed. Dynamic Client Registration Service not available.";
+                log.error(errorMsg);
+                errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 500l, errorMsg);
+                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+            } else {
+                errorMsg = "Logged in user '" + authUserName + "' and application owner '" + owner
+                        + "' should be same.";
+                errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, errorMsg);
+                response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             }
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-                    entity("Dynamic Client Registration Service not available.").build();
         } catch (APIManagementException e) {
             String msg = "Error occurred while registering client '" + profile.getClientName() + "'";
+            errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, msg);
+            response = Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
             log.error(msg, e);
-            response = Response.status(Response.Status.BAD_REQUEST).entity(msg).build();
-            //Response.status(Response.Status.BAD_REQUEST).entity(
-            //new FaultResponse(ErrorCode.INVALID_CLIENT_METADATA, msg)).build();
         }
         return response;
     }
