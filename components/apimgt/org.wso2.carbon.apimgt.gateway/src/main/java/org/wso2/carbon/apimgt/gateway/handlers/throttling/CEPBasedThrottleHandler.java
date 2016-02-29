@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.throttle.event.core.ThrottlerService;
+import org.wso2.carbon.event.throttle.core.ThrottlerService;
 
 /**
  * This class is implemented to handle
