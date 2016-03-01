@@ -24,7 +24,9 @@ import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.FaultResponse;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.RegistrationService;
 import org.wso2.carbon.apimgt.rest.api.dcr.web.dto.RegistrationProfile;
@@ -68,10 +70,19 @@ public class RegistrationServiceImpl implements RegistrationService {
             OAuthAppRequest appRequest = new OAuthAppRequest();
             OAuthApplicationInfo applicationInfo = new OAuthApplicationInfo();
 
-            //validates if the application owner and logged in username is same.
             String owner = profile.getOwner();
             String authUserName = RestApiUtil.getLoggedInUsername();
+            //validates if the application owner and logged in username is same.
             if (authUserName != null && authUserName.equals(owner)) {
+                if (!isUserAccessAllowed(authUserName)) {
+                    String msg = "You do not have enough privileges to create an OAuth app";
+                    log.error("User " + authUserName + " does not have any of subscribe/create/publish privileges " 
+                            + "to create an OAuth app");
+                    errorDTO = RestApiUtil.getErrorDTO(RestApiConstants.STATUS_FORBIDDEN_MESSAGE_DEFAULT, 403l, msg);
+                    response = Response.status(Response.Status.FORBIDDEN).entity(errorDTO).build();
+                    return response;
+                }
+
                 applicationInfo.setClientName(profile.getClientName());
                 applicationInfo.setCallBackURL(profile.getCallbackUrl());
                 applicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME, owner);
@@ -123,4 +134,36 @@ public class RegistrationServiceImpl implements RegistrationService {
         return response;
     }
 
+    /**
+     * Check whether user have any of create, publish or subscribe permissions
+     *
+     * @param username username
+     * @return true if user has any of create, publish or subscribe permissions
+     */
+    private boolean isUserAccessAllowed(String username) {
+        try {
+            log.debug("checking 'subscribe' permission for user " + username);
+            APIUtil.checkPermission(username, APIConstants.Permissions.API_SUBSCRIBE);
+            return true;
+        } catch (APIManagementException e) {
+            log.debug("user " + username + " does not have subscriber permission", e);
+        }
+
+        try {
+            log.debug("checking 'api publish' permission for user " + username);
+            APIUtil.checkPermission(username, APIConstants.Permissions.API_PUBLISH);
+            return true;
+        } catch (APIManagementException e) {
+            log.debug("user " + username + " does not have 'api publish' permission", e);
+        }
+
+        try {
+            log.debug("checking 'api create' permission for user " + username);
+            APIUtil.checkPermission(username, APIConstants.Permissions.API_CREATE);
+            return true;
+        } catch (APIManagementException e) {
+            log.debug("user " + username + " does not have 'api create' permission", e);
+        }
+        return false;
+    }
 }
