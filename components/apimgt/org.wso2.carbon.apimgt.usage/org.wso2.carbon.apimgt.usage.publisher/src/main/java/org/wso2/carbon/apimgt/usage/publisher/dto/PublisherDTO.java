@@ -33,6 +33,8 @@ public abstract class PublisherDTO {
 
     private String resourcePath;
 
+    private String resourceTemplate;
+
     private String method;
 
     private String version;
@@ -87,6 +89,14 @@ public abstract class PublisherDTO {
 
     public void setContext(String context) {
         this.context = context;
+    }
+
+    public String getResourceTemplate() {
+        return resourceTemplate;
+    }
+
+    public void setResourceTemplate(String resourceTemplate) {
+        this.resourceTemplate = resourceTemplate;
     }
 
     public String getApi_version() {
