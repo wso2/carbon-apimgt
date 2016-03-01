@@ -129,6 +129,67 @@ public final class ThrottlingDBUtil {
     }
 
 
+    public static String getThrottledEventsAsString(String query) {
+
+        String throttledEventString = "";
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        String sqlQuery = "select THROTTLE_KEY from ThrotleTable";
+        try {
+            conn = ThrottlingDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                String throttleKey = rs.getString("THROTTLE_KEY");
+                if(throttledEventString.length()>1) {
+                    throttledEventString = throttledEventString + "," + throttleKey;
+                }
+                else {
+                    throttledEventString = throttleKey;
+                }
+            }
+            int count = 1;
+            if(query != null && query.length()> 0){
+                count =  Integer.parseInt(query);
+                for (int i = 0; i < count; i++ ){
+                    throttledEventString = throttledEventString +","+"key_"+i;
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return throttledEventString;
+    }
+
+
+    public static ThrottledEventDTO isThrottled(String query) {
+        ThrottledEventDTO throttledEventDTO = new ThrottledEventDTO();
+        throttledEventDTO.setThrottleState("ALLOWED");
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        List<ThrottledEventDTO> throttledEventDTOList = new ArrayList<ThrottledEventDTO>();
+        String sqlQuery = "select THROTTLE_KEY from ThrotleTable WHERE THROTTLE_KEY=="+query;
+        try {
+            conn = ThrottlingDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                String throttleKey = rs.getString("THROTTLE_KEY");
+                throttledEventDTO.setThrottleState("THROTTLED");
+            }
+        } catch (SQLException e) {
+            log.error("Error while executing SQL", e);
+        } finally {
+            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return throttledEventDTO;
+    }
+
+
     public static void closeAllConnections(PreparedStatement preparedStatement, Connection connection,
                                            ResultSet resultSet) {
         closeConnection(connection);

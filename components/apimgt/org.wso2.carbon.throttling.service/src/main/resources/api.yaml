@@ -46,7 +46,64 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /throttleAsString:
+     get:
+       summary: throttled events available
+       description: |
+         This will provide access to throttled events in database.
+       parameters:
+         - name : query
+           in: query
+           description: |
+             **Search condition**.
 
+             You can search for an application by specifying the name as "query" attribute.
+
+             Eg.
+             "app1" will match an application if the name is exactly "app1".
+
+             Currently this does not support wildcards. Given name must exactly match the application name.
+           type: string
+       tags:
+         - Shops
+       responses:
+         200:
+           description: An array of shops around you
+           schema:
+             type: string
+         default:
+           description: Unexpected error
+           schema:
+             $ref: '#/definitions/Error'
+  /isThrottled:
+      get:
+        summary: throttled events available
+        description: |
+          This will provide access to throttled events in database.
+        parameters:
+          - name : query
+            in: query
+            description: |
+              **Search condition**.
+
+              You can search for an application by specifying the name as "query" attribute.
+
+              Eg.
+              "app1" will match an application if the name is exactly "app1".
+
+              Currently this does not support wildcards. Given name must exactly match the application name.
+            type: string
+        tags:
+          - Shops
+        responses:
+          200:
+            description: An array of shops around you
+            schema:
+              $ref: '#/definitions/ThrottledEvent'
+          default:
+            description: Unexpected error
+            schema:
+              $ref: '#/definitions/Error'
 definitions:
   ThrottledEvent:
     properties:
