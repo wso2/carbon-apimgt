@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -8076,5 +8077,81 @@ public class ApiMgtDAO {
             return APIUtil.getAccessTokenStoreTableFromAccessToken(accessToken);
         }
         return accessTokenStoreTable;
+    }
+
+    public Policy[] getPolicies(String policyLevel, String username) throws APIManagementException {
+        List<Policy> policies = new ArrayList<Policy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, policyLevel);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Policy policy = new Policy(rs.getString("NAME"));
+                QuotaPolicy quotaPolicy = new QuotaPolicy();
+                policy.setPolicyLevel(rs.getString("USER_LEVEL"));
+                policy.setDescription(rs.getString("DESCRIPTION"));
+                quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
+                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)){
+                    RequestCountLimit reqLimit = new RequestCountLimit();
+                    reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(reqLimit);
+                }
+                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)){
+                    BandwidthLimit bandLimit = new BandwidthLimit();
+                    bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(bandLimit);
+                }
+                policy.setRateLimitCount(rs.getInt("RATE_LIMIT_COUNT"));
+                policy.setRatelimitTimeUnit(rs.getString("RATE_LIMIT_TIME_UNIT"));
+                policy.setDefaultQuotaPolicy(quotaPolicy);
+                policies.add(policy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new Policy[policies.size()]);
+    }
+
+    public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {
+        List<String> names = new ArrayList<String>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_POLICY_NAMES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_POLICY_NAMES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, policyLevel);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                names.add(rs.getString("NAME"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return names.toArray(new String[names.size()]);
     }
 }

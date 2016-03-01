@@ -1996,4 +1996,22 @@ public class SQLConstants {
             "   AND IOAT.TENANT_ID = ?" +
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'" +
             "   AND LOWER(IOAT.USER_DOMAIN) = ?";
+
+    public static final String GET_POLICY_NAMES =
+            " SELECT "+
+            "   NAME " +
+            "FROM " +
+            "   AM_POLICY " +
+            " WHERE" +
+            "   TYPE = ?"+
+            "   AND TENANT_ID =?";
+
+    public static final String GET_POLICIES =
+            " SELECT "+
+            "   * " +
+            "FROM " +
+            "   AM_POLICY " +
+            " WHERE" +
+            "   TYPE = ?"+
+            "   AND TENANT_ID =?";
 }

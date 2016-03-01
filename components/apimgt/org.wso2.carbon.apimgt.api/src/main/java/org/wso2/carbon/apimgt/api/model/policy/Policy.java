@@ -30,6 +30,20 @@ public class Policy implements Serializable{
     private List<Pipeline> pipelines;
     private QuotaPolicy defaultQuotaPolicy;
     private int rateLimitCount;
+    private int tenantId;
+    private String ratelimitTimeUnit;
+
+    public Policy() {
+
+    }
+
+    public int getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(int tenantId) {
+        this.tenantId = tenantId;
+    }
 
     public String getRatelimitTimeUnit() {
         return ratelimitTimeUnit;
@@ -46,8 +60,6 @@ public class Policy implements Serializable{
     public void setRateLimitCount(int rateLimitCount) {
         this.rateLimitCount = rateLimitCount;
     }
-
-    private String ratelimitTimeUnit;
 
     public Policy(String name){
         this.policyName=name;

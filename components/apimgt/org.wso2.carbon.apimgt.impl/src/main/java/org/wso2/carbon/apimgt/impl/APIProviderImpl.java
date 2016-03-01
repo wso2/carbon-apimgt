@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -88,10 +89,7 @@ import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.*;
@@ -3586,5 +3584,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public String getCondition(Policy policy) {
         return null;
+    }
+
+    public String[] getPolicyNames(String username, String level) throws APIManagementException{
+        String[] policyNamesAPI = apiMgtDAO.getPolicyNames(level, username);
+        return policyNamesAPI;
+    }
+
+    public Policy[] getPolicies(String username, String level) throws APIManagementException{
+        Policy[] policies = apiMgtDAO.getPolicies(level, username);
+        return policies;
+    }
+
+    public void writeToFile(String content, String fileName) throws IOException {
+        File file =new File("repository/deployment/server/throttle-conf");
+        if(!file.exists()){
+            file.mkdir();
+        }
+        File writeFile = new File("repository/deployment/server/throttle-conf/"+fileName);
+        FileOutputStream fos = null;
+        fos = new FileOutputStream(file);
+        if (!writeFile.exists()) {
+            writeFile.createNewFile();
+        }
+
+        byte[] contentInBytes = content.getBytes();
+
+        fos.write(contentInBytes);
+        fos.flush();
+        fos.close();
     }
 }
