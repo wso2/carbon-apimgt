@@ -25,7 +25,7 @@
     <div class="row-fluid">
             <div class="span12">
                 <h3><%=i18n.localize("activeSubscriptions")%></h3>
-                <table class="table table-bordered">
+                <table class="table table-striped table-hover table-bordered display data-table">
                     <thead>
                     <tr>
                         <th class="span4"><%=i18n.localize("name")%></th>

@@ -1,0 +1,40 @@
+.api-wrapper {
+	background-color: #EFEFEF;
+	position: relative;
+}
+
+.apim-form {
+	max-width: 100% !important;
+}
+
+div.image-container {
+	width: auto;
+	height: 100%;
+	overflow: hidden;
+}
+
+.app-data h5, .launch-app-data h5 {
+	margin-top: 0px;
+}
+
+.launch-app-data h4 {
+	margin-top: 0px;
+}
+
+.api-name-icon{
+    color:#fff;
+    width:100%;
+    font-size:6.5em;
+    text-align:center;
+    font-weight:200;
+    text-transform:capitalize;
+}
+
+/* api Thumbnail image */
+.apiThumb{
+    min-width:150px;
+    min-height:150px;
+    display: block; 
+    margin-left: auto;
+    margin-right: auto;
+}

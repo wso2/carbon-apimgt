@@ -105,7 +105,7 @@
 
         <div class="panel-collapse collapse slideContainer" role="tabpanel" id="managed-api">
             <div class="panel-body">
-                    <form class="form-horizontal" method="POST" id="implement_form" enctype="multipart/form-data"
+                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
                                     action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
 
                         <div class="form-group form-inline">
@@ -234,7 +234,7 @@
                                             </tr>
                                             <tr>
                                                 <td>
-						   <div class="input-group input-wrap file-upload-control">
+						   <div id="in" class="input-group input-wrap file-upload-control">
 							   <div class="input-group-btn">
 								<button id="inSeqBrowse" class="btn browse" type="button" title="Browse File">
 								    <i class="fw fw-file-browse" aria-hidden="true"></i>
@@ -251,7 +251,7 @@
 						   </div>
                                                 </td>
                                                 <td>
-						    <div class="input-group input-wrap file-upload-control">
+						    <div id="out" class="input-group input-wrap file-upload-control">
 							   <div class="input-group-btn">
 								<button id="outSeqBrowse" class="btn browse" type="button" title="Browse File">
 								    <i class="fw fw-file-browse" aria-hidden="true"></i>
@@ -311,7 +311,7 @@
             <div class="panel-body">
 
             <div class="">
-            <form class="form-horizontal" method="POST" id="prototype_form" enctype="multipart/form-data"
+            <form class="form-horizontal apim-form" method="POST" id="prototype_form" enctype="multipart/form-data"
                 action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
                 <fieldset>
                 <div class="form-group">

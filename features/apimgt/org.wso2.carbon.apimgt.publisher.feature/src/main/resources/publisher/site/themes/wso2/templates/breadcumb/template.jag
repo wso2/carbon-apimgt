@@ -27,6 +27,8 @@
                 var statsMappedUrl=jagg.getMappedUrl("/site/pages/statistics.jag")+urlPrefix;
                 var allStatsUrl=jagg.getAbsoluteUrl("/site/pages/all-statistics.jag")+urlPrefix;
                 var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag")+urlPrefix;
+		var tierPermissionUrl=jagg.getAbsoluteUrl("/site/pages/tiers.jag")+urlPrefix;
+		var tierPermissionMappedUrl=jagg.getMappedUrl("/site/pages/tiers.jag")+urlPrefix;
             %>
 	    <div class="breadcrumb-wrapper">
             <ol class="breadcrumb">
@@ -34,7 +36,7 @@
                     <li>
                     <%=i18n.localize("apis")%> <span class="divider"></span>
                     </li>
-                    <li>
+                    <li class="active">
                         <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all")%></a>
                     </li>
                 <% } %>
@@ -46,7 +48,7 @@
                     <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all")%></a>
                 </li>
 
-                <li>
+                <li class="active">
                     <%
                         var apiUrl = infoMappedUrl + "?name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
                     %>
@@ -69,7 +71,7 @@
                 <li>
                     <%=i18n.localize("apis")%>
                 </li>
-                <li>
+                <li class="active">
                     <a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("allStats")%></a>
                 </li>
                 <% } %>
@@ -87,7 +89,7 @@
                 <li>
                     <span class="divider"></span>
                 </li>
-                <li>
+                <li class="active">
                     <%
                     var userTmpUrl = userMappedUrl + "?uname=" + encode.forUriComponent(request.getParameter("uname"))+urlPostfix;
                     %>
@@ -98,7 +100,7 @@
                 <li>
                     <%=i18n.localize("myAPIs", "My APIs")%> <span class="divider"></span>
                 </li>
-                <li>
+                <li class="active">
                     <a href="<%=subsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
                 </li>
                 <% } %>
@@ -108,8 +110,14 @@
                 <li>
                     <%=i18n.localize("myAPIs", "My APIs")%><span class="divider"></span>
                 </li>
-                <li>
+                <li class="active">
                     <a href="<%=statsMappedUrl%>?stat=stat&page=api-subscriptions" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>',e:event})"><%=i18n.localize("statistics", "Statistics")%></a>
+                </li>
+                <% } %>
+
+		 <% if(reqUrl.indexOf(tierPermissionUrl)>=0||reqUrl.indexOf(tierPermissionMappedUrl)>=0){%>
+                <li class="active">
+                    <%=i18n.localize("tierPermissions", "Tier Permissions")%><span class="divider"></span>
                 </li>
                 <% } %>
             </ol>
