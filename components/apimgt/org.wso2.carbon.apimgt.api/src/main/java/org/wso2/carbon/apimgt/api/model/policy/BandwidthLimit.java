@@ -38,4 +38,12 @@ public class BandwidthLimit extends Limit {
     public void setDataUnit(String dataUnit) {
         this.dataUnit = dataUnit;
     }
+
+    @Override
+    public String toString() {
+        return "BandwidthLimit [dataAmount=" + dataAmount + ", dataUnit=" + dataUnit + ", toString()="
+                + super.toString() + "]";
+    }
+    
+    
 }

@@ -47,4 +47,11 @@ public abstract class Condition implements Serializable {
     }
 
     public abstract String getCondition();
+
+    @Override
+    public String toString() {
+        return "Condition [type=" + type + ", queryAttributeName=" + queryAttributeName + ", invertCondition="
+                + invertCondition + "]";
+    }    
+    
 }

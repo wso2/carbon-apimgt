@@ -53,4 +53,11 @@ public class JWTClaimsCondition extends Condition{
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "JWTClaimsCondition [claimUrl=" + claimUrl + ", attribute=" + attribute + ", toString()="
+                + super.toString() + "]";
+    }
+    
 }

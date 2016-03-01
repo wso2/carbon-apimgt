@@ -60,4 +60,11 @@ public class IPCondition extends Condition {
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "IPCondition [specificIP=" + specificIP + ", toString()=" + super.toString() + "]";
+    }
+      
+    
 }
