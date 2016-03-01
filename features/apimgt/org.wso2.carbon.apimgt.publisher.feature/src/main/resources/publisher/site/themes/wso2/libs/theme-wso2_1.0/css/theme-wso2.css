@@ -214,7 +214,6 @@ body.inverse .fade-edge:after {
   display: inline-block !important;
 }
 
-/* generating padding and margin classes */
 .add-padding-1x {
   padding: 5px !important;
 }
@@ -861,6 +860,10 @@ header .dropdown[aria-expanded=true], header .dropdown:hover {
   background: #00575c;
 }
 
+.navbar-menu-toggle .icon {
+  line-height: 50px;
+}
+
 .navbar-toggle {
   border: none;
   -webkit-border-radius: 0;
@@ -1021,7 +1024,9 @@ header .dropdown[aria-expanded=true], header .dropdown:hover {
   border-left: 4px dashed transparent;
 }
 
-.nav-pills > li.active > a, .nav-pills > li.active > a:focus, .nav-pills > li.active > a:hover {
+.nav-pills > li.active > a,
+.nav-pills > li.active > a:focus,
+.nav-pills > li.active > a:hover {
   color: #ffffff;
   background: #5F343D;
   border-color: #5F343D;
@@ -1639,7 +1644,7 @@ footer a, footer a:hover {
 .loading .loading-animation .logo .pulse-line {
   stroke-dasharray: 200;
   stroke-dashoffset: 200;
-  animation: dash 4s linear  infinite;
+  animation: dash 4s linear infinite;
   opacity: 0;
   filter: "alpha(opacity=0)";
 }
@@ -1746,7 +1751,9 @@ footer a, footer a:hover {
   margin: 0 5px;
 }
 
-.input-group-btn .btn, .input-group-btn .btn:hover, .input-group-btn .btn:focus {
+.input-group-btn .btn,
+.input-group-btn .btn:hover,
+.input-group-btn .btn:focus {
   border-color: #ccc;
 }
 
@@ -1838,7 +1845,10 @@ a.btn:hover, .btn:hover {
   position: relative;
 }
 
-.form-control-btn, .form-control-btn:focus, .form-control-btn:active, .form-control-btn:hover {
+.form-control-btn,
+.form-control-btn:focus,
+.form-control-btn:active,
+.form-control-btn:hover {
   position: absolute;
   top: 0;
   right: 0;
@@ -2732,7 +2742,11 @@ a.list-group-item:hover {
   text-decoration: none;
 }
 
-.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover, .active > .list-group-item, .active > .list-group-item:focus, .active > .list-group-item:hover {
+.list-group-item.active,
+.list-group-item.active:focus,
+.list-group-item.active:hover, .active > .list-group-item,
+.active > .list-group-item:focus,
+.active > .list-group-item:hover {
   color: #ffffff;
   background: #5F343D;
   border-color: #5F343D;
@@ -2807,7 +2821,8 @@ a.list-group-item:hover {
   text-decoration: none;
 }
 
-.tree-view li button:active, .tree-view li button:focus {
+.tree-view li button:active,
+.tree-view li button:focus {
   cursor: pointer;
   text-decoration: none;
   border: none;
