@@ -32,6 +32,9 @@ import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import io.swagger.codegen.config.CodegenConfigurator;
+import io.swagger.codegen.ClientOptInput;
+import io.swagger.codegen.DefaultGenerator;
 import java.io.InterruptedIOException;
 
 
@@ -88,6 +91,23 @@ public class APIClientGenerationManager {
         processBuilder = new ProcessBuilder(commandsToZip);
         processShellCommands = processBuilder.start();     // Start the process.
         processShellCommands.waitFor();
+        generateClient();
         return appName;
+    }
+
+    private void generateClient(){
+        try {
+            CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
+            codegenConfigurator.setGroupId("org.wso2");
+            codegenConfigurator.setArtifactId("org.wso2.client");
+            codegenConfigurator.setInputSpec("http://petstore.swagger.io/v2/swagger.json");
+            codegenConfigurator.setLang("java");
+            codegenConfigurator.setOutputDir("client");
+            final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
+            new DefaultGenerator().opts(clientOptInput).generate();
+            System.out.println("done");
+        } catch (Throwable e) {
+            System.out.println(e);
+        }
     }
 }
