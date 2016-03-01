@@ -27,6 +27,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setApi_version(requestPublisherDTO.getApi_version());
         setApi(requestPublisherDTO.getApi());
         setResourcePath(requestPublisherDTO.getResourcePath());
+        setResourceTemplate(requestPublisherDTO.getResourceTemplate());
         setMethod(requestPublisherDTO.getMethod());
         setVersion(requestPublisherDTO.getVersion());
         setRequestTime(requestPublisherDTO.getRequestTime());
@@ -43,6 +44,13 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
 
     public static String getStreamDefinition() {
 
+        /*
+          Please use this comment to track the steam changes that were done.
+          Current Version -
+            1.1.0
+          Changes -
+            1.1.0 -  Added the resourceTemplate parameter.
+         */
         return "{" +
                 "  'name':'" +
                 DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName() + "'," +
@@ -59,6 +67,7 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
                 "          {'name':'api_version','type':'STRING'}," +
                 "          {'name':'api','type':'STRING'}," +
                 "          {'name':'resourcePath','type':'STRING'}," +
+                "          {'name':'resourceTemplate','type':'STRING'}," +
                 "          {'name':'method','type':'STRING'}," +
                 "          {'name':'version','type':'STRING'}," +
                 "          {'name':'request','type':'INT'}," +
@@ -77,10 +86,10 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
     }
 
     public Object createPayload(){
-        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(), getMethod(),
-                            getVersion(), getRequestCount(),getRequestTime(),getUsername(),getTenantDomain(),
-                            getHostName(), getApiPublisher(), getApplicationName(), getApplicationId(), getUserAgent(),
-                            getTier(), isContinuedOnThrottleOut()};
+        return new Object[]{getConsumerKey(),getContext(),getApi_version(),getApi(), getResourcePath(),
+                            getResourceTemplate(), getMethod(), getVersion(), getRequestCount(),getRequestTime(),
+                            getUsername(),getTenantDomain(), getHostName(), getApiPublisher(), getApplicationName(),
+                            getApplicationId(), getUserAgent(), getTier(), isContinuedOnThrottleOut()};
 
     }
 
