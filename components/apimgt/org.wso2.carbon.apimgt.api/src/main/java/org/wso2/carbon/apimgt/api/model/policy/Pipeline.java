@@ -41,4 +41,10 @@ public class Pipeline {
     public void setQuotaPolicy(QuotaPolicy quotaPolicy) {
         this.quotaPolicy = quotaPolicy;
     }
+
+    @Override
+    public String toString() {
+        return "Pipeline [quotaPolicy=" + quotaPolicy + ", conditions=" + conditions + "]";
+    }
+    
 }

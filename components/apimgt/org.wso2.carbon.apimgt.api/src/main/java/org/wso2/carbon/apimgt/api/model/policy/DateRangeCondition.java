@@ -55,5 +55,12 @@ public class DateRangeCondition extends Condition {
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "DateRangeCondition [startingDate=" + startingDate + ", endingDate=" + endingDate + ", toString()="
+                + super.toString() + "]";
+    }
+    
 }
 

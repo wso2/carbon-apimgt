@@ -53,4 +53,11 @@ public class QueryParameterCondition extends Condition {
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "QueryParameterCondition [parameter=" + parameter + ", value=" + value + ", toString()="
+                + super.toString() + "]";
+    }
+    
 }

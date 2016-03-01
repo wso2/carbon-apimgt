@@ -45,4 +45,10 @@ public class HTTPVerbCondition extends Condition {
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "HTTPVerbCondition [httpVerb=" + httpVerb + ", toString()=" + super.toString() + "]";
+    }
+    
 }
