@@ -1,0 +1,40 @@
+<% jagg.template("oidc/logout", function(inputs, outputs, jagg) { %>
+ 
+<%
+
+	var security =require("oidc");
+	var oidcRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
+	
+	if(site.ssoConfiguration.externalLogoutPage != null
+			&& site.ssoConfiguration.externalLogoutPage != ""){
+
+	} else {
+
+        var sessionId = session.getId();
+        oidcRelyingParty.invalidateSessionBySessionId(sessionId);
+
+		var idpURL = site.oidcConfiguration.identityProviderURI;
+        var logoutURL = idpURL + "logout" ;
+
+%>
+
+		<div>
+		   <p>You are now redirected to Stratos Identity. If the
+		   redirection fails, please click the post button.</p>
+
+			<form id="logoutForm" method="post" action="<%=logoutURL%>">
+			<p>
+				<button type="submit">POST</button>
+			</p>
+			</form>
+		</div>
+		<script type = "text/javascript" >
+					   document.forms[0].submit();
+
+		</script>
+<%
+	}
+%>
+       
+<% }); %>
+

@@ -35,6 +35,7 @@ import org.wso2.carbon.hostobjects.sso.internal.SessionInfo;
 import org.wso2.carbon.hostobjects.sso.internal.builder.AuthReqBuilder;
 import org.wso2.carbon.hostobjects.sso.internal.builder.LogoutRequestBuilder;
 import org.wso2.carbon.hostobjects.sso.internal.util.Util;
+import org.wso2.carbon.utils.xml.StringUtils;
 
 import javax.script.ScriptException;
 import java.util.*;
@@ -101,9 +102,13 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
 
         SAMLSSORelyingPartyObject relyingPartyObject = ssoRelyingPartyMap.get((String) args[0]);
         if (relyingPartyObject == null) {
-            relyingPartyObject = new SAMLSSORelyingPartyObject();
-            relyingPartyObject.setSSOProperty(SSOConstants.ISSUER_ID, (String) args[0]);
-            ssoRelyingPartyMap.put((String) args[0], relyingPartyObject);
+            synchronized (SAMLSSORelyingPartyObject.class) {
+                if (relyingPartyObject == null) {
+                    relyingPartyObject = new SAMLSSORelyingPartyObject();
+                    relyingPartyObject.setSSOProperty(SSOConstants.ISSUER_ID, (String) args[0]);
+                    ssoRelyingPartyMap.put((String) args[0], relyingPartyObject);
+                }
+            }
         }
         return relyingPartyObject;
     }
@@ -579,11 +584,17 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         if (argLength != 2 || !(args[0] instanceof String) || !(args[1] instanceof String)) {
             throw new ScriptException("Invalid arguments when setting sso configuration values.");
         }
-        if (log.isDebugEnabled()) {
-            log.debug("SSO key values pair properties that set on relying party object is " + args[0] + " " + args[1]);
-        }
         SAMLSSORelyingPartyObject relyingPartyObject = (SAMLSSORelyingPartyObject) thisObj;
-        relyingPartyObject.setSSOProperty((String) args[0], (String) args[1]);
+        synchronized (SAMLSSORelyingPartyObject.class) {
+            if (StringUtils.isEmpty(relyingPartyObject.getSSOProperty((String) args[0]))) {
+                relyingPartyObject.setSSOProperty((String) args[0], (String) args[1]);
+                if (log.isDebugEnabled()) {
+                    log.debug("Configured SSO relying party object with key : " + args[0] +
+                            " value : " + args[1] + " for issuer : " +
+                            relyingPartyObject.getSSOProperty(SSOConstants.ISSUER_ID));
+                }
+            }
+        }
 
     }
 
@@ -1034,15 +1045,6 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
         return null;
     }
 
-    /**
-     * Remove relying party object added with issuerId.
-     *
-     * @param issuerId
-     */
-    private static void invalidateRelyingPartyObject(String issuerId) {
-        ssoRelyingPartyMap.remove(issuerId);
-    }
-
     private static String getSSOSamlEncodingProperty(SAMLSSORelyingPartyObject relyingPartyObject) {
 
         if (relyingPartyObject.getSSOProperty(SSOConstants.SAML_ENCODED) == null) {
@@ -1221,8 +1223,7 @@ public class SAMLSSORelyingPartyObject extends ScriptableObject {
     private void clearSessionData(String sessionIndex){
         try {
             ssho.invalidateSessionBySessionIndex(sessionIndex);
-            // this is to invalidate relying party object after user log out. To release memory allocations.
-            invalidateRelyingPartyObject(ssho.getSSOProperty(SSOConstants.ISSUER_ID));
+
             if (sessionIndexMap != null && sessionIndex != null) {
                 Set<SessionHostObject> sessionList = sessionIndexMap.get(sessionIndex);
                 Object[] args = new Object[0];

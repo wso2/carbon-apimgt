@@ -1,0 +1,54 @@
+<% jagg.template("stats/api-usage-resource-path", function(inputs, outputs, jagg) { %>
+<div id="apiUsageResourcePath-stat-page" class="stat-page">
+
+    <div class="title-section"> <h2><%=i18n.localize("apiUsageFromResourcePathTitle")%></h2></div>
+
+    <br/ >
+    <div class="col-md-12">
+
+        <div id="rangeSliderWrapper" >
+           <div id="dateRangePickerContainer" style="text-align:right">
+               <div class="btn-group" role="group">
+                   <button id="hour-btn" type="button" class="btn btn-default date-range">Hour</button>
+                   <button id="today-btn" type="button" class="btn btn-default date-range">Day
+                   </button>
+                   <button id="week-btn" type="button" class="btn btn-default date-range">Week</button>
+                   <button id="month-btn" type="button" class="btn btn-default date-range active">Month</button>
+                   <buttton id="date-range" type="button" class="btn btn-default date-range last-child" >
+                     <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
+                     <span></span> <b class="caret"></b>
+                   </button>
+               </div>
+           </div>
+        </div>
+
+        <div id="spinner" class="center-wrapper">
+            <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+        </div>
+
+        <div id="noData"></div>
+
+        <br/ >
+        <div id="tableContainer"></div>
+
+        <div id="chartModal" class="modal fade">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Usage by Resource Path</h4>
+                    </div>
+                    <div class="modal-body" >
+                        <div id="chartContainer" ></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<% }); %>
+
+

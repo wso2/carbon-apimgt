@@ -400,7 +400,9 @@
         			<%}%>
                 <input type="hidden" name="action" value="design" />
                 <input type="hidden" id="swagger" name="swagger" value="" />
-
+                <div class="form-actions" style="display:none" id="saveMessage">
+                    <div class="btn loadingButton">Saving API. Please wait..</div>
+                </div>
                 <div class="form-actions" id="saveButtons">
 
                     <button type="submit" class="btn btn-default has-spinner" id="saveBtn">Save</button>

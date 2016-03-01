@@ -176,7 +176,7 @@ function APIDesigner(){
                         });
                     }
                     resource[method] = {
-                        responses : { '200':{}}
+                        responses : { '200':{"description": "add response description here"}}
                     };
                     if(tempPara.length > 0){
                        resource[method].parameters = tempPara;

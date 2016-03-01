@@ -35,9 +35,10 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import java.util.*;
-
-import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
@@ -104,12 +105,12 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
 			String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+			String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                     getProperty(Constants.Configuration.HTTP_METHOD);
 			API selectedApi = messageContext.getConfiguration().getAPI(apiName);
-            Resource selectedResourceWithVerb = null;
+			Resource selectedResourceWithVerb = null;
             Resource selectedResource = null;
-            String subPath = null;
+			String subPath = null;
             String path = RESTUtils.getFullRequestPath(messageContext);
 			if(selectedApi != null) {
 				if (VersionStrategyFactory.TYPE_URL.equals(selectedApi.getVersionStrategy().getVersionType())) {
@@ -181,9 +182,8 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 				status = false;
 			}
 		} finally {
-			//publishExecutionTime(messageContext, executionStartTime, "CORS");
-			context.stop();
-		}
+            context.stop();
+        }
         return status;
     }
 
