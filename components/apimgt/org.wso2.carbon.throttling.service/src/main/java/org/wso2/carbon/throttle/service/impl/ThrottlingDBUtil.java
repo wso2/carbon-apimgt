@@ -32,6 +32,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public final class ThrottlingDBUtil {
 
@@ -39,8 +41,11 @@ public final class ThrottlingDBUtil {
 
     private static volatile DataSource dataSource = null;
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
-
+    private  static volatile ThrottledEventDTO[] throttledEventDTOs = null;
     private static final String DB_CONFIG = "Database.";
+    private static volatile String throttledEvents = "";
+    private static long lastAccessed;
+    private static long timeBetweenUpdates = 10000;
 
     public static void initialize() throws Exception {
         if (dataSource != null) {
@@ -58,6 +63,10 @@ public final class ThrottlingDBUtil {
                     try {
                         Context ctx = new InitialContext();
                         dataSource = (DataSource) ctx.lookup(dataSourceName);
+                        //Start updator task
+                        ExecutorService executor = Executors.newFixedThreadPool(1);
+                            Runnable worker = new WorkerThread("");
+                            executor.execute(worker);
                     } catch (NamingException e) {
                         throw new Exception("Error while looking up the data " +
                                 "source: " + dataSourceName, e);
@@ -91,9 +100,6 @@ public final class ThrottlingDBUtil {
     }
 
     public static ThrottledEventDTO[] getThrottledEvents(String query) {
-
-
-        ThrottledEventDTO[] throttledEventDTOs = null;
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -130,38 +136,49 @@ public final class ThrottlingDBUtil {
 
 
     public static String getThrottledEventsAsString(String query) {
-
-        String throttledEventString = "";
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sqlQuery = "select THROTTLE_KEY from ThrotleTable";
-        try {
-            conn = ThrottlingDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                String throttleKey = rs.getString("THROTTLE_KEY");
-                if(throttledEventString.length()>1) {
-                    throttledEventString = throttledEventString + "," + throttleKey;
-                }
-                else {
-                    throttledEventString = throttleKey;
-                }
-            }
-            int count = 1;
-            if(query != null && query.length()> 0){
-                count =  Integer.parseInt(query);
-                for (int i = 0; i < count; i++ ){
-                    throttledEventString = throttledEventString +","+"key_"+i;
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Error while executing SQL", e);
-        } finally {
-            ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+        if (throttledEvents.length() > 1) {
+            //log.info("================================return from local cache");
+            return throttledEvents;
         }
-        return throttledEventString;
+        else {
+            return getThrottledEventsAsStringFromDB(query);
+        }
+    }
+
+
+    public static String getThrottledEventsAsStringFromDB(String query) {
+            String throttledEventString = "";
+            Connection conn = null;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            String sqlQuery = "select THROTTLE_KEY from ThrotleTable";
+            try {
+                conn = ThrottlingDBUtil.getConnection();
+                ps = conn.prepareStatement(sqlQuery);
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    String throttleKey = rs.getString("THROTTLE_KEY");
+                    if (throttledEventString.length() > 1) {
+                        throttledEventString = throttledEventString + "," + throttleKey;
+                    } else {
+                        throttledEventString = throttleKey;
+                    }
+                }
+                int count = 1;
+                if (query != null && query.length() > 0) {
+                    count = Integer.parseInt(query);
+                    for (int i = 0; i < count; i++) {
+                        throttledEventString = throttledEventString + "," + "key_" + i;
+                    }
+                }
+            } catch (SQLException e) {
+                log.error("Error while executing SQL", e);
+            } finally {
+                ThrottlingDBUtil.closeAllConnections(ps, conn, rs);
+            }
+            throttledEvents = throttledEventString;
+            //log.info("================================updated String"+throttledEventString);
+            return throttledEventString;
     }
 
 
@@ -172,7 +189,7 @@ public final class ThrottlingDBUtil {
         PreparedStatement ps = null;
         ResultSet rs = null;
         List<ThrottledEventDTO> throttledEventDTOList = new ArrayList<ThrottledEventDTO>();
-        String sqlQuery = "select THROTTLE_KEY from ThrotleTable WHERE THROTTLE_KEY=="+query;
+        String sqlQuery = "select THROTTLE_KEY from ThrotleTable WHERE THROTTLE_KEY = '"+query+"'";
         try {
             conn = ThrottlingDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
@@ -244,5 +261,46 @@ public final class ThrottlingDBUtil {
             }
         }
 
+    }
+
+
+    /**
+     * TODO This is not final implementation. This need to be revised and fix issues
+     * related to memory leaks caused due to web app stopping.
+     */
+    private static class WorkerThread implements Runnable {
+        private String command;
+        public WorkerThread(String s){
+            this.command=s;
+        }
+        @Override
+        public void run() {
+            String throttledEvents;
+            System.out.println(Thread.currentThread().getName()+" Start. Command = "+command);
+            if(lastAccessed <1){
+                lastAccessed = System.currentTimeMillis();
+            }
+            while(true) {
+                if (System.currentTimeMillis() - lastAccessed >= timeBetweenUpdates) {
+                    System.out.println("DB reading Started. Reading database");
+                    lastAccessed = System.currentTimeMillis();
+                    processCommand();
+                    System.out.println("DB reading End.Time taken = "+ (System.currentTimeMillis() - lastAccessed) );
+                    try {
+                        Thread.sleep(timeBetweenUpdates);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        private void processCommand() {
+                ThrottlingDBUtil.getThrottledEventsAsStringFromDB(null);
+        }
+        @Override
+        public String toString(){
+            return this.command;
+        }
     }
 }

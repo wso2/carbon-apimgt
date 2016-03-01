@@ -17,6 +17,6 @@ public class IsThrottledApiServiceImpl extends IsThrottledApiService {
     @Override
     public Response isThrottledGet(String query){
         // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return Response.ok().entity(ThrottlingDBUtil.isThrottled(query)).build();
     }
 }
