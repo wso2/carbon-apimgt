@@ -30,10 +30,12 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.uri.template.URITemplate;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
 
@@ -47,8 +49,15 @@ public class PreAuthenticationInterceptor extends AbstractPhaseInterceptor {
     public void handleMessage(Message message) throws Fault {
         String path = (String) message.get(Message.PATH_INFO);
         String httpMethod = (String) message.get(Message.HTTP_REQUEST_METHOD);
-
         Dictionary<URITemplate,List<String>> whiteListedResourcePathsMap;
+
+        //If Authorization headers are present anonymous URI check will be skipped
+        ArrayList authHeaders = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
+                .get(RestApiConstants.AUTH_HEADER_NAME);
+        if (authHeaders != null)
+            return;
+
+        //Check if the accessing URI is white-listed and then authorization is skipped
         try {
             whiteListedResourcePathsMap = RestApiUtil.getWhiteListedURIsToMethodsMap();
             Enumeration<URITemplate> uriTemplateSet = whiteListedResourcePathsMap.keys();
