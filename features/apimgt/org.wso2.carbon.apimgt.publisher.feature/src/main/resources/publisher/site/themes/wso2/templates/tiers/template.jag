@@ -4,11 +4,12 @@
 		var tierPermissions = outputs.tierPermissions;
 	%>
 	<div id="tiers">
-		<div class="title-section">
-                <h2><%=i18n.localize("tierPermissions")%></h2>
-        </div>
+	    <div class="page-header">
+                 <h2><%=i18n.localize("tierPermissions")%></h2>
+            </div>
+		
         <div class = "col-sm-12">
-        		<table class="table table-bordered">
+        		<table class="table table-striped table-hover table-bordered display data-table">
         			<thead>
         				<tr>
         					<th class="tierSpecialCell"><%=i18n.localize("tiers")%></th>
@@ -35,7 +36,8 @@
         					
         				
         				
-        				var radioInputName = "permissionType" + i; 
+        				var radioInputName = "permissionType" + i;
+					var divID = "div" + i;  
         				var roleInputName = "roles" + i;
         				var tierInputName = "tier" + i;
         				var statusUpdateMsgName = "statusUpdateMsg" +i;
@@ -45,35 +47,13 @@
 	        					<td><%=tierPermissions[i].tierDisplayName%></td>
 	        					<td>
 	        					<div>
-		        					<div id="radiodev" class="form-inline">
-		        					<% if (denied) {%>
-		        						<label class="radio-inline">
-			        						<input type="radio"  name="<%=radioInputName%>" value="allow" id="y"/>
-			       							<%=i18n.localize("allow")%>
-			       						</label>
-			       						<label class="radio-inline">
-			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z" checked/>
-			        						<%=i18n.localize("deny")%>
-			        					</label>
-		        					 <%} else {
-		        					 	
-		        					 %>
-		        					 	<label class="radio-inline">
-		        					 		<input type="radio"  name="<%=radioInputName%>" value="allow" id="y" checked/>
-			       							<%=i18n.localize("allow")%>
-			       						</label>
-			       						<label class="radio-inline">
-			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z"/>
-			        						<%=i18n.localize("deny")%>
-			        					</label>
-		        					 <%}%>
-		        					 </div>
 		        					 <div class="form-inline">
-		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">roles</label>
-		        					 	<input type="text" class="input rolesInput form-control"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>"/>
+		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">Roles:</label>
+		        					 	<input type="text" class="input rolesInput form-control"  id="<%=roleInputName%>" name="<%=roleInputName%>" 
+value="<%=roleList%>" data-role="tagsinput"/>
 		        					 	<label class="errorTier errorMsg" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
                                         <label class="errorTier errorMsg" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
-		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesHelpMsg")%></p>
+		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("rolesTagHelpMsg")%></p>
 		        					 </div>
 	        					</div>
 		                	
@@ -81,9 +61,28 @@
 	                        	
 		            			
 		            			
-		            			<div class="form-actions" id="saveButtons">
+		            			<div class="form-actions form-inline" id="saveButtons">
+						<div id="<%=divID%>" class="btn-group" data-toggle="buttons">
+		        					<% if (denied) {%>
+									<label class="btn btn-primary">
+									      <input type="radio" name="<%=radioInputName%>" value="allow" id="y"><%=i18n.localize("allow")%>
+									</label>
+									<label class="btn btn-primary active">
+									      <input type="radio" name="<%=radioInputName%>" value="deny" id="z"><%=i18n.localize("deny")%>
+									</label>
+		        					 <%} else {
+		        					 	
+		        					 %>
+		        					 	<label class="btn btn-primary active">
+									      <input type="radio" name="<%=radioInputName%>" value="allow" id="y"><%=i18n.localize("allow")%>
+									</label>
+									<label class="btn btn-primary">
+									      <input type="radio" name="<%=radioInputName%>" value="deny" id="z"><%=i18n.localize("deny")%>
+									</label>
+		        					 <%}%>
+		        					 </div>
                     				<div class="form-group">
-                                        <button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
+                                        <button type="submit" id="addNewAPIButton-<%=String(i)%>" name="addNewAPIButton" onclick="updatePermissions('<%=tierPermissions[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("updatePermissions")%></button>
                                     </div>
                 				</div>
                 				

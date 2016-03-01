@@ -141,7 +141,7 @@
  * ======================================================================== */
 
 $font-folder-path: '../fonts';
-@include font( 'Roboto', 400, 'normal', 'Roboto Regular', 'Roboto-Regular', $font-folder-path)
+@include font( 'Roboto', 400, 'normal', 'Roboto Regular', 'Roboto-Regular', $font-folder-path);
 $font-default: 'Roboto', Arial, Helvetica, sans-serif;
 $font-default-weight: 300;
 $font-icons: 'font-wso2';
@@ -163,11 +163,11 @@ $base-info-color: #009DA7;
 $base-warning-color: #f0ad4e;
 $base-danger-color: #d9534f;
 
-$primary-color: #5F343D;
+$primary-color: #715C4C;
 $secondary-color: #e4e4e4;
-$optional-color: #007D85;
+$optional-color: #DA762B;
 
-$header-background-color: #4A2029;
+$header-background-color: #463A31;
 $header-height: 50px;
 $header-link-hover-background-color: darken($header-background-color, 10%);
 
@@ -391,40 +391,6 @@ body.inverse .fade-edge {
 .visible-inline-block {
     display: inline-block !important;
 }
-
-/* generating padding and margin classes */
-//.generate-gaps($sizes-length);
-//.generate-gaps($n, $i: 1) when ($i =< $n) {
-//
-//    // padding
-//    .add-padding-${i}x {
-//        padding: ($i * $default-gap)!important;
-//    }
-//    .add-padding-side($iterator: 1) when($iterator <= length($sides)) {
-//        $side: extract(extract($sides, $iterator), 1);
-//        .add-padding-${side}-${i}x {
-//            padding-${side}: ($i * $default-gap)!important;
-//        }
-//        .add-padding-side(($iterator + 1));
-//    }
-//    .add-padding-side();
-//
-//    // margin
-//    .add-margin-${i}x {
-//        margin: ($i * $default-gap)!important;
-//    }
-//    .add-margin-side($iterator: 1) when($iterator <= length($sides)) {
-//        $side: extract(extract($sides, $iterator), 1);
-//        .add-margin-${side}-${i}x {
-//            margin-${side}: ($i * $default-gap)!important;
-//        }
-//        .add-margin-side(($iterator + 1));
-//    }
-//    .add-margin-side();
-//
-//    // generate gaps
-//    .generate-gaps($n, ($i + 1));
-//}
 
 @for $i from 1 through $sizes-length {
 
@@ -742,6 +708,9 @@ header .dropdown[aria-expanded=true], header .dropdown:hover {
     }
     &[aria-expanded=true] {
         background: darken($optional-color, 8%);
+    }
+    & .icon {
+        line-height: $navbar-height;
     }
 }
 

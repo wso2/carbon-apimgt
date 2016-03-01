@@ -8,7 +8,6 @@ i18n.init(request,localeResourcesBasePath);
 var tenantDomain = jagg.getTenantDomain();
 
 (function () {
-    isTenantAllowed();
     user = jagg.getUser();
 
     if ((!session.get("hasTriedSSO") || Boolean(user)) && site.ssoConfiguration.enabled == "true" && site.ssoConfiguration.passive == "true") {
