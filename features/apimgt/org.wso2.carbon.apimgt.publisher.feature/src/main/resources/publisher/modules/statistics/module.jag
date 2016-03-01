@@ -45,6 +45,8 @@ jagg.module("statistics", {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getThrottleDataOfAPIAndApplication.apply(this, arguments);
     },getExecutionTimeByAPI:function () {
         return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getExecutionTimeByAPI.apply(this, arguments);
+    },getExecutionTimeByMediationType:function () {
+        return jagg.require(jagg.getModulesDir() + "statistics/usage.jag").getExecutionTimeByMediationType.apply(this, arguments);
     }
 });
 %>

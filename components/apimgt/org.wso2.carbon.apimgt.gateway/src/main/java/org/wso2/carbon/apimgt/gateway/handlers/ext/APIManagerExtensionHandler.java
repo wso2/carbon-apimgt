@@ -21,8 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtCommonExtensionHandler;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -39,7 +39,7 @@ import java.util.Map;
  * is also invoked. If no extension is found either at the global level or at the per API level
  * this mediator simply returns true.
  */
-public class APIManagerExtensionHandler extends APIMgtCommonExtensionHandler {
+public class APIManagerExtensionHandler extends AbstractHandler {
 
     private static final String EXT_SEQUENCE_PREFIX = "WSO2AM--Ext--";
     private static final String DIRECTION_IN = "In";
@@ -67,7 +67,6 @@ public class APIManagerExtensionHandler extends APIMgtCommonExtensionHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
-        super.handleRequest(messageContext);
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_IN));
         Timer.Context context = timer.start();
@@ -79,7 +78,6 @@ public class APIManagerExtensionHandler extends APIMgtCommonExtensionHandler {
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        super.handleResponse(messageContext);
         Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_OUT));
         Timer.Context context = timer.start();

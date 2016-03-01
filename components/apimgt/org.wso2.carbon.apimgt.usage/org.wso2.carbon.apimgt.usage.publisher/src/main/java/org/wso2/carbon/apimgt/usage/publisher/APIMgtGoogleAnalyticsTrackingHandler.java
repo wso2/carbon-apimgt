@@ -19,15 +19,15 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseException;
 import org.apache.synapse.config.Entry;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtCommonExtensionHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsConstants;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsData;
 import org.wso2.carbon.ganalytics.publisher.GoogleAnalyticsDataPublisher;
 
-public class APIMgtGoogleAnalyticsTrackingHandler extends APIMgtCommonExtensionHandler {
+public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
 	private static final Log log = LogFactory
 			.getLog(APIMgtGoogleAnalyticsTrackingHandler.class);
@@ -47,7 +47,6 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends APIMgtCommonExtensionH
 
 	@Override
 	public boolean handleRequest(MessageContext msgCtx) {
-		super.handleRequest(msgCtx);
 		if (configKey == null) {
             throw new SynapseException("Google Analytics configuration unspecified for the API");
         }
@@ -206,7 +205,6 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends APIMgtCommonExtensionH
 
 	@Override
 	public boolean handleResponse(MessageContext arg0) {
-        super.handleResponse(arg0);
         return true;
 	}
 	

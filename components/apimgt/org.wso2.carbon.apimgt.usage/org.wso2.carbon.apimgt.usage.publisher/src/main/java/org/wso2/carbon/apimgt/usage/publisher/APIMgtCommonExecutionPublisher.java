@@ -5,13 +5,14 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.dto.ExecutionTimePublisherDTO;
-import org.wso2.carbon.apimgt.gateway.handlers.common.APIMgtCommonExtensionHandler;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.Map;
+
+import static org.wso2.carbon.apimgt.gateway.handlers.Utils.publishExecutionTime;
 
 public class APIMgtCommonExecutionPublisher extends AbstractMediator {
     protected boolean enabled;
@@ -37,7 +38,7 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
             if (totalTimeObject != null) {
                 totalTime = Long.parseLong((String) totalTimeObject);
             }
-            APIMgtCommonExtensionHandler.publishExecutionTime(messageContext, totalTime, "Total Time");
+            publishExecutionTime(messageContext, totalTime, "Total Time");
             Object executionTimeMapObject = messageContext.getProperty("api.execution.time");
             long eventTime = System.currentTimeMillis();
             Map<String, ExecutionTimePublisherDTO> executionTimePublisherDTOMap;

@@ -11,20 +11,7 @@ var log = new Log();
     toDate = request.getParameter("toDate"),
     drilldown = request.getParameter("drilldown"),
     site = require("/site/conf/site.json"),
-    msg = require("/site/conf/ui-messages.jag"),
-    convertToDateObj = function (date) {
-        var dateWithoutHour = date.split("\ ")[0].split("-");
-        var year = dateWithoutHour[0];
-        var month = dateWithoutHour[1] - 1;
-        var day = dateWithoutHour[2];
-        return new Date(year,month,day);
-    }
-
-    dayDiff = function (fromDate,toDate){
-        fromDate = convertToDateObj(fromDate);
-        toDate = convertToDateObj(toDate);
-        return (toDate - fromDate)/(1000*60*60*24);
-    }
+    msg = require("/site/conf/ui-messages.jag")
 
     if (jagg.getUser() == null) {
         print({
@@ -74,8 +61,77 @@ var log = new Log();
                             }
                             print(obj);
 
+                        }
+                        else if(action === "getAPIList"){
+                            var currentLocation = request.getParameter("currentLocation");
+                            var provider = jagg.getUser().username;
+                            var log = new Log();
+                            mod = jagg.module("api");
+                            result = mod.getAllAPIs();
+                            var apiNameVersionMap = {};
+                            var selectedApis =[];
+                            if (result.error == "true") {
+                                obj = {
+                                    error: result.error,
+                                    message: msg.error.backendError(action)
+                                      };
+                                } else {
+                                   var selectedApis =[];
+                                if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0) {
+                                    selectedApis = result.apis;
+                                    }else{
+                                if (result.apis && result.apis.length>0) {
+                                    var apiList = result.apis;
+                                    for (var i in apiList) {
+                                        var apiProvider = apiList[i].provider;
+                                        if(apiProvider == provider){
+                                            selectedApis.push(apiList[i]);
+                                                }
+                                            }
+                                                }                                        
+                                            }
+                               if (selectedApis && selectedApis.length>0) {
+                                for (var i in selectedApis) {
+                                    var apiname = selectedApis[i].name;
+                                    var versionList = apiNameVersionMap[apiname];
+                                    if (!versionList) {
+                                        versionList = [];
+                                        }
+                                        versionList.push(selectedApis[i].version);
+                                        apiNameVersionMap[apiname]=versionList;
+                                    }
+                                    }
+                                    obj = {
+                                           error: false,
+                                           apiNameVersionMap: apiNameVersionMap
+                                           };
+                                        print(obj);
+                                          }
+                        }else if(action === "getComparisonData"){
+                                         {
+                mod = jagg.module("statistics");
+                var data = {};
+                var versions = request.getParameter("versionArray");
+                var versionArray = JSON.parse(versions);
+                var mediation = decodeURI(request.getParameter("mediationName"));
+                for(var i in versionArray){
+                var tempVersion = versionArray[i];
+                var tempResult = mod.getExecutionTimeByMediationType(apiName,tempVersion,tenantDomain,fromDate,toDate,drilldown,mediation); 
+               if (tempResult.usage && tempResult.usage.length > 0) {
+                var tempdata = [];
+                  for(var usage1 in tempResult.usage ){
+                    var d = new Date(tempResult.usage[usage1].values.year, (tempResult.usage[usage1].values.month-1), tempResult.usage[usage1].values.day, tempResult.usage[usage1].values.hour,tempResult.usage[usage1].values.minutes,tempResult.usage[usage1].values.seconds,"00");
+                    tempdata.push({x:d.getTime(),y:tempResult.usage[usage1].values.executionTime});
+                  }
+                   data[tempVersion] = tempdata;           
+                }                
+                }
+                        obj = {
+                            error: false,
+                            usage: data
                         };
+                        print(obj);
                     }
-
+                 };}
                     }());
 %>

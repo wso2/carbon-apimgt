@@ -2354,6 +2354,14 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                                                                         String tenantDomain, String fromDate,
                                                                         String toDate, String drillDown)
             throws APIMgtUsageQueryServiceClientException {
+        return getExecutionTimeByAPI(apiName, version, tenantDomain, fromDate, toDate, drillDown, "ALL");
+
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown, String mediationType) throws
+            APIMgtUsageQueryServiceClientException {
         StringBuilder query = new StringBuilder("api:" + apiName);
         if (version != null) {
             query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append(":").append(version);
@@ -2371,36 +2379,30 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
                 handleException("Error occurred while Error parsing date", e);
             }
         }
+        if (mediationType != null && mediationType != "ALL") {
+            query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(":").append
+                    (mediationType);
+        }
         RequestSearchBean request;
         String tableName = getExecutionTimeTableByView(drillDown);
-          request  = new RequestSearchBean(query.toString(), 0, 500, tableName);
+        request = new RequestSearchBean(query.toString(), 0, 500, tableName);
         Type type = new TypeToken<List<Result<ExecutionTimeOfAPIValues>>>() {
         }.getType();
 
-        List<Result<ExecutionTimeOfAPIValues>> obj;
+        List<Result<ExecutionTimeOfAPIValues>> obj = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
         try {
             obj = restClient.doPost(request, type);
             if (obj.isEmpty()) {
-                return new ArrayList<Result<ExecutionTimeOfAPIValues>>();
+                obj = new ArrayList<Result<ExecutionTimeOfAPIValues>>();
             }
-            sort(obj, new Comparator<Result<ExecutionTimeOfAPIValues>>() {
-                @Override
-                public int compare(Result<ExecutionTimeOfAPIValues> o1, Result<ExecutionTimeOfAPIValues> o2) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.set(o1.getValues().getYear(), o1.getValues().getMonth(), o1.getValues().getDay(), o1
-                            .getValues().getHour(), o1.getValues().getMinutes(),o1.getValues().getSeconds());
-                    Calendar comparedDate = Calendar.getInstance();
-                    comparedDate.set(o2.getValues().getYear(), o2.getValues().getMonth(), o2.getValues().getDay(), o2
-                            .getValues().getHour(), o2.getValues().getMinutes(), o2.getValues().getSeconds());
-                    return calendar.getTime().compareTo(comparedDate.getTime());
-                }
-            });
-            return obj;
+            insertZeroElementsAndSort(obj, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
         } catch (JsonSyntaxException e) {
             handleException("Error occurred while parsing response", e);
         } catch (IOException e) {
             handleException("Error occurred while Connecting to DAS REST API", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse the date", e);
         }
-        return null;
+        return obj;
     }
 }

@@ -2374,6 +2374,13 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             tenantDomain, String fromDate, String toDate, String drillDown) throws
             APIMgtUsageQueryServiceClientException {
 
+        return getExecutionTimeByAPI(apiName, version, tenantDomain, fromDate, toDate, drillDown, "ALL");
+    }
+
+    @Override
+    public List<Result<ExecutionTimeOfAPIValues>> getExecutionTimeByAPI(String apiName, String version, String
+            tenantDomain, String fromDate, String toDate, String drillDown, String mediationType) throws
+            APIMgtUsageQueryServiceClientException {
         if (dataSource == null) {
             throw new APIMgtUsageQueryServiceClientException("BAM data source hasn't been initialized. Ensure "
                     + "that the data source is properly configured in the APIUsageTracker configuration.");
@@ -2386,7 +2393,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             connection = dataSource.getConnection();
             StringBuilder query = new StringBuilder("SELECT * FROM ");
             String tableName = getExecutionTimeTableByView(drillDown);
-                query.append(tableName).append(" WHERE ");
+            query.append(tableName).append(" WHERE ");
             query.append("api='" + apiName).append("'");
             if (version != null) {
                 query.append(" AND ").append(APIUsageStatisticsClientConstants.VERSION).append("='").append(version)
@@ -2399,11 +2406,16 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
             if (fromDate != null && toDate != null) {
                 try {
                     query.append(" AND ").append(getDateToLong(fromDate)).append(" <= ").append(" " +
+                            "" + APIUsageStatisticsClientConstants.TIME + " ").append(" AND ").append(" " +
                             "" + APIUsageStatisticsClientConstants.TIME + " ").append("<=").append(getDateToLong
                             (toDate));
                 } catch (ParseException e) {
                     handleException("Error occurred while Error parsing date", e);
                 }
+            }
+            if (mediationType != null && mediationType != "ALL") {
+                query.append(" AND ").append(APIUsageStatisticsClientConstants.MEDIATION).append(" = '").append
+                        (mediationType).append("'");
             }
             if (isTableExist(tableName, connection)) { //Tables exist
                 preparedStatement = connection.prepareStatement(query.toString());
@@ -2412,12 +2424,12 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                 int minute = 0;
                 int seconds = 0;
                 while (rs.next()) {
-                    if ("HOUR".equals(drillDown)){
+                    if ("HOUR".equals(drillDown)) {
                         hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
-                    }else if ("MINUTES".equals(drillDown)){
+                    } else if ("MINUTES".equals(drillDown)) {
                         hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
                         minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
-                    }else if ("SECONDS".equals(drillDown)){
+                    } else if ("SECONDS".equals(drillDown)) {
                         hour = rs.getInt(APIUsageStatisticsClientConstants.HOUR);
                         minute = rs.getInt(APIUsageStatisticsClientConstants.MINUTES);
                         seconds = rs.getInt(APIUsageStatisticsClientConstants.SECONDS);
@@ -2449,25 +2461,16 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
                         "Statistics Table:" + tableName +
                                 " does not exist.");
             }
-            if (!result.isEmpty()){
-                sort(result, new Comparator<Result<ExecutionTimeOfAPIValues>>() {
-                    @Override
-                    public int compare(Result<ExecutionTimeOfAPIValues> o1, Result<ExecutionTimeOfAPIValues> o2) {
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.set(o1.getValues().getYear(), o1.getValues().getMonth(), o1.getValues().getDay(), o1
-                                .getValues().getHour(), o1.getValues().getMinutes(),o1.getValues().getSeconds());
-                        Calendar comparedDate = Calendar.getInstance();
-                        comparedDate.set(o2.getValues().getYear(), o2.getValues().getMonth(), o2.getValues().getDay(), o2
-                                .getValues().getHour(), o2.getValues().getMinutes(), o2.getValues().getSeconds());
-                        return calendar.getTime().compareTo(comparedDate.getTime());
-                    }
-                });
+            if (!result.isEmpty()) {
+                insertZeroElementsAndSort(result, drillDown, getDateToLong(fromDate), getDateToLong(toDate));
             }
-            return result;
         } catch (SQLException e) {
             throw new APIMgtUsageQueryServiceClientException("Error occurred while querying from JDBC database", e);
+        } catch (ParseException e) {
+            handleException("Couldn't parse the date", e);
         } finally {
             closeDatabaseLinks(rs, preparedStatement, connection);
         }
+        return result;
     }
 }

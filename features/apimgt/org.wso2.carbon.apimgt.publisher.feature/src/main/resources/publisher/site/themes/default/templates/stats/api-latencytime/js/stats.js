@@ -2,46 +2,90 @@ var currentLocation;
 currentLocation = window.location.pathname;
 var statsEnabled = isDataPublishingEnabled();
 var apiNameVersionMap = {};
+var mediationName;
 var apiName;
 var version;
+var comparedVersion = {};
+var versionComparison = false;
 var d = new Date();
 var currentDay = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(),d.getSeconds());
 var to = new Date();
 var from = new Date(to.getTime() - 1000 * 60 * 60 * 24);
-var depth ="minutes";
+var depth ="HOUR";
 $( document ).ready(function() {
     populateAPIList();
    $("#apiSelect").change(function (e) {
        apiName = this.value;
-       populateVersionList(apiName);
+       populateVersionList(apiName,false);
     });
     $("#versionSelect").change(function (e) {
       version = this.value;
-      var fromDate = from;
-      var toDate = to;
-      renderGraph(fromDate,toDate,"HOUR");
-      depth = "HOUR";
+      comparedVersion[version] = version;
+      renderGraph(from,to,depth);
+    });
+    $("#mediationType").change(function (e) {
+      mediationName = this.value;
+      versionComparison = true;
+      renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));      
+    });
+    $("#compareVersion").change(function (e) {
+      var tempArray = {};
+       var tempVersion = $('#compareVersion option:selected');
+        $(tempVersion).each(function(index, tempVersion){
+
+      tempArray[$(this).val()] = $(this).val();
+        });
+      tempArray[version] = version;
+      comparedVersion = tempArray;
+      $('#mediationType').trigger('change');
     });
     $('#today-btn').on('click', function () {
-      renderGraph((currentDay - 86400000),currentDay,"HOUR");
+      from = currentDay - 86400000;
+      to = currentDay;
+      renderGraph(from,to,"HOUR");
+      versionComparison = false;
       depth = "HOUR";
     });
        $('#hour-btn').on('click', function () {
-         renderGraph((currentDay - 3600000),currentDay,"MINUTES");
+        from = currentDay - 3600000;
+        to = currentDay;
         depth = "MINUTES";
-
+        versionComparison = false;
+         renderGraph(from,to,depth);      
+      });
+      $('#clear-btn').on('click', function () {
+         versionComparison = false;
+         renderGraph(from,to,depth);  
+         $('#compareVersion-div').css("display", "none");
       });
        $('#week-btn').on('click', function () {
-         renderGraph((currentDay - 604800000),currentDay,"DAY");
-         depth = "DAY";
+        from = currentDay - 604800000;
+        to = currentDay;
+        depth = "DAY";
+        versionComparison = false;
+        renderGraph(from,to,depth);
+         
       });
        $('#month-btn').on('click', function () {
-        renderGraph((currentDay - (604800000 * 4)),currentDay,"DAY");
+        from = currentDay - (604800000 * 4);
+        to = currentDay;
         depth = "DAY";
+        versionComparison = false;
+        renderGraph(from,to,depth);
+        
         });
         $('#date-range').click(function () {
          $(this).removeClass('active');
          });
+        $('#compare-btn').on('click', function () {
+        if (apiNameVersionMap[apiName].length == 1) {
+          alert("There's not have any version to compare");
+        }else{
+          populateVersionList(apiName,true);
+               $('#compareVersion-div').css("display", "inline");
+        }
+        });
+ 
                    //date picker
         $('#date-range').dateRangePicker(
           {
@@ -60,31 +104,21 @@ $( document ).ready(function() {
                  from = convertDate(obj.date1);
                  to = convertDate(obj.date2);
                  if ((to-from)>(3600000*24*2)) {
-                 renderGraph(from, to,"DAY");
                  depth = "DAY";
+                 renderGraph(from, to,depth);
+                 
                  }else{
-                 renderGraph(from, to,"HOUR");
                  depth = "HOUR";
+                 renderGraph(from, to,depth);
                  }
                         });
 });
 
 var populateAPIList = function(){
-           jagg.post("/site/blocks/listing/ajax/item-list.jag", { action: "getAllAPIs"},
+           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getAPIList" ,currentLocation:currentLocation},
         function (json) {
         if (!json.error) {
-                if (json.apis && json.apis.length>0) {
-                    var apiList = json.apis;
-                    for (var i in apiList) {
-                        var apiname = apiList[i].name;
-                        var versionList = apiNameVersionMap[apiname];
-                        if (!versionList) {
-                            versionList = [];
-                            }
-                            versionList.push(apiList[i].version);
-                            apiNameVersionMap[apiname]=versionList;
-                        }
-                }
+              apiNameVersionMap = json.apiNameVersionMap;
                 var i=0;
                 $('#apiSelect').empty();
                 for (var name in apiNameVersionMap) {
@@ -99,8 +133,24 @@ var populateAPIList = function(){
             }
         });
 };
-var populateVersionList = function(apiName){
+var populateVersionList = function(apiName,compare){
         var i=0;
+        if (compare) {
+       $('#compareVersion').empty();
+        for (var ver in apiNameVersionMap[apiName]) {
+            var tempVersion = apiNameVersionMap[apiName][ver];
+            if (tempVersion != version) {
+                    if (i==0) {
+                    $('#compareVersion').append('<option selected="selected" value'+tempVersion+'>' + tempVersion + '</option>');
+                }else{
+                    $('#compareVersion').append('<option value='+tempVersion+'>' + tempVersion+ '</option>');
+                }
+                i++;
+              }
+        }
+        $('#compareVersion').multiselect();
+        $('#compareVersion').trigger('change');
+        }else{
        $('#versionSelect').empty();
         for (var version in apiNameVersionMap[apiName]) {
             var tempVersion = apiNameVersionMap[apiName][version];
@@ -112,6 +162,20 @@ var populateVersionList = function(apiName){
                 i++;
         }
           $('#versionSelect').trigger('change');
+        }
+};
+
+var populateMediations = function(data){
+        var i=0;
+       $('#mediationType').empty();
+        for (var mediationName in data) {
+                    if (i==0) {
+                    $('#mediationType').append('<option selected="selected" value'+mediationName+'>' + mediationName + '</option>');
+                }else{
+                    $('#mediationType').append('<option value='+encodeURIComponent(mediationName)+'>' + mediationName+ '</option>');
+                }
+                i++;
+              }
 };
 function isDataPublishingEnabled(){
     jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action: "isDataPublishingEnabled"},
@@ -168,7 +232,7 @@ function renderGraph(fromDate,toDate,drillDown){
            jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getExecutionTimeOfAPI" , apiName : apiName , apiVersion : version , fromDate : from , toDate : to,drilldown:drillDown},
         function (json) {
             if (!json.error) {
-            var data1 = [];
+            var data1 = {};
                 if (json.usage && json.usage.length > 0) {
                   for(var usage1 in json.usage ){
                     var mediationName = json.usage[usage1].values.mediationName;
@@ -180,6 +244,7 @@ function renderGraph(fromDate,toDate,drillDown){
                     tempdata.push({x:d,y:json.usage[usage1].values.executionTime});
                      data1[mediationName] = tempdata;
                   }
+                    populateMediations(data1);
                     drawGraphInArea(data1,drillDown);
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
@@ -191,7 +256,7 @@ function renderGraph(fromDate,toDate,drillDown){
                 else {
                     $('#middle').html("");
                     $('#middle').append($('<div class="errorWrapper"><span class="label top-level-warning"><i class="icon-warning-sign icon-white"></i>'
-                        + i18n.t('errorMsgs.checkBAMConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-last-access-times/images/statsThumb.png" alt="Smiley face"></div>'));
+                        + i18n.t('errorMsgs.checkDASConnectivity') + '</span><br/><img src="../themes/default/templates/stats/api-last-access-times/images/statsThumb.png" alt="Smiley face"></div>'));
                 }
             }
             else {
@@ -203,6 +268,17 @@ function renderGraph(fromDate,toDate,drillDown){
             }
         }, "json");
 }
+function renderCompareGraph(fromDate,toDate,drillDown,mediationName){
+   var to = convertTimeString(toDate);
+    var from = convertTimeString(fromDate);
+           jagg.post("/site/blocks/stats/api-latencytime/ajax/stats.jag", { action : "getComparisonData" , apiName : apiName , fromDate : from , toDate : to,drilldown:drillDown,versionArray:JSON.stringify(comparedVersion),mediationName:decodeURIComponent(mediationName)},
+        function (json) {
+            if (!json.error) {
+                  drawGraphInArea(json.usage,drillDown);                    
+          }
+        }, "json");
+}
+
 function drawGraphInArea(rdata,drilldown){
     $('#chartContainer').show();
     $('#chartContainer').empty();
@@ -252,31 +328,33 @@ nv.addGraph(function() {
  d3.selectAll(".nv-point").on("click", function (e) {
     var date = new Date(e.x);
     if (depth == "DAY"){
-    var fromDate = new Date(e.x).setDate(date.getDate()-1);
-    var toDate = new Date(e.x).setDate(date.getDate()+1);
+     from = new Date(e.x).setDate(date.getDate()-1);
+     to = new Date(e.x).setDate(date.getDate()+1);
     depth = "HOUR";
-    renderGraph(fromDate,toDate,"HOUR");
     }else if (depth == "HOUR"){
-    var fromDate = new Date(e.x).setHours(date.getHours()-1);
-    var toDate = new Date(e.x).setHours(date.getHours()+1);
+     from = new Date(e.x).setHours(date.getHours()-1);
+     to = new Date(e.x).setHours(date.getHours()+1);
     depth = "MINUTES";
-    renderGraph(fromDate,toDate,"MINUTES");
     }else if (depth == "MINUTES"){
-    var fromDate = new Date(e.x).setMinutes(date.getMinutes()-1);
-    var toDate = new Date(e.x).setMinutes(date.getMinutes()+1);
+     from = new Date(e.x).setMinutes(date.getMinutes()-1);
+     to = new Date(e.x).setMinutes(date.getMinutes()+1);
     depth = "SECONDS";
-    renderGraph(fromDate,toDate,"SECONDS");
     }else if (depth == "SECONDS"){
     depth = "HOUR";
-    var fromDate = new Date(e.x).setHours(date.getHours()-1);
-    var toDate = new Date(e.x).setHours(date.getHours()+1);
-    renderGraph(fromDate,toDate,"HOUR");
+     from = new Date(e.x).setHours(date.getHours()-1);
+     to = new Date(e.x).setHours(date.getHours()+1);
+    }
+    if (versionComparison) {
+       renderCompareGraph(from,to,depth,encodeURIComponent(mediationName));      
+    }else{
+    renderGraph(from,to,depth);
     }
   });
 });
 $('#chartContainer').append($('<div id="latencytTime"><svg style="height:600px;"></svg></div>'));
 $('#latencytTime svg').show();
 }
+
 var pickLegandColor = function(legand){
  switch (legand) {
     case "BackEnd":
@@ -292,6 +370,12 @@ var pickLegandColor = function(legand){
           return "#DA4806";
           break;
     case "CORS":
+          return "#06DA0A";
+        break;
+    case "1.0.0":
+         return "#DA4806";
+          break;
+    case "2.0.0":
           return "#06DA0A";
         break;
 }
