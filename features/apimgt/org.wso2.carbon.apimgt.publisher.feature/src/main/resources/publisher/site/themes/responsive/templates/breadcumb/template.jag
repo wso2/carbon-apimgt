@@ -108,7 +108,7 @@
                     <%=i18n.localize("myAPIs", "My APIs")%><span class="divider"></span>
                 </li>
                 <li>
-                    <a href="<%=statsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>',e:event})"><%=i18n.localize("statistics", "Statistics")%></a>
+                    <a href="<%=statsMappedUrl%>?stat=stat&page=api-subscriptions" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>',e:event})"><%=i18n.localize("statistics", "Statistics")%></a>
                 </li>
                 <% } %>
             </ul>

@@ -1,0 +1,9 @@
+<%
+jagg.initializer("item-nav-list", {
+
+   preInitialize:function () {
+    	jagg.addHeaderJS("listing", "bgcolor", "templates/utils/common/common.js");
+    }
+});
+%>
+

@@ -25,6 +25,7 @@
 
                                 <th class="appSpecialCell">Subscribed APIs</th>
                                 <th class="userSpecialCell col-sm-4">Actions</th>
+								<th class="userSpecialCell">Still Subscribed?</th>
                             </tr>
                         </thead>
                         <tbody id="users">
@@ -116,6 +117,7 @@
 	                var existingStatus=api[0];
                     apiName=api[1];
                     version=api[2];
+					var subscriptionStatus = api[3];
                     apiPath=jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + apiName + "&version=" + version
                         + "&provider=" + jagg.getUser().username+urlPostfix;
                     %>
@@ -181,6 +183,13 @@
                                     </a>
                         <%}%>
                                </td>
+						 <td style="width:100px">
+                    <% if (subscriptionStatus =='SUBSCRIBE') {%>
+                        <label>Yes</label>
+                    <%} else {%>
+                        <label>No</label>
+                    <%} %>
+                    </td>
                             </tr>
                             <tr>
                   <%}

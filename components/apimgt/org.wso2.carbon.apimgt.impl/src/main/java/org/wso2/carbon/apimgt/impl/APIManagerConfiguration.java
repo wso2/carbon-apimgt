@@ -25,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -146,7 +147,7 @@ public class APIManagerConfiguration {
     }
 
     private void readChildElements(OMElement serverConfig,
-                                   Stack<String> nameStack) {
+                                   Stack<String> nameStack) throws APIManagementException{
         for (Iterator childElements = serverConfig.getChildElements(); childElements
                 .hasNext(); ) {
             OMElement element = (OMElement) childElements.next();
@@ -220,6 +221,26 @@ public class APIManagerConfiguration {
                     OMElement storeElem = (OMElement) apistoreIterator.next();
                     String type = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_TYPE));
                     store.setType(type); //Set Store type [eg:wso2]
+                    String className = storeElem.getAttributeValue(new QName(APIConstants
+                            .EXTERNAL_API_STORE_CLASS_NAME));
+                    try {
+                        store.setPublisher((APIPublisher) APIUtil.getClassForName(className).newInstance());
+                    } catch (InstantiationException e) {
+                        String msg = "One or more classes defined in" + APIConstants.EXTERNAL_API_STORE_CLASS_NAME +
+                                "cannot be instantiated";
+                        log.error(msg, e);
+                        throw new APIManagementException(msg, e);
+                    } catch (IllegalAccessException e) {
+                        String msg = "One or more classes defined in" + APIConstants.EXTERNAL_API_STORE_CLASS_NAME +
+                                "cannot be access";
+                        log.error(msg, e);
+                        throw new APIManagementException(msg, e);
+                    } catch (ClassNotFoundException e) {
+                        String msg = "One or more classes defined in" + APIConstants.EXTERNAL_API_STORE_CLASS_NAME +
+                                "cannot be found";
+                        log.error(msg, e);
+                        throw new APIManagementException(msg, e);
+                    }
                     String name = storeElem.getAttributeValue(new QName(APIConstants.EXTERNAL_API_STORE_ID));
                     if (name == null) {
                         log.error("The ExternalAPIStore name attribute is not defined in api-manager.xml.");

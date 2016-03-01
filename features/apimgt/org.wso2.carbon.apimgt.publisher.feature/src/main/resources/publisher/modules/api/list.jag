@@ -142,7 +142,7 @@ var getAllAPIDetails = function () {
             api = apis[i];
             resultAPI=getAPI({name:apiName, version:version, provider:provider});
 
-           
+
             result=resultAPI.api;
             list.push(result);
         }
@@ -173,6 +173,7 @@ var getAllPaginatedAPIs = function (tenantDomain,start,end) {
         return {
             error:false,
             response:result,
+            totalLength:result.totalLength,
         };
     } catch (e) {
         log.error(e.message);

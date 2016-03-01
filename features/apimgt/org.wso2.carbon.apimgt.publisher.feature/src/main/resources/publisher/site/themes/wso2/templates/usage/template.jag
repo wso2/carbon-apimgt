@@ -1,0 +1,60 @@
+<% jagg.template("usage", function(inputs, outputs, jagg) { %>
+
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/css/nv.d3.css"))%>"/>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/d3.v3.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/nv.d3.js"))%>"></script>
+
+
+<h3><%=i18n.localize("apiUsageByVersionTitle")%></h3>
+    <div id="apiUsageByVersionSpinner" class="center-wrapper">
+        <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+    </div>
+    <div class="row">
+        <div id="apiUsageByVersionNoData"></div>
+        <div class="col-sm-6">
+            <div id="versionChart">
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <br />
+            <br />
+            <table class="display table table-striped table-bordered" cellspacing="0" width="100%" id="versionTable" style="display:none;">
+                  <thead>
+                  <tr>
+                    <th><%=i18n.localize("version")%></th>
+                    <th><%=i18n.localize("noOfAPICalls")%></th>
+                  </tr>
+                  </thead>
+              </table>
+        </div>
+    </div>
+
+
+
+<h3><%=i18n.localize("apiSubscriptionsByVersionTitle")%></h3>
+    <div id="apiSubscriptionsByVersionSpinner" class="center-wrapper">
+        <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
+    </div>
+
+    <div class="row">
+        <div id="apiSubscriptionsByVersionsNoData"></div>
+        <div class="col-sm-6">
+            <div id="versionUserChart">
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <br />
+            <br />
+            <table class="display table table-striped table-bordered" cellspacing="0" width="100%" id="versionUserTable" style="display:none">
+                  <thead>
+                  <tr>
+                    <th><%=i18n.localize("version")%></th>
+                    <th><%=i18n.localize("noOfSubs")%></th>
+                  </tr>
+                  </thead>
+              </table>
+        </div>
+    </div>
+
+
+<% }); %>
