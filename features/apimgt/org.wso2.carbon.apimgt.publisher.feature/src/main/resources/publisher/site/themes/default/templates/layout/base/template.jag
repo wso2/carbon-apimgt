@@ -20,6 +20,7 @@
         </div>
         <% } %>
         <div id="middle">
+        	<% jagg.includeBlocks(outputs.breadcrumb); %>
             <% jagg.includeBlocks(outputs.middle); %>
         </div>
         <% if(outputs.right) { %>

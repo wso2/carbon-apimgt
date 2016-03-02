@@ -56,6 +56,10 @@ var tenantDomain =MultitenantUtils.getTenantDomain(outputs.user.username);
 </header>
 <!-- End header -->
 
+<!--Breadcumb -->
+<%jagg.includeBlocks(outputs.breadcrumb);%>
+<!--End Breadcumb -->
+
 <!-- navbar -->
 <div class="navbar-wrapper">
 	<nav class="navbar navbar-default" data-spy="affix"
