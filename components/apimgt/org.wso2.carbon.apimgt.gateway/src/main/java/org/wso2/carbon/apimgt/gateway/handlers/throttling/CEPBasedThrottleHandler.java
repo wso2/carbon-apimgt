@@ -26,7 +26,10 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.throttle.event.core.ThrottlerService;
+import org.wso2.carbon.event.throttle.core.ThrottlerService;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is implemented to handle
@@ -121,8 +124,13 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             } else {
                 remoteIP = (String) synCtx.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
             }
-            Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, resourceKey, appTier, apiTier, resourceTier, verbInfoDTO.getHttpVerb(), remoteIP};
 
+            //todo Added some dummy parameters
+            Map propertiesMap = new HashMap<String,String>();
+            propertiesMap.put("remoteIp",remoteIP);
+            propertiesMap.put("roleID", roleID);
+
+            Object[] objects = new Object[]{synCtx.getMessageID(), appKey, apiKey, appTier, apiTier, authorizedUser, propertiesMap};
             canAccess = throttler.isThrottled(objects);
         }
         return canAccess;

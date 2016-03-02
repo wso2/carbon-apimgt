@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.gateway.internal;
 import org.apache.axis2.context.ConfigurationContext;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.throttle.event.core.ThrottlerService;
+import org.wso2.carbon.event.throttle.core.ThrottlerService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 
 

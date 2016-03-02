@@ -100,4 +100,13 @@ public class Policy implements Serializable{
     public QuotaPolicy getDefaultQuotaPolicy() {
         return defaultQuotaPolicy;
     }
+
+    @Override
+    public String toString() {
+        return "Policy [policyName=" + policyName + ", policyLevel=" + policyLevel + ", userLevel=" + userLevel
+                + ", description=" + description + ", pipelines=" + pipelines + ", defaultQuotaPolicy="
+                + defaultQuotaPolicy + ", rateLimitCount=" + rateLimitCount + ", ratelimitTimeUnit=" + ratelimitTimeUnit
+                + "]";
+    }
+    
 }
