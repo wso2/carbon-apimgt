@@ -45,4 +45,10 @@ public class DateCondition extends Condition{
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "DateCondition [specificDate=" + specificDate + ", toString()=" + super.toString() + "]";
+    }
+    
 }

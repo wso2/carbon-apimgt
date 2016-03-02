@@ -39,4 +39,10 @@ public class QuotaPolicy {
     public void setLimit(Limit limit) {
         this.limit = limit;
     }
+
+    @Override
+    public String toString() {
+        return "QuotaPolicy [type=" + type + ", limit=" + limit + "]";
+    }
+    
 }

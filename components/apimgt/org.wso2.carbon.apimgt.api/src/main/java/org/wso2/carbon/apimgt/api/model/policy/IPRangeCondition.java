@@ -71,4 +71,11 @@ public class IPRangeCondition extends Condition {
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "IPRangeCondition [startingIP=" + startingIP + ", endingIP=" + endingIP + ", toString()="
+                + super.toString() + "]";
+    }
+    
 }

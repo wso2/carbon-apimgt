@@ -8079,6 +8079,227 @@ public class ApiMgtDAO {
         return accessTokenStoreTable;
     }
 
+    //Method to save Throttling policy details into the database
+    public void addThrottlingPolicy(Policy policy) throws APIManagementException {
+        Connection conn = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(false);
+            PreparedStatement psPolicy = null;
+            ResultSet rs = null;
+
+            try {
+                String sqlAddQuery = SQLConstants.INSERT_POLICY_SQL;
+                // Adding data to the AM_POLICY  table
+                psPolicy = conn.prepareStatement(sqlAddQuery);
+                psPolicy.setString(1, policy.getPolicyName());
+                psPolicy.setString(2, policy.getPolicyLevel());
+                psPolicy.setInt(3, policy.getTenantId());
+                psPolicy.setString(4, policy.getUserLevel());
+                psPolicy.setString(5, policy.getDescription());
+                psPolicy.setString(6, policy.getDefaultQuotaPolicy().getType());
+
+                if(policy.getDefaultQuotaPolicy().getType() == PolicyConstants.REQUEST_COUNT_TYPE){
+                    psPolicy.setLong(7, ((RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+                }
+                //if Bandwidth type, convert to kilobytes
+                else if(policy.getDefaultQuotaPolicy().getType() == PolicyConstants.BANDWIDTH_TYPE){
+                    if(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit()=="KB"){
+                        psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount());
+                    }
+                    else if(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit()=="MB"){
+                        psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount()*1024);
+                    }
+                    else if(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit()== "GB"){
+                        psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount() * 1024*1024);
+                    }
+                }
+
+                psPolicy.setLong(8, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+                psPolicy.setString(9, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+                psPolicy.setInt(10, policy.getRateLimitCount());
+                psPolicy.setString(11, policy.getRatelimitTimeUnit());
+                psPolicy.executeUpdate();
+                rs= psPolicy.getGeneratedKeys(); //get the inserted POLICY_ID (auto incremented value)
+                while (rs.next()) {
+                    int policyID = rs.getInt(1);
+                    List<Pipeline> pipelines = policy.getPipelines();
+                    if(pipelines != null){
+                        for (int i = 0; i < pipelines.size(); i++) { //add each pipeline data to AM_CONDITION table
+                            addCondition(pipelines.get(i), policyID, conn);
+                        }
+                    }                    
+                }
+            } catch (SQLException e) {
+                handleException("Failed to add Policy", e);
+            } finally {
+                APIMgtDBUtil.closeAllConnections(psPolicy, null, rs);
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException e1) {
+                    log.error("Failed to rollback the add Policy ", e1);
+                }
+            }
+            handleException("Failed to add Policy", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(null, conn, null);
+        }
+    }
+
+    public void addCondition(Pipeline pipeline, int policyID, Connection conn) throws APIManagementException, SQLException {
+        PreparedStatement psCondition = null;
+        ResultSet rs = null;
+        String startingIP = null;
+        String endingIP = null;
+        String specificIP = null;
+        String httpVerb = null;
+        Date startingDate = null;
+        Date endingDate = null;
+        Date specificDate = null;
+
+        try {
+            String sqlAddQuery = SQLConstants.INSERT_CONDITION_SQL;
+
+            // Adding data to the AM_CONDITION table
+            psCondition = conn.prepareStatement(sqlAddQuery);
+            psCondition.setInt(1, policyID);
+
+            List<Condition> conditionList= pipeline.getConditions();
+            for(int i=0; i < conditionList.size(); i++ ){
+                if(conditionList.get(i).getType() == PolicyConstants.IP_RANGE_TYPE){
+                    startingIP = ((IPRangeCondition) conditionList.get(i)).getStartingIP();
+                    endingIP = ((IPRangeCondition)conditionList.get(i)).getEndingIP();
+                }
+                else if (conditionList.get(i).getType() == PolicyConstants.IP_SPECIFIC_TYPE){
+                    specificIP = ((IPCondition) conditionList.get(i)).getSpecificIP();
+                }
+                else if (conditionList.get(i).getType() == PolicyConstants.HTTP_VERB_TYPE){
+                    httpVerb = ((HTTPVerbCondition) conditionList.get(i)).getHttpVerb();
+                }
+                if(conditionList.get(i).getType() == PolicyConstants.DATE_RANGE_TYPE){
+                    startingDate = Date.valueOf(((DateRangeCondition) conditionList.get(i)).getStartingDate());
+                    endingDate = Date.valueOf(((DateRangeCondition)conditionList.get(i)).getEndingDate());
+                }
+                else if (conditionList.get(i).getType() == PolicyConstants.DATE_SPECIFIC_TYPE){
+                    specificDate = Date.valueOf(((DateCondition) conditionList.get(i)).getSpecificDate());
+                }
+            }
+            psCondition.setString(2, startingIP);
+            psCondition.setString(3, endingIP);
+            psCondition.setString(4, specificIP);
+            psCondition.setString(5, httpVerb);
+            psCondition.setDate(6, startingDate);
+            psCondition.setDate(7, endingDate);
+            psCondition.setDate(8, specificDate);
+            psCondition.setString(9, pipeline.getQuotaPolicy().getType());
+
+            if(pipeline.getQuotaPolicy().getType() == PolicyConstants.REQUEST_COUNT_TYPE){
+                psCondition.setLong(10, ((RequestCountLimit) pipeline.getQuotaPolicy().getLimit()).getRequestCount());
+            }
+            //if Bandwidth type, convert to kilobytes
+            else if(pipeline.getQuotaPolicy().getType() == PolicyConstants.BANDWIDTH_TYPE){
+                if(((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataUnit()=="KB"){
+                    psCondition.setLong(10, ((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataAmount());
+                }
+                else if(((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataUnit()=="MB"){
+                    psCondition.setLong(10, ((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataAmount()*1024);
+                }
+                else if(((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataUnit()== "GB"){
+                    psCondition.setLong(10, ((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataAmount() * 1024*1024);
+                }
+            }
+
+            psCondition.setLong(11,pipeline.getQuotaPolicy().getLimit().getUnitTime() );
+            psCondition.setString(12,pipeline.getQuotaPolicy().getLimit().getTimeUnit());
+
+            psCondition.executeUpdate();
+            rs = psCondition.getGeneratedKeys();
+
+            //add Throttling parameters which have multiple entries
+            while (rs.next()) {
+                int conditionID = rs.getInt(1);//get the inserted CONDITION_ID (auto incremented value)
+                for(int i=0; i < conditionList.size(); i++ ) {
+                    if (conditionList.get(i).getType() == PolicyConstants.HEADER_TYPE) {
+                        addHeaderCondition((HeaderCondition) conditionList.get(i),conditionID,conn);
+                    }
+                    else if (conditionList.get(i).getType() == PolicyConstants.QUERY_PARAMETER_TYPE) {
+                        addQueryParameterCondition((QueryParameterCondition) conditionList.get(i), conditionID, conn);
+                    }
+                    else if (conditionList.get(i).getType() == PolicyConstants.JWT_CLAIMS_TYPE) {
+                        addJWTClaimsCondition((JWTClaimsCondition) conditionList.get(i), conditionID, conn);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+            handleException("Failed to add conditions to policy" , e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psCondition, null, rs);
+        }
+    }
+
+    // Adding data to the AM_HEADER_FIELD_CONDITION table
+    public void addHeaderCondition(HeaderCondition headerCondition, int conditionID, Connection conn) throws APIManagementException, SQLException {
+
+        PreparedStatement psHeaderCondition = null;
+        try {
+            String sqlQuery = SQLConstants.INSERT_HEADER_FIELD_CONDITION_SQL;
+            psHeaderCondition = conn.prepareStatement(sqlQuery);
+            psHeaderCondition.setInt(1, conditionID);
+            psHeaderCondition.setString(2, headerCondition.getHeaderName());
+            psHeaderCondition.setString(3, headerCondition.getValue());
+            psHeaderCondition.executeUpdate();
+
+        } catch (SQLException e) {
+            handleException("Failed to add Header condition ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psHeaderCondition, null, null);
+        }
+    }
+
+    // Adding data to the AM_QUERY_PARAMETER_CONDITION table
+    public void addQueryParameterCondition(QueryParameterCondition queryParameterCondition, int conditionID, Connection conn) throws APIManagementException, SQLException {
+
+        PreparedStatement psQueryParameterCondition = null;
+        try {
+            String sqlQuery = SQLConstants.INSERT_QUERY_PARAMETER_CONDITION_SQL;
+            psQueryParameterCondition = conn.prepareStatement(sqlQuery);
+            psQueryParameterCondition.setInt(1, conditionID);
+            psQueryParameterCondition.setString(2, queryParameterCondition.getParameter());
+            psQueryParameterCondition.setString(3, queryParameterCondition.getValue());
+            psQueryParameterCondition.executeUpdate();
+
+        } catch (SQLException e) {
+            handleException("Failed to add Query Parameter condition ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psQueryParameterCondition, null, null);
+        }
+    }
+
+    // Adding data to the AM_JWT_CLAIM_CONDITION table
+    public void addJWTClaimsCondition(JWTClaimsCondition jwtClaimsCondition, int conditionID, Connection conn) throws APIManagementException, SQLException {
+
+        PreparedStatement psJWTClaimsCondition = null;
+        try {
+            String sqlQuery = SQLConstants.INSERT_JWT_CLAIM_CONDITION_SQL;
+            psJWTClaimsCondition = conn.prepareStatement(sqlQuery);
+            psJWTClaimsCondition.setInt(1, conditionID);
+            psJWTClaimsCondition.setString(2, jwtClaimsCondition.getClaimUrl());
+            psJWTClaimsCondition.setString(3, jwtClaimsCondition.getAttribute());
+            psJWTClaimsCondition.executeUpdate();
+
+        } catch (SQLException e) {
+            handleException("Failed to add JWT Claims Condition ", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(psJWTClaimsCondition, null, null);
+        }
+    }
+
     public Policy[] getPolicies(String policyLevel, String username) throws APIManagementException {
         List<Policy> policies = new ArrayList<Policy>();
         Connection conn = null;

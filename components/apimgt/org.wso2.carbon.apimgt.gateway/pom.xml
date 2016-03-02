@@ -31,8 +31,8 @@
 
     <dependencies>
         <dependency>
-            <artifactId>org.wso2.carbon.throttle.event.core</artifactId>
-            <groupId>org.wso2.carbon.throttle</groupId>
+            <artifactId>org.wso2.carbon.event.throttle.core</artifactId>
+            <groupId>org.wso2.carbon.event-processing</groupId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>

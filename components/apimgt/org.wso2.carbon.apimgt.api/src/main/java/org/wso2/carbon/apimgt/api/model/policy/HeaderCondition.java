@@ -53,4 +53,11 @@ public class HeaderCondition extends Condition {
         }
         return condition;
     }
+
+    @Override
+    public String toString() {
+        return "HeaderCondition [headerName=" + headerName + ", value=" + value + ", toString()=" + super.toString()
+                + "]";
+    }
+    
 }

@@ -38,4 +38,10 @@ public class Limit {
     public void setUnitTime(int unitTime) {
         UnitTime = unitTime;
     }
+
+    @Override
+    public String toString() {
+        return "Limit [timeUnit=" + timeUnit + ", UnitTime=" + UnitTime + "]";
+    }
+    
 }

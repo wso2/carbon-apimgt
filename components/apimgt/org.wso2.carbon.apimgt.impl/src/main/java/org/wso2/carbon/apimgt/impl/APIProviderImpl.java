@@ -54,6 +54,9 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
+import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -63,6 +66,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
+import org.wso2.carbon.apimgt.impl.template.APITemplateException;
+import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
@@ -3591,8 +3596,65 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void addPolicy(Policy policy) throws APIManagementException {
-
+        addPolicy(policy, null, null, null);
     }
+
+    public void addPolicy(Policy policy, String apiVersion, String apiContext, String apiName)
+            throws APIManagementException {
+
+        // generate policy
+
+        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
+        List<String> policies = new ArrayList<String>();
+       
+        try {
+            if (PolicyConstants.POLICY_LEVEL_API.equals(policy.getPolicyLevel())) {
+
+                policies = policyBuilder.getThrottlePolicyForAPILevel(policy, apiName, apiVersion, apiContext);
+
+            } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policy.getPolicyLevel())) {
+
+                String policyString = policyBuilder.getThrottlePolicyForAppLevel(policy);
+                policies.add(policyString);
+            } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policy.getPolicyLevel())) {
+
+                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(policy);
+                policies.add(policyString);
+            } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policy.getPolicyLevel())) {
+
+                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(policy);
+                policies.add(policyString);
+            }
+            apiMgtDAO.addThrottlingPolicy(policy);
+        } catch (APITemplateException e) {
+            String msg = "Error while generating policy: ";
+            log.error(msg, e);
+            throw new APIManagementException(msg);
+        } catch (Exception e) {
+            String msg = "Error while saving policy to database: ";
+            log.error(msg, e);
+            throw new APIManagementException(msg);
+        }
+
+       
+
+        // deploy in global cep and gateway manager
+        ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
+        try {
+            for (String policyString : policies) {
+                manager.deployPolicyToGlobalCEP(policyString);
+                manager.deployPolicyToGatewayManager(policyString);
+            }
+        } catch (APIManagementException e) {
+            String msg = "Error while deploying policy: ";
+            log.error(msg, e);
+
+            // TODO rollback db if deployment failed
+
+            throw new APIManagementException(msg);
+        }
+
+    }    
 
     public long ipToLong(String ip) {
         long ipAddressinLong = 0;
