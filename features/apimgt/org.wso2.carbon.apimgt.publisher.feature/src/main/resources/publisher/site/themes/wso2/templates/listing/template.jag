@@ -152,7 +152,10 @@
                                     <% if(api.thumb == null) { %>
                                     	<div class="setbgcolor">
 											<div class="api-name-icon apiThumb"><a href="<%=path%>"></a></div>
-										</div> 
+											<div style="display: none">
+												<a href="" class="api-name"><%=api.name%></a>
+											</div>
+								</div> 
                                     <% } else { %>
                                     	<a href="<%=path%>">
                                     		<img class="img-responsive apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="">
@@ -160,7 +163,7 @@
                                     <% } %>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4><a class ="fade-out api-name" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=api.name%>"><%=api.name%></a></h4>
+                                    <h4><a class ="fade-out" class="link-h1" href="<%=path%>" onclick="jagg.sessionAwareJS({redirect:'<%=path%>'})" title="<%=api.name%>"><%=api.name%></a></h4>
                                     <h5><a href="#"><%=api.version%></a></h5>
                                     <p><%=api.provider%></p>
                                     <p>
@@ -236,7 +239,7 @@ $(window).load(function(){
     });
 
     $(".api-name-icon").each(function() {
-        var elem = $(this).parent().parent().next().children().children(".api-name");
+        var elem = $(this).next().children(".api-name");
         $(this).nametoChar({
             nameElement: elem
         });
