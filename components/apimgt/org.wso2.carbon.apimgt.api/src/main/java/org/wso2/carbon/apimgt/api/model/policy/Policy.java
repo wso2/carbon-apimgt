@@ -117,8 +117,9 @@ public class Policy implements Serializable{
     public String toString() {
         return "Policy [policyName=" + policyName + ", policyLevel=" + policyLevel + ", userLevel=" + userLevel
                 + ", description=" + description + ", pipelines=" + pipelines + ", defaultQuotaPolicy="
-                + defaultQuotaPolicy + ", rateLimitCount=" + rateLimitCount + ", ratelimitTimeUnit=" + ratelimitTimeUnit
-                + "]";
+                + defaultQuotaPolicy + ", rateLimitCount=" + rateLimitCount + ", tenantId=" + tenantId
+                + ", ratelimitTimeUnit=" + ratelimitTimeUnit + "]";
     }
+   
     
 }
