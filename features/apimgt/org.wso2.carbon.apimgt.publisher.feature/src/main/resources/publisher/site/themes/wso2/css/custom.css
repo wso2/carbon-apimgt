@@ -21,20 +21,22 @@ div.image-container {
 	margin-top: 0px;
 }
 
-.api-name-icon{
-    color:#fff;
-    width:100%;
-    font-size:6.5em;
-    text-align:center;
-    font-weight:200;
-    text-transform:capitalize;
+.api-name-icon {
+	color: #fff;
+	width: 100%;
+	font-size: 6.5em;
+	text-align: center;
+	font-weight: 200;
+	text-transform: capitalize;
 }
 
 /* api Thumbnail image */
-.apiThumb{
-    min-width:150px;
-    min-height:150px;
-    display: block; 
-    margin-left: auto;
-    margin-right: auto;
+.apiThumb {
+	min-width: 150px;
+	min-height: 150px;
+	max-height: 150px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	cursor: pointer;
 }

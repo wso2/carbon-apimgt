@@ -151,7 +151,7 @@
                                 <div class="image-container">                                    
                                     <% if(api.thumb == null) { %>
                                     	<div class="setbgcolor">
-											<div class="api-name-icon apiThumb"><a href="<%=path%>"></a></div>
+											<div class="api-name-icon apiThumb" onclick="location.href='<%=path%>'"></div>
 											<div style="display: none">
 												<a href="" class="api-name"><%=api.name%></a>
 											</div>
