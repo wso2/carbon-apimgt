@@ -45,7 +45,7 @@ public class ThrottlingPolicyTest extends TestCase {
     }
 
     public void testInsertPolicy() throws Exception {
-        apiMgtDAO.addThrottlingPolicy(getPolicyAPILevelPerUser(),"admin");
+        apiMgtDAO.addThrottlingPolicy(getPolicyAPILevelPerUser());
     }
 
     private Policy getPolicyAPILevelPerUser(){
@@ -54,6 +54,7 @@ public class ThrottlingPolicyTest extends TestCase {
         policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");
         policy.setPolicyLevel("api");
+        policy.setTenantId(-1234);
 
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");

@@ -8080,7 +8080,7 @@ public class ApiMgtDAO {
     }
 
     //Method to save Throttling policy details into the database
-    public void addThrottlingPolicy(Policy policy, String userId) throws APIManagementException {
+    public void addThrottlingPolicy(Policy policy) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -8089,15 +8089,12 @@ public class ApiMgtDAO {
             ResultSet rs = null;
 
             try {
-                int tenantId;
-                tenantId = APIUtil.getTenantId(userId);
-
                 String sqlAddQuery = SQLConstants.INSERT_POLICY_SQL;
                 // Adding data to the AM_POLICY  table
                 psPolicy = conn.prepareStatement(sqlAddQuery);
                 psPolicy.setString(1, policy.getPolicyName());
                 psPolicy.setString(2, policy.getPolicyLevel());
-                psPolicy.setInt(3, tenantId);
+                psPolicy.setInt(3, policy.getTenantId());
                 psPolicy.setString(4, policy.getUserLevel());
                 psPolicy.setString(5, policy.getDescription());
                 psPolicy.setString(6, policy.getDefaultQuotaPolicy().getType());
@@ -8301,4 +8298,79 @@ public class ApiMgtDAO {
         }
     }
 
+    public Policy[] getPolicies(String policyLevel, String username) throws APIManagementException {
+        List<Policy> policies = new ArrayList<Policy>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_POLICIES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_POLICIES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, policyLevel);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Policy policy = new Policy(rs.getString("NAME"));
+                QuotaPolicy quotaPolicy = new QuotaPolicy();
+                policy.setPolicyLevel(rs.getString("USER_LEVEL"));
+                policy.setDescription(rs.getString("DESCRIPTION"));
+                quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
+                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)){
+                    RequestCountLimit reqLimit = new RequestCountLimit();
+                    reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(reqLimit);
+                }
+                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)){
+                    BandwidthLimit bandLimit = new BandwidthLimit();
+                    bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
+                    bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
+                    bandLimit.setDataAmount(rs.getInt("DEFAULT_QUOTA"));
+                    quotaPolicy.setLimit(bandLimit);
+                }
+                policy.setRateLimitCount(rs.getInt("RATE_LIMIT_COUNT"));
+                policy.setRatelimitTimeUnit(rs.getString("RATE_LIMIT_TIME_UNIT"));
+                policy.setDefaultQuotaPolicy(quotaPolicy);
+                policies.add(policy);
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return policies.toArray(new Policy[policies.size()]);
+    }
+
+    public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {
+        List<String> names = new ArrayList<String>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        String sqlQuery = SQLConstants.GET_POLICY_NAMES;
+        if (forceCaseInsensitiveComparisons) {
+            sqlQuery = SQLConstants.GET_POLICY_NAMES;
+        }
+
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, policyLevel);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                names.add(rs.getString("NAME"));
+            }
+        } catch (SQLException e) {
+            handleException("Error while executing SQL", e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return names.toArray(new String[names.size()]);
+    }
 }

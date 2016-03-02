@@ -2038,5 +2038,21 @@ public class SQLConstants {
                     "RATE_LIMIT_TIME_UNIT = ? " +
             "WHERE POLICY_ID = ?";
 
+    public static final String GET_POLICY_NAMES =
+            " SELECT "+
+            "   NAME " +
+            "FROM " +
+            "   AM_POLICY " +
+            " WHERE" +
+            "   TYPE = ?"+
+            "   AND TENANT_ID =?";
 
+    public static final String GET_POLICIES =
+            " SELECT "+
+            "   * " +
+            "FROM " +
+            "   AM_POLICY " +
+            " WHERE" +
+            "   TYPE = ?"+
+            "   AND TENANT_ID =?";
 }
