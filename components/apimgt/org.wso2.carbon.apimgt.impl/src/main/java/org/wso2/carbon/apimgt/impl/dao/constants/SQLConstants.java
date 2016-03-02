@@ -1996,4 +1996,47 @@ public class SQLConstants {
             "   AND IOAT.TENANT_ID = ?" +
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'" +
             "   AND LOWER(IOAT.USER_DOMAIN) = ?";
+
+    public static final String GET_EXISTING_POLICY_SQL =
+            "SELECT POLICY_ID FROM AM_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
+
+    public static final String GET_POLICY_CONDITIONS_SQL =
+            "SELECT CONDITION_ID FROM AM_CONDITION WHERE POLICY_ID = ? ";
+
+    public static final String INSERT_POLICY_SQL =
+            "INSERT INTO AM_POLICY(NAME,TYPE,TENANT_ID,USER_LEVEL,DESCRIPTION,DEFAULT_QUOTA_POLICY_TYPE,DEFAULT_QUOTA,DEFAULT_UNIT_TIME,DEFAULT_TIME_UNIT,RATE_LIMIT_COUNT,RATE_LIMIT_TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String INSERT_CONDITION_SQL =
+            "INSERT INTO AM_CONDITION(POLICY_ID,STARTING_IP,ENDING_IP,SPECIFIC_IP,HTTP_VERB,STARTING_DATE,ENDING_DATE,SPECIFIC_DATE,QUOTA_POLICY_TYPE,QUOTA,UNIT_TIME,TIME_UNIT) \n" +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+
+    public static final String INSERT_QUERY_PARAMETER_CONDITION_SQL =
+            "INSERT INTO AM_QUERY_PARAMETER_CONDITION(CONDITION_ID,PARAMETER_NAME,PARAMETER_VALUE) \n" +
+            "VALUES (?,?,?)";
+
+    public static final String INSERT_HEADER_FIELD_CONDITION_SQL =
+            "INSERT INTO AM_HEADER_FIELD_CONDITION(CONDITION_ID,HEADER_FIELD_NAME,HEADER_FIELD_VALUE) \n" +
+            "VALUES (?,?,?)";
+
+    public static final String INSERT_JWT_CLAIM_CONDITION_SQL =
+            "INSERT INTO AM_JWT_CLAIM_CONDITION(CONDITION_ID,CLAIM_URL,CLAIM_ATTRIBUTE) \n" +
+            "VALUES (?,?,?)";
+
+    public static final String UPDATE_POLICY_SQL =
+            "UPDATE AM_POLICY " +
+            "SET " +
+                    "NAME = ?," +
+                    "TYPE = ?," +
+                    "TENANT_ID = ?," +
+                    "USER_LEVEL = ? ," +
+                    "DESCRIPTION = ? ," +
+                    "DEFAULT_QUOTA_POLICY_TYPE = ? ," +
+                    "DEFAULT_QUOTA = ?," +
+                    "DEFAULT_UNIT_TIME = ?," +
+                    "RATE_LIMIT_COUNT = ?," +
+                    "RATE_LIMIT_TIME_UNIT = ? " +
+            "WHERE POLICY_ID = ?";
+
+
 }
