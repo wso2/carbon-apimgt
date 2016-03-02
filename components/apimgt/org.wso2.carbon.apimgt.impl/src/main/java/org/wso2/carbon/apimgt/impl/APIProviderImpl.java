@@ -3631,7 +3631,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(msg, e);
             throw new APIManagementException(msg);
         } catch (Exception e) {
-            String msg = "Error while generating policy: ";
+            String msg = "Error while saving policy to database: ";
             log.error(msg, e);
             throw new APIManagementException(msg);
         }
