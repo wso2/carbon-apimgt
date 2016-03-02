@@ -1049,4 +1049,9 @@ public final class APIConstants {
     public static final String POLICY_FILE_FOLDER = "repository" + File.separator + "deployment" + File.separator +
             "server" + File.separator + "throttle-config";
     public static final String POLICY_FILE_LOCATION = POLICY_FILE_FOLDER + File.separator;
+
+    public static final String ELIGIBILITY_QUERY_ELEM= "eligibilityQuery";
+    public static final String POLICY_NAME_ELEM = "name";
+    public static final String DECISION_QUERY_ELEM = "decisionQuery";
+
 }
