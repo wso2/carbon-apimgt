@@ -29,6 +29,7 @@ public final class RestApiConstants {
     public static final String CONTENT_DISPOSITION_FILENAME = "filename";
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+    public static final String AUTHENTICATION_REQUIRED = "authentication_required";
 
     public static final String DEFAULT_RESPONSE_CONTENT_TYPE = APPLICATION_JSON;
     
