@@ -8080,7 +8080,7 @@ public class ApiMgtDAO {
     }
 
     //Method to save Throttling policy details into the database
-    public void addThrottlingPolicy(Policy policy,String userId) throws APIManagementException {
+    public void addThrottlingPolicy(Policy policy, String userId) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
