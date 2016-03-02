@@ -1046,6 +1046,7 @@ public final class APIConstants {
     public static final String CPS_SERVER_URL = "CPSServerUrl";
     public static final String CPS_SERVER_USERNAME = "CPSServerUsername";
     public static final String CPS_SERVER_PASSWORD = "CPSServerPassword";
-
-
+    public static final String POLICY_FILE_FOLDER = "repository" + File.separator + "deployment" + File.separator +
+            "server" + File.separator + "throttle-config";
+    public static final String POLICY_FILE_LOCATION = POLICY_FILE_FOLDER + File.separator;
 }
