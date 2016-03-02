@@ -3617,24 +3617,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return null;
     }
 
-    public String[] getPolicyNames(String username, String level) throws APIManagementException{
+    public String[] getPolicyNames(String username, String level) throws APIManagementException {
         String[] policyNamesAPI = apiMgtDAO.getPolicyNames(level, username);
         return policyNamesAPI;
     }
 
-    public Policy[] getPolicies(String username, String level) throws APIManagementException{
+    public Policy[] getPolicies(String username, String level) throws APIManagementException {
         Policy[] policies = apiMgtDAO.getPolicies(level, username);
         return policies;
     }
 
     public void writeToFile(String content, String fileName) throws IOException {
-        File file =new File(APIConstants.POLICY_FILE_FOLDER);      //WSO2Carbon_Home/repository/deployment/server/throttle-config
-        if(!file.exists()){    //if directory doesn't exist, make onee
+        File file = new File(APIConstants.POLICY_FILE_FOLDER);      //WSO2Carbon_Home/repository/deployment/server/throttle-config
+        if (!file.exists()) {    //if directory doesn't exist, make onee
             file.mkdir();
         }
-        File writeFile = new File(APIConstants.POLICY_FILE_LOCATION+fileName);  //file folder+/
+        File writeFile = new File(APIConstants.POLICY_FILE_LOCATION + fileName);  //file folder+/
         FileOutputStream fos = null;
-        try{
+        try {
             fos = new FileOutputStream(writeFile);
             if (!writeFile.exists()) {
                 writeFile.createNewFile();
@@ -3643,15 +3643,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             fos.write(contentInBytes);
             fos.flush();
             fos.close();
-        }catch (IOException e) {
-            log.error("Error occurred writing to file: "+fileName);
-        }finally{
-            try{
-                if(fos!=null){
+        } catch (IOException e) {
+            log.error("Error occurred writing to " + fileName + ":", e);
+        } finally {
+            try {
+                if (fos != null) {
                     fos.close();
                 }
-            }catch(IOException e){
-                log.error("Error occurred closing file output stream");
+            } catch (IOException e) {
+                log.error("Error occurred closing file output stream", e);
             }
         }
     }

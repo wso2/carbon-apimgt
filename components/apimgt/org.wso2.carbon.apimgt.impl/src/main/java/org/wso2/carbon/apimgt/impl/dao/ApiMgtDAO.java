@@ -8101,14 +8101,14 @@ public class ApiMgtDAO {
                 policy.setPolicyLevel(rs.getString("USER_LEVEL"));
                 policy.setDescription(rs.getString("DESCRIPTION"));
                 quotaPolicy.setType(rs.getString("DEFAULT_QUOTA_POLICY_TYPE"));
-                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)){
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.REQUEST_COUNT_TYPE)) {
                     RequestCountLimit reqLimit = new RequestCountLimit();
                     reqLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
                     reqLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
                     reqLimit.setRequestCount(rs.getInt("DEFAULT_QUOTA"));
                     quotaPolicy.setLimit(reqLimit);
                 }
-                if(rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)){
+                if (rs.getString("DEFAULT_QUOTA_POLICY_TYPE").equals(PolicyConstants.BANDWIDTH_TYPE)) {
                     BandwidthLimit bandLimit = new BandwidthLimit();
                     bandLimit.setUnitTime(rs.getInt("DEFAULT_UNIT_TIME"));
                     bandLimit.setTimeUnit(rs.getString("DEFAULT_TIME_UNIT"));
@@ -8138,7 +8138,6 @@ public class ApiMgtDAO {
         if (forceCaseInsensitiveComparisons) {
             sqlQuery = SQLConstants.GET_POLICY_NAMES;
         }
-
         try {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
