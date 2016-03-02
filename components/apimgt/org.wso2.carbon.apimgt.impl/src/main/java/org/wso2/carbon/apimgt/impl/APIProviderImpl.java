@@ -18,12 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
-import org.apache.axiom.om.OMText;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
@@ -41,8 +38,21 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
+import org.wso2.carbon.apimgt.api.model.Provider;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
@@ -53,9 +63,12 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilderImpl;
-import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
-import org.wso2.carbon.apimgt.impl.utils.*;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIStoreNameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.StatUpdateClusterMessage;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceAPIManagementExceptionException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceClusteringFaultException;
 import org.wso2.carbon.apimgt.statsupdate.stub.GatewayStatsUpdateServiceExceptionException;
@@ -71,7 +84,12 @@ import org.wso2.carbon.governance.custom.lifecycles.checklist.util.CheckListItem
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.LifecycleBeanPopulator;
 import org.wso2.carbon.governance.custom.lifecycles.checklist.util.Property;
 import org.wso2.carbon.registry.common.CommonConstants;
-import org.wso2.carbon.registry.core.*;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.CollectionImpl;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
@@ -94,8 +112,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -3586,5 +3615,44 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public String getCondition(Policy policy) {
         return null;
+    }
+
+    public String[] getPolicyNames(String username, String level) throws APIManagementException{
+        String[] policyNamesAPI = apiMgtDAO.getPolicyNames(level, username);
+        return policyNamesAPI;
+    }
+
+    public Policy[] getPolicies(String username, String level) throws APIManagementException{
+        Policy[] policies = apiMgtDAO.getPolicies(level, username);
+        return policies;
+    }
+
+    public void writeToFile(String content, String fileName) throws IOException {
+        File file =new File(APIConstants.POLICY_FILE_FOLDER);      //WSO2Carbon_Home/repository/deployment/server/throttle-config
+        if(!file.exists()){    //if directory doesn't exist, make onee
+            file.mkdir();
+        }
+        File writeFile = new File(APIConstants.POLICY_FILE_LOCATION+fileName);  //file folder+/
+        FileOutputStream fos = null;
+        try{
+            fos = new FileOutputStream(writeFile);
+            if (!writeFile.exists()) {
+                writeFile.createNewFile();
+            }
+            byte[] contentInBytes = content.getBytes();
+            fos.write(contentInBytes);
+            fos.flush();
+            fos.close();
+        }catch (IOException e) {
+            log.error("Error occurred writing to file: "+fileName);
+        }finally{
+            try{
+                if(fos!=null){
+                    fos.close();
+                }
+            }catch(IOException e){
+                log.error("Error occurred closing file output stream");
+            }
+        }
     }
 }
