@@ -3618,8 +3618,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public String[] getPolicyNames(String username, String level) throws APIManagementException {
-        String[] policyNamesAPI = apiMgtDAO.getPolicyNames(level, username);
-        return policyNamesAPI;
+        String[] policyNames = apiMgtDAO.getPolicyNames(level, username);
+        return policyNames;
     }
 
     public Policy[] getPolicies(String username, String level) throws APIManagementException {
