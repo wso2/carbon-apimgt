@@ -11,3 +11,5 @@ features/apimgt/org.wso2.carbon.apimgt.gateway.feature/src/main/resources/am#sam
 features/apimgt/org.wso2.carbon.apimgt.rest.api.dcr.feature/src/main/resources/client-registration#v1.war
 features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api#am#publisher#v1.war
 features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api#am#store#v1.war
+features/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.feature/src/main/resources/api-docs/
+features/apimgt/org.wso2.carbon.apimgt.rest.api.store.feature/src/main/resources/api-docs/
