@@ -8124,9 +8124,11 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     int policyID = rs.getInt(1);
                     List<Pipeline> pipelines = policy.getPipelines();
-                    for (int i = 0; i < pipelines.size(); i++) { //add each pipeline data to AM_CONDITION table
-                        addCondition(pipelines.get(i), policyID, conn);
-                    }
+                    if(pipelines != null){
+                        for (int i = 0; i < pipelines.size(); i++) { //add each pipeline data to AM_CONDITION table
+                            addCondition(pipelines.get(i), policyID, conn);
+                        }
+                    }                    
                 }
             } catch (SQLException e) {
                 handleException("Failed to add Policy", e);
