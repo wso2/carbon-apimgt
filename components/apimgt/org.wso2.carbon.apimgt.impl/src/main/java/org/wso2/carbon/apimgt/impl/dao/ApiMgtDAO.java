@@ -8154,7 +8154,6 @@ public class ApiMgtDAO {
 
     public void addCondition(Pipeline pipeline, int policyID, Connection conn) throws APIManagementException, SQLException {
         PreparedStatement psCondition = null;
-        PreparedStatement psSelect = null;
         ResultSet rs = null;
         String startingIP = null;
         String endingIP = null;
@@ -8220,11 +8219,11 @@ public class ApiMgtDAO {
             psCondition.setString(12,pipeline.getQuotaPolicy().getLimit().getTimeUnit());
 
             psCondition.executeUpdate();
-            ResultSet getConditionIdResultSet = psCondition.getGeneratedKeys();
+            rs = psCondition.getGeneratedKeys();
 
             //add Throttling parameters which have multiple entries
-            while (getConditionIdResultSet.next()) {
-                int conditionID = getConditionIdResultSet.getInt(1);//get the inserted CONDITION_ID (auto incremented value)
+            while (rs.next()) {
+                int conditionID = rs.getInt(1);//get the inserted CONDITION_ID (auto incremented value)
                 for(int i=0; i < conditionList.size(); i++ ) {
                     if (conditionList.get(i).getType() == PolicyConstants.HEADER_TYPE) {
                         addHeaderCondition((HeaderCondition) conditionList.get(i),conditionID,conn);
@@ -8241,8 +8240,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to add conditions to policy" , e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(psCondition, null, null);
-            APIMgtDBUtil.closeAllConnections(psSelect, null, rs);
+            APIMgtDBUtil.closeAllConnections(psCondition, null, rs);
         }
     }
 
