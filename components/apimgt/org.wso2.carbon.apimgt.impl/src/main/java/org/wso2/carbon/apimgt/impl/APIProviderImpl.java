@@ -3654,8 +3654,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(msg);
         }
 
-    }    
+    }
 
+    /**
+     *
+     * @param ip ip address as a string
+     * @return ip address in long
+     */
     public long ipToLong(String ip) {
         long ipAddressinLong = 0;
         if (ip != null) {
@@ -3671,14 +3676,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return ipAddressinLong;
     }
 
-    public void appendPolicy(String eligibilityQuery, String decisionQuery, String tierName){
-
-    }
-
-    public String getCondition(Policy policy) {
-        return null;
-    }
-
     public String[] getPolicyNames(String username, String level) throws APIManagementException {
         String[] policyNames = apiMgtDAO.getPolicyNames(level, username);
         return policyNames;
@@ -3689,7 +3686,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return policies;
     }
 
-    public void writeToFile(String content, String fileName) throws IOException {
+    /**
+     *
+     * @param content Content to be written to the file
+     * @param fileName  name of the file
+     */
+    public void writeToFile(String content, String fileName){
         File file = new File(APIConstants.POLICY_FILE_FOLDER);      //WSO2Carbon_Home/repository/deployment/server/throttle-config
         if (!file.exists()) {    //if directory doesn't exist, make onee
             file.mkdir();
