@@ -8079,8 +8079,13 @@ public class ApiMgtDAO {
         return accessTokenStoreTable;
     }
 
-    //Method to save Throttling policy details into the database
-    public void addThrottlingPolicy(APIPolicy policy) throws APIManagementException {
+    /**
+     * Add a throttling policy to database
+     *
+     * @param policy policy object defining the throttle policy
+     * @throws APIManagementException
+     */
+    public void addThrottlingPolicy(Policy policy) throws APIManagementException {
         Connection conn = null;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -8148,6 +8153,15 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Add throttling policy condition to database
+     *
+     * @param pipeline condition pipeline
+     * @param policyID
+     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @throws APIManagementException
+     * @throws SQLException
+     */
     public void addCondition(Pipeline pipeline, int policyID, Connection conn) throws APIManagementException, SQLException {
         PreparedStatement psCondition = null;
         ResultSet rs = null;
@@ -8245,9 +8259,16 @@ public class ApiMgtDAO {
         }
     }
 
-    // Adding data to the AM_HEADER_FIELD_CONDITION table
     public void addHeaderCondition(HeaderCondition headerCondition, int conditionID, Connection conn) throws APIManagementException, SQLException {
-
+    /**
+     * Add HEADER throttling condition to AM_HEADER_FIELD_CONDITION table
+     *
+     * @param headerCondition
+     * @param conditionID
+     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @throws APIManagementException
+     * @throws SQLException
+     */
         PreparedStatement psHeaderCondition = null;
         try {
             String sqlQuery = SQLConstants.INSERT_HEADER_FIELD_CONDITION_SQL;
@@ -8264,9 +8285,16 @@ public class ApiMgtDAO {
         }
     }
 
-    // Adding data to the AM_QUERY_PARAMETER_CONDITION table
     public void addQueryParameterCondition(QueryParameterCondition queryParameterCondition, int conditionID, Connection conn) throws APIManagementException, SQLException {
-
+    /**
+     * Add QUERY throttling condition to AM_QUERY_PARAMETER_CONDITION table
+     *
+     * @param queryParameterCondition
+     * @param conditionID
+     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @throws APIManagementException
+     * @throws SQLException
+     */
         PreparedStatement psQueryParameterCondition = null;
         try {
             String sqlQuery = SQLConstants.INSERT_QUERY_PARAMETER_CONDITION_SQL;
@@ -8283,9 +8311,16 @@ public class ApiMgtDAO {
         }
     }
 
-    // Adding data to the AM_JWT_CLAIM_CONDITION table
     public void addJWTClaimsCondition(JWTClaimsCondition jwtClaimsCondition, int conditionID, Connection conn) throws APIManagementException, SQLException {
-
+    /**
+     * Add JWTCLAIMS throttling condition to AM_JWT_CLAIM_CONDITION table
+     *
+     * @param jwtClaimsCondition
+     * @param conditionID
+     * @param conn database connection. This should be provided inorder to rollback transaction
+     * @throws APIManagementException
+     * @throws SQLException
+     */
         PreparedStatement psJWTClaimsCondition = null;
         try {
             String sqlQuery = SQLConstants.INSERT_JWT_CLAIM_CONDITION_SQL;
@@ -8465,6 +8500,14 @@ public class ApiMgtDAO {
         return policies.toArray(new SubscriptionPolicy[policies.size()]);
     }
 
+    /**
+     * Retrieves list of available policy names under <code>policyLevel</code> and user <code>username</code>'s tenant
+     *
+     * @param policyLevel policY level to filter policies
+     * @param username username will be used to get the tenant
+     * @return array of policy names
+     * @throws APIManagementException
+     */
     public String[] getPolicyNames(String policyLevel, String username) throws APIManagementException {
         List<String> names = new ArrayList<String>();
         Connection conn = null;
