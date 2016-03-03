@@ -1,6 +1,6 @@
 <% jagg.template("stats/api-throttledcounts", function(inputs, outputs, jagg) { %>
 <div id="apiThrottledCounts-stat-page" class="stat-page">
-    <div class="title-section"> <h2><%=i18n.localize("apiThrottledCountsTitle")%></h2> </div>
+    <div class="page-header"> <h2><%=i18n.localize("apiThrottledCountsTitle")%></h2> </div>
     <div class="col-md-12" style="margin-top :10px">
 
     <div class="form-group col-md-3">

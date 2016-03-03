@@ -101,7 +101,7 @@ function pushDataForTabs(clickedTab){
                                   $('#versionTable').hide();
                                   $('#versionChart').css("fontSize", 14);
                                   $('#apiUsageByVersionNoData').html('');
-                                  $('#apiUsageByVersionNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                                  $('#apiUsageByVersionNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
                               }
                           } else {
                               if (json.message == "AuthenticateError") {
@@ -138,7 +138,7 @@ function pushDataForTabs(clickedTab){
                                   $('#versionUserTable').hide();
                                   $('#versionUserChart').css("fontSize", 14);
                                   $('#apiSubscriptionsByVersionsNoData').html('');
-                                  $('#apiSubscriptionsByVersionsNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                                  $('#apiSubscriptionsByVersionsNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
 
                               }
 
@@ -184,7 +184,7 @@ function pushDataForTabs(clickedTab){
                                   $('#userChart').hide();
                                   $('#userChart').css("fontSize", 14);
                                   $('#usageByCurrentSubscribersAcrossAllNoData').html('');
-                                  $('#usageByCurrentSubscribersAcrossAllNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                                  $('#usageByCurrentSubscribersAcrossAllNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
                               }
 
                           } else {
@@ -220,7 +220,7 @@ function pushDataForTabs(clickedTab){
                                   $('#userVersionTable').hide();
                                   $('#userVersionChart').css("fontSize", 14);
                                   $('#usageByCurrentSubscribersNoData').html('');
-                                  $('#usageByCurrentSubscribersNoData').append($('<h3 class="no-data-heading center-wrapper">No Data Available</h3>'));
+                                  $('#usageByCurrentSubscribersNoData').append($('<h4 class="center-wrapper">No Data Available</h4>'));
                               }
 
                           } else {

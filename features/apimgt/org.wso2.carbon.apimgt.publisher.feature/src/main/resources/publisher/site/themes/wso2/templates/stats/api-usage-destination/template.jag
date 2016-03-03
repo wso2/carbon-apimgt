@@ -1,7 +1,7 @@
 <% jagg.template("stats/api-usage-destination", function(inputs, outputs, jagg) { %>
 
 <div id="apiUsageDestination-stat-page" class="stat-page">
-<div class="title-section"> <h2><%=i18n.localize("apiUsageFromDestinationTitle")%></h2></div>
+<div class="page-header"> <h2><%=i18n.localize("apiUsageFromDestinationTitle")%></h2></div>
 
         <div id="rangeSliderWrapper" >
            <div id="dateRangePickerContainer" style="text-align:right">

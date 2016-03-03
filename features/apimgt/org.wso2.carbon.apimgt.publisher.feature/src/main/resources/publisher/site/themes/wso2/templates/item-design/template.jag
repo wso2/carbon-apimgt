@@ -73,8 +73,8 @@
         </a>
     </li>
 </ul>
-</center> 
-    <div class="title-section">
+</center>
+	<div class="page-header">
         <% if(api){ %> 
             <h2><%= encode.forHtml(api.name) %>(<%= encode.forHtml(api.version) %>) : <%= encode.forHtml(api.context) %>&nbsp;<a class = "btn btn-default pull-right" href="<%= jagg.url("/info?"+ apiUrlId ) %>" ><i class="glyphicon glyphicon-list-alt"></i> Go to Overview</a></h2>
         <% }else{ %>

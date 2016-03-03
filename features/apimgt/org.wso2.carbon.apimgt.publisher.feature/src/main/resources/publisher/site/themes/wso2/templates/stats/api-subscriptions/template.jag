@@ -1,7 +1,7 @@
 <% jagg.template("stats/api-subscriptions", function(inputs, outputs, jagg) { %>
 
 <div id="apiSubscription-stat-page" class="stat-page">
-<div class="title-section"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
+<div class="page-header"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
     <br>
     <div class="col-md-12">
 

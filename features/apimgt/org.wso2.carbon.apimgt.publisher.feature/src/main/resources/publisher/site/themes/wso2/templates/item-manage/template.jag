@@ -79,15 +79,13 @@
 <%}%>
 
 </center>
-    <div class="title-section">
-
-        <h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
+	<div class="page-header">
+ 		<h2>Manage API: <%= encode.forHtml(api.name) %> : <%= encode.forHtml(api.context) %>&nbsp;
         <% if(api){ %>
-               <button type="button" class="btn btn-default pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
+           <button type="button" class="btn btn-default pull-right" onclick="window.location='<%= jagg.url("/info?"+ apiUrlId ) %>'"><i class=" glyphicon glyphicon-list-alt"></i> Go to Overview</button>
         <% } %>
         </h2>
-
-    </div>     
+ 	</div>     
     <div class="content-section shadow-up">
     <div class="content-data">   
     <div class="alert alert-danger" id="addAPIError" style="display:none">

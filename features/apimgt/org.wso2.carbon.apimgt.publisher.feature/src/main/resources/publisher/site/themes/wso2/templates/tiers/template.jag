@@ -4,11 +4,11 @@
 		var tierPermissions = outputs.tierPermissions;
 	%>
 	<div id="tiers">
-	    <div class="page-header">
-                 <h2><%=i18n.localize("tierPermissions")%></h2>
-            </div>
-		
-        <div class = "col-sm-12">
+	<div class="page-header">
+		<h2><%=i18n.localize("tierPermissions")%></h2>
+	</div>
+
+	<div class = "col-sm-12">
         		<table class="table table-striped table-hover table-bordered display data-table">
         			<thead>
         				<tr>
