@@ -8095,7 +8095,7 @@ public class ApiMgtDAO {
             String sqlAddQuery = SQLConstants.INSERT_POLICY_SQL;
 
             // Adding data to the AM_POLICY  table
-            psPolicy = conn.prepareStatement(sqlAddQuery);
+            psPolicy = conn.prepareStatement(sqlAddQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             psPolicy.setString(1, policy.getPolicyName());
             psPolicy.setInt(2, policy.getTenantId());
             psPolicy.setString(3, policy.getUserLevel());
@@ -8170,7 +8170,7 @@ public class ApiMgtDAO {
             String sqlAddQuery = SQLConstants.INSERT_CONDITION_SQL;
 
             // Adding data to the AM_CONDITION table
-            psCondition = conn.prepareStatement(sqlAddQuery);
+            psCondition = conn.prepareStatement(sqlAddQuery, PreparedStatement.RETURN_GENERATED_KEYS);
             psCondition.setInt(1, policyID);
 
             List<Condition> conditionList = pipeline.getConditions();
