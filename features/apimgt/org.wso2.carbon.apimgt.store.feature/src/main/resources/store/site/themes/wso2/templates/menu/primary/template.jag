@@ -1,0 +1,83 @@
+<% jagg.template("menu/primary", function(inputs, outputs, jagg) { 
+  var tenant = jagg.getTenantDomain();
+%>
+
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top navbar-inverse">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="<%=jagg.urlTenanted("/site/pages/index.jag")%>">API Store</a>
+  </div>
+  <div id="navbar" class="collapse navbar-collapse">
+  <% if(outputs.tenantDomains==null || outputs.tenantDomains.indexOf(tenant) > -1 ){%>  
+    <ul class="nav navbar-nav long-navbar">
+      <% var i, link, links = outputs.links, length = links.length;
+       for(i = 0; i < length; i++) {
+       link = links[i];
+       if(link.title=='Forum' && (outputs.tenantDomains && outputs.tenantDomains.indexOf(tenant) > -1 && tenant !="carbon.super" ) ){ }else{
+       %>
+       <li <%=(link.active ? 'class="active"' : '')%>>
+       <a title="<%=link.tooltip%>" href="<%=link.url%>"<%=(link.classes ? ' class="' + link.classes + '"' : "")%>>
+       <i class="<%=link.classIcon%>"></i>
+       <%=link.title%>
+       </a>
+       </li>
+            <% } }%>      
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-line-chart"></i> Statistics<span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=perAppAPICount")%>" ><%=i18n.localize("apiUsage")%></a>
+          </li>
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=topUsers")%>" ><%=i18n.localize("topUsersDropDown")%></a>
+          </li>
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=apiCallType")%>" ><%=i18n.localize("callType")%></a>
+          </li>
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=faultCount")%>" ><%=i18n.localize("faultyInvocationTitle")%></a>
+          </li>
+        </ul>
+      </li>      
+    </ul>
+    <ul class="nav navbar-nav short-navbar">
+      <% var i, link, links = outputs.links, length = links.length;
+       for(i = 0; i < length; i++) {
+       link = links[i];
+       if(link.title=='Forum' && (outputs.tenantDomains && outputs.tenantDomains.indexOf(tenant) > -1 && tenant !="carbon.super" ) ){ }else{
+       %>
+       <li <%=(link.active ? 'class="active"' : '')%>>
+       <a title="<%=link.tooltip%>" href="<%=link.url%>"<%=(link.classes ? ' class="' + link.classes + '"' : "")%>>
+       <i class="<%=link.classIcon%>"></i>
+       </a>
+       </li>
+            <% } }%>      
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-line-chart"></i><span class="caret"></span></a>
+        <ul class="dropdown-menu" role="menu">
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=perAppAPICount")%>" ><%=i18n.localize("apiUsage")%></a>
+          </li>
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=topUsers")%>" ><%=i18n.localize("topUsersDropDown")%></a>
+          </li>
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=apiCallType")%>" ><%=i18n.localize("callType")%></a>
+          </li>
+          <li>
+            <a href="<%=jagg.urlTenanted("/site/pages/statistics.jag?stat=faultCount")%>" ><%=i18n.localize("faultyInvocationTitle")%></a>
+          </li>
+        </ul>
+      </li>      
+    </ul>    
+    <% jagg.includeBlock("user/login", null); %>
+  <%}%>         
+  </div><!--/.nav-collapse -->
+</nav>
+<% }); %>
