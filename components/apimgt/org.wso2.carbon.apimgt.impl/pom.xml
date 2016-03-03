@@ -166,7 +166,7 @@
             <artifactId>org.wso2.carbon.governance.lcm</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger.wso2</groupId>
+            <groupId>io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
             <version>2.1.5</version>
         </dependency>

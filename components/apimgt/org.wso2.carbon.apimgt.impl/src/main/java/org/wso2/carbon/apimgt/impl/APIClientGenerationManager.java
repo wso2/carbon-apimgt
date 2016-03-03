@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -35,9 +36,6 @@ import java.io.IOException;
 import io.swagger.codegen.config.CodegenConfigurator;
 import io.swagger.codegen.ClientOptInput;
 import io.swagger.codegen.DefaultGenerator;
-import java.io.InterruptedIOException;
-
-
 
 /*
  * This class is used to generate sdks for subscribed APIs
@@ -58,19 +56,28 @@ public class APIClientGenerationManager {
         currentSubscriber = apiMgtDAO.getSubscriber(userName);
         apiSet = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName , groupId);
         File spec = null;
-        String[] commandsToGen =  new String[4];
-        String[] commandsToZip =  new String[3];
-        commandsToGen[0] = "sh";
-        commandsToGen[1] = "resources/swaggerCodegen/generate.sh";
-        commandsToZip[0] = "sh";
-        commandsToZip[1] = "resources/swaggerCodegen/toZip.sh";
+        String apiName;
+        String apiVersion;
+        String specLocation = "resources/swaggerCodegen/swagger.json";
+        String clientOutPutDir;
+        String sourceToZip;
+        String zipName;
+        ZIPUtils zipUtils = new ZIPUtils();
+        File tempFolder = new File("resources/swaggerCodegen");
+        if(!tempFolder.exists()){
+            tempFolder.mkdir();
+        }else{
+            FileUtils.deleteDirectory(tempFolder);
+            tempFolder.mkdir();
+        }
+
         for (Iterator<SubscribedAPI> apiIterator = apiSet.iterator(); apiIterator.hasNext(); ) {
             SubscribedAPI subscribedAPI = apiIterator.next();
             resourcePath = APIUtil.getSwagger20DefinitionFilePath(subscribedAPI.getApiId().getApiName(),
                     subscribedAPI.getApiId().getVersion(), subscribedAPI.getApiId().getProviderName());
             if (consumer.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
                 swagger = consumer.definitionFromSwagger20.getAPIDefinition(subscribedAPI.getApiId(), consumer.registry);
-                spec = new File("resources/swaggerCodegen/swagger.json");
+                spec = new File(specLocation);
                 if (!spec.exists()) {
                     spec.createNewFile();
                 }
@@ -78,36 +85,38 @@ public class APIClientGenerationManager {
                 BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
                 bufferedWriter.write(swagger);
                 bufferedWriter.close();
-                commandsToGen[2] = subscribedAPI.getApiId().getApiName();
-                commandsToGen[3] = appName;
-                processBuilder = new ProcessBuilder(commandsToGen);
-                processShellCommands = processBuilder.start();     // Start the process.
-                processShellCommands.waitFor();
+                apiName = subscribedAPI.getApiId().getApiName();
+                apiVersion = subscribedAPI.getApiId().getVersion();
+                clientOutPutDir = "resources/swaggerCodegen/"+appName+"/"+apiName+"/"+apiVersion;
+                generateClient(apiName,apiVersion,specLocation,sdkLanguage,clientOutPutDir);
             }
 
 
         }
-        commandsToZip[2] = appName;
-        processBuilder = new ProcessBuilder(commandsToZip);
-        processShellCommands = processBuilder.start();     // Start the process.
-        processShellCommands.waitFor();
-        generateClient();
+        sourceToZip = "resources/swaggerCodegen/"+appName;
+        zipName = "resources/swaggerCodegen/"+appName+".zip";
+        try {
+            zipUtils.zipDir(sourceToZip,zipName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return appName;
     }
 
-    private void generateClient(){
+    private void generateClient(String apiName, String apiVersion,String spec,String lang,String outPutDir){
         try {
             CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
             codegenConfigurator.setGroupId("org.wso2");
-            codegenConfigurator.setArtifactId("org.wso2.client");
-            codegenConfigurator.setInputSpec("http://petstore.swagger.io/v2/swagger.json");
-            codegenConfigurator.setLang("java");
-            codegenConfigurator.setOutputDir("client");
+            codegenConfigurator.setArtifactId("org.wso2.client."+apiName+"."+apiVersion.replace(".",""));
+            codegenConfigurator.setModelPackage("org.wso2.client.model."+apiName+"."+apiVersion.replace(".",""));
+            codegenConfigurator.setApiPackage("org.wso2.client.api."+apiName+"."+apiVersion.replace(".",""));
+            codegenConfigurator.setInputSpec(spec);
+            codegenConfigurator.setLang("io.swagger.codegen.languages.JavaClientCodegen");
+            codegenConfigurator.setOutputDir(outPutDir);
             final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
             new DefaultGenerator().opts(clientOptInput).generate();
-            System.out.println("done");
         } catch (Throwable e) {
-            System.out.println(e);
+           e.printStackTrace();
         }
     }
 }

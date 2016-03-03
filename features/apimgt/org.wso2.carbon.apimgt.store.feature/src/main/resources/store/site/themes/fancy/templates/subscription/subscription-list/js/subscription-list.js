@@ -400,6 +400,7 @@ var regenerate=function(appName,keyType,i,btn,div,clientId,clientSecret) {
     $(btn).parent().prev().show();
     var elem = $(this);
     var divId;
+
     var oldAccessToken;
     var inputId;
     var authorizedDomainsTemp;
