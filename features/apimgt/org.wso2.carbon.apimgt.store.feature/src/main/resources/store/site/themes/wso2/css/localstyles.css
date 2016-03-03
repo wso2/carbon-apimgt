@@ -1,0 +1,434 @@
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
+.page-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+  z-index: 1010;
+  padding-top: 10px;
+  display: none;
+}
+
+.inside-footer{
+  display: block;
+}
+
+
+/* Custom page CSS
+-------------------------------------------------- */
+/* Not required for template or sticky footer method. */
+
+body > .container {
+  padding: 60px 15px 0;
+}
+.container .text-muted {
+  margin: 20px 0;
+}
+
+.page-footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+code {
+  font-size: 80%;
+}
+
+
+/*!
+ * Start Bootstrap - Simple Sidebar HTML Template (http://startbootstrap.com)
+ * Code licensed under the Apache License v2.0.
+ * For details, see http://www.apache.org/licenses/LICENSE-2.0.
+ */
+
+/* Toggle Styles */
+
+#wrapper {
+    padding-left: 0;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+    padding-top: 50px;
+}
+
+#wrapper.no-left{
+  padding-left: 0px !important;
+}
+
+#wrapper.toggled {
+    padding-left: 250px;
+}
+
+#sidebar-wrapper {
+    z-index: 1000;
+    position: fixed;
+    left: 250px;
+    width: 0;
+    height: 100%;
+    margin-left: -250px;
+    overflow-y: auto;
+    background: #fff;
+    padding: 0;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    width: 250px;
+}
+
+#page-content-wrapper {
+    width: 100%;
+    position: absolute;
+    padding: 5px 15px 15px 15px;
+}
+
+#wrapper.toggled #page-content-wrapper {
+    position: absolute;
+    margin-right: -250px;
+}
+
+/* Sidebar Styles */
+
+.sidebar-nav {
+    position: absolute;
+    top: 0;
+    width: 250px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar-nav li {
+    text-indent: 20px;
+    line-height: 15px;
+}
+
+.sidebar-nav .nav-header{
+    display: block;
+    font-weight: bolder;
+    padding: 10px 0px;  
+}
+
+.sidebar-nav li a {
+    display: block;
+    text-decoration: none;
+    color: #999999;
+}
+
+.sidebar-nav li a:hover {
+    text-decoration: none;
+    color: #fff;
+    background: rgba(255,255,255,0.2);
+}
+
+.sidebar-nav li a:active,
+.sidebar-nav li a:focus {
+    text-decoration: none;
+}
+
+.sidebar-nav > .sidebar-brand {
+    height: 65px;
+    font-size: 18px;
+    line-height: 60px;
+}
+
+.sidebar-nav > .sidebar-brand a {
+    color: #999999;
+}
+
+.sidebar-nav > .sidebar-brand a:hover {
+    color: #fff;
+    background: none;
+}
+
+@media(min-width:1200px) {
+    #wrapper {
+        padding-left: 300px;
+    }
+
+    #wrapper.toggled {
+        padding-left: 0;
+    }
+
+    #sidebar-wrapper {
+        width: 300px;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        width: 0;
+    }
+
+    .page-footer{
+      display: block;
+    }  
+
+    .inside-footer{
+      display: none;
+    }      
+
+    #page-content-wrapper {
+        padding: 5px 20px 20px 20px;
+        position: relative;
+    }
+
+    #wrapper.toggled #page-content-wrapper {
+        position: relative;
+        margin-right: 0;
+    }
+}
+
+
+/** Bootstrap overides **/
+.breadcrumb{
+  margin: 0px;
+  padding: 0px;
+  background: #FFF;
+}
+
+.page-header{
+  margin-top: 20px;
+}
+
+.page-header h2{
+  margin-bottom: 0px;
+}
+
+
+/** thumbnail list */
+.thumbnails{ display: inline; list-style: none; padding-left: 0px;}
+.thumbnails li{ list-style: none; width:200px; float: left; margin-right: 25px}
+.thumbnails li img { width: 150px; height: 150px;}
+
+.form-search{ margin-bottom: 25px}
+
+
+#recently-added .panel-body {
+  padding: 0px;
+}
+
+#recently-added .panel-body hr{
+  margin: 0px;
+}
+
+#recently-added .panel-body .row{
+  padding: 5px 10px;
+}
+
+#sidebar-wrapper .panel{
+  margin: 20px 20px 10px 10px;
+}
+
+
+#login-link { cursor: pointer;}
+
+.api-search { margin-top: 15px; line-height: 30px;}
+
+.help-text { color:gray; }
+
+.help-popover-content { font-size: 0.9em }
+
+.api-details-table { margin-bottom: 15px; margin-top: 15px;}
+.api-details-table td table { margin: 0px 20px; }
+.api-details-table td table td{ padding: 0 0 5px 0; }
+.api-details-table td table th{ padding: 0 0 5px 0; min-width: 100px}
+
+
+.tab-content { border-width: 0px 1px 1px 1px; border-style: solid; border-color:#ddd; padding: 20px; 
+  min-height: 300px }
+
+
+/* Nav Bar */
+.long-navbar { display: none;}
+@media(min-width:1200px){
+  .short-navbar { display: none;}
+  .long-navbar { display: block;}
+}
+
+
+/* API Overview Tab */
+.share-select { margin: 0;}
+.share-select li.active a{ background: #f5f5f5; border-color: #ddd; color: #777}
+.share-select li.active a:active{ background: #f5f5f5; border-color: #ddd; color: #777}
+.social_links img { border: 0 none; display: inline; padding: 5px; width: 50px; }
+#store-redirect-link { padding: 40px; text-align: center; }
+input#access_token {margin-right: 20px}
+.average-rating {
+    background: transparent url("../images/bigstar.png") no-repeat scroll 0 0;
+    font-size: 18px;
+    font-weight: bold;
+    height: 64px;
+    line-height: 70px;
+    padding-left: 20px;
+    width: 70px;
+}
+
+/* Customize swagger UI */
+#swagger-ui-container {max-width: 100%;}
+#swagger-ui-container .container{ width: 100% !important;padding: 0 !important; }
+#swagger-ui-container #api_info { display: none;}
+#resources_container ul { padding-left: 0px;}
+
+/* Subscription page styles */
+.copybtn-wrapper { float: right;}
+.token { padding: 5px; margin-bottom: 5px;}
+.curl-copyinfo{ display: none;}
+.curl-testurlp-wrapper { display: none; background: #FFFFCC; padding: 5px 0px; margin: 0px; font-size: 1.1em;}
+.panel-title .collapsed .glyphicon-chevron-up { display: none;}
+.panel-title .glyphicon-chevron-down { display: none;}
+.panel-title .collapsed .glyphicon-chevron-down { display: inline-block;}
+.subscribed-api-name { font-size: 1.1em; font-weight: bold;}
+.sub-title .collapsed .glyphicon-chevron-up { display: none;}
+.sub-title .glyphicon-chevron-down { display: none;}
+.sub-title .collapsed .glyphicon-chevron-down { display: inline-block;}
+#subscription-list dl{ margin: 10px;}
+
+/* Brand */
+.navbar-brand { background: url('../images/wso2.svg'); background-size: 75px ; background-repeat: no-repeat; 
+padding-left: 80px; margin-left: 10px; font-size: 1.8em; background-position: 0px 5px; }
+
+
+/* Rating color */
+.rating-symbol { color: orange; cursor: pointer;}
+.glyphicon-star-empty { color: #aaa;}
+a.remove_rating{ color: gray; cursor: pointer;}
+a.remove_rating:hover{ color: #C00}
+
+/* Required Astrix color */
+.requiredAstrix{ color: red; }
+
+/* forum styles */
+#forum_add_reply_button, #topic-add-actions, .edit-topic-form-actions, .forum-reply-actions{
+    margin-top : 10px;
+}
+
+/* bold Forum Subject */
+#subject, #forum_topic_subject_edit_input{
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+/*pointer for forum paginator*/
+#forum_topics_list_paginator{
+    cursor:pointer;
+}
+
+/* word wrap */
+.wrap-text{
+    word-wrap:break-word;
+    word-break:break-all;
+}
+
+/* pointer to show more Details in sign-up */
+.moreDetails{
+    cursor:pointer
+}
+
+/* API List styling */
+.thumbnail .caption .api-name{ font-weight: bold; display: block; width: 100%; font-size: 1.2em;}
+.thumbnail .caption .api-version{ font-weight: bold; display: block; width: 100%;}
+.api-count-display{ color:#747474; font-size:15px;padding:10px 0px 10px }
+.api-count-display span{ font-size:16px; font-weight:bold; }
+
+#tenant_container {
+    margin:0px;
+}
+#tenant_container li{
+    display: inline-block;
+    list-style:none;
+}
+.tenent-thumb {
+    margin: 0.79% 0.79% !important;
+    /* re-declare  thumb border styles since it is overidden by styles-layout */
+    border: 1px solid #DDDDDD;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.055);
+    display: block;
+    line-height: 20px;
+    padding: 8px 4px 4px 4px;
+    transition: all 0.2s ease-in-out 0s;
+}
+
+.tenent-thumb h3{
+    margin:0px !important;
+}
+
+.fade-out{     
+    display: block;
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;}
+
+.fade-out:after {
+    background: rgba(0, 0, 0, 0) linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.9) 50%) repeat scroll 0 0;
+    bottom: 0;
+    content: "";
+    height: 26px;
+    position: absolute;
+    right: 0;
+    text-align: right;
+    width: 30%;
+  }
+
+
+/* Utility Components Styles */
+
+.help-popup { cursor: pointer; margin-top: 10px;}
+.margin-top { margin-top: 10px;}
+/* Stat pages Styles */
+#date-range{
+    padding-right:30px;
+    width:300px;
+    height:100%;
+    display:inline-block;
+}
+
+#today-btn,#hour-btn,#week-btn, #month-btn{
+    width:60px;
+}
+
+.center-wrapper{
+    margin:0 auto;
+	margin-left:auto;
+	margin-right:auto;
+	align:center;
+	text-align:center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+#rangeSliderWrapper{
+    z-index: 3;
+}
+
+.no-data-heading{
+    color : #7e7e7e;
+}
+
+#subsChart>svg{
+    width:300px !important;
+    height:240px !important;
+    display:inline-block;
+}
+
+.blue{
+    color:#337ab7;
+}
+
+/* aligning api listing page pagination */
+#apiListingPagination{
+    margin-left:-15px;
+}
