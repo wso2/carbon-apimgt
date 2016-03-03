@@ -5,7 +5,6 @@
 */
 (function ( $ ) {
 $.fn.generateBgcolor = function(options){
-	console.log("sss");
 
     var defaultPalette = [
     "#F44336","#D32F2F","#B71C1C","#E91E63","#F06292","#D81B60","#AD1457","#880E4F","#9C27B0","#BA68C8",
@@ -25,37 +24,31 @@ $.fn.generateBgcolor = function(options){
     var settings = $.extend({
         //defaults
        definite: true,
-       palette: defaultPalette,
+       palette: defaultPalette
     }, options );
 
     return this.each(function(){
 
         //traversal used inside iteration to avoid multiple plugin calls
-        var strAstName = $(this).next().children().children("h3").text(),
-            strAstType = $(this).next().children().children("span").text();
+        var strAstName = $(this).children().next().children(".api-name").text(),
 
         strAstName = strAstName.trim().split(" ");
-        strAstType = strAstType.trim().split(" ");
-        var catNameType = strAstName.concat(strAstType);
 
 
         try {
-            var firstChar = catNameType[0][0],
-                secondChar = catNameType[1][0],
-                thirdChar = catNameType[2][0];
+            var firstChar = strAstName[0][0];
+
         }
         catch(err) {
             //console.log(err.message);
             if(typeof firstChar === 'undefined'){firstChar = "";}
-            if(typeof secondChar === 'undefined'){secondChar = "";}
-            if(typeof thirdChar === 'undefined'){thirdChar = "";}
         }
 
 
         if(settings.definite){
         /*predefined set of random colors **var colorD = settings.palette[Math.floor(Math.random()*settings.palette.length)];***/
             //predefined set of indexed colors
-            var magicNumber = getNumberFromString(firstChar+secondChar+thirdChar) % settings.palette.length,
+            var magicNumber = getNumberFromString(firstChar) % settings.palette.length,
                 colorD = settings.palette[magicNumber];
             $(this).css('background', colorD);
         }else{
@@ -93,7 +86,6 @@ $.fn.generateBgcolor = function(options){
         }, options );
 
         var str = $(settings.nameElement).text();
-        console.log("ssss"+str);
         str = str.trim().split(" ");
         try {
             var firstChar = str[0].charAt(0);
