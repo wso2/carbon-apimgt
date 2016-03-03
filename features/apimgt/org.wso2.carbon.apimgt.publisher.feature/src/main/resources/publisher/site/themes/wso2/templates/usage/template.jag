@@ -4,9 +4,10 @@
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/d3.v3.js"))%>"></script>
 <script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("lib/nvd3/js/nv.d3.js"))%>"></script>
 
-
-<h3><%=i18n.localize("apiUsageByVersionTitle")%></h3>
-    <div id="apiUsageByVersionSpinner" class="center-wrapper">
+<div class="page-header">
+	<p class="lead"><%=i18n.localize("apiUsageByVersionTitle")%></p>
+</div>
+<div id="apiUsageByVersionSpinner" class="center-wrapper">
         <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
     </div>
     <div class="row">
@@ -30,8 +31,10 @@
     </div>
 
 
+<div class="page-header">
+	<p class="lead"><%=i18n.localize("apiSubscriptionsByVersionTitle")%></p>
+</div>
 
-<h3><%=i18n.localize("apiSubscriptionsByVersionTitle")%></h3>
     <div id="apiSubscriptionsByVersionSpinner" class="center-wrapper">
         <i id="icon-spinner" class="fa fa-spinner fa-pulse fa-4x"></i>
     </div>

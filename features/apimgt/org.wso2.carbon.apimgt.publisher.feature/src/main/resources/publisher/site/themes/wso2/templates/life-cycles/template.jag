@@ -135,7 +135,9 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
       </div>
       </form>
 
-<h4><%=i18n.localize("lifecycleHistory")%></h4><br/>
+<div class="page-header">
+		<h4 class="lead"><%=i18n.localize("lifecycleHistory")%></h4>
+	</div>
 <%if(lcs!=null){
         var length = lcs.length;
         if (length == 0) {

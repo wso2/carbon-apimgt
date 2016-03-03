@@ -17,7 +17,7 @@
 		</div>
 		
 	</li>
-	<%}else{%> <li><img id="apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="" /></li>
+	<%}else{%> <li><img class="apiThumb" src="<%=jagg.getRegistryPath(api.thumb)%>" alt="" /></li>
   <%}%>
   <li><a href="#" onclick="showTab('usersLink')"><i class="icon-user"></i>
       <span class="userCount">

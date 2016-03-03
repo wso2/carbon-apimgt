@@ -1,6 +1,6 @@
 <% jagg.template("stats/application-throttledcounts", function(inputs, outputs, jagg) { %>
 <div id="applicationThrottledCounts-stat-page" class="stat-page">
-    <div class="title-section"> <h2><%=i18n.localize("applicationThrottledCountsTitle")%></h2> </div>
+    <div class="page-header"> <h2><%=i18n.localize("applicationThrottledCountsTitle")%></h2> </div>
     <div class="col-md-12" style="margin-top :10px">
 
     <div class="form-group col-md-12">

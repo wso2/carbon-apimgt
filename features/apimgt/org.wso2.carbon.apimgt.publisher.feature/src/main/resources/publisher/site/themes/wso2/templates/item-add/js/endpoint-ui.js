@@ -539,7 +539,9 @@ $(document).ready(function () {
 
     $( "#endpoint_form" ).delegate( ".advance_endpoint_config", "click", function() {
         $('form#advance_form').html('');
-        APP.form.advance_endpoint_config.value = jQuery.parseJSON($(this).attr('ep-config-data'));
+        if ($(this).attr('ep-config-data')) {
+        	APP.form.advance_endpoint_config.value = jQuery.parseJSON($(this).attr('ep-config-data'));
+        }
         $('form#advance_form').jsonForm(APP.form.advance_endpoint_config);
         $('.error_codes_selection').multiselect({
             buttonText: function(options, select) {
