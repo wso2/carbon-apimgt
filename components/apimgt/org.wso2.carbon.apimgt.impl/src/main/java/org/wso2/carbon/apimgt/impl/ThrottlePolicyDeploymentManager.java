@@ -29,13 +29,15 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.event.throttle.core.ThrottlerService;
+import org.wso2.carbon.event.throttle.core.exception.ThrottleConfigurationException;
 
 public class ThrottlePolicyDeploymentManager {
     private static final Log log = LogFactory.getLog(ThrottlePolicyDeploymentManager.class);
     private static ThrottlePolicyDeploymentManager instance;
+    private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     private ThrottlePolicyDeploymentManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -62,9 +64,19 @@ public class ThrottlePolicyDeploymentManager {
                     .getText();
             String decisionQuery = element.getFirstChildWithName(new QName(APIConstants.DECISION_QUERY_ELEM))
                     .getText();
+            String fileName = element.getAttributeValue(new QName(APIConstants.POLICY_NAME_ELEM));
             //deploy to cep
+            String policyQuery = elegibilityQuery + "\n" + decisionQuery;
+            if(log.isDebugEnabled()){
+                log.debug("deploy policy to global event processor : \n" + policyQuery );
+            }
+            throttler.deployGlobalThrottlingPolicy(fileName, policyQuery);
         } catch (XMLStreamException e) {
             String msg = "Error while parsing the policy to get the eligibility query: ";
+            log.error(msg , e);
+            throw new APIManagementException(msg);
+        } catch (ThrottleConfigurationException e) {
+            String msg = "Error while deploying policy to global event processor: ";
             log.error(msg , e);
             throw new APIManagementException(msg);
         }

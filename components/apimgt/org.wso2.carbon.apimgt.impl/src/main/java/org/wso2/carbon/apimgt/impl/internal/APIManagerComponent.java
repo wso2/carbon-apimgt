@@ -46,6 +46,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.context.RegistryType;
+import org.wso2.carbon.event.throttle.core.ThrottlerService;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
@@ -109,6 +110,9 @@ import java.util.List;
  * @scr.reference name="bam.service.data.publisher"
  * interface="org.wso2.carbon.bam.service.data.publisher.services.ServiceDataPublisherAdmin" cardinality="0..1"
  * policy="dynamic" bind="setDataPublisherService" unbind="unsetDataPublisherService"
+ * @scr.reference name="throttle.event.core.service"
+ * interface="org.wso2.carbon.event.throttle.core.ThrottlerService" cardinality="1..1"
+ * policy="dynamic" bind="setThrottlerService" unbind="unsetThrottlerService"
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -558,6 +562,19 @@ public class APIManagerComponent {
 
     public static TenantRegistryLoader getTenantRegistryLoader(){
         return tenantRegistryLoader;
+    }
+    protected void setThrottlerService(ThrottlerService throttlerService) {
+        if (log.isDebugEnabled()) {
+            log.debug("API manager configuration service bound to the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setThrottler(throttlerService);
+    }
+
+    protected void unsetThrottlerService(ThrottlerService throttlerService) {
+        if (log.isDebugEnabled()) {
+            log.debug("API manager configuration service unbound from the API handlers");
+        }
+        ServiceReferenceHolder.getInstance().setThrottler(null);
     }
 
 
