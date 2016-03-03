@@ -8092,50 +8092,42 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             PreparedStatement psPolicy = null;
             ResultSet rs = null;
+            String sqlAddQuery = SQLConstants.INSERT_POLICY_SQL;
 
-            try {
-                String sqlAddQuery = SQLConstants.INSERT_POLICY_SQL;
-                // Adding data to the AM_POLICY  table
-                psPolicy = conn.prepareStatement(sqlAddQuery);
-                psPolicy.setString(1, policy.getPolicyName());
-                psPolicy.setInt(2, policy.getTenantId());
-                psPolicy.setString(3, policy.getUserLevel());
-                psPolicy.setString(4, policy.getDescription());
-                psPolicy.setString(5, policy.getDefaultQuotaPolicy().getType());
+            // Adding data to the AM_POLICY  table
+            psPolicy = conn.prepareStatement(sqlAddQuery);
+            psPolicy.setString(1, policy.getPolicyName());
+            psPolicy.setInt(2, policy.getTenantId());
+            psPolicy.setString(3, policy.getUserLevel());
+            psPolicy.setString(4, policy.getDescription());
+            psPolicy.setString(5, policy.getDefaultQuotaPolicy().getType());
 
-                if( PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())){
-                    psPolicy.setLong(6, ((RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+            if (PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+                psPolicy.setLong(6, ((RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
+            } else if (PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())) {
+                if ("KB".equals(((BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())) {
+                    psPolicy.setLong(6, ((BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit()).getDataAmount());
+                } else if ("MB".equals(((BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())) {
+                    psPolicy.setLong(6,
+                            ((BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit()).getDataAmount() * 1024);
+                } else if ("GB".equals(((BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())) {
+                    psPolicy.setLong(6,
+                            ((BandwidthLimit) policy.getDefaultQuotaPolicy().getLimit()).getDataAmount() * 1024 * 1024);
                 }
-                //if Bandwidth type, convert to kilobytes
-                else if(PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())){
-                    if("KB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
-                        psPolicy.setLong(6, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount());
-                    }
-                    else if("MB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
-                        psPolicy.setLong(6, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount()*1024);
-                    }
-                    else if("GB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
-                        psPolicy.setLong(6, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount() * 1024*1024);
-                    }
-                }
+            }
 
-                psPolicy.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
-                psPolicy.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
-                psPolicy.executeUpdate();
-                rs= psPolicy.getGeneratedKeys(); //get the inserted POLICY_ID (auto incremented value)
-                while (rs.next()) {
-                    int policyID = rs.getInt(1);
-                    List<Pipeline> pipelines = policy.getPipelines();
-                    if(pipelines != null){
-                        for (int i = 0; i < pipelines.size(); i++) { //add each pipeline data to AM_CONDITION table
-                            addCondition(pipelines.get(i), policyID, conn);
-                        }
-                    }                    
+            psPolicy.setLong(7, policy.getDefaultQuotaPolicy().getLimit().getUnitTime());
+            psPolicy.setString(8, policy.getDefaultQuotaPolicy().getLimit().getTimeUnit());
+            psPolicy.executeUpdate();
+            rs = psPolicy.getGeneratedKeys(); //get the inserted POLICY_ID (auto incremented value)
+            while (rs.next()) {
+                int policyID = rs.getInt(1);
+                List<Pipeline> pipelines = policy.getPipelines();
+                if (pipelines != null) {
+                    for (int i = 0; i < pipelines.size(); i++) { //add each pipeline data to AM_CONDITION table
+                        addCondition(pipelines.get(i), policyID, conn);
+                    }
                 }
-            } catch (SQLException e) {
-                handleException("Failed to add Policy", e);
-            } finally {
-                APIMgtDBUtil.closeAllConnections(psPolicy, null, rs);
             }
 
             conn.commit();
