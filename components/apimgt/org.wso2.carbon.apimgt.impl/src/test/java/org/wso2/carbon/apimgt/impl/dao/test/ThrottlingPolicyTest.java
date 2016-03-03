@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dao.test;
 
 import junit.framework.TestCase;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
@@ -45,12 +46,16 @@ public class ThrottlingPolicyTest extends TestCase {
         apiMgtDAO = ApiMgtDAO.getInstance();
     }
 
-    public void testInsertPolicy() throws Exception {
+    public void testInsertPolicy() throws APIManagementException {
         apiMgtDAO.addThrottlingPolicy(getPolicyAPILevelPerUser());
     }
 
-    private APIPolicy getPolicyAPILevelPerUser(){
-        APIPolicy policy = new APIPolicy("Silver");
+    public void testDeltePolicy() throws APIManagementException {
+        apiMgtDAO.removeThrottlingPolicy("app", "Bronze", "admin");
+    }
+
+    private Policy getPolicyAPILevelPerUser(){
+        Policy policy = new Policy("Silver");
 
         policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");
