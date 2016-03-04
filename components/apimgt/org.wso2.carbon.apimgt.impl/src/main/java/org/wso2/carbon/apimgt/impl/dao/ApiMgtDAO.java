@@ -8099,18 +8099,18 @@ public class ApiMgtDAO {
                 psPolicy.setString(5, policy.getDescription());
                 psPolicy.setString(6, policy.getDefaultQuotaPolicy().getType());
 
-                if(policy.getDefaultQuotaPolicy().getType() == PolicyConstants.REQUEST_COUNT_TYPE){
+                if( PolicyConstants.REQUEST_COUNT_TYPE.equals(policy.getDefaultQuotaPolicy().getType())){
                     psPolicy.setLong(7, ((RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit()).getRequestCount());
                 }
                 //if Bandwidth type, convert to kilobytes
-                else if(policy.getDefaultQuotaPolicy().getType() == PolicyConstants.BANDWIDTH_TYPE){
-                    if(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit()=="KB"){
+                else if(PolicyConstants.BANDWIDTH_TYPE.equals(policy.getDefaultQuotaPolicy().getType())){
+                    if("KB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
                         psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount());
                     }
-                    else if(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit()=="MB"){
+                    else if("MB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
                         psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount()*1024);
                     }
-                    else if(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit()== "GB"){
+                    else if("GB".equals(((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataUnit())){
                         psPolicy.setLong(7, ((BandwidthLimit)policy.getDefaultQuotaPolicy().getLimit()).getDataAmount() * 1024*1024);
                     }
                 }
@@ -8170,25 +8170,28 @@ public class ApiMgtDAO {
             psCondition.setInt(1, policyID);
 
             List<Condition> conditionList= pipeline.getConditions();
-            for(int i=0; i < conditionList.size(); i++ ){
-                if(conditionList.get(i).getType() == PolicyConstants.IP_RANGE_TYPE){
-                    startingIP = ((IPRangeCondition) conditionList.get(i)).getStartingIP();
-                    endingIP = ((IPRangeCondition)conditionList.get(i)).getEndingIP();
-                }
-                else if (conditionList.get(i).getType() == PolicyConstants.IP_SPECIFIC_TYPE){
-                    specificIP = ((IPCondition) conditionList.get(i)).getSpecificIP();
-                }
-                else if (conditionList.get(i).getType() == PolicyConstants.HTTP_VERB_TYPE){
-                    httpVerb = ((HTTPVerbCondition) conditionList.get(i)).getHttpVerb();
-                }
-                if(conditionList.get(i).getType() == PolicyConstants.DATE_RANGE_TYPE){
-                    startingDate = Date.valueOf(((DateRangeCondition) conditionList.get(i)).getStartingDate());
-                    endingDate = Date.valueOf(((DateRangeCondition)conditionList.get(i)).getEndingDate());
-                }
-                else if (conditionList.get(i).getType() == PolicyConstants.DATE_SPECIFIC_TYPE){
-                    specificDate = Date.valueOf(((DateCondition) conditionList.get(i)).getSpecificDate());
+            if(conditionList != null){
+                for(int i=0; i < conditionList.size(); i++ ){
+                    if(PolicyConstants.IP_RANGE_TYPE.equals(conditionList.get(i).getType())){
+                        startingIP = ((IPRangeCondition) conditionList.get(i)).getStartingIP();
+                        endingIP = ((IPRangeCondition)conditionList.get(i)).getEndingIP();
+                    }
+                    else if (PolicyConstants.IP_SPECIFIC_TYPE.equals(conditionList.get(i).getType())){
+                        specificIP = ((IPCondition) conditionList.get(i)).getSpecificIP();
+                    }
+                    else if (PolicyConstants.HTTP_VERB_TYPE.equals(conditionList.get(i).getType())){
+                        httpVerb = ((HTTPVerbCondition) conditionList.get(i)).getHttpVerb();
+                    }
+                    if(PolicyConstants.DATE_RANGE_TYPE.equals(conditionList.get(i).getType())){
+                        startingDate = Date.valueOf(((DateRangeCondition) conditionList.get(i)).getStartingDate());
+                        endingDate = Date.valueOf(((DateRangeCondition)conditionList.get(i)).getEndingDate());
+                    }
+                    else if (PolicyConstants.DATE_SPECIFIC_TYPE.equals(conditionList.get(i).getType())){
+                        specificDate = Date.valueOf(((DateCondition) conditionList.get(i)).getSpecificDate());
+                    }
                 }
             }
+   
             psCondition.setString(2, startingIP);
             psCondition.setString(3, endingIP);
             psCondition.setString(4, specificIP);
@@ -8198,18 +8201,19 @@ public class ApiMgtDAO {
             psCondition.setDate(8, specificDate);
             psCondition.setString(9, pipeline.getQuotaPolicy().getType());
 
-            if(pipeline.getQuotaPolicy().getType() == PolicyConstants.REQUEST_COUNT_TYPE){
+            if(PolicyConstants.REQUEST_COUNT_TYPE.equals(pipeline.getQuotaPolicy().getType())){
                 psCondition.setLong(10, ((RequestCountLimit) pipeline.getQuotaPolicy().getLimit()).getRequestCount());
             }
             //if Bandwidth type, convert to kilobytes
-            else if(pipeline.getQuotaPolicy().getType() == PolicyConstants.BANDWIDTH_TYPE){
-                if(((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataUnit()=="KB"){
+            else if(PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())){
+                String dataunite = ((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataUnit();
+                if("KB".equals(dataunite)){
                     psCondition.setLong(10, ((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataAmount());
                 }
-                else if(((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataUnit()=="MB"){
+                else if("MB".equals(dataunite)){
                     psCondition.setLong(10, ((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataAmount()*1024);
                 }
-                else if(((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataUnit()== "GB"){
+                else if("GB".equals(dataunite)){
                     psCondition.setLong(10, ((BandwidthLimit)pipeline.getQuotaPolicy().getLimit()).getDataAmount() * 1024*1024);
                 }
             }
@@ -8224,13 +8228,14 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 int conditionID = rs.getInt(1);//get the inserted CONDITION_ID (auto incremented value)
                 for(int i=0; i < conditionList.size(); i++ ) {
-                    if (conditionList.get(i).getType() == PolicyConstants.HEADER_TYPE) {
+                    String type = conditionList.get(i).getType();
+                    if (PolicyConstants.HEADER_TYPE.equals(type)) {
                         addHeaderCondition((HeaderCondition) conditionList.get(i),conditionID,conn);
                     }
-                    else if (conditionList.get(i).getType() == PolicyConstants.QUERY_PARAMETER_TYPE) {
+                    else if (PolicyConstants.QUERY_PARAMETER_TYPE.equals(type)) {
                         addQueryParameterCondition((QueryParameterCondition) conditionList.get(i), conditionID, conn);
                     }
-                    else if (conditionList.get(i).getType() == PolicyConstants.JWT_CLAIMS_TYPE) {
+                    else if (PolicyConstants.JWT_CLAIMS_TYPE.equals(type)) {
                         addJWTClaimsCondition((JWTClaimsCondition) conditionList.get(i), conditionID, conn);
                     }
                 }
