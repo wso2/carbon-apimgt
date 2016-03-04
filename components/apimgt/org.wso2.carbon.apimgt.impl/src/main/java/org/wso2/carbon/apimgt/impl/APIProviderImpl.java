@@ -3685,38 +3685,4 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Policy[] policies = apiMgtDAO.getPolicies(level, username);
         return policies;
     }
-
-    /**
-     *
-     * @param content Content to be written to the file
-     * @param fileName  name of the file
-     */
-    public void writeToFile(String content, String fileName){
-        File file = new File(APIConstants.POLICY_FILE_FOLDER);      //WSO2Carbon_Home/repository/deployment/server/throttle-config
-        if (!file.exists()) {    //if directory doesn't exist, make onee
-            file.mkdir();
-        }
-        File writeFile = new File(APIConstants.POLICY_FILE_LOCATION + fileName);  //file folder+/
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(writeFile);
-            if (!writeFile.exists()) {
-                writeFile.createNewFile();
-            }
-            byte[] contentInBytes = content.getBytes();
-            fos.write(contentInBytes);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            log.error("Error occurred writing to " + fileName + ":", e);
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                log.error("Error occurred closing file output stream", e);
-            }
-        }
-    }
 }
