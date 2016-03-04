@@ -3654,8 +3654,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(msg);
         }
 
-    }    
+    }
 
+    /**
+     *
+     * @param ip ip address as a string
+     * @return ip address in long
+     */
     public long ipToLong(String ip) {
         long ipAddressinLong = 0;
         if (ip != null) {
@@ -3671,23 +3676,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return ipAddressinLong;
     }
 
-    public void appendPolicy(String eligibilityQuery, String decisionQuery, String tierName){
-
+    public String[] getPolicyNames(String username, String level) throws APIManagementException {
+        String[] policyNames = apiMgtDAO.getPolicyNames(level, username);
+        return policyNames;
     }
 
-    public String getCondition(Policy policy) {
-        return null;
-    }
-
-    public String[] getPolicyNames(String username, String level) throws APIManagementException{
-        String[] policyNamesAPI = apiMgtDAO.getPolicyNames(level, username);
-        return policyNamesAPI;
-    }
-
-    public Policy[] getPolicies(String username, String level) throws APIManagementException{
+    public Policy[] getPolicies(String username, String level) throws APIManagementException {
         Policy[] policies = apiMgtDAO.getPolicies(level, username);
         return policies;
     }
-
-    
 }
