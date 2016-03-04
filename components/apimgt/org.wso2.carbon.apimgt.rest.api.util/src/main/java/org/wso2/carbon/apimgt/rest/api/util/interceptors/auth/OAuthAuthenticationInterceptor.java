@@ -24,6 +24,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.WebAppAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl;
 
@@ -47,6 +48,12 @@ public class OAuthAuthenticationInterceptor extends AbstractPhaseInterceptor {
         super(Phase.PRE_INVOKE);
     }
     public void handleMessage(Message inMessage) {
+        //by-passes the interceptor if user calls an anonymous api
+        if (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
+                !Boolean.parseBoolean(RestApiConstants.AUTHENTICATION_REQUIRED)) {
+            return;
+        }
+
         if(handleRequest(inMessage, null)){
             /*String requestedTenant = ((ArrayList) ((TreeMap) (inMessage.get(Message.PROTOCOL_HEADERS))).get("X-WSO2_Tenant")).get(0).toString();
             if(requestedTenant!=null){
