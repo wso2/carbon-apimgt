@@ -63,11 +63,12 @@ public class IPRangeCondition extends Condition {
     public String getCondition() {
         long ipStart = ipToLong(getStartingIP());
         long ipEnd = ipToLong(getEndingIP());
-        String condition = PolicyConstants.OPEN_BRACKET+ipStart+PolicyConstants.LESS_THAN+ getQueryAttributeName() +
-                PolicyConstants.AND+ipEnd+PolicyConstants.GREATER_THAN+ getQueryAttributeName()+
-                PolicyConstants.CLOSE_BRACKET;    //"("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
-        if(isInvertCondition()){
-            condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
+        String condition = PolicyConstants.OPEN_BRACKET + PolicyConstants.QUOTE + ipStart + PolicyConstants.QUOTE
+                + PolicyConstants.LESS_THAN + getQueryAttributeName() + PolicyConstants.AND + PolicyConstants.QUOTE
+                + ipEnd + PolicyConstants.QUOTE + PolicyConstants.GREATER_THAN + getQueryAttributeName()
+                + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
+        if (isInvertCondition()) {
+            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
         }
         return condition;
     }

@@ -30,9 +30,9 @@ ${apiname}_per_${pipeline}##
 #if($quotaPolicy != "")
 		FROM EligibilityStream[isEligible==true AND rule == '#getRule($policy)']#window.time($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit()) 
 #if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
-		select throttle_key, (count(messageID)) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled 
+		select throttle_key, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled 
 #else
-		select throttle_key, (count(messageID)) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}
+		select throttle_key, (count(messageID) >= 1000) as isThrottled #########change {use $quotaPolicy.getLimit().getDataAmount()}
 #end		
 #if($policy.getUserLevel() == $PER_USER)
 		group by throttle_key

@@ -46,8 +46,8 @@ public class JWTClaimsCondition extends Condition{
 
     @Override
     public String getCondition() {
-        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL +
-                getAttribute() + PolicyConstants.CLOSE_BRACKET;  //"("+queryAttribute+"=="+value+")"
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL +  PolicyConstants.QUOTE +
+                getAttribute() +  PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET;  //"("+queryAttribute+"=="+value+")"
         if(isInvertCondition()){
             condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
         }

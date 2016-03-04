@@ -53,10 +53,10 @@ public class IPCondition extends Condition {
     @Override
     public String getCondition() {
         long ip = ipToLong(getSpecificIP());
-        String condition = PolicyConstants.OPEN_BRACKET+getQueryAttributeName()+PolicyConstants.EQUAL+ip+
-                PolicyConstants.CLOSE_BRACKET;  //"("+queryAttribute+"=="+value+")"
-        if(isInvertCondition()){
-            condition = PolicyConstants.INVERT_CONDITION + condition;   // "!"+condition
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
+                + PolicyConstants.QUOTE + ip + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+"=="+value+")"
+        if (isInvertCondition()) {
+            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
         }
         return condition;
     }

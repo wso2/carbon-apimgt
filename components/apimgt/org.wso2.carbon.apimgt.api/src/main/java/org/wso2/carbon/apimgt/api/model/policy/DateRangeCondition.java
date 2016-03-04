@@ -47,11 +47,12 @@ public class DateRangeCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.GREATER_THAN +
-                getStartingDate() + PolicyConstants.AND + getQueryAttributeName() + PolicyConstants.LESS_THAN +
-                getEndingDate()+PolicyConstants.CLOSE_BRACKET; //"("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
-        if(isInvertCondition()){
-            condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.GREATER_THAN
+                + PolicyConstants.QUOTE + getStartingDate() + PolicyConstants.QUOTE + PolicyConstants.AND
+                + getQueryAttributeName() + PolicyConstants.LESS_THAN + PolicyConstants.QUOTE + getEndingDate()
+                + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+">="+value+"AND""+queryAttribute+"<="+value+)"
+        if (isInvertCondition()) {
+            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
         }
         return condition;
     }
