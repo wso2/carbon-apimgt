@@ -18,9 +18,8 @@
 */
 package org.wso2.carbon.apimgt.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -30,7 +29,9 @@ import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.event.throttle.core.ThrottlerService;
 import org.wso2.carbon.event.throttle.core.exception.ThrottleConfigurationException;
 
@@ -38,11 +39,12 @@ public class ThrottlePolicyDeploymentManager {
     private static final Log log = LogFactory.getLog(ThrottlePolicyDeploymentManager.class);
     private static ThrottlePolicyDeploymentManager instance;
     private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
+    private Map<String, Environment> environments;
 
     private ThrottlePolicyDeploymentManager() {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
-        // get the gateway manager related configurations
+        environments = config.getApiGatewayEnvironments();
     }
 
     public static synchronized ThrottlePolicyDeploymentManager getInstance() {
@@ -92,10 +94,14 @@ public class ThrottlePolicyDeploymentManager {
         try {
             element = AXIOMUtil.stringToOM(policy);
             String fileName = element.getAttributeValue(new QName(APIConstants.POLICY_NAME_ELEM));
-            // TODO call gatewaymanager admin service to deploy.
-
-            // Temp. save in local location
-            writeToFile(policy, fileName);
+            for (Map.Entry<String, Environment> environment : environments.entrySet()) {
+                if(log.isDebugEnabled()){
+                    log.debug("deploy policy to gateway : " + environment.getValue().getName());
+                }
+                APIGatewayAdminClient client = new APIGatewayAdminClient(null , environment.getValue());
+                client.deployPolicy(policy, fileName);
+            }
+     
         } catch (XMLStreamException e) {
             String msg = "Error while parsing the policy to get the eligibility query: ";
             log.error(msg , e);
@@ -106,34 +112,5 @@ public class ThrottlePolicyDeploymentManager {
             throw new APIManagementException(msg);
         }
         
-    }
-    
-    private void writeToFile(String content, String fileName) throws IOException {
-        File file = new File(APIConstants.POLICY_FILE_FOLDER); // WSO2Carbon_Home/repository/deployment/server/throttle-config
-        if (!file.exists()) { // if directory doesn't exist, make onee
-            file.mkdir();
-        }
-        File writeFile = new File(APIConstants.POLICY_FILE_LOCATION + fileName); // file folder+/
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(writeFile);
-            if (!writeFile.exists()) {
-                writeFile.createNewFile();
-            }
-            byte[] contentInBytes = content.getBytes();
-            fos.write(contentInBytes);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            log.error("Error occurred writing to file: " + fileName, e);
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                log.error("Error occurred closing file output stream", e);
-            }
-        }
-    }
+    }   
 }
