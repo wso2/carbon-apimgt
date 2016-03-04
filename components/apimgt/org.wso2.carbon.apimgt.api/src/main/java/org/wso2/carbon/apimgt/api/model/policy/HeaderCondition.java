@@ -46,10 +46,10 @@ public class HeaderCondition extends Condition {
 
     @Override
     public String getCondition() {
-        String condition = PolicyConstants.OPEN_BRACKET+getQueryAttributeName()+PolicyConstants.EQUAL+getValue()+
-                PolicyConstants.CLOSE_BRACKET; //"("+queryAttribute+"=="+value+")"
-        if(isInvertCondition()){
-            condition = PolicyConstants.INVERT_CONDITION + condition;  // "!"+condition
+        String condition = PolicyConstants.OPEN_BRACKET + getQueryAttributeName() + PolicyConstants.EQUAL
+                + PolicyConstants.QUOTE + getValue() + PolicyConstants.QUOTE + PolicyConstants.CLOSE_BRACKET; // "("+queryAttribute+"=="+value+")"
+        if (isInvertCondition()) {
+            condition = PolicyConstants.INVERT_CONDITION + condition; // "!"+condition
         }
         return condition;
     }
