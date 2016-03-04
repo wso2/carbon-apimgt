@@ -392,7 +392,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (deleted) {
             log.info("File : " + fileName + " is deleted");
         } else {
-            log.info("Error occurred in deleting file: " + fileName);
+            log.error("Error occurred in deleting file: " + fileName);
         }
     }
 }
