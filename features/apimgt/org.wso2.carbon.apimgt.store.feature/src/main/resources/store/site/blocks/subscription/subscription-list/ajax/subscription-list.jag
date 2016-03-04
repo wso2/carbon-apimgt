@@ -43,7 +43,7 @@ include("/jagg/jagg.jag");
             language = request.getParameter('language');
         }
         else {
-            language="android";
+            language=null;
         }
 
         var groupId = session.get("groupId");

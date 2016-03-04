@@ -51,6 +51,9 @@ public class APIClientGenerationManager {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         currentSubscriber = apiMgtDAO.getSubscriber(userName);
         apiSet = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName , groupId);
+        if (apiSet.isEmpty()){
+            return null;
+        }
         File spec = null;
         String apiName;
         String apiVersion;

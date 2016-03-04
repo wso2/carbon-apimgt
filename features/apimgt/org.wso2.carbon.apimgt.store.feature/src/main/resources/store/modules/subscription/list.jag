@@ -82,6 +82,7 @@ var generateClientSdk = function (appName,language,userName,groupId){
     }
     else{
         return {
+            message:"App doesn't have any APIs",
             error:true
         };
     }
