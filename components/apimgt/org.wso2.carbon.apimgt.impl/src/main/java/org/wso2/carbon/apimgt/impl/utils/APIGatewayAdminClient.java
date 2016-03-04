@@ -20,6 +20,7 @@ import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.apache.axiom.om.OMElement;
 
 import java.io.StringWriter;
+import java.rmi.RemoteException;
 
 public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
@@ -449,4 +450,34 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+
+   /**
+     * deploying policy file
+     *
+     * @param content  content to be deployed
+     * @param fileName name of the file
+     * @throws AxisFault
+     */
+    public void deployPolicy(String content, String fileName) throws AxisFault {
+        try {
+            apiGatewayAdminStub.deployPolicy(content, fileName);
+        } catch (RemoteException e) {
+            throw new AxisFault("Error occured in deploying policy file " + fileName, e);
+        }
+    }
+
+    /**
+     * removing policy file
+     *
+     * @param fileName name of the file to be removed
+     * @throws AxisFault
+     *
+     */
+    public void removePolicy(String fileName) throws AxisFault {
+        try {
+            apiGatewayAdminStub.removePolicy(fileName);
+        } catch (RemoteException e) {
+            throw new AxisFault("Error occured in removing policy file " + fileName, e);
+        }
+    }
 }

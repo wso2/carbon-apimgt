@@ -1,8 +1,5 @@
 package org.wso2.carbon.apimgt.gateway.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.llom.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -12,9 +9,15 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.utils.MediationSecurityAdminServiceClient;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminClient;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceClient;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.rest.api.stub.types.carbon.APIData;
 
 import javax.xml.stream.XMLStreamException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.io.IOException;
 
 public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
@@ -340,5 +343,56 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return encodedValue;
     }
 
+    /**
+     * policy is writtent in to files
+     *
+     * @param content  content to be written
+     * @param fileName name of the file
+     * @throws AxisFault
+     */
+    public void deployPolicy(String content, String fileName) throws AxisFault {
+        File file = new File(APIConstants.POLICY_FILE_FOLDER);      //WSO2Carbon_Home/repository/deployment/server/throttle-config
+        //if directory doesn't exist, make onee
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        File writeFile = new File(APIConstants.POLICY_FILE_LOCATION + fileName + APIConstants.XML_EXTENSION);  //file folder+/
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(writeFile);
+            //if file doesn't exit make one
+            if (!writeFile.exists()) {
+                writeFile.createNewFile();
+            }
+            byte[] contentInBytes = content.getBytes();
+            fos.write(contentInBytes);
+            fos.flush();
+        } catch (IOException e) {
+            log.error("Error occurred writing to " + fileName + ":", e);
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                log.error("Error occurred closing file output stream", e);
+            }
+        }
+    }
 
+    /**
+     * Delete file with the "fileName"
+     *
+     * @param fileName name of the file to be deleted
+     */
+    public void removePolicy(String fileName) {
+
+        File file = new File(APIConstants.POLICY_FILE_LOCATION + fileName + APIConstants.XML_EXTENSION);
+        boolean deleted = file.delete();
+        if (deleted) {
+            log.info("File : " + fileName + " is deleted");
+        } else {
+            log.info("Error occurred in deleting file: " + fileName);
+        }
+    }
 }
