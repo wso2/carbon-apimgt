@@ -47,12 +47,8 @@ public class APIClientGenerationManager {
         String swagger;
         Set<SubscribedAPI> apiSet;
         String resourcePath = null;
-        APIIdentifier api;
-        ProcessBuilder processBuilder;
-        Process processShellCommands;
         APIConsumerImpl consumer =  (APIConsumerImpl) APIManagerFactory.getInstance().getAPIConsumer(userName);
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        //currentSubscriber = ApiMgtDAO.getSubscriber(userName);
         currentSubscriber = apiMgtDAO.getSubscriber(userName);
         apiSet = apiMgtDAO.getSubscribedAPIs(currentSubscriber, appName , groupId);
         File spec = null;
@@ -104,6 +100,15 @@ public class APIClientGenerationManager {
     }
 
     private void generateClient(String apiName, String apiVersion,String spec,String lang,String outPutDir){
+        String configClass;
+        if (lang.equals("java")){
+            configClass = "io.swagger.codegen.languages.JavaClientCodegen";
+        }else if (lang.equals("android")){
+            configClass = "io.swagger.codegen.languages.AndroidClientCodegen";
+        }else{
+            configClass = null;
+        }
+
         try {
             CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
             codegenConfigurator.setGroupId("org.wso2");
@@ -111,7 +116,7 @@ public class APIClientGenerationManager {
             codegenConfigurator.setModelPackage("org.wso2.client.model."+apiName+"."+apiVersion.replace(".",""));
             codegenConfigurator.setApiPackage("org.wso2.client.api."+apiName+"."+apiVersion.replace(".",""));
             codegenConfigurator.setInputSpec(spec);
-            codegenConfigurator.setLang("io.swagger.codegen.languages.JavaClientCodegen");
+            codegenConfigurator.setLang(configClass);
             codegenConfigurator.setOutputDir(outPutDir);
             final ClientOptInput clientOptInput = codegenConfigurator.toClientOptInput();
             new DefaultGenerator().opts(clientOptInput).generate();
