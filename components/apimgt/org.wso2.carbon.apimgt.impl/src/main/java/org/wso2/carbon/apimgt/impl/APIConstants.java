@@ -1053,5 +1053,5 @@ public final class APIConstants {
     public static final String ELIGIBILITY_QUERY_ELEM= "eligibilityQuery";
     public static final String POLICY_NAME_ELEM = "name";
     public static final String DECISION_QUERY_ELEM = "decisionQuery";
-
+    public static final String XML_EXTENSION= ".xml";
 }
