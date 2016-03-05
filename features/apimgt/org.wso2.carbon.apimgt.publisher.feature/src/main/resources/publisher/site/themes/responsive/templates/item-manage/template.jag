@@ -497,7 +497,7 @@
 
         $.get( "<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=swagger" , function( data ) {
             var data = jQuery.parseJSON(data);
-            var designer = APIDesigner();
+            var designer = PolicyDesigner();
             designer.load_api_document(data);
             designer.set_default_management_values();
             designer.render_resources();
@@ -593,7 +593,7 @@
             if(!validate_Transports()){
                 return false;
             }
-            var designer = APIDesigner();
+            var designer = PolicyDesigner();
             $('#swagger').val(JSON.stringify(designer.api_doc));
             $('#'+thisID).buttonLoader('start');
             $(form).ajaxSubmit({

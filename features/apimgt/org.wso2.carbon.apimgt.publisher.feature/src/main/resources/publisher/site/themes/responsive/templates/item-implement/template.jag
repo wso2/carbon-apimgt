@@ -417,7 +417,7 @@ mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
 
         $.get( "<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>?name=<%= encode.forHtml(api.name) %>&version=<%= encode.forHtml(api.version) %>&provider=<%= encode.forHtml(api.provider) %>&action=swagger" , function( data ) {
             var data = jQuery.parseJSON(data);
-            var designer = APIDesigner();
+            var designer = PolicyDesigner();
             designer.load_api_document(data);
             $("#swaggerUpload").modal('hide');
         });
