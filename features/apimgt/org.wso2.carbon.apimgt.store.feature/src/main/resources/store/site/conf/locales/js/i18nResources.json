@@ -23,7 +23,7 @@
         "curlHelpMsg" : "CURL command created from the access tokens to send the request.",
         "domainUpdateHelp":"Specify list of domains that are permitted to send requests to the gateway through this application.",
         "cancelSubs":"Cancel Subscription",
-        "clieGenHelpMsg":"This will generate the client side Android SDK for the selected application. It will take few seconds to begin the download."
+        "clieGenHelpMsg":"This will generate the client side SDK for the selected application. Select the language you prefer."
 
     },
     "confirm": {
