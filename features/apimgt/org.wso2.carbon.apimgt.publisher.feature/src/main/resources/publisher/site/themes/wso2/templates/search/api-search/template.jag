@@ -2,8 +2,7 @@
 var query=request.getParameter("query");
 %>
 <div class="row">
-  <div class="col-md-6 api-search">
-
+  <div class="col-md-4 api-search">
         <form class="form-horizontal" action="<%=jagg.getMappedUrl("/site/pages/index.jag")%>">
                 <div class="form-group">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -36,7 +35,7 @@ var query=request.getParameter("query");
 	      </div>
    </form>
   </div>
-  <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#searchAPIHelp"><i class="fa fa-question-circle"></i> Search Options</a></div>
+  <div class="col-md-2 api-search "><a href="#" title="<%=i18n.localize("searchAPIHelpMsg1")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#searchAPIHelp"><i class="fa fa-question-circle"></i> Search Options</a></div>
 </div>
 <div class="alert alert-success" id="searchMessageContainer" style="display:none">
         <a class="close" data-dismiss="alert">x</a>
