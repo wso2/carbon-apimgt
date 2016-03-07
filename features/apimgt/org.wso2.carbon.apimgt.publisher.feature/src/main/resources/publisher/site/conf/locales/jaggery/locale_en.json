@@ -228,6 +228,7 @@
     "descriptionHelpLable":"maximum 20000 characters support",
     "optionsHelpMsg": "Select Options method to send OPTIONS calls to backed. If not selected API gateway will return OPTIONS call with the allowed methods in gateway.",
     "rolesHelpMsg":"Comma-separated list (e.g.: role1,role2,role3)",
+    "rolesTagHelpMsg":"Type a role and Enter",
     "allowTenantsHelpMsg":"Comma separated list (e.g.,: tenant1.com,tenant2.com). Your API will be accessible to those defined Tenants as well.",
     "wadlHelpMsg":"E.g.,:http://example.com/service.wadl",
     "wsdlHelpMsg":"E.g.,:http://appserver/services/echo?wsdl",
