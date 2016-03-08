@@ -8104,7 +8104,7 @@ public class ApiMgtDAO {
                 List<Pipeline> pipelines = policy.getPipelines();
                 if (pipelines != null) {
                     for (int i = 0; i < pipelines.size(); i++) { //add each pipeline data to AM_CONDITION table
-                        addCondition(pipelines.get(i), policyID, conn);
+                        addPipeline(pipelines.get(i), policyID, conn);
                     }
                 }
             }
@@ -8125,7 +8125,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add throttling policy condition to database
+     * Add throttling policy pipeline to database
      *
      * @param pipeline condition pipeline
      * @param policyID
@@ -8133,7 +8133,7 @@ public class ApiMgtDAO {
      * @throws APIManagementException
      * @throws SQLException
      */
-    private void addCondition(Pipeline pipeline, int policyID, Connection conn)
+    private void addPipeline(Pipeline pipeline, int policyID, Connection conn)
             throws APIManagementException, SQLException {
         PreparedStatement psCondition = null;
         ResultSet rs = null;
