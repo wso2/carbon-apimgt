@@ -174,12 +174,6 @@
 			                            </a>
                                     </p>
                                     <h5><a><%=api.status%></a></h5>
-                                    <a href="<%=path%>">
-	                                    <span class="fw-stack">
-			                                <i class="fw fw-circle-outline fw-stack-2x"></i>
-			                                <i class="fw fw-view fw-stack-1x"></i>
-			                            </span>
-		                            </a>
 		                            <%if(outputs.isCreatePermitted){ %>
 			                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>">
 				                            <span class="fw-stack">
