@@ -2,7 +2,7 @@
 
 %>
  <div id="tokens">
-     <div class="title-section"> <h2><%=i18n.localize("revokeTitle")%></h2> </div>
+     <div class="page-header"> <h2><%=i18n.localize("revokeTitle")%></h2> </div>
      <div class="content-section shadow-up">
      <div class="content-data">
  <%jagg.includeBlock("search/token-search", null); %>

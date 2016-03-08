@@ -13,7 +13,7 @@
 		</script>
 		<div id="col-sm-12">
         <div id="userKey">
-            <div class="title-section">
+            <div class="page-header">
                 <h2><%=i18n.localize("subscriptions")%></h2>
             </div>
 

@@ -8,7 +8,10 @@ jagg.block("menu/primary", {
 
         var user =jagg.getUser();
         return {
-            "user": user
+            "user": user,
+            "breadcrumb":[{
+                "name":"breadcumb"
+            }]
         };
     }
 

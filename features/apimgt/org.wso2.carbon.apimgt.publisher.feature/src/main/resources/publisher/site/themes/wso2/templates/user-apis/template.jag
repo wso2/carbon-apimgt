@@ -2,7 +2,7 @@
 var uname=request.getParameter("uname");
 %>
 <div id="user">
-    <div class="title-section"><h2><%=i18n.localize("apisByProviderTitle")%> <%= encode.forHtml(uname)%></h2></div>
+    <div class="page-header"><h2><%=i18n.localize("apisByProviderTitle")%> <%= encode.forHtml(uname)%></h2></div>
     <%
        if ((outputs.apis != null && outputs.apis.length > 0) || request.getParameter('query') != null) {
            jagg.includeBlock("search/apis-by-provider-search", null);

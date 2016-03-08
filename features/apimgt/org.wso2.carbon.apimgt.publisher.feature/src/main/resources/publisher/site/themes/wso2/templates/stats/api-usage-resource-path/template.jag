@@ -1,7 +1,7 @@
 <% jagg.template("stats/api-usage-resource-path", function(inputs, outputs, jagg) { %>
 <div id="apiUsageResourcePath-stat-page" class="stat-page">
 
-    <div class="title-section"> <h2><%=i18n.localize("apiUsageFromResourcePathTitle")%></h2></div>
+    <div class="page-header"> <h2><%=i18n.localize("apiUsageFromResourcePathTitle")%></h2></div>
 
     <br/ >
     <div class="col-md-12">

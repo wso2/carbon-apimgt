@@ -1,6 +1,6 @@
 <% jagg.template("stats/api-usage-user", function(inputs, outputs, jagg) { %>
 <div id="apiUsage-stat-page" class="stat-page">
-    <div class="title-section"> <h2><%=i18n.localize("overallAPIUsageTitle")%></h2></div>
+    <div class="page-header"> <h2><%=i18n.localize("overallAPIUsageTitle")%></h2></div>
 
     <br/ >
     <div class="col-md-12">

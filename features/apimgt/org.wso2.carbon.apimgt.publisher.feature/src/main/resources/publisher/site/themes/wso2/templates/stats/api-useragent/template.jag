@@ -13,7 +13,7 @@
 
   <!--[if lt IE 9]><script language="javascript" type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("templates/utils/jqplot/excanvas.min.js"))%>" ></script><![endif]-->
 
-<div class="title-section"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
+<div class="page-header"> <h2><%=i18n.localize("overallAPISubscriptionsTitle")%></h2> </div>
 
 <div class="content-section shadow-up">
 <div class="content-data">
