@@ -6,119 +6,170 @@
                 var urlPrefix;
                 var urlPostfix;
                 if(tenantDomain!='null'){
-                urlPrefix="?tenant="+tenantDomain;
-                urlPostfix="&tenant="+tenantDomain;
+	                urlPrefix="?tenant="+tenantDomain;
+	                urlPostfix="&tenant="+tenantDomain;
                 }else{
-                urlPrefix='';
-                urlPostfix='';
+	                urlPrefix='';
+	                urlPostfix='';
                 }
                 var reqUrl = request.getRequestURI()+urlPrefix;
-                var listUrl=jagg.getAbsoluteUrl("/site/pages/index.jag")+urlPrefix;
-                var listMappedUrl=jagg.getMappedUrl("/site/pages/index.jag")+urlPrefix;
-                var infoUrl=jagg.getAbsoluteUrl("/site/pages/item-info.jag");
-                var infoMappedUrl=jagg.getMappedUrl("/site/pages/item-info.jag");
-                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag")+urlPrefix;
-                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag")+urlPrefix;
-                var subsUrl=jagg.getAbsoluteUrl("/site/pages/subscriptions.jag")+urlPrefix;
-                var subsMappedUrl=jagg.getMappedUrl("/site/pages/subscriptions.jag")+urlPrefix;
-                var userUrl=jagg.getAbsoluteUrl("/site/pages/user.jag")+urlPrefix;
-                var userMappedUrl=jagg.getMappedUrl("/site/pages/user.jag")+urlPrefix;
-                var statsUrl=jagg.getAbsoluteUrl("/site/pages/statistics.jag")+urlPrefix;
-                var statsMappedUrl=jagg.getMappedUrl("/site/pages/statistics.jag")+urlPrefix;
-                var allStatsUrl=jagg.getAbsoluteUrl("/site/pages/all-statistics.jag")+urlPrefix;
-                var allStatsMappedUrl=jagg.getMappedUrl("/site/pages/all-statistics.jag")+urlPrefix;
-		var tierPermissionUrl=jagg.getAbsoluteUrl("/site/pages/tiers.jag")+urlPrefix;
-		var tierPermissionMappedUrl=jagg.getMappedUrl("/site/pages/tiers.jag")+urlPrefix;
+                var listUrl = jagg.getAbsoluteUrl("/site/pages/index.jag")+urlPrefix;
+                var listMappedUrl = jagg.getMappedUrl("/site/pages/index.jag")+urlPrefix;
+                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag");
+                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag");
+                var addUrl = jagg.getAbsoluteUrl("/site/pages/add.jag")+urlPrefix;
+                var addMappedUrl = jagg.getMappedUrl("/site/pages/add.jag")+urlPrefix;
+                var subsUrl = jagg.getAbsoluteUrl("/site/pages/subscriptions.jag")+urlPrefix;
+                var subsMappedUrl = jagg.getMappedUrl("/site/pages/subscriptions.jag")+urlPrefix;
+                var userUrl = jagg.getAbsoluteUrl("/site/pages/user.jag")+urlPrefix;
+                var userMappedUrl = jagg.getMappedUrl("/site/pages/user.jag")+urlPrefix;
+                var statsUrl = jagg.getAbsoluteUrl("/site/pages/statistics.jag")+urlPrefix;
+                var statsMappedUrl = jagg.getMappedUrl("/site/pages/statistics.jag")+urlPrefix;
+                var allStatsUrl = jagg.getAbsoluteUrl("/site/pages/all-statistics.jag")+urlPrefix;
+                var allStatsMappedUrl = jagg.getMappedUrl("/site/pages/all-statistics.jag") + urlPrefix;
+	
+                var designUrl = jagg.getAbsoluteUrl("/site/pages/design.jag") + urlPrefix;
+                var designMappedUrl = jagg.getMappedUrl("/site/pages/design.jag") + urlPrefix;
+                var implementUrl = jagg.getAbsoluteUrl("/site/pages/implement.jag") + urlPrefix;
+                var implementMappedUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
+                var manageUrl = jagg.getAbsoluteUrl("/site/pages/manage.jag") + urlPrefix;
+                var manageMappedUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
             %>
 	    <div class="breadcrumb-wrapper">
             <ol class="breadcrumb">
                 <% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){%>
-                    <li>
-                    <%=i18n.localize("apis")%> <span class="divider"></span>
-                    </li>
                     <li class="active">
-                        <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all")%></a>
+                    	<a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
                     </li>
                 <% } %>
                 <% if(reqUrl.indexOf(infoUrl)>=0||reqUrl.indexOf(infoMappedUrl)>=0){%>
-                <li>
-                    <%=i18n.localize("apis")%> <span class="divider"></span>
-                </li>
-                <li>
-                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all")%></a>
-                </li>
+	                <li>
+	                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+	                </li>
 
-                <li class="active">
-                    <%
-                        var apiUrl = infoMappedUrl + "?name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
-                    %>
-                    <a href="<%=apiUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
-                </li>
+	                <li class="active">
+	                    <%
+	                        var apiUrl = infoMappedUrl + "?name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+	                    %>
+	                    <a href="<%=apiUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
+	                </li>
                 <% } %>
 
 
                 <% if(reqUrl.indexOf(addUrl)>=0||reqUrl.indexOf(addMappedUrl)>=0){%>
-                <li>
-                    <%=i18n.localize("apis")%>
-                </li>
+	                <li>
+	                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+	                </li>
 
-                <li>
-                    <a href="<%=addMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%>',e:event})"><%=i18n.localize("addAPI")%></a>
-                </li>
+	                <li class="active">
+	                    <a href="<%=addMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%>',e:event})"><%=i18n.localize("addAPI")%></a>
+	                </li>
                 <% } %>
+                
+                <% if(reqUrl.indexOf(designUrl) >= 0 || reqUrl.indexOf(designMappedUrl) >= 0){%>
+                	<% if (request.getParameter("name")) { %>                		
+		                 <%
+		                 	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+		                 	var apiUrl = infoMappedUrl + "?" + apiUrlId;
+		                 %>
+                		 <li>
+		                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+		                </li>
+	
+		                <li>
+		                    <a href="<%=apiUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
+		                </li>
+		                <li class="active">
+		                    <a href="<%=designUrl%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=designUrl%>?<%=apiUrlId%>',e:event})"><%=i18n.localize("design")%></a>
+		                </li>
+                	<% } else { %>
+                		<li>
+	                    	<a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+	                	</li>
+
+		                <li class="active">
+		                    <a href="<%=designUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=designUrl%>',e:event})"><%=i18n.localize("design")%></a>
+		                </li>
+                	<%} %>
+                
+                <%} %>
+                
+                <% if(reqUrl.indexOf(implementUrl) >= 0 || reqUrl.indexOf(implementMappedUrl) >= 0){%>
+                	<% if (request.getParameter("name")) { %>
+                		 <%
+		                 	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+		                 	var apiUrl = infoMappedUrl + "?" + apiUrlId;
+		                 %>
+                		 <li>
+		                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+		                </li>
+		                <li>
+		                    <a href="<%=apiUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
+		                </li>
+		                <li class="active">
+		                    <a href="<%=implementMappedUrl%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=implementMappedUrl%>?<%=apiUrlId%>',e:event})"><%=i18n.localize("implement")%></a>
+		                </li>
+                	<% } else { %>
+                		<li>
+	                    	<a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+	                	</li>
+
+		                <li class="active">
+		                    <a href="<%=implementMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=implementMappedUrl%>',e:event})"><%=i18n.localize("implement")%></a>
+		                </li>
+                	<%} %>
+                
+                <%} %>
+                
+                <% if(reqUrl.indexOf(manageUrl) >= 0 || reqUrl.indexOf(manageMappedUrl) >= 0){%>
+                	<% if (request.getParameter("name")) { %>
+                		 <%
+		                 	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+		                 	var apiUrl = infoMappedUrl + "?" + apiUrlId;
+		                 %>
+                		 <li>
+		                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+		                </li>
+	
+		                <li>
+		                    <a href="<%=apiUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
+		                </li>
+		                <li class="active">
+		                    <a href="<%=manageMappedUrl%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=manageMappedUrl%>?<%=apiUrlId%>',e:event})"><%=i18n.localize("manage")%></a>
+		                </li>
+                	<% } else { %>
+                		<li>
+	                    	<a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+	                	</li>
+
+		                <li class="active">
+		                    <a href="<%=manageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=manageMappedUrl%>',e:event})"><%=i18n.localize("manage")%></a>
+		                </li>
+                	<%} %>
+                
+                <%} %>
 
                 <% if(reqUrl.indexOf(allStatsUrl)>=0||reqUrl.indexOf(allStatsMappedUrl)>=0){%>
-                <li>
-                    <%=i18n.localize("apis")%>
-                </li>
-                <li class="active">
-                    <a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("allStats")%></a>
-                </li>
+	                <li class="active">
+	                    <a href="<%=allStatsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>',e:event})"><%=i18n.localize("statistics")%></a>
+	                </li>
                 <% } %>
-
-
 
                 <% if(reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>
-
-                <li>
-                    APIs <span class="divider"></span>
-                </li>
-                <li>
-                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("all", "All")%></a>
-                </li>
-                <li>
-                    <span class="divider"></span>
-                </li>
-                <li class="active">
-                    <%
-                    var userTmpUrl = userMappedUrl + "?uname=" + encode.forUriComponent(request.getParameter("uname"))+urlPostfix;
-                    %>
-                    <a href="<%=userTmpUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=userTmpUrl%>',e:event})"><%=i18n.localize("user", "User")%> - <%= encode.forHtml(request.getParameter("uname"))%></a>
-                </li>
+	                <li>
+	                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+	                </li>
+	                <li class="active">
+	                    <%
+	                    var userTmpUrl = userMappedUrl + "?uname=" + encode.forUriComponent(request.getParameter("uname"))+urlPostfix;
+	                    %>
+	                    <a href="<%=userTmpUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=userTmpUrl%>',e:event})"><%=i18n.localize("user", "User")%> - <%= encode.forHtml(request.getParameter("uname"))%></a>
+	                </li>
                 <% } %>
-           <% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>
-                <li>
-                    <%=i18n.localize("myAPIs", "My APIs")%> <span class="divider"></span>
-                </li>
-                <li class="active">
-                    <a href="<%=subsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
-                </li>
-                <% } %>
-
-
-                <% if(reqUrl.indexOf(statsUrl)>=0||reqUrl.indexOf(statsMappedUrl)>=0){%>
-                <li>
-                    <%=i18n.localize("myAPIs", "My APIs")%><span class="divider"></span>
-                </li>
-                <li class="active">
-                    <a href="<%=statsMappedUrl%>?stat=stat&page=api-subscriptions" onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>',e:event})"><%=i18n.localize("statistics", "Statistics")%></a>
-                </li>
-                <% } %>
-
-		 <% if(reqUrl.indexOf(tierPermissionUrl)>=0||reqUrl.indexOf(tierPermissionMappedUrl)>=0){%>
-                <li class="active">
-                    <%=i18n.localize("tierPermissions", "Tier Permissions")%><span class="divider"></span>
-                </li>
+           		<% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>                
+	                <li class="active">
+	                    <a href="<%=subsMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%>',e:event})"><%=i18n.localize("subscriptions", "Subscriptions")%></a>
+	                </li>
                 <% } %>
             </ol>
 </div>

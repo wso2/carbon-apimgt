@@ -1,0 +1,114 @@
+<% jagg.template("menu/actions", function(inputs, outputs, jagg) { %>
+            <%
+                var encode = require('encode');
+                encode = new encode.Encode();
+                var tenantDomain = encode.forUriComponent(request.getParameter("tenant"));
+                var site = require("/site/conf/site.json");
+                var ssoEnabled = site.ssoConfiguration.enabled;
+                var urlPrefix = '', urlPostfix = '', isCreatePermitted, isPublishPermitted, api;
+
+                if(tenantDomain!='null'){
+                	urlPrefix = "?tenant=" + tenantDomain;
+                	urlPostfix = "&tenant=" + tenantDomain;
+                }
+                
+                api = outputs.api;
+                
+                var reqUrl = request.getRequestURI() + urlPrefix;
+                
+                var listUrl = jagg.getAbsoluteUrl("/site/pages/index.jag") + urlPrefix;
+                var listMappedUrl = jagg.getMappedUrl("/site/pages/index.jag") + urlPrefix;
+                
+                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag");
+                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag");
+                
+                var subsUrl = jagg.getAbsoluteUrl("/site/pages/subscriptions.jag") + urlPrefix;
+                var subsMappedUrl = jagg.getMappedUrl("/site/pages/subscriptions.jag") + urlPrefix;
+                
+                var infoUrl = jagg.getAbsoluteUrl("/site/pages/item-info.jag");
+                var infoMappedUrl = jagg.getMappedUrl("/site/pages/item-info.jag");
+                
+                var addDesignUrl=jagg.getMappedUrl("/site/pages/design.jag");
+                var addUrl=jagg.getAbsoluteUrl("/site/pages/add.jag");
+                var addMappedUrl=jagg.getMappedUrl("/site/pages/add.jag");
+                
+                isCreatePermitted = jagg.getCreatePermitted().permitted;
+                isPublishPermitted = jagg.getPublishPermitted().permitted;
+            %>
+            
+        <div class="navbar-wrapper">
+		<nav class="navbar navbar-default" data-spy="affix"
+			data-offset-top="85" data-offset-bottom="40">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+						aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-menu-toggle collapsed hidden"
+						data-toggle="collapse" data-target="#navbar2" aria-expanded="false"
+						aria-controls="navbar2"> <span class="icon fw-stack"> <i
+							class="fw fw-tiles fw-stack-1x toggle-icon-up"></i>
+					</span>
+					</a> <a class="navbar-menu-toggle collapsed active"
+						data-toggle="sidebar" data-target="#left-sidebar"
+						data-container=".page-content-wrapper" data-container-divide="true"
+						aria-expanded="true" rel="sub-nav"> <span class="icon fw-stack">
+							<i class="fw fw-menu fw-stack-1x toggle-icon-left"></i>
+					</span>
+					</a>
+				</div>
+				<!-- Actions Bar -->
+				<div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                    	<% if(reqUrl.indexOf(listUrl)>=0 ||reqUrl.indexOf(listMappedUrl)>=0||reqUrl.equals(jagg.url("/"))){ %>
+	                        <%if(isCreatePermitted) {%>
+	                        <li>
+	                            <a href="<%=addUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-add fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+	                                <%=i18n.localize("addAPI")%>
+	                            </a>
+	                        </li>
+	                        <%} %>
+                        <%} %>
+                        <% if(reqUrl.indexOf(infoUrl)>=0 ||reqUrl.indexOf(infoMappedUrl)>=0){%>
+	                        <%if(isCreatePermitted) {
+	                            var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+	                        %>
+	                        <li>
+	                            <a href="<%=jagg.url("/design")%>?<%= apiUrlId %>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-edit fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+	                                <%=i18n.localize("editAPI")%>
+	                            </a>
+	                        </li>
+	                        <%} else if(api && isPublishPermitted && api.endpointConfig) {%>	                        
+	                        <li>
+	                            <a href="<%=jagg.url("/manage")%>?<%=apiUrlId%>">
+	                                <span class="icon fw-stack">
+	                                    <i class="fw fw-settings fw-stack-1x"></i>
+	                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+	                                </span>
+	                                <%=i18n.localize("manageAPI")%>
+	                            </a>
+	                        </li>
+	                        <%} %>
+                        <%} %>
+                    </ul>
+           </div>
+				<!-- End Actions Bar -->
+			</div>	
+		</nav>
+</div>
+            
+        
+
+<% }); %>
