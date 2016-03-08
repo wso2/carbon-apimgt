@@ -8310,7 +8310,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-
+        int tenantId = APIUtil.getTenantId(username);
         String sqlQuery = SQLConstants.GET_POLICIES;
         if (forceCaseInsensitiveComparisons) {
             sqlQuery = SQLConstants.GET_POLICIES;
@@ -8320,6 +8320,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, policyLevel);
+            ps.setInt(2, tenantId);
             rs = ps.executeQuery();
             while (rs.next()) {
                 Policy policy = new Policy(rs.getString("NAME"));
@@ -8359,7 +8360,7 @@ public class ApiMgtDAO {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-
+        int tenantId = APIUtil.getTenantId(username);
         String sqlQuery = SQLConstants.GET_POLICY_NAMES;
         if (forceCaseInsensitiveComparisons) {
             sqlQuery = SQLConstants.GET_POLICY_NAMES;
@@ -8369,6 +8370,7 @@ public class ApiMgtDAO {
             conn = APIMgtDBUtil.getConnection();
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, policyLevel);
+            ps.setInt(2, tenantId);
             rs = ps.executeQuery();
             while (rs.next()) {
                 names.add(rs.getString("NAME"));
