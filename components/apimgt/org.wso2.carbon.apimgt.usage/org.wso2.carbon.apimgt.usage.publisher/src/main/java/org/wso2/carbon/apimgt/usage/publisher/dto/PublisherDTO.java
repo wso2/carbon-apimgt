@@ -49,7 +49,15 @@ public abstract class PublisherDTO {
 
     private String protocol;
 
+    private String clientIp;
 
+    public String getClientIp() {
+        return clientIp;
+    }
+
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
+    }
 
     public String getHostName() {
         return hostName;

@@ -99,7 +99,7 @@ public class APIUsageStatisticsRestClientImpl extends APIUsageStatisticsClient {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
             apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
 
-            if (!apiManagerAnalyticsConfiguration.isAnalyticsEnabled()) {
+            if (!APIUtil.isAnalyticsEnabled()) {
                 throw new APIMgtUsageQueryServiceClientException("Analytics not enabled");
             }
 

@@ -124,7 +124,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         long difference;
 
         try {
-            if (APIUtil.isStatsEnabled()) {
+            if (APIUtil.isAnalyticsEnabled()) {
                 long currentTime = System.currentTimeMillis();
                 messageContext.setProperty("api.ut.requestTime", Long.toString(currentTime));
             }

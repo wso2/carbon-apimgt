@@ -47,7 +47,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
     public boolean handleRequest(MessageContext mc) {
 
-        boolean enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+        boolean enabled = APIUtil.isAnalyticsEnabled();
 
         /*setting global analytic enabled status. Which use at by the by bam mediator in
         synapse to enable or disable destination based stat publishing*/
@@ -128,7 +128,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             if (throttleOutProperty instanceof Boolean) {
                 throttleOutHappened = (Boolean) throttleOutProperty;
             }
-
+            String clientIp = DataPublisherUtil.getClientIp(axis2MsgContext);
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setConsumerKey(consumerKey);
             requestPublisherDTO.setContext(context);
@@ -148,7 +148,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
             requestPublisherDTO.setUserAgent(userAgent);
             requestPublisherDTO.setTier(tier);
             requestPublisherDTO.setContinuedOnThrottleOut(throttleOutHappened);
-
+            requestPublisherDTO.setClientIp(clientIp);
             publisher.publishEvent(requestPublisherDTO);
         } catch (Exception e) {
             log.error("Cannot publish event. " + e.getMessage(), e);

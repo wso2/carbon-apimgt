@@ -30,7 +30,7 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
 
     @Override
     public boolean mediate(MessageContext messageContext) {
-        if (DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled()
+        if (enabled
                 && !skipEventReceiverConnection) {
             Object totalTimeObject = messageContext.getProperty(APIMgtGatewayConstants
                     .REQUEST_EXECUTION_START_TIME);
@@ -59,7 +59,7 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
 
     protected void initializeDataPublisher() {
 
-        enabled = DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled();
+        enabled = APIUtil.isAnalyticsEnabled();
         skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                 isSkipEventReceiverConnection();
         if (!enabled || skipEventReceiverConnection) {

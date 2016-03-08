@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIMRegistryServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
 import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -2896,11 +2897,12 @@ public final class APIUtil {
     }
 
     public static boolean isAnalyticsEnabled() {
-        ServiceDataPublisherAdmin serviceDataPublisherAdmin = APIManagerComponent.getDataPublisherAdminService();
-        if (serviceDataPublisherAdmin != null) {
-            return serviceDataPublisherAdmin.getEventingConfigData().isServiceStatsEnable();
-        }
-        return false;
+        APIManagerConfigurationService apiManagerConfigurationService = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService();
+        APIManagerConfiguration configuration = apiManagerConfigurationService.getAPIManagerConfiguration();
+        String apiUsageEnabled = configuration.getFirstProperty(APIConstants.API_USAGE_ENABLED);
+
+        return JavaUtils.isTrueExplicitly(apiUsageEnabled);
     }
 
 
@@ -5163,16 +5165,6 @@ public final class APIUtil {
                         getFirstProperty(APIConstants.CORS_CONFIGURATION_ENABLED);
 
         return Boolean.parseBoolean(corsEnabled);
-    }
-
-    /**
-     * Used to return analytic enabled from the configuration
-     *
-     * @return true if analytics enabled in analytic configuration
-     */
-    public static boolean isStatsEnabled() {
-        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIAnalyticsConfiguration().isAnalyticsEnabled();
     }
 
     /**

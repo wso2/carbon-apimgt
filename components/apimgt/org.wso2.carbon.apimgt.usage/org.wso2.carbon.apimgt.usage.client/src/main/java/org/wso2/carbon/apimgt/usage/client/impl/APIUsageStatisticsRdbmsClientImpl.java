@@ -101,7 +101,7 @@ public class APIUsageStatisticsRdbmsClientImpl extends APIUsageStatisticsClient 
         try {
             config = APIUsageClientServiceComponent.getAPIManagerConfiguration();
             apiManagerAnalyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
-            if (apiManagerAnalyticsConfiguration.isAnalyticsEnabled() && dataSource == null) {
+            if (APIUtil.isAnalyticsEnabled() && dataSource == null) {
                 initializeDataSource();
             }
             // text = config.getFirstProperty("BillingConfig");

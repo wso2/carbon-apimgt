@@ -39,7 +39,7 @@ public class APIMgtLatencyStatsHandler extends AbstractHandler {
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        if (APIUtil.isStatsEnabled()) {
+        if (APIUtil.isAnalyticsEnabled()) {
             if (messageContext.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME) == null) {
 
                 long executionStartTime = Long.parseLong((String) messageContext.getProperty(APIMgtGatewayConstants

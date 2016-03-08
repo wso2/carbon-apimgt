@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.events.APIMgtWorkflowDataPublisher;
 import org.wso2.carbon.registry.core.utils.UUIDGenerator;
 
@@ -128,10 +129,7 @@ public abstract class WorkflowExecutor implements Serializable {
      * @param workflowDTO workflow DTO
      */
     public void publishEvents(WorkflowDTO workflowDTO) {
-        APIManagerAnalyticsConfiguration analyticsConfiguration = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().
-                getAPIAnalyticsConfiguration();
-        boolean enabled = analyticsConfiguration.isAnalyticsEnabled();
+        boolean enabled = APIUtil.isAnalyticsEnabled();
         if (enabled) {
             APIMgtWorkflowDataPublisher publisher = new APIMgtWorkflowDataPublisher();
             publisher.publishEvent(workflowDTO);

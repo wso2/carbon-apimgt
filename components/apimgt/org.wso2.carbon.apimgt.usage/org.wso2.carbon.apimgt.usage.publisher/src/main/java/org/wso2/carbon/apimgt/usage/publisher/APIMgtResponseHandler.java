@@ -58,7 +58,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
         }
 
         try {
-            if (!DataPublisherUtil.getApiManagerAnalyticsConfiguration().isAnalyticsEnabled()
+            if (!enabled
                 || skipEventReceiverConnection) {
                 return true;
             }
