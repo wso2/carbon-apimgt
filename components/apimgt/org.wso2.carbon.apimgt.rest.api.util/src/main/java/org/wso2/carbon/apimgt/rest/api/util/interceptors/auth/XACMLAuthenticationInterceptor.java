@@ -25,6 +25,7 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.wso2.balana.XACMLConstants;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.EntitlementServiceClient;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -43,8 +44,13 @@ public class XACMLAuthenticationInterceptor extends AbstractPhaseInterceptor {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
     }
-    public void handleMessage(Message outMessage) {
-        handleRequest(outMessage, null);
+    public void handleMessage(Message inMessage) {
+        //by-passes the interceptor if user calls an anonymous api
+        if (inMessage.get(RestApiConstants.AUTHENTICATION_REQUIRED) != null &&
+                !Boolean.parseBoolean(RestApiConstants.AUTHENTICATION_REQUIRED)) {
+            return;
+        }
+        handleRequest(inMessage, null);
     }
 
 
