@@ -44,15 +44,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
-
     private static final Log log = LogFactory.getLog(UserSignUpWSWorkflowExecutor.class);
-
     private String serviceEndpoint;
-
     private String username;
-
-    private String password;
-
+    private char[] password;
     private String contentType;
 
     @Override
@@ -119,8 +114,12 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
             String adminUsername = signupConfig.getAdminUserName();
             String adminPassword = signupConfig.getAdminPassword();
-            if (serverURL == null || adminUsername == null || adminPassword == null) {
-                throw new WorkflowException("Required parameter missing to connect to the" + " authentication manager");
+            if (serverURL == null) {
+                throw new WorkflowException("Can't connect to the authentication manager. serverUrl is missing");
+            } else if(adminUsername == null) {
+                throw new WorkflowException("Can't connect to the authentication manager. adminUsername is missing");
+            } else if(adminPassword == null) {
+                throw new WorkflowException("Can't connect to the authentication manager. adminPassword is missing");
             }
 
             String tenantAwareUserName = MultitenantUtils.getTenantAwareUsername(workflowDTO.getWorkflowReference());
@@ -162,11 +161,11 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
 
             client.fireAndForget(AXIOMUtil.stringToOM(payload));
         } catch (AxisFault axisFault) {
-            errorMsg = "Error sending out cancel pending user signup approval process message. cause: " + axisFault
+            errorMsg = "Error sending out cancel pending user signup approval process message. Cause: " + axisFault
                     .getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         } catch (XMLStreamException e) {
-            errorMsg = "Error converting cancel user signup String to OMElement. cause: " + e.getMessage();
+            errorMsg = "Error converting cancel user signup String to OMElement. Cause: " + e.getMessage();
             throw new WorkflowException(errorMsg, e);
         }
     }
@@ -194,9 +193,9 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
         // Assumes authentication is required if username and password is given
-        if (username != null && password != null) {
+        if (username != null && !username.isEmpty() && password != null && password.length != 0) {
             auth.setUsername(username);
-            auth.setPassword(password);
+            auth.setPassword(String.valueOf(password));
             auth.setPreemptiveAuthentication(true);
             List<String> authSchemes = new ArrayList<String>();
             authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
@@ -226,11 +225,11 @@ public class UserSignUpWSWorkflowExecutor extends UserSignUpWorkflowExecutor {
         this.contentType = contentType;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 

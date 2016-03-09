@@ -34,7 +34,6 @@ import java.util.List;
  * WS workflow executor for application delete action
  */
 public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor {
-
     private static final Log log = LogFactory.getLog(ApplicationDeletionSimpleWorkflowExecutor.class);
 
     @Override
@@ -44,6 +43,8 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
 
     @Override
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
+
+        // implemetation is not provided in this version
         return null;
     }
 
@@ -61,7 +62,7 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
         Application application = applicationWorkflowDTO.getApplication();
         Connection conn = null;
-        String errorMsg = null;
+        String errorMsg;
         try {
             conn = APIMgtDBUtil.getConnection();
             conn.setAutoCommit(false);
@@ -80,6 +81,8 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
                 try {
                     conn.rollback();
                 } catch (SQLException ex) {
+
+                    // exception is not thrown since it is caught when closing the database connection
                     log.error("Failed to rollback remove application ", ex);
                 }
             }
@@ -91,6 +94,8 @@ public class ApplicationDeletionSimpleWorkflowExecutor extends WorkflowExecutor 
                     conn.close();
                 }
             } catch (SQLException e) {
+
+                // exception is not thrown since it is caught when closing the database connection in a finally block
                 log.error("Couldn't close database connection of delete application workflow", e);
             }
         }

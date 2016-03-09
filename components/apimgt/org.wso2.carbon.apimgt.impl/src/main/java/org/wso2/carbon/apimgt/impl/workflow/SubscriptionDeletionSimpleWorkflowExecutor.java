@@ -34,7 +34,6 @@ import java.util.List;
  * Simple workflow executor for subscription delete action
  */
 public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor {
-
     private static final Log log = LogFactory.getLog(SubscriptionDeletionSimpleWorkflowExecutor.class);
 
     @Override
@@ -44,6 +43,8 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
 
     @Override
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
+
+        // implemetation is not provided in this version
         return null;
     }
 
@@ -60,7 +61,7 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         SubscriptionWorkflowDTO subWorkflowDTO = (SubscriptionWorkflowDTO) workflowDTO;
         Connection conn = null;
-        String errorMsg = null;
+        String errorMsg;
 
         try {
             APIIdentifier identifier = new APIIdentifier(subWorkflowDTO.getApiProvider(),
@@ -80,6 +81,8 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
                 try {
                     conn.rollback();
                 } catch (SQLException ex) {
+
+                    // exception is not thrown since it is caught when closing the database connection
                     log.error("Failed to rollback remove subscription ", ex);
                 }
             }
@@ -91,6 +94,8 @@ public class SubscriptionDeletionSimpleWorkflowExecutor extends WorkflowExecutor
                     conn.close();
                 }
             } catch (SQLException e) {
+
+                // exception is not thrown since it is caught when closing the database connection in a finally block
                 log.error("Couldn't close database connection for subscription deletion workflow", e);
             }
         }

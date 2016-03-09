@@ -41,15 +41,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
-
     private static final Log log = LogFactory.getLog(SubscriptionCreationWSWorkflowExecutor.class);
-
     private String serviceEndpoint;
-
     private String username;
-
-    private String password;
-
+    private char[] password;
     private String contentType;
 
     @Override
@@ -192,9 +187,9 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
         HttpTransportProperties.Authenticator auth = new HttpTransportProperties.Authenticator();
 
         // Assumes authentication is required if username and password is given
-        if (username != null && password != null) {
+        if (username != null && !username.isEmpty() && password != null && password.length != 0) {
             auth.setUsername(username);
-            auth.setPassword(password);
+            auth.setPassword(String.valueOf(password));
             auth.setPreemptiveAuthentication(true);
             List<String> authSchemes = new ArrayList<String>();
             authSchemes.add(HttpTransportProperties.Authenticator.BASIC);
@@ -227,11 +222,11 @@ public class SubscriptionCreationWSWorkflowExecutor extends WorkflowExecutor {
         this.username = username;
     }
 
-    public String getPassword() {
+    public char[] getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(char[] password) {
         this.password = password;
     }
 
