@@ -59,3 +59,29 @@ div.image-container {
     padding-top: 100px;
     padding-bottom: 100px;
 }
+
+/* ========================================================================
+ * Media panels tablist
+ * ======================================================================== */
+
+#accordion h4 a{
+    text-decoration:none;
+    font-weight:bold;
+}
+#accordion h4 p{
+    padding:10px 20px;
+    margin-bottom:0px;
+}
+#accordion .panel{
+    margin-bottom:10px;
+}
+#accordion .panel-heading{
+    padding:10px;
+    background:#e2e2e2;
+    margin-bottom:0px;
+    border:none;
+}
+#accordion .panel-collapse{
+    padding:10px;
+    border:1px solid #e2e2e2;
+}
