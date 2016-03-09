@@ -90,15 +90,15 @@
     <div class="row">
         <div class="col-sm-12">
 
-        <div class="panel panel-default">
+        <div class="panel panel-default" id="accordion">
           <div class="panel-heading" style="height:100px;">
               <div class="api-implement-type" data-parent="#accordion" data-toggle="collapse" data-target="#managed-api" value="#managed-api">
                  <div class="col-sm-1">
                      <i class="icon-implement fa fa-cogs fa-3x"></i>
                  </div>
                  <div class="col-sm-11">
-                     <h4>Managed API</h4>
-                     <p>Provide the production and sandbox endpoints of the API to be managed.</p>
+                     <h3>Managed API</h3>
+                     <h5>Provide the production and sandbox endpoints of the API to be managed.</h5>
                  </div>
               </div>
         </div>
@@ -294,15 +294,16 @@
             </div>
             </div>
 
-            <div class="panel panel-default">
+            <div class="panel panel-default" id="accordion">
               <div class="panel-heading" style ="height:100px;">
                   <div class="api-implement-type" data-parent="#accordion" data-toggle="collapse" data-target="#prototype" value="#prototype">
+                  	 
                      <div class="col-sm-1">
                          <i class="icon-implement fa fa-cog fa-3x"></i>
                      </div>
                      <div class="col-sm-11">
-                         <h4>Prototyped API</h4>
-                         <p>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</p>
+                         <h3 >Prototyped API</h3>
+                         <h5>Use the inbuilt JavaScript engine to prototype the API or provide an endpoint to a prototype API. The inbuilt JavaScript engine does not have support to prototype SOAP APIs</h5>
                      </div>
                   </div>
               </div>

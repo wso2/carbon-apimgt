@@ -103,7 +103,7 @@
 
     <div class="row">
         <div class="col-sm-12">
-            <form class="form-horizontal" method="POST"
+            <form class="form-horizontal apim-form" method="POST"
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
 
@@ -116,7 +116,7 @@
         </a>
       </h4>
     </div>
-    <div id="collapseOne" role="tabpanel" aria-labelledby="headingOne">
+    <div id="collapseOne" role="tabpanel" class="panel-collapse collapse in" aria-labelledby="headingOne">
       <div class="panel-body">
 
             <div class="form-group form-inline">
@@ -288,7 +288,7 @@
       </div>
     </div>
   </div><!-- End of configuration panel -->
-  <div class="panel panel-default">
+  <div class="panel panel-default" id="accordion">
     <div class="panel-heading" role="tab" id="headingTwo">
       <h4 class="panel-title">
         <a class="collapsed" data-toggle="collapse" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -354,7 +354,7 @@
     </div>
   </div><!-- Gateway environments -->
 
-  <div class="panel panel-default">
+  <div class="panel panel-default" id="accordion">
     <div class="panel-heading" role="tab" id="headingThree">
       <h4 class="panel-title">
         <a class="collapsed" data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
@@ -392,7 +392,7 @@
     </div>
   </div><!-- Business Information -->
 
-  <div class="panel panel-default">
+  <div class="panel panel-default" id="accordion">
     <div class="panel-heading" role="tab" id="headingFour">
       <h4 class="panel-title">
         <a class="" data-toggle="collapse" href="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
