@@ -131,7 +131,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 id="swaggerUploadLabel">Import API Definition</h3>
+        <h4 id="swaggerUploadLabel">Import API Definition</h4>
       </div>
         <div class="modal-body" style="height:140px;">
             <div id="swagger_help" class="alert alert-danger hide" role="alert">
@@ -170,7 +170,7 @@
 
     <div class="row">
         <div class="col-sm-12">     
-            <form class="form-horizontal" method="POST"
+            <form class="form-horizontal apim-form" method="POST"
               id="design_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
 
@@ -410,6 +410,8 @@
 
                     <a class="btn btn-primary has-spinner" id="go_to_implement">Next: Implement &gt;</a>
 
+                </div>
+                </div>
                 </div>
             </form>
 
