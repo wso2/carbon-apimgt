@@ -5,16 +5,13 @@ var updateSubscription = function (apiName, version, provider, appId, newstatus,
     n = Math.round(n);
     var ahrefId = $(link);
     var status = ahrefId.text();
-    console.log(status);
-    //var blockType = getRadioValue($('input[name=blockType'+n+']:radio:checked'));
-    var newProdStatus = $('#prodStatus'+n).val();
-    var newSandboxStatus = $('#sandboxStatus'+n).val();
-    console.log(newProdStatus);
-    if (newProdStatus.trim().toUpperCase() == 'Unblock'.toUpperCase() && newSandboxStatus.trim().toUpperCase() == 'Unblock'.toUpperCase()) {
+    var blockType = getRadioValue($('input[name=blockType'+n+']:radio:checked'));
+    var newStatus;
+    if (status.trim().toUpperCase() == 'Unblock'.toUpperCase()) {
         newStatus = 'UNBLOCKED';
-        //$('input[name=blockType'+n+']:radio:checked').removeAttr("checked");
-    } else if(newProdStatus.trim().toUpperCase() == 'Unblock') {
-    	//newStatus = 'PROD_ONLY_BLOCKED';
+        $('input[name=blockType'+n+']:radio:checked').removeAttr("checked");
+    } else if(blockType == 'blockProduction') {
+    	newStatus = 'PROD_ONLY_BLOCKED';
     } else {
     	$('input[name=blockType'+n+']').attr('checked', 'checked');
         newStatus = 'BLOCKED';

@@ -1,4 +1,5 @@
 {
+	"apiPublisher":"API Publisher",
     "api":"API",
     "name" : "Name" ,
     "context" : "Context" ,
@@ -68,10 +69,14 @@
     "apis":"APIs",
 
     "addAPI":"Add New API",
+    "editAPI":"Edit API",
+    "manageAPI":"Manage API",
+    "viewInStore":"View in Store",
     "allStats":"All Statistics",
     "myAPIs":"My APIs",
     "user":"User",
     "subscriptions":"Subscriptions",
+    "manageSubscriptions":"Manage Subscriptions",
     "statistics":"Statistics",
     "revokeTokens":"Revoke Tokens",
     "blockProduction":"Production Only",

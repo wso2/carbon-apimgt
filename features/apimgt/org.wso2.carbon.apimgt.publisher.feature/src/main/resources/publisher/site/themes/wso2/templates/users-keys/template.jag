@@ -13,19 +13,18 @@
 		</script>
 		<div id="col-sm-12">
         <div id="userKey">
-            <div class="page-header">
-                <h2><%=i18n.localize("subscriptions")%></h2>
-            </div>
+			<div class="page-header">
+				<h2><%=i18n.localize("subscriptions")%></h2>
+			</div>
 
                     <table class="table table-bordered display data-table">
                         <thead>
-                            <tr class="filter-row">
+                            <tr>
                                 <th class="userSpecialCell"><%=i18n.localize("user")%></th>
-                                <th class="appSpecialCell" class="text-filter"><%=i18n.localize("application")%></th>
+                                <th class="appSpecialCell"><%=i18n.localize("application")%></th>
 
                                 <th class="appSpecialCell">Subscribed APIs</th>
-                                <th class="userSpecialCell col-sm-4">Production Subscriptions</th>
-				<th class="userSpecialCell col-sm-4">Sandbox Subscriptions</th>
+                                <th class="userSpecialCell col-sm-4">Actions</th>
 								<th class="userSpecialCell">Still Subscribed?</th>
                             </tr>
                         </thead>
@@ -109,7 +108,7 @@
                 if(apiList != null){
                     var apis=apiList.split(",");
                 %>
-                                <td rowspan=<%=apis.length%>><span class="icon fw-stack fw-lg"><i class="fw fw-user fw-stack-1x"></i></span><%=subscriber.username%></td>
+                                <td rowspan=<%=apis.length%>><i class="icon-user"></i><%=subscriber.username%></td>
                                 <td rowspan=<%=apis.length%>><%=subscriber.application%></td>
 
 	                <%
@@ -124,7 +123,7 @@
                     %>
 
                                 <td rowspan="1">
-	                                <a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})" class="navbar-link">
+	                                <a href="<%= apiPath%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiPath%>',e:event})">
 	                                    <%=apiName%>-<%=version%>
 	                                </a>
 	                            </td>
@@ -141,131 +140,50 @@
 	                }
                     listCount ++;
         	        var radioInputName = "blockType" + listCount;
-			var prodValueId = "prodStatus" + listCount;
-			var sandboxValueId = "sandboxStatus" + listCount;
                     %>
-                                <td>
-                    <%if (existingStatus=='PROD_ONLY_BLOCKED') { %>
-					<a href="#" data-click-event="remove-form" class="btn " onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
-				            <i class="<%=className%>"></i>
-				            <span class="hidden-xs">Unblock</span>
-				        </a>
-					<input id="<%=prodValueId%>" type="hidden" value="block">
+                                <td style="width:300px">
 
-					
-					<!--<label class="btn btn-primary active">
-						<input type="radio" name="<%=radioInputName%>" value="blockProduction" id="y"><%=i18n.localize("blockProduction")%>
-					</label>
-					<label class="btn btn-primary">
-					      <input type="radio" name="<%=radioInputName%>" value="blockAll" id="z"><%=i18n.localize("blockAll")%>
-					</label>   -->    		                        
+                    <%if (existingStatus=='PROD_ONLY_BLOCKED') { %>
+       		                        <label class="radio-inline">
+       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" checked="true" disabled/><%=i18n.localize("blockProduction")%>
+       		                        </label>
+       		                        <label  class="radio-inline">
+       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll"  disabled/><%=i18n.localize("blockAll")%>
+                                    </label>
                         <%} else if (existingStatus=='BLOCKED'){%>
-					<a href="#" data-click-event="remove-form" class="btn " onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
-				            <i class="<%=className%>"></i>
-				            <span class="hidden-xs">Unblock</span>
-				        </a>
-					<input id="<%=prodValueId%>" type="hidden" value="block">
-					
-       		                        <!--<label class="radio-inline">
+
+       		                        <label class="radio-inline">
        		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" disabled/><%=i18n.localize("blockProduction")%>
        		                        </label>
        		                        <label  class="radio-inline">
        		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll" checked="true" disabled/><%=i18n.localize("blockAll")%>
-       		                        </label>-->
+       		                        </label>
                         <%} else {%>
-					<a href="#" data-click-event="remove-form" class="btn " onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
-				            <i class="<%=className%>"></i>
-				            <span class="hidden-xs">Block</span>
-				        </a>
-					<input id="<%=prodValueId%>" type="hidden" value="unblock">
-					
-					<!--<label class="btn btn-primary">
-						<input type="radio" name="<%=radioInputName%>" value="blockProduction" id="y"><%=i18n.localize("blockProduction")%>
-					</label>
-					<label class="btn btn-primary">
-					      <input type="radio" name="<%=radioInputName%>" value="blockAll" id="z"><%=i18n.localize("blockAll")%>
-					</label>    -->                                     
+
+                                        <label class="radio-inline"><input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" /><%=i18n.localize("blockProduction")%></label>
+                                        <label  class="radio-inline"><input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll"  /><%=i18n.localize("blockAll")%></label>
 
                         <% }%>
+
                         <%if(existingStatus == 'ON_HOLD'){
                             var tip = i18n.localize("subsPendingApproval");
                         %>
-                                   <!-- <span id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
+                                    <span id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
                                     onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>'
                                             ,'<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)"
                                     title="<%=tip%>">
                                         <i class="<%=className%>"></i> <%=status%>
-                                    </span>-->
+                                    </span>
                         <%}
                         else{%>
-                                   <!-- <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
+                                    <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
                                     onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>'
                                             ,'<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
                                         <i class="<%=className%>"></i> <%=status%>
-                                    </a> -->
+                                    </a>
                         <%}%>
                                </td>
-
-				<td>
-
-					<%if (existingStatus=='PROD_ONLY_BLOCKED') { %>
-					
-					<a href="#" id="sandbox<%=listCount%>" data-click-event="remove-form" class="btn padding-reduce-on-grid-view" onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
-				            <i class="<%=className%>"></i>
-				            <span class="hidden-xs">Block</span>
-				        </a>
-					<input id="<%=sandboxValueId%>" type="hidden" value="unblock">
-					<!--<label class="btn btn-primary active">
-						<input type="radio" name="<%=radioInputName%>" value="blockProduction" id="y"><%=i18n.localize("blockProduction")%>
-					</label>
-					<label class="btn btn-primary">
-					      <input type="radio" name="<%=radioInputName%>" value="blockAll" id="z"><%=i18n.localize("blockAll")%>
-					</label>   -->    		                        
-                        <%} else if (existingStatus=='BLOCKED'){%>
-					<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view" onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
-				            <i class="<%=className%>"></i>
-				            <span class="hidden-xs">Unblock</span>
-				        </a>
-					<input id="<%=sandboxValueId%>" type="hidden" value="block">
-       		                        <!--<label class="radio-inline">
-       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockProduction" disabled/><%=i18n.localize("blockProduction")%>
-       		                        </label>
-       		                        <label  class="radio-inline">
-       		                            <input type="radio" class="radio-class" name="<%=radioInputName%>" value="blockAll" checked="true" disabled/><%=i18n.localize("blockAll")%>
-       		                        </label>-->
-                        <%} else {%>
-					<a href="#" data-click-event="remove-form" class="btn padding-reduce-on-grid-view" onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>','<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
-				            <i class="<%=className%>"></i>
-				            <span class="hidden-xs">Block</span>
-				        </a>
-					<input id="<%=sandboxValueId%>" type="hidden" value="unblock">
-					<!--<label class="btn btn-primary">
-						<input type="radio" name="<%=radioInputName%>" value="blockProduction" id="y"><%=i18n.localize("blockProduction")%>
-					</label>
-					<label class="btn btn-primary">
-					      <input type="radio" name="<%=radioInputName%>" value="blockAll" id="z"><%=i18n.localize("blockAll")%>
-					</label>    -->                                     
-
-                        <% }%>
-                        <%if(existingStatus == 'ON_HOLD'){
-                            var tip = i18n.localize("subsPendingApproval");
-                        %>
-                                   <!-- <span id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
-                                    onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>'
-                                            ,'<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)"
-                                    title="<%=tip%>">
-                                        <i class="<%=className%>"></i> <%=status%>
-                                    </span>-->
-                        <%}
-                        else{%>
-                                   <!-- <a id="<%=apiName%><%=jagg.getUser().username%><%=subscriber.appId%>"
-                                    onclick="updateSubscription('<%=apiName%>','<%=version%>','<%=jagg.getUser().username%>'
-                                            ,'<%=subscriber.appId%>', '<%=newStatus%>', '<%=listCount%>', this)">
-                                        <i class="<%=className%>"></i> <%=status%>
-                                    </a> -->
-                        <%}%>
-				</td>
-						 <td>
+						 <td style="width:100px">
                     <% if (subscriptionStatus =='SUBSCRIBE') {%>
                         <label>Yes</label>
                     <%} else {%>

@@ -72,27 +72,15 @@
 		<div class="nano">
 			<div class="nano-content">
 				<ul class="nav navbar-stacked">
-					<li class="sidebar-brand"><%=i18n.localize("apis")%></li>
-					<li
-						<%if(reqUrl.equals(jagg.url(""))||reqUrl.equals(jagg.url("/"))||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0|| reqUrl.indexOf(userUrl)>=0||reqUrl.indexOf(userMappedUrl)>=0){%>
-						class="active" <% } %>><a
+					<li><a
 						href="<%=listMappedUrl%>?page=1<%=urlPostfix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("browse")%></a></li>
-					<%if(isPermitted){%><li
-						<% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addDesignUrl)>=0){%>
-						class="active" <% } %>><a href="<%=addUrl%><%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=addDesignUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("add")%></a></li>
-					<%}%>
-					<!-- <%if(isPermitted){%><li <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(addMappedUrl)>=0){%>class="active"<% } %>><a href="<%=addMappedUrl%><%=urlPrefix%>" onclick="jagg.sessionAwareJS({redirect:'<%=addMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"></a></li><%}%>-->
-					<li
-						<% if(reqUrl.indexOf(allStatsUrl)>=0 || reqUrl.indexOf(allStatsMappedUrl)>=0){%>
-						class="active" <% } %>><a
+						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-api"></i> <%=i18n.localize("apis")%></a></li>
+					<li><a
 						href="<%=allStatsMappedUrl%>?stat=all-stat&page=api-subscriptions<%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?stat=all-stat&page=api-subscriptions<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("allStats")%><i
-							style="margin-left: 10px;" class="icon-chevron-down"></i></a></li>
+						onclick="jagg.sessionAwareJS({redirect:'<%=allStatsMappedUrl%>?stat=all-stat&page=api-subscriptions<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-statistics"></i> <%=i18n.localize("statistics")%></a></li>
 					<%       var stat;
-    var  stat = request.getParameter("stat");
-    if(stat == "all-stat" ) {%>
+    				var  stat = request.getParameter("stat");
+    				if(stat == "all-stat" ) {%>
 					<li class="child-nodesw"><ul class="nav nav-list">
 							<li <% if(page == "api-subscriptions"){ %> class="statsActive"
 								<% } %>><a class="substats"
@@ -140,75 +128,11 @@
 
 
 					<%if(isPermitted){%>
-					<li class="sidebar-brand"><%=i18n.localize("myAPIs")%></li>
-					<li
-						<% if(reqUrl.indexOf(subsUrl)>=0||reqUrl.indexOf(subsMappedUrl)>=0){%>
-						class="active" <% } %>><a class="js_toggler"
+					<li><a class="js_toggler"
 						href="<%=subsMappedUrl%><%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("subscriptions")%></a></li>
-					<li
-						<% if(reqUrl.indexOf(statsUrl)>=0||reqUrl.indexOf(statsMappedUrl)>=0){%>
-						class="active" <% } %>><a class="js_toggler"
-						href="<%=statsMappedUrl%>?stat=stat&page=api-subscriptions<%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?stat=stat&page=api-subscriptions<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("statistics")%><i
-							style="margin-left: 28px;" class="icon-chevron-down"></i></a></li>
-
-					<%  var  stat = request.getParameter("stat");
-        if(stat == "stat" ) {%>
-					<li class="child-nodesw"><ul class="nav nav-list">
-							<li <% if(page == "api-subscriptions"){ %> class="statsActive"
-								<% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=api-subscriptions&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-subscriptions&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiSubscriptons")%></a></li>
-							<li <% if(page == "api-usage-user"){ %> class="statsActive"
-								<% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=api-usage-user&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%><?page=api-usage-user&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiUsage")%></a></li>
-							<li <% if(page == "api-response-times"){ %> class="statsActive"
-								<% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=api-response-times&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-response-times&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiResponseTimes")%></a></li>
-							<li <% if(page == "api-last-access-times"){ %>
-								class="statsActive" <% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=api-last-access-times&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-last-access-times&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiLastAccessTimes")%></a></li>
-							<li <% if(page == "api-usage-resource-path"){ %>
-								class="statsActive" <% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=api-usage-resource-path&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-usage-resource-path&stat=stat',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiUsageResourcePath")%></a></li>
-							<li <% if(page == "api-usage-destination"){ %>
-								class="statsActive" <% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=api-usage-destination&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-usage-destination&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiUsageFromDestination")%></a></li>
-							<li <% if(page == "api-usage"){ %> class="statsActive" <% } %>><a
-								class="substats"
-								href="<%=statsMappedUrl%>?page=api-usage&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-usage&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiUsageComparison")%></a></li>
-							<li <% if(page == "api-throttledcounts"){ %> class="statsActive"
-								<% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=api-throttledcounts&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=api-throttledcounts&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("apiThrottledCounts")%></a></li>
-							<li <% if(page == "application-throttledcounts"){ %>
-								class="statsActive" <% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=application-throttledcounts&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=application-throttledcounts&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("applicationThrottledCounts")%></a></li>
-							<li <% if(page == "faulty-invocations"){ %> class="statsActive"
-								<% } %>><a class="substats"
-								href="<%=statsMappedUrl%>?page=faulty-invocations&stat=stat<%=urlPrefix%>"
-								onclick="jagg.sessionAwareJS({redirect:'<%=statsMappedUrl%>?page=faulty-invocations&stat=stat<%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("faultyInvocations")%></a></li>
-						</ul></li>
+						onclick="jagg.sessionAwareJS({redirect:'<%=subsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-settings"></i> <%=i18n.localize("manageSubscriptions")%></a></li>
+					
 					<%}%>
-
-					<%}%>
-					<%if(isManageTierPermitted){%>
-					<li class="sidebar-brand"><%=i18n.localize("tierPermissions")%></li>
-					<li
-						<% if(reqUrl.indexOf(tierPermissionsUrl)>=0||reqUrl.indexOf(tierPermissionsMappedUrl)>=0){%>
-						class="active" <% } %>><a
-						href="<%=tierPermissionsMappedUrl%><%=urlPrefix%>"
-						onclick="jagg.sessionAwareJS({redirect:'<%=tierPermissionsMappedUrl%><%=urlPrefix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%=i18n.localize("tierPermissions")%></a></li>
-					<%}%>
-
 				</ul>
 			</div>
 		</div>
