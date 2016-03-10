@@ -24,7 +24,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.HTTPVerbCondition;
 import org.wso2.carbon.apimgt.api.model.policy.IPCondition;
 import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
@@ -32,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 
 public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     
@@ -48,7 +52,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     }
 
     public void testGetThrottlePolicyForAPILevelPerUser() throws Exception {
-        Policy policy = getPolicyAPILevelPerUser();
+        APIPolicy policy = getPolicyAPILevelPerUser();
         String apiContext = "/weather";
         String apiName = "weather";
         String apiVersion = "1.0.0";
@@ -56,7 +60,7 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     }
     
     public void  testGetThrottlePolicyForAPILevelPerAPI() throws Exception {
-        Policy policy = getPolicyAPILevelPerAPI();
+        APIPolicy policy = getPolicyAPILevelPerAPI();
         String apiContext = "/weather";
         String apiName = "weather";
         String apiVersion = "1.0.0";
@@ -64,27 +68,27 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
     }
     
     public void  testGetThrottlePolicyForGlobalLevel() throws Exception {        
-        Policy policy = getPolicyGlobalLevel();       
+        GlobalPolicy policy = getPolicyGlobalLevel();
         System.out.println(templateBuilder.getThrottlePolicyForGlobalLevel(policy));   
         
     }
     public void  testGetThrottlePolicyForAppLevel() throws Exception {        
-        Policy policy = getPolicyAppLevel();   
+        ApplicationPolicy policy = getPolicyAppLevel();
         System.out.println(templateBuilder.getThrottlePolicyForAppLevel(policy));   
         
     }
     public void  testGetThrottlePolicyForSubscriptionLevelperUser() throws Exception {        
-        Policy policy = getPolicySubscriptionLevelperUser();
+        SubscriptionPolicy policy = getPolicySubscriptionLevelperUser();
         System.out.println(templateBuilder.getThrottlePolicyForSubscriptionLevel(policy));   
         
     } 
     
-    private Policy getPolicyAPILevelPerAPI(){
-        Policy policy = new Policy("Gold");
+    private APIPolicy getPolicyAPILevelPerAPI(){
+        APIPolicy policy = new APIPolicy("Gold");
         
         policy.setUserLevel(PolicyConstants.ACROSS_ALL);
         policy.setDescription("Description");    
-        policy.setPolicyLevel("api");
+       // policy.setPolicyLevel("api");
        
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");
@@ -153,20 +157,20 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
         pipelines.add(p);
         ///////////pipeline item end//////
         
-        
+
         policy.setPipelines(pipelines);
         
         return policy;
     }
     
     
-    private Policy getPolicyAPILevelPerUser(){
-        Policy policy = new Policy("Gold");
+    private APIPolicy getPolicyAPILevelPerUser(){
+        APIPolicy policy = new APIPolicy("Gold");
         
         policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");    
-        policy.setPolicyLevel("api");
-       
+        //policy.setPolicyLevel("api");
+
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");
         defaultLimit.setUnitTime(5);
@@ -218,12 +222,12 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
         return policy;
     }
     
-    private Policy getPolicyAppLevel(){
-        Policy policy = new Policy("gold");
+    private ApplicationPolicy getPolicyAppLevel(){
+        ApplicationPolicy policy = new ApplicationPolicy("gold");
         
         policy.setUserLevel(PolicyConstants.ACROSS_ALL); 
         policy.setDescription("Description");    
-        policy.setPolicyLevel("app");
+       // policy.setPolicyLevel("app");
        
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");
@@ -240,12 +244,12 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
         return policy;
     }
     
-    private Policy getPolicyGlobalLevel(){
-        Policy policy = new Policy("1");
+    private GlobalPolicy getPolicyGlobalLevel(){
+        GlobalPolicy policy = new GlobalPolicy("1");
         
         policy.setUserLevel(PolicyConstants.ACROSS_ALL);
         policy.setDescription("Description");    
-        policy.setPolicyLevel("global");
+       // policy.setPolicyLevel("global");
        
         List<Pipeline> pipelines = new ArrayList<Pipeline>();
         Pipeline p = new Pipeline();
@@ -264,17 +268,17 @@ public class ThrottlingPolicyTemplateBuilderTest extends TestCase {
         p.setConditions(condition);
         pipelines.add(p);
         
-        policy.setPipelines(pipelines);
+      //  policy.setPipelines(pipelines);
       
         return policy;
     }
     
-    private Policy getPolicySubscriptionLevelperUser(){
-        Policy policy = new Policy("gold");
+    private SubscriptionPolicy getPolicySubscriptionLevelperUser(){
+        SubscriptionPolicy policy = new SubscriptionPolicy("gold");
         
       
         policy.setDescription("Description");    
-        policy.setPolicyLevel("sub");
+        //policy.setPolicyLevel("sub");
        
         RequestCountLimit defaultLimit = new RequestCountLimit();
         defaultLimit.setTimeUnit("min");

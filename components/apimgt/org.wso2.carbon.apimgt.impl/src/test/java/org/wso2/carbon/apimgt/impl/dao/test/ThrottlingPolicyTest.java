@@ -31,6 +31,7 @@ import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
 public class ThrottlingPolicyTest extends TestCase {
     ApiMgtDAO apiMgtDAO;
 
@@ -48,12 +49,12 @@ public class ThrottlingPolicyTest extends TestCase {
         apiMgtDAO.addThrottlingPolicy(getPolicyAPILevelPerUser());
     }
 
-    private Policy getPolicyAPILevelPerUser(){
-        Policy policy = new Policy("Silver");
+    private APIPolicy getPolicyAPILevelPerUser(){
+        APIPolicy policy = new APIPolicy("Silver");
 
         policy.setUserLevel(PolicyConstants.PER_USER);
         policy.setDescription("Description");
-        policy.setPolicyLevel("api");
+      //  policy.setPolicyLevel("api");
         policy.setTenantId(-1234);
 
         RequestCountLimit defaultLimit = new RequestCountLimit();
@@ -163,9 +164,12 @@ public class ThrottlingPolicyTest extends TestCase {
         ///////////pipeline item 2 end//////
 
         policy.setPipelines(pipelines);
-        policy.setRateLimitCount(100);
-        policy.setRatelimitTimeUnit("sec");
+        */
+/*policy.setRateLimitCount(100);
+        policy.setRatelimitTimeUnit("sec");*//*
+
 
         return policy;
     }
 }
+*/
