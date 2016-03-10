@@ -48,23 +48,20 @@ public class APIMgtUsageHandler extends AbstractHandler {
     public boolean handleRequest(MessageContext mc) {
 
         boolean enabled = APIUtil.isAnalyticsEnabled();
+        boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
+                isSkipEventReceiverConnection();
+
+        if (!enabled || skipEventReceiverConnection) {
+            return true;
+        }
 
         /*setting global analytic enabled status. Which use at by the by bam mediator in
         synapse to enable or disable destination based stat publishing*/
         mc.setProperty("isStatEnabled", Boolean.toString(enabled));
 
-        boolean skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                isSkipEventReceiverConnection();
-
-        String publisherClass = UsageComponent.getAmConfigService().
-                getAPIAnalyticsConfiguration().getPublisherClass();
+        String publisherClass = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration().getPublisherClass();
         try {
             long currentTime = System.currentTimeMillis();
-
-            if (!enabled || skipEventReceiverConnection) {
-                return true;
-            }
-
             if (publisher == null) {
                 // The publisher initializes in the first request only
                 synchronized (this) {
@@ -113,7 +110,7 @@ public class APIMgtUsageHandler extends AbstractHandler {
 
             String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
             if (apiPublisher == null) {
-                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion,tenantDomain);
+                apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
 
             String api = APIUtil.getAPINamefromRESTAPI(apiVersion);

@@ -28,6 +28,7 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
@@ -39,6 +40,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 /*
@@ -103,7 +105,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                     if (env != null) {
                         SOAPBody soapbody = env.getBody();
                         if (soapbody != null) {
-                            byte[] size = soapbody.toString().getBytes();
+                            byte[] size = soapbody.toString().getBytes(Charset.defaultCharset());
                             responseSize = size.length;
                         }
                     }
@@ -145,6 +147,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                     APIMgtGatewayConstants.VERSION));
             responsePublisherDTO.setResourcePath((String) mc.getProperty(
                     APIMgtGatewayConstants.RESOURCE));
+            responsePublisherDTO.setResourceTemplate((String) mc.getProperty(APIConstants.API_ELECTED_RESOURCE));
             responsePublisherDTO.setMethod((String) mc.getProperty(
                     APIMgtGatewayConstants.HTTP_METHOD));
             responsePublisherDTO.setResponseTime(responseTime);

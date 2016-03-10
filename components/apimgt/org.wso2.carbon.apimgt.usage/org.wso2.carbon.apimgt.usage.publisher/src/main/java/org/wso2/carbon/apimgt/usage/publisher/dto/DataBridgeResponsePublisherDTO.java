@@ -27,6 +27,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setApi_version(responsePublisherDTO.getApi_version());
         setApi(responsePublisherDTO.getApi());
         setResourcePath(responsePublisherDTO.getResourcePath());
+        setResourceTemplate(responsePublisherDTO.getResourceTemplate());
         setMethod(responsePublisherDTO.getMethod());
         setVersion(responsePublisherDTO.getVersion());
         setResponseTime(responsePublisherDTO.getResponseTime());
@@ -62,6 +63,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                "          {'name':'api_version','type':'STRING'}," +
                "          {'name':'api','type':'STRING'}," +
                "          {'name':'resourcePath','type':'STRING'}," +
+               "          {'name':'resourceTemplate','type':'STRING'}," +
                "          {'name':'method','type':'STRING'}," +
                "          {'name':'version','type':'STRING'}," +
                "          {'name':'response','type':'INT'}," +
@@ -85,7 +87,7 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
 
     public Object createPayload() {
         return new Object[]{getConsumerKey(), getContext(), getApi_version(), getApi(),
-                            getResourcePath(), getMethod(),
+                            getResourcePath(), getResourceTemplate(), getMethod(),
                             getVersion(), getResponse(),getResponseTime(), getServiceTime(), getBackendTime(), getUsername(),
                             getEventTime(), getTenantDomain(), getHostName(),
                             getApiPublisher(), getApplicationName(), getApplicationId(), getCacheHit(),
