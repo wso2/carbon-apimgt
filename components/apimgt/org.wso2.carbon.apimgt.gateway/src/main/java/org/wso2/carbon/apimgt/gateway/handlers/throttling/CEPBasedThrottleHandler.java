@@ -146,7 +146,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
     }
 
     private boolean doThrottle(MessageContext messageContext) {
-        boolean isThrottled = true;
+        boolean isThrottled = false;
         if (!messageContext.isResponse()) {
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
