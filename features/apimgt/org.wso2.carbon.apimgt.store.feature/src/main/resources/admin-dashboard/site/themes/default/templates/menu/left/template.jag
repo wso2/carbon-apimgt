@@ -35,8 +35,13 @@
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("themeUpload") %></a></li>
         <li <%if (reqUrl.match("analytics")){%>class="active"<% } %>><a href="<%= jagg.url("/analytics") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("analytics") %></a></li>
+    <li class="nav-header"><%="Throttling"%></li>
         <li <%if (reqUrl.match("tier-manage")){%>class="active"<% } %>><a href="<%= jagg.url("/tier-manage") %>"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("tierManagement") %></a></li>
+        <li <%if (reqUrl.match("app-policy-manage")){%>class="active"<% } %>><a href="<%= jagg.url("/app-policy-manage") %>"
+        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= " App Level Policies" %></a></li>
+        <li <%if (reqUrl.match("subscription-policy-manage")){%>class="active"<% } %>><a href="<%= jagg.url("/subscription-policy-manage") %>"
+        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= " Subscription Level Policies" %></a></li>
      </ul>
 </div>
 

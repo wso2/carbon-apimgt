@@ -1,0 +1,74 @@
+<%
+var log = new Log();
+
+var addAppPolicy = function (policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
+                             defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit, stopOnQuotaReach, tierPlan, attributes) {
+    try {
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var policy = constructPolicyObject(provider, policyName, description, defaultQuotaPolicy, defaultRequestCount,
+                defaultBandwidth, defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit);
+
+        apiProvider.addPolicy(policy);
+        log.info(policy.toString());
+        return {
+            error: false
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while saving policy (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+
+var constructPolicyObject = function (userName, policyName, description, defaultQuotaPolicy, defaultRequestCount, defaultBandwidth,
+                                      defaultBandwidthUnit, defaultUnitTime, defaultTimeUnit) {
+    var Policy = Packages.org.wso2.carbon.apimgt.api.model.policy.Policy;
+    var QuotaPolicy = Packages.org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+    var RequestCountLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+    var BandwidthLimit = Packages.org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+    var Pipeline = Packages.org.wso2.carbon.apimgt.api.model.policy.Pipeline;
+    var ArrayList = Packages.java.util.ArrayList;
+    var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+    var policy = new Policy(policyName);
+
+    policy.setPolicyName(policyName);
+    policy.setDescription(description);
+    policy.setPolicyLevel("app");
+
+    var tenantId = APIUtil.getTenantId(userName);
+    policy.setTenantId(tenantId);
+
+    var default_quotaPolicy = new QuotaPolicy();
+
+    if (defaultQuotaPolicy == "RequestCount") {
+        var requestCountLimit = new RequestCountLimit();
+        requestCountLimit.setRequestCount(defaultRequestCount);
+        requestCountLimit.setUnitTime(defaultUnitTime);
+        requestCountLimit.setTimeUnit(defaultTimeUnit);
+        default_quotaPolicy.setType(defaultQuotaPolicy);
+        default_quotaPolicy.setLimit(requestCountLimit);
+    }
+    else if (defaultQuotaPolicy == "Bandwidth") {
+        var bandwidthLimit = new BandwidthLimit();
+        bandwidthLimit.setDataAmount(defaultBandwidth);
+        bandwidthLimit.setDataUnit(defaultBandwidthUnit);
+        bandwidthLimit.setUnitTime(defaultUnitTime);
+        bandwidthLimit.setTimeUnit(defaultTimeUnit);
+        default_quotaPolicy.setType(defaultQuotaPolicy);
+        default_quotaPolicy.setLimit(bandwidthLimit);
+    }
+
+    policy.setDefaultQuotaPolicy(default_quotaPolicy);
+
+    var pipelines = new ArrayList();
+    policy.setPipelines(pipelines);
+    return policy;
+}
+%>

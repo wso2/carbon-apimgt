@@ -1,0 +1,72 @@
+<% jagg.template("policy/subscription/manage", function(inputs, outputs, jagg) {%>
+    <div id="listing">
+    <div class="title-section">
+        <h2>Subscription Level Policy List</h2>
+    </div>
+    <div class="content-section shadow-up">
+    <div class="content-data">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th class="userSpecialCell"><%="Name"%></th>
+                <th class="appSpecialCell"><%="Quota Policy"%></th>
+                <th class="appSpecialCell"><%="Quota"%></th>
+                <th class="appSpecialCell"><%="Unit Time"%></th>
+                <th class="appSpecialCell"><%="Rate Limit"%></th>
+                <th class="appSpecialCell"><%="Time Unit"%></th>
+                <th class="userSpecialCell"><%=i18n.localize("actions")%></th>
+            </tr>
+        </thead>
+
+          <!--      <tr>
+                    <td>Ultimate</td>
+                    <td>Request Count</td>
+                    <td>1000</td>
+                    <td>1 min</td>
+                    <td>
+                        <a id="editButton1" >
+                            <i class="icon-edit"></i> 
+                                Edit 
+                        </a>
+                        <a id="deleteButton1" >
+                            <i class="icon-trash"></i>
+                                Delete
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Medium</td>
+                    <td>Bandwidth</td>
+                    <td>100 MB</td>
+                    <td>1 sec</td>
+                    <td>
+                        <a id="editButton2" >
+                            <i class="icon-edit"></i>
+                                Edit
+                        </a>
+                        <a id="deleteButton2" >
+                            <i class="icon-trash"></i>
+                                Delete
+                        </a>
+                    </td>
+
+                </tr> -->
+    </table>
+    </div>
+
+    </div>
+    <div class='form-actions'>
+        <input id="add-policy-btn" type='button' class='btn btn-primary' value='Add New Policy' />
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function(){
+        $('#add-policy-btn').on('click',function(){
+            location.href = "<%= jagg.url('/subscription-policy-edit')%>";
+        });
+    });
+</script>
+
+<% }); %>

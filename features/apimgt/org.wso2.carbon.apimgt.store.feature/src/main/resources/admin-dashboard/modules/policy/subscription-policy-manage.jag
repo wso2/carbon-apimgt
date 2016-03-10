@@ -1,0 +1,11 @@
+<%
+var log = new Log();
+
+var deleteSubscriptionPolicy = function (policyName) {
+
+};
+
+var getAllSubscriptionPolicies = function () {
+
+};
+%>

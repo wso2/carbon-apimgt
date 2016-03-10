@@ -1,0 +1,28 @@
+<%
+jagg.module("policy", {
+
+	addAppPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/app-policy-edit.jag").addAppPolicy.apply(this, arguments);
+    },
+
+    addSubscriptionPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/subscription-policy-edit.jag").addSubscriptionPolicy.apply(this, arguments);
+    },
+
+    deleteAppPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").deleteAppPolicy.apply(this, arguments);
+    },
+
+    getAllAppPolicies:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").getAllAppPolicies.apply(this, arguments);
+    },
+
+    deleteSubscriptionPolicy:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").deleteSubscriptionPolicy.apply(this, arguments);
+    },
+
+    getAllSubscriptionPolicies:function () {
+        return jagg.require(jagg.getModulesDir() + "policy/app-policy-manage.jag").getAllSubscriptionPolicies.apply(this, arguments);
+    }
+});
+%>

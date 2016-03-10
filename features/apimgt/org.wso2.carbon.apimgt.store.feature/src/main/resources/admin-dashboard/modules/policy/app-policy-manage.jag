@@ -1,0 +1,28 @@
+<%
+var log = new Log();
+
+var deleteAppPolicy = function (policyName) {
+
+};
+
+var getAllAppPolicies = function () {
+    try{
+        var provider = jagg.getUser().username;
+        var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
+        var apiProvider = new APIProviderImpl(provider);
+
+        var appPolicies = apiProvider.getPolicies(provider,"app");
+        return {
+            error: false,
+            appPolicies: appPolicies
+        };
+    } catch (ex) {
+        var errorMessage = "Error occurred while getting all app policies (Cause:" + ex.message + ")";
+        log.error(errorMessage);
+        return {
+            error: true,
+            message: errorMessage
+        };
+    }
+};
+%>

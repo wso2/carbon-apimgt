@@ -1,0 +1,20 @@
+<%
+include("/jagg/jagg.jag");
+
+jagg.block("policy/subscription/manage", {
+    initializer:function (data) {},
+
+    getInputs:function () {
+        return {
+
+        }
+    },
+
+    getOutputs:function (inputs) {
+
+    }
+});
+%>
+
+
+
