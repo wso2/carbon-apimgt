@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.InputStream;
@@ -557,5 +558,5 @@ public interface APIProvider extends APIManager {
 
     String[] getPolicyNames(String username, String level) throws APIManagementException;
 
-    Policy[] getPolicies(String username, String level) throws APIManagementException;
+    Policy[] getPolicies(int tenantId) throws APIManagementException;
 }

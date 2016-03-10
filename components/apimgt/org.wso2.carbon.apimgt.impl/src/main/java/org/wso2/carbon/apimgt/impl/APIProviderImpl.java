@@ -53,10 +53,14 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -3606,26 +3610,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         List<String> policies = new ArrayList<String>();
-       
+
         try {
-            if (PolicyConstants.POLICY_LEVEL_API.equals(policy.getPolicyLevel())) {
+            if (policy instanceof APIPolicy) {
+                APIPolicy apiPolicy = new APIPolicy(policy.getPolicyName());
+                apiPolicy = ((APIPolicy) policy);
+                policies = policyBuilder.getThrottlePolicyForAPILevel(apiPolicy, apiName, apiVersion, apiContext);
 
-                policies = policyBuilder.getThrottlePolicyForAPILevel(policy, apiName, apiVersion, apiContext);
-
-            } else if (PolicyConstants.POLICY_LEVEL_APP.equals(policy.getPolicyLevel())) {
-
-                String policyString = policyBuilder.getThrottlePolicyForAppLevel(policy);
+            } else if (policy instanceof ApplicationPolicy) {
+                ApplicationPolicy appPolicy = new ApplicationPolicy(policy.getPolicyName());
+                appPolicy = ((ApplicationPolicy) policy);
+                String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
                 policies.add(policyString);
-            } else if (PolicyConstants.POLICY_LEVEL_SUB.equals(policy.getPolicyLevel())) {
-
-                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(policy);
+            } else if (policy instanceof SubscriptionPolicy) {
+                SubscriptionPolicy subPolicy = new SubscriptionPolicy(policy.getPolicyName());
+                subPolicy = ((SubscriptionPolicy) policy);
+                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(subPolicy);
                 policies.add(policyString);
-            } else if (PolicyConstants.POLICY_LEVEL_GLOBAL.equals(policy.getPolicyLevel())) {
-
-                String policyString = policyBuilder.getThrottlePolicyForSubscriptionLevel(policy);
+            } else if (policy instanceof GlobalPolicy) {
+                GlobalPolicy globalPolicy = new GlobalPolicy(policy.getPolicyName());
+                globalPolicy = ((GlobalPolicy) policy);
+                String policyString = policyBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
                 policies.add(policyString);
             }
-            apiMgtDAO.addThrottlingPolicy(policy);
+           // apiMgtDAO.addThrottlingPolicy(policy);
         } catch (APITemplateException e) {
             String msg = "Error while generating policy: ";
             log.error(msg, e);
@@ -3636,7 +3644,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(msg);
         }
 
-       
 
         // deploy in global cep and gateway manager
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
@@ -3681,8 +3688,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return policyNames;
     }
 
-    public Policy[] getPolicies(String username, String level) throws APIManagementException {
-        Policy[] policies = apiMgtDAO.getPolicies(level, username);
+    public Policy[] getPolicies(int tenantId) throws APIManagementException {
+        Policy[] policies = apiMgtDAO.getAPIPolicies(tenantId);
         return policies;
     }
 }
