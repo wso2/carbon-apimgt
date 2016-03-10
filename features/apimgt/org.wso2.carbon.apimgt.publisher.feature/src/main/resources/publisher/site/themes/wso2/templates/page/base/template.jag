@@ -3,7 +3,7 @@
 <%
 var i18n = require("i18n");
 var localeResourcesBasePath="/site/conf/locales/jaggery/";
-var tenantDomain=request.getParameter("tenant");
+var tenantDomain=encode.forUriComponent(request.getParameter("tenant"));
 var urlPrefix;
 var urlPostfix;
 if(tenantDomain!='null'){
@@ -50,8 +50,47 @@ var inlineUrl="inline";
 var jsonUrl="json";
 var addUrl="add";
 var editUrl="info";
+var user = jagg.getUser()
 %>
 <body>
+
+	
+<!-- header -->
+<header class="header header-default">
+	<div class="container-fluid">
+		<div class="pull-left brand float-remove-xs text-center-xs">
+			<a href="#"> <img
+				src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/theme-wso2_1.0/images/logo-inverse.svg"))%>"
+				alt="wso2" title="wso2" class="logo">
+				<h1><%=i18n.localize("apiPublisher")%></h1>
+			</a>
+		</div>
+		<%if(user) { %>
+			<div class="pull-right auth float-remove-xs text-center-xs">
+				<a href="#" class="dropdown" data-toggle="dropdown"> <span
+					class="hidden-xs add-padding-left-3x">
+						<%if(user!=null){%><%=user.username%>
+						<%}%> <span class="caret"></span>
+				</span> <span class="icon fw-stack fw-lg"> <i
+						class="fw fw-user fw-stack-1x"></i>
+				</span>
+				</a>
+				<ul
+					class="dropdown-menu float-remove-xs position-static-xs text-center-xs remove-margin-xs slideInDown"
+					role="menu">
+					<li class="dropdown-header visible-xs">
+						<%if(user!=null){%><%=user.username%>
+						<%}%> <span class="caret"></span>
+					</li>
+					<li class="divider visible-xs"></li>
+					<li><a
+						href="<%=jagg.getAbsoluteUrl("/site/pages/logout.jag")%><%=urlPrefix%>"><%=i18n.localize("logout")%></a></li>
+				</ul>
+			</div>
+		<%} %>
+	</div>
+</header>
+<!-- End header -->
 
     <% jagg.includeBlocks(outputs.header); %>
     <% jagg.includeBlocks(outputs.body); %>

@@ -107,7 +107,7 @@
               id="manage_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>&action=manage">
 
-<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+<div id="accordion" role="tablist" aria-multiselectable="true">
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="headingOne">
       <h4 class="panel-title">
@@ -250,15 +250,15 @@
             		result = mod.isMultipleTenantsAvailable();
                 	var isMultipleTenantsAvailable = result.status;
             		if(api.visibility == "public" && isMultipleTenantsAvailable == true){%>
-            			<div class="form-group ">
+            			<div class="form-group form-inline">
                         <label class="control-label col-sm-3" for="subscriptions"><%=i18n.localize("subscriptionsTitle")%>:</label>
                         <div class="controls col-sm-8">
                             <% if(api.visibility!="public") {%>
-                            <select class="select required" id="subscriptions" name="subscriptions" >
+                            <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                 <option value="current_tenant"  selected="selected"><%=i18n.localize("availableToCurrentTenant")%></option>
                             </select>
                             <%} else {%>
-                                <select class="select required" id="subscriptions" name="subscriptions" >
+                                <select class="select required form-control" id="subscriptions" name="subscriptions" >
                                 <option value="current_tenant" <%if(api.subscriptionAvailability=="current_tenant"){%> selected="selected" <%}%> ><%=i18n.localize("availableToCurrentTenant")%></option>
                                 <option value="all_tenants" <%if(api.subscriptionAvailability=="all_tenants"){%> selected="selected" <%}%> ><%=i18n.localize("availableToAllTenants")%></option>
                                     <% if(!(enableSelectedTenantSubscription == 'false')) {%>
@@ -267,7 +267,7 @@
                                 </select>
                             <%}%>
                                 <a class="glyphicon glyphicon-question-sign help_popup" help_data="subscriptions_help"></a>
-                            <div id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></div>
+                            <p id="subscriptions_help" class="hide"><%=i18n.localize("subscriptionHelpMsg")%></p>
                        </div>
 
                         </br>

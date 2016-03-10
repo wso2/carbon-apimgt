@@ -93,13 +93,12 @@
         for(var apiInfo in apis) {
                     api = apis[apiInfo];
                     path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version + "&provider=" + api.provider+urlPostfix;
-                    var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
 
                     var nameSubstring = api.name;
                     if (api.name.length > 15) {
                         nameSubstring = api.name.substring(0, 15)+"..";
                     }
-                    var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
+                    var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider) + urlPostfix;
 
         %>        
         <%if(query != null && (query.indexOf("Doc:") == 0 || query.indexOf("doc:") == 0)) {%>         

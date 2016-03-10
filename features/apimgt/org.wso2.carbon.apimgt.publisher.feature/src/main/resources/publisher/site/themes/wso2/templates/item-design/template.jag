@@ -174,7 +174,7 @@
               id="design_form"
               enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?" + apiUrlId ) %>">
 
-<div class="panel-group" id="accordion" role="tablist">
+<div id="accordion" role="tablist">
   <div class="panel panel-default">
     <div class="panel-heading" role="tab" id="headingOne">
       <h4 class="panel-title">
@@ -189,13 +189,13 @@
 <div class="row">
   <div class="col-md-6">
 <% if(!api){ %>    
-    <div class="form-group">
+    <div class="form-group form-inline">
         <label class="col-sm-4 control-label" for="name"><%=i18n.localize("name")%>:<span class="requiredAstrix">*</span></label>
         <div class="col-sm-6">
-            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>            
-        </div>
-        <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
-        <p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>
+            <input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>  
+            <a class="help_popup" help_data="name_help"><i class="fa fa-question-circle"></i></a>
+        	<p id="name_help" class="hide"><%=i18n.localize("nameHelpMsg")%></p>          
+        </div>        
     </div>
 
     <div class="form-group">

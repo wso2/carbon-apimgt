@@ -14,9 +14,7 @@ if(api != null) {
 	<div class="page-header">
 		<h2><%= encode.forHtml(api.name)%> - <%= encode.forHtml(api.version)%>&nbsp;</h2>
 	</div>
-    
-    <button type="button" class="btn btn-default" onclick="javascript:$('#copy-api').toggle('slow');$('#show-copy-api').toggle()"><%=i18n.localize("CreateNewVersion")%></button>
-    <br /><br />
+
     <div class="content-section shadow-up">
         <div class="content-data">
             <input type="hidden" id="infoAPIVersion" value="<%=api.version%>"/>

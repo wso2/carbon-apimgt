@@ -34,6 +34,9 @@
                 var implementMappedUrl = jagg.getMappedUrl("/site/pages/implement.jag") + urlPrefix;
                 var manageUrl = jagg.getAbsoluteUrl("/site/pages/manage.jag") + urlPrefix;
                 var manageMappedUrl = jagg.getMappedUrl("/site/pages/manage.jag") + urlPrefix;
+                
+                var versionUrl = jagg.getAbsoluteUrl("/site/pages/version.jag") + urlPrefix;
+                var versionMappedUrl = jagg.getMappedUrl("/site/pages/version.jag") + urlPrefix;
             %>
 	    <div class="breadcrumb-wrapper">
             <ol class="breadcrumb">
@@ -146,6 +149,26 @@
 		                    <a href="<%=manageMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=manageMappedUrl%>',e:event})"><%=i18n.localize("manage")%></a>
 		                </li>
                 	<%} %>
+                
+                <%} %>
+                
+                <% if(reqUrl.indexOf(versionUrl) >= 0 || reqUrl.indexOf(versionMappedUrl) >= 0){%>
+                	<% if (request.getParameter("name")) { %>                		
+		                 <%
+		                 	var apiUrlId = "name=" + encode.forUriComponent(request.getParameter("name")) + "&version=" + encode.forUriComponent(request.getParameter("version"))+ "&provider=" + encode.forUriComponent(request.getParameter("provider"))+urlPostfix;
+		                 	var apiUrl = infoMappedUrl + "?" + apiUrlId;
+		                 %>
+                		 <li>
+		                    <a href="<%=listMappedUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event})"><%=i18n.localize("apis")%></a>
+		                </li>
+	
+		                <li>
+		                    <a href="<%=apiUrl%>" onclick="jagg.sessionAwareJS({redirect:'<%= apiUrl%>',e:event})"><%= encode.forHtml(request.getParameter("name"))%>-<%= encode.forHtml(request.getParameter("version"))%></a>
+		                </li>
+		                <li class="active">
+		                    <a href="<%=versionMappedUrl%>?<%=apiUrlId%>" onclick="jagg.sessionAwareJS({redirect:'<%=versionMappedUrl%>?<%=apiUrlId%>',e:event})"><%=i18n.localize("CreateNewVersion")%></a>
+		                </li>
+		             <%} %>
                 
                 <%} %>
 
