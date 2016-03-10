@@ -1,0 +1,116 @@
+<% jagg.template("item-version", function(inputs, outputs, jagg) {
+
+    var api = outputs.api;
+    var createPermitted = outputs.isCreatePermitted;
+    var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
+    //get environments detail from api-manager.xml
+    var provider = jagg.module("manager").getAPIProviderObj();
+    var environmentsList=provider.getEnvironments();
+    //fetch and display tiers
+    var mod = jagg.module("api");
+    var tiers = mod.getTiers().tiers;
+    var resourceTiers = mod.getResourceTiers().tiers;
+    var default_tier = tiers[tiers.length -1].tierName;
+    for (var i = 0; i < tiers.length; i++){
+        if(tiers[i].defaultTier){
+            default_tier = tiers[i].tierName;
+            break;
+        }
+    }
+    var enableSelectedTenantSubscription = site.enableSelectedTenantSubscription;
+    var storeUrl = jagg.module("manager").getAPIStoreURL().url;
+
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+%>
+<script>
+            var provider = '<%=api.provider%>';
+        </script>
+<div id="item-version">
+
+	<div class="page-header">
+		<h2><%=encode.forHtml(api.name)%> - <%=encode.forHtml(api.version)%></h2>
+	</div>
+	<div class="content-section shadow-up">
+		<div class="content-data">
+
+			<div class="row">
+				<div class="col-sm-12">
+					<form class="form-horizontal apim-form" method="POST"
+						id="copyApiForm">
+
+						<div id="accordion" role="tablist" aria-multiselectable="true">
+							<div class="panel panel-default">
+								<div class="panel-heading" role="tab" id="headingOne">
+									<h4 class="panel-title">
+										<a href="#collapseOne" aria-expanded="true"
+											aria-controls="collapseOne"> <strong>Create New Version</strong>
+										</a>
+									</h4>
+								</div>
+								<div id="collapseOne" role="tabpanel" class="panel-collapse collapse in" aria-labelledby="headingOne">
+									<div class="panel-body">
+										<div id="copy-api">
+											<input type="hidden" id="overviewAPIVersion"
+												value="<%=api.version%>" /> <input type="hidden" id="overviewAPIName" value="<%=api.name%>" />
+												
+											<div class="form-group form-inline">
+												<label class="col-sm-4 control-label" for="new-version"><%=i18n.localize("newVersion")%>:<span class="requiredAstrix">*</span></label>
+												<div class="col-sm-6">
+													<input type="text" placeholder="e.g: v1.0.1"
+														class="form-control required validInput noSpace"
+														id="new-version" name="new-version" autofocus="autofocus"
+														value="" /> 
+												    <a class="glyphicon glyphicon-question-sign help_popup"
+														help_data="versionCopy_help"></a>
+													<p id="versionCopy_help" class="hide"><%=i18n.localize("versionCopyHelpMsg")%></p>
+												</div>
+											</div>
+											<div class="form-group form-inline">
+												<label class="col-sm-4 control-label">Make this the
+													Default Version</label>
+												<div class="col-sm-4">
+													<div class="checkbox">
+														<label> <input type="checkbox" class="default_version_check_cp" id="default_version_cp"
+															name="default_version_cp" value="default_version" />
+														</label>
+														<a class="glyphicon glyphicon-question-sign help_popup" help_data="default_api_help"></a>
+														<p id="default_api_help" class="hide"><%=i18n.localize("defaultAPIHelpMsg")%></p>
+													</div>
+													<input type="hidden" id="default_version_checked_cp" name="default_version_checked_cp" value="" />																									
+												</div>
+											</div>
+											<div class="alert alert-info" role="alert">
+										                <i class="icon fw fw-warning"></i><strong>Info!</strong>
+										                <%if(api.hasDefaultVersion){%>
+										                	Default version currently set to : <%=api.currentDefaultVersion%>
+										                <%} else { %>
+										                	No default version defined for the current API
+										                <%} %>
+										                <button type="button" class="close" aria-label="close" data-dismiss="alert">
+										                    <span aria-hidden="true">
+										                        <i class="fw fw-cancel"></i>
+										                    </span>
+										                </button>
+										            </div>
+											<div class="copy-buttons" id="saveButtons">
+												<button type="submit" class="btn btn-primary copy-button"><%=i18n.localize("done")%></button>
+												<button type="button" class="btn btn-default cancel-button"
+													onclick="location.href='<%=jagg.url("/info")%>?<%=apiUrlId%>'"><%=i18n.localize("cancel")%></button>
+											</div>
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+
+				</div>
+
+
+			</div>
+		</div>
+	</div>
+</div>
+<% }); %>
